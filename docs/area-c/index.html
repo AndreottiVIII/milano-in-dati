@@ -60,7 +60,8 @@
     <li><a href="#ore">Mezz'ora per mezz'ora</a></li>
     <li><a href="#varchi">Varchi piu usati</a></li>
     <li><a href="#tipi">Che veicoli</a></li>
-    <li><a href="#aria">Stazioni dell'aria vicine (preparazione)</a></li>
+    <li><a href="#aria">Stazioni dell'aria vicine al confine</a></li>
+    <li><a href="#legame-aria">Area C e l'aria</a></li>
     <li><a href="#fonti">Fonti, licenze, trappole</a></li>
   </ul>
 </nav>
@@ -108,8 +109,11 @@
 <h2 id="tipi">Che veicoli</h2>
 <div id="tipi-c"></div>
 
-<h2 id="aria">Stazioni dell'aria vicine al confine (preparazione per il confronto con l'aria)</h2>
+<h2 id="aria">Stazioni dell'aria vicine al confine</h2>
 <div id="aria-c"></div>
+
+<h2 id="legame-aria">Area C e l'aria</h2>
+<div id="legame-c"><p class="nota">Caricamento...</p></div>
 
 <footer id="fonti">
   <h2 style="margin-top:0;border:0;padding:0">Fonti, licenze, trappole</h2>
@@ -323,7 +327,7 @@ function sezioniTabelle() {
     ['Auto per persone', 'veic_persone'], ['Merci', 'veic_merci'], ['Euro 6', 'euro_euro6'], ['Euro non classificato', 'euro_nc'], ['Diesel', 'alim_diesel'], ['Benzina', 'alim_benzina'], ['Ibrido', 'alim_ibrido'], ['Elettrico', 'alim_elettrico']];
   $('#tipi-c').innerHTML = tab(['% degli ingressi (feriali normali)'].concat(ys), voci.map(([n, k]) => [n].concat(ys.map(y => nf(C[y][k], 1))))) + '<p class="fonte">Fonte: file mensili per varco, campi classe_areac, categoria_veicolo, categoria_euro, tipologia_alimentazione. Attenzione: la quota "non classificato" cambia molto da un anno all\'altro (vedi trappole), quindi le singole classi Euro non sono confrontabili senza guardarla.</p>';
   const st = DATA.stazioni_aria;
-  $('#aria-c').innerHTML = `<p class="nota">Solo preparazione: nessun confronto con i dati dell'aria in questa pagina. Distanza dal confine dell'Area C (poligono del Comune). Le stazioni vicine sono quelle dentro o entro 1,5 km; le altre servirebbero da controllo.</p>` +
+  $('#aria-c').innerHTML = `<p class="nota">Qui solo l'elenco delle stazioni; il confronto con l'aria e' nella sezione <a href="#legame-aria">Area C e l'aria</a>, piu sotto. Distanza dal confine dell'Area C (poligono del Comune). Le stazioni vicine sono quelle dentro o entro 1,5 km; le altre servirebbero da controllo.</p>` +
     tab(['Stazione', 'Posizione', 'Distanza dal confine', 'Attivita', 'Inquinanti (Comune)'], st.map(s => [s.nome, s.classe, nf(s.distanza_dal_confine_m) + ' m', s.fine_attivita === 'in corso' ? 'in corso' : 'chiusa ' + s.fine_attivita, s.inquinanti_comune])) +
     '<p class="fonte">Posizioni dal filone aria (<code>qaria_stazione.csv</code>, Comune di Milano; ARPA Lombardia per le stazioni dell\'hinterland). Elenco completo con 15 stazioni dell\'hinterland entro 20 km in <code>area-c/pulito/stazioni_aria_vicino_areac.csv</code>. Nessuna stazione fuori dall\'Area C sta entro 1 km dal confine.</p>';
   $('#footer-c').innerHTML = `<p>Fonte dei dati: Comune di Milano, dati aperti (dati.comune.milano.it), gestore AMAT (Agenzia Mobilita Ambiente Territorio). Licenza CC BY. Scaricati il 29/10/2026. Dati: gli ingressi sono i transiti rilevati dai varchi (non le persone), moto comprese.</p>
@@ -340,6 +344,173 @@ function sezioniTabelle() {
   } catch (e) {
     const el = $('#errore'); el.style.display = 'block'; el.textContent = 'Errore nel caricamento dei dati: ' + e.message; console.error(e);
   }
+})();
+</script>
+<script>
+"use strict";
+(function () {
+  const Q = s => document.querySelector(s);
+  const f = (x, d = 1) => (x === null || x === undefined || Number.isNaN(x)) ? '–' : Number(x).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d }).replace('-', '−');
+  const sg = (x, d = 1) => (x === null || x === undefined) ? '–' : (x > 0 ? '+' : '') + f(x, d);
+  const ci = (o, d = 1) => o ? `<b>${sg(o.d, d)}</b> <span class="nota">[${sg(o.lo, d)} ; ${sg(o.hi, d)}]</span>` : '–';
+  const T = (head, rows) => '<div class="w"><table><thead><tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody></table></div>';
+  const AC = '#c2410c', FONT = 'Georgia,serif';
+
+  function scatter(J) {
+    const S = J.scatter, W = 760, H = 380, ml = 56, mr = 14, mt = 14, mb = 40;
+    const x0 = 80, x1 = 200, y0 = -30, y1 = 25;
+    const X = v => ml + (W - ml - mr) * (v - x0) / (x1 - x0), Y = v => mt + (H - mt - mb) * (1 - (v - y0) / (y1 - y0));
+    let s = `<svg class="g" viewBox="0 0 ${W} ${H}" role="img" aria-label="Nuvola di punti: ingressi al giorno e differenza di NO2 tra dentro Area C e resto di Milano">`;
+    for (let v = y0; v <= y1; v += 5) s += `<line x1="${ml}" x2="${W - mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v === 0 ? '#000' : '#ddd'}" stroke-dasharray="${v === 0 ? '4 3' : ''}"/><text x="${ml - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="13" font-family="${FONT}">${v}</text>`;
+    for (let v = x0; v <= x1; v += 20) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${mt}" y2="${H - mb}" stroke="#eee"/><text x="${X(v)}" y="${H - mb + 16}" text-anchor="middle" font-size="13" font-family="${FONT}">${v}</text>`;
+    s += `<text x="${(ml + W - mr) / 2}" y="${H - 6}" text-anchor="middle" font-size="13" font-family="${FONT}">Ingressi in Area C in un giorno normale (migliaia)</text>`;
+    s += `<text transform="translate(14 ${(mt + H - mb) / 2}) rotate(-90)" text-anchor="middle" font-size="13" font-family="${FONT}">NO2 dentro meno resto di Milano (µg/m³)</text>`;
+    S.x.forEach((v, i) => { s += `<circle cx="${X(v).toFixed(1)}" cy="${Y(S.y[i]).toFixed(1)}" r="2.2" fill="#555" fill-opacity="0.28"/>`; });
+    S.fasce.forEach(b => { s += `<line x1="${X(b.x)}" x2="${X(b.x)}" y1="${Y(b.lo)}" y2="${Y(b.hi)}" stroke="${AC}" stroke-width="2"/><circle cx="${X(b.x)}" cy="${Y(b.y)}" r="5" fill="${AC}" stroke="#fff" stroke-width="1.5"><title>${f(b.x)} mila ingressi: media ${f(b.y, 2)} µg/m³, ${b.n} giorni</title></circle>`; });
+    return s + '</svg>';
+  }
+
+  function serie(J) {
+    const A = J.serie, N = A.mesi.length, W = 760, H = 540, ml = 56, mr = 14;
+    const X = i => ml + (W - ml - mr) * i / (N - 1);
+    const p1 = { t: 14, b: 220 }, p2 = { t: 275, b: 490 };
+    const Y1 = v => p1.t + (p1.b - p1.t) * (1 - (v - 60) / (180 - 60));
+    const Y2 = v => p2.t + (p2.b - p2.t) * (1 - (v + 12) / (16 + 12));
+    let s = `<svg class="g" viewBox="0 0 ${W} ${H}" role="img" aria-label="Serie mensile 2016-2024: ingressi in Area C e differenza di NO2 tra dentro e fuori">`;
+    for (let v = 60; v <= 180; v += 20) s += `<line x1="${ml}" x2="${W - mr}" y1="${Y1(v)}" y2="${Y1(v)}" stroke="#ddd"/><text x="${ml - 6}" y="${Y1(v) + 4}" text-anchor="end" font-size="13" font-family="${FONT}">${v}</text>`;
+    for (let v = -12; v <= 16; v += 4) s += `<line x1="${ml}" x2="${W - mr}" y1="${Y2(v)}" y2="${Y2(v)}" stroke="#ddd"/><text x="${ml - 6}" y="${Y2(v) + 4}" text-anchor="end" font-size="13" font-family="${FONT}">${v}</text>`;
+    s += `<line x1="${ml}" x2="${W - mr}" y1="${Y2(0)}" y2="${Y2(0)}" stroke="#000" stroke-dasharray="4 3"/>`;
+    A.mesi.forEach((m, i) => { if (m.endsWith('-01')) s += `<line x1="${X(i)}" x2="${X(i)}" y1="${p1.t}" y2="${p2.b}" stroke="#eee"/><text x="${X(i) + 2}" y="${p2.b + 16}" font-size="13" font-family="${FONT}">${m.slice(0, 4)}</text>`; });
+    const ic = A.mesi.indexOf('2020-03'), ie = A.mesi.indexOf('2021-06');
+    s += `<rect x="${X(ic)}" y="${p1.t}" width="${X(ie) - X(ic)}" height="${p2.b - p1.t}" fill="#000" fill-opacity="0.08"><title>Covid (3/2020-6/2021): escluso</title></rect><text x="${X(ic) + 4}" y="${p1.b - 6}" font-size="12" font-family="${FONT}">Covid: escluso</text>`;
+    const path = (v, Y, col, w, dash) => { let p = '', pen = false; v.forEach((y, i) => { if (y === null) { pen = false; return; } p += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(y).toFixed(1); pen = true; }); return `<path d="${p}" fill="none" stroke="${col}" stroke-width="${w}" stroke-dasharray="${dash || ''}" stroke-linejoin="round"/>`; };
+    s += path(A.ingressi, Y1, AC, 2);
+    s += path(A.D_B, Y2, '#000', 2) + path(A.D_C, Y2, '#555', 2, '6 3');
+    s += `<text x="${ml + 4}" y="${p1.t + 12}" font-size="13" font-weight="bold" font-family="${FONT}" fill="${AC}">Ingressi al giorno (migliaia, media del mese; minimi = agosto)</text>`;
+    s += `<text x="${ml + 4}" y="${p2.t - 6}" font-size="13" font-weight="bold" font-family="${FONT}">NO2, µg/m³: piena = dentro − resto di Milano; tratteggio = dentro − fuori Milano</text>`;
+    return s + '</svg>';
+  }
+
+  function tabEsperimenti(J) {
+    const nm = { 'Agosto (8-23 agosto)': 'Agosto, 8-23', 'Natale (27 dic-5 gen)': 'Natale, 27 dic-5 gen' };
+    const rows = J.esperimenti.map(e => {
+      const a = e.senza, c = e.con;
+      const nome = nm[e.nome] || e.nome.replace(' (venerdi dopo festivo di giovedi, lunedi prima di festivo di martedi)', ' (venerdì dopo un giovedì festivo, lunedì prima di un martedì festivo)');
+      return [nome, a.ingressi10k ? f(a.ingressi10k.d * 10, 0) : '–', a.D_NO2m_B ? a.D_NO2m_B.ne + ' / ' + a.D_NO2m_B.nr : '–', ci(a.D_NO2m_B), ci(c.D_NO2m_B), ci(a.R_NO2m_B, 0), ci(a.D_NO2m_C), ci(a.D_PM10_B)];
+    });
+    return T(['Periodo', 'Ingressi al giorno: differenza (migliaia)', 'Giorni: periodo / confronto', 'NO2 dentro − resto di Milano (µg/m³)', 'Lo stesso, tolto il meteo', 'Stesso, in % (dentro/resto di Milano)', 'NO2 dentro − fuori Milano (µg/m³)', 'PM10 dentro − Pascal (µg/m³)'], rows);
+  }
+  function tabAnni(J) {
+    const out = [];
+    for (const k of Object.keys(J.per_anno)) {
+      out.push([`<b>${k}</b>`, '', '', '', '']);
+      J.per_anno[k].forEach(r => out.push([r.nome, r.ing ? f(r.ing.d * 10, 0) : '–', r.DB ? sg(r.DB.d, 1) : '–', r.RB ? sg(r.RB.d, 0) : '–', r.DC ? sg(r.DC.d, 1) : '–']));
+    }
+    return T(['Anno', 'Ingressi (migliaia)', 'NO2 dentro − resto di Milano (µg/m³)', 'Stesso, in %', 'NO2 dentro − fuori Milano (µg/m³)'], out);
+  }
+  function tabReg(J) {
+    const R = J.regressioni, P = J.placebo, nome = { D_NO2m_B: 'NO2 medio, dentro − resto di Milano (µg/m³)', D_NO2m_C: 'NO2 medio, dentro − fuori Milano (µg/m³)', D_NO2x_B: 'NO2 massimo orario, dentro − resto di Milano (µg/m³)', D_PM10_B: 'PM10, dentro − Pascal (µg/m³)', D_PM10_C: 'PM10, dentro − fuori Milano (µg/m³)', D_PM25_B: 'PM2,5, Senato − Pascal (µg/m³)', D_BC_Marche: 'Black Carbon, Senato − viale Marche (µg/m³; solo 11/2020-11/2024)', D_BC_Pascal: 'Black Carbon, Senato − Pascal (µg/m³; solo 9/2016-12/2017)' };
+    const rows = Object.keys(nome).map(v => {
+      const get = (arr, pre, camp) => arr.find(r => r.variabile === v && r.campione.startsWith(camp) && r.specifica.startsWith(pre));
+      const m = get(R, '4', 'feriali normali'), m2 = get(R, '2', 'feriali normali'), pl = get(P, '3 placebo: ingressi di 7 giorni dopo', 'feriali normali');
+      const o = x => x ? { d: x.effetto_per_10mila_ingressi, lo: x.ci95_basso, hi: x.ci95_alto } : null;
+      const d = (v.startsWith('D_BC') ? 3 : 2);
+      return [nome[v], m ? m.n : '–', ci(o(m2), d), ci(o(m), d), ci(o(pl), d), m ? sg(m.spearman_grezzo, 2) : '–', m ? sg(m.spearman_dopo_aver_tolto_anche_meteo, 2) : '–'];
+    });
+    return T(['Cosa si confronta (feriali normali)', 'Giorni', 'Per +10.000 ingressi: solo giorno della settimana e mese', 'Per +10.000 ingressi: più anno e meteo', 'Prova: gli ingressi di 7 giorni dopo (non dovrebbero contare)', 'Spearman grezzo', 'Spearman, tolti giorno, mese, anno, meteo'], rows);
+  }
+  function tabPD(J) {
+    const D = J.prima_dopo_2012, nome = { N_in: 'NO2 medio dentro (Senato, Verziere)', N_B: 'NO2 medio, resto di Milano (Marche, Liguria)', N_C: 'NO2 medio, 5 stazioni fuori Milano', D_B: 'NO2 dentro − resto di Milano (µg/m³)', D_C: 'NO2 dentro − fuori Milano (µg/m³)', P_B: 'PM10 dentro − Pascal (µg/m³)', P_C: 'PM10 dentro − fuori Milano (µg/m³)' };
+    const rows = D.reale.filter(r => nome[r.variabile]).map(r => {
+      const pl = D.placebo.find(p => p.variabile === r.variabile);
+      return [nome[r.variabile], f(r.media_prima, 1), f(r.media_dopo, 1), ci({ d: r.differenza, lo: r.ci95_basso, hi: r.ci95_alto }), r.differenza_percento !== null ? sg(r.differenza_percento, 1) + '%' : '', pl ? `${sg(pl.placebo_min, 1)} ; ${sg(pl.placebo_max, 1)}` : '', pl ? `${pl.quanti_placebo_piu_estremi} su ${pl.placebo_n}` : ''];
+    });
+    return T(['', 'Prima (16/1/2011-15/1/2012)', 'Dopo (16/1/2012-15/1/2013)', 'Cambio [intervallo 95%]', 'Cambio %', 'Altri anni: da ; a', 'Altri anni con cambio uguale o più grande'], rows);
+  }
+
+  async function run() {
+    const el = Q('#legame-c');
+    const J = await fetch('data/legame_aria.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('legame_aria.json: ' + r.status); return r.json(); });
+    const A = J.annuale.filter(a => a.campione.indexOf('settembre') >= 0);
+    const tA = T(['Anno (feriali di settembre-novembre)', 'Ingressi al giorno', 'NO2 dentro Area C', 'NO2 resto di Milano', 'NO2 fuori Milano', 'Dentro − resto di Milano', 'Dentro − fuori Milano'],
+      A.map(a => [a.anno, f(a.ingressi, 0), f(a.NO2m_dentro, 1), f(a.NO2m_fuoriAC, 1), f(a.NO2m_controllo, 1), sg(a.D_NO2m_B, 1), sg(a.D_NO2m_C, 1)]));
+    el.innerHTML = `
+<div class="avviso forte">In breve. Con otto anni di dati non si vede un legame stabile tra quanti veicoli entrano in Area C in un giorno e quanto l'aria delle due stazioni dentro (Senato, Verziere) è più o meno sporca di quella delle altre. Nei feriali normali, tolti giorno della settimana, mese, anno e meteo, <b>10.000 ingressi in più</b> vanno con <b>−0,08 µg/m³</b> di NO2 [da −0,71 a +0,54] nella differenza dentro − resto di Milano: praticamente zero, con un intervallo troppo largo per escludere effetti piccoli o medi. Gli esperimenti naturali (agosto, Natale, Covid) non vanno tutti nello stesso senso. Non è la prova che Area C non conti: è la prova che con queste stazioni e questi dati non si riesce a misurarlo.</div>
+
+<h3>Come si è fatto, in parole semplici</h3>
+<ul>
+<li><b>Il problema.</b> Il tempo atmosferico (vento, pioggia, freddo) muove l'aria di tutta la città insieme: nei giorni di vento il NO2 scende dappertutto. Per toglierlo si guarda la <b>differenza nello stesso giorno</b> tra le stazioni dentro Area C e quelle fuori. Il tempo comune sparisce, o quasi.</li>
+<li><b>Dentro:</b> via Senato e Verziere (media delle due). <b>Fuori, in Milano:</b> viale Marche, viale Liguria, via Pascal (media delle tre; tutte dentro Area B ma fuori Area C). <b>Fuori Milano:</b> Pioltello, Magenta, Sesto San Giovanni, Rho, Cinisello Balsamo (media di almeno 4 su 5). Un giorno conta solo se ci sono tutte le stazioni del gruppo, così il gruppo non cambia da un giorno all'altro. La posizione di Senato e Verziere dentro Area C è una lettura nostra, non controllata sul perimetro ufficiale.</li>
+<li><b>Giorni usati.</b> Dal 1 settembre 2016 al 30 novembre 2024, solo giorni feriali non festivi. Gli ingressi sono i transiti ai varchi (moto comprese). La serie 2012-2015 ha un altro conteggio e non è usata come numero.</li>
+<li><b>Il meteo</b> è quello di Milano Brera (ARPA Lombardia, CC0): vento medio, pioggia sì/no, temperatura media, anche del giorno prima. Per il 2011-2013 è Milano Lambrate, perché Brera non ha la pioggia prima del 2016.</li>
+<li><b>Ogni stima ha un intervallo</b> al 95% (tra parentesi quadre): la fascia dei valori compatibili con i dati. Se contiene lo zero, i dati non permettono di dire che l'effetto c'è. Gli intervalli tengono conto che giorni vicini si assomigliano (si ricampionano settimane intere).</li>
+</ul>
+
+<h3>1. Giorno per giorno: più ingressi, più NO2 dentro?</h3>
+<p>Ogni puntino grigio è un giorno feriale normale (senza agosto, Natale e Covid): a destra i giorni con più ingressi. In verticale, di quanti µg/m³ il NO2 medio dentro Area C supera quello del resto di Milano (sotto lo zero: dentro è <i>meno</i> sporco; il tipo di sito delle stazioni non è nei dati scaricati, quindi non sappiamo perché). I pallini arancioni sono le medie di sette gruppi di giorni, con lo stesso numero di giorni, e il loro intervallo al 95%.</p>
+${scatter(J)}
+<p class="fonte">Fonte: <code>area-c/legame_aria/scatter_NO2_B.csv</code> (dal <code>pannello_giornaliero.csv</code>, campi <code>ingressi</code>, <code>D_NO2m_B</code>). ${J.scatter.x.length.toLocaleString('it-IT')} giorni; ingressi nei giorni normali: media ${f(J.ingressi_normali.media, 0)}, scarto tipico ${f(J.ingressi_normali.dev_std, 0)}.</p>
+<p>Il grafico <b>non</b> ha tolto nulla: a occhio la nuvola è piatta. Il gruppo con meno ingressi (circa 122.000) ha una differenza più alta (circa −0,4 µg/m³ contro circa −2 degli altri sei gruppi); sono soprattutto giorni degli ultimi anni, quindi è la tendenza di fondo (vedi sotto), non l'effetto di un giorno singolo.</p>
+<h3>Le stime, con i controlli</h3>
+${tabReg(J)}
+<p class="fonte">Fonte: <code>area-c/legame_aria/regressioni.csv</code> (campi <code>effetto_per_10mila_ingressi</code>, <code>ci95_basso/alto</code>, <code>spearman_grezzo</code>, <code>spearman_dopo_aver_tolto_anche_meteo</code>). Minimi quadrati con errori a grappoli per settimana. Spearman = quanto i due numeri salgono e scendono insieme (da −1 a +1; 0 = niente).</p>
+<ul>
+<li><b>NO2, PM10, PM2,5:</b> con anno e meteo tolti, le stime sono vicine a zero e gli intervalli contengono sempre lo zero (per le polveri era atteso: sono regionali). Sul NO2 massimo orario l'intervallo è ancora più largo.</li>
+<li><b>Se si tengono anche agosto, Natale e Covid</b> (campione "tutti i feriali" in <code>regressioni.csv</code>), alcune stime diventano piccole ma positive, con l'intervallo sopra lo zero, per ogni 10.000 ingressi in più: PM10 dentro − fuori Milano +0,29 µg/m³ [da +0,11 a +0,47], PM2,5 +0,21 [da +0,07 a +0,36], rapporto del NO2 dentro/resto di Milano +0,9% [da +0,2 a +1,6]; il NO2 in µg/m³ resta vicino a zero (+0,20 [da −0,09 a +0,48]). Arrivano dai periodi in cui cala il traffico di tutta la città (agosto, Covid), non dalle variazioni normali da un giorno all'altro, e anche la prova degli ingressi di 7 giorni dopo dà valori positivi simili per le polveri.</li>
+<li><b>La prova degli ingressi di 7 giorni dopo</b> (che non possono aver cambiato l'aria di oggi) dà anch'essa zero per NO2 e polveri: nessun legame né col giorno né con la settimana dopo. Per il Black Carbon di viale Marche invece dà zero mentre il giorno stesso dà −0,03: lì il legame c'è, ma ha il segno opposto a quello atteso.</li>
+<li><b>Black Carbon</b> (il marcatore più diretto del traffico): esiste solo in due periodi brevi e non negli stessi posti. Senato − viale Marche scende leggermente quando gli ingressi salgono (−0,03 µg/m³ ogni 10.000, intervallo da −0,07 a +0,00). Lettura possibile, non verificata: viale Marche segue il traffico di tutta la città più di via Senato, e gli ingressi seguono il traffico di tutta la città. Il BC di via Pascal manca dal 2018 al 2025 nei dati scaricati.</li>
+<li><b>Coppia per coppia</b> (<code>robustezza_coppie.csv</code>): 6 coppie di stazioni su 8 danno zero; solo le due contro via Pascal danno +0,6 e +0,7 µg/m³ ogni 10.000 ingressi, con l'intervallo appena sopra lo zero. Pascal ha salti di livello nella sua serie: non è un segnale pulito.</li>
+</ul>
+
+<h3>2. Esperimenti naturali: quando gli ingressi crollano</h3>
+<p>Agosto, Natale, i "ponti", il lockdown: giorni in cui gli ingressi calano molto per motivi che non riguardano l'aria. Si confronta la differenza dentro − fuori in quei giorni con quella di giorni normali vicini (per il Covid: le stesse date del 2018-2019). Date del Covid e delle sospensioni di Area C da fonti pubbliche, <b>da verificare</b> (<code>eventi.csv</code>).</p>
+${tabEsperimenti(J)}
+<p class="fonte">Fonte: <code>area-c/legame_aria/esperimenti_naturali.csv</code> e <code>esperimenti_naturali_meteo.csv</code> (campo <code>differenza</code>, intervallo in <code>ci95_basso/alto</code>). Differenza tra i giorni del periodo e i giorni di confronto, tolto l'effetto del giorno della settimana (e dell'anno). Giorni di confronto per agosto: 27/6-25/7 e 6/9-4/10 dello stesso anno; per Natale: 15/11-13/12 e 12/1-9/2.</p>
+<ul>
+<li><b>Non vanno tutti nello stesso senso.</b> Agosto e lockdown stretto: la differenza dentro − fuori si abbassa (−2,3 e −8,2 µg/m³), com'era atteso se i veicoli di Area C pesassero. Ma a Natale (ingressi −57.000) sale di +1,5; nella seconda sospensione Covid (novembre 2020 - febbraio 2021, ingressi −32.000) sale di +6,0; con l'orario ridotto (febbraio-giugno 2021) scende di −6,3 con soli −30.000 ingressi.</li>
+<li><b>Agosto anno per anno</b> (tabella sotto): la differenza si abbassa in 6 anni su 8, ma va da −12,1 a +2,5: tra un anno e l'altro il risultato balla più della media.</li>
+<li><b>Cosa confonde.</b> In agosto e nel lockdown cala il traffico di <i>tutta</i> la città, non solo quello che entra in Area C, e calano altre sorgenti: tutti i valori di NO2 si abbassano e la differenza si accorcia solo per questo. Per questo c'è anche la colonna in %. Nel lockdown stretto il rapporto dentro/resto di Milano scende di circa il 22%, ma con otto anni e 5-6 stazioni non si può separare Area C dal resto.</li>
+</ul>
+<details><summary>Agosto e Natale, un anno alla volta</summary>
+${tabAnni(J)}
+<p class="fonte">Fonte: <code>esperimenti_naturali.csv</code>, righe "Agosto ... anno" e "Natale ... anno". Pochi giorni per anno: gli intervalli (nel file) sono poco affidabili. Dove manca la cifra, mancano i dati dell'aria o degli ingressi.</p></details>
+
+<h3>3. Tendenza 2016-2024</h3>
+<p>Gli ingressi nei feriali sono scesi da circa 167.000 (2016) a circa 127.000 (2024), cioè circa −4.000 al giorno ogni anno (pendenza lineare sui mesi, <code>tendenza_correlazioni.csv</code>). Se Area C pesasse molto sulla differenza, la differenza dovrebbe seguire questa discesa.</p>
+${serie(J)}
+<p class="fonte">Fonte: <code>area-c/legame_aria/tendenza_mensile.csv</code> (campi <code>ingressi</code>, <code>D_NO2m_B</code>, <code>D_NO2m_C</code>); mesi con meno di 8 giorni validi non disegnati; Covid escluso.</p>
+${tA}
+<p class="fonte">Fonte: <code>tendenza_annuale.csv</code>. Il 2020 non c'è (Covid). Settembre-novembre perché sono gli unici mesi presenti in tutti gli anni.</p>
+<ul>
+<li><b>Dentro − resto di Milano:</b> oscilla tra circa +1 e −4 µg/m³ senza tendenza (pendenza +0,01 µg/m³ l'anno; correlazione mensile con gli ingressi −0,07). Gli ingressi sono calati di un quarto e questa differenza non si è mossa.</li>
+<li><b>Dentro − fuori Milano:</b> scende da circa +11 (2016) a circa 0 (dal 2021) e <b>segue</b> gli ingressi (correlazione mensile +0,34; tolta la stagione +0,43; sulle 8 medie annuali +0,81). Ma tutte le stazioni di Milano sono scese più in fretta di quelle fuori Milano (circa −3,3 contro −2,4 µg/m³ l'anno): è la città contro l'hinterland, non Area C contro il resto di Milano. Due linee che scendono insieme sono sempre correlate: è una tendenza, non una prova. Infatti, appena si toglie l'anno (tabella delle stime), la relazione giorno per giorno sparisce.</li>
+</ul>
+
+<h3>4. Prima e dopo l'avvio di Area C (16 gennaio 2012)</h3>
+<p>Qui gli ingressi non servono (il conteggio 2012-2015 è diverso): si guarda solo l'aria nei 12 mesi prima e nei 12 mesi dopo, nei feriali. Poiché le stazioni cambiano anche per conto proprio da un anno all'altro, la stessa misura è stata rifatta per le altre coppie di anni dal 2005 al 2019: se il cambio del 2012 sta dentro l'intervallo degli altri, non si distingue dal normale. Via Pascal non ha la media del NO2 nel 2012: tra le stazioni "fuori" restano viale Marche e viale Liguria.</p>
+${tabPD(J)}
+<p class="fonte">Fonte: <code>area-c/legame_aria/prima_dopo_2012.csv</code> e <code>prima_dopo_2012_placebo.csv</code>. L'intervallo del cambio (errori a grappoli per settimana) conta solo le variazioni da un giorno all'altro, non quelle da un anno all'altro: per questo gli "altri anni" sono il confronto più onesto.</p>
+<ul>
+<li>Il NO2 scende del 17,5% dentro (da 66,6 a 55,0 µg/m³), del 4,2% nel resto di Milano e del 6,6% fuori Milano: coerente con la <a href="../aria/">pagina dell'aria</a>. La differenza dentro − resto di Milano scende di 5,8 µg/m³ e dentro − fuori Milano di 8,1.</li>
+<li>Ma negli altri anni lo stesso cambio varia moltissimo (da −11,4 a +17,4 µg/m³ per dentro − resto di Milano): in 5 coppie di anni su 13 il cambio è uguale o più grande in valore assoluto. Il 2012 non spicca.</li>
+<li><b>Il PM10</b> sembra l'unico a spiccare (nessun altro anno così grande), ma guardando mese per mese (<code>prima_dopo_2012_mensile.csv</code>, campo <code>P_B</code>) il motivo è l'inverno 2010-2011: a dicembre 2010, gennaio e febbraio 2011 le stazioni dentro erano 10,6, 24,0 e 18,2 µg/m³ sopra Pascal, poi la differenza è scesa vicino a zero da aprile 2011, <i>prima</i> di Area C. Non c'è un gradino a gennaio 2012.</li>
+<li>Con il meteo di Lambrate (solo 260-300 giorni su circa 450 hanno vento, pioggia e temperatura) le <b>differenze</b> dentro − fuori cambiano poco (dentro − fuori Milano: da −5,4 a −6,6 µg/m³; <code>prima_dopo_2012_con_meteo.csv</code>); i livelli assoluti invece sì, e non sono affidabili su quel sottoinsieme.</li>
+<li><b>Ecopass.</b> Prima di Area C, dal 2008 al 2011, nello stesso centro c'era già un pedaggio (Ecopass): il confronto misura Area C rispetto a Ecopass, non rispetto al nulla.</li>
+</ul>
+
+<h3>Cosa questi dati non possono dire</h3>
+<ul>
+<li><b>Non è una misura dell'effetto di Area C.</b> Mostra solo se la differenza dentro − fuori si muove con gli ingressi; non sappiamo cosa sarebbe successo senza Area C.</li>
+<li><b>Due stazioni dentro</b> e tre fuori in città: uno strumento che si sposta o si cambia sposta il risultato (via Pascal ha salti di livello: nel 2011 il suo NO2 cala di colpo ad aprile).</li>
+<li><b>Il traffico che conta può non essere quello dei varchi.</b> Il NO2 locale dipende anche da riscaldamento, strade vicine, rinnovo dei veicoli, vento.</li>
+<li><b>Il traffico dentro Area C e quello fuori si muovono insieme</b> (festivi, estate, Covid): gli esperimenti naturali non isolano Area C.</li>
+<li><b>Intervalli larghi.</b> Da un giorno all'altro la differenza dentro − resto di Milano varia di circa ±6,6 µg/m³. Con questa variabilità un effetto di 0,3-0,5 µg/m³ ogni 10.000 ingressi (cioè 4-8 µg/m³ su tutto il traffico di Area C) è compatibile con i dati: semplicemente non si vedrebbe.</li>
+<li><b>Date non verificate:</b> sospensioni Covid di Area C, regole e tariffe, da stampa e siti terzi (il sito del Comune blocca i programmi). Black Carbon: due periodi soltanto, e quello di via Pascal manca nel 2018-2025 nei dati scaricati.</li>
+<li>Correlazione non è causalità.</li>
+</ul>
+<p class="fonte">Programmi e risultati: <code>area-c/legame_aria/</code> (<code>RISULTATI.md</code> con ogni numero e il file di provenienza; programmi <code>00_scarica_meteo.py</code> ... <code>07_robustezza.py</code>). Meteo: ARPA Lombardia, dati.lombardia.it, CC0 (Brera: vento 19007, pioggia 19373, temperatura 5897; Lambrate: 2003, 2006, 2001). Aria: ARPA Lombardia (CC0) e Comune di Milano. Ingressi: Comune di Milano / AMAT (CC BY). Dati di questa sezione: <a href="data/legame_aria.json">legame_aria.json</a>.</p>`;
+  }
+  run().catch(e => { const el = Q('#legame-c'); el.innerHTML = '<div class="avviso">Errore nel caricamento della sezione: ' + e.message + '</div>'; console.error(e); });
 })();
 </script>
 </body>

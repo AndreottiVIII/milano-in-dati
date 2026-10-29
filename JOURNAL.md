@@ -878,6 +878,21 @@ Script: 01_catalogo.py (catalogo), 02_scarica.py (download, riprendibile), 03_ve
   - I varchi 87 e 89 spariscono dal 30/5/2022.
 - **Per il legame con l'aria**: dentro Area C ci sono Senato e Verziere; nessuna centralina fuori Area C sta entro 1 km dal confine (Liguria e Juvara a circa 1,2 km).
 
+### Legame con l'aria (filone 5) — 2026-10-29
+
+- **Metodo**:
+  - Differenze nello stesso giorno: NO2 dentro Area C (Senato, Verziere) meno fuori, cioè Marche, Liguria e Pascal più 5 centraline fuori Milano.
+  - Solo feriali, dall'1/9/2016 al 30/11/2024.
+  - Si tengono fermi giorno della settimana, mese, anno e meteo ARPA di Brera (vento, pioggia, temperatura).
+  - Intervalli al 95%.
+  - Dettagli in `area-c/legame_aria/RISULTATI.md`.
+- **Risultato**:
+  - Nessun legame stabile: 10.000 ingressi in più vanno con -0,08 µg/m³ [-0,71; +0,54] nella differenza dentro meno resto di Milano.
+  - Gli esperimenti naturali non vanno nello stesso senso: agosto -2,3, lockdown stretto -8,2, Natale +1,5, seconda sospensione Covid +6,0.
+  - Dal 2016 al 2024 gli ingressi calano di un quarto, ma la differenza resta piatta.
+  - Prima e dopo il 16/1/2012: -17,5% dentro contro -4,2% nel resto di Milano. Su 13 altre coppie di anni, 5 mostrano cambi altrettanto grandi.
+- **Cosa si può dire**: con queste stazioni non si vede un legame, e non si riesce a misurarlo; effetti fino a circa 0,5 µg/m³ ogni 10.000 ingressi non si vedrebbero. Non vuol dire che Area C non conti. La pagina lo dice così.
+
 ## 7. Bici contro auto contro mezzi
 
 _Fonti, date di scarico, licenze, ipotesi, scelte, problemi. Cartella `bici-auto-mezzi/`._
