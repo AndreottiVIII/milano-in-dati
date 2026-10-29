@@ -10,7 +10,7 @@ Ogni problema trovato nei dati va annotato: diventa materiale per la rubrica "tr
 - 2026-10-29 — Regola licenze: se una fonte non permette di ripubblicare, nel repo vanno solo programmi e risultati, non i dati grezzi.
 - 2026-10-29 — Divisione del lavoro: Opus coordina e fa il delicato, Sonnet scrive il codice, Sonnet medio il meccanico, Haiku solo controlli di testo.
 
-- 2026-10-29 — **Idea in attesa: film e libri ambientati a Milano** (Davide: "dopo", prima si chiudono i filoni aperti). Fonti individuate:
+- 2026-10-29 — **Idea: film e libri ambientati a Milano** (prima "dopo"; avviata la notte del 29/10, sezione 11). Fonti individuate:
   - Wikidata: P840 "luogo dell'ambientazione" = Milano e, per i film, P915 "luogo delle riprese"; CC0, in blocco.
   - Categorie di it.wikipedia: Film ambientati a / girati a Milano, Romanzi ambientati a Milano.
   - Open Library e Library of Congress, con il soggetto "Milan (Italy) -- Fiction".
@@ -1299,4 +1299,15 @@ _Fonti, date di scarico, licenze, scelte, problemi. Cartella `violenza-politica/
     3. I casi "DA DECIDERE" in `esclusi.csv`: Ambrosoli, Abbruciati, Saronio, Lahderi, Pasqua Rossa.
   - **Mancano**: la bomba al Cova (1920) e l'attentato alla caserma Santa Barbara (2009), senza voce su it.wikipedia; il 1946-68 e il dopo 1993 sono poco coperti.
   - **Pagina** `docs/violenza-politica/` pronta e provata, **non pubblicata** in attesa dell'ok di Davide.
+- 2026-10-30 notte — **Decisioni di Davide (con i clic)**:
+  1. I morti negli scontri o in custodia contano a tutti gli effetti.
+  2. Le rapine di autofinanziamento (Saporito 1977, Carloni 1982) restano, con la nota "rapina di autofinanziamento" (`pulito/correzioni_coordinatore.csv`, colonna `nota`).
+  3. I 5 casi incerti (Saronio, Ambrosoli, Abbruciati, Lahderi, Pasqua Rossa) entrano, ciascuno con una nota "caso incerto"; li aggiunge l'agente che riempie i buchi.
+  - **Pagina pubblicata** con 65 eventi; i casi incerti e le aggiunte arriveranno con il prossimo aggiornamento.
+
+## 11. Film e libri ambientati a Milano
+
+_Fonti, date di scarico, licenze, scelte, problemi. Cartella `film-e-libri/` (nome proposto dal coordinatore, da confermare con Davide)._
+
+- 2026-10-29 notte — Avviata la fase 1 su richiesta di Davide ("continua, più agenti in parallelo"). Le fonti sono quelle dell'idea in attesa, nelle Decisioni generali.
 

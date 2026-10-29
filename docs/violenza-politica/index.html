@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Violenza politica dal 1900</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#b71c1c;--s1:#7f0000;--s2:#c62828;--s3:#ef7b7b;--s4:#f6c4c4;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r{text-align:right;white-space:nowrap} .sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut)}
+a{color:var(--acc)}
+#map{height:62vh;min-height:360px;border:1px solid var(--ink)} #map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.filters{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;margin:.5em 0 .8em}
+.filters label{white-space:nowrap;cursor:pointer;font-size:.95rem}
+.filters .dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--s1);vertical-align:-1px;margin-right:4px}
+.per button{font:inherit;font-size:.9rem;border:1px solid var(--ink);background:#fff;color:var(--ink);padding:3px 10px;margin:0 4px 4px 0;cursor:pointer;border-radius:0}
+.per button.on{background:var(--ink);color:#fff}
+.scroll{max-height:560px;overflow:auto;border:1px solid var(--line)} .scroll th{position:sticky;top:0;background:#fff}
+.kpi{display:flex;flex-wrap:wrap;gap:8px 28px;margin:.4em 0 0} .kpi b{font-size:1.5rem;color:var(--acc);display:block;line-height:1.1} .kpi span{font-size:.8rem;color:var(--mut)}
+svg text{font:14px system-ui,Arial,sans-serif;fill:#444} #tl{overflow-x:auto} #tl svg{min-width:720px} .box{border-left:4px solid var(--ink);padding:.2em 0 .2em .9em;margin:.8em 0}
+.tag{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-popup-content{font-size:.9rem;line-height:1.4;margin:10px 12px} .leaflet-popup-content .pt{font-weight:700}
+@media(max-width:640px){th,td{padding:5px 4px;font-size:.86rem} .hide-s{display:none}}
+</style></head><body><main>
+<h1>Violenza politica a Milano dal 1900</h1>
+<p>Stragi, attentati, omicidi politici e morti negli scontri avvenuti nel Comune di Milano dal 1900 a oggi, <b>così come sono registrati da Wikipedia e Wikidata</b>. Ogni evento rimanda alla sua pagina di Wikipedia. Chi ha agito, chi ha rivendicato e chi è stato condannato è riportato come lo scrive Wikipedia, senza giudizi nostri.</p>
+<div class="kpi" id="kpi"></div>
+
+<h2>La mappa</h2>
+<div class="filters" id="ftype"></div>
+<div class="per" id="fper"></div>
+<div id="map" role="img" aria-label="Mappa di Milano con gli eventi di violenza politica"></div>
+<p class="src">Il cerchio è più grande dove ci sono più morti. Il colore indica il tipo (legenda sopra). <span id="nocoord"></span></p>
+
+<h2>Gli eventi anno per anno</h2>
+<div id="tl"></div>
+<p class="src">Ogni barra è un anno, l&rsquo;altezza è il numero di eventi (con i filtri scelti sopra). Gli anni fuori dal periodo scelto sono in grigio.</p>
+
+<h2>L&rsquo;elenco per data</h2>
+<div class="scroll"><table id="tab"><thead><tr><th>Data</th><th>Evento</th><th class="hide-s">Tipo</th><th>Morti</th><th class="hide-s">Feriti</th><th class="hide-s">Responsabili secondo Wikipedia</th><th>Wikipedia</th></tr></thead><tbody></tbody></table></div>
+<p class="src" id="tabsrc"></p>
+
+<h2>Cosa c&rsquo;è e cosa manca</h2>
+<div class="box">
+<p><b>Cosa c&rsquo;è.</b> Gli eventi avvenuti nel Comune di Milano dal 1900 che Wikipedia in italiano o Wikidata registrano come strage o bomba, attentato, omicidio politico oppure morte in uno scontro, in un&rsquo;azione delle forze dell&rsquo;ordine o in custodia. Per il periodo 1969-1982 la base sono le tabelle di Wikipedia &laquo;Persone uccise negli anni di piombo&raquo;; per gli anni 1919-1922 la &laquo;Cronologia dello squadrismo&raquo;; per gli altri anni le voci dedicate e gli elementi di Wikidata.</p>
+<p><b>Cosa manca.</b> Wikipedia racconta bene gli eventi famosi e poco quelli minori: attentati senza morti, feriti, aggressioni e gambizzazioni sono presenti solo se hanno una voce o una riga in una cronologia. Per questo l&rsquo;elenco <b>non è un conteggio completo</b> della violenza politica a Milano e non si deve leggere come tale: più un periodo è documentato su Wikipedia, più eventi compaiono. Mancano gli anni 1946-1968 quasi del tutto (poche voci) e gli anni dopo il 1993.</p>
+<p><b>Cosa non c&rsquo;è, di proposito.</b> Ordigni inesplosi, incendi senza vittime, gambizzazioni, sequestri senza morti, rapine e guerre di mala, incidenti, bombardamenti di guerra, fatti fuori dal Comune (per esempio a Sesto San Giovanni, Segrate o Vernio). L&rsquo;elenco con il motivo di ogni esclusione è in <a href="data/esclusi.csv">data/esclusi.csv</a>; alcuni casi dubbi sono segnati &laquo;DA DECIDERE&raquo;.</p>
+<p><b>Come leggere i dati.</b> Il numero di morti e di feriti è quello indicato da Wikipedia (o da Wikidata, dove l&rsquo;evento ha una voce) e a volte le due fonti non coincidono: le differenze note sono nelle note. Dove Wikipedia non dà il luogo esatto la posizione sulla mappa è approssimata (la nota lo dice); gli eventi senza luogo sono solo nell&rsquo;elenco. Nel popup, &laquo;la voce parla di rivendicazione / condanne&raquo; significa solo che quelle parole compaiono nella pagina di Wikipedia: va letta la pagina per sapere chi e che cosa.</p>
+<p class="sub">Le vittime sono nominate per rispetto e per documentazione. Dati raccolti il 29 ottobre 2026.</p>
+</div>
+
+<footer>
+<p><b>Fonti e licenze.</b> <a href="https://it.wikipedia.org">Wikipedia in italiano</a> (testi CC BY-SA 4.0; qui si pubblicano solo fatti brevi, numeri e collegamenti, non il testo delle voci) e <a href="https://www.wikidata.org">Wikidata</a> (CC0). Posizioni sulla mappa: coordinate di Wikipedia/Wikidata, oppure strada dal registro dei numeri civici del Comune di Milano, <a href="https://dati.comune.milano.it/dataset/ds634-numeri-civici-coordinate">ds634</a>, CC BY. Mappa di base: tessere OpenStreetMap (&copy; contributori di OpenStreetMap), rese in grigio. Dati: <a href="data/eventi.json">eventi.json</a>, <a href="data/eventi.csv">eventi.csv</a>, <a href="data/esclusi.csv">esclusi.csv</a>.</p>
+<p>Aggiornato al 29 ottobre 2026. Progetto Milano in dati.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var TYPES = [
+  {k:'strage/bomba', lab:'Stragi e bombe', col:'#7f0000'},
+  {k:'omicidio politico', lab:'Omicidi politici', col:'#c62828'},
+  {k:'rappresaglia o esecuzione', lab:'Rappresaglie ed esecuzioni (1943-1945)', col:'#5d4037'},
+  {k:'attentato', lab:'Altri attentati', col:'#ef7b7b'},
+  {k:'scontro o custodia', lab:'Morti in scontri, azioni delle forze dell’ordine o custodia', col:'#f6c4c4'}
+];
+var PERIODS = [{lab:'Tutto', a:1900, b:2100}, {lab:'1900–1945', a:1900, b:1945}, {lab:'1946–1968', a:1946, b:1968}, {lab:'1969–1988', a:1969, b:1988}, {lab:'1989–oggi', a:1989, b:2100}];
+var ALL = [], onT = {}, per = PERIODS[0], layer, map;
+TYPES.forEach(function(t){ onT[t.k] = true; });
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function col(tp){ for (var i = 0; i < TYPES.length; i++) if (TYPES[i].k === tp) return TYPES[i].col; return '#888'; }
+function dfmt(d){ var p = d.split('-'); var m = ['', 'gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic']; return p.length === 3 ? (+p[2]) + ' ' + m[+p[1]] + ' ' + p[0] : p.length === 2 ? m[+p[1]] + ' ' + p[0] : p[0]; }
+function sel(){ return ALL.filter(function(e){ return onT[e.tp] && e.y >= per.a && e.y <= per.b; }); }
+function mk(){
+  var f = document.getElementById('ftype'); f.innerHTML = '';
+  TYPES.forEach(function(t){
+    var l = document.createElement('label'); l.innerHTML = '<input type="checkbox" checked> <span class="dot" style="background:' + t.col + '"></span>' + esc(t.lab);
+    l.querySelector('input').addEventListener('change', function(ev){ onT[t.k] = ev.target.checked; draw(); }); f.appendChild(l);
+  });
+  var p = document.getElementById('fper'); p.innerHTML = '';
+  PERIODS.forEach(function(q){
+    var b = document.createElement('button'); b.textContent = q.lab; if (q === per) b.className = 'on';
+    b.addEventListener('click', function(){ per = q; mk(); draw(); }); p.appendChild(b);
+  });
+}
+function popup(e){
+  var h = '<div class="pt">' + esc(e.t) + '</div>' + dfmt(e.d) + (e.dm ? ' (morte il ' + dfmt(e.dm) + ')' : '') + '<br>' + esc(e.tp);
+  h += '<br>Morti: ' + (e.m == null ? 'n.d.' : e.m) + (e.f != null ? ' · Feriti: ' + e.f : '');
+  if (e.v) h += '<br>Vittime: ' + esc(e.v);
+  h += '<br>Responsabili secondo Wikipedia: ' + (e.r ? esc(e.r) : 'non indicati');
+  var s = []; if (e.riv) s.push('rivendicazione'); if (e.con) s.push('condanne'); if (s.length) h += '<br><i>La voce parla di: ' + s.join(', ') + '.</i>';
+  if (e.n) h += '<br><span class="sub">' + esc(e.n) + '</span>';
+  h += '<br><a href="' + esc(e.wp || e.en) + '" target="_blank" rel="noopener">Leggi su Wikipedia</a>' + (e.wp ? '' : ' (in inglese)');
+  if (e.wp && e.en) h += ' · <a href="' + esc(e.en) + '" target="_blank" rel="noopener">en</a>';
+  if (e.q) h += ' · <a href="https://www.wikidata.org/wiki/' + esc(e.q) + '" target="_blank" rel="noopener">Wikidata</a>';
+  return h;
+}
+function draw(){
+  var S = sel();
+  // mappa
+  layer.clearLayers(); var nc = 0;
+  S.forEach(function(e){
+    if (e.lat == null) { nc++; return; }
+    L.circleMarker([e.lat, e.lon], {radius: 5 + 3 * Math.sqrt(e.m || 0), color: '#7f0000', weight: 1.2, fillColor: col(e.tp), fillOpacity: .85}).bindPopup(popup(e), {maxWidth: 300}).addTo(layer);
+  });
+  document.getElementById('nocoord').textContent = nc ? nc + ' degli eventi scelti non hanno un luogo preciso su Wikipedia e compaiono solo nell’elenco.' : '';
+  // kpi
+  var morti = S.reduce(function(a, e){ return a + (e.m || 0); }, 0);
+  document.getElementById('kpi').innerHTML = '<div><b>' + S.length + '</b><span>eventi</span></div><div><b>' + morti + '</b><span>morti indicati</span></div><div><b>' + (S.length ? Math.min.apply(null, S.map(function(e){ return e.y; })) : '–') + '–' + (S.length ? Math.max.apply(null, S.map(function(e){ return e.y; })) : '–') + '</b><span>anni coperti</span></div>';
+  // timeline
+  var y0 = 1900, y1 = 2026, W = 1000, H = 190, pl = 28, pb = 22, n = y1 - y0 + 1, bw = (W - pl) / n;
+  var cnt = {}; S.forEach(function(e){ cnt[e.y] = (cnt[e.y] || 0) + 1; });
+  var perAll = {}; ALL.forEach(function(e){ if (onT[e.tp]) perAll[e.y] = (perAll[e.y] || 0) + 1; });
+  var mx = 1; for (var k in perAll) mx = Math.max(mx, perAll[k]);
+  var sv = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Eventi per anno">';
+  for (var g = 0; g <= mx; g++) { var gy = H - pb - g * (H - pb - 8) / mx; sv += '<line x1="' + pl + '" x2="' + W + '" y1="' + gy + '" y2="' + gy + '" stroke="#eee"/><text x="' + (pl - 4) + '" y="' + (gy + 4) + '" text-anchor="end">' + g + '</text>'; }
+  for (var y = y0; y <= y1; y++) {
+    var x = pl + (y - y0) * bw, inP = y >= per.a && y <= per.b;
+    // barra impilata per tipo
+    var ys = H - pb;
+    TYPES.forEach(function(t){
+      var c = ALL.filter(function(e){ return e.y === y && e.tp === t.k && onT[t.k]; }).length; if (!c) return;
+      var h = c * (H - pb - 8) / mx; ys -= h;
+      sv += '<rect x="' + (x + .5) + '" y="' + ys + '" width="' + Math.max(bw - 1, 1) + '" height="' + h + '" fill="' + (inP ? t.col : '#ccc') + '"><title>' + y + ': ' + c + ' ' + esc(t.lab) + '</title></rect>';
+    });
+    if (y % 10 === 0) sv += '<line x1="' + x + '" x2="' + x + '" y1="' + (H - pb) + '" y2="' + (H - pb + 4) + '" stroke="#444"/><text x="' + x + '" y="' + (H - 6) + '" text-anchor="middle">' + y + '</text>';
+  }
+  sv += '<line x1="' + pl + '" x2="' + W + '" y1="' + (H - pb) + '" y2="' + (H - pb) + '" stroke="#444"/></svg>';
+  document.getElementById('tl').innerHTML = sv;
+  // tabella
+  var tb = document.querySelector('#tab tbody'); tb.innerHTML = '';
+  S.forEach(function(e){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="r">' + esc(dfmt(e.d)) + '</td><td><span class="tag" style="background:' + col(e.tp) + '"></span>' + esc(e.t) + (e.v && e.m > 1 ? '<br><span class="sub">' + esc(e.v) + '</span>' : '') + '</td><td class="hide-s sub">' + esc(e.tp) + '</td><td class="r">' + (e.m == null ? '–' : e.m) + '</td><td class="r hide-s">' + (e.f == null ? '–' : e.f) + '</td><td class="hide-s sub">' + (e.r ? esc(e.r) : 'non indicati') + '</td><td><a href="' + esc(e.wp || e.en) + '" target="_blank" rel="noopener">' + (e.vt === 'elenco/cronologia' ? 'cronologia' : (e.wp ? 'voce' : 'voce (en)')) + '</a></td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('tabsrc').textContent = S.length + ' eventi. «cronologia» = l’evento ha solo una riga in un elenco di Wikipedia (non una voce propria).';
+}
+map = L.map('map').setView([45.4642, 9.19], 12);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+layer = L.layerGroup().addTo(map);
+mk();
+fetch('data/eventi.json', {cache: 'no-cache'}).then(function(r){ return r.json(); }).then(function(d){ ALL = d; draw(); })
+  .catch(function(){ document.getElementById('map').insertAdjacentHTML('afterend', '<p>Dati non caricati.</p>'); });
+</script></body></html>
