@@ -1273,4 +1273,16 @@ Dimensioni: tutta la cartella `raw\comune_milano` pesa circa 243 MB (il grosso s
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `violenza-politica/`._
 
 - 2026-10-29 — Filone chiesto da Davide: dove e quando sono avvenuti gli attentati a Milano dal 1900, su una mappa collegata a Wikipedia. Si contano bombe, stragi e omicidi politici (scelta di Davide); non si contano ordigni inesplosi, incendi e gambizzazioni senza morti. Nome della cartella e della sezione: `violenza-politica` (scelta di Davide). Fonti: Wikidata e Wikipedia. La Global Terrorism Database (1970-2020) chiede la registrazione: non la usiamo, salvo che Davide si registri lui.
+- 2026-10-29 notte — **Fase 1 e 2** (`violenza-politica/NOTE.md`, `pulito/eventi.csv`):
+  - **65 eventi, 1919-2003, 167 morti indicati.** Per decennio: 1910 5, 1920 10, 1940 5, 1960 4, 1970 22, 1980 17, 1990 1, 2000 1; negli anni '50 nessuno.
+  - **Fonti**: le tabelle di Wikipedia "Persone uccise negli anni di piombo", la "Cronologia dello squadrismo", le voci dedicate e Wikidata (39 eventi con QID). 21 eventi senza coordinate compaiono solo nell'elenco.
+  - **Revisione del coordinatore** (`pulito/correzioni_coordinatore.csv`, applicata da `scripts/09_pubblica.py`):
+    - Arena 1943, piazzale Loreto e viale Tibaldi 1944 passano dal tipo "strage/bomba" al nuovo tipo "rappresaglia o esecuzione";
+    - l'agguato di via Schievano 1980 diventa "omicidio politico".
+  - **Da decidere (Davide), prima di pubblicare**:
+    1. L'agente ha aggiunto il tipo "scontro o custodia" (16 morti: polizia ai comizi del 1919-20, Pinelli, Saltarelli, Franceschi, Zibecchi, Luca Rossi, brigatisti uccisi negli scontri a fuoco…), che è fuori dalla definizione scelta (bombe, stragi, omicidi politici).
+    2. Le rapine di autofinanziamento con morti (Saporito 1977, Carloni 1982) sono contate come omicidio politico.
+    3. I casi "DA DECIDERE" in `esclusi.csv`: Ambrosoli, Abbruciati, Saronio, Lahderi, Pasqua Rossa.
+  - **Mancano**: la bomba al Cova (1920) e l'attentato alla caserma Santa Barbara (2009), senza voce su it.wikipedia; il 1946-68 e il dopo 1993 sono poco coperti.
+  - **Pagina** `docs/violenza-politica/` pronta e provata, **non pubblicata** in attesa dell'ok di Davide.
 
