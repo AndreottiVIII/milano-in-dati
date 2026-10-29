@@ -3,11 +3,12 @@
 uso: python -I statistiche.py SERIE_CSV SPLICE_JSON OUTDIR
   SERIE_CSV    temperature/serie/serie_unica.csv   (date,tmin,tmax,tmean,fonte,qflag)
   SPLICE_JSON  temperature/splice.json             (solo per scrivere stato e segmenti nei metadati)
-  OUTDIR       docs/temperature/data               (meta, annuale, mensile, clima, giorni, records, gelate .json)
+  OUTDIR       docs/temperature/data               (meta, annuale, mensile, clima, giorni, records, gelate .json,
+                                                     giorni/AAAA0.json per decennio, giorni/ordinati/MM.json)
 
-Licenza: in OUTDIR finiscono solo aggregati (annuali, mensili, per giorno del calendario, record, serie di eventi).
-La serie giornaliera completa precedente al 1990 (ECA&D/GHCN-D, non commerciale) NON viene scritta in OUTDIR.
-Nei campi 'riga' c'e' il numero di riga (da 1, intestazione = riga 1) in serie_unica.csv, file locale non pubblicato.
+Licenza: dal 2026-10-29 il sito pubblica anche la serie giornaliera completa (giorni/AAAA0.json), con le citazioni delle
+fonti (ECA&D: uso non commerciale per ricerca e istruzione; sito non commerciale). Vedi la sezione Fonti della pagina.
+Nei campi 'riga' c'e' il numero di riga (da 1, intestazione = riga 1) in serie_unica.csv (file locale della serie).
 
 Soglie (documentate anche in meta.json):
   anno valido           >= 330 giorni con tmin e tmax (circa 90%)
@@ -104,6 +105,7 @@ ann['max_ass'] = g.tmax.max(); ann['max_data'] = g.tmax.idxmax()
 ann['min_ass'] = g.tmin.min(); ann['min_data'] = g.tmin.idxmin()
 ann['fonti'] = g.fonte.agg(lambda s: '+'.join(sorted(set(s))))
 ann['ok'] = ann.n >= MIN_GIORNI_ANNO
+ann['in_corso'] = ann.index == ANNO_CORR     # anno in corso: non valido per soglia, ma mostrato e confrontato 'finora'
 V = ann[ann.ok]                       # anni validi
 ULT_VALIDO = int(V.index.max())
 L20 = (ULT_VALIDO - 19, ULT_VALIDO)
@@ -116,9 +118,10 @@ for y, r in ann.iterrows():
         'tmedia': r.tmedia, 'tmin_media': r.tmin_media, 'tmax_media': r.tmax_media,
         'max_ass': r.max_ass, 'max_data': r.max_data, 'min_ass': r.min_ass, 'min_data': r.min_data,
         'gg_gelo': int(r.gg_gelo), 'gg_caldi': int(r.gg_caldi), 'notti_tropicali': int(r.notti_tropicali),
-        'gg_35': int(r.gg_35), 'fonti': r.fonti})
+        'gg_35': int(r.gg_35), 'fonti': r.fonti, 'in_corso': bool(r.in_corso)})
 salva('annuale.json', {'campi_nota': 'un oggetto per anno; ok=false: anno escluso dalle classifiche (meno di '
-                       f'{MIN_GIORNI_ANNO} giorni con tmin e tmax); i conteggi di giorni di un anno non valido sono un minimo',
+                       f'{MIN_GIORNI_ANNO} giorni con tmin e tmax); i conteggi di giorni di un anno non valido sono un minimo. '
+                       f'in_corso=true: anno in corso, dati fino al {dstr(ULT)}; per confrontarlo vedi finora.json',
                        'anni': righe_ann})
 
 # ------------------------------------------------------------------ MENSILE
@@ -193,6 +196,8 @@ mm_all = chiave[['tmax', 'tmin', 'tmean']].mean()
 mm20 = df[sel20].groupby(['m', 'd'])[['tmax', 'tmin', 'tmean']].mean()
 mm5 = df[sel5].groupby(['m', 'd'])[['tmax', 'tmin', 'tmean']].mean()
 mm9120 = df[sel9120].groupby(['m', 'd'])[['tmax', 'tmin', 'tmean']].mean()
+mm6190 = df[anni_in(1961, 1990)].groupby(['m', 'd'])[['tmax', 'tmin', 'tmean']].mean()
+ntx = chiave.tmax.count(); ntn = chiave.tmin.count()
 cur = df[df.y == ANNO_CORR].set_index(['m', 'd'])
 nn = chiave.tmean.count()
 txmax = chiave.tmax.idxmax(); tnmin = chiave.tmin.idxmin()
@@ -203,16 +208,125 @@ for (m, d) in mm_all.index:
            mm20.loc[(m, d), 'tmax'], mm20.loc[(m, d), 'tmin'], mm20.loc[(m, d), 'tmean'],
            mm5.loc[(m, d), 'tmax'], mm5.loc[(m, d), 'tmin'], mm5.loc[(m, d), 'tmean'], int(nn[(m, d)]),
            cur.tmax.get((m, d), np.nan), cur.tmin.get((m, d), np.nan),
-           mm9120.loc[(m, d), 'tmean']]
+           mm9120.loc[(m, d), 'tmean'],
+           mm6190.loc[(m, d), 'tmax'], mm6190.loc[(m, d), 'tmin'], mm6190.loc[(m, d), 'tmean'],
+           mm9120.loc[(m, d), 'tmax'], mm9120.loc[(m, d), 'tmin'], int(ntx[(m, d)]), int(ntn[(m, d)])]
     giorni.append(row)
 salva('giorni.json', {
     'campi': ['m', 'd', 'tx_rec', 'tx_rec_anno', 'tx_rec_fonte', 'tx_rec_riga', 'tn_rec', 'tn_rec_anno', 'tn_rec_fonte',
               'tn_rec_riga', 'tx_med', 'tn_med', 'tm_med', 'tx_20', 'tn_20', 'tm_20', 'tx_5', 'tn_5', 'tm_5', 'n_anni',
-              'tx_att', 'tn_att', 'tm_9120'],
+              'tx_att', 'tn_att', 'tm_9120', 'tx_6190', 'tn_6190', 'tm_6190', 'tx_9120', 'tn_9120', 'n_tx', 'n_tn'],
     'nota': 'tx_rec = massima piu alta mai registrata in quel giorno del calendario (a parita il primo anno); tn_rec = minima piu '
             'bassa. *_med = media su tutta la serie; *_20 e *_5 = media sugli ultimi 20 / 5 anni validi; tm_9120 = media '
-            f'1991-2020. *_att = valore dell\'anno {ANNO_CORR} (ARPA 5897); n_anni = anni con dato in tutta la serie.',
+            f'1991-2020 (tx_9120, tn_9120 per massima e minima); *_6190 = media 1961-1990; n_tx / n_tn = anni con massima / minima in quel giorno. *_att = valore dell\'anno {ANNO_CORR} (ARPA 5897); n_anni = anni con dato in tutta la serie.',
     'anno_attuale': ANNO_CORR, 'ultimi_20': list(L20), 'ultimi_5': list(L5), 'righe': giorni})
+
+# ------------------------------------------------------------------ SERIE GIORNALIERA PUBBLICATA (per decennio) + ordinati per giorno del calendario
+import shutil
+FONTI_COD = ['MAUGERI', 'LINATE', 'BRERA_H', 'VICINE_ARPA']
+nuove_fonti = sorted(set(df.fonte) - set(FONTI_COD))
+if nuove_fonti:
+    raise SystemExit(f'fonte non prevista in serie_unica.csv: {nuove_fonti}; aggiornare FONTI_COD qui e FONTE_NOMI nella pagina')
+
+
+def num(x):
+    """numero compatto per il JSON: None se mancante, intero se senza decimali, 2 decimali al massimo"""
+    if x is None or (isinstance(x, float) and math.isnan(x)):
+        return None
+    x = round(float(x), 2)
+    return int(x) if x == int(x) else x
+
+
+gdir = os.path.join(outdir, 'giorni')
+shutil.rmtree(gdir, ignore_errors=True)
+os.makedirs(os.path.join(gdir, 'ordinati'))
+tot = 0
+for dec in range(int(df.y.min()) // 10 * 10, ANNO_CORR + 1, 10):
+    sub = df[(df.y >= dec) & (df.y <= dec + 9)]
+    if not len(sub):
+        continue
+    t0, t1 = sub.index.min(), sub.index.max()
+    idx = pd.date_range(t0, t1)
+    sub = sub.reindex(idx)
+    righe, qf = [], {}
+    for i, r in enumerate(sub.itertuples()):
+        if pd.isna(r.fonte):
+            righe.append(None)          # giorno assente dalla serie
+            continue
+        righe.append([num(r.tmin), num(r.tmax), num(r.tmean), FONTI_COD.index(r.fonte)])
+        if r.qflag:
+            qf[i] = r.qflag
+    p = os.path.join(gdir, f'{dec}.json')
+    with open(p, 'w', encoding='utf-8') as f:
+        json.dump({'da': dstr(t0), 'a': dstr(t1), 'fonti': FONTI_COD, 'campi': ['tmin', 'tmax', 'tmean', 'fonte'],
+                   'nota': 'r[i] = giorno da+i: [tmin, tmax, tmean, indice in fonti]; null = giorno assente dalla serie; '
+                           'valori null dentro la riga = misura mancante; qflag[i] = flag NOAA GHCN-D (primo carattere minima, secondo massima; '
+                           'I = incoerenza interna, N = fuori norma): valore da verificare.',
+                   'qflag': qf, 'r': righe}, f, ensure_ascii=False, separators=(',', ':'))
+    tot += os.path.getsize(p)
+print(f'giorni/AAAA0.json: {len(os.listdir(gdir)) - 1} file, {tot/1024:.0f} KB')
+
+# valori ordinati per giorno del calendario (per la posizione in classifica di un giorno), un file per mese
+tot2 = 0
+for m in range(1, 13):
+    out = {}
+    for d in range(1, calendar.monthrange(2000, m)[1] + 1):
+        sub = df[(df.m == m) & (df.d == d)]
+        out[str(d)] = {k: [num(v) for v in sorted(sub[c].dropna())] for k, c in (('tn', 'tmin'), ('tx', 'tmax'), ('tm', 'tmean'))}
+    p = os.path.join(gdir, 'ordinati', f'{m:02d}.json')
+    with open(p, 'w', encoding='utf-8') as f:
+        json.dump({'nota': 'per ogni giorno del mese: valori di tmin (tn), tmax (tx), tmean (tm) di tutti gli anni con dato, in ordine crescente',
+                   'g': out}, f, separators=(',', ':'))
+    tot2 += os.path.getsize(p)
+print(f'giorni/ordinati/MM.json: 12 file, {tot2/1024:.0f} KB')
+
+# ------------------------------------------------------------------ ANNO IN CORSO "FINORA": stesso periodo (1 gen - ultimo giorno) di ogni anno
+mdc = (int(ULT.month), int(ULT.day))
+inper = (df.m < mdc[0]) | ((df.m == mdc[0]) & (df.d <= mdc[1]))
+# stessi giorni del calendario per tutti gli anni: solo quelli in cui l'anno in corso ha minima e massima
+# (cosi un mese mancante, per esempio marzo 2026, non sposta il confronto)
+cc = df[(df.y == ANNO_CORR) & inper & df.tmin.notna() & df.tmax.notna()]
+giorni_ok = set(zip(cc.m, cc.d))
+n_periodo = int(((pd.Timestamp(year=ANNO_CORR, month=mdc[0], day=mdc[1]) - pd.Timestamp(year=ANNO_CORR, month=1, day=1)).days) + 1)
+mancano = pd.date_range(f'{ANNO_CORR}-01-01', ULT).difference(cc.index)
+mesi_manc = {}
+for t in mancano:
+    mesi_manc[t.month] = mesi_manc.get(t.month, 0) + 1
+dp = df[inper & pd.Series(list(zip(df.m, df.d)), index=df.index).isin(giorni_ok)]
+gp = dp.groupby('y')
+fin = pd.DataFrame({'n_tmin': gp.tmin.count(), 'n_tmax': gp.tmax.count(), 'tmedia': gp.tmean.mean(), 'tmin_media': gp.tmin.mean(),
+                    'tmax_media': gp.tmax.mean(), 'gg_gelo': (dp.tmin < 0).groupby(dp.y).sum(), 'gg_caldi': (dp.tmax >= 30).groupby(dp.y).sum(),
+                    'notti_tropicali': (dp.tmin >= 20).groupby(dp.y).sum(), 'gg_35': (dp.tmax >= 35).groupby(dp.y).sum()})
+fin['atteso'] = len(giorni_ok)
+fin['ok'] = (fin.n_tmin >= 0.9 * fin.atteso) & (fin.n_tmax >= 0.9 * fin.atteso)
+FV = fin[fin.ok]
+nome_f = {'tmedia': ('temperatura media', 1), 'tmin_media': ('media delle minime', 1), 'tmax_media': ('media delle massime', 1),
+          'gg_gelo': ('giorni di gelo (minima sotto 0 °C)', 0), 'gg_caldi': ('giorni con massima da 30 °C', 0),
+          'notti_tropicali': ('notti tropicali (minima da 20 °C)', 0), 'gg_35': ('giorni con massima da 35 °C', 0)}
+righe_f = []
+if ANNO_CORR in FV.index:
+    altri = FV[FV.index != ANNO_CORR]
+    for k, (nome, dec) in nome_f.items():
+        v = float(FV.at[ANNO_CORR, k])
+        sp = FV[k]
+        righe_f.append({'var': k, 'nome': nome, 'decimali': dec, 'valore': v, 'media_altri': altri[k].mean(),
+                        'media_9120': FV[(FV.index >= 1991) & (FV.index <= 2020)][k].mean(),
+                        'rank_alto': int((sp > v).sum()) + 1, 'rank_basso': int((sp < v).sum()) + 1, 'n': int(len(sp)),
+                        'pari': int((sp == v).sum()) - 1,
+                        'max': {'anno': int(altri[k].idxmax()), 'valore': altri[k].max()},
+                        'min': {'anno': int(altri[k].idxmin()), 'valore': altri[k].min()}})
+tm_f = FV.tmedia.sort_values(kind='stable')
+salva('finora.json', {
+    'anno': ANNO_CORR, 'da': '01-01', 'giorni_confronto': len(giorni_ok), 'giorni_periodo': n_periodo,
+    'giorni_mancanti_anno_corso': int(len(mancano)), 'mesi_con_giorni_mancanti': {str(k): v for k, v in mesi_manc.items()}, 'a': f'{mdc[0]:02d}-{mdc[1]:02d}', 'ultimo_giorno': ULT,
+    'nota': f'Confronto dell anno in corso ({ANNO_CORR}) con lo stesso periodo (1 gennaio - {mdc[1]} {MESI[mdc[0]-1]}) di ogni altro anno, '
+            f'ma solo sui {len(giorni_ok)} giorni del calendario (su {n_periodo}) in cui il {ANNO_CORR} ha minima e massima: i giorni mancanti sono esclusi per tutti gli anni. '
+            'Entrano gli anni con almeno il 90% dei giorni del periodo con minima e con massima (anno in corso incluso). '
+            'rank_alto = posizione partendo dal valore piu alto (1 = il piu alto), rank_basso partendo dal piu basso; pari = altri anni con lo stesso valore. '
+            'Anche i conteggi di giorni riguardano solo questi giorni. Media: media delle medie giornaliere.',
+    'anni_esclusi': [int(y) for y in fin.index[~fin.ok]], 'n_anni': int(len(FV)), 'righe': righe_f,
+    'classifica_tmedia_caldi': [{'anno': int(y), 'tmedia': v} for y, v in tm_f[::-1].head(10).items()],
+    'classifica_tmedia_freddi': [{'anno': int(y), 'tmedia': v} for y, v in tm_f.head(10).items()]})
 
 # ------------------------------------------------------------------ RECORD: giorni estremi
 def top(serie, n=10, asc=False, extra=None):
@@ -401,6 +515,10 @@ fatto(f"Il {ANNO_CORR} finora ({len(c)} giorni con dato, fino al {dstr(c.index.m
       if np.mean(diff) >= 0 else
       f"Il {ANNO_CORR} finora ({len(c)} giorni con dato, fino al {dstr(c.index.max())}) e stato {fmt(-np.mean(diff))} °C sotto la media 1991-2020 degli stessi giorni del calendario.",
       'serie_unica.csv, campo tmean dell\'anno corrente (ARPA 5897) contro media 1991-2020 per giorno del calendario (giorni.json campo tm_9120)', [])
+if righe_f:
+    rt = righe_f[0]
+    fatto(f"Nello stesso periodo (1 gennaio - {mdc[1]} {MESI[mdc[0]-1]}) il {ANNO_CORR} e al posto {rt['rank_alto']} su {rt['n']} per temperatura media ({fmt(rt['valore'])} °C; media degli altri anni {fmt(rt['media_altri'])} °C), contando dal piu caldo.",
+          'finora.json campo righe (tmedia); stesso periodo di ogni anno con almeno il 90% dei giorni', [])
 records['curiosita'] = cur_list
 salva('records.json', records)
 
@@ -413,6 +531,6 @@ salva('meta.json', {
                'notte_tropicale': 'tmin >= 20', 'caldo_forte': 'tmax >= 35'},
     'fonti_codici': {'maugeri': 'Maugeri / GHCN-D ITE00100554 (copia di ECA&D SOUID 105248, 105247)',
                      'arpa5897': 'ARPA Lombardia sensore 5897 Milano v.Brera'},
-    'n_anni_validi': int(len(V)), 'n_anni_totali': int(len(ann)), 'anni_non_validi': [int(y) for y in ann.index[~ann.ok]],
+    'n_anni_validi': int(len(V)), 'n_anni_totali': int(len(ann)), 'anni_non_validi': [int(y) for y in ann.index[~ann.ok] if y != ANNO_CORR], 'anno_in_corso_parziale': bool(not ann.at[ANNO_CORR, 'ok']),
 })
 print('anni validi', len(V), 'su', len(ann), '| ultimo valido', ULT_VALIDO)

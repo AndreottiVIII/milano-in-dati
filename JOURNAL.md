@@ -137,6 +137,9 @@ Fonti trovate: Maugeri, Buffoni e Chlistovsky 2002 (storia delle osservazioni, C
 - **Effetto sui numeri**: la differenza tra le normali 1961-90 e 1991-2020 passa da +1,3 °C (cucitura provvisoria) a +0,5 °C. Anno più caldo: 2022, con 16,2 °C.
 - **Licenza**: nel sito solo valori aggregati; la serie giornaliera prima del 1995 (ECA&D/GHCN, non ridistribuibile) resta sul PC.
 
+- **2026-10-29, giorno singolo e 2026**: Davide ha deciso di pubblicare anche la serie giornaliera completa (pagina "Un giorno a scelta"), citando Maugeri et al. 2002, ECA&D (Klein Tank et al. 2002), NOAA GHCN-D e GSOD, ARPA; sito non commerciale. Il 2026 (dati fino al 28/10) entra in tutte le tabelle come anno in corso; nelle classifiche annuali c'è un confronto a parte "2026 finora", fatto sugli stessi 271 giorni di calendario per tutti gli anni.
+- **Da verificare**: il 2026 risulta il più caldo di sempre nello stesso periodo (19,3 °C contro i 18,7 del 2022). L'estate 2026 a Brera ha una media di 28,1 °C, contro i 27,4 del 2022. Il confronto con le stazioni vicine per il 2026 non è stato possibile: l'API di ARPA ha risposto "too many requests". Da rifare.
+
 ## 2. Donne nelle vie
 
 - **Fonti:** OpenStreetMap (Overpass), Wikidata, Comune di Milano (registro civici ds634, vie storiche ds2914), Mapping Diversity (solo controllo).

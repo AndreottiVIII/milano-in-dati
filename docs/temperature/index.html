@@ -33,18 +33,23 @@
   dl.k dt { font-weight: bold; } dl.k dd { margin: 0; }
   footer { border-top: 2px solid #000; margin-top: 48px; padding-top: 8px; font-size: 0.9em; }
   #errore { border: 3px solid #000; padding: 8px 12px; display: none; }
+  tr.corso td { font-style: italic; }
+  tr.sel td { font-weight: bold; background: #eee; }
+  .dubbio { border: 2px solid #000; padding: 4px 8px; margin: 8px 0; }
+  button { font: inherit; }
 </style>
 </head>
 <body>
 
 <h1>Temperature di Milano Brera, 1763-2026</h1>
-<p>Temperature minime, massime e medie giornaliere della stazione di Brera: medie, mesi, tendenze, record, curiosita e il confronto giorno per giorno.</p>
+<p>Temperature minime, massime e medie giornaliere della stazione di Brera: un giorno a scelta, medie, mesi, tendenze, record, curiosita e il confronto giorno per giorno. La serie giornaliera completa e pubblicata (vedi Fonti, licenze, metodo). Il <span class="anno-corso"></span> e l'anno in corso: i dati arrivano al <span class="ult-giorno"></span>.</p>
 
 <div class="avviso" id="avviso"></div>
 <div id="errore"></div>
 
 <nav>
   <ul>
+    <li><a href="#ungiorno">Un giorno a scelta</a></li>
     <li><a href="#inbreve">In breve</a></li>
     <li><a href="#grafico">Grafico: media annua</a></li>
     <li><a href="#anni">Anno per anno</a></li>
@@ -59,6 +64,9 @@
   </ul>
 </nav>
 
+<h2 id="ungiorno">Un giorno a scelta</h2>
+<div id="ungiorno-c"></div>
+
 <h2 id="inbreve">In breve</h2>
 <div id="inbreve-c"></div>
 
@@ -68,7 +76,7 @@
 <h2 id="anni">Anno per anno</h2>
 <p class="nota"><label><input type="checkbox" id="solo-validi" checked> mostra solo gli anni validi (almeno <span class="soglia-anno"></span> giorni con minima e massima)</label></p>
 <div class="scroll" id="anni-c"></div>
-<p class="fonte">Fonte: data/annuale.json, un oggetto per anno. Campi: <code>n</code> giorni con dato, <code>tmedia</code>, <code>tmin_media</code>, <code>tmax_media</code>, <code>min_ass</code>/<code>min_data</code>, <code>max_ass</code>/<code>max_data</code>, <code>gg_gelo</code> (minima sotto 0 °C), <code>gg_caldi</code> (massima da 30 °C), <code>notti_tropicali</code> (minima da 20 °C), <code>fonti</code>. Gli anni grigi hanno dati insufficienti: i conteggi di giorni sono un minimo e l'anno non entra nelle classifiche.</p>
+<p class="fonte">Fonte: data/annuale.json, un oggetto per anno. Campi: <code>n</code> giorni con dato, <code>tmedia</code>, <code>tmin_media</code>, <code>tmax_media</code>, <code>min_ass</code>/<code>min_data</code>, <code>max_ass</code>/<code>max_data</code>, <code>gg_gelo</code> (minima sotto 0 °C), <code>gg_caldi</code> (massima da 30 °C), <code>notti_tropicali</code> (minima da 20 °C), <code>fonti</code>. Gli anni grigi hanno dati insufficienti: i conteggi di giorni sono un minimo e l'anno non entra nelle classifiche. L'anno in corso (in corsivo) e sempre mostrato: i suoi totali sono parziali e non sono confrontabili con quelli di un anno intero; per il confronto vedi "Anni piu caldi e piu freddi" (<code>data/finora.json</code>).</p>
 
 <h2 id="classifiche">Anni piu caldi e piu freddi</h2>
 <div id="classifiche-c"></div>
@@ -98,14 +106,16 @@
 
 <script>
 "use strict";
-const NOMI_FILE = ['meta', 'annuale', 'mensile', 'clima', 'giorni', 'records', 'gelate'];
+const NOMI_FILE = ['meta', 'annuale', 'mensile', 'clima', 'giorni', 'records', 'gelate', 'finora'];
 const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 const $ = s => document.querySelector(s);
 const nf = (x, d = 1) => (x === null || x === undefined || Number.isNaN(x)) ? '–' : Number(x).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
 const sg = (x, d = 1) => (x === null || x === undefined) ? '–' : (x > 0 ? '+' : '') + nf(x, d);
 const tab = (head, rows, rowCls) => '<div class="w"><table><thead><tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>' +
   rows.map((r, i) => `<tr${rowCls && rowCls[i] ? ` class="${rowCls[i]}"` : ''}>` + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody></table></div>';
-const FONTE_NOMI = { maugeri: 'Maugeri', arpa5897: 'ARPA 5897' };
+const FONTE_NOMI = { maugeri: 'Maugeri', arpa5897: 'ARPA 5897', continua: 'serie unica', MAUGERI: 'Maugeri', LINATE: 'Linate GSOD', BRERA_H: 'ARPA Brera 5897', VICINE_ARPA: 'ARPA vicine' };
+const FONTE_LUNGA = { MAUGERI: 'Maugeri (serie storica di Brera, da GHCN-D / ECA&D)', LINATE: 'Linate, NOAA GSOD (1986-87, corretta)', BRERA_H: 'ARPA Lombardia, Milano v.Brera, sensore 5897 (letture orarie)', VICINE_ARPA: 'media delle stazioni ARPA vicine (giorno senza dato a Brera)' };
+const dm = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7);
 const fl = f => String(f || '').split('+').map(x => FONTE_NOMI[x] || x).join('+');
 const rigaTxt = (f, r) => `${fl(f)}, riga ${r}`;
 const doyStr = d => d === null || d === undefined ? '–' : new Date(Date.UTC(2001, 0, Math.round(d))).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', timeZone: 'UTC' });
@@ -127,7 +137,104 @@ function costruisci() {
     : 'Cucitura delle fonti: ' + M.stato_cucitura + '.';
   if (!prov) $('#avviso').style.fontWeight = 'normal';
   document.querySelectorAll('.soglia-anno').forEach(e => e.textContent = M.soglie.giorni_anno_valido);
-  inBreve(); grafico(); anni(); classifiche(); tendenze(); mesi(); giorni(); record(); gelate(); curiosita(); footer();
+  document.querySelectorAll('.anno-corso').forEach(e => e.textContent = M.anno_corrente);
+  document.querySelectorAll('.ult-giorno').forEach(e => e.textContent = dm(M.ultimo_giorno));
+  unGiorno(); inBreve(); grafico(); anni(); classifiche(); tendenze(); mesi(); giorni(); record(); gelate(); curiosita(); footer();
+}
+
+// ---------------------------------------------------------------- UN GIORNO A SCELTA
+const cacheDec = {}, cacheOrd = {};
+const caricaJson = (cache, url) => cache[url] || (cache[url] = fetch(url).then(r => { if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); }).catch(e => { delete cache[url]; throw e; }));
+const isoPiu = (iso, n) => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n)).toISOString().slice(0, 10);
+const dataLunga = iso => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10))).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+function unGiorno() {
+  const M = D.meta, G = D.giorni, ix = {}; G.campi.forEach((c, i) => ix[c] = i);
+  const primo = M.primo_giorno, ultimo = M.ultimo_giorno;
+  $('#ungiorno-c').innerHTML = `<p>Scegli una data dal ${dataLunga(primo)} al ${dataLunga(ultimo)}: minima, massima e media di quel giorno, il confronto con lo stesso giorno del calendario negli altri anni, la posizione in classifica e i 7 giorni attorno.</p>` +
+    `<p><button type="button" id="u-prec" title="giorno prima">&larr;</button> <label>Data <input type="date" id="u-data" min="${primo}" max="${ultimo}" value="${ultimo}"></label> <button type="button" id="u-succ" title="giorno dopo">&rarr;</button> ` +
+    '<span class="nota">(se il browser non mostra il calendario, scrivi la data come AAAA-MM-GG)</span></p>' +
+    '<div id="u-scheda" aria-live="polite"></div>';
+  const inp = $('#u-data');
+  let tok = 0;
+  const trova = (iso, dec) => {                       // riga del giorno iso dentro il file del suo decennio
+    const f = dec[iso.slice(0, 3) + '0'];
+    if (!f) return undefined;
+    const i = Math.round((Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) - Date.UTC(+f.da.slice(0, 4), +f.da.slice(5, 7) - 1, +f.da.slice(8, 10))) / 86400000);
+    if (i < 0 || i >= f.r.length) return undefined;
+    return { r: f.r[i], q: f.qflag[i] || '', fonti: f.fonti };
+  };
+  const mostra = async () => {
+    const my = ++tok, v = inp.value, el = $('#u-scheda');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || Number.isNaN(Date.parse(v + 'T00:00:00Z')) || new Date(v + 'T00:00:00Z').toISOString().slice(0, 10) !== v) { el.innerHTML = '<p class="dubbio">Data non valida: usa il formato AAAA-MM-GG.</p>'; return; }
+    if (v < primo || v > ultimo) { el.innerHTML = `<p class="dubbio">Nessun dato per il ${dataLunga(v)}: la serie va dal ${primo} al ${ultimo}.</p>`; return; }
+    el.innerHTML = '<p class="nota">Carico i dati...</p>';
+    const vicini = Array.from({ length: 7 }, (_, k) => isoPiu(v, k - 3)).filter(x => x >= primo && x <= ultimo);
+    const decs = [...new Set(vicini.map(x => x.slice(0, 3) + '0'))];
+    const m = +v.slice(5, 7), d = +v.slice(8, 10);
+    try {
+      const [fd, ord] = await Promise.all([Promise.all(decs.map(x => caricaJson(cacheDec, `data/giorni/${x}.json`))), caricaJson(cacheOrd, `data/giorni/ordinati/${String(m).padStart(2, '0')}.json`)]);
+      if (my !== tok) return;
+      const dec = {}; decs.forEach((x, i) => dec[x] = fd[i]);
+      disegna(v, m, d, vicini, dec, ord.g[d]);
+    } catch (e) {
+      if (my === tok) el.innerHTML = `<p class="dubbio">Impossibile caricare i dati del giorno (${e.message}).</p>`;
+    }
+  };
+  const disegna = (v, m, d, vicini, dec, ordG) => {
+    const hit = trova(v, dec), r = hit && hit.r;
+    const gr = G.righe.find(x => x[0] === m && x[1] === d), gv = k => gr[ix[k]];
+    const [tn, tx, tm] = r ? [r[0], r[1], r[2]] : [null, null, null];
+    const fonteTxt = r ? (FONTE_LUNGA[hit.fonti[r[3]]] || hit.fonti[r[3]]) : null;
+    const flag = hit && hit.q ? `<p class="dubbio"><strong>Da verificare</strong>: il controllo di qualita NOAA ha segnato questo giorno (flag ${hit.q}: primo carattere minima, secondo massima; I = incoerenza interna, N = fuori norma). Il valore e tenuto, ma e sospetto.</p>` : '';
+    let h = `<h3>${dataLunga(v)}</h3>`;
+    if (!r) h += '<p class="dubbio">Giorno senza dato: questo giorno non c\'e nella serie (nessuna delle fonti ha una misura). Sotto restano il confronto del calendario e i giorni attorno.</p>';
+    else {
+      if (tm === null || tn === null || tx === null) h += `<p class="dubbio">Dato incompleto: ${tn === null ? 'manca la minima' : ''}${tn === null && tx === null ? ' e ' : ''}${tx === null ? 'manca la massima' : ''}; la media non si puo calcolare${tm === null ? '' : ' per intero'}.</p>`;
+      h += flag + tab(['Minima °C', 'Massima °C', 'Media °C', 'Fonte'], [[nf(tn), nf(tx), nf(tm), fonteTxt]]);
+    }
+    // confronto con lo stesso giorno del calendario
+    const rif = [['Media su tutta la serie', 'med', gv('n_anni')], ['Media 1961-1990', '6190'], ['Media 1991-2020', '9120'], [`Media ultimi 20 anni (${G.ultimi_20.join('-')})`, '20'], [`Media ultimi 5 anni (${G.ultimi_5.join('-')})`, '5']];
+    const cella = (val, ref) => (val === null || ref === null) ? nf(ref) : `${nf(ref)} <small>(${sg(val - ref)})</small>`;
+    const nomeG = `${d} ${MESI[m - 1]}`;
+    h += `<h3>Lo stesso giorno (${nomeG}) negli altri anni</h3><p class="nota">Tra parentesi: di quanto questo giorno si discosta dal riferimento (°C; positivo = piu caldo).</p>` +
+      tab(['Riferimento', 'Minima °C', 'Massima °C', 'Media °C'], [
+        ...rif.map(([t, k]) => [t, cella(tn, gv('tn_' + k)), cella(tx, gv('tx_' + k)), cella(tm, gv('tm_' + k))]),
+        ['Record minima piu bassa', `${nf(gv('tn_rec'))} (${gv('tn_rec_anno')})`, '–', '–'],
+        ['Record massima piu alta', '–', `${nf(gv('tx_rec'))} (${gv('tx_rec_anno')})`, '–']]) +
+      '<p class="fonte">Fonte: data/giorni.json, campi <code>tn_*, tx_*, tm_*</code> (med, 6190, 9120, 20, 5, rec) del giorno ' + nomeG + '. Il 29 febbraio ha meno anni degli altri giorni. Le medie sono su tutti gli anni con dato (anche quelli esclusi dalle classifiche).</p>';
+    // posizione in classifica
+    const pos = (val, arr) => {
+      if (val === null) return null;
+      let alto = 1, basso = 1, pari = -1;
+      arr.forEach(x => { if (x > val) alto++; else if (x < val) basso++; else pari++; });
+      return { alto, basso, pari, n: arr.length };
+    };
+    const pr = [['Media', tm, ordG.tm, 'piu calda'], ['Massima', tx, ordG.tx, 'piu alta'], ['Minima', tn, ordG.tn, 'piu alta']].map(([t, val, arr, agg]) => {
+      const p = pos(val, arr);
+      return p ? [t, nf(val), `${p.alto}${p.alto === 1 ? ' (la piu alta)' : ''}`, `${p.basso}${p.basso === 1 ? ' (la piu bassa)' : ''}`, p.n, p.pari ? `${p.pari} altri anni con lo stesso valore` : '–'] : [t, '–', '–', '–', arr.length, '–'];
+    });
+    h += `<h3>Posizione fra tutti i ${nomeG}</h3>` + tab(['Grandezza', 'Valore °C', 'Posizione dal piu alto', 'Posizione dal piu basso', 'Anni con dato', 'Pari merito'], pr) +
+      `<p class="fonte">Fonte: data/giorni/ordinati/${String(m).padStart(2, '0')}.json (valori di ogni anno per il ${nomeG}, in ordine crescente). Posizione 1 = il valore piu alto (dal piu alto) o il piu basso (dal piu basso) mai registrato in quel giorno del calendario.</p>`;
+    // 7 giorni attorno
+    const righe = [], cls = [];
+    for (let k = -3; k <= 3; k++) {
+      const iso = isoPiu(v, k);
+      if (iso < primo || iso > ultimo) { righe.push([iso, '–', '–', '–', 'fuori dalla serie']); cls.push(''); continue; }
+      const x = trova(iso, dec);
+      if (!x || !x.r) { righe.push([iso, '–', '–', '–', 'giorno senza dato']); cls.push(k === 0 ? 'sel' : ''); continue; }
+      righe.push([iso, nf(x.r[0]), nf(x.r[1]), nf(x.r[2]), (FONTE_NOMI[x.fonti[x.r[3]]] || x.fonti[x.r[3]]) + (x.q ? ` <small>(flag NOAA ${x.q}: da verificare)</small>` : '')]);
+      cls.push(k === 0 ? 'sel' : '');
+    }
+    h += '<h3>I 7 giorni attorno</h3>' + tab(['Data', 'Minima °C', 'Massima °C', 'Media °C', 'Fonte'], righe, cls) +
+      `<p class="fonte">Fonte: data/giorni/${[...new Set(vicini.map(x => x.slice(0, 3) + '0'))].join('.json, data/giorni/')}.json (un file per decennio, caricato solo quando serve).</p>`;
+    $('#u-scheda').innerHTML = h;
+  };
+  const sposta = n => { const x = isoPiu(inp.value && /^\d{4}-\d{2}-\d{2}$/.test(inp.value) ? inp.value : ultimo, n); if (x >= primo && x <= ultimo) { inp.value = x; mostra(); } };
+  inp.addEventListener('change', mostra);
+  $('#u-prec').addEventListener('click', () => sposta(-1));
+  $('#u-succ').addEventListener('click', () => sposta(1));
+  mostra();
 }
 
 // ---------------------------------------------------------------- IN BREVE
@@ -142,10 +249,11 @@ function inBreve() {
     `<dt>Media annua</dt><dd>${nf(n6190.tmedia)} °C nel 1961-1990 (${n6190.n_anni} anni), ${nf(n9120.tmedia)} °C nel 1991-2020 (${n9120.n_anni} anni): ${sg(n9120.tmedia - n6190.tmedia)} °C.</dd>` +
     `<dt>Tendenza</dt><dd>${sg(t1900.pend_secolo)} °C per secolo dal 1900, ${sg(t80.pend_secolo)} °C per secolo dal 1980 (±${nf(t80.se_secolo)}, errore standard).</dd>` +
     `<dt>Anno piu caldo</dt><dd>${ac.anno}, ${nf(ac.tmedia)} °C. Il piu freddo: ${af.anno}, ${nf(af.tmedia)} °C.</dd>` +
+    (D.finora.righe.length ? (() => { const f = D.finora.righe[0]; return `<dt>${M.anno_corrente} finora</dt><dd>Dal 1 gennaio al ${dm(M.ultimo_giorno)} (sui giorni con dato): media ${nf(f.valore)} °C, al posto ${f.rank_alto} su ${f.n} nello stesso periodo di ogni anno (contando dal piu caldo); media degli altri anni ${nf(f.media_altri)} °C.</dd>`; })() : '') +
     `<dt>Giorno piu caldo</dt><dd>${te.data}, massima ${nf(te.valore)} °C (${rigaTxt(te.fonte, te.riga)}).</dd>` +
     `<dt>Giorno piu freddo</dt><dd>${tf.data}, minima ${nf(tf.valore)} °C (${rigaTxt(tf.fonte, tf.riga)})${qfTxt(tf.qflag)}.</dd>` +
     '</dl>' +
-    '<p class="fonte">Fonte: data/meta.json (conteggi, date); data/clima.json campi <code>normali</code> e <code>tendenze</code>; data/records.json campi <code>anni_caldi</code>, <code>anni_freddi</code>, <code>giorni_estremi</code>. "riga" = riga del file locale temperature/serie/serie_unica.csv (non pubblicato; vedi Fonti).</p>';
+    '<p class="fonte">Fonte: data/meta.json (conteggi, date); data/clima.json campi <code>normali</code> e <code>tendenze</code>; data/records.json campi <code>anni_caldi</code>, <code>anni_freddi</code>, <code>giorni_estremi</code>. "riga" = riga del file locale temperature/serie/serie_unica.csv (locale; la serie giornaliera pubblicata e in data/giorni/, vedi Fonti).</p>';
 }
 
 // ---------------------------------------------------------------- GRAFICO
@@ -186,10 +294,10 @@ function anni() {
   const draw = () => {
     const only = $('#solo-validi').checked;
     const rows = [], cls = [];
-    D.annuale.anni.filter(a => !only || a.ok).forEach(a => {
-      rows.push([a.anno, a.n, nf(a.tmedia), nf(a.tmin_media), nf(a.tmax_media), `${nf(a.min_ass)} (${a.min_data})`, `${nf(a.max_ass)} (${a.max_data})`,
+    D.annuale.anni.filter(a => !only || a.ok || a.in_corso).forEach(a => {
+      rows.push([a.in_corso ? `${a.anno} <small>(anno in corso, dati fino al ${dm(D.meta.ultimo_giorno)})</small>` : a.anno, a.n, nf(a.tmedia), nf(a.tmin_media), nf(a.tmax_media), `${nf(a.min_ass)} (${a.min_data})`, `${nf(a.max_ass)} (${a.max_data})`,
         a.gg_gelo, a.gg_caldi, a.notti_tropicali, fl(a.fonti)]);
-      cls.push(a.ok ? '' : 'invalido');
+      cls.push(a.in_corso ? 'corso' : (a.ok ? '' : 'invalido'));
     });
     $('#anni-c').innerHTML = tab(['Anno', 'Giorni', 'Media °C', 'Media min', 'Media max', 'Minima assoluta (data)', 'Massima assoluta (data)', 'Giorni di gelo', 'Giorni ≥30 °C', 'Notti ≥20 °C', 'Fonti'], rows, cls);
   };
@@ -200,8 +308,16 @@ function anni() {
 function classifiche() {
   const R = D.records;
   const lista = (t, arr) => `<h3>${t}</h3><ol>` + arr.map(o => `<li>${o.anno}: ${nf(o.tmedia)} °C</li>`).join('') + '</ol>';
+  const F = D.finora, AC = F.anno, per = `1 gennaio - ${dm(F.ultimo_giorno)}`;
+  const listaF = (t, arr) => `<h3>${t}</h3><ol>` + arr.map(o => `<li>${o.anno === AC ? '<strong>' : ''}${o.anno}: ${nf(o.tmedia)} °C${o.anno === AC ? '</strong>' : ''}</li>`).join('') + '</ol>';
+  const fr = F.righe.map(r => [r.nome, nf(r.valore, r.decimali), nf(r.media_altri, r.decimali), nf(r.media_9120, r.decimali),
+    `${r.rank_alto}${r.pari ? ` (pari con ${r.pari})` : ''}`, r.rank_basso, `${nf(r.max.valore, r.decimali)} (${r.max.anno})`, `${nf(r.min.valore, r.decimali)} (${r.min.anno})`]);
   $('#classifiche-c').innerHTML = '<div style="display:flex;gap:32px;flex-wrap:wrap"><div>' + lista('10 anni piu caldi', R.anni_caldi) + '</div><div>' + lista('10 anni piu freddi', R.anni_freddi) + '</div></div>' +
-    '<p class="fonte">Fonte: data/records.json, campi <code>anni_caldi</code> e <code>anni_freddi</code> (da data/annuale.json, campo <code>tmedia</code>). Solo anni validi: almeno ' + D.meta.soglie.giorni_anno_valido + ' giorni con minima e massima. Anni esclusi: ' + D.meta.anni_non_validi.join(', ') + '.</p>';
+    '<p class="fonte">Fonte: data/records.json, campi <code>anni_caldi</code> e <code>anni_freddi</code> (da data/annuale.json, campo <code>tmedia</code>). Solo anni validi: almeno ' + D.meta.soglie.giorni_anno_valido + ' giorni con minima e massima. ' + (D.meta.anni_non_validi.length ? 'Altri anni esclusi: ' + D.meta.anni_non_validi.join(', ') + '. ' : '') + `Il ${AC}, anno in corso, non e incluso: ha dati solo fino al ${dm(F.ultimo_giorno)}, vedi sotto.</p>` +
+    `<h3>${AC} finora, a parita di periodo</h3><p class="nota">Il ${AC} (dati fino al ${dm(F.ultimo_giorno)}) confrontato solo con lo stesso periodo (${per}) di ogni altro anno, non con gli anni interi. Il confronto usa solo i ${F.giorni_confronto} giorni del calendario (su ${F.giorni_periodo}) in cui il ${AC} ha il dato: mancano ${F.giorni_mancanti_anno_corso} giorni (${Object.entries(F.mesi_con_giorni_mancanti).map(([m, n]) => `${n} di ${MESI[m - 1]}`).join(', ')}) e sono esclusi per tutti gli anni, cosi i mesi mancanti non spostano la media. ${F.n_anni} anni confrontabili${F.anni_esclusi.length ? ` (esclusi: ${F.anni_esclusi.join(', ')})` : ''}. Posizione 1 = il valore piu alto.</p>` +
+    tab(['Grandezza nel periodo', `${AC}`, 'Media degli altri anni', 'Media 1991-2020', `Posizione dal piu alto (su ${F.n_anni})`, 'Posizione dal piu basso', 'Valore piu alto (anno)', 'Valore piu basso (anno)'], fr) +
+    '<div style="display:flex;gap:32px;flex-wrap:wrap"><div>' + listaF(`10 periodi ${per} piu caldi (media)`, F.classifica_tmedia_caldi) + '</div><div>' + listaF(`10 periodi ${per} piu freddi`, F.classifica_tmedia_freddi) + '</div></div>' +
+    `<p class="fonte">Fonte: data/finora.json (calcolato da temperature/scripts/statistiche.py). Entrano gli anni con almeno il 90% dei giorni del periodo con minima e con massima. Anche i conteggi di giorni (gelo, caldo, notti tropicali) riguardano solo i giorni del confronto. In grassetto il ${AC}.</p>`;
 }
 
 // ---------------------------------------------------------------- TENDENZE
@@ -246,7 +362,7 @@ function mesi() {
   $('#anno-mese').innerHTML = anniL.slice().reverse().map(y => `<option>${y}</option>`).join('');
   const drawAnno = () => {
     const y = +$('#anno-mese').value;
-    $('#anno-mesi').innerHTML = tab(['Mese', 'Media °C', 'Media min', 'Media max', 'Giorni con dato', 'Valido'],
+    $('#anno-mesi').innerHTML = (y === D.meta.anno_corrente ? `<p class="nota">Anno in corso: dati fino al ${dm(D.meta.ultimo_giorno)}; l'ultimo mese e parziale.</p>` : '') + tab(['Mese', 'Media °C', 'Media min', 'Media max', 'Giorni con dato', 'Valido'],
       righe.filter(r => r[0] === y).map(r => [MESI[r[1] - 1], nf(r[2]), nf(r[3]), nf(r[4]), r[5], r[6] ? 'si' : 'no']));
   };
   $('#anno-mese').addEventListener('change', drawAnno); drawAnno();
@@ -361,19 +477,20 @@ function footer() {
   const seg = M.segmenti.map(s => `${FONTE_NOMI[s.fonte] || s.fonte} dal ${s.da} al ${s.a || 'ultimo dato'}${(s.adjust && (s.adjust.tmin || s.adjust.tmax)) ? ` (correzione additiva: minima ${sg(s.adjust.tmin)} °C, massima ${sg(s.adjust.tmax)} °C)` : ' (nessuna correzione)'}`).join('; ');
   $('#footer-c').innerHTML =
     (prov ? '<p><strong>Serie provvisoria.</strong> ' : '<p>') + 'Cucitura delle fonti usata ora: ' + seg + '. Fonte: data/meta.json, campi <code>segmenti</code> e <code>stato_cucitura</code> (' + M.stato_cucitura + ').</p>' +
-    '<h3>Fonti e licenze</h3><ul>' +
-    '<li><strong>Serie storica 1763-2008 (Maugeri, Universita di Milano)</strong>, stazione di Brera/Milano. Letta dalla copia di GHCN-D (NOAA NCEI), stazione ITE00100554, elementi TMAX e TMIN, identica alla serie di ECA&amp;D (European Climate Assessment &amp; Dataset, www.ecad.eu, sorgenti 105248 e 105247). Citazione richiesta: Klein Tank, A.M.G. e altri, 2002, Int. J. of Climatol., 22, 1441-1453. Licenza ECA&amp;D: uso solo non commerciale per ricerca e istruzione. <strong>Per questo il sito non ripubblica la serie giornaliera precedente al 1990</strong>: ci sono solo aggregati (medie annuali e mensili, statistiche per giorno del calendario, record e serie di eventi).</li>' +
-    '<li><strong>ARPA Lombardia</strong>, stazione Milano v.Brera, sensore di temperatura 5897, dati da dati.lombardia.it (archivi 6eu4-4tja, d4kj-kbpj, w9wd-u6jh, 647i-nhxk). Licenza CC0 1.0 (pubblico dominio), attribuzione: ARPA Lombardia. Dati sub-giornalieri (orari fino al 2020, ogni 10 minuti dal 2021); minima e massima giornaliere calcolate da noi.</li>' +
-    '</ul><p>Data di scarico dei dati: <strong>' + M.data_scarico + '</strong>. Ultimo giorno nella serie: ' + M.ultimo_giorno + '.</p>' +
+    '<h3>Fonti e licenze</h3><p><strong>I valori giornalieri sono pubblicati</strong>: ogni giorno dal ' + M.primo_giorno + ' al ' + M.ultimo_giorno + ' e in data/giorni/ (un file JSON per decennio: minima, massima, media, codice della fonte e flag NOAA). Il sito e <strong>non commerciale</strong>. Le fonti sono citate qui sotto e chi riusa i dati deve citarle a sua volta.</p><ul>' +
+    '<li><strong>Serie storica di Milano Brera, 1763-1994 (Maugeri e altri, Universita di Milano).</strong> Maugeri, M. e altri (2002), «Daily Milan temperature and pressure series (1763-1998)», Climatic Change 53. Letta dalla copia di <strong>NOAA GHCN-D</strong> (Global Historical Climatology Network - Daily), stazione ITE00100554, elementi TMAX e TMIN: Menne, M.J., Durre, I., Vose, R.S., Gleason, B.E., Houston, T.G. (2012), «An overview of the Global Historical Climatology Network-Daily database», J. Atmos. Oceanic Technol. 29, 897-910 (NOAA NCEI, dominio pubblico). La serie e identica a quella di <strong>ECA&amp;D</strong> (European Climate Assessment &amp; Dataset, eca.knmi.nl, sorgenti 105248 e 105247): Klein Tank, A.M.G. e altri (2002), Int. J. Climatol. 22, 1441-1453, «data from the ECA&amp;D project, eca.knmi.nl». I dati ECA&amp;D sono usati <strong>per ricerca e istruzione non commerciali</strong>, come da licenza ECA&amp;D.</li>' +
+    '<li><strong>Linate, NOAA GSOD</strong> (Global Summary of the Day), stazione 16080099999, usata dal 1986-11-15 al 1987-09-15, con la correzione descritta nel rapporto di confronto fra le fonti. NOAA NCEI, dati pubblici.</li>' +
+    '<li><strong>ARPA Lombardia</strong>, stazione Milano v.Brera, sensore di temperatura 5897, dal 1995 (letture orarie), da dati.lombardia.it (archivi 6eu4-4tja, d4kj-kbpj, w9wd-u6jh, 647i-nhxk); i giorni senza dato sono riempiti con la media delle stazioni ARPA vicine di Milano (via Juvara, via Marche, piazza Zavattari), segnate con fonte «ARPA vicine». Licenza CC0 1.0 (pubblico dominio), attribuzione: ARPA Lombardia. Minima e massima giornaliere calcolate da noi dalle letture orarie.</li>' +
+    '</ul><p>Data di scarico dei dati: <strong>' + M.data_scarico + '</strong>. Ultimo giorno nella serie: ' + M.ultimo_giorno + '. L\'anno ' + M.anno_corrente + ' e in corso.</p>' +
     '<h3>Metodo</h3><ul>' +
-    '<li>Tutto parte da un solo file locale, temperature/serie/serie_unica.csv (colonne date, tmin, tmax, tmean, fonte, qflag), costruito da temperature/scripts/costruisci_serie.py secondo temperature/splice.json. I dati di questa pagina vengono da temperature/scripts/statistiche.py; si rigenera tutto con temperature/scripts/rigenera.ps1.</li>' +
+    '<li>Tutto parte da un solo file locale, temperature/serie/serie_unica.csv (colonne date, tmin, tmax, tmean, fonte, qflag), costruito da temperature/scripts/costruisci_serie.py secondo temperature/splice.json. I dati di questa pagina (compresi i file in data/giorni/) vengono da temperature/scripts/statistiche.py; si rigenera tutto con temperature/scripts/rigenera.ps1.</li>' +
     '<li>Media giornaliera = (minima + massima) / 2, per tutte le fonti.</li>' +
-    '<li>ARPA, minima e massima del giorno: si scartano le letture con valore -999 o stato diverso da VA; il giorno vale solo con almeno l\'83% delle letture attese (20 su 24 per i dati orari, 120 su 144 per quelli ogni 10 minuti). Il giorno va da 00:10 a 00:00 ora solare, perche l\'orario ARPA e quello di fine intervallo. Dal 2021 le letture ogni 10 minuti danno massime un po\' piu alte di quelle orarie: possibile piccolo salto di omogeneita.</li>' +
-    '<li>Anno valido: almeno ' + M.soglie.giorni_anno_valido + ' giorni con minima e massima. Mese valido: almeno ' + Math.round(M.soglie.frazione_mese_valido * 100) + '% dei giorni. Solo i periodi validi entrano in classifiche, medie per periodo, decenni, normali e tendenze.</li>' +
+    '<li>ARPA, minima e massima del giorno: si scartano le letture con valore -999 o stato diverso da VA; il giorno vale solo con almeno l\'83% delle letture orarie attese (20 su 24). Il giorno va da 00:10 a 00:00 ora solare, perche l\'orario ARPA e quello di fine intervallo. Come si e arrivati alla serie unica (perche dopo il 2000 la serie storica e stata sostituita dal sensore ARPA) e spiegato nel rapporto temperature/discrepanza/RAPPORTO.md.</li>' +
+    '<li>Anno valido: almeno ' + M.soglie.giorni_anno_valido + ' giorni con minima e massima. Mese valido: almeno ' + Math.round(M.soglie.frazione_mese_valido * 100) + '% dei giorni. Solo i periodi validi entrano in classifiche, medie per periodo, decenni, normali e tendenze. L\'anno in corso non e valido: lo si confronta con lo stesso periodo (1 gennaio - ultimo giorno) degli altri anni.</li>' +
     '<li>Soglie: giorno di gelo = minima sotto 0 °C; giorno caldo = massima da 30 °C; notte tropicale = minima da 20 °C. Il 29 febbraio ha meno anni degli altri giorni.</li>' +
     '<li>Il flag NOAA (qflag) del GHCN-D segnala valori storici sospetti; i valori sono tenuti, con il segno accanto.</li>' +
     '<li>La stazione ha cambiato posto e strumenti piu volte nella sua storia (riforma di Carlini 1835, passaggi del 1971 e 1987): la serie non e stata omogeneizzata da noi.</li>' +
-    '</ul><p class="fonte">I campi "riga" rinviano a righe del file locale temperature/serie/serie_unica.csv, non pubblicato; permettono di controllare ogni numero rigenerando la serie con gli stessi programmi.</p>';
+    '</ul><p class="fonte">I campi "riga" rinviano a righe del file locale temperature/serie/serie_unica.csv; la serie giornaliera pubblicata (data/giorni/AAAA0.json, e data/giorni/ordinati/MM.json per le classifiche di ogni giorno del calendario) contiene gli stessi valori: permette di controllare ogni numero rigenerando la serie con gli stessi programmi.</p>';
 }
 </script>
 </body>
