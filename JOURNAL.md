@@ -1339,6 +1339,13 @@ _Fonti, date di scarico, licenze, scelte, problemi. Cartella `violenza-politica/
   2. Le rapine di autofinanziamento (Saporito 1977, Carloni 1982) restano, con la nota "rapina di autofinanziamento" (`pulito/correzioni_coordinatore.csv`, colonna `nota`).
   3. I 5 casi incerti (Saronio, Ambrosoli, Abbruciati, Lahderi, Pasqua Rossa) entrano, ciascuno con una nota "caso incerto"; li aggiunge l'agente che riempie i buchi.
   - **Pagina pubblicata** con 65 eventi; i casi incerti e le aggiunte arriveranno con il prossimo aggiornamento.
+- 2026-10-30 notte — **Fase 3, buchi riempiti** (`violenza-politica/pulito/aggiunte_fase3.md`):
+  - Ora 84 eventi (+19) e 202 morti indicati.
+  - Aggiunti: bombe al Cova e a un albergo (1920); viale Abruzzi 1944; Volante Rossa 1947-49; Pasqua Rossa 1946; Ambrosoli, Lahderi e Abbruciati (con nota "caso incerto"); attentati con feriti 2009 (caserma Santa Barbara), 2017 e 2019 (Stazione Centrale).
+  - Saronio resta escluso: la voce non dice che morì a Milano.
+  - Per il 1900-1918 e il 1950-1968 non si è trovato nulla.
+  - Conflitti tra le fonti risolti: Mazzanti a Milano (via Orseolo); Tavecchio, scontri l'11 marzo e morte il 14; Fiera 1928, 20 morti.
+  - Pagina ripubblicata.
 
 ## 11. Film e libri ambientati a Milano
 

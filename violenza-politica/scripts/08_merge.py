@@ -2,10 +2,19 @@ import sys, json, re, csv, statistics, urllib.parse
 sys.path.insert(0, sys.argv[1])
 import wp, infobox as ib
 from eventi_seed import SEEDS, ESCLUSI, CRON_SQ, CRON_PB
+from eventi_seed_fase3 import SEEDS3, ESCLUSI3, ESCLUSI_TOGLI, PATCH   # fase 3 (29/10/2026): eventi aggiunti per colmare le lacune
+SEEDS = SEEDS + SEEDS3
+for _s in SEEDS:                                  # correzioni a eventi già presenti (posizioni, date, note)
+    _p = dict(PATCH.get(_s['k'], {})); _na = _p.pop('nota_add', None); _s.update(_p)
+    if _na: _s['nota'] = (_s.get('nota', '') + ' ' + _na).strip()
+ESCLUSI = [e for e in ESCLUSI if e[1] not in ESCLUSI_TOGLI] + ESCLUSI3
 base = sys.argv[2]                       # cartella violenza-politica
 civici = sys.argv[3]                     # csv civici ds634 (sola lettura)
 raw = base + "/raw"; out = base + "/pulito"
 W = json.load(open(raw + "/wikipedia/wikitext_eventi.json", encoding="utf-8"))
+import os
+if os.path.exists(raw + "/wikipedia/wikitext_fase3.json"):   # voci it aggiunte in fase 3 (non sovrascrive quelle già lette)
+    for k, v in json.load(open(raw + "/wikipedia/wikitext_fase3.json", encoding="utf-8")).items(): W.setdefault(k, v)
 S1 = {}
 for r in json.load(open(raw + "/wikipedia/piombo_righe_tutte.json", encoding="utf-8")):
     S1[r["nome"]] = r
@@ -52,16 +61,20 @@ rows = []; problemi = []
 for s in SEEDS:
     r = dict(id=s["k"], data=s["data"], anno=int(s["data"][:4]), titolo=s["titolo"], tipo=s["tipo"], nota=s.get("nota", ""), confidenza=s["conf"], fonte=s["fonte"], data_morte=s.get("data_morte", ""))
     page = s["wp"]; Wp = W.get(page) if page in W else None
+    Wrev = Wp                                  # versione letta (anche se la voce è solo il riferimento e non descrive l'evento)
+    if s.get("link_only"): Wp = None           # la voce cita l'evento ma parla d'altro: niente qid/coordinate/infobox dalla voce
     if page in (CRON_SQ, CRON_PB): r["voce_tipo"] = "elenco/cronologia"
+    elif s.get("vt"): r["voce_tipo"] = s["vt"]
     else: r["voce_tipo"] = "voce dedicata" if page and (page.startswith(("Omicidio", "Strage", "Assalto", "Attentato", "Bombe", "Giovedì", "Persone")) ) else ("solo voce en/Wikidata" if not page else "voce biografica")
     r["wikipedia_it"] = "https://it.wikipedia.org/wiki/" + urllib.parse.quote(page.replace(" ", "_"), safe="_(),'!:") if page else ""
     r["wikipedia_titolo"] = page or ""
     r["wikipedia_rev"] = ""; r["wikipedia_rev_data"] = ""
     qid = s.get("qid", "")
-    if Wp:
-        qid = Wp.get("qid") or ""; r["wikipedia_rev"] = Wp["revid"]; r["wikipedia_rev_data"] = Wp["ts"][:10]
+    if Wrev:
+        qid = (Wrev.get("qid") or "") if Wp else s.get("qid", ""); r["wikipedia_rev"] = Wrev["revid"]; r["wikipedia_rev_data"] = Wrev["ts"][:10]
     elif page in L:
         r["wikipedia_rev"] = L[page]["revid"]; r["wikipedia_rev_data"] = L[page]["ts"][:10]
+    if s.get("rev"): r["wikipedia_rev"], r["wikipedia_rev_data"] = s["rev"]   # versione di una voce non italiana (en/de), indicata in 'fonte'
     r["wikidata_qid"] = qid
     r["wikipedia_en"] = s.get("en", "")
     d = WD.get(qid)
@@ -80,12 +93,14 @@ for s in SEEDS:
     txt = txt + " " + r["note_tabella"]
     r["rivendicazione_citata"] = "sì" if re.search(r"rivendic", txt, re.I) else "no"
     r["condanne_citate"] = "sì" if re.search(r"condannat|condanna|ergastol", txt, re.I) else "no"
-    r["rivendicazione_snippet"] = snippet(txt, r"rivendic") if r["rivendicazione_citata"] == "sì" else ""
+    if "riv" in s: r["rivendicazione_citata"] = s["riv"]      # evento aggiunto a mano: la voce è generale, il rilevamento automatico non è affidabile
+    if "cond" in s: r["condanne_citate"] = s["cond"]
+    r["rivendicazione_snippet"] = snippet(txt, r"rivendic") if (r["rivendicazione_citata"] == "sì" and "riv" not in s) else s.get("snip", "")
     r["tipo_attribuzione"] = "; ".join(x for x in [("rivendicato" if r["rivendicazione_citata"] == "sì" else ""), ("condannati" if r["condanne_citate"] == "sì" else ""), ("attribuito a" if r["responsabili_wikipedia"] and r["responsabili_wikipedia"].lower() not in ("ignoti", "non indicati") else "ignoti/non indicati")] if x)
     r["morti"] = s.get("morti"); r["feriti"] = s.get("feriti")
     # coordinate
     lat = lon = None; met = ""
-    if s.get("coords"): lat, lon = s["coords"]; met = "Wikidata/Wikipedia (coordinate della questura)"
+    if s.get("coords"): lat, lon = s["coords"]; met = s.get("coords_met", "Wikidata/Wikipedia (coordinate della questura)")
     elif d and pt(d["coord"]): lat, lon = pt(d["coord"]); met = "Wikidata P625"
     elif Wp and Wp["coords"]: lat, lon = Wp["coords"][0]["lat"], Wp["coords"][0]["lon"]; met = "Wikipedia (coordinate della voce)"
     elif s.get("wp_coord_of"):
