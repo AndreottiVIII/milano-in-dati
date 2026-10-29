@@ -461,6 +461,21 @@ python -I scripts/05_verifica_istituzioni.py work/tsv beni_culturali_milano.csv 
 
 Tempi: scarico circa 66 minuti, estrazione circa 10 minuti, tabella Milano circa 10 minuti, 7-8 GB di RAM al massimo.
 
+### Fase 2 — tabella pulita e pagina (2026-10-29)
+
+- `beni-culturali/pulito/beni_milano.csv`: 30.721 righe, chiave `iri` (l'`id` non è unico). Trappole in `pulito/problemi.md` (34).
+- **Completezza** (27.459 schede con sede a Milano):
+  - autore indicato nel 47,0%;
+  - datazione nel 94,4%;
+  - ente che le conserva nel 31,4%;
+  - luogo più preciso di "Milano" nel 21,7%;
+  - coordinate dentro il Comune nel 48,0% (13.193 schede in 769 punti).
+- **Correzioni**: 2 coordinate con latitudine e longitudine scambiate, corrette; una (Cascina Mirabello) cade fuori dal Comune e non è sulla mappa.
+- **Da verificare**:
+  - Le 3.195 schede senza ente hanno tutte le coordinate di Brera; restano con l'ente "non indicata".
+  - I link alle schede (`https://catalogo.beniculturali.it/detail/<Classe>/<codice>`) non sono stati verificati: il catalogo ha un controllo anti-robot. Davide controlla a mano un link.
+- Pagina `docs/beni-culturali/`; dati derivati CC BY-SA 4.0 con attribuzione a ICCD (ArCo 2.0).
+
 ## 4. Elezioni milanesi
 
 - **Fonti:** portale open data del Comune di Milano (dati.comune.milano.it, CKAN): 328 dataset elettorali, 658 file pubblicati.

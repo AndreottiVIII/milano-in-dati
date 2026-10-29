@@ -177,3 +177,67 @@ python -I scripts/05_verifica_istituzioni.py work/tsv beni_culturali_milano.csv 
 ```
 
 Tempi: scarico circa 66 minuti, estrazione circa 10 minuti, tabella Milano circa 10 minuti, 7-8 GB di RAM al massimo.
+
+---
+
+# Fase 2 (2026-10-29): pulizia e prima pagina
+
+Licenza deciso da Davide: dati derivati ripubblicati con **CC BY-SA 4.0**, con citazione dell'ICCD (Istituto Centrale per il Catalogo e la Documentazione) e di ArCo 2.0 (CNR-ISTC, dump del 2023-12-01). Programmi: `scripts\06_pulisci.py` (pulizia), `scripts\07_pagina.py` + `scripts\pagina_template.html` (pagina). Nessun git, niente online: i file sono solo sul PC.
+
+## Che cosa e' stato fatto
+
+- **File pulito**: `pulito\beni_milano.csv`, 30.721 righe, una per scheda, chiave `iri` (mai `id`). Il file della fase 1 non e' stato toccato.
+- **Righe doppie**: nessuna rimasta (`iri` e codice di catalogo sono unici). I doppioni veri erano nel dump e sono stati tolti in fase 1. Sono stati tolti solo i valori ripetuti dentro un campo (6 titoli, 7 date, 5 materie).
+- **Problemi trovati**: tutti in `pulito\problemi.md` ("trappole dei dati", 34 punti con i numeri) e, come conteggi, in `pulito\problemi_conteggi.json`.
+- **Pagina**: `..\docs\beni-culturali\index.html` con i dati in `..\docs\beni-culturali\data\` (`oggetti.json` 3,0 MB, `punti.json` 0,13 MB, `beni_milano.csv.gz` 1,4 MB, `numeri.json`, `problemi.md`).
+
+## Che cosa c'e' nel file pulito
+
+Per ogni scheda: tipo di scheda (sigla + nome in italiano), titolo pulito, soggetto, autori (nomi uniti e messi in ordine uguale; l'originale resta in `autore_originale`; le qualifiche tipo "attribuito" in `autore_qualifica`), data (testo + anno di inizio e di fine + secolo), materia e tecnica, detentore, luogo attuale e indirizzo, coordinate corrette e segnate se dentro il Comune, link al catalogo, e il segno `sede_milano` (1 = il bene e' a Milano, 0 = solo luogo collegato).
+
+## Numeri principali (27.459 schede con sede a Milano)
+
+Fonte: `..\docs\beni-culturali\data\numeri.json`, calcolati da `pulito\beni_milano.csv`.
+
+| Cosa | Schede | Quota |
+|---|---|---|
+| autore indicato | 12.894 | 47,0% (manca nel 53,0%) |
+| data indicata | 25.916 | 94,4% |
+| detentore con nome | 8.610 | 31,4% (manca nel 68,6%) |
+| luogo con nome o via | 5.945 | 21,7% |
+| solo "Milano" come luogo | 10.799 | 39,3% |
+| nessun luogo | 10.715 | 39,0% |
+| coordinate dentro il Comune | 13.193 | 48,0% (mancano nel 52,0%) |
+
+Tipi: OA 17.292, D 4.464, RA 2.204, S 1.578, PST 788, A 665, BDM 199, OAC 166, MA 38, F 36, NU 16, CA 11, PG 2. Autori distinti: 3.192. Punti sulla mappa: 769.
+
+Rispetto alla fase 1: autore mancante 53,0% (uguale), coordinate mancanti 52,0% (uguale). La "localizzazione fisica attuale mancante 42,5%" della fase 1 qui non c'e': ora si guarda se il luogo e' piu' preciso di "Milano" (sito o via), che e' il 21,7% presente, perche' il campo della fase 1 era riempito anche con la sola scritta "Milano".
+
+## Decisioni prese e cose da sapere
+
+- **Detentore senza nome**: i 3.262 codici senza etichetta (3.195 + 67) sono stati cercati in tutte le 97 parti del dump: nessun nome. I 3.195 hanno tutti le coordinate di Brera, ma non e' scritto: nel file resta "non indicata" e il codice e' in `istituzione_iri`.
+- **Coordinate**: le 2 con latitudine e longitudine scambiate sono state rimesse a posto. Controllo fatto sul confine vero del Comune (poligono in `..\citta-15-minuti\raw\comune_milano\confine_comune\`, non un rettangolo): 13.193 dentro, 1 fuori (Cascina Mirabello, scheda `ArchitecturalOrLandscapeHeritage/0300101875`, a circa 18 km: coordinata sbagliata, non disegnata).
+- **Le coordinate sono del museo, non dell'oggetto**: 769 punti per 13.193 schede.
+- **Link al catalogo**: nel file pulito `url_catalogo` e' `https://catalogo.beniculturali.it/detail/<iri>` (formato visto in un motore di ricerca per altre schede dello stesso catalogo; per le schede di Milano **non verificato** perche' il sito e' dietro il controllo anti-bot). Il vecchio indirizzo del dump e' in `url_catalogo_dump`.
+- **Secolo**: e' quello del punto medio della data (non un dato del catalogo); le date oltre 300 anni di ampiezza non hanno secolo.
+- **Titoli**: il 62,5% e' solo il tipo di oggetto ("dipinto"): la ricerca guarda anche il soggetto.
+- La home `..\docs\index.html` dice ancora "Beni culturali: in arrivo": non e' stata toccata, il link va aggiunto dal coordinatore.
+
+## Prova della pagina
+
+Anteprima "milano-in-dati" (porta 8796): pagina, mappa (769 punti, clic con elenco a pagine di 20 e link alle schede), ricerca (es. "hayez": 32 schede) e filtro per tipo funzionano; nessun errore in console; a 375 px di larghezza non c'e' scorrimento orizzontale.
+
+## Cosa non e' stato fatto
+
+- Nessun nome per l'ente catalogatore (solo codici, non e' mostrato nella pagina).
+- Il catalogo vivo non e' stato letto (anti-bot): il dato resta quello del 2022-2023.
+- Il significato della sigla `VeAC` (1 scheda) non e' scritto nel dump: l'etichetta e' una nostra lettura.
+- Nessun controllo a mano sul testo delle licenze dell'ICCD (vedi fase 1).
+
+## Come rifare
+
+```
+python -I scripts/06_pulisci.py beni_culturali_milano.csv ../citta-15-minuti/raw/comune_milano/confine_comune/confine_comune_milano_layer_0_confine_comune_milano.geojson pulito
+python -I scripts/07_pagina.py pulito/beni_milano.csv ../docs/beni-culturali pulito/problemi.md
+```
+(`problemi.md` e' scritto a mano con i conteggi di `problemi_conteggi.json`; se si rifa la pulizia vanno ricontrollati.)
