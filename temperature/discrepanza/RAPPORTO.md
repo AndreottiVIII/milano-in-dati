@@ -82,7 +82,7 @@ Note sulla tabella:
 
 ## Cose non risolte
 
-- **Brera dal 2008 al 2016 è più calda delle vicine** di 0,5-1,7 °C (massime) e poi torna come prima verso il 2017 (`out/brera_meno_singole_annue.csv`, colonna `BRERA_meno_ARPA_5909_H_TX`: 2005 +0,06, 2009 +1,19, 2012 +1,74, 2017 -0,17; simile con le altre). Rispetto a Linate invece resta più calda anche dopo (`BRERA_meno_LINATE_TG`: 2005 -0,07, 2009 +1,38, 2025 +1,06). Anche le vicine cambiano (Zavattari +1 °C dal 2020, `out/diff_annue_vs_VICINE_H_1989-2026.csv`, colonna `ARPA_5920_TX`). Non l'ho corretto: serve un'omogeneizzazione vera del periodo recente con più stazioni. Incertezza sul periodo recente: circa ±0,5 °C.
+- **Brera dal 2008 al 2016 è più calda delle vicine** di 0,5-1,7 °C (massime) e poi torna come prima verso il 2017 (`out/brera_meno_singole_annue.csv`, colonna `BRERA_meno_ARPA_5909_H_TX`: 2005 +0,06, 2009 +1,19, 2012 +1,74, 2017 -0,17; simile con le altre). Rispetto a Linate invece resta più calda anche dopo (`BRERA_meno_LINATE_TG`: 2005 -0,07, 2009 +1,38, 2025 +1,06). Anche le vicine cambiano (Zavattari +1 °C dal 2020, `out/diff_annue_vs_VICINE_H_1989-2026.csv`, colonna `ARPA_5920_TX`). Non l'ho corretto: serve un'omogeneizzazione vera del periodo recente con più stazioni. Incertezza sul periodo recente: circa ±0,5 °C. **Aggiornamento**: analizzato con 10 stazioni in `RAPPORTO_2008_2016.md` (salto di Brera 11/12/2007-29/9/2016, circa +0,65 °C; correzione proposta, spenta).
 - Il 1986-87 si appoggia solo a Linate (unica stazione disponibile).
 - Prima del 1986 non ho controllato nulla: la serie è quella di Maugeri.
 

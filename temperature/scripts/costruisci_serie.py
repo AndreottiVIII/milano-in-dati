@@ -15,6 +15,8 @@ Regole:
   2020-12-31) o 144 (ogni 10 minuti, dal 2021-01-01). Frazione di default 0,83 -> almeno 20/24 e 120/144.
   risoluzione 'native' = tutte le letture; 'hourly' = dal 2021 solo le letture al minuto :00 (stessa risoluzione
   oraria degli anni precedenti, massime meno alte).
+- Segmenti: 'adjust' = correzione additiva costante; 'adjust_mensile' (facoltativo) = {tmin|tmax: 12 valori gen..dic}
+  aggiunti secondo il mese del calendario; 'attivo': false = segmento ignorato (proposta spenta, es. Brera 2008-2016).
 - tmean = (tmin + tmax) / 2 per TUTTE le fonti (definizione unica attraverso la cucitura), solo se ci sono entrambe.
 """
 import sys, os, glob, gzip, json, math
@@ -81,12 +83,19 @@ fonti = {k: tipi[s['tipo']](s) for k, s in cfg['fonti'].items()}
 
 pezzi = []
 for seg in cfg['segmenti']:
+    if not seg.get('attivo', True):      # segmento proposto ma spento (es. correzione Brera 2008-2016): ignorato
+        continue
     f = fonti[seg['fonte']].copy()
     da = pd.Timestamp(seg['da']); a = pd.Timestamp(seg['a']) if seg.get('a') else f.index.max()
     f = f[(f.index >= da) & (f.index <= a)]
     adj = seg.get('adjust', {})
     f['tmin'] = f.tmin + adj.get('tmin', 0.0)
     f['tmax'] = f.tmax + adj.get('tmax', 0.0)
+    # facoltativo: correzione additiva diversa per ogni mese del calendario (12 valori, gennaio..dicembre)
+    am = seg.get('adjust_mensile', {})
+    for col in ('tmin', 'tmax'):
+        if col in am:
+            f[col] = f[col] + np.asarray(am[col], float)[f.index.month - 1]
     if 'fonte' not in f:
         f['fonte'] = seg['fonte']
     pezzi.append(f)

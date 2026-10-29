@@ -524,7 +524,7 @@ salva('records.json', records)
 
 # ------------------------------------------------------------------ META
 salva('meta.json', {
-    'stato_cucitura': splice.get('stato'), 'segmenti': splice.get('segmenti'), 'config_fonti': splice.get('fonti'),
+    'stato_cucitura': splice.get('stato'), 'segmenti': [s for s in splice.get('segmenti', []) if s.get('attivo', True)], 'config_fonti': splice.get('fonti'),  # segmenti spenti (proposte) esclusi
     'data_scarico': DATA_SCARICO, 'primo_giorno': df.index.min(), 'ultimo_giorno': ULT, 'anno_corrente': ANNO_CORR,
     'ultimo_anno_valido': ULT_VALIDO, 'n_giorni': int(len(df)), 'n_giorni_tmean': int(df.tmean.count()),
     'soglie': {'giorni_anno_valido': MIN_GIORNI_ANNO, 'frazione_mese_valido': MIN_FRAZ_MESE, 'gelo': 'tmin < 0', 'caldo': 'tmax >= 30',
