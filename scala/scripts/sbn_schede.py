@@ -3,10 +3,11 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sbn_lib as s, sbn_parse as p
 recs, _ = p.load()
-ordine = {"produzione": 0, "stagione": 1, "tournee": 2, "concerto": 3}
+ordine = {"produzione": 0, "ospiti": 1, "tournee": 1, "stagione": 2}
 todo = []
 for bid, r in recs.items():
     cls = p.classifica(r); anno, _f = p.anno_di(r)
+    if cls == "produzione": cls = p.riclassifica(r["titolo"])
     if cls in ordine and anno and 1963 <= anno <= 2024:
         todo.append((ordine[cls], anno, bid))
 todo.sort()

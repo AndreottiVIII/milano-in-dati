@@ -1121,6 +1121,16 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
     - mancano Cambiasi 1832 e 1835;
     - Marangoni non ha i cast;
     - in Gatti le tournée sono mescolate agli spettacoli in sede.
+- 2026-10-30 notte — **Raccolta SBN finita** (`scala/sbn/`):
+  - 318 ricerche e 1.240 schede complete, nessun blocco; 1.725 righe dopo aver unito 347 doppioni del catalogo.
+  - Contenuto: 920 produzioni, 498 concerti, 224 libretti di stagione.
+  - Produzioni per decennio: 1963-69 80, anni '70 167, '80 136, '90 167, 2000 183, 2010 148, 2020-24 47.
+  - Copertura: circa 14-18 all'anno nel 1970-2019, contro le 15-20 di una stagione tipica; il calo dal 2020 dipende dal ritardo di catalogazione.
+  - Accordo con Wikipedia: 45 aperture su 56 (80%); 67 titoli su 93 nelle stagioni complete.
+  - Limiti:
+    - c'è l'anno di stampa; la data si ricava dalle note (683 produzioni);
+    - il direttore è indicato solo nel 14% dei casi, il regista nel 16%, il cast nel 4%.
+  - Licenza non indicata: si usano solo fatti, con la citazione "Catalogo SBN – ICCU".
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 

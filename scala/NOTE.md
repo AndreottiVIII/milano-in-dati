@@ -161,3 +161,43 @@ python -I -X utf8 scripts/confronti.py pulito
 2. 1964-2022: serve l'archivio della Scala (dati dalla Scala, oppure togliere l'anti-bot per il programma).
 3. Cambiasi: leggere anche la serie dei balli (pagina 104 in poi) e controllare a campione 20 pagine del parser contro le immagini.
 4. Romani: sistemare l'intestazione degli anni per recuperare i 39 anni mancanti.
+
+
+## SBN programmi di sala (29/10/2026)
+**Che cos'è.** Il catalogo delle biblioteche italiane (SBN OPAC) schedula i programmi di sala della Scala: uno per opera o balletto, più i libretti di stagione e i concerti. Dà titolo, compositore, spesso direttore e regia, a volte una nota con la data ("prima rappresentazione 11 gennaio 1963"). Non dà le repliche giorno per giorno.
+
+**Come l'ho raccolto.** Interfaccia JSON che usa il sito stesso (`opacmobilegw/search.json` e `full.json`). `robots.txt` permette tutto, nessuna chiave, nessun blocco, nessun errore. Una richiesta alla volta, almeno 3 secondi di pausa, User-Agent "milano-in-dati research project", ogni risposta salvata in `raw\sbn\` (riprendibile). Programmi: `scripts\sbn_lib.py`, `sbn_raccogli.py`, `sbn_schede.py`, `sbn_parse.py`, `sbn_copertura.py`.
+- Ricerche (318 richieste): "teatro alla scala AAAA" per ogni anno 1963-2024 (tutte le pagine), "rappresentazioni teatro alla scala AAAA-AA" e "teatro alla scala stagione AAAA-AA" per ogni stagione, "piccola scala AAAA", Arcimboldi, tournée. 6.313 record letti, 2.072 sono della Scala (editore o ente), ma non tutti sono programmi (il resto: mostre del Museo, libri, cataloghi).
+- Schede complete (1.240 richieste, solo produzioni, ospiti, tournée, libretti di stagione): note (date), compositore, biblioteche. Circa 1.558 richieste in tutto, 11 MB di risposte.
+
+**Risultato.** `sbn\sbn_programmi.csv`: 1.725 righe dopo aver unito i doppioni (stesso programma schedato da più biblioteche: 347 schede unite). Di queste 920 produzioni + 8 ospiti (opere, balletti, serate) + 4 tournée, 498 concerti, 224 libretti di stagione, 71 "da verificare". Ogni riga ha il titolo originale, il BID, il link alla scheda e le biblioteche (in media 8,6 per programma). Sala: quasi tutto "Scala" (è il valore di partenza: SBN non lo dice); Piccola Scala 10 e Arcimboldi 6 solo dove il titolo lo scrive.
+- Compositore trovato nell'91% delle produzioni; **direttore solo nel 14%, regia 16%, coreografo 20%, interpreti 4%**: il cast compare nel titolo solo per una parte dei record.
+- Data (giorno) per 683 produzioni su 928 (dalle note: spesso la prima, non le repliche). Stagione nota per 702 (da "stagione 1962-63" nel testo o ricavata dalla data: da settembre in poi = stagione che comincia quell'anno).
+
+**Copertura per decennio (produzioni distinte, anno di stampa del programma).**
+
+| Decennio | Programmi (produzioni) | Titoli distinti | Per anno | Concerti | Libretti di stagione |
+|---|---|---|---|---|---|
+| 1963-69 | 80 | 77 | 11 | 11 | 36 |
+| 1970-79 | 167 | 130 | 17 | 48 | 42 |
+| 1980-89 | 136 | 119 | 14 | 84 | 31 |
+| 1990-99 | 167 | 151 | 17 | 187 | 52 |
+| 2000-09 | 183 | 155 | 18 | 64 | 33 |
+| 2010-19 | 148 | 119 | 15 | 91 | 23 |
+| 2020-24 | 47 | 44 | 9 | 13 | 7 |
+
+Una stagione tipica della Scala ha 15-20 produzioni tra opere e balletti (più il balletto di settembre). Quindi 1970-2009 è vicino alla stagione quasi intera (per anno 14-18); **1963-69 è più rado** (4-19 per anno, poche schede del 1965 e del 1969); **dal 2020 cala** (2022-23: nessuna produzione con stagione nota, 2023-24: una): il catalogo ha ritardo, non sono mancate le produzioni. File per anno: `sbn\copertura_sbn_per_anno.csv`; per stagione: `sbn\copertura_sbn.csv` (colonna "stima totale" = quelle con stagione nota + metà delle senza stagione dei due anni vicini).
+
+**Confronto con Wikipedia** (`sbn\confronto_wikipedia.csv`, sola lettura di `pulito\_wp_stagioni.csv`). Wikipedia ha una sola riga all'anno dopo il 1963 (l'apertura del 7 dicembre), tranne 2011-15 e dal 2022 (stagioni intere).
+- Aperture 1963-2024: 56 righe, **45 trovate in SBN con lo stesso titolo (80%)**, 8 trovano solo un'altra opera dello stesso compositore (programma dell'apertura non catalogato), 3 niente (1963 "Cavalleria-Amico Fritz", 1993 La Vestale, 2022 Boris Godunov).
+- Stagioni 2011-15 e 2022-24: 93 titoli Wikipedia, **67 trovati (72%)**; 26 no: 2012 Hoffmann e Don Pasquale; quasi tutto il 2022 e il 2023 (catalogo in ritardo). Non è Wikipedia contro SBN a vincere: i due elenchi si completano.
+- Differenze di grafia che il confronto ha dovuto aggirare: Götterdämmerung / Il crepuscolo degli dei, Tristan und Isolde / Tristano e Isotta, Die Walküre / La Walkiria; nomi sbagliati in Wikipedia (compositore "W", "cane").
+
+**Licenza.** Nessuna licenza dichiarata sull'OPAC. Sono fatti bibliografici (titolo, nomi, anno, biblioteca). Citazione da usare: "Catalogo SBN – ICCU; licenza non indicata". Pubblichiamo solo i fatti con la citazione, non i testi dei programmi. Interfaccia JSON non documentata: resta consigliato scrivere all'ICCU (ic-cu.opacsbn@cultura.gov.it) come già scritto in `FONTI_POST_1963.md`.
+
+**Problemi.**
+- Solo l'anno di stampa, non il giorno delle repliche; il programma del 1975 può essere della stagione 1974-75 o 1975-76 (risolto con le note nel 40% dei casi).
+- Nel titolo SBN il compositore e il cast hanno forme libere: l'estrazione è fatta con regole e **va controllata** (es. a volte "regia" contiene più nomi). Il testo originale resta in `titolo_originale`.
+- 71 righe "da_verificare" (recital, gala, titoli senza parole chiave) e gruppi di concerti dei quali non ho scaricato le schede complete (solo ricerca: senza biblioteche né note).
+- Doppioni residui possibili (stesso titolo scritto in modo diverso) e raggruppamenti sbagliati (stesso titolo, due produzioni nello stesso anno): controllare con `bid_altri`.
+- Per un paio di minuti due copie del programma di scarico sono girate insieme (due richieste ogni 3 secondi invece di una): nessun errore.
