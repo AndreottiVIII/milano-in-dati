@@ -76,3 +76,88 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
 - Struttura: l'archivio storico non ha elenchi di stagioni ne' indirizzi fissi per spettacolo: si arriva ai dati solo da una maschera di ricerca (`/it/archivio/ricerca.html`) con filtri su tipo, titolo, autore, artista, luogo e stagioni (86 stagioni dalla 1943-44 alla 2025-26). Non ci sono servizi JSON dietro.
 - Problema: la ricerca funziona solo se il browser invia un codice "info" prodotto da uno script anti-bot (`etnobot.js`). Senza, il sito risponde "Non sono stati trovati spettacoli" (provato su stagione 1946 e su "Callas"). Falsificare quel codice vorrebbe dire aggirare l'anti-bot: non l'ho fatto.
 - Risultato: nessuna stagione ne' spettacolo raccolti, nessun `pulito/archivio_scala.csv`. Serve che la Scala tolga l'anti-bot per questa raccolta o mandi i dati direttamente (dettagli in STATO.md).
+
+---
+
+# FASE 2 - la tabella unica del cartellone (29/10/2026)
+Cartella `pulito\`. Programmi in `scripts\`. Nessuna pagina del sito, nessun git. L'archivio storico della Scala (la ricerca con anti-bot) resta fuori: non si tocca.
+
+## Che cosa c'e adesso
+| File | Che cos'e |
+|---|---|
+| `cartellone.csv` | **Tabella unica**: 5146 righe, una per titolo e stagione secondo UNA fonte (le fonti si sovrappongono apposta). Colonne: stagione, data, anno, titolo, autore, genere, direttore, regista, interpreti (separati da `;`), sala, fonte, affidabilita (alta/media/bassa), riga_fonte, ripubblicabile (si/no). |
+| `copertura.csv` | Per ogni anno 1778-2027: titoli distinti in tutte le fonti, titoli per fonte, fonti presenti. |
+| `copertura_stagioni_1906_1963.csv` | Per ogni stagione 1906-07 ... 1962-63: titoli da Wikipedia, Wikidata, Marangoni, da Gatti, quanti nuovi grazie a Gatti. |
+| `gatti_vol1_citazioni.csv` | Tutto quello che si ricava da Gatti vol. I (3025 righe: titolo, autore, pagina del libro, stagione, direttore, regista, interpreti, confidenza). Solo fatti, nessun testo copiato. |
+| `gatti_vol1_verifica.md` | Controllo a mano: precisione dell'estrazione. |
+| `differenze.md` | Confronti: Cambiasi / Romani / Wikipedia (1778-1862) e Gatti / Wikipedia / Wikidata / Marangoni (1906-1963). |
+| file che iniziano con `_` | Passaggi intermedi. **`_gatti_contesti_locali.csv` contiene brani del libro di Gatti (ancora protetto): resta solo sul PC, mai su GitHub.** |
+
+## Righe per fonte
+| Fonte (`fonte`) | Righe | Anni | Qualita | `ripubblicabile` |
+|---|---|---|---|---|
+| `cambiasi_1881` (opere) | 1076 | 1778-1881 (tranne 1832 e 1835, vuoti) | OCR di Internet Archive: media, bassa dove la confidenza OCR e sotto 45 | si (opera libera; la scansione no) |
+| `romani_1862` | 750 | 46 anni su 85 tra 1778 e 1862 | lettura parziale del testo OCR: titolo, genere, a volte maestro | si |
+| `wikipedia_it_stagioni_liriche` | 1092 | 1778-2024 | media; alcuni titoli troncati | si, ma CC BY-SA 4.0: citare e riusare con la stessa licenza |
+| `wikidata_prime` | 772 | 1778-2020 circa | prime assolute con data, solo cio che Wikidata ha | si (CC0) |
+| `marangoni_vanbianchi_1922` | 118 | 1906-1918 | 64 righe dalla tabella delle opere (1906-1913) + 54 titoli dai cartelloni di 6 stagioni (titoli corretti a mano sull'OCR) | **no** |
+| `gatti_vol1` | 951 | 1882-1962 | media/bassa, vedi sotto | **no** (i fatti si possono usare citando: "C. Gatti, Il Teatro alla Scala nella storia e nell'arte, vol. I, Ricordi 1964") |
+| `scala_sito_pubblico` | 387 | 2023-24 ... 2026-27 | alta (dati ufficiali) | si, citando "(c) Teatro alla Scala" (autorizzazione ricevuta da Davide) |
+
+## Gatti vol. I - come e stato letto
+Il volume 1 e il *racconto*: non ha la cronologia (quella e nel volume 2), quindi **non e un elenco completo**. Si e fatto cosi:
+1. Il testo OCR del PDF (682 pagine) e stato estratto con pymupdf. Pagina stampata = pagina del PDF meno 12; l'appendice 1958-63 ha numeri romani.
+2. Letti i due indici: **indice delle opere** (1263 voci + 161 dell'appendice) e **indice dei nomi** (3007 + 167). Dicono su quali pagine ogni opera e ogni persona compaiono.
+3. La stagione di ogni pagina si ricava dai titoli di sezione ("La stagione 1932-33.", 57 in tutto) e dalle date con giorno, mese e anno. Le date che rimandano al passato dentro una sezione ("nel maggio del 1950") vengono scartate.
+4. Per ogni titolo e ogni pagina dell'indice si cerca il titolo nel testo della pagina (anche con piccoli errori OCR e nelle pagine accanto). Se la frase dice che l'opera "si rappresenta", "va in scena", "diretta da ..." la riga conta come spettacolo (`segnale_spettacolo = si`).
+5. Direttore, regista e interpreti: si cercano nomi **che l'indice dei nomi mette proprio su quella pagina**, vicino al titolo, dopo parole come "diretta da", "cantanti principali", "protagonista". Se la frase contiene piu titoli il legame e segnato come incerto e nel `cartellone.csv` i nomi restano vuoti.
+
+**Numeri:** 2992 coppie (titolo, pagina); titolo ritrovato nel testo 80%; 1529 righe con segnale di spettacolo; solo 180 righe con almeno un nome (il racconto nomina i cantanti col solo cognome e spesso senza dire in quale opera).
+**Precisione (controllo a mano, vedi `gatti_vol1_verifica.md`):** titolo e stagione giusti in 61 righe su 70 = **87%**. Nomi: 79% sui verificabili; 100% sulle righe non segnate "incerte".
+**Limite principale:** Gatti nomina circa 10-12 titoli per stagione contro i 20-30 reali. Quello che Gatti non cita non c'e: il buco 1906-1963 si riduce molto ma non si chiude.
+
+## Copertura per periodo (titoli distinti per anno, tutte le fonti)
+| Periodo | Titoli per anno | Da quali fonti |
+|---|---|---|
+| 1778-1881 | 18 in media (104 anni su 104) | Cambiasi, Romani, Wikipedia, Wikidata |
+| 1882-1905 | 11 | **Gatti** (6 per anno) + Wikipedia e Wikidata (3-4 ciascuno): il buco dopo Cambiasi 1881 e riempito in parte |
+| 1906-1920 | 15 (13 anni su 15) | Marangoni 7,6 + Gatti 8,5 + Wikipedia 2,4 + Wikidata 1,2 |
+| 1921-1943 | 13,5 | Gatti 10,3 + Wikipedia 3 + Wikidata 2 |
+| 1944-1963 | 15,6 | Gatti 9,2 + Wikipedia 4,7 + Wikidata 2,5 |
+| 1964-2022 | 4 | solo Wikipedia e Wikidata: **buco da chiudere** (serve l'archivio della Scala) |
+| 2023-2027 | 75 | sito della Scala |
+
+**1906-1963 prima e dopo Gatti** (somma su 57 stagioni): titoli-stagione da Wikipedia 202 (per eccesso); da Wikipedia + Wikidata + Marangoni 372; con Gatti 878. Stagioni con almeno 5 titoli: 14 con la sola Wikipedia, 34 con Wikidata e Marangoni, **55 su 57 con Gatti**. Le uniche stagioni sotto i 5 titoli sono 1919-20 e 1920-21 (il racconto di Gatti passa in fretta sugli anni dell'Ente Autonomo). Dettaglio per stagione in `copertura_stagioni_1906_1963.csv`.
+
+## Qualita dell'OCR e dei programmi di lettura
+- **Cambiasi 1881**: hOCR di Internet Archive (ABBYY). Righe grezze 1136, 1076 tenute. Riparate due pagine che il primo programma saltava (pagine 42 e 90 del file: una riga cominciava con "(" ed era scambiata per una nota). L'anno si legge bene solo in 116 righe: per le altre si contano i cambi di stagione (Autunno poi Carnevale = anno dopo). Nomi dei maestri storpiati ("Sftlieri"): corretti solo quando una forma simile compare almeno 3 volte. Segni "-fa" e "^" tolti dai titoli. La data completa (giorno e mese) c'e solo su una parte delle righe. **La serie dei balli (dopo la pagina 104) non e stata letta.**
+- **Romani 1862**: letto il testo OCR; funziona per le stagioni scritte "Titolo. D. s.", 46 anni su 85. Mancano 39 anni (1783, 1785, 1788, 1794, 1802-03, 1807-08, 1810, 1812-15, 1820-24, ...) perche l'intestazione dell'anno e storpiata.
+- **Marangoni-Vanbianchi**: la tabella ha le colonne spezzate dall'OCR; si sono lette solo data, titolo, genere e maestro dove stanno sulla stessa riga; gli esecutori non si possono abbinare. Vuoti: 1914-15, 1917-18, 1919-20.
+- **Sito Scala**: 390 pagine, 387 righe; 345 con data, 196 con direttore. I concerti non hanno compositore ne programma.
+
+## Trappole dei dati (nuove)
+- Cambiasi e Romani contano per *anno teatrale* (il Carnevale che comincia il 26 dicembre vale per l'anno dopo), Wikipedia per anno del calendario: i confronti guardano anche l'anno prima e quello dopo.
+- Gatti: una citazione non e una rappresentazione. Le righe "senza segnale di spettacolo" restano solo in `gatti_vol1_citazioni.csv`. Le tournee (Berlino, Genova, Edimburgo) compaiono nel racconto accanto ai titoli della stagione: la colonna `sala` e vuota per Gatti.
+- Gatti: gli indici hanno pagine sbagliate dall'OCR (un 2xx al posto di un 26x): per questo il titolo si cerca anche nelle pagine accanto (75 casi, segnati nella nota).
+- Wikipedia: alcune righe hanno titoli troncati ("Fior", "La fanciulla", "Figli"); le righe senza data valgono per due stagioni possibili, quindi i conteggi per stagione sono per eccesso.
+- Nei conteggi un titolo vale una volta per stagione: le repliche non si contano.
+
+## Come rifare tutto
+```
+python -I -X utf8 scripts/gatti_estrai_testo.py raw/programmi_davide/programmi_scala.pdf raw/gatti_testo/gatti_pagine.json
+python -I -X utf8 scripts/gatti_indici.py raw/gatti_testo/gatti_pagine.json pulito
+python -I -X utf8 scripts/gatti_citazioni.py raw/gatti_testo/gatti_pagine.json pulito
+python -I -X utf8 scripts/parse_cambiasi_opere.py pulito/_cambiasi_hocr.json pulito/_cambiasi_opere.csv
+python -I -X utf8 scripts/pulisci_cambiasi.py pulito/_cambiasi_opere.csv pulito/_wp_stagioni.csv pulito/_cambiasi_pulito.csv
+python -I -X utf8 scripts/parse_romani.py raw/romani/teatroallascalac00romauoft/teatroallascalac00romauoft_djvu.txt pulito/_romani_opere.csv
+python -I -X utf8 scripts/parse_marangoni.py raw/cambiasi/pdf24_merged-16/pdf24_merged-16_djvu.txt pulito/_marangoni_opere.csv
+python -I -X utf8 scripts/parse_scala_stagioni.py raw/scala_stagioni pulito/_scala_sito.csv
+python -I -X utf8 scripts/costruisci_cartellone.py pulito
+python -I -X utf8 scripts/confronti.py pulito
+```
+
+## Da decidere / prossimi passi
+1. Gatti vol. 2 (la cronologia completa 1778-1963): il racconto riempie solo meta dei titoli.
+2. 1964-2022: serve l'archivio della Scala (dati dalla Scala, oppure togliere l'anti-bot per il programma).
+3. Cambiasi: leggere anche la serie dei balli (pagina 104 in poi) e controllare a campione 20 pagine del parser contro le immagini.
+4. Romani: sistemare l'intestazione degli anni per recuperare i 39 anni mancanti.

@@ -1096,6 +1096,17 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
   - (3) **MusicBrainz** (CC0): utile solo per controllo, con 38 date.
   - Non utilizzabili: gli archivi dei giornali, che non si raggiungono da questo PC, ed Europeana, che chiede una chiave.
   - Per il 1978-2022 nessuna fonte libera dà le date dei singoli giorni.
+- 2026-10-29 notte — **Tabella unica del cartellone** (`scala/pulito/cartellone.csv`, 5.146 righe; copertura in `copertura.csv`):
+  - **Righe per fonte**: Cambiasi 1.076 (1778-1881), Romani 750, Wikipedia 1.092, prime assolute da Wikidata 772, Marangoni 118, Gatti vol. 1 951 (1882-1962), stagioni della Scala 2023-27 387.
+  - **1906-1963**: le stagioni con almeno 5 titoli passano da 14 su 57 (solo Wikipedia) a 55 su 57 con Gatti. Gatti nomina però circa 10 titoli a stagione su 20-30 reali.
+  - **Ancora scoperto**: 1964-2022 ha circa 4 titoli all'anno (arriverà SBN).
+  - **Estrazione da Gatti**: titolo e stagione giusti nell'87% di 70 casi controllati a mano; i nomi nel 79%. I collegamenti incerti sono lasciati vuoti.
+  - **Fonti non ripubblicabili** (`ripubblicabile=no`): Gatti e Marangoni. I brani di Gatti (`_gatti_contesti_locali.csv`) restano solo sul PC.
+  - **Problemi aperti**:
+    - i balli di Cambiasi non sono ancora letti;
+    - mancano Cambiasi 1832 e 1835;
+    - Marangoni non ha i cast;
+    - in Gatti le tournée sono mescolate agli spettacoli in sede.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 
