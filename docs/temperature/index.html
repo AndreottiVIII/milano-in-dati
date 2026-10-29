@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temperature di Milano Brera, 1763-2026</title>
+<style>
+  body { font: 16px/1.4 Georgia, serif; color: #000; background: #fff; max-width: 980px; margin: 0 auto; padding: 0 16px 48px; }
+  h1 { font-size: 1.6em; margin: 24px 0 4px; }
+  h2 { font-size: 1.25em; margin: 40px 0 8px; border-top: 2px solid #000; padding-top: 8px; }
+  h3 { font-size: 1.05em; margin: 20px 0 6px; }
+  table { border-collapse: collapse; margin: 8px 0; font-size: 0.88em; }
+  th, td { border: 1px solid #000; padding: 2px 6px; text-align: right; vertical-align: top; }
+  th { background: #eee; }
+  td { white-space: nowrap; }
+  td:first-child, th:first-child { text-align: left; }
+  td.t, th.t { text-align: left; }
+  .scroll { max-height: 420px; overflow: auto; border: 1px solid #000; margin: 8px 0; }
+  .scroll table { margin: 0; }
+  .scroll thead th { position: sticky; top: 0; }
+  .avviso { border: 3px solid #000; padding: 8px 12px; margin: 12px 0; font-weight: bold; }
+  .fonte { font-size: 0.8em; color: #333; margin: 2px 0 12px; }
+  .nota { font-size: 0.85em; }
+  .invalido td { color: #777; }
+  .w { overflow-x: auto; }
+  .scroll .w { overflow: visible; }
+  svg { width: 100%; height: auto; display: block; border: 1px solid #000; }
+  nav ul { columns: 2; padding-left: 20px; }
+  select, input { font: inherit; }
+  details { margin: 8px 0; }
+  summary { cursor: pointer; font-weight: bold; }
+  dl.k { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 8px 0; }
+  dl.k dt { font-weight: bold; } dl.k dd { margin: 0; }
+  footer { border-top: 2px solid #000; margin-top: 48px; padding-top: 8px; font-size: 0.9em; }
+  #errore { border: 3px solid #000; padding: 8px 12px; display: none; }
+</style>
+</head>
+<body>
+
+<h1>Temperature di Milano Brera, 1763-2026</h1>
+<p>Temperature minime, massime e medie giornaliere della stazione di Brera: medie, mesi, tendenze, record, curiosita e il confronto giorno per giorno.</p>
+
+<div class="avviso" id="avviso"></div>
+<div id="errore"></div>
+
+<nav>
+  <ul>
+    <li><a href="#inbreve">In breve</a></li>
+    <li><a href="#grafico">Grafico: media annua</a></li>
+    <li><a href="#anni">Anno per anno</a></li>
+    <li><a href="#classifiche">Anni piu caldi e piu freddi</a></li>
+    <li><a href="#tendenze">Decenni, normali, tendenze</a></li>
+    <li><a href="#mesi">Mese per mese</a></li>
+    <li><a href="#giorni">Giorno per giorno</a></li>
+    <li><a href="#record">Record</a></li>
+    <li><a href="#gelate">Prime e ultime gelate</a></li>
+    <li><a href="#curiosita">Curiosita</a></li>
+    <li><a href="#fonti">Fonti, licenze, metodo</a></li>
+  </ul>
+</nav>
+
+<h2 id="inbreve">In breve</h2>
+<div id="inbreve-c"></div>
+
+<h2 id="grafico">Grafico: temperatura media annua</h2>
+<div id="grafico-c"></div>
+
+<h2 id="anni">Anno per anno</h2>
+<p class="nota"><label><input type="checkbox" id="solo-validi" checked> mostra solo gli anni validi (almeno <span class="soglia-anno"></span> giorni con minima e massima)</label></p>
+<div class="scroll" id="anni-c"></div>
+<p class="fonte">Fonte: data/annuale.json, un oggetto per anno. Campi: <code>n</code> giorni con dato, <code>tmedia</code>, <code>tmin_media</code>, <code>tmax_media</code>, <code>min_ass</code>/<code>min_data</code>, <code>max_ass</code>/<code>max_data</code>, <code>gg_gelo</code> (minima sotto 0 °C), <code>gg_caldi</code> (massima da 30 °C), <code>notti_tropicali</code> (minima da 20 °C), <code>fonti</code>. Gli anni grigi hanno dati insufficienti: i conteggi di giorni sono un minimo e l'anno non entra nelle classifiche.</p>
+
+<h2 id="classifiche">Anni piu caldi e piu freddi</h2>
+<div id="classifiche-c"></div>
+
+<h2 id="tendenze">Decenni, normali climatiche, tendenze</h2>
+<div id="tendenze-c"></div>
+
+<h2 id="mesi">Mese per mese</h2>
+<div id="mesi-c"></div>
+
+<h2 id="giorni">Giorno per giorno</h2>
+<div id="giorni-c"></div>
+
+<h2 id="record">Record</h2>
+<div id="record-c"></div>
+
+<h2 id="gelate">Prime e ultime gelate</h2>
+<div id="gelate-c"></div>
+
+<h2 id="curiosita">Curiosita</h2>
+<div id="curiosita-c"></div>
+
+<footer id="fonti">
+  <h2 style="margin-top:0;border:0;padding:0">Fonti, licenze, metodo</h2>
+  <div id="footer-c"></div>
+</footer>
+
+<script>
+"use strict";
+const NOMI_FILE = ['meta', 'annuale', 'mensile', 'clima', 'giorni', 'records', 'gelate'];
+const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const $ = s => document.querySelector(s);
+const nf = (x, d = 1) => (x === null || x === undefined || Number.isNaN(x)) ? '–' : Number(x).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
+const sg = (x, d = 1) => (x === null || x === undefined) ? '–' : (x > 0 ? '+' : '') + nf(x, d);
+const tab = (head, rows, rowCls) => '<div class="w"><table><thead><tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>' +
+  rows.map((r, i) => `<tr${rowCls && rowCls[i] ? ` class="${rowCls[i]}"` : ''}>` + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody></table></div>';
+const FONTE_NOMI = { maugeri: 'Maugeri', arpa5897: 'ARPA 5897' };
+const fl = f => String(f || '').split('+').map(x => FONTE_NOMI[x] || x).join('+');
+const rigaTxt = (f, r) => `${fl(f)}, riga ${r}`;
+const doyStr = d => d === null || d === undefined ? '–' : new Date(Date.UTC(2001, 0, Math.round(d))).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const qfTxt = q => q ? ` <small>(flag NOAA ${q}: da verificare)</small>` : '';
+let D = {};
+
+Promise.all(NOMI_FILE.map(n => fetch(`data/${n}.json`).then(r => { if (!r.ok) throw new Error(`${n}.json: HTTP ${r.status}`); return r.json(); })))
+  .then(v => { NOMI_FILE.forEach((n, i) => D[n] = v[i]); costruisci(); })
+  .catch(e => {
+    const el = $('#errore'); el.style.display = 'block';
+    el.textContent = 'Impossibile caricare i dati (' + e.message + '). Se hai aperto il file direttamente dal disco, servilo con un piccolo server, per esempio: python -m http.server dalla cartella docs/temperature.';
+  });
+
+function costruisci() {
+  const M = D.meta;
+  const prov = M.stato_cucitura === 'PROVVISORIA';
+  $('#avviso').innerHTML = prov
+    ? 'SERIE PROVVISORIA. Fino al 1989 i valori vengono dalla serie storica di Maugeri, dal 1990 dal sensore ARPA 5897: nel periodo di sovrapposizione 1990-2008 le due fonti divergono (fino a 3,5 °C sulle massime) e non e ancora deciso come cucirle. Tutti i numeri qui sotto, in particolare le tendenze, i record dopo il 1990 e il confronto fra periodi, possono cambiare.'
+    : 'Cucitura delle fonti: ' + M.stato_cucitura + '.';
+  if (!prov) $('#avviso').style.fontWeight = 'normal';
+  document.querySelectorAll('.soglia-anno').forEach(e => e.textContent = M.soglie.giorni_anno_valido);
+  inBreve(); grafico(); anni(); classifiche(); tendenze(); mesi(); giorni(); record(); gelate(); curiosita(); footer();
+}
+
+// ---------------------------------------------------------------- IN BREVE
+function inBreve() {
+  const M = D.meta;
+  const N = D.clima.normali, T = D.clima.tendenze, A = D.annuale.anni.filter(a => a.ok), R = D.records;
+  const n6190 = N.find(x => x.periodo === '1961-1990'), n9120 = N.find(x => x.periodo === '1991-2020');
+  const t80 = T.find(x => x.variabile === 'tmedia' && x.dal === 1980), t1900 = T.find(x => x.variabile === 'tmedia' && x.dal === 1900);
+  const ac = R.anni_caldi[0], af = R.anni_freddi[0], te = R.giorni_estremi.tmax_alta[0], tf = R.giorni_estremi.tmin_bassa[0];
+  $('#inbreve-c').innerHTML = '<dl class="k">' +
+    `<dt>Dati</dt><dd>${nf(M.n_giorni_tmean, 0)} giorni con minima e massima, dal ${M.primo_giorno} al ${M.ultimo_giorno}; ${M.n_anni_validi} anni validi su ${M.n_anni_totali}.</dd>` +
+    `<dt>Media annua</dt><dd>${nf(n6190.tmedia)} °C nel 1961-1990 (${n6190.n_anni} anni), ${nf(n9120.tmedia)} °C nel 1991-2020 (${n9120.n_anni} anni): ${sg(n9120.tmedia - n6190.tmedia)} °C.</dd>` +
+    `<dt>Tendenza</dt><dd>${sg(t1900.pend_secolo)} °C per secolo dal 1900, ${sg(t80.pend_secolo)} °C per secolo dal 1980 (±${nf(t80.se_secolo)}, errore standard).</dd>` +
+    `<dt>Anno piu caldo</dt><dd>${ac.anno}, ${nf(ac.tmedia)} °C. Il piu freddo: ${af.anno}, ${nf(af.tmedia)} °C.</dd>` +
+    `<dt>Giorno piu caldo</dt><dd>${te.data}, massima ${nf(te.valore)} °C (${rigaTxt(te.fonte, te.riga)}).</dd>` +
+    `<dt>Giorno piu freddo</dt><dd>${tf.data}, minima ${nf(tf.valore)} °C (${rigaTxt(tf.fonte, tf.riga)})${qfTxt(tf.qflag)}.</dd>` +
+    '</dl>' +
+    '<p class="fonte">Fonte: data/meta.json (conteggi, date); data/clima.json campi <code>normali</code> e <code>tendenze</code>; data/records.json campi <code>anni_caldi</code>, <code>anni_freddi</code>, <code>giorni_estremi</code>. "riga" = riga del file locale temperature/serie/serie_unica.csv (non pubblicato; vedi Fonti).</p>';
+}
+
+// ---------------------------------------------------------------- GRAFICO
+function grafico() {
+  const an = D.annuale.anni, ok = an.filter(a => a.ok);
+  const ma = new Map();
+  ok.forEach(a => {
+    const w = ok.filter(b => b.anno > a.anno - 20 && b.anno <= a.anno);
+    if (w.length >= 15) ma.set(a.anno, w.reduce((s, b) => s + b.tmedia, 0) / w.length);
+  });
+  const W = 860, H = 380, L = 46, R = 12, T = 14, B = 30;
+  const x0 = an[0].anno, x1 = ok[ok.length - 1].anno;
+  const lo = Math.floor(Math.min(...ok.map(a => a.tmedia))), hi = Math.ceil(Math.max(...ok.map(a => a.tmedia)));
+  const X = y => L + (y - x0) / (x1 - x0) * (W - L - R), Y = t => T + (hi - t) / (hi - lo) * (H - T - B);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="gt gd"><title id="gt">Temperatura media annua a Milano Brera</title><desc id="gd">Linea grigia: media annua di ogni anno valido. Linea nera: media mobile sui 20 anni precedenti. Linea tratteggiata: punto di cucitura tra le fonti.</desc>`;
+  for (let t = lo; t <= hi; t++) s += `<line x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}" stroke="#bbb" stroke-width="1"/><text x="${L - 6}" y="${Y(t) + 4}" font-size="12" text-anchor="end">${t}</text>`;
+  for (let y = Math.ceil(x0 / 25) * 25; y <= x1; y += 25) s += `<line x1="${X(y)}" x2="${X(y)}" y1="${H - B}" y2="${H - B + 5}" stroke="#000"/><text x="${X(y)}" y="${H - 10}" font-size="12" text-anchor="middle">${y}</text>`;
+  s += `<line x1="${L}" x2="${L}" y1="${T}" y2="${H - B}" stroke="#000"/><line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="#000"/>`;
+  s += `<text x="${L + 4}" y="${T + 10}" font-size="12">°C</text>`;
+  let d = '', pen = false;
+  an.forEach(a => { if (!a.ok || a.anno > x1) { pen = false; return; } d += (pen ? 'L' : 'M') + X(a.anno).toFixed(1) + ' ' + Y(a.tmedia).toFixed(1); pen = true; });
+  s += `<path d="${d}" fill="none" stroke="#888" stroke-width="1"/>`;
+  d = ''; pen = false;
+  an.forEach(a => { if (!ma.has(a.anno)) { pen = false; return; } d += (pen ? 'L' : 'M') + X(a.anno).toFixed(1) + ' ' + Y(ma.get(a.anno)).toFixed(1); pen = true; });
+  s += `<path d="${d}" fill="none" stroke="#000" stroke-width="2.5"/>`;
+  (D.meta.segmenti || []).slice(1).forEach(sg_ => {
+    const y = +sg_.da.slice(0, 4);
+    if (y > x0 && y < x1) s += `<line x1="${X(y)}" x2="${X(y)}" y1="${T}" y2="${H - B}" stroke="#000" stroke-dasharray="4 4"/><text x="${X(y) - 4}" y="${T + 24}" font-size="12" text-anchor="end">cucitura ${y}${D.meta.stato_cucitura === 'PROVVISORIA' ? ' (provvisoria)' : ''}</text>`;
+  });
+  s += '</svg>';
+  $('#grafico-c').innerHTML = s +
+    '<p class="nota">Linea grigia: media annua (media delle medie giornaliere, solo anni validi; i buchi sono anni esclusi). Linea nera: media dei 20 anni validi precedenti, tracciata se ce ne sono almeno 15.</p>' +
+    '<p class="fonte">Fonte: data/annuale.json, campi <code>anno</code>, <code>tmedia</code>, <code>ok</code>. La media mobile e calcolata nella pagina da questi stessi campi. Il segno tratteggiato viene da data/meta.json, campo <code>segmenti</code>.</p>';
+}
+
+// ---------------------------------------------------------------- ANNI
+function anni() {
+  const draw = () => {
+    const only = $('#solo-validi').checked;
+    const rows = [], cls = [];
+    D.annuale.anni.filter(a => !only || a.ok).forEach(a => {
+      rows.push([a.anno, a.n, nf(a.tmedia), nf(a.tmin_media), nf(a.tmax_media), `${nf(a.min_ass)} (${a.min_data})`, `${nf(a.max_ass)} (${a.max_data})`,
+        a.gg_gelo, a.gg_caldi, a.notti_tropicali, fl(a.fonti)]);
+      cls.push(a.ok ? '' : 'invalido');
+    });
+    $('#anni-c').innerHTML = tab(['Anno', 'Giorni', 'Media °C', 'Media min', 'Media max', 'Minima assoluta (data)', 'Massima assoluta (data)', 'Giorni di gelo', 'Giorni ≥30 °C', 'Notti ≥20 °C', 'Fonti'], rows, cls);
+  };
+  $('#solo-validi').addEventListener('change', draw); draw();
+}
+
+// ---------------------------------------------------------------- CLASSIFICHE
+function classifiche() {
+  const R = D.records;
+  const lista = (t, arr) => `<h3>${t}</h3><ol>` + arr.map(o => `<li>${o.anno}: ${nf(o.tmedia)} °C</li>`).join('') + '</ol>';
+  $('#classifiche-c').innerHTML = '<div style="display:flex;gap:32px;flex-wrap:wrap"><div>' + lista('10 anni piu caldi', R.anni_caldi) + '</div><div>' + lista('10 anni piu freddi', R.anni_freddi) + '</div></div>' +
+    '<p class="fonte">Fonte: data/records.json, campi <code>anni_caldi</code> e <code>anni_freddi</code> (da data/annuale.json, campo <code>tmedia</code>). Solo anni validi: almeno ' + D.meta.soglie.giorni_anno_valido + ' giorni con minima e massima. Anni esclusi: ' + D.meta.anni_non_validi.join(', ') + '.</p>';
+}
+
+// ---------------------------------------------------------------- TENDENZE
+function tendenze() {
+  const C = D.clima;
+  const dec = tab(['Decennio', 'Anni validi', 'Media °C', 'Media min', 'Media max', 'Giorni di gelo / anno', 'Giorni ≥30 °C / anno', 'Giorni ≥35 °C / anno', 'Notti ≥20 °C / anno'],
+    C.decenni.map(d => [d.decennio + 's', d.n_anni, nf(d.tmedia), nf(d.tmin_media), nf(d.tmax_media), nf(d.gg_gelo), nf(d.gg_caldi), nf(d.gg_35), nf(d.notti_tropicali)]));
+  const nor = tab(['Periodo', 'Anni validi (su attesi)', 'Media °C', 'Media min', 'Media max', 'Giorni di gelo / anno', 'Giorni ≥30 °C / anno', 'Notti ≥20 °C / anno'],
+    C.normali.map(d => [d.periodo, `${d.n_anni} (${d.anni_attesi})`, nf(d.tmedia), nf(d.tmin_media), nf(d.tmax_media), nf(d.gg_gelo), nf(d.gg_caldi), nf(d.notti_tropicali)]));
+  const nomeVar = { tmedia: 'Media', tmin_media: 'Media delle minime', tmax_media: 'Media delle massime' };
+  const tr = tab(['Grandezza', 'Dal', 'Pendenza (°C per secolo)', 'Errore standard', 'Anni', 'R²'],
+    C.tendenze.map(t => [nomeVar[t.variabile], t.dal, sg(t.pend_secolo, 2), nf(t.se_secolo, 2), t.n, nf(t.r2, 2)]));
+  $('#tendenze-c').innerHTML = '<h3>Medie per decennio</h3>' + dec +
+    '<p class="fonte">Fonte: data/clima.json, campo <code>decenni</code> (medie sugli anni validi del decennio, da data/annuale.json). Il 2020s e incompleto.</p>' +
+    '<h3>Normali climatiche</h3>' + nor +
+    '<p class="fonte">Fonte: data/clima.json, campo <code>normali</code> (medie sugli anni validi del periodo). Gli anni mancanti rispetto ai 30 attesi sono quelli esclusi per dati insufficienti.</p>' +
+    '<h3>Tendenza lineare</h3>' + tr +
+    '<p class="fonte">Fonte: data/clima.json, campo <code>tendenze</code>: regressione lineare ai minimi quadrati sulle medie annue degli anni validi dall\'anno indicato al ' + D.meta.ultimo_anno_valido + '. L\'errore standard non tiene conto dell\'autocorrelazione. Con una cucitura provvisoria tra fonti, le tendenze che attraversano il 1990 includono l\'eventuale salto tra le due serie.</p>';
+}
+
+// ---------------------------------------------------------------- MESI
+function mesi() {
+  const C = D.clima.clima_mensile;
+  const el = $('#mesi-c');
+  el.innerHTML = '<h3>Clima di ogni mese</h3><p class="nota">Grandezza: <select id="var-mese"><option value="tmedia">temperatura media</option><option value="tmin">media delle minime</option><option value="tmax">media delle massime</option></select></p>' +
+    '<div id="clima-mese"></div>' +
+    '<p class="fonte">Fonte: data/clima.json, campo <code>clima_mensile</code>: media dei mesi validi (almeno ' + Math.round(D.meta.soglie.frazione_mese_valido * 100) + '% dei giorni) nei periodi indicati, da data/mensile.json. Ultimi 20 = ' + D.clima.periodi.ultimi_20.join('-') + '. Record: massima e minima giornaliera piu alta e piu bassa mai misurate in quel mese; riga = riga di serie_unica.csv.</p>' +
+    '<h3>Un anno, mese per mese</h3><p class="nota">Anno: <select id="anno-mese"></select></p><div id="anno-mesi"></div>' +
+    '<p class="fonte">Fonte: data/mensile.json, campi <code>anno, mese, tmedia, tmin, tmax, n, ok</code>. n = giorni con dato; "no" = mese con meno dell\'80% dei giorni.</p>' +
+    '<details><summary>Tabella completa: media di ogni mese di ogni anno</summary><div class="scroll" id="matrice"></div>' +
+    '<p class="fonte">Fonte: data/mensile.json, campo <code>tmedia</code>; i mesi non validi sono in grigio tra parentesi.</p></details>';
+  const drawClima = () => {
+    const v = $('#var-mese').value;
+    $('#clima-mese').innerHTML = '<div class="scroll">' + tab(['Mese', 'Tutta la serie', '1961-1990', '1991-2020', 'Ultimi 20 anni', 'Mese piu caldo', 'Mese piu freddo', 'Record massima', 'Record minima'],
+      C.map(m => [m.nome, nf(m.serie_intera[v]), nf(m['1961_1990'][v]), nf(m['1991_2020'][v]), nf(m.ultimi_20[v]),
+        `${m.mese_piu_caldo.anno}: ${nf(m.mese_piu_caldo.tmedia)}`, `${m.mese_piu_freddo.anno}: ${nf(m.mese_piu_freddo.tmedia)}`,
+        `${nf(m.record_max.valore)} (${m.record_max.data})<br><small>${rigaTxt(m.record_max.fonte, m.record_max.riga)}</small>`,
+        `${nf(m.record_min.valore)} (${m.record_min.data})<br><small>${rigaTxt(m.record_min.fonte, m.record_min.riga)}</small>`])) + '</div>';
+  };
+  $('#var-mese').addEventListener('change', drawClima); drawClima();
+  const righe = D.mensile.righe, anniL = [...new Set(righe.map(r => r[0]))];
+  $('#anno-mese').innerHTML = anniL.slice().reverse().map(y => `<option>${y}</option>`).join('');
+  const drawAnno = () => {
+    const y = +$('#anno-mese').value;
+    $('#anno-mesi').innerHTML = tab(['Mese', 'Media °C', 'Media min', 'Media max', 'Giorni con dato', 'Valido'],
+      righe.filter(r => r[0] === y).map(r => [MESI[r[1] - 1], nf(r[2]), nf(r[3]), nf(r[4]), r[5], r[6] ? 'si' : 'no']));
+  };
+  $('#anno-mese').addEventListener('change', drawAnno); drawAnno();
+  const mat = {}; righe.forEach(r => { (mat[r[0]] = mat[r[0]] || {})[r[1]] = r; });
+  $('#matrice').innerHTML = tab(['Anno', ...MESI.map(m => m.slice(0, 3))], anniL.map(y => [y, ...MESI.map((_, i) => {
+    const r = (mat[y] || {})[i + 1]; return r ? (r[6] ? nf(r[2]) : `<span style="color:#777">(${nf(r[2])})</span>`) : '–';
+  })]));
+}
+
+// ---------------------------------------------------------------- GIORNI
+function giorni() {
+  const G = D.giorni, ix = {}; G.campi.forEach((c, i) => ix[c] = i);
+  const AC = G.anno_attuale, el = $('#giorni-c');
+  el.innerHTML = `<p>Scegli un giorno del calendario: record, medie su tutta la serie, sugli ultimi 20 anni (${G.ultimi_20.join('-')}) e sugli ultimi 5 (${G.ultimi_5.join('-')}), e il confronto con il ${AC}.</p>` +
+    '<p>Mese <select id="g-mese">' + MESI.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('') + '</select> giorno <select id="g-giorno"></select></p>' +
+    '<div id="g-scheda"></div>' +
+    '<details open><summary>Tutti i 366 giorni</summary><div class="scroll" id="g-tabella" style="max-height:520px"></div>' +
+    `<p class="fonte">Fonte: data/giorni.json, un array per giorno del calendario con i campi elencati in <code>campi</code>. Max/min record = valore piu alto della massima / piu basso della minima mai registrato quel giorno (anno tra parentesi). Medie: tutta la serie (dal ${D.meta.primo_giorno.slice(0, 4)}), ultimi 20 anni validi, ultimi 5. ${AC}: valori misurati (ARPA 5897); un buco indica giorno senza dati.</p></details>`;
+  const oggi = new Date(D.meta.ultimo_giorno + 'T12:00:00');
+  $('#g-mese').value = oggi.getMonth() + 1;
+  const riempiGiorni = () => {
+    const m = +$('#g-mese').value, nd = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1], cur = $('#g-giorno').value;
+    $('#g-giorno').innerHTML = Array.from({ length: nd }, (_, i) => `<option>${i + 1}</option>`).join('');
+    if (cur && +cur <= nd) $('#g-giorno').value = cur;
+  };
+  riempiGiorni(); $('#g-giorno').value = oggi.getDate();
+  const g = (m, d) => G.righe.find(r => r[0] === m && r[1] === d);
+  const scheda = () => {
+    const m = +$('#g-mese').value, d = +$('#g-giorno').value, r = g(m, d); if (!r) return;
+    const v = k => r[ix[k]];
+    const diff = (a, b) => (a === null || b === null) ? '–' : sg(a - b);
+    $('#g-scheda').innerHTML = `<h3>${d} ${MESI[m - 1]}</h3>` + tab(['', 'Massima °C', 'Minima °C', 'Media °C'], [
+      ['Record', `${nf(v('tx_rec'))} (${v('tx_rec_anno')})<br><small>${rigaTxt(v('tx_rec_fonte'), v('tx_rec_riga'))}</small>`, `${nf(v('tn_rec'))} (${v('tn_rec_anno')})<br><small>${rigaTxt(v('tn_rec_fonte'), v('tn_rec_riga'))}</small>`, '–'],
+      [`Media su tutta la serie (${v('n_anni')} anni con dato)`, nf(v('tx_med')), nf(v('tn_med')), nf(v('tm_med'))],
+      ['Media ultimi 20 anni', nf(v('tx_20')), nf(v('tn_20')), nf(v('tm_20'))],
+      ['Media ultimi 5 anni', nf(v('tx_5')), nf(v('tn_5')), nf(v('tm_5'))],
+      [`${AC} (misurato)`, nf(v('tx_att')), nf(v('tn_att')), (v('tx_att') === null || v('tn_att') === null) ? '–' : nf((v('tx_att') + v('tn_att')) / 2)],
+      [`${AC} meno media ultimi 20 anni`, diff(v('tx_att'), v('tx_20')), diff(v('tn_att'), v('tn_20')), (v('tx_att') === null || v('tn_att') === null) ? '–' : sg((v('tx_att') + v('tn_att')) / 2 - v('tm_20'))],
+      [`${AC} meno media ultimi 5 anni`, diff(v('tx_att'), v('tx_5')), diff(v('tn_att'), v('tn_5')), (v('tx_att') === null || v('tn_att') === null) ? '–' : sg((v('tx_att') + v('tn_att')) / 2 - v('tm_5'))]
+    ]) + '<p class="fonte">Fonte: data/giorni.json, campi <code>tx_rec, tn_rec, tx_med, tn_med, tm_med, tx_20, tn_20, tm_20, tx_5, tn_5, tm_5, tx_att, tn_att</code> per questo giorno. Differenze calcolate nella pagina.</p>';
+  };
+  $('#g-mese').addEventListener('change', () => { riempiGiorni(); scheda(); });
+  $('#g-giorno').addEventListener('change', scheda); scheda();
+  $('#g-tabella').innerHTML = tab(['Giorno', 'Max record', 'Min record', 'Max media serie', 'Max media 20a', 'Max media 5a', 'Min media serie', 'Min media 20a', 'Min media 5a', `Max ${AC}`, `Min ${AC}`],
+    G.righe.map(r => [`${r[0] === 0 ? '' : r[1]} ${MESI[r[0] - 1].slice(0, 3)}`, `${nf(r[ix.tx_rec])} (${r[ix.tx_rec_anno]})`, `${nf(r[ix.tn_rec])} (${r[ix.tn_rec_anno]})`,
+      nf(r[ix.tx_med]), nf(r[ix.tx_20]), nf(r[ix.tx_5]), nf(r[ix.tn_med]), nf(r[ix.tn_20]), nf(r[ix.tn_5]), nf(r[ix.tx_att]), nf(r[ix.tn_att])]));
+}
+
+// ---------------------------------------------------------------- RECORD
+function record() {
+  const R = D.records, E = R.giorni_estremi;
+  const tg = (t, arr, col, nota) => `<h3>${t}</h3>` + tab(['#', 'Data', col, 'Minima', 'Massima', 'Fonte, riga'],
+    arr.map((o, i) => [i + 1, o.data, nf(o.valore), nf(o.tmin), nf(o.tmax), rigaTxt(o.fonte, o.riga) + qfTxt(o.qflag)])) + (nota || '');
+  const sr = (t, arr, col, key) => `<h3>${t}</h3>` + tab(['#', 'Dal', 'Al', 'Giorni', col, 'Fonte, righe'],
+    arr.map((o, i) => [i + 1, o.inizio, o.fine, o.giorni, nf(o.media), `${fl(o.fonti)}, righe ${o.riga_inizio}-${o.riga_fine}`]));
+  const per = (t, arr, f) => `<h3>${t}</h3><ol>` + arr.map(o => `<li>${f(o)}</li>`).join('') + '</ol>';
+  $('#record-c').innerHTML =
+    tg('10 giorni con la massima piu alta', E.tmax_alta, 'Massima °C') +
+    tg('10 giorni con la minima piu bassa', E.tmin_bassa, 'Minima °C') +
+    '<p class="fonte">Fonte: data/records.json, campo <code>giorni_estremi</code>; riga = riga di temperature/serie/serie_unica.csv (file locale). Un flag NOAA (I = incoerenza interna, N = fuori norma, primo carattere per la minima, secondo per la massima) segnala una misura storica sospetta del Settecento-Ottocento che il controllo di qualita NOAA ha segnato ma non scartato.</p>' +
+    '<details><summary>Altri giorni estremi</summary>' +
+    tg('10 giorni con la minima piu alta (notti piu calde)', E.tmin_alta, 'Minima °C') +
+    tg('10 giorni con la massima piu bassa', E.tmax_bassa, 'Massima °C') +
+    tg('10 giorni con la media piu alta', E.tmedia_alta, 'Media °C') +
+    tg('10 giorni con la media piu bassa', E.tmedia_bassa, 'Media °C') +
+    tg('10 giorni con la maggiore escursione (massima meno minima)', E.escursione_max, 'Escursione °C') +
+    '<p class="fonte">Fonte: data/records.json, campo <code>giorni_estremi</code> (<code>tmin_alta, tmax_bassa, tmedia_alta, tmedia_bassa, escursione_max</code>).</p></details>' +
+    '<h3>Mesi, estati e inverni</h3><div style="display:flex;gap:28px;flex-wrap:wrap">' +
+    '<div>' + per('10 mesi piu caldi', R.mesi_caldi, o => `${MESI[o.mese - 1]} ${o.anno}: ${nf(o.tmedia)} °C`) + '</div>' +
+    '<div>' + per('10 mesi piu freddi', R.mesi_freddi, o => `${MESI[o.mese - 1]} ${o.anno}: ${nf(o.tmedia)} °C`) + '</div>' +
+    '<div>' + per('5 estati piu calde (giu-ago)', R.estati_calde, o => `${o.anno}: ${nf(o.tmedia)} °C`) + per('5 estati piu fredde', R.estati_fredde, o => `${o.anno}: ${nf(o.tmedia)} °C`) + '</div>' +
+    '<div>' + per('5 inverni piu caldi (dic-feb, anno di gennaio)', R.inverni_caldi, o => `${o.anno}: ${nf(o.tmedia)} °C`) + per('5 inverni piu freddi', R.inverni_freddi, o => `${o.anno}: ${nf(o.tmedia)} °C`) + '</div></div>' +
+    '<p class="fonte">Fonte: data/records.json, campi <code>mesi_caldi, mesi_freddi, estati_*, inverni_*</code> (da data/mensile.json, solo mesi validi; estate e inverno solo se validi tutti e tre i mesi).</p>' +
+    '<h3>Le serie piu lunghe</h3><p class="nota">Una serie e una successione di giorni consecutivi sopra o sotto soglia; un giorno senza dato la interrompe. Totale serie: ' +
+    `${R.n_serie.caldo_tmax30} di caldo (massima ≥30 °C), ${R.n_serie.notti_tropicali} di notti tropicali, ${R.n_serie.gelo_tmin0} di gelo, ${R.n_serie.ghiaccio_tmax0} di giorni di ghiaccio.</p>` +
+    sr('Caldo: massima ≥30 °C per piu giorni di fila', R.serie_caldo_tmax30, 'Massima media °C') +
+    sr('Freddo: minima sotto 0 °C per piu giorni di fila', R.serie_gelo_tmin0, 'Minima media °C') +
+    sr('Giorni di ghiaccio: massima sotto 0 °C', R.serie_ghiaccio_tmax0, 'Massima media °C') +
+    sr('Notti tropicali: minima ≥20 °C', R.serie_notti_tropicali, 'Minima media °C') +
+    '<p class="fonte">Fonte: data/records.json, campi <code>serie_caldo_tmax30, serie_gelo_tmin0, serie_ghiaccio_tmax0, serie_notti_tropicali</code>; righe = prima e ultima riga della serie in serie_unica.csv.</p>';
+}
+
+// ---------------------------------------------------------------- GELATE
+function gelate() {
+  const Gt = D.gelate;
+  const E = Gt.estremi;
+  const ex = (t, o) => `<li>${t}: ${o.data} (${doyStr(o.doy)}, anno ${o.anno}; ${rigaTxt(o.fonte, o.riga)})</li>`;
+  $('#gelate-c').innerHTML = '<p class="nota">Ultima gelata = ultimo giorno con minima sotto 0 °C fra il 1 gennaio e il 31 luglio; prima gelata = primo giorno con minima sotto 0 °C fra il 1 agosto e il 31 dicembre. Solo anni validi con almeno il 90% delle minime tra gennaio-aprile e ottobre-dicembre (' + Gt.anni.length + ' anni).</p>' +
+    '<ul>' + ex('Ultima gelata piu precoce', E.ultima_piu_precoce) + ex('Ultima gelata piu tardiva', E.ultima_piu_tardiva) + ex('Prima gelata piu precoce', E.prima_piu_precoce) + ex('Prima gelata piu tardiva', E.prima_piu_tardiva) + '</ul>' +
+    (Gt.anni_senza_gelate.length ? `<p>Anni validi senza nessun giorno di gelo: ${Gt.anni_senza_gelate.join(', ')}.</p>` : '<p>Nessun anno valido senza giorni di gelo.</p>') +
+    '<h3>Date medie per decennio</h3>' + tab(['Decennio', 'Anni', 'Ultima gelata (media)', 'Prima gelata (media)', 'Giorni tra le due', 'Giorni di gelo / anno'],
+      Gt.decenni.map(d => [d.decennio + 's', d.n_anni, doyStr(d.ultima_doy), doyStr(d.prima_doy), nf(d.senza_gelo, 0), nf(d.gg_gelo)])) +
+    '<h3>Tendenza</h3>' + tab(['Grandezza', 'Dal', 'Giorni per secolo', 'Errore standard', 'Anni', 'R²'],
+      Gt.tendenze.map(t => [t.nome, t.dal, sg(t.pend_secolo, 1), nf(t.se_secolo, 1), t.n, nf(t.r2, 2)])) +
+    '<p class="fonte">Fonte: data/gelate.json, campi <code>estremi, decenni, tendenze</code>. Pendenza negativa = la data arriva prima; per le ultime gelate la tendenza e verso la primavera piu mite, per le prime gelate verso l\'autunno piu tardi se positiva. Regressione sui giorni dell\'anno, errore standard senza correzione per autocorrelazione.</p>' +
+    '<details><summary>Anno per anno</summary><div class="scroll">' + tab(['Anno', 'Ultima gelata', 'Prima gelata', 'Giorni tra le due', 'Giorni di gelo', 'Fonte, riga (ultima / prima)'],
+      Gt.anni.map(a => [a.anno, a.ultima || '–', a.prima || '–', a.senza_gelo ?? '–', a.gg_gelo, (a.ultima ? rigaTxt(a.ultima_fonte, a.ultima_riga) : '–') + ' / ' + (a.prima ? rigaTxt(a.prima_fonte, a.prima_riga) : '–')])) +
+    '</div><p class="fonte">Fonte: data/gelate.json, campo <code>anni</code>.</p></details>';
+}
+
+// ---------------------------------------------------------------- CURIOSITA
+function curiosita() {
+  $('#curiosita-c').innerHTML = '<ul>' + D.records.curiosita.map(c => `<li>${c.testo}${qfAvviso(c)}<br><small>Fonte: ${c.fonte}.` +
+    (c.righe.length ? ' Righe: ' + c.righe.map(r => `${r.data} (${rigaTxt(r.fonte, r.riga)})`).join('; ') + '.' : '') + '</small></li>').join('') + '</ul>' +
+    '<p class="fonte">Fonte: data/records.json, campo <code>curiosita</code>, calcolato da temperature/serie/serie_unica.csv con temperature/scripts/statistiche.py. Prima del 1835 (riforma di Carlini) le misure sono meno affidabili: i record e i salti di quel periodo vanno letti con cautela.</p>';
+}
+function qfAvviso(c) { return c.righe.some(r => r.qflag) ? ' <small>(flag NOAA)</small>' : ''; }
+
+// ---------------------------------------------------------------- FOOTER
+function footer() {
+  const M = D.meta, prov = M.stato_cucitura === 'PROVVISORIA';
+  const seg = M.segmenti.map(s => `${FONTE_NOMI[s.fonte] || s.fonte} dal ${s.da} al ${s.a || 'ultimo dato'}${(s.adjust && (s.adjust.tmin || s.adjust.tmax)) ? ` (correzione additiva: minima ${sg(s.adjust.tmin)} °C, massima ${sg(s.adjust.tmax)} °C)` : ' (nessuna correzione)'}`).join('; ');
+  $('#footer-c').innerHTML =
+    (prov ? '<p><strong>Serie provvisoria.</strong> ' : '<p>') + 'Cucitura delle fonti usata ora: ' + seg + '. Fonte: data/meta.json, campi <code>segmenti</code> e <code>stato_cucitura</code> (' + M.stato_cucitura + ').</p>' +
+    '<h3>Fonti e licenze</h3><ul>' +
+    '<li><strong>Serie storica 1763-2008 (Maugeri, Universita di Milano)</strong>, stazione di Brera/Milano. Letta dalla copia di GHCN-D (NOAA NCEI), stazione ITE00100554, elementi TMAX e TMIN, identica alla serie di ECA&amp;D (European Climate Assessment &amp; Dataset, www.ecad.eu, sorgenti 105248 e 105247). Citazione richiesta: Klein Tank, A.M.G. e altri, 2002, Int. J. of Climatol., 22, 1441-1453. Licenza ECA&amp;D: uso solo non commerciale per ricerca e istruzione. <strong>Per questo il sito non ripubblica la serie giornaliera precedente al 1990</strong>: ci sono solo aggregati (medie annuali e mensili, statistiche per giorno del calendario, record e serie di eventi).</li>' +
+    '<li><strong>ARPA Lombardia</strong>, stazione Milano v.Brera, sensore di temperatura 5897, dati da dati.lombardia.it (archivi 6eu4-4tja, d4kj-kbpj, w9wd-u6jh, 647i-nhxk). Licenza CC0 1.0 (pubblico dominio), attribuzione: ARPA Lombardia. Dati sub-giornalieri (orari fino al 2020, ogni 10 minuti dal 2021); minima e massima giornaliere calcolate da noi.</li>' +
+    '</ul><p>Data di scarico dei dati: <strong>' + M.data_scarico + '</strong>. Ultimo giorno nella serie: ' + M.ultimo_giorno + '.</p>' +
+    '<h3>Metodo</h3><ul>' +
+    '<li>Tutto parte da un solo file locale, temperature/serie/serie_unica.csv (colonne date, tmin, tmax, tmean, fonte, qflag), costruito da temperature/scripts/costruisci_serie.py secondo temperature/splice.json. I dati di questa pagina vengono da temperature/scripts/statistiche.py; si rigenera tutto con temperature/scripts/rigenera.ps1.</li>' +
+    '<li>Media giornaliera = (minima + massima) / 2, per tutte le fonti.</li>' +
+    '<li>ARPA, minima e massima del giorno: si scartano le letture con valore -999 o stato diverso da VA; il giorno vale solo con almeno l\'83% delle letture attese (20 su 24 per i dati orari, 120 su 144 per quelli ogni 10 minuti). Il giorno va da 00:10 a 00:00 ora solare, perche l\'orario ARPA e quello di fine intervallo. Dal 2021 le letture ogni 10 minuti danno massime un po\' piu alte di quelle orarie: possibile piccolo salto di omogeneita.</li>' +
+    '<li>Anno valido: almeno ' + M.soglie.giorni_anno_valido + ' giorni con minima e massima. Mese valido: almeno ' + Math.round(M.soglie.frazione_mese_valido * 100) + '% dei giorni. Solo i periodi validi entrano in classifiche, medie per periodo, decenni, normali e tendenze.</li>' +
+    '<li>Soglie: giorno di gelo = minima sotto 0 °C; giorno caldo = massima da 30 °C; notte tropicale = minima da 20 °C. Il 29 febbraio ha meno anni degli altri giorni.</li>' +
+    '<li>Il flag NOAA (qflag) del GHCN-D segnala valori storici sospetti; i valori sono tenuti, con il segno accanto.</li>' +
+    '<li>La stazione ha cambiato posto e strumenti piu volte nella sua storia (riforma di Carlini 1835, passaggi del 1971 e 1987): la serie non e stata omogeneizzata da noi.</li>' +
+    '</ul><p class="fonte">I campi "riga" rinviano a righe del file locale temperature/serie/serie_unica.csv, non pubblicato; permettono di controllare ogni numero rigenerando la serie con gli stessi programmi.</p>';
+}
+</script>
+</body>
+</html>

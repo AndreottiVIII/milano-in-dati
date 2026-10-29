@@ -124,6 +124,19 @@ Fonti trovate: Maugeri, Buffoni e Chlistovsky 2002 (storia delle osservazioni, C
 - Non scaricati gli archivi ECA&D interi (5,2 GB, tutta Europa).
 - Non scaricati gli altri sensori ARPA di Milano (Zavattari, Juvara, Marche, Feltre, Lambrate).
 
+### Fase 2 — la discrepanza e la serie unica (2026-10-29)
+
+- **Sbagliata è la serie storica (Maugeri), non ARPA.** Confrontata con la media di tre altre stazioni ARPA di Milano (Juvara, Marche, Zavattari), Brera ARPA resta piatta dal 1995 al 2007; la serie Maugeri invece si scalda d'estate dal 1995, fa un salto il 21/6/2001 (Maugeri meno Brera sulle massime da +1,06 a +3,54 °C) e un altro di circa 1 °C nella primavera 2006. Nessuno documenta da dove vengano i dati Maugeri dopo il 1998 (l'omogeneizzazione del 2002 si ferma lì). Dettagli e numeri: `temperature/discrepanza/RAPPORTO.md`.
+- **Cucitura scelta** (`temperature/splice.json`, costruita da `temperature/discrepanza/scripts/giunzione.py`): Maugeri 1763 → 14/11/1986; Linate (NOAA GSOD) corretto 15/11/1986 → 15/9/1987, durante il trasloco dell'osservatorio; Maugeri 16/9/1987 → 1994; ARPA Brera dal 1995, solo letture orarie, con scarti mensili (`discrepanza/out/giunzione_scarti.csv`); buchi riempiti con la media delle vicine ARPA. Incertezza della giunzione: 0,2-0,4 °C.
+- **Problema aperto**: Brera ARPA è più calda delle vicine di 0,5-1,7 °C sulle massime nel 2008-2016. Non corretto: servirebbe un'omogeneizzazione con più stazioni.
+- **Trappole dei dati**:
+  - La serie "omogeneizzata" di ECA&D prende per buona la parte rotta recente e alza tutto il 1781-2001 di 2-2,5 °C: da non usare.
+  - ARPA passa ai dati ogni 10 minuti il 19/3/2014, non nel 2021: con le letture ogni 10 minuti le massime salgono di +0,28 °C.
+  - Il codice GHCN-D di Linate (ITM00016080) non esiste.
+  - Prima del 1835 le minime Maugeri sono sospette: troppe notti tropicali.
+- **Effetto sui numeri**: la differenza tra le normali 1961-90 e 1991-2020 passa da +1,3 °C (cucitura provvisoria) a +0,5 °C. Anno più caldo: 2022, con 16,2 °C.
+- **Licenza**: nel sito solo valori aggregati; la serie giornaliera prima del 1995 (ECA&D/GHCN, non ridistribuibile) resta sul PC.
+
 ## 2. Donne nelle vie
 
 - **Fonti:** OpenStreetMap (Overpass), Wikidata, Comune di Milano (registro civici ds634, vie storiche ds2914), Mapping Diversity (solo controllo).
