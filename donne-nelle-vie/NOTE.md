@@ -100,3 +100,60 @@ Tutti i numeri vengono da `copertura.json` (calcolato da `scripts/09_coverage.py
 - Controllo manuale degli incerti, partendo dai 53 con primo candidato donna, e delle 33+28 donne trovate.
 - Per ogni donna: professione leggibile (le professioni Wikidata vanno raggruppate in poche categorie).
 - Data di intitolazione solo dove c'è (30,6%): decidere se basta o se cercare le delibere altrove.
+
+---
+
+# Fase 2 (2026-10-29): matching migliorato, percentuali, mappa
+
+Programmi nuovi in `scripts/`: `10_chiavi_e_ricerca_v2.py` (chiavi di ricerca con/senza titoli, ricerche Wikidata rifatte), `11_classifica_v2.py` (classificazione di tutte le 4.278 vie), `11b_arricchisci.py` (professioni, elenco da verificare), `12_percentuali.py`, `13_geojson_donne.py`, `14_overpass_geom.py`, `14b_overpass_supplemento.py`, `15_costruisci_pagina.py`. Il primo giro (`matching_candidati.csv`, `strade_persone.csv`) resta com'era, per confronto.
+
+## Risultato (da `out/percentuali.json`, calcolato su `out/strade_classificate_v2.csv`, campi `categoria`, `confidenza`, `santa`, `santo`)
+Universo: 4.278 vie e piazze (4.030 codici via del Comune + 248 solo OSM; 2 righe "solo OSM" sono state fuse con la via del Comune, vedi trappola 5). Dati OSM del 2026-10-29.
+
+| | Numero fermo (tag OSM + match sicuro) | Con i casi incerti | Estremi teorici |
+|---|---|---|---|
+| Donne su vie intitolate a persone, santi compresi | **4,7%** (96 su 2.063) | 4,7%-5,8% | 3,8%-7,1% |
+| Donne su vie intitolate a persone, senza santi | **4,2%** (83 su 1.986) | 4,2%-4,6% | 3,4%-5,6% |
+| Donne su tutte le vie, santi compresi | **2,2%** (96 su 4.278) | 2,2%-3,5% | = |
+| Donne su tutte le vie, senza santi | **2,0%** (83 su 4.122) | 2,0%-2,7% | = |
+
+- "Persone" = donne + uomini + "misti" (Fratelli..., coniugi, coppie di nomi: 35 vie, mai contate come donne), come in Mapping Diversity. Un gruppo di sole sorelle conta come donne.
+- "Con i casi incerti" = si aggiungono al numeratore le 54 vie incerte con una donna candidata e al denominatore tutti i 541 incerti che sono persone (uomini compresi: 487). "Estremi teorici": basso = nessuna delle 54 incerte e donna (e restano persone tutti gli altri incerti), alto = tutte le 54 sono donne e gli altri incerti non sono persone.
+- "Senza santi" toglie dal numeratore e dal denominatore tutte le vie con titolo San/Santa/Sant'/Santo (flag `santa` = santa, `santo` = santo): 13 sante certe + 24 incerte, 64 santi certi.
+- Le 143 vie "sconosciute" (nomi locali tipo Ciovasso, Pontaccio, cascine) e le 1.531 non-persone (luoghi, date, fiumi, montagne, collettivi) non sono nei denominatori "persone".
+- Per decennio di intitolazione (solo vie con `DATA_INTITOLAZIONE`: 881 persone con data valida, 711 certe): `out/percentuali_per_decennio.csv` e `out/percentuali_per_periodo.csv`. Quota di donne (numero fermo): fino al 1949 2,6% (9/348), 1950-79 4,3% (7/163), 1980-99 7,0% (7/100), dal 2000 11,0% (11/100). Per decennio i numeri sono minuscoli (anni Venti: 8 su 264; anni 2020: 6 su 8). Gli anni Venti sono un'onda di intitolazioni (264 persone certe con data nel decennio).
+
+## File prodotti
+`out/strade_classificate_v2.csv` e `out/strade_classificate_arricchite_v2.csv` (una riga per via: categoria, confidenza, fonte, motivo, flag, persona, anni, professioni, candidati), `matching_candidati_v2.csv` (solo le vie senza tag, stesso schema), **`da_verificare_donne.csv`** (55 righe: 26 santa/titolo senza persona trovata (probabili chiese), 17 omonimi o nome parziale su Wikidata, 12 solo nome di battesimo; con colonna vuota `tua_decisione`), `out/percentuali*.json/csv`, `out/occ_labels.json` (etichette professioni), `raw/wikidata/matching_v2/` (ricerche e dettagli Wikidata v2), `raw/osm_geom/overpass_geom.json` (20 MB) e `supplemento_nomi.json`. Pubblicabili in `../docs/vie/`: `index.html`, `data/vie_donne.geojson` (149 vie su 150 donne, 0,1 MB, coordinate a 5 decimali), `data/strade_classificate_v2.csv`, `data/da_verificare_donne.csv`, `data/percentuali*`. La via Gaetanina Calvi (certa, Wikidata) non ha geometria: nel Comune c'e il codice via ma OSM non ha una strada con quel nome.
+
+## Come e stato migliorato il matching (script 10 e 11)
+1. Titoli religiosi e nobiliari tolti dalla chiave di ricerca (Santa, San, Sant', Madre, Suor, Don, Fra, Padre, Beata, Contessa, Regina, Principessa, Duchessa, Imperatrice, Donna, ecc.): si cerca sia il nome intero sia quello senza titolo; il titolo fissa il sesso atteso (Santa/Madre/Regina = donna, San/Don/Padre = uomo) e scarta i candidati dell'altro sesso.
+2. Sante: se tra i candidati c'e una persona con descrizione religiosa (santa, martire, monaca...) e nome identico = sicuro, con `santa=1`; se i candidati sono piu di uno ma tutte donne (Santa Monica...) il sesso e certo e la persona precisa no (`persona_ambigua=1`); se non si trova nulla ("Santa Marta", "Santa Maria Segreta") la via e incerta, probabilmente una chiesa.
+3. Nomi di battesimo: elenco scritto a mano (circa 400 femminili, 330 maschili) piu i nomi ricorrenti su Wikidata (almeno 3 volte e mai dell'altro sesso). Un nome tipo "Rosina Grugnola Ferrario" senza match su Wikidata diventa "donna, incerta, fonte nome".
+4. Gruppi: "Sorelle X" = donne; "Fratelli X", "F.lli", coniugi, "Nome e Nome Cognome" con un nome femminile e uno maschile = misto (non donne); collettivi (Caduti, Martiri, Monte, Val, Cascina...) = non persona.
+5. Sesso solo dal campo P21 di Wikidata; dove manca, dal nome di battesimo, e la riga diventa incerta.
+6. Coerenza dei tag: se la persona indicata dal tag OSM non ha nessuna parola in comune col nome della via, la riga e incerta (7 casi, tutti uomini: es. Via Chopin con tag su Enrico Peressutti).
+7. Per ogni strada senza tag due o tre chiavi di ricerca (3.643 distinte), 3.820 ricerche in totale (2.299 riusate dal primo giro).
+
+## Confronto con le altre cifre
+- **Mapping Diversity (feb 2023): 135 donne su 2.677 vie dedicate a persone (5,04%)**. Noi: 96 certe + 54 incerte = 150 donne; 2.063 + 541 = 2.604 persone: stesso ordine di grandezza (4,7% certo, 5,8% con incerti). Differenze: (a) loro hanno fatto una verifica manuale e attribuiscono il sesso dal nome di battesimo quando Wikidata non lo ha, noi lo mettiamo tra gli incerti; (b) loro contano i nomi di strada da OSM (4.480), noi le vie del registro del Comune piu 248 solo OSM (4.278); (c) tre anni di differenza (23 vie intitolate dal 2017, 6 a donne dal 2020); (d) trattamento di santi, gruppi e omonimi diverso; (e) il loro file per singola via e su Google Sheet, non scaricato: non si e potuto confrontare via per via.
+- **Stampa (censimento 2019): 141 donne su 4.250 vie (3,3%)**. Noi sulle vie totali: 2,2% certo, 3,5% con incerti (150 su 4.278): con gli incerti siamo quasi uguali. Metodo del censimento non noto.
+
+## Nuove trappole dei dati (Fase 2)
+1. **Wikidata `wbsearchentities` risponde HTTP 200 con un errore** (`cirrussearch-too-busy-error`) quando il servizio e carico: nel primo giro 737 ricerche su 3.047 risultavano "vuote" per questo (anche "Galileo Galilei", "Adelaide Ristori", "Giuseppe Pinelli"). Controllare sempre il campo `error` e ritentare con attesa crescente; ora le ricerche vuote vere sono 673 su 3.820.
+2. **Il codice `loc_ref` raggruppa piu nomi OSM**: "Via Fezzan" e "Viale Caterina da Forli" hanno lo stesso CODICE_VIA, e le etimologie della seconda finivano sulla prima (Piazza Insubria = Laura Ciceri Visconti, Via Fezzan = Caterina Sforza). Ora il tag si prende solo dal nome OSM che corrisponde al nome del Comune (194 vie con tag diverso rispetto al primo giro). Resta un errore possibile quando il nome OSM e scritto molto diversamente (es. "Piazza Pietro Gobetti" / "PIERO GOBETTI": la via cade nel matching senza tag).
+3. **Il primo giro perdeva i tag delle way senza `loc_ref`** (es. Piazza del Duomo, Via Marco Polo): ora l'etimologia e presa per nome.
+4. **Bug nell'articolo iniziale**: la regola che toglieva "al/la/lo/de/di" davanti al nome mangiava le prime lettere ("Albona" diventava "bona", "Dalmazia" "mazia"). Corretto (articoli solo se seguiti da spazio o apostrofo).
+5. **Righe doppie**: una via del Comune senza nome OSM agganciato (es. "Galleria Anna Castelli Ferrieri", in OSM "Via Anna Castelli Ferrieri") riappare come riga "solo OSM": 2 casi fusi con una regola sulle parole significative.
+6. **Tag OSM sbagliati o indiretti**: "Via San Luca" ha come etimologia Q38 (Italia); "Piazza della Scala" punta a Regina della Scala (la chiesa che ha dato il nome al teatro): contata come donna certa perche e il tag OSM, ma e indiretta.
+7. **Nomi di una parola**: "Via Teano", "Via Sarno", "Via Albona" sono citta, ma hanno omonimi umani su Wikidata; per i nomi singoli senza titolo e senza nome di battesimo, se esiste un'entita non umana con lo stesso nome (e la persona non e molto nota: meno di 25 pagine Wikipedia) la via diventa "luogo".
+8. **Santa Maria + qualificativo** (13 vie: Santa Maria alla Porta, Segreta, Podone, Valle, Fulcorina...): quasi sempre chiese, non persone; incerte con `santa=1`.
+9. **Overpass**: il server principale ha risposto 502/504 ("at capacity") alla prima richiesta bulk con tutte le highway; la seconda, limitata ai tipi dell'universo (residential, tertiary, secondary, primary, unclassified, living_street, pedestrian, trunk + piazze), e riuscita dopo alcuni tentativi (20,4 MB, timestamp OSM 2026-10-29T16:00:51Z). Alcune strade di donne sono mappate solo come `service` o `footway` (Via Galla Placidia, Largo Maria Callas, Viale Rita Levi Montalcini scritta senza trattino): una richiesta piccola di supplemento per nome (`14b`) le ha recuperate.
+10. **Mappa di base**: le tessere CARTO "light_all" mostrano ora la scritta "API KEY REQUIRED"; la pagina usa le tessere OpenStreetMap rese in grigio con un filtro CSS (uso leggero, con attribuzione; se il traffico crescesse servirebbe un fornitore di tessere).
+11. **Console**: il terminale mostra "?" al posto delle lettere accentate (es. "Forl?"): i dati sono giusti (UTF-8), non "correggere".
+12. **"Sicuro" non vuol dire verificato a mano**: un solo candidato su Wikidata puo essere comunque l'omonimo sbagliato (es. "Piazzetta Adelaide Brignone" e assegnata a Lilla Brignone). Controllo a campione fatto solo sulle donne.
+
+## Da decidere
+- Le 55 righe di `da_verificare_donne.csv` (colonna `tua_decisione`). Prendendo tutti gli incerti per buoni la quota sale a 5,8%; scartandoli resta 4,7%.
+- Se contare le chiese dedicate a sante ("Santa Maria ...") come vie di donne: oggi sono incerte e fuori dal numero fermo.
+- Pubblicare o no `data/strade_classificate_v2.csv` (1,1 MB, tutte le vie con candidati): e ODbL, quindi con attribuzione e stessa licenza.

@@ -6,7 +6,7 @@ Ogni problema trovato nei dati va annotato: diventa materiale per la rubrica "tr
 ## Decisioni generali
 
 - 2026-10-29 — Cartella `milano-in-dati/`, repository GitHub pubblico `AndreottiVIII/milano-in-dati`, sito `andreottiviii.github.io/milano-in-dati` (scelti da Davide).
-- 2026-10-29 — Quattro filoni indipendenti, ognuno nella sua sottocartella: `temperature/`, `donne-nelle-vie/`, `beni-culturali/`, `elezioni/`.
+- 2026-10-29 — Filoni indipendenti (prima 4, poi 8: aria, Area C, bici/auto/mezzi, Scala aggiunti lo stesso giorno), ognuno nella sua sottocartella: `temperature/`, `donne-nelle-vie/`, `beni-culturali/`, `elezioni/`.
 - 2026-10-29 — Regola licenze: se una fonte non permette di ripubblicare, nel repo vanno solo programmi e risultati, non i dati grezzi.
 - 2026-10-29 — Divisione del lavoro: Opus coordina e fa il delicato, Sonnet scrive il codice, Sonnet medio il meccanico, Haiku solo controlli di testo.
 
@@ -251,6 +251,20 @@ Tutti i numeri vengono da `copertura.json` (calcolato da `scripts/09_coverage.py
 - Controllo manuale degli incerti, partendo dai 53 con primo candidato donna, e delle 33+28 donne trovate.
 - Per ogni donna: professione leggibile (le professioni Wikidata vanno raggruppate in poche categorie).
 - Data di intitolazione solo dove c'è (30,6%): decidere se basta o se cercare le delibere altrove.
+
+### Fase 2 — percentuali e mappa (2026-10-29)
+
+- **Percentuali** (`donne-nelle-vie/out/percentuali.json`; "certe" = tag OSM o abbinamento sicuro, la forchetta aggiunge i casi incerti): tra le vie intitolate a persone, donne **4,7%** (96 su 2.063), forchetta 4,7-5,8%; senza le sante 4,2% (83 su 1.986). Su tutte le 4.278 vie: 2,2% (forchetta 2,2-3,5%).
+- **Per periodo di intitolazione** (solo le vie con data nel registro del Comune, ds634): fino al 1949 2,6%, 1950-79 4,3%, 1980-99 7,0%, dal 2000 11,0%.
+- **Confronti**: Mapping Diversity (feb. 2023) 5,04% (135 su 2.677); censimento giornalistico 2019 141 su 4.250 (3,3%). Le differenze sono spiegate in `donne-nelle-vie/NOTE.md`, "Fase 2".
+- **Da verificare**: 55 casi in `donne-nelle-vie/da_verificare_donne.csv` (decide Davide).
+- **Controllo del coordinatore**: su 25 vie "certe" estratte a caso, una era sbagliata: Via Donna Prassede abbinata a una santa (Santa Prassede / Adelaide di Kiev), ma è il personaggio dei Promessi Sposi. Da correggere nella revisione.
+- **Trappole dei dati**:
+  - Wikidata ha restituito risposte vuote "too busy" con codice 200 (737 ricerche).
+  - Il codice via del Comune (`loc_ref`) raggruppa più nomi OSM, e un tag finiva sulla via sbagliata (Via Fezzan = Caterina Sforza).
+  - Gaetanina Calvi non ha la via su OSM.
+  - Lo sfondo cartografico CARTO ora chiede una chiave: si usano le tessere OSM in grigio.
+  - L'elenco completo delle trappole è in NOTE.md.
 
 ## 3. Opere d'arte e beni culturali
 
@@ -622,3 +636,28 @@ Ogni voce nomina file e campo.
 - Tabella di corrispondenza circoscrizione (1–20) ↔ zona (1–9) per i confronti a cavallo del 1999.
 - Sezione → NIL: partire da ds939 (per civico) e ripetere con gli altri stradari (ds1614, ds1862, ds2169, ds2741, ds2922, ds2973) per vedere se la sezione cambia NIL negli anni; poi decidere la regola per le 345 sezioni a cavallo.
 - Valutare SIEL (ds23) per controllare i totali delle elezioni 1979–2000.
+
+## 5. Qualità dell'aria, centralina per centralina
+
+_Fonti, date di scarico, licenze, scelte, problemi. Cartella `aria/`._
+
+## 6. Ingressi in Area C
+
+_Fonti, date di scarico, licenze, scelte, problemi. Cartella `area-c/`._
+
+## 7. Bici contro auto contro mezzi
+
+_Fonti, date di scarico, licenze, ipotesi, scelte, problemi. Cartella `bici-auto-mezzi/`._
+
+## 8. La Scala, cartellone dal 1778 a oggi
+
+_Fonti, date di scarico, licenze, scelte, problemi. Cartella `scala/`._
+
+- 2026-10-29 — **Archivio online della Scala (dal 1943-44)**: il robots.txt di teatroallascala.org vieta ai programmi le pagine dell'archivio, e al primo giro l'agente si è fermato. Davide comunica di aver ricevuto l'autorizzazione dal Teatro alla Scala: si raccoglie con un programma, lentamente (pause di alcuni secondi), citando la fonte "©Teatro alla Scala".
+- 2026-10-29 — **Cambiasi**: si usa l'edizione 1778-1881 (Internet Archive) più la cronologia di Romani 1862 per i confronti; la quinta edizione (1778-1906) è solo su HathiTrust, non accessibile dall'Italia, e va bene così (decisione di Davide).
+
+## 9. Redditi e servizi: la città dei 15 minuti
+
+_Fonti, date di scarico, licenze, ipotesi (velocità a piedi 4,5 km/h), scelte, problemi. Cartella `citta-15-minuti/`._
+
+- 2026-10-29 — Punti di partenza: i numeri civici del Comune con coordinate (circa 51 mila), non una griglia (scelta di Davide). Media per quartiere (NIL) pesata sugli abitanti. Velocità a piedi: 4,5 km/h, lungo le strade.
