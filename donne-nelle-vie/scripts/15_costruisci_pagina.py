@@ -31,7 +31,8 @@ def cell(r, key):
         sub = f"{n(r['donne_sicure'])} donne su {n(r['strade_totali'])} vie in tutto"
     a, b = min(firm, wide), max(firm, wide)
     return (f'<span class="big">{pc(firm)}</span><br><span class="sub">{sub}</span><br>'
-            f'<span class="rng">con i casi incerti: <b>{pc(a)}&ndash;{pc(b)}</b></span>')
+            + (f'<span class="rng">contando anche le vie incerte (quasi tutte di uomini): <b>{pc(a)}&ndash;{pc(b)}</b></span>'
+               if pc(a) != pc(b) else '<span class="rng">le vie incerte non cambiano questo conto</span>'))
 
 
 cs, ss = res['con santi'], res['senza santi']
@@ -108,9 +109,9 @@ Fonte dei numeri: <a href="data/percentuali.json">data/percentuali.json</a> (cal
 <p class="legend"><span></span>via intitolata a una donna (caso certo) &nbsp; <span class="d"></span>caso da verificare. Clic su una via per vedere la persona.</p>
 <div id="map" role="img" aria-label="Mappa di Milano con le vie intitolate a donne"></div>
 
-<h2>Le vie intitolate a donne ({n_ok} certe, {n_inc} da verificare)</h2>
+<h2>Le vie intitolate a donne ({n_ok}{(', ' + str(n_inc) + ' da verificare') if n_inc else ''})</h2>
 <div class="scroll"><table><tr><th>Via</th><th>Persona</th><th>Anni</th><th>Professione</th><th>Intitolata il</th><th>Note</th></tr>{''.join(lis)}</table></div>
-<p class="src">Fonti: persona e anni da Wikidata (<code>strade_classificate_v2.csv</code>: persona, nascita, morte, professioni); data di intitolazione dal registro del Comune (campo <code>DATA_INTITOLAZIONE</code>, spesso vuoto). Le righe grigie sono i casi incerti: <a href="data/da_verificare_donne.csv">elenco dei casi da verificare (CSV)</a>.</p>
+<p class="src">Fonti: persona e anni da Wikidata (<code>strade_classificate_v2.csv</code>: persona, nascita, morte, professioni); data di intitolazione dal registro del Comune (campo <code>DATA_INTITOLAZIONE</code>, spesso vuoto). I 56 casi dubbi sono stati decisi uno per uno il 29/10/2026: <a href="data/decisioni_davide.csv">elenco delle decisioni (CSV)</a>; tra questi, le vie "Santa Maria…" contano come donna (la Madonna) e Via Donna Prassede come personaggio dei Promessi Sposi.</p>
 
 <footer>
 <p><b>Fonti e licenze.</b> Vie, geometrie ed etimologie: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, licenza ODbL; i dati derivati qui pubblicati (<code>vie_donne.geojson</code>, tabelle CSV) sono quindi anch&rsquo;essi ODbL (condivisione alla pari, con attribuzione). Persone, sesso, date: <a href="https://www.wikidata.org">Wikidata</a>, CC0. Registro dei numeri civici e date di intitolazione: <a href="https://dati.comune.milano.it/dataset/ds634-numeri-civici-coordinate">Comune di Milano, ds634</a>, CC BY. Mappa di base: tessere OpenStreetMap (&copy; OpenStreetMap contributors), rese in grigio.</p>

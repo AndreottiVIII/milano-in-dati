@@ -265,6 +265,12 @@ Tutti i numeri vengono da `copertura.json` (calcolato da `scripts/09_coverage.py
   - Gaetanina Calvi non ha la via su OSM.
   - Lo sfondo cartografico CARTO ora chiede una chiave: si usano le tessere OSM in grigio.
   - L'elenco completo delle trappole è in NOTE.md.
+- **2026-10-29, decisioni di Davide sui 56 casi dubbi** (`donne-nelle-vie/decisioni_davide.csv`, applicate da `scripts/11c_decisioni.py`; le tabelle di prima sono in `out/prima_delle_decisioni/`):
+  - Contano come donna: Anita Garibaldi, Maria Drago, Maria Teresa, Mafalda di Savoia, Isabella d'Aragona (probabilmente la duchessa di Milano, da confermare), Bianca Maria Visconti, Maddalena (santa), le 23 vie "Santa…/Sant'…" (le "Santa Maria" come la Madonna), le 2 "Madre…", le 12 vie con nome e cognome di donna, e Donna Prassede come personaggio dei Promessi Sposi.
+  - Non contano: Emilia, Postumia, Sabina e Teano sono luoghi; Zuccaro, Braschi e Garofalo sono uomini; Costanza, Letizia e Marinella sono persone non identificate.
+  - Via Santa Croce è stata tolta dal gruppo delle sante dal coordinatore: è la croce, non una persona.
+- **Nuove percentuali**: tra le vie intitolate a persone, donne **6,6%** (140 su 2.110); senza sante **5,1%** (103 su 2.009). Su tutte le vie 3,3%. Contando le 486 vie incerte, quasi tutte di uomini, la quota scende a 5,4%.
+
 
 ## 3. Opere d'arte e beni culturali
 
