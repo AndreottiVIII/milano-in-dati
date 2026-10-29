@@ -1016,6 +1016,12 @@ PC: Intel i5-12600K (10 core, 16 thread), 31,8 GB RAM, 78 GB liberi su disco, Wi
     - mezzi con 180 s di margine nei cambi e 60 s di accesso alle stazioni.
   - **Risultati**: alle 8:00 la bici vince nell'88% delle coppie, l'auto nell'11%, i mezzi nell'1%; alle 21:00 l'auto nel 57%. Il risultato dipende molto dalla velocità della bici: la pagina lo dice.
   - Nel sito non ci sono i tempi di Google, solo i nostri errori. Pagina `docs/bici-auto-mezzi/` pubblicata.
+- 2026-10-30 notte — **Incidenti in bici (fase 4)**:
+  - **Collocazione sulla mappa**: 131.435 incidenti 2010-2024 collocati solo con dati locali (civici e incroci OSM): l'80,1% ha una posizione (incidenti in bici: 83,8%). Gli incroci, confrontati con i civici, distano in mediana 30 m.
+  - **Numeri**: la bici è coinvolta in 16.067 incidenti con feriti in 15 anni (dall'8% al 13% del totale), 74 morti in quegli incidenti; 573 incidenti con monopattino nel 2024.
+  - **Punti critici**: corso Buenos Aires / piazzale Loreto (47), via Gioia / viale Lunigiana (24), corso Buenos Aires / piazza Oberdan (21). Sono conteggi, non rischio per viaggio: mancano i conteggi delle bici che passano.
+  - **Trappola**: `morti24` e `morti30` si sommano, non sono uno dentro l'altro.
+  - Sezione "Dove la bici è più a rischio" pubblicata nella pagina bici-auto-mezzi.
 
 ## 8. La Scala, cartellone dal 1778 a oggi
 

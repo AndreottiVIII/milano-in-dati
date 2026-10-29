@@ -73,6 +73,187 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 <li><b>Un solo giorno</b> (martedì), nessun fine settimana né estate.</li>
 </ul>
 
+<!-- RISCHIO:INIZIO (sezione generata da scripts/f4_inserisci.py a partire da scripts/f4_sezione_rischio.html; i numeri vengono da data/incidenti.json) -->
+<style>
+.nm{background:#fff;border:2px solid #111;border-radius:50%;width:22px;height:22px;font:700 11px/18px system-ui,Arial,sans-serif;text-align:center;color:#111}
+button.zoom{font:inherit;font-size:.8rem;border:1px solid #bbb;background:#fff;color:var(--ink);padding:1px 8px;border-radius:12px;cursor:pointer}
+.ck{display:inline-flex;gap:5px;align-items:center;font-size:.9rem;cursor:pointer}
+table.vie td:first-child,table.vie th:first-child{white-space:normal}
+.rmap{height:70vh;min-height:380px}
+td.g{font-weight:700;background:var(--soft)}
+</style>
+<h2 id="rischio">Dove la bici è più a rischio</h2>
+<div class="surp" id="r-sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="warn"><b>Non è un rischio per viaggio.</b> Non esistono conteggi di quante biciclette passano da ogni via, quindi qui si vede <b>dove gli incidenti con la bici si concentrano</b>, non dove è più probabile farsi male per chilometro pedalato. Dove gli incidenti sono tanti, spesso passano anche molte biciclette (e molte auto).</div>
+
+<h3>Anno per anno</h3>
+<p id="r-anni-testo"></p>
+<div class="scroll"><table id="r-tab-anni"></table></div>
+<p class="src">Incidente &laquo;con la bici&raquo;: almeno uno dei veicoli registrati (fino a tre per incidente) è una bicicletta, anche elettrica. Feriti e morti sono quelli di <b>tutto l&rsquo;incidente</b>, non solo ciclisti. Morti = entro 24 ore più quelli deceduti entro 30 giorni. Fino al 2019 le biciclette elettriche non hanno un codice proprio; il monopattino elettrico ce l&rsquo;ha dal 2020.</p>
+
+<h3>Dove si concentrano</h3>
+<p>Ogni quadrato misura 100 m. Più è scuro, più incidenti sono avvenuti lì. Si vedono solo gli incidenti di cui si è riusciti a trovare il luogo con un indirizzo preciso o un incrocio (<span id="r-pos-bici"></span>% di quelli con la bici). Il numero nei cerchi è la posizione nella classifica degli incroci qui sotto.</p>
+<div class="ctl"><span class="sub">Quali:</span><span id="r-b-q"></span><span class="sub">Periodo:</span><span id="r-b-p"></span></div>
+<div class="ctl"><label class="ck"><input type="checkbox" id="r-ck-top" checked> i 20 incroci</label><label class="ck"><input type="checkbox" id="r-ck-bm"> le stazioni BikeMi (file del 2022)</label></div>
+<div id="r-map" class="map rmap" role="img" aria-label="Mappa di Milano: quadrati di 100 metri colorati secondo il numero di incidenti con la bicicletta"></div>
+<div class="lgd" id="r-lg"></div>
+<p class="src" id="r-map-nota"></p>
+
+<h3>I 20 incroci con più incidenti con la bici</h3>
+<p class="sub">Dal 2010 al 2024. &laquo;Tutti&raquo; = incidenti di ogni tipo registrati allo stesso incrocio; &laquo;quota bici&raquo; = bici sul totale. Un incrocio grande (una piazza) può raccogliere anche gli incidenti vicini indicati con lo stesso nome.</p>
+<div class="scroll"><table id="r-tab-inc"></table></div>
+
+<h3>Le vie</h3>
+<p class="sub">Gli incidenti di un incrocio contano metà per ciascuna delle due vie. Solo vie lunghe almeno 1 km (lunghezza misurata su OpenStreetMap; le vie a due carreggiate vicine sono in genere contate una volta sola). Incidenti per km all&rsquo;anno = media 2020&ndash;2024.</p>
+<div class="grid2">
+<div><h4 style="margin:.6em 0 .2em">Più incidenti con la bici (2020&ndash;2024)</h4><div class="scroll"><table id="r-tab-vie" class="vie"></table></div></div>
+<div><h4 style="margin:.6em 0 .2em">Più incidenti per km (almeno 15 in cinque anni)</h4><div class="scroll"><table id="r-tab-viekm" class="vie"></table></div></div>
+</div>
+
+<h3>Vie con e senza ciclabile</h3>
+<p id="r-cicl-testo"></p>
+<div class="scroll"><table id="r-tab-cicl"></table></div>
+<p class="src" id="r-cicl-nota"></p>
+
+<h3>Con chi si scontra la bici</h3>
+<div class="scroll"><table id="r-tab-chi"></table></div>
+
+<h3>Quanto sono precisi i luoghi</h3>
+<p id="r-qual"></p>
+<h3>Cosa non dicono questi numeri</h3>
+<ul class="m" id="r-limiti"></ul>
+<p class="src"><b>Fonti e licenze.</b> Incidenti: microdati ISTAT (rilevazione degli incidenti stradali con lesioni a persone) pubblicati da Regione Lombardia / PoliS-Lombardia su dati.lombardia.it, licenza CC BY 4.0; per il confronto dei totali, conteggi mensili della Polizia Locale del Comune di Milano, CC BY. Luoghi: registro dei civici del Comune di Milano (CC BY) e strade di &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (ODbL), usati sul computer senza servizi esterni. Stazioni BikeMi: Comune di Milano, CC BY (file di settembre 2022: oggi potrebbero essere diverse).</p>
+<script>
+(function(){
+var R=null,map,cellL=null,bmL=null,topL=null,st={q:'b',p:'15'};
+var RAMP={b:['#f6dcea','#eba8cd','#d2689f','#9c2b73','#560a3d'],a:['#e6e6e6','#c4c4c4','#9a9a9a','#666','#2b2b2b']};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){if(x==null||isNaN(x))return '';var f=Number(x).toFixed(d||0).split('.');f[0]=f[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return f.join(',')}
+function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s}
+function $(id){return document.getElementById(id)}
+function avvia(){fetch('data/incidenti.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error('incidenti.json');return r.json()}).then(function(d){
+  R=d;testi();anni();bottoni();mappa();incroci();vie();ciclabili();chi();precisione();
+}).catch(function(e){$('r-sorpresa').innerHTML='<b>Dati sugli incidenti non caricati.</b> '+esc(e.message)})}
+if(document.readyState==='complete')avvia();else window.addEventListener('load',avvia);
+
+function testi(){
+  var S=R.serie,n=S.anno.length,tot=sum(S.bici),mx=0,iy=0,i;
+  for(i=0;i<n;i++)if(S.bici[i]>mx){mx=S.bici[i];iy=i}
+  var cc=R.con_chi,auto=cc[0][1]/tot,solo=cc[5][1]/tot,top=R.incroci[0],v=R.vie_top;
+  $('r-sorpresa').innerHTML=
+   '<p>In 15 anni (2010&ndash;2024) a Milano la bicicletta è coinvolta in <b>'+nf(tot)+' incidenti con feriti</b>, circa '+nf(tot/n)+' all&rsquo;anno. Erano l&rsquo;<b>'+nf(S.quota_bici_pct[0])+'%</b> di tutti gli incidenti nel 2010, sono il <b>'+nf(S.quota_bici_pct[n-1])+'%</b> nel 2024: gli incidenti in totale sono calati molto più di quelli con la bici.</p>'+
+   '<p>Nel <b>'+nf(100*auto)+'%</b> dei casi c&rsquo;è anche un&rsquo;auto; nel <b>'+nf(100*solo)+'%</b> nessun altro veicolo. L&rsquo;incrocio con più incidenti è <b>'+esc(top.a)+' / '+esc(top.b)+'</b> ('+top.b15+'); tra le vie spiccano <b>'+esc(v[0].nome)+'</b>, <b>'+esc(v[1].nome)+'</b> e <b>'+esc(v[2].nome)+'</b>.</p>';
+  $('r-pos-bici').textContent=nf(R.qualita.bici.posizionati_pct);
+}
+function barra(x,mx){return '<svg class="bar" viewBox="0 0 100 10" preserveAspectRatio="none" role="img" aria-label="'+nf(x)+'"><rect width="'+(100*x/mx)+'" height="10" fill="#009E73"/></svg>'}
+function anni(){
+  var S=R.serie,n=S.anno.length,mx=Math.max.apply(null,S.bici),h='<tr><th>Anno</th><th style="min-width:150px">Incidenti con la bici</th><th class="r">Quota sul totale</th><th class="r">Feriti</th><th class="r">Morti</th><th class="r">Incidenti con un monopattino</th></tr>',i;
+  for(i=0;i<n;i++){
+    h+='<tr><td>'+S.anno[i]+(S.anno[i]===2020?' <span class="sub">(Covid)</span>':'')+'</td><td><div style="display:flex;gap:8px;align-items:center"><span style="flex:1;min-width:80px">'+barra(S.bici[i],mx)+'</span><b>'+nf(S.bici[i])+'</b></div></td><td class="r">'+nf(S.quota_bici_pct[i],1)+'%</td><td class="r">'+nf(S.bici_feriti[i])+'</td><td class="r">'+S.bici_morti[i]+'</td><td class="r">'+(S.anno[i]<2020?'&ndash;':nf(S.monop[i]))+'</td></tr>';
+  }
+  $('r-tab-anni').innerHTML=h;
+  var mi=0;for(i=0;i<n;i++)if(S.bici[i]>S.bici[mi])mi=i;
+  var lo=0;for(i=0;i<n;i++)if(S.anno[i]!==2020&&S.bici[i]<S.bici[lo])lo=i;
+  var e=S.ebike[n-1],ms=S.monop[n-1];
+  $('r-anni-testo').innerHTML='Il massimo è nel <b>'+S.anno[mi]+'</b> ('+nf(S.bici[mi])+' incidenti), poi si scende a circa mille l&rsquo;anno e ci si resta: '+nf(S.bici[n-1])+' nel '+S.anno[n-1]+'. Il 2020 ('+nf(S.bici[S.anno.indexOf(2020)])+') è l&rsquo;anno del Covid: rispetto al 2019 tutti gli incidenti calano del '+nf(100*(1-S.tutti[S.anno.indexOf(2020)]/S.tutti[S.anno.indexOf(2019)]))+'%, quelli con la bici del '+nf(100*(1-S.bici[S.anno.indexOf(2020)]/S.bici[S.anno.indexOf(2019)]))+'%. Nel '+S.anno[n-1]+' gli incidenti con una bici elettrica sono '+nf(e)+' (nel 2021: '+S.ebike[S.anno.indexOf(2021)]+'); quelli con un monopattino elettrico '+nf(ms)+', con '+nf(S.monop_feriti[n-1])+' feriti.';
+}
+function btn(id,opts,key,cb){
+  var el=$(id);el.innerHTML='';
+  opts.forEach(function(o){var b=document.createElement('button');b.type='button';b.textContent=o[1];b.className=st[key]===o[0]?'on':'';
+    b.addEventListener('click',function(){st[key]=o[0];Array.prototype.forEach.call(el.children,function(c){c.className=''});b.className='on';cb()});el.appendChild(b)});
+}
+function bottoni(){
+  btn('r-b-q',[['b','Incidenti con la bici'],['a','Tutti gli incidenti']],'q',colora);
+  btn('r-b-p',[['15','2010–2024'],['5','2020–2024']],'p',colora);
+  $('r-ck-top').addEventListener('change',function(){if(this.checked)topL.addTo(map);else map.removeLayer(topL)});
+  $('r-ck-bm').addEventListener('change',function(){if(this.checked)bmL.addTo(map);else map.removeLayer(bmL)});
+}
+function mappa(){
+  map=L.map('r-map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  bmL=L.layerGroup(R.bikemi.map(function(s){return L.circleMarker([s[1],s[0]],{radius:3.5,color:'#fff',weight:1,fillColor:'#009E73',fillOpacity:1}).bindTooltip(esc(s[2])+' ('+s[3]+' stalli)')}));
+  topL=L.layerGroup(R.incroci.map(function(c,i){
+    var m=L.marker([c.lat,c.lon],{icon:L.divIcon({className:'',html:'<div class="nm">'+(i+1)+'</div>',iconSize:[22,22],iconAnchor:[11,11]}),keyboard:false});
+    m.bindTooltip((i+1)+'. '+esc(c.a)+' / '+esc(c.b)+': '+c.b15+' incidenti con la bici');return m})).addTo(map);
+  colora();
+}
+function classe(v,so){for(var i=0;i<so.length;i++)if(v<=so[i])return i;return so.length}
+function colora(){
+  var G=R.griglia,k=st.q+st.p,so=G.soglie[k],ramp=RAMP[st.q],cl=so.length+1,i,n=G.lon.length;
+  if(cellL)map.removeLayer(cellL);
+  cellL=L.layerGroup();
+  var cols=[];for(i=0;i<cl;i++)cols.push(ramp[Math.round(i*(ramp.length-1)/Math.max(1,cl-1))]);
+  for(i=0;i<n;i++){
+    var v=G[k][i];if(!v)continue;
+    var la=G.lat[i],lo=G.lon[i],dl=50/110570,dn=50/(111320*Math.cos(la*Math.PI/180));
+    var r=L.rectangle([[la-dl,lo-dn],[la+dl,lo+dn]],{weight:0,fillColor:cols[classe(v,so)],fillOpacity:.85});
+    (function(r,i){r.bindTooltip('',{sticky:true});r.on('mouseover',function(){
+      r.setTooltipContent('Con la bici: <b>'+G['b'+st.p][i]+'</b> &middot; tutti gli incidenti: <b>'+G['a'+st.p][i]+'</b> ('+(st.p==='15'?'2010–2024':'2020–2024')+')')})})(r,i);
+    r.addTo(cellL);
+  }
+  cellL.addTo(map);
+  if(topL&&map.hasLayer(topL)){map.removeLayer(topL);topL.addTo(map)}
+  if(bmL&&map.hasLayer(bmL)){map.removeLayer(bmL);bmL.addTo(map)}
+  var lg='',lab=[];
+  for(i=0;i<cl;i++){var a=i===0?1:so[i-1]+1,b=i<so.length?so[i]:null;lab.push(b==null?(a+' o più'):(a===b?''+a:a+'&ndash;'+b))}
+  for(i=0;i<cl;i++)lg+='<span><i style="background:'+cols[i]+'"></i>'+lab[i]+'</span>';
+  $('r-lg').innerHTML='<span class="sub">Incidenti per quadrato di 100 m ('+(st.q==='b'?'con la bici':'di ogni tipo')+', '+(st.p==='15'?'2010–2024':'2020–2024')+'):</span>'+lg+'<span><i style="background:#fff"></i>nessuno (o luogo non preciso)</span>';
+  var tot=sum(G[k]);
+  $('r-map-nota').textContent=nf(tot)+' incidenti sulla mappa, in '+nf(G[k].filter(function(x){return x>0}).length)+' quadrati. Passa il mouse (o tocca) un quadrato per leggere i numeri.';
+}
+function incroci(){
+  var h='<tr><th class="r">#</th><th>Incrocio</th><th class="r">Con la bici 2010&ndash;24</th><th class="r">di cui 2020&ndash;24</th><th class="r">Feriti</th><th class="r">Morti</th><th class="r">Tutti</th><th class="r">Quota bici</th><th></th></tr>';
+  R.incroci.forEach(function(c,i){
+    h+='<tr><td class="r">'+(i+1)+'</td><td>'+esc(c.a)+' / '+esc(c.b)+'</td><td class="r"><b>'+c.b15+'</b></td><td class="r">'+c.b5+'</td><td class="r">'+c.feriti+'</td><td class="r">'+c.morti+'</td><td class="r">'+c.a15+'</td><td class="r">'+c.quota+'%</td><td><button type="button" class="zoom" data-i="'+i+'" aria-label="Mostra sulla mappa: '+esc(c.a)+' / '+esc(c.b)+'">mappa</button></td></tr>';
+  });
+  $('r-tab-inc').innerHTML=h;
+  Array.prototype.forEach.call(document.querySelectorAll('#r-tab-inc button.zoom'),function(b){
+    b.addEventListener('click',function(){var c=R.incroci[+b.getAttribute('data-i')];
+      $('r-map').scrollIntoView({behavior:'smooth',block:'center'});map.setView([c.lat,c.lon],17);
+      L.popup().setLatLng([c.lat,c.lon]).setContent('<b>'+esc(c.a)+' / '+esc(c.b)+'</b><br>'+c.b15+' incidenti con la bici (2010&ndash;2024)').openOn(map)});
+  });
+}
+function vie(){
+  var h='<tr><th>Via</th><th class="r">km</th><th class="r">Con la bici 2020&ndash;24</th><th class="r">per km all&rsquo;anno</th><th class="r">Ciclabile</th></tr>';
+  R.vie_top.forEach(function(v){h+='<tr><td>'+esc(v.nome)+'</td><td class="r">'+nf(v.km,1)+'</td><td class="r"><b>'+v.b5+'</b></td><td class="r">'+nf(v.b5_km_anno,1)+'</td><td class="r">'+v.infra+'%</td></tr>'});
+  $('r-tab-vie').innerHTML=h;
+  h='<tr><th>Via</th><th class="r">km</th><th class="r">Con la bici 2020&ndash;24</th><th class="r">per km all&rsquo;anno</th><th class="r">Ciclabile</th></tr>';
+  R.vie_km.forEach(function(v){h+='<tr><td>'+esc(v.nome)+'</td><td class="r">'+nf(v.km,1)+'</td><td class="r">'+v.b5+'</td><td class="r"><b>'+nf(v.b5_km_anno,1)+'</b></td><td class="r">'+v.infra+'%</td></tr>'});
+  $('r-tab-viekm').innerHTML=h;
+}
+function ciclabili(){
+  var T=R.ciclabili,N=R.ciclabili_nota,h='<tr><th>Via</th><th class="r">Vie</th><th class="r">km</th><th class="r">Incidenti con la bici 2020&ndash;24</th><th class="r">per km all&rsquo;anno</th><th class="r">Tutti gli incidenti per km all&rsquo;anno</th><th class="r">Quota bici</th></tr>',cl='';
+  T.forEach(function(r){
+    if(r.classe!==cl){cl=r.classe;h+='<tr><td colspan="7" class="g">'+esc(cl)+'</td></tr>'}
+    h+='<tr><td>'+esc(r.gruppo)+'</td><td class="r">'+nf(r.vie)+'</td><td class="r">'+nf(r.km,0)+'</td><td class="r">'+nf(r.b5)+'</td><td class="r"><b>'+nf(r.b5_km_anno,2)+'</b></td><td class="r">'+nf(r.a5_km_anno,1)+'</td><td class="r">'+nf(r.quota_bici_pct,0)+'%</td></tr>';
+  });
+  $('r-tab-cicl').innerHTML=h;
+  $('r-cicl-testo').innerHTML='Abbiamo diviso '+nf(N.vie)+' vie di Milano (almeno 300 m, '+nf(N.km)+' km in tutto) secondo la quota di lunghezza che ha, in OpenStreetMap, una corsia o una pista ciclabile (sulla via stessa o su una pista accanto, entro 10 m). Poi abbiamo contato gli incidenti con la bici avvenuti lì nel 2020&ndash;2024. <b>Sulle vie con ciclabile ci sono più incidenti con la bici per km</b> &mdash; ma probabilmente perché lì passano molte più biciclette (le ciclabili si fanno dove la bici c&rsquo;è già, e non lo possiamo misurare). Questa tabella <b>non dice se la ciclabile protegga o no</b>: per dirlo servirebbero i conteggi delle bici.';
+  $('r-cicl-nota').innerHTML='Descrittivo, con quattro cautele. (1) La rete ciclabile è quella di OpenStreetMap a ottobre 2026, gli incidenti sono del 2020&ndash;2024: una ciclabile aperta dopo o dipinta male in mappa è classificata sbagliata. (2) Le corsie riservate ai bus aperte alle bici non sono contate come ciclabili. (3) Gli incidenti di un incrocio sono divisi a metà fra le due vie; il '+nf(N.attribuiti_bici_pct)+'% di quelli con la bici è attribuito a una via di cui conosciamo la lunghezza. (4) Le vie non sono confrontabili in dimensione, traffico e quartiere: il confronto è fatto separatamente per strade grandi e di quartiere, ma resta grossolano.';
+}
+function chi(){
+  var cc=R.con_chi,tot=sum(cc.map(function(r){return r[1]})),t5=sum(cc.map(function(r){return r[2]})),h='<tr><th>Incidenti con la bici, 2010&ndash;2024</th><th class="r">Numero</th><th class="r">Quota</th><th class="r">di cui 2020&ndash;24</th><th class="r">Morti</th></tr>';
+  cc.forEach(function(r){h+='<tr><td>'+esc(r[0].charAt(0).toUpperCase()+r[0].slice(1))+'</td><td class="r">'+nf(r[1])+'</td><td class="r">'+nf(100*r[1]/tot,0)+'%</td><td class="r">'+nf(r[2])+'</td><td class="r">'+r[3]+'</td></tr>'});
+  h+='<tr style="font-weight:700"><td>Totale</td><td class="r">'+nf(tot)+'</td><td class="r">100%</td><td class="r">'+nf(t5)+'</td><td class="r">'+sum(cc.map(function(r){return r[3]}))+'</td></tr>';
+  $('r-tab-chi').innerHTML=h;
+}
+function precisione(){
+  var q=R.qualita,b=q.bici,t=q.tutti,c=q.controllo_incroci;
+  $('r-qual').innerHTML='Il luogo non è nei dati come coordinate, ma come testo (&laquo;via Monte Rosa, 57&raquo; o &laquo;via Padova incrocio via Venini&raquo;). Lo abbiamo cercato nel registro dei civici del Comune e nelle strade di OpenStreetMap. Per gli incidenti con la bici: <b>'+nf(b.civico+b.civico_approx,1)+'%</b> con il numero civico (di cui '+nf(b.civico_approx,1)+'% con un numero vicino, perché quello esatto non esiste), <b>'+nf(b.incrocio+b.incrocio_approx,1)+'%</b> a un incrocio, <b>'+nf(b.solo_via,1)+'%</b> solo la via (di solito &laquo;palo luce n.&raquo;, che non si può trasformare in un punto) e <b>'+nf(b.nessuna,1)+'%</b> senza luogo (autostrade, tangenziali, nomi non riconosciuti). Sulla mappa ci sono quindi il <b>'+nf(b.posizionati_pct,0)+'%</b> degli incidenti con la bici (il '+nf(t.posizionati_pct,0)+'% di tutti). Il punto ha la precisione dell&rsquo;indirizzo: al massimo una via o un incrocio, non il punto esatto dello scontro. Controllo: per '+nf(c.confronti)+' incroci abbiamo calcolato la posizione anche in un secondo modo, dai civici delle due vie; la distanza mediana tra i due punti è di '+c.mediana_m+' m e nel '+nf(c.entro_100m_pct,0)+'% dei casi è sotto i 100 m. Non è però una verifica con la verità, che non esiste.';
+  var L=[
+   '<b>Solo incidenti con feriti registrati dalle forze dell&rsquo;ordine.</b> Le cadute da soli e gli urti lievi spesso non finiscono in questi dati, e per chi va in bici è probabile che siano molti: il numero vero è più alto, e non sappiamo quanto.',
+   '<b>Niente conteggi di bici.</b> Senza sapere quanti ciclisti passano, un numero alto può voler dire &laquo;pericoloso&raquo; o solo &laquo;molto frequentato&raquo;. Per questo non diamo un tasso.',
+   '<b>Feriti e morti sono di tutto l&rsquo;incidente.</b> Il file non dice se erano ciclisti, automobilisti o pedoni. I '+R.morti_bici_15+' morti in 15 anni includono anche loro.',
+   '<b>L&rsquo;ora e il giorno non ci sono</b> (solo il mese), e nemmeno la gravità per ciclista: non si può dire &laquo;di notte&raquo; o &laquo;nelle ore di punta&raquo;.',
+   '<b>Al massimo tre veicoli.</b> Il file registra al massimo tre veicoli per incidente: negli incidenti con più veicoli la bici può mancare. Con un veicolo &laquo;datosi alla fuga&raquo; (tipo ignoto) non sappiamo se era una bici.',
+   '<b>I totali non coincidono del tutto con quelli del Comune</b> (Polizia Locale): per il 2024 7.743 incidenti qui, 7.602 là.'
+  ];
+  $('r-limiti').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+})();
+</script>
+<!-- RISCHIO:FINE -->
+
 <footer>
 <p><b>Fonti e licenze.</b> Rete stradale, ciclabili e mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Orari ATM (metro, tram, bus): <a href="https://dati.comune.milano.it/">Comune di Milano</a>/AMAT, formato GTFS, CC BY. Orari Trenord: Regione Lombardia, CC BY 4.0. Confine del Comune, Area C e registro dei civici: Comune di Milano, CC BY. Il traffico delle 8 è tarato sul <a href="https://www.tomtom.com/traffic-index/milan-traffic/">TomTom Traffic Index</a> (dato consultato, non ripubblicato). Google Maps è stato usato solo per tarare il modello su alcuni tragitti: non pubblichiamo i suoi tempi, solo i nostri errori in percentuale.</p>
 <p id="foot-data" class="sub"></p>
