@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · La Scala dal 1778</title>
+<style>
+:root{--acc:#a3122a;--acc2:#d98f9b;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#f6f6f6}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} .big{font-size:2.2rem;font-weight:700;color:var(--acc)} .sub{font-size:.85rem;color:var(--mut)}
+.src{font-size:.8rem;color:var(--mut)} a{color:var(--acc)} code{font-size:.9em}
+.scroll{max-height:520px;overflow:auto;border:1px solid var(--line)} .scroll th{position:sticky;top:0;background:#fff}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;margin:.6em 0;align-items:end} .ctl label{display:flex;flex-direction:column;font-size:.8rem;color:var(--mut);gap:2px}
+.ctl select,.ctl input{font:inherit;font-size:1rem;padding:6px 8px;border:1px solid var(--ink);border-radius:0;background:#fff;color:var(--ink);min-width:0}
+.ctl input[type=text]{width:min(100%,22rem)}
+button{font:inherit;padding:6px 12px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:0;cursor:pointer} button:hover{background:var(--ink);color:#fff}
+.chip{display:inline-block;min-width:1.35em;text-align:center;font-size:.75rem;font-weight:700;border:1px solid var(--ink);padding:0 3px;margin-right:2px;line-height:1.3;cursor:help}
+.chip.S{background:var(--acc);border-color:var(--acc);color:#fff} .chip.B{background:var(--acc2);border-color:var(--acc2)} .chip.C,.chip.R{background:var(--ink);color:#fff}
+.chip.G,.chip.M{background:#666;border-color:#666;color:#fff} .chip.W,.chip.D{background:#bbb;border-color:#bbb}
+.rel{font-size:.75rem;color:var(--mut)} .rel.alta{color:var(--acc);font-weight:700}
+.lg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.85rem;margin:.4em 0} .lg i{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px}
+svg{display:block;width:100%;height:auto} svg text{font-family:system-ui,Arial,sans-serif}
+.gap{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.4em 0;font-size:.92rem} .gap b{color:var(--acc)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px} .tt{font-size:.8rem;color:var(--mut)} .small{font-size:.85rem}
+.note{font-size:.88rem;color:var(--mut)} .err{color:var(--acc);font-weight:700}
+.t2 td:first-child{font-weight:600} .cast{font-size:.82rem;color:var(--mut)}
+@media(min-width:701px){.mcomp{display:none}}
+@media(max-width:700px){.co{display:none}.two{grid-template-columns:1fr} .big{font-size:1.7rem} th,td{padding:5px 4px;font-size:.88rem}}
+</style></head><body><main>
+<p class="small"><a href="../">&larr; Milano in dati</a></p>
+<h1>La Scala dal 1778: che cosa sappiamo di quello che &egrave; andato in scena</h1>
+<p>Qui c&rsquo;&egrave; tutto quello che abbiamo messo insieme sul cartellone del Teatro alla Scala, dal 1778 a oggi, con le fonti dichiarate una per una. <b>Il quadro non &egrave; completo</b>: per molti periodi abbiamo solo una parte dei titoli, e la pagina dice dove. Un titolo conta <b>una volta per anno</b>, senza contare le repliche: non &egrave; il numero delle serate.</p>
+<p id="errore" class="err" hidden></p>
+
+<h2>Quanto sappiamo</h2>
+<p>Ogni barra &egrave; un anno: l&rsquo;altezza &egrave; il numero di titoli diversi (opere, balletti, altri spettacoli; senza i concerti) che troviamo nelle fonti. Il colore dice quale fonte ha visto quel titolo per prima, in ordine di affidabilit&agrave;. <i>Clic su una barra per vedere i titoli di quell&rsquo;anno.</i></p>
+<div id="chart" role="img" aria-label="Titoli per anno dal 1778 al 2027, colorati per fonte"></div>
+<div class="lg" id="legend"></div>
+<h3>Dove mancano pezzi</h3>
+<div id="gaps"></div>
+<h3>Chi copre che cosa</h3>
+<div class="scroll" style="max-height:none"><table id="periodi"></table></div>
+<p class="note">Per confronto: una stagione vera ha di solito 20-30 titoli (nel Cambiasi, 1778-1881, ne contiamo in media 17 per anno, e ci sono anche anni letti solo in parte). Dove la barra &egrave; bassa non vuol dire che la Scala fosse ferma: vuol dire che le nostre fonti non vedono il resto.</p>
+
+<h2>Cerca nel cartellone</h2>
+<div class="ctl">
+ <label>Anno<select id="fy"></select></label>
+ <label>Titolo, compositore o artista<input id="fq" type="text" placeholder="es. Norma, Verdi, Callas, Abbado" autocomplete="off"></label>
+ <label>Tipo<select id="fk"><option value="">tutti</option><option value="o">opere</option><option value="b">balletti</option><option value="c">concerti</option><option value="p">prime assolute</option></select></label>
+ <button id="fr" type="button">Azzera</button>
+</div>
+<p class="note" id="fcount"></p>
+<div class="scroll" style="max-height:640px"><table id="ft"></table></div>
+<p><button id="fmore" type="button" hidden>Mostra altre righe</button></p>
+<p class="src">L&rsquo;anno &egrave; quello del calendario (nelle cronologie dell&rsquo;Ottocento &egrave; l&rsquo;anno teatrale: un Carnevale che comincia il 26 dicembre vale per l&rsquo;anno dopo). Le fonti si fondono per anno e titolo: le lettere indicano chi lo conferma (passa il mouse), &laquo;affidabilit&agrave;&raquo; &egrave; quella della fonte migliore. Se un titolo compare in due anni vicini senza fondersi, &egrave; un limite del confronto.</p>
+
+<h2>Le opere pi&ugrave; rappresentate</h2>
+<div class="ctl"><label>Periodo<select id="tp"></select></label></div>
+<p class="note" id="tnote"></p>
+<div class="two"><div><h3>I 20 titoli pi&ugrave; presenti</h3><table id="tt"></table></div><div><h3>I 20 compositori pi&ugrave; presenti</h3><table id="tc"></table></div></div>
+<p class="src">&laquo;Presenze&raquo; = quanti anni diversi un titolo compare (non le serate). Un compositore conta le coppie titolo-anno. Le classifiche seguono la copertura delle fonti: dove una fonte nomina pochi titoli, ne escono distorte. I titoli senza compositore noto non entrano nella classifica dei compositori.</p>
+
+<h2>Prime assolute alla Scala</h2>
+<div class="ctl"><label>Filtra<input id="pq" type="text" placeholder="titolo o compositore" autocomplete="off"></label></div>
+<p class="note" id="pcount"></p>
+<div class="scroll"><table id="pt"></table></div>
+<p class="src">Una &laquo;prima assoluta&raquo; &egrave; conteggiata se Wikidata dice che la prima rappresentazione fu alla Scala (propriet&agrave; P4647), se la pagina di Wikipedia sulle stagioni lo indica, o (segnata <i>asterisco</i>) se il Cambiasi la d&agrave; come &laquo;scritta apposta per la Scala&raquo;. Sono quelle che le fonti elencano, non per forza tutte.</p>
+
+<h2>Le serate del 7 dicembre</h2>
+<p>Dal 1951 la stagione si apre il 7 dicembre, giorno di Sant&rsquo;Ambrogio. Qui le serate datate 7 dicembre che troviamo nei dati.</p>
+<p class="note" id="scount"></p>
+<div class="scroll"><table id="st"></table></div>
+<p class="src" id="snote"></p>
+
+<h2>Fonti e limiti</h2>
+<div class="scroll" style="max-height:none"><table id="fonti" class="t2"></table></div>
+<h3>Che cosa non c&rsquo;&egrave;</h3>
+<ul>
+<li><b>L&rsquo;archivio online della Scala non &egrave; stato usato.</b> L&rsquo;archivio storico del teatro (dal 1943-44) ha una ricerca protetta da un controllo anti-bot, e il file robots.txt del sito ne vieta la raccolta automatica. Non l&rsquo;abbiamo aggirato. Per avere i dati completi servono il file dell&rsquo;archivio della Scala stessa oppure la <i>Cronologia 1778-1977</i> di Tintori (1979, solo su carta) e il volume II di Gatti (1778-1963, solo su carta).</li>
+<li><b>Non &egrave; un elenco di serate.</b> Un titolo vale una volta per anno. Per le repliche, i giorni e il cast completo manca la fonte.</li>
+<li><b>Dopo il 1977 mancano i giorni</b> delle serate (Tintori si ferma l&igrave;); dal 1978 al 2022 abbiamo una scheda per produzione, dai programmi di sala conservati nelle biblioteche.</li>
+<li><b>Errori possibili.</b> Cambiasi e Romani sono letti da una scansione (OCR): nomi storpiati e anni mancanti. Gatti &egrave; un racconto: nomina circa 10-12 titoli per stagione su 20-30.</li>
+<li><b>Diritti.</b> Dai libri ancora protetti (Gatti) sono usati soli fatti: titolo, compositore, stagione, direttore. Il Marangoni-Vanbianchi entra solo nel grafico, come conteggio. Le righe derivate da Wikipedia restano sotto licenza CC BY-SA 4.0.</li>
+</ul>
+<footer>Dati: <a href="data/titoli.json">titoli.json</a> &middot; <a href="data/copertura.json">copertura.json</a> &middot; <a href="data/prime.json">prime.json</a> &middot; <a href="data/sette_dicembre.json">sette_dicembre.json</a> &middot; <a href="data/classifiche.json">classifiche.json</a> &middot; <a href="data/fonti.json">fonti.json</a>. Costruiti da <code>scala/scripts/pagina_dati.py</code>. <span id="gen"></span>
+Fonti da citare: Catalogo SBN &ndash; ICCU; (c) Teatro alla Scala; Wikipedia (CC BY-SA 4.0), Wikidata (CC0); Cambiasi 1881 e Romani 1862 (pubblico dominio); C. Gatti, <i>Il Teatro alla Scala nella storia e nell&rsquo;arte</i>, vol. I, Ricordi 1964 (solo fatti).</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+function get(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u+' '+r.status);return r.json()})}
+var NAMES={}, KIND={o:'opera',b:'balletto',c:'concerto',g:'ospiti',r:'per ragazzi',x:'opera o balletto',t:'tournée'};
+var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function chips(codes){return String(codes||'').split('').map(function(c){return '<span class="chip '+c+'" title="'+esc(NAMES[c]||c)+'">'+c+'</span>'}).join('')}
+var RELN=['bassa','media','alta'];
+function rel(n){return '<span class="rel '+RELN[n]+'">'+RELN[n]+'</span>'}
+function dstr(d){if(!d||d.length<10)return '';return parseInt(d.slice(8,10),10)+' '+MESI[parseInt(d.slice(5,7),10)-1]}
+
+Promise.all([get('data/copertura.json'),get('data/fonti.json'),get('data/titoli.json'),get('data/classifiche.json'),get('data/prime.json'),get('data/sette_dicembre.json')]).then(function(r){
+  var cov=r[0], fonti=r[1], titoli=r[2], cls=r[3], prime=r[4], sette=r[5];
+  fonti.fonti.forEach(function(f){NAMES[f.c]=f.nome});
+  $('gen').textContent='Aggiornato il '+fonti.meta.generato+'.';
+  chart(cov); gaps(cov); periodi(cov); search(titoli); tops(cls); primeT(prime); setteT(sette); fontiT(fonti);
+}).catch(function(e){var el=$('errore');el.hidden=false;el.textContent='Non riesco a caricare i dati ('+e.message+').'});
+
+/* ---------- grafico ---------- */
+var CL=[['S','Sito del Teatro (2023-27)','#a3122a'],['B','Programmi di sala SBN (1963-2024)','#d98f9b'],['C','Cambiasi e Romani (1778-1881)','#111'],['G','Libri del Novecento: Gatti, Marangoni','#666'],['W','Solo Wikipedia / Wikidata','#bbb']];
+var BANDS=[
+ {k:'A',a:1882,b:1905,t:'dopo Cambiasi'},
+ {k:'B',a:1919,b:1921,t:'chiusura?'},
+ {k:'C',a:1943,b:1946,t:'bombe'},
+ {k:'D',a:1964,b:2022,t:'solo programmi di sala'}
+];
+function chart(cov){
+  var W=1000,H=300,L=34,R=8,T=26,B=34,y0=1778,y1=2027,n=y1-y0+1,pw=(W-L-R)/n;
+  var max=0;cov.anni.forEach(function(d){if(d.t>max)max=d.t});max=Math.ceil(max/10)*10;
+  function X(y){return L+(y-y0)*pw}
+  function Y(v){return T+(H-T-B)*(1-v/max)}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+  BANDS.forEach(function(b){
+    s+='<rect x="'+X(b.a)+'" y="'+(T-14)+'" width="'+((b.b-b.a+1)*pw)+'" height="'+(H-B-T+14)+'" fill="#a3122a" fill-opacity=".07"/>';
+    s+='<rect x="'+X(b.a)+'" y="'+(T-14)+'" width="'+((b.b-b.a+1)*pw)+'" height="12" fill="#a3122a" fill-opacity=".85"/>';
+    s+='<text x="'+(X(b.a)+(b.b-b.a+1)*pw/2)+'" y="'+(T-4.5)+'" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">'+b.k+'</text>';
+  });
+  for(var v=0;v<=max;v+=10){s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#ddd" stroke-width=".7"/><text x="'+(L-4)+'" y="'+(Y(v)+3.5)+'" font-size="10" fill="#666" text-anchor="end">'+v+'</text>'}
+  for(var yy=1800;yy<=2000;yy+=25){s+='<line x1="'+X(yy)+'" x2="'+X(yy)+'" y1="'+Y(0)+'" y2="'+(Y(0)+4)+'" stroke="#111"/><text x="'+(X(yy)+pw/2)+'" y="'+(Y(0)+16)+'" font-size="11" fill="#111" text-anchor="middle">'+yy+'</text>'}
+  s+='<text x="'+(X(2025)+pw/2)+'" y="'+(Y(0)+28)+'" font-size="11" fill="#111" text-anchor="end">2027</text>';
+  cov.anni.forEach(function(d){
+    var base=Y(0),x=X(d.y);
+    var acc=0;
+    var order=['C','G','W','B','S'];
+    order.forEach(function(k){var v=d[k];if(v>0){var h=(Y(0)-Y(v));acc+=h;var col=CL.filter(function(c){return c[0]===k})[0][2];
+      s+='<rect x="'+(x+.25)+'" y="'+(base-acc)+'" width="'+(pw-.5)+'" height="'+h+'" fill="'+col+'"/>'}});
+    var tip=d.y+': '+d.t+' titoli'+(d.t===0?' (nessuno nelle fonti)':'');
+    s+='<rect class="hit" data-y="'+d.y+'" x="'+x+'" y="'+T+'" width="'+pw+'" height="'+(H-B-T)+'" fill="transparent" style="cursor:pointer"><title>'+tip+'</title></rect>';
+  });
+  s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#111"/>';
+  s+='<text x="'+L+'" y="10" font-size="10.5" fill="#666">titoli diversi per anno</text>';
+  s+='</svg>';
+  $('chart').innerHTML=s;
+  $('chart').addEventListener('click',function(e){var y=e.target&&e.target.getAttribute&&e.target.getAttribute('data-y');if(y){setYear(+y);$('fy').scrollIntoView({behavior:'smooth',block:'center'})}});
+  $('legend').innerHTML=CL.map(function(c){return '<span><i style="background:'+c[2]+'"></i>'+c[1]+'</span>'}).join('')+'<span><i style="background:#a3122a;opacity:.2"></i>buco (lettera A-D, vedi sotto)</span>';
+}
+function gaps(cov){
+  var vuoti=cov.anni_vuoti.join(', ');
+  var h='';
+  h+='<div class="gap"><b>A &middot; 1882-1905.</b> Dopo il Cambiasi (che si ferma al 1881) non c&rsquo;&egrave; nessuna cronologia a nostra disposizione: ci sono solo i titoli citati nel racconto di Gatti e quelli di Wikipedia e Wikidata. In media sono 10-11 titoli l&rsquo;anno.</div>';
+  h+='<div class="gap"><b>B &middot; 1919-1921.</b> '+(cov.anni_vuoti.length?'Nelle fonti non c&rsquo;&egrave; nessun titolo per '+vuoti+'. ':'')+'Probabile chiusura del teatro in quegli anni (la stagione 1921-22 riparte con 15 titoli): &egrave; un&rsquo;ipotesi, da verificare. Mancano anche 1914-15 e 1917-18 nel Marangoni.</div>';
+  h+='<div class="gap"><b>C &middot; 1943-1946.</b> Il teatro &egrave; stato distrutto dai bombardamenti dell&rsquo;agosto 1943 ed &egrave; riaperto l&rsquo;11 maggio 1946. I titoli di quegli anni (soprattutto da Gatti) sono probabilmente stati dati in altre sale: le fonti non dicono quale, e nella tabella sono segnati <i>teatro distrutto: altra sala?</i>.</div>';
+  h+='<div class="gap"><b>D &middot; 1964-2022.</b> Qui c&rsquo;&egrave; solo la scheda dei programmi di sala delle biblioteche (una per produzione, spesso senza cast completo) e i titoli di Wikipedia e Wikidata: pochi, spesso 6-18 per anno contro i 20-30 reali. Il sito della Scala copre solo dal 2023-24. <b>Dopo il 1977 mancano le date delle singole serate</b> (la cronologia di Tintori si ferma l&igrave;).</div>';
+  h+='<div class="gap"><b>Piccoli buchi.</b> Cambiasi non ha righe leggibili per 1832 e 1835 (le riempiono Romani e Wikipedia). Romani &egrave; letto per 46 anni su 85. Il Marangoni (1906-1920) entra nel grafico ma non nelle tabelle.</div>';
+  $('gaps').innerHTML=h;
+}
+function periodi(cov){
+  var h='<tr><th>Periodo</th><th>Fonti che lo coprono</th><th class="r">Anni con titoli</th><th class="r">Titoli per anno (media)</th></tr>';
+  cov.periodi.forEach(function(p){h+='<tr><td>'+p.da+'&ndash;'+p.a+'</td><td>'+esc(p.fonti)+'</td><td class="r">'+p.anni_con_dati+' / '+p.anni+'</td><td class="r">'+String(p.media).replace('.',',')+'</td></tr>'});
+  $('periodi').innerHTML=h;
+}
+
+/* ---------- ricerca ---------- */
+var ROWS=[],VIEW=[],SHOWN=0,STEP=150;
+function search(t){
+  ROWS=t.map(function(r){return {y:r[0],st:r[1],d:r[2],t:r[3],a:r[4],g:r[5],dir:r[6],reg:r[7],i:r[8],f:r[9],rel:r[10],p:r[11],sa:r[12],h:norm([r[3],r[4],r[6],r[7],r[8]].join(' '))}});
+  var years={};ROWS.forEach(function(r){years[r.y]=(years[r.y]||0)+1});
+  var sel='<option value="">tutti gli anni</option>';
+  Object.keys(years).sort(function(a,b){return b-a}).forEach(function(y){sel+='<option value="'+y+'">'+y+' ('+years[y]+')</option>'});
+  $('fy').innerHTML=sel;$('fy').value='2025';
+  ['fy','fk'].forEach(function(id){$(id).addEventListener('change',run)});
+  $('fq').addEventListener('input',run);
+  $('fr').addEventListener('click',function(){$('fy').value='';$('fq').value='';$('fk').value='';run()});
+  $('fmore').addEventListener('click',function(){SHOWN+=STEP;draw()});
+  run();
+}
+window.__setYear=function(y){$('fy').value=String(y);$('fq').value='';$('fk').value='';run()};
+function setYear(y){window.__setYear(y)}
+function run(){
+  var y=$('fy').value,q=norm($('fq').value).trim().split(/\s+/).filter(Boolean),k=$('fk').value;
+  VIEW=ROWS.filter(function(r){
+    if(y&&String(r.y)!==y)return false;
+    if(k==='p'){if(!r.p)return false}else if(k&&r.g!==k)return false;
+    for(var i=0;i<q.length;i++){if(r.h.indexOf(q[i])<0)return false}
+    return true});
+  SHOWN=STEP;draw();
+}
+function draw(){
+  var n=VIEW.length;
+  $('fcount').textContent=n+(n===1?' titolo':' titoli');
+  var h='<tr><th>Anno</th><th>Titolo e artisti</th><th class="co">Compositore</th><th>Fonti</th></tr>';
+  VIEW.slice(0,SHOWN).forEach(function(r){
+    var sub=[];
+    if(r.dir)sub.push('dir. '+esc(r.dir));
+    if(r.reg)sub.push(esc(r.reg));
+    var cast=r.i?'<div class="cast">'+esc(r.i.replace(/;\s*/g,'; '))+'</div>':'';
+    var extra=[];
+    if(r.sa)extra.push(esc(r.sa));
+    if(r.g&&r.g!=='o')extra.push(KIND[r.g]||'');
+    if(r.p===2)extra.push('prima assoluta');else if(r.p===1)extra.push('scritta per la Scala');
+    h+='<tr><td class="r">'+r.y+(r.d?'<div class="sub">'+dstr(r.d)+'</div>':(r.st?'<div class="sub">'+esc(r.st)+'</div>':''))+'</td><td><b>'+esc(r.t)+'</b>'+(extra.length?' <span class="sub">('+extra.join(', ')+')</span>':'')+(r.a?'<div class="sub mcomp">'+esc(r.a)+'</div>':'')+(sub.length?'<div class="cast">'+sub.join(' &middot; ')+'</div>':'')+cast+'</td><td class="co">'+esc(r.a)+'</td><td>'+chips(r.f)+'<br>'+rel(r.rel)+'</td></tr>'});
+  if(!n)h+='<tr><td colspan="4">Nessun titolo con questi filtri.</td></tr>';
+  $('ft').innerHTML=h;
+  var more=$('fmore');more.hidden=!(n>SHOWN);if(n>SHOWN)more.textContent='Mostra altre '+Math.min(STEP,n-SHOWN)+' righe (restano '+(n-SHOWN)+')';
+}
+
+/* ---------- classifiche ---------- */
+function tops(cls){
+  var keys=Object.keys(cls);
+  $('tp').innerHTML=keys.map(function(k){return '<option value="'+k+'">'+k.replace('-',' &ndash; ')+(k==='1778-2027'?' (tutto)':'')+'</option>'}).join('');
+  $('tp').value='1778-2027';
+  function show(){
+    var c=cls[$('tp').value];
+    $('tnote').textContent=c.totale_titoli_anno+' coppie titolo-anno nel periodo'+(c.senza_compositore?' ('+c.senza_compositore+' senza compositore noto).':'.');
+    var h='<tr><th class="r">#</th><th>Titolo</th><th class="r">Anni</th></tr>';
+    c.titoli.forEach(function(t,i){h+='<tr><td class="r">'+(i+1)+'</td><td><b>'+esc(t.titolo)+'</b><div class="sub">'+esc(t.autore)+(t.da!==t.a?' &middot; '+t.da+'&ndash;'+t.a:' &middot; '+t.da)+'</div></td><td class="r">'+t.n+'</td></tr>'});
+    $('tt').innerHTML=h;
+    h='<tr><th class="r">#</th><th>Compositore</th><th class="r">Presenze</th><th class="r">Titoli</th></tr>';
+    c.compositori.forEach(function(t,i){h+='<tr><td class="r">'+(i+1)+'</td><td><b>'+esc(t.autore)+'</b></td><td class="r">'+t.n+'</td><td class="r">'+t.opere+'</td></tr>'});
+    $('tc').innerHTML=h;
+  }
+  $('tp').addEventListener('change',show);show();
+}
+
+/* ---------- prime ---------- */
+function primeT(p){
+  var rows=p.map(function(r){return {y:r[0],d:r[1],t:r[2],a:r[3],g:r[4],f:r[5],p:r[6],h:norm(r[2]+' '+r[3])}});
+  function show(){
+    var q=norm($('pq').value).trim().split(/\s+/).filter(Boolean);
+    var v=rows.filter(function(r){for(var i=0;i<q.length;i++){if(r.h.indexOf(q[i])<0)return false}return true});
+    $('pcount').textContent=v.length+(v.length===1?' prima':' prime')+' (su '+rows.length+')';
+    var h='<tr><th>Data</th><th>Titolo</th><th>Compositore</th><th>Fonti</th></tr>';
+    v.forEach(function(r){h+='<tr><td class="r">'+(r.d?r.d.slice(8,10)*1+' '+MESI[r.d.slice(5,7)*1-1]+' ':'')+r.y+'</td><td><b>'+esc(r.t)+'</b>'+(r.g==='b'?' <span class="sub">(balletto)</span>':'')+(r.p===1?' <span class="sub">(asterisco)</span>':'')+'</td><td>'+esc(r.a)+'</td><td>'+chips(r.f)+'</td></tr>'});
+    $('pt').innerHTML=h;
+  }
+  $('pq').addEventListener('input',show);show();
+}
+
+/* ---------- 7 dicembre ---------- */
+function setteT(s){
+  var an=s.anni_con_data,min=1951,max=0;an.forEach(function(y){if(y>max)max=y});
+  var tot=max-min+1;
+  $('scount').textContent=an.length+' anni su '+tot+' ('+min+'-'+max+') hanno una serata datata 7 dicembre nei dati.';
+  var h='<tr><th class="r">Anno</th><th>Titolo</th><th>Compositore</th><th>Direttore</th><th>Regia</th><th>Fonti</th></tr>';
+  s.serate.forEach(function(r){h+='<tr><td class="r"><b>'+r[0]+'</b></td><td><b>'+esc(r[1])+'</b></td><td>'+esc(r[2])+'</td><td>'+esc(r[3])+'</td><td>'+esc(r[4])+'</td><td>'+chips(r[5])+'</td></tr>'});
+  $('st').innerHTML=h;
+  var miss=[];for(var y=min;y<=max;y++){if(an.indexOf(y)<0)miss.push(y)}
+  var t='Anni senza serata del 7 dicembre nei dati: '+(miss.length?miss.join(', '):'nessuno')+'.';
+  if(s.aperture_senza_data.length)t+=' Per '+s.aperture_senza_data.map(function(a){return a[0]+' ('+a[1]+')'}).join(', ')+' Wikipedia indica l&rsquo;apertura di stagione ma senza il giorno.';
+  t+=' Dove sul 7 dicembre ci sono pi&ugrave; fonti, valgono Wikipedia e il sito della Scala; le schede dei programmi di sala SBN con la stessa data compaiono solo se mancano quelle.';
+  $('snote').innerHTML=t;
+}
+
+/* ---------- fonti ---------- */
+function fontiT(f){
+  var h='<tr><th></th><th>Fonte</th><th>Anni</th><th class="r">Righe lette</th><th class="r">Righe pubblicate</th><th>Licenza e citazione</th></tr>';
+  f.fonti.forEach(function(x){h+='<tr><td>'+chips(x.c)+'</td><td><b>'+esc(x.nome)+'</b><div class="sub">'+esc(x.dettaglio)+'</div><div class="sub">'+esc(x.note)+'</div></td><td>'+esc(x.anni)+'</td><td class="r">'+x.righe_lette+'</td><td class="r">'+x.righe_pubblicate+(x.righe_pubblicate===0&&x.righe_lette>0?'<div class="sub">solo conteggi</div>':'')+'</td><td>'+esc(x.licenza)+'<div class="sub">Pubblicato: '+esc(x.pubblicate)+'</div></td></tr>'});
+  $('fonti').innerHTML=h;
+}
+})();
+</script></body></html>

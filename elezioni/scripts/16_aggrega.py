@@ -3,8 +3,11 @@ Nel sito ogni elezione ha: fam (famiglie, per tabella sezioni e mappa), par (lis
 Le liste sotto lo 0,5% dei voti di lista della citta (se almeno 2 nella stessa famiglia) sono unite in "Altre liste" della famiglia.
 Dal 2026-10-29 include anche le consultazioni 1946-1979 di Eligendo (pulito/milano_pre1979.csv): solo totale della citta, nessun territorio ne' sezione
 (flag pre=True, sistema=None, terr={}). Le coppie (tipo, data) gia' presenti nei dati del Comune (es. Camera 1979) non si duplicano.
+Dal 2026-10-29 (seconda parte) aggrega anche per quartiere (NIL) le elezioni dal 2016 in cui almeno il 95% delle sezioni (e dei votanti) e' in
+pulito/sezione_nil.csv (prodotto da 40_sezione_nil.py): scrive docs/elezioni/data/nil/<id>.json con due varianti (p = sezioni divise in proporzione
+ai civici, m = sezione assegnata al NIL prevalente) e aggiunge a ogni elezione di index.json il campo "nil".
 uso: python -I 16_aggrega.py <cartella elezioni> <cartella docs/elezioni>
-Scrive: pulito/aggregati_territorio.csv, docs/elezioni/data/index.json, docs/elezioni/data/e/<id>.json
+Scrive: pulito/aggregati_territorio.csv, docs/elezioni/data/index.json, docs/elezioni/data/e/<id>.json, docs/elezioni/data/nil/<id>.json
 """
 import sys, os, re, json
 import numpy as np
@@ -13,6 +16,11 @@ import pandas as pd
 base, docs = sys.argv[1], sys.argv[2]
 pul = os.path.join(base, 'pulito')
 os.makedirs(os.path.join(docs, 'data', 'e'), exist_ok=True)
+os.makedirs(os.path.join(docs, 'data', 'nil'), exist_ok=True)
+SOGLIA_NIL = 0.95   # quota minima di sezioni E di votanti abbinate a un NIL per pubblicare l'elezione per quartiere
+ANNO_NIL = 2016
+WNIL = pd.read_csv(os.path.join(base, 'pulito', 'sezione_nil.csv'), encoding='utf-8-sig')
+NILMATCH = []       # righe per il rapporto sul match
 
 cat = pd.read_csv(os.path.join(pul, 'elezioni.csv'), encoding='utf-8-sig')
 ris = pd.read_csv(os.path.join(pul, 'risultati_sezione.csv'), encoding='utf-8-sig', low_memory=False)
@@ -164,6 +172,51 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
     if not ispre:
         json.dump({'id': eid, 'fam': fams, 'righe': rows}, open(os.path.join(docs, 'data', 'e', eid + '.json'), 'w'), separators=(',', ':'))
 
+    # ---- quartieri (NIL): solo dal 2016 e solo se l'abbinamento sezione -> NIL copre almeno il 95% delle sezioni e dei votanti
+    nilmeta = None
+    if not ispre and r.anno >= ANNO_NIL and m.votanti.sum() > 0:
+        okmask = m.sezione.isin(WNIL.sezione)
+        rs, rv = okmask.mean(), m.loc[okmask, 'votanti'].sum() / m.votanti.sum()
+        NILMATCH.append(dict(elezione_id=eid, gruppo=r.gruppo, data=r.data, sezioni=len(m), abbinate=int(okmask.sum()), pct_sezioni=round(100 * rs, 2),
+                             votanti=int(m.votanti.sum()), votanti_abbinati=int(m.loc[okmask, 'votanti'].sum()), pct_votanti=round(100 * rv, 2),
+                             pubblicata='si' if (rs >= SOGLIA_NIL and rv >= SOGLIA_NIL) else 'no'))
+        if rs >= SOGLIA_NIL and rv >= SOGLIA_NIL:
+            num = ['elettori', 'votanti'] + pcols
+            mm = m[['sezione'] + num].copy()
+            mm[num] = mm[num].astype(float).fillna(0)
+            j = mm.merge(WNIL[['sezione', 'id_nil', 'peso', 'prevalente']], on='sezione', how='inner')
+
+            def pack(g_sum, ns):
+                out = {}
+                for n, row in g_sum.iterrows():
+                    out[str(int(n))] = dict(e=int(round(row.elettori)), vt=int(round(row.votanti)), ns=ns[n], v=[int(round(row[c])) for c in pcols])
+                return out
+            # proporzionale: voti * peso
+            jp = j.copy()
+            jp[num] = jp[num].multiply(jp['peso'], axis=0)
+            sp = jp.groupby('id_nil')[num].sum()
+            nsp = jp.groupby('id_nil').size().to_dict()
+            # prevalente: tutta la sezione al NIL col peso maggiore
+            jm = j[j.prevalente == 'si']
+            sm = jm.groupby('id_nil')[num].sum()
+            nsm = jm.groupby('id_nil').size().to_dict()
+            na = mm[~okmask.values]
+            # differenza tra le due varianti: NIL (presenti in entrambe) in cui cambia la famiglia in testa
+            def lead_f(row, cols):
+                fv = {}
+                for c, (nm, fi) in zip(pcols, par):
+                    fv[fi] = fv.get(fi, 0) + row[c]
+                return max(fv, key=fv.get) if sum(fv.values()) > 0 else None
+            cambia = sum(1 for n in sm.index if n in sp.index and lead_f(sp.loc[n], pcols) != lead_f(sm.loc[n], pcols))
+            tot_p = float(sp['votanti'].sum())
+            json.dump({'id': eid, 'na': dict(s=int((~okmask).sum()), e=int(na.elettori.sum()), vt=int(na.votanti.sum())),
+                       'p': pack(sp, nsp), 'm': pack(sm, nsm)},
+                      open(os.path.join(docs, 'data', 'nil', eid + '.json'), 'w'), separators=(',', ':'))
+            nilmeta = dict(ps=round(100 * rs, 1), pv=round(100 * rv, 1), cambia=int(cambia), nn=int(len(sm)))
+            NILMATCH[-1].update(nil_con_dati_prop=int(len(sp)), nil_con_dati_prev=int(len(sm)), nil_leader_diverso_tra_varianti=int(cambia))
+        else:
+            nilmeta = None
+
     def aggreg(g):
         e = g.elettori.sum(min_count=1)
         vt = g.votanti.sum(min_count=1)
@@ -212,6 +265,8 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
     elez_out.append(dict(id=eid, tipo=r.gruppo, data=r.data, anno=int(r.anno), label=label(r), sistema=r.sistema_territorio,
                          ds=[int(r.ds_risultati)] + ([int(r.ds_voti)] if r.ds_voti == r.ds_voti and r.ds_voti != '' else []),
                          fam=fams, par=par, city=city, terr=terr, note=note))
+    if nilmeta:
+        elez_out[-1]['nil'] = nilmeta
 
 idx = dict(
     generato='2026-10-29',
@@ -221,6 +276,7 @@ idx = dict(
     elezioni=elez_out)
 json.dump(idx, open(os.path.join(docs, 'data', 'index.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 pd.DataFrame(agg_rows).to_csv(os.path.join(pul, 'aggregati_territorio.csv'), index=False, encoding='utf-8-sig')
+pd.DataFrame(NILMATCH).to_csv(os.path.join(pul, 'nil_match.csv'), index=False, encoding='utf-8-sig')
 pd.Series(unmapped).sort_values(ascending=False).to_csv(os.path.join(pul, 'liste_non_mappate.csv'), header=['righe'], encoding='utf-8-sig')
 print('elezioni', len(elez_out), 'non mappate', len(unmapped))
 tot = sum(os.path.getsize(os.path.join(docs, 'data', 'e', f)) for f in os.listdir(os.path.join(docs, 'data', 'e')))

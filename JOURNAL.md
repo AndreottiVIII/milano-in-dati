@@ -667,6 +667,11 @@ Ogni voce nomina file e campo.
 - Sezione → NIL: partire da ds939 (per civico) e ripetere con gli altri stradari (ds1614, ds1862, ds2169, ds2741, ds2922, ds2973) per vedere se la sezione cambia NIL negli anni; poi decidere la regola per le 345 sezioni a cavallo.
 - Valutare SIEL (ds23) per controllare i totali delle elezioni 1979–2000.
 - 2026-10-29 sera — **Senato 1983-1994** aggiunto da Eligendo (i 6 collegi di Milano sommati; votanti di almeno 25 anni; nel 1994 le "liste" sono coalizioni): la serie del Senato ora va dal 1948 al 2022 senza buchi. Le 28 liste nuove sono state rivedute dal coordinatore: Polo delle Libertà nel Centrodestra, Progressisti nel Centrosinistra, Patto per l'Italia nel Centro. Il sito ha 167 elezioni.
+- 2026-10-30 notte — **Elezioni per quartiere (NIL) dal 2016**:
+  - 30 elezioni 2016-2026, con il legame ufficiale sezione-civico del 2020 (ds939); sezioni ritrovate tra il 98,2% e il 99,2%.
+  - I voti di ogni sezione sono divisi tra i NIL in proporzione ai civici. La variante "NIL prevalente" differisce in media di 0,2 punti.
+  - Prima del 2016 non si pubblica: il legame tiene solo per il 92-98% dei civici.
+  - Esempi: comunali 2021, centrosinistra primo in tutti gli 88 NIL (dal 39% di Comasina al 61% di Porta Vigentina); europee 2024, destra prima in 6 NIL, tra cui Quarto Oggiaro (27%).
 
 ## 5. Qualità dell'aria, centralina per centralina
 
@@ -1131,6 +1136,12 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
     - c'è l'anno di stampa; la data si ricava dalle note (683 produzioni);
     - il direttore è indicato solo nel 14% dei casi, il regista nel 16%, il cast nel 4%.
   - Licenza non indicata: si usano solo fatti, con la citazione "Catalogo SBN – ICCU".
+- 2026-10-30 notte — **Pagina della Scala pubblicata** (`docs/scala/`, dati da `scala/scripts/pagina_dati.py`):
+  - 4.635 titoli per anno dopo l'unione delle fonti.
+  - Copertura per anno con i buchi segnati: A 1882-1905; B 1919-21, probabile chiusura; C 1943-46; D le date dopo il 1977.
+  - Fonti con licenza e citazione, compreso "(c) Teatro alla Scala" per le stagioni 2023-27: autorizzazione riferita da Davide ("poi li citiamo").
+  - Da Gatti si pubblicano solo titolo, autore, stagione e direttore; Marangoni compare solo nei conteggi.
+  - Sistemato in pubblicazione un difetto di `sbn_parse.py`: il numero d'ordine del libretto finiva nel titolo (181 righe).
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 

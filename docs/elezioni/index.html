@@ -26,6 +26,10 @@
   #map path.sel { stroke:#000; stroke-width:3; }
   #map text { font-size:11px; text-anchor:middle; pointer-events:none; fill:#fff; paint-order:stroke; stroke:#0006; stroke-width:2px; font-weight:600; }
   #map text.lt { fill:#111; stroke:#fffc; }
+  #map path.ov { fill:url(#hatch); stroke:none; pointer-events:none; cursor:default; }
+  #map.nilmap text { display:none; }
+  .geobar { display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; margin:0 0 6px; font-size:14px; }
+  .geobar select { max-width:100%; }
   .legend { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:2px 10px; font-size:14px; margin-top:6px; }
   .legend .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-left:6px; }
   .legend .fh { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; margin-top:7px; }
@@ -51,7 +55,7 @@
 <body>
 <div class="wrap">
   <h1>Milano in dati: le elezioni sezione per sezione</h1>
-  <p class="lead">Risultati delle elezioni dal 1946 al 2026 (per sezione elettorale dal 1979), partito per partito, con il colore dello schieramento. Scegli il tipo di elezione, muovi il tempo e, dal 1979, clicca un territorio sulla mappa.</p>
+  <p class="lead">Risultati delle elezioni dal 1946 al 2026 (per sezione elettorale dal 1979), partito per partito, con il colore dello schieramento. Scegli il tipo di elezione, muovi il tempo e, dal 1979, clicca un territorio sulla mappa (dal 2016 anche i quartieri).</p>
 
   <div class="bar">
     <label>Tipo di elezione <select id="tipo"></select></label>
@@ -71,6 +75,10 @@
     </div>
     <div>
       <h2 id="mapTitle">Mappa</h2>
+      <div class="geobar" id="geoBar">
+        <label>Mappa per <select id="geo"><option value="off">municipi, zone o circoscrizioni (come nei dati)</option><option value="nil" id="geoNil">Quartieri (NIL), dal 2016</option></select></label>
+        <label id="varBox" hidden>Sezioni a cavallo di più quartieri <select id="varNil"><option value="p">divise in proporzione ai civici</option><option value="m">assegnate al quartiere prevalente</option></select></label>
+      </div>
       <svg id="map" viewBox="0 0 300 320"></svg>
       <div class="info" id="mapNote"></div>
       <p class="info" id="preLine" hidden>Per le elezioni prima del 1979 ci sono solo i risultati di tutta la città (fonte: Ministero dell&rsquo;Interno, Eligendo).</p>
@@ -104,6 +112,7 @@
     <p><b>Partiti e schieramenti (famiglie provvisorie).</b> L&rsquo;emiciclo e la legenda mostrano i partiti con il nome che hanno nei dati; il colore indica lo schieramento (la famiglia) e i partiti della stessa famiglia hanno sfumature diverse, con il pi&ugrave; votato nel colore pieno. I colori seguono quelli storici: rosso per il PCI (Sinistra), rosa-rosso per PSI, PDS e PD (Centrosinistra), bianco per la DC (Centro, con il bordo grigio per vederlo sulla pagina), azzurro per Forza Italia (Centrodestra), verde per la Lega, nero per il MSI (Destra), giallo per il M5S. Ogni lista &egrave; assegnata a una famiglia con una tabella semplice e modificabile (<a href="data/famiglie_partiti.csv">famiglie_partiti.csv</a>); le liste senza regola finiscono in Altri. Da rivedere. Le liste sotto lo 0,5% dei voti della citt&agrave; sono unite in &ldquo;Altre liste&rdquo; della loro famiglia (se in quella famiglia ce n&rsquo;&egrave; pi&ugrave; di una). Nella mappa, nella tabella delle sezioni e nelle barre dell&rsquo;andamento il colore di un territorio &egrave; quello della famiglia pi&ugrave; votata (somma dei suoi partiti).</p>
     <p><b>Elezioni prima del 1979.</b> Fonte: Ministero dell&rsquo;Interno, archivio storico delle elezioni (Eligendo, <a href="https://elezionistorico.interno.gov.it">elezionistorico.interno.gov.it</a>), open data messi a disposizione &ldquo;a scopo divulgativo&rdquo; (senza licenza esplicita), file scaricati il 2026-10-29. Sono risultati del solo comune di Milano, una riga per lista: niente territori n&eacute; sezioni. Comprendono Costituente 1946, referendum 1946, 1974 e 1978, Camera e Senato 1948-1979, regionali 1970 e 1975, comunali 1964, 1970 e 1975 (voti alle liste); mancano le comunali 1946-1960, che Eligendo non ha. Per il Senato non ci sono dati tra il 1979 e il 1996 (le elezioni 1983-1992 non sono nel dataset del Comune). Le liste comuni (Fronte Democratico Popolare 1948, PCI-PSIUP al Senato 1968 e 1972) sono una riga sola. Controllo di coerenza: per la Camera 1979 Eligendo ha 553 voti di lista in meno della somma delle sezioni del Comune (&minus;0,05%), con gli stessi votanti; per questo la Camera 1979 del grafico viene dal Comune e le due serie si attaccano senza salti.</p>
     <p>Prima del 1999 il territorio &egrave; la circoscrizione (20), dal 1999 la zona (9, con la stessa numerazione e gli stessi confini degli attuali municipi), dal 2016 il municipio (9). Le tre mappe non sono confrontabili tra loro. Nei referendum 1985-1997 la colonna "Zona" del dataset contiene in realt&agrave; le circoscrizioni.</p>
+    <p><b>Quartieri (NIL), dal 2016.</b> Il Comune non pubblica i confini delle sezioni n&eacute; i risultati per quartiere. L&rsquo;unico legame ufficiale tra sezioni e quartieri (NIL) &egrave; lo stradario del referendum del 20-21 settembre 2020 (ds939: per ogni numero civico, la sezione e il NIL). Per ogni sezione ho contato la quota dei suoi civici in ciascun NIL e ho diviso i voti della sezione in proporzione a quella quota (scelta predefinita); in alternativa si pu&ograve; dare l&rsquo;intera sezione al NIL in cui cade la maggior parte dei suoi civici (&ldquo;prevalente&rdquo;). Confini dei NIL: ds964 (NIL vigenti, PGT Milano 2030). Pesi per sezione: <a href="data/sezione_nil.csv">sezione_nil.csv</a>. <b>Cautele.</b> (1) Il legame del 2020 vale per tutti gli anni dal 2016 al 2026: confrontandolo con gli stradari delle altre elezioni, il 98,8-100% dei civici ha la stessa sezione (nel 2025 e nel 2026 compaiono 2 sezioni nuove). Prima del 2016 la sezione cambia pi&ugrave; spesso (2001-2011: 92-98% dei civici uguali; 2013-2014: 98,8-99%) e per ora quelle elezioni non sono pubblicate per quartiere. (2) 344 sezioni su 1.238 hanno civici in pi&ugrave; di un NIL (fino a 4): per loro il risultato dei quartieri &egrave; una stima, che dipende dal peso dei civici (un civico conta uno, non un elettore). Tra le due scelte, per i quartieri con almeno 2.000 votanti, la quota della famiglia in testa cambia in media di 0,2 punti (al massimo 1,8) e quasi mai cambia la famiglia in testa. (3) I NIL piccoli o poco coperti dallo stradario 2020 &mdash; molti parchi (Parco Sempione, Parco Nord, Parco dei Navigli&hellip;), Giardini P.ta Venezia, Cascina Merlata (costruita dopo il 2020), Assiano, Stephenson &mdash; hanno pochi votanti o un rapporto elettori/residenti fuori scala: sono segnati sulla mappa con le righe oblique e vanno letti con cautela (con la scelta &ldquo;prevalente&rdquo; molti restano senza nessuna sezione). (4) Le sezioni senza civici nello stradario 2020 (da 10 a 23 per elezione, comprese le speciali 9001-9011 del 2025) non sono attribuite: i loro voti sono contati nella citt&agrave; ma non nei quartieri (da 0,01% a 2,7% dei votanti). (5) Nei quartieri i voti sono arrotondati, quindi la somma pu&ograve; differire di qualche unit&agrave; dal totale.</p>
     <p>I seggi sono solo un modo di leggere le percentuali (100 seggi ripartiti tra i partiti col metodo dei resti pi&ugrave; alti, disposti da sinistra a destra per famiglia): non sono seggi reali.</p>
   </footer>
 </div>
@@ -111,7 +120,8 @@
 <script>
 "use strict";
 var IDX, GEO = {}, DETAIL = {};
-var state = { tipo: null, id: null, terr: null, playing: null };
+var state = { tipo: null, id: null, terr: null, playing: null, geo: 'off', vnil: 'p' };
+var NILD = {}, NILS = null, nilToken = 0, stripToken = 0, SOGLIA_POCHI = 1000;
 var COL = {};
 var FAMS = [];
 
@@ -251,18 +261,23 @@ function centroid(f,P){
 }
 var MAPKEY=null;
 function drawMap(sistema){
-  var key = sistema==='circoscrizione' ? 'circoscrizioni' : 'municipi';
+  var key = sistema==='nil' ? 'nil' : sistema==='circoscrizione' ? 'circoscrizioni' : 'municipi';
   if(MAPKEY===key) return;
   MAPKEY=key;
   var geo=GEO[key], P=project(geo), svg=el('map'), ns='http://www.w3.org/2000/svg';
   svg.setAttribute('viewBox','0 0 '+(P.w+10).toFixed(0)+' '+(P.h+10).toFixed(0));
+  svg.setAttribute('class', key==='nil' ? 'nilmap' : '');
   svg.innerHTML='';
+  if(key==='nil') svg.innerHTML='<defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="#000" stroke-opacity=".6" stroke-width="1.5"></line></pattern></defs>';
   geo.features.forEach(function(f){
     var p=document.createElementNS(ns,'path'), n=f.properties.n;
     p.setAttribute('d',pathOf(f,P)); p.setAttribute('fill','#ddd'); p.setAttribute('data-n',n);
     p.addEventListener('click',function(){ selectTerr(String(n)); });
     var t=document.createElementNS(ns,'title'); p.appendChild(t);
     svg.appendChild(p);
+  });
+  if(key==='nil') geo.features.forEach(function(f){
+    var p=document.createElementNS(ns,'path'); p.setAttribute('d',pathOf(f,P)); p.setAttribute('class','ov'); p.setAttribute('data-o',f.properties.n); p.style.display='none'; svg.appendChild(p);
   });
   geo.features.forEach(function(f){
     var c=centroid(f,P), t=document.createElementNS(ns,'text');
@@ -272,22 +287,60 @@ function drawMap(sistema){
 function leader(fams, v){ var b=0; for(var i=1;i<v.length;i++) if(v[i]>v[b]) b=i; return fams[b]; }
 function isLight(col){ return lum(col)>0.8; }
 function paintMap(e){
-  var ps=el('map').querySelectorAll('path');
+  var nil=useNil(e);
+  var ps=el('map').querySelectorAll('path[data-n]');
   var nome = {circoscrizione:'Circoscrizione', zona:'Zona', municipio:'Municipio'}[e.sistema];
   ps.forEach(function(p){
-    var n=p.getAttribute('data-n'), d=e.terr[n], light=true;
+    var n=p.getAttribute('data-n'), d=TD(e,n), light=true;
+    if(nil){ nome='Quartiere '+n+' '+NILS.info[n].nome; var ov=el('map').querySelector('path[data-o="'+n+'"]'); if(ov) ov.style.display=weak(d,n)?'':'none'; }
     if(d && d.v.some(function(x){return x>0;})){
       var fv=famVotes(e,d.v), lf=leader(e.fam,fv), col=COL[lf];
       p.setAttribute('fill',col);
       var tot=fv.reduce(function(a,b){return a+b;},0), top=Math.max.apply(null,fv)/tot;
       light=isLight(col);
       p.setAttribute('fill-opacity', light ? '1' : (0.55+0.45*Math.max(0,Math.min(1,(top-0.3)/0.4))).toFixed(2));
-      var tt=nome+' '+n+': '+e.fam.map(function(f,i){return f+' '+pct(fv[i],tot,0);}).join(', ');
+      var tt=(nil ? nome : nome+' '+n)+': '+e.fam.map(function(f,i){return f+' '+pct(fv[i],tot,0);}).join(', ')+(nil&&weak(d,n) ? ' (dato poco affidabile: '+weakWhy(d,n)+')' : '');
       p.querySelector('title').textContent=tt;
-    } else { p.setAttribute('fill','#ddd'); p.setAttribute('fill-opacity','1'); p.querySelector('title').textContent=nome+' '+n+': nessun dato'; }
+    } else { p.setAttribute('fill','#ddd'); p.setAttribute('fill-opacity','1'); p.querySelector('title').textContent=(nil ? nome+': nessuna sezione assegnata a questo quartiere' : nome+' '+n+': nessun dato'); }
     p.classList.toggle('sel', String(state.terr)===n);
     var t=el('map').querySelector('text[data-n="'+n+'"]'); if(t) t.classList.toggle('lt', light);
   });
+}
+
+/* ---------- quartieri (NIL) ---------- */
+function useNil(e){ return state.geo==='nil' && !!e.nil && !e.pre; }
+function geoKey(e){ return useNil(e) ? 'nil' : e.sistema; }
+function TD(e,n){ if(useNil(e)){ var N=NILD[e.id]; return N ? (N[state.vnil][n]||null) : null; } return e.terr[n]; }
+function weak(d,n){ return !!(d && (d.vt<SOGLIA_POCHI || NILS.info[n].x)); }
+function weakWhy(d,n){ var w=[]; if(d.vt<SOGLIA_POCHI) w.push('meno di '+fmt(SOGLIA_POCHI)+' votanti'); if(NILS.info[n].x) w.push('quartiere piccolo o poco coperto dallo stradario 2020'); return w.join('; '); }
+function loadNilStatic(){
+  if(NILS) return Promise.resolve(NILS);
+  return Promise.all([
+    fetch('data/nil.geojson',{cache:'no-cache'}).then(function(r){return r.json();}),
+    fetch('data/nil_info.json',{cache:'no-cache'}).then(function(r){return r.json();}),
+    fetch('data/nil_sezioni.json',{cache:'no-cache'}).then(function(r){return r.json();})
+  ]).then(function(a){ GEO.nil=a[0]; NILS={info:a[1], sez:a[2]}; return NILS; });
+}
+function getNil(id){
+  if(NILD[id]) return Promise.resolve(NILD[id]);
+  return fetch('data/nil/'+id+'.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(j){ NILD[id]=j; return j; });
+}
+function checkTerr(e){ if(!e.pre && state.terr!=null && state.sisTerr && state.sisTerr!==geoKey(e)) state.terr=null; }
+function renderNil(e){
+  var tok=++nilToken;
+  el('mapTitle').textContent='Mappa per quartiere (NIL, 88)';
+  el('mapNote').textContent='Carico i quartieri...';
+  Promise.all([loadNilStatic(), getNil(e.id)]).then(function(){
+    var cur=byId(state.id);
+    if(tok!==nilToken || cur.id!==e.id || !useNil(cur)) return;
+    drawMap('nil');
+    var N=NILD[e.id], na=N.na, tv=e.city.vt;
+    el('mapNote').textContent='Colore = famiglia (schieramento) più votata nel quartiere, sommando i suoi partiti (più intenso = più netta). Quartieri a righe oblique: meno di '+fmt(SOGLIA_POCHI)+' votanti o stima poco affidabile (vedi note in fondo): leggere con cautela. '+
+      (state.vnil==='p' ? 'Le sezioni a cavallo di più quartieri sono divise in proporzione ai civici.' : 'Ogni sezione è data al quartiere dove cade la maggior parte dei suoi civici (alcuni quartieri restano vuoti).')+
+      ' Voti non attribuiti a nessun quartiere: '+fmt(na.vt)+' ('+pct(na.vt,tv,2)+' dei votanti, '+na.s+' sezioni senza civici nello stradario 2020).';
+    paintMap(e);
+    renderFocus();
+  }).catch(function(err){ el('mapNote').textContent='Non riesco a caricare i quartieri: '+err; });
 }
 
 /* ---------- controlli ---------- */
@@ -330,10 +383,11 @@ function setElezione(id){
   } else qb.hidden=true;
   el('anni').querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-d')===e.data); });
   // se cambia il sistema territoriale, il numero non e' piu' lo stesso territorio
-  if(!e.pre && state.terr!=null && state.sisTerr && state.sisTerr!==e.sistema){ state.terr=null; }
+  checkTerr(e);
   render();
 }
 function render(){
+  ++nilToken;
   var e=byId(state.id), sistemaNome={circoscrizione:'Circoscrizione',zona:'Zona',municipio:'Municipio'}[e.sistema];
   el('info').innerHTML='<b>'+e.label+'</b> &middot; '+dataIt(e.data)+' &middot; '+(e.pre ? 'fonte: Eligendo (Ministero dell&rsquo;Interno), solo totale della citt&agrave;' : 'dataset '+e.ds.map(function(d){return 'ds'+d;}).join(', ')+' &middot; sezioni: '+fmt(e.city.ns));
   el('avvisi').textContent=e.note.join(' - ');
@@ -343,15 +397,20 @@ function render(){
   el('affCity').innerHTML='Affluenza: <b>'+pct(e.city.vt,e.city.e)+'</b> ('+fmt(e.city.vt)+' votanti su '+fmt(e.city.e)+' elettori)';
   // elezioni prima del 1979: niente mappa, niente focus
   var pre=!!e.pre;
-  el('map').style.display=pre?'none':''; el('mapTitle').hidden=pre; el('mapNote').hidden=pre; el('preLine').hidden=!pre; el('focus').hidden=pre;
+  el('map').style.display=pre?'none':''; el('mapTitle').hidden=pre; el('mapNote').hidden=pre; el('preLine').hidden=!pre; el('focus').hidden=pre; el('geoBar').hidden=pre;
   var fn=e.fn||[]; el('fnote').hidden=!fn.length; el('fnote').textContent=fn.join(' ');
   if(pre) return;
+  // geografia: territori dell'epoca o quartieri (NIL, dal 2016)
+  var nil=useNil(e);
+  el('geoNil').disabled=!e.nil; el('geo').value=nil?'nil':'off'; el('varBox').hidden=!nil; el('varNil').value=state.vnil;
+  if(nil){ renderNil(e); return; }
   // mappa
   drawMap(e.sistema);
   el('mapTitle').textContent='Mappa per '+sistemaNome.toLowerCase()+' ('+(e.sistema==='circoscrizione'?'20 circoscrizioni':'9 '+(e.sistema==='zona'?'zone':'municipi'))+')';
   el('mapNote').textContent = e.sistema==='circoscrizione' ? 'Colore = famiglia (schieramento) più votata, sommando i suoi partiti (più intenso = più netta). Confini delle 20 ex zone di decentramento (ds378): assumo che il numero coincida con le circoscrizioni del dataset (la 1 contiene il Duomo).'
      : e.sistema==='zona' ? 'Colore = famiglia (schieramento) più votata, sommando i suoi partiti (più intenso = più netta). Le 9 zone 1999-2011 hanno gli stessi numeri e gli stessi confini degli attuali municipi (verificato sulle superfici).'
      : 'Colore = famiglia (schieramento) più votata, sommando i suoi partiti (più intenso = più netta).';
+  if(state.geo==='nil' && !e.nil) el('mapNote').textContent += ' I quartieri (NIL) ci sono solo dal 2016: per questa elezione mostro i territori dell\'epoca.';
   paintMap(e);
   renderFocus();
 }
@@ -361,35 +420,45 @@ function selectTerr(n){
 }
 var detailToken=0;
 function renderFocus(){
-  var e=byId(state.id), n=state.terr;
-  if(n==null || !e.terr[n]){
+  var e=byId(state.id), n=state.terr, nil=useNil(e);
+  if(n==null || !TD(e,n)){
     el('focusEmpty').hidden=false; el('focusBody').hidden=true;
     el('focusTitle').textContent='Focus su un territorio';
+    el('focusEmpty').textContent = (n!=null && nil) ? 'Con questa scelta nessuna sezione è assegnata a questo quartiere: scegli "divise in proporzione" o un altro quartiere.' : 'Clicca un territorio sulla mappa per vedere l\'emiciclo, l\'affluenza e le sezioni.';
     state.sisTerr=null; return;
   }
-  state.sisTerr=e.sistema;
-  var d=e.terr[n], nome={circoscrizione:'Circoscrizione',zona:'Zona',municipio:'Municipio'}[e.sistema]+' '+n;
+  el('focusEmpty').textContent='Clicca un territorio sulla mappa per vedere l\'emiciclo, l\'affluenza e le sezioni.';
+  state.sisTerr=geoKey(e);
+  var d=TD(e,n), nome=nil ? 'Quartiere (NIL) '+n+' '+NILS.info[n].nome : {circoscrizione:'Circoscrizione',zona:'Zona',municipio:'Municipio'}[e.sistema]+' '+n;
   el('focusEmpty').hidden=true; el('focusBody').hidden=false;
   el('focusTitle').textContent='Focus: '+nome+' - '+e.label+' ('+dataIt(e.data)+')';
   paintHemi('hemiTerr', e, d.v);
   legend('legTerr', e, d.v);
-  el('affTerr').innerHTML='Affluenza: <b>'+pct(d.vt,d.e)+'</b> ('+fmt(d.vt)+' votanti su '+fmt(d.e)+' elettori) &middot; '+fmt(d.ns)+' sezioni';
+  var nin=nil ? NILS.info[n] : null;
+  el('affTerr').innerHTML='Affluenza: <b>'+pct(d.vt,d.e)+'</b> ('+fmt(d.vt)+' votanti su '+fmt(d.e)+' elettori) &middot; '+fmt(d.ns)+' sezioni'+
+    (nil ? '<div class="info">Quartiere del municipio '+nin.m+'. '+(state.vnil==='p' ? 'Stima: voti delle sezioni divise in proporzione ai civici; ' : 'Stima: sezioni date al quartiere prevalente; ')+
+      'il '+Math.round(100*nin.q)+'% dei civici del quartiere (2020) è in sezioni condivise con altri quartieri.</div>'+
+      (weak(d,n) ? '<div class="note">Dato poco affidabile: '+weakWhy(d,n)+'.</div>' : '') : '');
   strip(n, e);
   // sezioni (caricate al bisogno)
   var tok=++detailToken;
   el('tab').innerHTML='<div class="info" style="padding:6px">Carico le sezioni...</div>';
   getDetail(e.id).then(function(D){
     if(tok!==detailToken) return;
-    var rows=D.righe.filter(function(r){return String(r[1])===n;});
+    var rows, quota={};
+    if(nil){
+      var bysez={}; D.righe.forEach(function(r){ bysez[r[0]]=r; });
+      rows=[]; NILS.sez[n].forEach(function(q){ if(bysez[q[0]] && (state.vnil==='p' || q[2])){ rows.push(bysez[q[0]]); quota[q[0]]=q[1]; } });
+    } else rows=D.righe.filter(function(r){return String(r[1])===n;});
     el('nSez').textContent='('+rows.length+')';
-    var h='<table><thead><tr><th>Sezione</th><th>Elettori</th><th>Votanti</th><th>Affl.</th>'+D.fam.map(function(f){return '<th>'+swHtml(COL[f])+f+'</th>';}).join('')+'<th>Prima</th></tr></thead><tbody>';
+    var h='<table><thead><tr><th>Sezione</th>'+(nil?'<th>Quota nel quartiere</th>':'')+'<th>Elettori</th><th>Votanti</th><th>Affl.</th>'+D.fam.map(function(f){return '<th>'+swHtml(COL[f])+f+'</th>';}).join('')+'<th>Prima</th></tr></thead><tbody>';
     rows.forEach(function(r){
       var v=r.slice(4), tot=v.reduce(function(a,b){return a+b;},0);
-      h+='<tr><td>'+r[0]+'</td><td>'+fmt(r[2])+'</td><td>'+fmt(r[3])+'</td><td>'+(r[2]?pct(r[3],r[2],0):'n.d.')+'</td>'+
+      h+='<tr><td>'+r[0]+'</td>'+(nil?'<td>'+quota[r[0]]+'%</td>':'')+'<td>'+fmt(r[2])+'</td><td>'+fmt(r[3])+'</td><td>'+(r[2]?pct(r[3],r[2],0):'n.d.')+'</td>'+
          v.map(function(x){return '<td>'+fmt(x)+(tot?' <span class="info">'+pct(x,tot,0)+'</span>':'')+'</td>';}).join('')+
          '<td>'+(tot?swHtml(COL[leader(D.fam,v)]):'')+'</td></tr>';
     });
-    el('tab').innerHTML=h+'</tbody></table>';
+    el('tab').innerHTML=(nil ? '<div class="info" style="padding:6px">Risultati dell\'intera sezione (non solo della parte nel quartiere); &ldquo;quota&rdquo; = parte dei civici della sezione che cade nel quartiere (stradario 2020).</div>' : '')+h+'</tbody></table>';
   }).catch(function(){ el('tab').textContent='Non riesco a caricare le sezioni.'; });
 }
 function getDetail(id){
@@ -401,21 +470,34 @@ function strip(n, cur){
   var list=tipoElezioni(state.tipo);
   if(state.tipo==='referendum') list=list.filter(function(x){return x.data===cur.data;});
   else list=list.filter(function(x){return x.sistema===cur.sistema;});
+  if(useNil(cur)){
+    list=list.filter(function(x){return x.nil;});
+    var tok=++stripToken;
+    Promise.all(list.map(function(x){return getNil(x.id);})).then(function(){
+      if(tok!==stripToken) return;
+      drawStrip(n, cur, list, function(x){ return NILD[x.id][state.vnil][n]||null; }, true);
+    });
+    return;
+  }
+  ++stripToken;
+  drawStrip(n, cur, list, function(x){ return x.sistema===cur.sistema ? x.terr[n] : null; }, false);
+}
+function drawStrip(n, cur, list, getD, nil){
   var svg=el('strip'), ns='http://www.w3.org/2000/svg', rowH=16, W=400, x0=(state.tipo==='referendum'?150:40), h='';
   svg.setAttribute('viewBox','0 0 '+W+' '+(list.length*rowH+4));
   list.forEach(function(x,i){
-    var y=i*rowH+2, d = x.sistema===cur.sistema ? x.terr[n] : null;
+    var y=i*rowH+2, d = getD(x);
     var lab = state.tipo==='referendum' ? x.label.replace(/^Referendum\s+\S+\s+(su\s+|sulla\s+)?/,'').slice(0,26) : x.data.slice(0,4);
     h+='<text x="0" y="'+(y+11)+'" font-weight="'+(x.id===cur.id?'700':'400')+'">'+lab+'</text>';
     if(d){
       var tot=d.v.reduce(function(a,b){return a+b;},0), xx=x0, pc=partyColors(x);
       x.par.forEach(function(p,k){ var w=(W-x0)*d.v[k]/tot; if(w>0){ h+='<rect x="'+xx.toFixed(1)+'" y="'+y+'" width="'+w.toFixed(1)+'" height="'+(rowH-3)+'" fill="'+pc[k]+'" stroke="'+seatStroke(pc[k])+'" stroke-width=".4"><title>'+esc(p[0])+' ('+x.fam[p[1]]+') '+pct(d.v[k],tot)+'</title></rect>'; xx+=w; } });
-    } else h+='<text x="'+x0+'" y="'+(y+11)+'" fill="#999">altro sistema territoriale</text>';
+    } else h+='<text x="'+x0+'" y="'+(y+11)+'" fill="#999">'+(nil?'nessun dato':'altro sistema territoriale')+'</text>';
     h+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rowH+'" fill="transparent" style="cursor:pointer" data-id="'+x.id+'"></rect>';
   });
   svg.innerHTML=h;
   svg.querySelectorAll('rect[data-id]').forEach(function(r){ r.addEventListener('click',function(){ stop(); setElezione(r.getAttribute('data-id')); }); });
-  el('stripNote').textContent = state.tipo==='referendum' ? 'Un quesito per riga (stessa data).' : 'Un’elezione per riga, solo con lo stesso sistema territoriale (circoscrizioni fino al 1997, zone 1999-2014, municipi dal 2016): i numeri non sono confrontabili tra sistemi. Clicca una riga per andarci.';
+  el('stripNote').textContent = nil ? (state.tipo==='referendum' ? 'Un quesito per riga (stessa data). ' : 'Un’elezione per riga, dal 2016, con gli stessi quartieri. ')+'Clicca una riga per andarci.' : state.tipo==='referendum' ? 'Un quesito per riga (stessa data).' : 'Un’elezione per riga, solo con lo stesso sistema territoriale (circoscrizioni fino al 1997, zone 1999-2014, municipi dal 2016): i numeri non sono confrontabili tra sistemi. Clicca una riga per andarci.';
 }
 
 /* ---------- animazione ---------- */
@@ -443,6 +525,8 @@ Promise.all([
   IDX.famiglie.forEach(function(f){ COL[f.nome]=f.colore; });
   buildTipo();
   el('play').addEventListener('click',play);
+  el('geo').addEventListener('change',function(){ stop(); state.geo=this.value; checkTerr(byId(state.id)); render(); });
+  el('varNil').addEventListener('change',function(){ state.vnil=this.value; render(); });
   setTipo('comunali_consiglio');
 }).catch(function(err){
   el('info').textContent='Non riesco a caricare i dati (apri la pagina da un server web, non da file): '+err;
