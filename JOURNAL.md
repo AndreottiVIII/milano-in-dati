@@ -1142,6 +1142,14 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
   - Fonti con licenza e citazione, compreso "(c) Teatro alla Scala" per le stagioni 2023-27: autorizzazione riferita da Davide ("poi li citiamo").
   - Da Gatti si pubblicano solo titolo, autore, stagione e direttore; Marangoni compare solo nei conteggi.
   - Sistemato in pubblicazione un difetto di `sbn_parse.py`: il numero d'ordine del libretto finiva nel titolo (181 righe).
+- 2026-10-30 notte — **Libri e locandine in biblioteca** (`scala/LIBRI_E_LOCANDINE.md`):
+  - **Locandine**: nel catalogo SBN ce ne sono solo una quarantina, sparse. La Biblioteca Livia Simoni (Museo Teatrale) ne conserva circa 3.000, consultabili su appuntamento e senza catalogo online.
+  - **Libri**:
+    - Tintori vol. 2 (1964-77, con i giorni) si trova alla Braidense, alla Civica d'Arte e nelle Biblioteche di Milano.
+    - Dopo il 1977 non risulta in SBN nessuna cronologia.
+    - Da verificare di persona: Tintori, "Cronologia" [1993?], e gli annuari EDT "Opera '87-2012".
+  - **Programmi di sala**: il Conservatorio Verdi ha i programmi del 62% delle produzioni 1964-2022.
+  - **Visita consigliata**: la biblioteca del Conservatorio Verdi.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 
