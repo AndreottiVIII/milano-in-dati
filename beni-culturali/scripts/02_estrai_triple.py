@@ -62,7 +62,7 @@ PRED = {
 }
 TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 LABEL = "http://www.w3.org/2000/01/rdf-schema#label"
-LABEL_SUBJ = ("/Address/", "/Feature/", "/City/", "/Province/", "/Region/",
+LABEL_SUBJ = ("/Site/", "/Address/", "/Feature/", "/City/", "/Province/", "/Region/",
               "/CulturalInstituteOrSite/", "/Agent/", "/CulturalPropertyCataloguingCategory/")
 
 

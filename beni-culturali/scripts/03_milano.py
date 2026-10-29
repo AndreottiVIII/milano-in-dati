@@ -65,6 +65,7 @@ def main(tsvdir, out_csv, out_json):
     prop_titl = defaultdict(set)
     prop_addr = defaultdict(set)
     prop_cis = defaultdict(set)
+    site_addr = {}
     cov_mi = set()
     labels = {}  # Address / Feature / City / CIS / Agent -> prima etichetta
     n_props = Counter()
@@ -84,7 +85,9 @@ def main(tsvdir, out_csv, out_json):
             else:
                 prop_cis[s].add(o)
         elif k == "atSite":
-            titl_site[s].add(o.rsplit("/", 1)[-1])
+            titl_site[s].add(o)
+        elif k == "cis_siteAddress":
+            site_addr[s] = o
         elif k == "hasTITL":
             prop_titl[s].add(o)
         elif k in ("hasPropAddress", "dct_spatial"):
@@ -98,12 +101,15 @@ def main(tsvdir, out_csv, out_json):
                 n_props[cls(s)] += 1
         elif k == "label":
             c = cls(s)
-            if c in ("Address", "Feature", "City", "CulturalInstituteOrSite"):
+            if c in ("Address", "Feature", "City", "CulturalInstituteOrSite", "Site"):
                 # preferisci l'etichetta piu' corta per gli indirizzi (la piu' specifica) -> prima trovata
                 labels.setdefault(s, unq(o))
     print("props nazionali:", len(prop_seen), "indirizzi:", len(addr_city), "milano cov:", len(cov_mi), flush=True)
 
     mi_addr = {a for a, c in addr_city.items() if c == MILANO_CITY}
+
+    def site_mi(x):
+        return x.startswith("Site/") and site_addr.get(x) in mi_addr
 
     def feat_mi(f):
         return any(a in mi_addr for a in feat_addr.get(f, ()))
@@ -115,7 +121,7 @@ def main(tsvdir, out_csv, out_json):
         f_addr = any(a in mi_addr for a in prop_addr.get(p, ()))
         f_cur = f_oth = False
         for t in prop_titl.get(p, ()):
-            if any(feat_mi(f) for f in titl_feat.get(t, ())):
+            if any(feat_mi(f) for f in titl_feat.get(t, ())) or any(site_mi(x) for x in titl_site.get(t, ())):
                 if titl_type.get(t) == CUR:
                     f_cur = True
                 else:
@@ -150,6 +156,10 @@ def main(tsvdir, out_csv, out_json):
             coords.setdefault(s, {})[k] = o
         elif k == "label" and cls(s) == "Agent":
             labels.setdefault(s, unq(o))
+    coords_by_prop = {}
+    for k2, v2 in coords.items():
+        if k2.startswith("Coordinates/") and "-geometry" in k2:
+            coords_by_prop.setdefault(k2[len("Coordinates/"):].split("-geometry")[0], v2)
     agent_by_base = {}
     for k2, v2 in labels.items():
         if k2.startswith("Agent/"):
@@ -159,7 +169,7 @@ def main(tsvdir, out_csv, out_json):
     for r, p in rec_of.items():
         p_rec[p] = r
 
-    cols = ["id", "ambito", "classe_bene", "tipo_scheda", "codice_catalogo", "url_catalogo", "titolo", "tipo_oggetto",
+    cols = ["iri", "id", "ambito", "classe_bene", "tipo_scheda", "codice_catalogo", "url_catalogo", "titolo", "tipo_oggetto",
             "soggetto", "autore", "datazione", "materia_tecnica", "categoria_catalogazione", "diritti",
             "copertura_dc", "cov_milano", "indirizzo_milano", "loc_attuale_mi", "loc_altra_mi",
             "indirizzo_bene", "localizzazione_attuale", "altre_localizzazioni", "istituzione", "codice_sito",
@@ -190,23 +200,22 @@ def main(tsvdir, out_csv, out_json):
                 lab = labels.get(f, f)
                 cities = {addr_city.get(x, "") for x in feat_addr.get(f, ())}
                 places.append(lab + (" [Milano]" if feat_mi(f) else ""))
+            for x in titl_site.get(t, ()):
+                if x.startswith("Site/"):
+                    places.append("sito: " + labels.get(x, x) + (" [Milano]" if site_mi(x) else ""))
             if tt == "CurrentPhysicalLocation":
                 cur_loc += places
                 for c in titl_cis.get(t, ()):
                     inst.add(labels.get(c, c))
-                sites |= titl_site.get(t, set())
+                sites |= {x.rsplit("/", 1)[-1] for x in titl_site.get(t, ()) if not x.startswith("Site/")}
             else:
                 oth_loc += [f"{tt}: {x}" for x in places]
         for c in prop_cis.get(p, ()):
             inst.add(labels.get(c, c))
         paddr = sorted({labels.get(x, x) + (" [Milano]" if x in mi_addr else "") for x in prop_addr.get(p, ())})
-        cr = coords.get(p.split("/", 1)[1] + "-geometry-coordinates", {})
-        if not cr:
-            for gk in coords:
-                if gk.startswith("Coordinates/" + p.split("/", 1)[1] + "-") and "geometry" in gk:
-                    cr = coords[gk]
-                    break
+        cr = coords_by_prop.get(p.split("/", 1)[1], {})
         rows.append({
+            "iri": p,
             "id": unq(a["uniqueIdentifier"][0]) if a["uniqueIdentifier"] else p.split("/", 1)[1],
             "ambito": "sede_milano" if (f_cov or f_addr or f_cur) else "solo_luogo_collegato",
             "classe_bene": cls(p),

@@ -14,7 +14,7 @@ I dati grezzi non ci sono: si riscaricano con i programmi in `*/scripts/`. Alcun
 
 ## Fonti e licenze
 
-- Temperature: Maugeri et al. tramite ECA&D e NOAA GHCN-Daily (solo uso non commerciale, nel sito ci sono solo valori aggregati); ARPA Lombardia (CC0).
+- Temperature: Maugeri et al. tramite ECA&D e NOAA GHCN-Daily (uso non commerciale con citazione: Maugeri et al. 2002, Klein Tank et al. 2002; il sito non è commerciale); ARPA Lombardia (CC0).
 - Vie: © contributori di OpenStreetMap (ODbL); Wikidata (CC0); Comune di Milano (CC BY).
-- Beni culturali: ICCD / ArCo (licenza in verifica).
-- Elezioni: Comune di Milano, dati.comune.milano.it (CC BY).
+- Beni culturali: ICCD / ArCo 2.0 (dump CNR-ISTC 2023); i dati derivati si ripubblicano con licenza CC BY-SA 4.0, citando ICCD.
+- Elezioni: Comune di Milano, dati.comune.milano.it (CC BY); prima del 1979 Ministero dell'Interno, Eligendo (archivio storico delle elezioni, a scopo divulgativo).
