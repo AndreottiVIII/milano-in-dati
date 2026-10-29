@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Area C di Milano: ingressi al giorno, 2016-2024</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+  :root { --c: #c2410c; }
+  body { font: 16px/1.4 Georgia, serif; color: #000; background: #fff; max-width: 980px; margin: 0 auto; padding: 0 16px 48px; }
+  h1 { font-size: 1.6em; margin: 24px 0 4px; }
+  h2 { font-size: 1.25em; margin: 40px 0 8px; border-top: 2px solid #000; padding-top: 8px; }
+  h3 { font-size: 1.05em; margin: 20px 0 6px; }
+  table { border-collapse: collapse; margin: 8px 0; font-size: 0.88em; }
+  th, td { border: 1px solid #000; padding: 2px 6px; text-align: right; vertical-align: top; }
+  th { background: #eee; }
+  td { white-space: nowrap; }
+  td:first-child, th:first-child { text-align: left; }
+  .scroll { max-height: 420px; overflow: auto; border: 1px solid #000; margin: 8px 0; }
+  .scroll table { margin: 0; }
+  .scroll thead th { position: sticky; top: 0; }
+  .avviso { border: 3px solid #000; padding: 8px 12px; margin: 12px 0; }
+  .avviso.forte { font-weight: bold; }
+  .fonte { font-size: 0.8em; color: #333; margin: 2px 0 12px; }
+  .nota { font-size: 0.85em; }
+  .w { overflow-x: auto; }
+  svg.g { width: 100%; height: auto; display: block; border: 1px solid #000; background: #fff; }
+  nav ul { columns: 2; padding-left: 20px; }
+  button, select, input { font: inherit; }
+  footer { border-top: 2px solid #000; margin-top: 48px; padding-top: 8px; font-size: 0.9em; }
+  #errore { border: 3px solid #000; padding: 8px 12px; display: none; }
+  #mappa { height: 480px; border: 1px solid #000; margin: 8px 0; }
+  #mappa .leaflet-tile-pane { filter: grayscale(1) contrast(0.9) brightness(1.08); }
+  .scheda { border: 2px solid #000; padding: 8px 12px; margin: 8px 0; min-height: 60px; }
+  .acc { color: var(--c); font-weight: bold; }
+  tr.sel td { font-weight: bold; background: #eee; }
+  #leggi { margin: 4px 0; font-size: 0.9em; min-height: 1.4em; }
+  .lg span { display: inline-block; margin-right: 14px; font-size: 0.85em; }
+  ul.ev li { margin: 2px 0; }
+  .vuoto { color: #666; }
+</style>
+</head>
+<body>
+
+<h1>Area C di Milano: ingressi al giorno, 2016-2024</h1>
+<p>Quante volte al giorno si passa da uno dei varchi che entrano nell'Area C, la zona a pagamento dentro la Cerchia dei Bastioni. Qui solo numeri: giorno per giorno, per varco, per ora. Nessuna spiegazione sulle cause.</p>
+
+<div class="avviso forte" id="avviso"></div>
+<div id="errore"></div>
+
+<nav>
+  <ul>
+    <li><a href="#inbreve">In breve</a></li>
+    <li><a href="#grafico">Grafico: ingressi al giorno 2016-2024</a></li>
+    <li><a href="#vecchia">La serie 2012-2015 (conteggio diverso)</a></li>
+    <li><a href="#mappa-s">Mappa dei varchi</a></li>
+    <li><a href="#anni">Anno per anno</a></li>
+    <li><a href="#covid">Mese per mese: 2019, 2020, 2021</a></li>
+    <li><a href="#giorni">Giorno della settimana, agosto, festivi</a></li>
+    <li><a href="#ore">Mezz'ora per mezz'ora</a></li>
+    <li><a href="#varchi">Varchi piu usati</a></li>
+    <li><a href="#tipi">Che veicoli</a></li>
+    <li><a href="#aria">Stazioni dell'aria vicine (preparazione)</a></li>
+    <li><a href="#fonti">Fonti, licenze, trappole</a></li>
+  </ul>
+</nav>
+
+<h2 id="inbreve">In breve</h2>
+<div id="inbreve-c"></div>
+
+<h2 id="grafico">Grafico: ingressi al giorno, settembre 2016 - novembre 2024</h2>
+<p class="nota">Linea grigia sottile: ogni giorno. Linea colorata: media su 7 giorni. Fasce grigie: periodi in cui Area C risulta sospesa (secondo giornali e siti, da verificare). Righe verticali con lettera: cambi di regola, sotto l'elenco. Muovi il mouse (o tocca) per leggere un giorno. Le interruzioni della linea sono giorni senza dato.</p>
+<p class="nota"><label><input type="checkbox" id="chk-giorni" checked> mostra i giorni singoli</label></p>
+<div id="grafico-c"></div>
+<div id="leggi"></div>
+<ul class="ev" id="eventi-c"></ul>
+<p class="fonte">Fonte: <code>data/giorni.json</code>, costruito da ds1085 (1/9/2016-31/12/2018), ds1072 (2019 - 30/11/2024) e, per 61 giorni del 2024 mancanti li, dalla somma dei file mensili per varco. 16 giorni non hanno nessun dato. Il totale comprende le moto.</p>
+
+<h2 id="vecchia">La serie 2012-2015 (conteggio diverso): non confrontabile</h2>
+<div class="avviso forte">ATTENZIONE. Questa serie e' un'altra cosa: da gennaio 2016 scende da circa 135.000 a circa 45.000 al giorno senza che il traffico sia calato. Non va letta insieme al grafico sopra.</div>
+<div id="vecchia-c"></div>
+<div id="vecchia-t"></div>
+<p class="fonte">Fonte: <code>data/vecchia.json</code> (ds779-ds783, campo <code>totale</code>). In grigio i giorni da gennaio 2016 (livello ridotto); i cerchi vuoti sono giorni parziali; le interruzioni sono giorni senza dato (2012: 2; 2014: 16; 2015: 52; 2016: 21).</p>
+
+<h2 id="mappa-s">Mappa dei varchi</h2>
+<p class="nota">Cerchio = media degli ingressi nei giorni feriali normali (non agosto, non Natale), 2017-2024. Clicca un varco per la scheda. I due varchi tolti a maggio 2022 sono in grigio. Il bordo e' l'Area C (dati del Comune). I quadratini neri sono le stazioni dell'aria piu vicine (solo posizione).</p>
+<div id="mappa"></div>
+<div class="scheda" id="scheda"><span class="vuoto">Clicca un varco sulla mappa.</span></div>
+<p class="fonte">Fonte: <code>data/varchi.json</code> (posizioni: ds82; ingressi: file mensili Settembre 2016 - Novembre 2024, somma delle mezz'ore). Base: © OpenStreetMap contributors.</p>
+
+<h2 id="anni">Anno per anno</h2>
+<div id="anni-c"></div>
+<p class="fonte">Fonte: <code>data/tabelle.json</code> (<code>anno</code>). "Feriali" = lunedi-venerdi non festivi. "Feriali normali" = feriali fuori da agosto e da 24/12-6/1. Il 2016 ha solo settembre-dicembre, il 2024 solo gennaio-novembre: per confrontare gli anni usa le colonne settembre-novembre, i soli mesi presenti in tutti gli anni.</p>
+
+<h2 id="covid">Mese per mese: media dei feriali nel 2019, 2020 e 2021</h2>
+<div id="covid-c"></div>
+
+<h2 id="giorni">Giorno della settimana, agosto, festivi</h2>
+<div id="giorni-c"></div>
+
+<h2 id="ore">Mezz'ora per mezz'ora</h2>
+<p class="nota">Ingressi medi in ogni mezz'ora, nei giorni normali (fuori da agosto, Natale e festivi). Area C e' regolata dalle 7.30 alle 19.30 nei feriali.</p>
+<div id="ore-c"></div>
+
+<h2 id="varchi">Varchi piu usati</h2>
+<div id="varchi-c"></div>
+
+<h2 id="tipi">Che veicoli</h2>
+<div id="tipi-c"></div>
+
+<h2 id="aria">Stazioni dell'aria vicine al confine (preparazione per il confronto con l'aria)</h2>
+<div id="aria-c"></div>
+
+<footer id="fonti">
+  <h2 style="margin-top:0;border:0;padding:0">Fonti, licenze, trappole</h2>
+  <div id="footer-c"></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const nf = (x, d = 0) => (x === null || x === undefined || Number.isNaN(x)) ? '–' : Number(x).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pc = (x, d = 0) => (x === null || x === undefined) ? '–' : nf(x, d) + '%';
+const tab = (head, rows, cls) => '<div class="w"><table><thead><tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>' +
+  rows.map((r, i) => `<tr${cls && cls[i] ? ` class="${cls[i]}"` : ''}>` + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody></table></div>';
+const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const DOW = ['dom','lun','mar','mer','gio','ven','sab'];
+const D0 = (s) => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+const dayDate = (d0, i) => new Date(D0(d0) + i * 86400000);
+const fmtDate = (dt) => DOW[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + MESI[dt.getUTCMonth()] + ' ' + dt.getUTCFullYear();
+const ACC = '#c2410c';
+let DATA = {};
+
+async function carica() {
+  const nomi = ['giorni', 'vecchia', 'varchi', 'tabelle', 'eventi', 'stazioni_aria', 'confine'];
+  const res = await Promise.all(nomi.map(n => fetch('data/' + n + '.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(n + ': ' + r.status); return r.json(); })));
+  nomi.forEach((n, i) => DATA[n] = res[i]);
+}
+
+/* ---------- grafico a linee in SVG ---------- */
+function lineChart(opt) {
+  // opt: n[], d0, ymax, ymaxLabel, w, h, bands[], marks[], flags[], mean7, showDays, colorDays
+  const W = 960, H = opt.h || 360, ml = 56, mr = 12, mt = 16, mb = 28;
+  const N = opt.n.length, x = i => ml + (W - ml - mr) * i / (N - 1), y = v => mt + (H - mt - mb) * (1 - v / opt.ymax);
+  let s = `<svg class="g" viewBox="0 0 ${W} ${H}" id="${opt.id}" role="img" aria-label="${opt.label}">`;
+  // griglia y
+  for (let v = 0; v <= opt.ymax; v += opt.ystep) {
+    s += `<line x1="${ml}" x2="${W - mr}" y1="${y(v)}" y2="${y(v)}" stroke="#ccc" stroke-width="1"/><text x="${ml - 6}" y="${y(v) + 4}" text-anchor="end" font-size="12" font-family="Georgia,serif">${nf(v)}</text>`;
+  }
+  // asse x: gennaio di ogni anno
+  const d0 = new Date(D0(opt.d0));
+  for (let yr = d0.getUTCFullYear(); yr <= 2025; yr++) {
+    const i = Math.round((Date.UTC(yr, 0, 1) - D0(opt.d0)) / 86400000);
+    if (i < 0 || i >= N) continue;
+    s += `<line x1="${x(i)}" x2="${x(i)}" y1="${mt}" y2="${H - mb}" stroke="#ddd"/><text x="${x(i) + 3}" y="${H - 10}" font-size="12" font-family="Georgia,serif">${yr}</text>`;
+  }
+  (opt.bands || []).forEach(b => {
+    const a = Math.max(0, Math.round((D0(b.da) - D0(opt.d0)) / 86400000)), z = Math.min(N - 1, Math.round((D0(b.a) - D0(opt.d0)) / 86400000));
+    s += `<rect x="${x(a)}" y="${mt}" width="${Math.max(1, x(z) - x(a))}" height="${H - mt - mb}" fill="${b.fill || '#000'}" fill-opacity="${b.op || 0.12}"><title>${b.t}</title></rect>`;
+  });
+  // giorni singoli
+  const path = (vals, w, col, op) => {
+    let p = '', pen = false;
+    vals.forEach((v, i) => { if (v === null || v === undefined) { pen = false; return; } p += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; });
+    return `<path d="${p}" fill="none" stroke="${col}" stroke-width="${w}" stroke-opacity="${op}" stroke-linejoin="round"/>`;
+  };
+  if (opt.showDays) s += `<g id="${opt.id}-giorni">${path(opt.n, 0.7, opt.colDays || '#888', 0.9)}</g>`;
+  if (opt.mean7) s += path(opt.mean7, 2, ACC, 1);
+  (opt.extra || []).forEach(e => { s += e(x, y); });
+  (opt.marks || []).forEach(m => {
+    const i = Math.round((D0(m.d) - D0(opt.d0)) / 86400000); if (i < 0 || i >= N) return;
+    s += `<line x1="${x(i)}" x2="${x(i)}" y1="${mt}" y2="${H - mb}" stroke="#000" stroke-dasharray="3 3"/><text x="${x(i)}" y="${mt + 10}" text-anchor="middle" font-size="12" font-weight="bold" font-family="Georgia,serif" style="paint-order:stroke" stroke="#fff" stroke-width="3">${m.l}</text>`;
+  });
+  s += `<line id="${opt.id}-cur" x1="0" x2="0" y1="${mt}" y2="${H - mb}" stroke="${ACC}" stroke-width="1" visibility="hidden"/>`;
+  s += `<rect x="${ml}" y="${mt}" width="${W - ml - mr}" height="${H - mt - mb}" fill="transparent" id="${opt.id}-hit"/></svg>`;
+  return { svg: s, x, y, W, ml, mr, N };
+}
+function mediaMobile(n, k = 7) {
+  const out = [];
+  for (let i = 0; i < n.length; i++) {
+    let s = 0, c = 0;
+    for (let j = i - Math.floor(k / 2); j <= i + Math.floor(k / 2); j++) if (j >= 0 && j < n.length && n[j] !== null) { s += n[j]; c++; }
+    out.push(c >= 5 ? s / c : null);
+  }
+  return out;
+}
+function aggancia(chart, id, d0, n, extraTxt) {
+  const svg = $('#' + id), hit = $('#' + id + '-hit'), cur = $('#' + id + '-cur'), out = $('#' + (id === 'gr1' ? 'leggi' : 'leggi2'));
+  const mv = (ev) => {
+    const r = svg.getBoundingClientRect(); const cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
+    const vx = (cx - r.left) / r.width * chart.W; let i = Math.round((vx - chart.ml) / (chart.W - chart.ml - chart.mr) * (chart.N - 1));
+    i = Math.max(0, Math.min(chart.N - 1, i)); const px = chart.x(i); cur.setAttribute('x1', px); cur.setAttribute('x2', px); cur.setAttribute('visibility', 'visible');
+    out.innerHTML = '<b>' + fmtDate(dayDate(d0, i)) + '</b>: ' + (n[i] === null ? 'nessun dato' : nf(n[i]) + ' ingressi') + extraTxt(i);
+  };
+  hit.addEventListener('mousemove', mv); hit.addEventListener('touchstart', mv, { passive: true }); hit.addEventListener('touchmove', mv, { passive: true });
+}
+
+/* ---------- sezioni ---------- */
+function sezioneGrafico() {
+  const G = DATA.giorni, ev = DATA.eventi;
+  const tipoNome = { L: 'feriale', S: 'sabato', D: 'domenica', F: 'festivo' };
+  const m7 = mediaMobile(G.n);
+  const bands = [
+    { da: '2020-03-09', a: '2020-05-03', fill: '#000', op: 0.08, t: 'Lockdown nazionale 9/3-3/5/2020' },
+    { da: '2020-03-11', a: '2020-06-14', fill: '#000', op: 0.14, t: 'Area C sospesa 11/3-14/6/2020 (da verificare)' },
+    { da: '2020-11-05', a: '2021-02-23', fill: '#000', op: 0.14, t: 'Area C sospesa 5/11/2020-23/2/2021 (da verificare)' },
+    { da: '2021-02-24', a: '2021-06-08', fill: '#000', op: 0.06, t: 'Area C con orario 10.00-19.30 dal 24/2 all 8/6/2021 (da verificare)' }
+  ];
+  const marcaDate = [['2017-02-13', 'A'], ['2021-06-09', 'B'], ['2022-05-30', 'C'], ['2023-10-30', 'D'], ['2024-01-01', 'E']];
+  const marks = marcaDate.map(([d, l]) => ({ d, l }));
+  const ch = lineChart({ id: 'gr1', label: 'Ingressi giornalieri in Area C', n: G.n, d0: G.d0, ymax: 200000, ystep: 50000, bands, marks, mean7: m7, showDays: true });
+  $('#grafico-c').innerHTML = ch.svg;
+  aggancia(ch, 'gr1', G.d0, G.n, i => ' (' + tipoNome[G.tipo[i]] + (m7[i] !== null ? '; media 7 giorni ' + nf(m7[i]) : '') + (G.flag[i] === 1 ? '; da somma dei file mensili' : G.flag[i] === 2 ? '; dato ufficiale diverso di oltre 1% dalla somma dei mensili' : '') + ')');
+  $('#chk-giorni').addEventListener('change', e => { $('#gr1-giorni').style.display = e.target.checked ? '' : 'none'; });
+  const lett = Object.fromEntries(marcaDate.map(([d, l]) => [d, l]));
+  const evInGrafico = ev.filter(e => e.data >= '2016-09-01');
+  const usate = new Set();
+  $('#eventi-c').innerHTML = evInGrafico.map(e => { const L_ = lett[e.data] && !usate.has(e.data) ? lett[e.data] : ''; usate.add(e.data); return `<li>${L_ ? '<b>' + L_ + '</b> ' : ''}<b>${e.data.split('-').reverse().join('/')}</b> — ${e.descrizione}. <span class="nota">${e.verifica === 'dai dati' ? 'Dai dati.' : 'Da verificare.'} <a href="${e.fonte.startsWith('http') ? e.fonte : '#fonti'}">fonte</a></span></li>`; }).join('');
+}
+
+function sezioneVecchia() {
+  const V = DATA.vecchia;
+  const nn = V.n.map((v, i) => V.flag[i] === 3 ? null : v);
+  const livello = V.n.map((v, i) => (V.flag[i] === 1 || V.flag[i] === 2) && v !== null ? v : null);
+  const extra = [(x, y) => {
+    let s = '';
+    V.flag.forEach((f, i) => { if (f === 2 && V.n[i] !== null) s += `<circle cx="${x(i)}" cy="${y(V.n[i])}" r="3.5" fill="#fff" stroke="#000" stroke-width="1.2"/>`; });
+    return s;
+  }];
+  const gin = [];
+  const m7 = mediaMobile(V.n.map((v, i) => V.flag[i] === 2 ? null : v));
+  const ch = lineChart({ id: 'gr2', label: 'Ingressi giornalieri 2012-2016, conteggio diverso', n: V.n.map((v, i) => V.flag[i] === 2 ? null : v), d0: V.d0, ymax: 200000, ystep: 50000, h: 300,
+    bands: [{ da: '2016-01-01', a: '2016-09-18', fill: '#000', op: 0.12, t: 'Da gennaio 2016 il conteggio scende di circa 3 volte' }], mean7: m7, showDays: true, extra, marks: [{ d: '2016-01-01', l: '2016' }] });
+  $('#vecchia-c').innerHTML = ch.svg + '<div id="leggi2" style="margin:4px 0;font-size:.9em;min-height:1.4em"></div>';
+  aggancia(ch, 'gr2', V.d0, V.n, i => V.flag[i] === 2 ? ' (giorno parziale)' : V.flag[i] === 1 ? ' (da gennaio 2016: livello ridotto)' : '');
+  const T = DATA.tabelle;
+  $('#vecchia-t').innerHTML = '<h3>Perche non si uniscono: gli stessi 18 giorni (1-18 settembre 2016) in due conti</h3>' +
+    tab(['Conto', 'Ingressi al giorno (media)', 'Rapporto'], [
+      ['Serie 2012-2016 (ds783, campo totale)', '43.179', '1'],
+      ['Serie 2016+ ufficiale (ds1085), moto comprese', '153.474', '0,28 (tra 0,25 e 0,35)'],
+      ['Stessa serie 2016+, solo autoveicoli (somma dei mensili, moto = 0)', '125.133', '0,345 (tra 0,32 e 0,38)']]) +
+    `<p class="nota">Nelle categorie (autorizzati, residenti, merci, bus, Euro 4-6, diesel) il rapporto con i soli autoveicoli e' quasi sempre 0,33-0,35; per i veicoli "non classificati" e' 0,14. Cioe' dal 2016 la serie vecchia sembra contare circa un terzo delle autovetture, senza le moto. Non e' un sottoinsieme di varchi. Non e' stato applicato nessun fattore di correzione: i dati non dicono se la serie 2012-2015 includeva le moto. Dettagli in <code>pulito/problemi.md</code>.</p>` +
+    `<p class="nota">Medie giornaliere della serie vecchia: 2012-2015 ${nf(129091)} (1.268 giorni con dato); marzo 2015 ${nf(139554)}; marzo 2016 ${nf(44073)}. Il 7/1/2016 conta 7.170, dall'8 al 27/1 non c'e' nessun dato.</p>`;
+}
+
+function sezioneInBreve() {
+  const T = DATA.tabelle, a = Object.fromEntries(T.anno.map(r => [r.anno, r]));
+  const v = (y, k) => a[y][k];
+  const rid = (x, y) => (x / y - 1) * 100;
+  const r17 = v(2017, 'lavorativi_sett_nov'), r19 = v(2019, 'lavorativi_sett_nov'), r24 = v(2024, 'lavorativi_sett_nov'), r16 = v(2016, 'lavorativi_sett_nov');
+  const ap19 = T.mesi['2019'][3], ap20 = T.mesi['2020'][3];
+  const ag = T.agosto.filter(x => x.rapporto && x.anno >= 2017 && x.anno !== 2020);
+  const agmin = Math.min(...ag.map(x => x.rapporto)), agmax = Math.max(...ag.map(x => x.rapporto));
+  const fer = T.festivi.find(x => x.festivo === 'Ferragosto'), amb = T.festivi.find(x => x.festivo.startsWith("Sant'Ambrogio"));
+  const top = T.top[0];
+  const e1 = nf(T.top.length);
+  $('#inbreve-c').innerHTML = `<ul>
+  <li><b>2016 → 2024:</b> nei feriali di settembre-novembre gli ingressi al giorno passano da ${nf(r16)} (2016) e ${nf(r17)} (2017) a ${nf(r24)} (2024): ${nf(rid(r24, r17), 0)}% rispetto al 2017, ${nf(rid(r24, r19), 0)}% rispetto al 2019. (Totale con le moto.)</li>
+  <li><b>Covid:</b> in aprile 2020 la media dei feriali e' ${nf(ap20)}, contro ${nf(ap19)} di aprile 2019 (${nf(rid(ap20, ap19), 0)}%). Nei feriali di settembre-novembre il 2021 e' al ${nf(v(2021, 'indice_sett_nov_vs_2019'))}% del 2019, il 2022 e il 2023 all'${nf(v(2022, 'indice_sett_nov_vs_2019'))}%, il 2024 all'${nf(v(2024, 'indice_sett_nov_vs_2019'))}%.</li>
+  <li><b>Agosto:</b> nei feriali di agosto gli ingressi sono tra il ${nf(agmin * 100)}% e il ${nf(agmax * 100)}% di quelli di un feriale normale (2017-2024, senza il 2020).</li>
+  <li><b>Festivi infrasettimanali:</b> Ferragosto ${nf(fer.media)} ingressi (${nf(fer.rapporto * 100)}% di un feriale normale), Sant'Ambrogio ${nf(amb.media)} (${nf(amb.rapporto * 100)}%).</li>
+  <li><b>Varchi:</b> ${e1} varchi in tutto (40 dopo maggio 2022). Il piu usato, ${top.nome}, ha ${nf(top.mtot)} ingressi al giorno nei feriali normali; i primi 5 varchi pesano il ${nf(T.top_quota2019_primi5 * 100)}% del totale (2019).</li>
+  <li><b>Orario:</b> nei feriali normali il picco e' alle 8.30 nel 2019 e alle 9.00 nel 2023 (vedi la tabella a mezz'ora).</li>
+  </ul>`;
+  $('#avviso').innerHTML = 'Dati del Comune di Milano / AMAT scaricati il 29/10/2026. Ultimo giorno disponibile: 30 novembre 2024. Primo sguardo: numeri, nessuna spiegazione delle cause. Le date di sospensione Covid e di cambio regola vengono da giornali e siti, non da atti, e sono da verificare.';
+}
+
+function sezioneMappa() {
+  const V = DATA.varchi, m0 = V.mese0;
+  const map = L.map('mappa', { scrollWheelZoom: false }).setView([45.4655, 9.1925], 15);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(map);
+  L.geoJSON(DATA.confine, { style: { color: '#000', weight: 2, dashArray: '6 4', fill: false } }).addTo(map);
+  const rad = v => 3 + Math.sqrt(v || 0) / 12;
+  const layers = {};
+  V.varchi.forEach(g => {
+    const chiuso = g.ultima < '2024-11-30';
+    const c = L.circleMarker([g.lat, g.lon], { radius: rad(g.mtot), color: chiuso ? '#555' : '#7c2d12', weight: 1.5, fillColor: chiuso ? '#999' : ACC, fillOpacity: 0.65 }).addTo(map);
+    c.bindTooltip(`${g.nome}: ${nf(g.mtot)} al giorno`);
+    c.on('click', () => scheda(g, m0));
+    layers[g.id] = c;
+  });
+  DATA.stazioni_aria.forEach(s => {
+    L.marker([s.lat, s.lon], { icon: L.divIcon({ className: '', html: '<div style="width:10px;height:10px;background:#000;border:1px solid #fff"></div>', iconSize: [10, 10] }) }).addTo(map).bindTooltip('Aria: ' + s.nome + ' (' + (s.fine_attivita === 'in corso' ? 'attiva' : 'chiusa ' + s.fine_attivita) + ')');
+  });
+  const grp = L.featureGroup(Object.values(layers)); map.fitBounds(grp.getBounds().pad(0.12));
+  const top = V.varchi.reduce((a, b) => (b.mtot || 0) > (a.mtot || 0) ? b : a); scheda(top, m0);
+}
+function scheda(g, m0) {
+  const n = g.serie, W = 520, H = 130, ml = 44, mt = 8, mb = 22, mr = 6;
+  const mx = Math.max(...n.filter(v => v !== null), 1), ym = Math.ceil(mx / 1000) * 1000 || 1000;
+  const x = i => ml + (W - ml - mr) * i / (n.length - 1), y = v => mt + (H - mt - mb) * (1 - v / ym);
+  let p = '', pen = false; n.forEach((v, i) => { if (v === null) { pen = false; return; } p += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; });
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:560px;height:auto;border:1px solid #000">`;
+  [0, 0.5, 1].forEach(f => { const v = ym * f; s += `<line x1="${ml}" x2="${W - mr}" y1="${y(v)}" y2="${y(v)}" stroke="#ccc"/><text x="${ml - 4}" y="${y(v) + 4}" text-anchor="end" font-size="11" font-family="Georgia,serif">${nf(v)}</text>`; });
+  const [ya, ma] = m0.split('-').map(Number);
+  for (let yr = 2017; yr <= 2024; yr++) { const i = (yr - ya) * 12 - (ma - 1); s += `<line x1="${x(i)}" x2="${x(i)}" y1="${mt}" y2="${H - mb}" stroke="#eee"/><text x="${x(i) + 2}" y="${H - 8}" font-size="11" font-family="Georgia,serif">${yr}</text>`; }
+  s += `<path d="${p}" fill="none" stroke="${ACC}" stroke-width="2"/></svg>`;
+  const chiuso = g.ultima < '2024-11-30';
+  $('#scheda').innerHTML = `<b>Varco ${g.id} — ${g.nome}</b>${chiuso ? ' <span class="nota">(non compare piu dal ' + g.ultima.split('-').reverse().join('/') + ': tolto)</span>' : ''}
+   <div class="nota">Ingressi al giorno nei feriali, media per feriali normali: 2017 <b>${nf(g.m2017)}</b> · 2019 <b>${nf(g.m2019)}</b> · 2023 <b>${nf(g.m2023)}</b> · 2017-2024 <b>${nf(g.mtot)}</b>. Dati dal ${g.prima.split('-').reverse().join('/')} al ${g.ultima.split('-').reverse().join('/')}.</div>
+   <div class="nota">Linea: media mensile degli ingressi nei giorni feriali, settembre 2016 - novembre 2024.</div>${s}`;
+}
+
+function sezioniTabelle() {
+  const T = DATA.tabelle;
+  $('#anni-c').innerHTML = tab(['Anno', 'Feriali normali: ingressi al giorno', 'Giorni', 'Feriali sett.-nov.', 'Indice sett.-nov. (2019 = 100)', 'Sabato', 'Domenica', 'di cui moto (feriali)'],
+    T.anno.map(r => [r.anno, nf(r.lavorativi_media), nf(r.lavorativi_n), nf(r.lavorativi_sett_nov), nf(r.indice_sett_nov_vs_2019), nf(r.sabato), nf(r.domenica), nf(r.moto_lavorativi)]));
+  const mesi = MESI.map((m, i) => [m, nf(T.mesi['2019'][i]), nf(T.mesi['2020'][i]), pc(T.mesi['2020'][i] / T.mesi['2019'][i] * 100 - 100), nf(T.mesi['2021'][i]), pc(T.mesi['2021'][i] / T.mesi['2019'][i] * 100 - 100)]);
+  $('#covid-c').innerHTML = tab(['Mese', '2019', '2020', '2020 su 2019', '2021', '2021 su 2019'], mesi) + '<p class="fonte">Media degli ingressi nei giorni feriali non festivi, tutti i feriali del mese (agosto compreso). Fonte: <code>tabelle.json</code> (<code>mesi</code>). Lockdown nazionale 9/3-3/5/2020; Area C risulta sospesa 11/3-14/6/2020 e 5/11/2020-23/2/2021 (fonti pubbliche, da verificare).</p>';
+  const d = T.dow;
+  let h = '<h3>Giorno della settimana (giorni normali)</h3>' + tab(['Giorno', '2017', '2019', '2023'], d.giorni.map((g, i) => [g, nf(d['2017'][i]), nf(d['2019'][i]), nf(d['2023'][i])]));
+  h += '<h3>Agosto: media dei feriali</h3>' + tab(['Anno', 'Feriali di agosto', 'Feriali normali', 'Rapporto'], T.agosto.filter(x => x.agosto).map(x => [x.anno, nf(x.agosto), nf(x.normali), nf(x.rapporto * 100) + '%']));
+  h += '<h3>Festivi che cadono in un giorno feriale (2017-2019 e 2022-2024)</h3>' + tab(['Festivo', 'Ingressi (media)', 'Rispetto a un feriale normale', 'Volte'], T.festivi.map(x => [x.festivo, nf(x.media), nf(x.rapporto * 100) + '%', x.n]));
+  h += `<p class="nota">Periodo 24 dicembre - 6 gennaio, solo feriali (2017-2019, 2022-2023): ${nf(T.natale.media_lavorativi_24dic_6gen)} ingressi al giorno, contro ${nf(T.natale.rif_normali)} di un feriale normale.</p>`;
+  $('#giorni-c').innerHTML = h;
+  const M = T.mezzora, rows = M.slot.map((s, i) => [s, nf(M['2017_L'][i]), nf(M['2019_L'][i]), nf(M['2023_L'][i]), nf(M['2019_S'][i]), nf(M['2019_D'][i])]);
+  $('#ore-c').innerHTML = `<div class="scroll">${tab(['Ora (inizio)', 'Feriale 2017', 'Feriale 2019', 'Feriale 2023', 'Sabato 2019', 'Domenica 2019'], rows)}</div><p class="fonte">Fonte: file mensili per varco (somma sui varchi, divisa per i giorni). Tutte le altre annate sono in <code>tabelle.json</code> (<code>mezzora</code>).</p>`;
+  const tv = T.top.map(x => [x.nome, nf(x.m2017), nf(x.m2019), nf(x.m2023), nf(x.mtot), x.stato === 'attivo' ? '' : 'tolto nel 2022']);
+  $('#varchi-c').innerHTML = `<div class="scroll">${tab(['Varco', '2017', '2019', '2023', '2017-2024', 'Nota'], tv)}</div><p class="fonte">Ingressi al giorno, media dei feriali normali. Ordinati per la media 2017-2024 (per i due varchi tolti: fino a maggio 2022).</p>`;
+  const C = T.composizione, ys = Object.keys(C);
+  const voci = [['Autorizzati (classe)', 'classe_autorizzati'], ['Ecologici', 'classe_ecologici'], ['Paganti residenti', 'classe_paganti_residenti'], ['Paganti di servizio', 'classe_paganti_servizio'], ['Altri paganti', 'classe_altri_paganti'], ['Moto', 'classe_moto'],
+    ['Auto per persone', 'veic_persone'], ['Merci', 'veic_merci'], ['Euro 6', 'euro_euro6'], ['Euro non classificato', 'euro_nc'], ['Diesel', 'alim_diesel'], ['Benzina', 'alim_benzina'], ['Ibrido', 'alim_ibrido'], ['Elettrico', 'alim_elettrico']];
+  $('#tipi-c').innerHTML = tab(['% degli ingressi (feriali normali)'].concat(ys), voci.map(([n, k]) => [n].concat(ys.map(y => nf(C[y][k], 1))))) + '<p class="fonte">Fonte: file mensili per varco, campi classe_areac, categoria_veicolo, categoria_euro, tipologia_alimentazione. Attenzione: la quota "non classificato" cambia molto da un anno all\'altro (vedi trappole), quindi le singole classi Euro non sono confrontabili senza guardarla.</p>';
+  const st = DATA.stazioni_aria;
+  $('#aria-c').innerHTML = `<p class="nota">Solo preparazione: nessun confronto con i dati dell'aria in questa pagina. Distanza dal confine dell'Area C (poligono del Comune). Le stazioni vicine sono quelle dentro o entro 1,5 km; le altre servirebbero da controllo.</p>` +
+    tab(['Stazione', 'Posizione', 'Distanza dal confine', 'Attivita', 'Inquinanti (Comune)'], st.map(s => [s.nome, s.classe, nf(s.distanza_dal_confine_m) + ' m', s.fine_attivita === 'in corso' ? 'in corso' : 'chiusa ' + s.fine_attivita, s.inquinanti_comune])) +
+    '<p class="fonte">Posizioni dal filone aria (<code>qaria_stazione.csv</code>, Comune di Milano; ARPA Lombardia per le stazioni dell\'hinterland). Elenco completo con 15 stazioni dell\'hinterland entro 20 km in <code>area-c/pulito/stazioni_aria_vicino_areac.csv</code>. Nessuna stazione fuori dall\'Area C sta entro 1 km dal confine.</p>';
+  $('#footer-c').innerHTML = `<p>Fonte dei dati: Comune di Milano, dati aperti (dati.comune.milano.it), gestore AMAT (Agenzia Mobilita Ambiente Territorio). Licenza CC BY. Scaricati il 29/10/2026. Dati: gli ingressi sono i transiti rilevati dai varchi (non le persone), moto comprese.</p>
+   <p>Cosa c'e' sotto: serie giornaliera ufficiale (ds1085 per 2016-2018, ds1072 per 2019-2024), file mensili a mezz'ora per varco (settembre 2016 - novembre 2024), serie 2012-2016 con un altro conteggio (ds779-ds818), posizioni dei varchi (ds82), confine dell'Area C (ds51). Calcoli nostri: medie, calendario dei festivi.</p>
+   <p><b>Trappole dei dati:</b> la serie 2012-2016 non si unisce alla successiva; il campo areac dei file mensili non dice se Area C era sospesa; 16 giorni senza dati; 29 giorni dove ufficiale e mensili differiscono dell'1-2%; la quota di veicoli non classificati cambia da un anno all'altro; le date Covid e delle regole vengono da fonti non ufficiali (il sito del Comune blocca i programmi). Elenco completo con i numeri: <a href="https://github.com/AndreottiVIII/milano-in-dati/blob/main/area-c/pulito/problemi.md">area-c/pulito/problemi.md</a> e <a href="https://github.com/AndreottiVIII/milano-in-dati/blob/main/area-c/NOTE.md">area-c/NOTE.md</a>.</p>
+   <p>Dati puliti scaricabili: <a href="data/ingressi_giornalieri.csv">ingressi_giornalieri.csv</a> (serie 2016+ con dettagli), <a href="data/ingressi_giornalieri_2012-2016_conteggio_diverso.csv">serie 2012-2016</a>, <a href="data/varchi.csv">varchi.csv</a>, <a href="data/eventi.csv">eventi.csv</a>. Il file per varco e giorno (4 MB) e' nel repository: <code>area-c/pulito/ingressi_varco_giorno.csv</code>. Mappa: © OpenStreetMap contributors. <a href="../">Torna alla pagina iniziale</a>.</p>`;
+}
+
+(async () => {
+  try {
+    await carica();
+    sezioneInBreve(); sezioneGrafico(); sezioneVecchia(); sezioniTabelle();
+    if (window.L) sezioneMappa(); else $('#mappa').innerHTML = '<p class="nota" style="padding:8px">La mappa non si e caricata (libreria Leaflet non raggiungibile).</p>';
+  } catch (e) {
+    const el = $('#errore'); el.style.display = 'block'; el.textContent = 'Errore nel caricamento dei dati: ' + e.message; console.error(e);
+  }
+})();
+</script>
+</body>
+</html>

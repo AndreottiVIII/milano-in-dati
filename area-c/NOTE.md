@@ -64,3 +64,32 @@ Nessuna registrazione o clic di licenza richiesti. Nessun errore di download (`r
 ## File di controllo
 `verifica\copertura_mensili.csv` (per mese: righe, giorni, varchi, transiti, giorni mancanti; le colonne `dt`, `n`, `day` non ci sono: la colonna `col` e' 16 perche' include 3 campi di servizio aggiunti dal controllo, il file originale ne ha 13), `verifica\varchi_per_mese.csv`, `verifica\giornaliero_da_mensili.csv` (totale, moto, auto per giorno sommando i varchi, 2016-2024).
 Script: 01_catalogo.py (catalogo), 02_scarica.py (download, riprendibile), 03_verifica.py, 04_confronto_giornaliero.py.
+
+# FASE 2 (29/10/2026): pulizia e prima pagina
+
+Cartella `pulito\` (dati puliti), script 05-08 in `scripts\`, pagina in `..\docs\area-c\`. Regole delle trappole: vedi `pulito\problemi.md` (con tutti i numeri).
+
+## Cosa c'e' in `pulito\`
+- `ingressi_giornalieri.csv`: un giorno per riga, dal 1/9/2016 al 30/11/2024 (3.013 giorni). Colonne: `totale` (serie ufficiale: ds1085 fino al 2018, ds1072 dal 2019), `serie`, `fonte_dataset`, `flag`, `tot_mensili` (somma dei varchi), e il dettaglio dai file mensili (tipo di veicolo, autorizzati, residenti, servizio, categoria, classe Area C, Euro, alimentazione, FAP). 61 giorni del 2024 vengono dai mensili; 16 giorni non hanno nessun dato.
+- `ingressi_giornalieri_2012-2016_conteggio_diverso.csv`: la serie vecchia, **separata e non unibile** (vedi sotto).
+- `ingressi_varco_giorno.csv`: giorno x varco (42 varchi; 40 dal 30/5/2022). La somma dei varchi coincide con il totale dei mensili.
+- `varchi.csv` (nome, posizione, primo/ultimo giorno, medie), `calendario.csv` (festivi, agosto, Natale, feriali), `eventi.csv` (date delle regole e del Covid con link, "da verificare"), `stazioni_aria_vicino_areac.csv` (per il confronto futuro con l'aria), `tabella_*.csv` (le tabelle della pagina), `problemi.md`.
+
+## La serie 2012-2015
+Dal gennaio 2016 scende da circa 135.000 a circa 45.000 al giorno: e' il modo di contare, non il traffico. Nei 18 giorni in comune (1-18/9/2016) la serie vecchia dice 43.179 al giorno, quella ufficiale 153.474 (rapporto 0,28). Contro le sole autovetture dei mensili (125.133) il rapporto e' 0,345, quasi uguale per quasi tutte le categorie: sembra circa un terzo delle auto, senza le moto. Non e' un sottoinsieme di varchi. Non e' stato applicato nessun fattore. Non si sa se il 2012-2015 includesse le moto: da chiedere ad AMAT.
+
+## Prime cifre (solo numeri, nessuna causa)
+- Feriali di settembre-novembre: 163.933 al giorno nel 2017, 163.981 nel 2019, 137.788 nel 2024 (meno 16% sul 2017 e sul 2019). Totale con le moto.
+- Aprile 2020: 40.072 al giorno nei feriali contro 153.559 di aprile 2019. Settembre-novembre 2021: 93% del 2019.
+- Feriali di agosto: circa meta di un feriale normale. Ferragosto: 26%.
+- Varco piu usato: Turati (11.828 al giorno). I primi 5 varchi: 31% del totale (2019).
+- Profilo orario: picco alle 8.30 (2019) e alle 9.00 (2023).
+
+## Cose da sapere
+- Il campo `areac` dei mensili e' il calendario regolamentare (7.30-19.30 dei feriali), non dice se Area C era davvero sospesa nel Covid. Le date di sospensione vengono da giornali e siti (il sito del Comune blocca i programmi): 11-12/3/2020 - 15/6/2020 e 5/11/2020 - 24/2/2021 (poi orario 10-19.30 fino al 9/6/2021). Tutto "da verificare" in `eventi.csv`.
+- Il lockdown 9/3-3/5/2020 viene dal mandato, non da un atto.
+- Scioperi dei trasporti: nessuna lista aperta trovata, saltati.
+- Confronto con l'aria (fase 3, non fatto): nessuna stazione fuori dall'Area C sta entro 1 km dal confine; dentro: via Senato (573 m dal confine) e Verziere (837 m); entro 1,5 km: viale Liguria, via Juvara (chiusa 2007); le altre come controllo, piu 15 stazioni ARPA dell'hinterland.
+- Pagina: `docs\area-c\index.html` (grafici in SVG, mappa Leaflet, tabelle). Dati del sito: 1,5 MB in `docs\area-c\data\`. Provata sul server "milano-in-dati" (porta 8796), nessun errore in console.
+
+Ripetere la pulizia: `python -I scripts/05_aggrega_mensili.py raw pulito/_agg` (3-4 minuti), poi `06_giornaliero_calendario.py raw pulito`, `07_serie_vecchia.py raw pulito`, `08_varchi_tabelle_sito.py . ..\docs\area-c\data ..\aria`.

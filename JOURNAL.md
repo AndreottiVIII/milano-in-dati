@@ -850,6 +850,19 @@ Nessuna registrazione o clic di licenza richiesti. Nessun errore di download (`r
 `verifica\copertura_mensili.csv` (per mese: righe, giorni, varchi, transiti, giorni mancanti; le colonne `dt`, `n`, `day` non ci sono: la colonna `col` e' 16 perche' include 3 campi di servizio aggiunti dal controllo, il file originale ne ha 13), `verifica\varchi_per_mese.csv`, `verifica\giornaliero_da_mensili.csv` (totale, moto, auto per giorno sommando i varchi, 2016-2024).
 Script: 01_catalogo.py (catalogo), 02_scarica.py (download, riprendibile), 03_verifica.py, 04_confronto_giornaliero.py.
 
+### Fase 2 — serie pulita e pagina (2026-10-29)
+
+- Serie giornaliera `area-c/pulito/ingressi_giornalieri.csv`: 3.013 giorni, dall'1/9/2016 al 30/11/2024 (ds1085 e ds1072, moto comprese), con le suddivisioni per tipo di veicolo, classe Euro e paganti. Ingressi per varco in `ingressi_varco_giorno.csv`. Trappole in `area-c/pulito/problemi.md`.
+- **La serie 2012-2015 resta a parte**: nei 18 giorni in comune legge 43.179 ingressi al giorno contro 153.474 (rapporto 0,28; sulle sole auto 0,345, quasi uguale per tutte le categorie). Sembra contare circa un terzo delle auto e nessuna moto. Non è un sottoinsieme di varchi. Non è stata corretta; da chiedere ad AMAT.
+- Primi numeri (feriali di settembre-novembre): 163.933 al giorno nel 2017, 163.981 nel 2019, 137.788 nel 2024 (-16%). Ad aprile 2020 40.072 contro 153.559 ad aprile 2019 (-74%). Il varco più usato è Turati, con 11.828 al giorno; il picco è alle 8:30 nel 2019 e alle 9:00 nel 2023.
+- **Controllo del coordinatore**: ricalcolato sulla serie pulita, includendo i festivi: 163.165 nel 2019 e 136.985 nel 2024 (-16%), aprile 2020 -73%. Torna.
+- **Altre trappole**:
+  - Il campo `areac` resta a 1 anche durante le sospensioni Covid.
+  - Le date di Covid e regole vengono dalla stampa (il sito del Comune risponde 403 ai programmi): sono "da verificare".
+  - Non esiste un elenco aperto degli scioperi.
+  - I varchi 87 e 89 spariscono dal 30/5/2022.
+- **Per il legame con l'aria**: dentro Area C ci sono Senato e Verziere; nessuna centralina fuori Area C sta entro 1 km dal confine (Liguria e Juvara a circa 1,2 km).
+
 ## 7. Bici contro auto contro mezzi
 
 _Fonti, date di scarico, licenze, ipotesi, scelte, problemi. Cartella `bici-auto-mezzi/`._
