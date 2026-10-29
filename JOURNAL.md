@@ -946,6 +946,28 @@ PC: Intel i5-12600K (10 core, 16 thread), 31,8 GB RAM, 78 GB liberi su disco, Wi
 - Stazioni BikeMi aggiornate a oggi (file del 2022).
 - Velocita' reali del traffico auto: nessun dato aperto, come previsto.
 
+### Fase 2 — motore dei percorsi e taratura (2026-10-29)
+
+- **Motore in Python** (numpy/scipy/numba, niente servizi a pagamento né chiavi):
+  - grafi a piedi, in bici e in auto da OSM;
+  - Connection Scan sugli orari GTFS: ATM aggiornato alla v425, valido dal 26/10 al 30/11/2026, più Trenord;
+  - mezzi: fino a 800 m a piedi per la fermata, cambi con al massimo 300 m a piedi, media di 6 partenze;
+  - griglia di 2.915 celle da 250 m; da un punto a tutte le celle in 0,1-0,3 secondi.
+- **Ipotesi da tarare** (tabella in `bici-auto-mezzi/NOTE.md`, "Fase 2"):
+  - bici 15 km/h sulle ciclabili e 13 km/h su strada, con attese ai semafori (in pratica circa 12 km/h);
+  - auto alle 8:00 tarata su TomTom 2025 (38'43" ogni 10 km); alle 12:00 e alle 21:00 sono ipotesi;
+  - minuti per parcheggiare per zona;
+  - Area C 7,50 €, orari "da verificare".
+- **Primi risultati** (ore 8:00, 300 origini casuali verso tutte le celle):
+  - 0-2 km vince la bici nel 92% dei casi;
+  - 2-4 km la bici nel 78%;
+  - 4-6 km bici 44%, auto 39%, mezzi 17%;
+  - 6-8 km l'auto nel 55%;
+  - 8-12 km l'auto nel 68%.
+  - Provvisori fino alla taratura.
+- **Taratura**: `bici-auto-mezzi/tragitti_prova.csv` (20 tragitti, martedì 3/11/2026 alle 8:00, 12:00 e 21:00) con le istruzioni in `COME_CONTROLLARE.md`. Davide riempie i tempi di Google Maps.
+- **Incidenti**: su 500 righe di prova, il 74% si colloca bene sulla mappa (28,6% al civico esatto, 45,4% all'incrocio), il 17% solo con la via, l'8% non si trova.
+
 ## 8. La Scala, cartellone dal 1778 a oggi
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `scala/`._
