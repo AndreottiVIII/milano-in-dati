@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Milano nei film e nei libri</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--film:#c2185b;--libri:#1565c0;--both:#6a1b9a;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} .big{font-size:2.2rem;font-weight:700;line-height:1.1} .sub{font-size:.85rem;color:var(--mut)}
+.src{font-size:.82rem;color:var(--mut)} a{color:var(--libri)}
+#map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)} #map{height:68vh;min-height:380px;border:1px solid var(--ink)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:.4em 0 .6em;font-size:.95rem} .ctl label{white-space:nowrap} select{font:inherit;padding:2px 4px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-right:4px;border:1px solid #fff;box-shadow:0 0 0 1px #888}
+.kpi{display:flex;flex-wrap:wrap;gap:16px 36px;margin:.6em 0} .kpi div{min-width:150px}
+details{border-bottom:1px solid var(--line);padding:4px 0} summary{cursor:pointer;font-weight:600;padding:3px 0} summary span{font-weight:400;color:var(--mut);font-size:.88rem}
+ul.op{list-style:none;margin:.2em 0 .6em;padding:0} ul.op li{padding:3px 0;border-top:1px dotted var(--line)} ul.op .m{display:block;font-size:.82rem;color:var(--mut)}
+.pop{max-height:240px;overflow:auto;font-size:.9rem} .pop ul{margin:.3em 0 0;padding-left:1.1em} .pop li{margin:.15em 0}
+button.lnk{font:inherit;background:none;border:0;color:var(--libri);text-decoration:underline;cursor:pointer;padding:0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+@media(max-width:640px){.big{font-size:1.7rem} th,td{padding:5px 4px;font-size:.88rem} #map{height:60vh}}
+</style></head><body><main>
+<h1>Milano nei film e nei libri</h1>
+<p id="intro">Caricamento dei dati&hellip;</p>
+
+<h2>Quante opere hanno un luogo preciso</h2>
+<div class="kpi" id="kpi"></div>
+<table id="tcov"></table>
+<p class="src">Un&rsquo;opera conta se almeno un luogo (strada, piazza, stazione, teatro, quartiere&hellip;) &egrave; stato riconosciuto con confidenza alta o media. &ldquo;Prima&rdquo; = solo i luoghi indicati su Wikidata (fase 1). Fonte: <a href="data/stats.json">data/stats.json</a>, calcolato da <a href="data/luoghi.csv">data/luoghi.csv</a>.</p>
+
+<h2>La mappa</h2>
+<div class="ctl">
+ <label>Decennio <select id="fdec"></select></label>
+ <label><input type="checkbox" id="ffilm" checked> <span class="dot" style="background:var(--film)"></span>film e serie TV</label>
+ <label><input type="checkbox" id="flibri" checked> <span class="dot" style="background:var(--libri)"></span>libri</label>
+ <label>Luogo come <select id="ftipo"><option value="">ambientazione e riprese</option><option value="a">solo ambientazione</option><option value="r">solo riprese</option></select></label>
+</div>
+<p class="src"><span class="dot" style="background:var(--both)"></span>luogo con film e libri. Cerchio pi&ugrave; grande = pi&ugrave; opere. Clic su un cerchio per vedere le opere. <span id="mapn"></span></p>
+<div id="map" role="img" aria-label="Mappa di Milano con i luoghi di film e libri"></div>
+
+<h2>I luoghi pi&ugrave; raccontati</h2>
+<table id="ttop"></table>
+<p class="src">Conta le opere diverse che nominano il luogo (con i filtri della mappa qui sopra). Luoghi vicini (meno di 100 m) sono contati insieme.</p>
+
+<h2>Film e serie TV per decennio</h2>
+<div id="lfilm"></div>
+<h2>Libri per decennio</h2>
+<div id="llibri"></div>
+<h2>Altre opere</h2>
+<div id="laltro"></div>
+
+<h2>Fonti e limiti</h2>
+<div id="limiti"></div>
+
+<footer>
+<p><b>Licenze.</b> Elenco delle opere, anni, registi e autori: Wikidata (CC0). Wikipedia (it e en, CC BY-SA): da ogni articolo si leggono la trama e le sezioni sulle riprese solo per ricavare i nomi dei luoghi; qui si pubblicano solo fatti (opera, luogo, ambientazione o riprese) e il link all&rsquo;articolo, nessuna frase. Strade e quartieri: Comune di Milano, registro dei civici e NIL (CC BY). Nomi e coordinate di edifici e stazioni: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> (ODbL). Libri: metadati di Open Library e catalogo della Library of Congress.</p>
+<p>Aggiornato al 30 ottobre 2026. Progetto Milano in dati.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
+function nf(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+var COL = {f: '#c2185b', l: '#1565c0', fl: '#6a1b9a'};
+var map = L.map('map').setView([45.4642, 9.19], 12);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+var layer = L.layerGroup().addTo(map);
+var OPERE = [], LUOGHI = {}, ST = null, PW = {}, MARK = {};
+
+function decLabel(d) { return d === 'nd' ? 'senza data' : (d === 'old' ? 'prima del 1900' : d + '-' + (+d + 9)); }
+function decKey(o) { if (o.y == null && o.d == null) return 'nd'; var d = o.d != null ? o.d : Math.floor(o.y / 10) * 10; return d < 1900 ? 'old' : String(d); }
+function link(o) {
+  var u = o.w || (o.q ? 'https://www.wikidata.org/wiki/' + o.q : '') || o.ol;
+  var t = esc(o.t);
+  return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + t + '</a>' : t;
+}
+function filtri() {
+  return {dec: document.getElementById('fdec').value, film: document.getElementById('ffilm').checked,
+          libri: document.getElementById('flibri').checked, tipo: document.getElementById('ftipo').value};
+}
+function passa(o, f) {
+  if (o.k === 'f' && !f.film) return false;
+  if (o.k === 'l' && !f.libri) return false;
+  if (o.k === 'a') return false;
+  if (f.dec && decKey(o) !== f.dec) return false;
+  return true;
+}
+function opereDelLuogo(pid, f) {
+  var out = [], seen = {};
+  (PW[pid] || []).forEach(function(x) {
+    var o = x[0];
+    if (!passa(o, f) || (f.tipo && x[1] !== f.tipo)) return;
+    if (seen[o.id]) { if (x[1] === 'r' && seen[o.id].tipi.indexOf('r') < 0) seen[o.id].tipi += 'r'; if (x[1] === 'a' && seen[o.id].tipi.indexOf('a') < 0) seen[o.id].tipi += 'a'; return; }
+    seen[o.id] = {o: o, tipi: x[1], c: x[2]}; out.push(seen[o.id]);
+  });
+  out.sort(function(a, b) { return (a.o.y || 9999) - (b.o.y || 9999); });
+  return out;
+}
+function popup(pid, f) {
+  var L0 = LUOGHI[pid], lst = opereDelLuogo(pid, f);
+  var h = '<div class="pop"><b>' + esc(L0.n) + '</b><br><span class="sub">' + esc(L0.tl) + ' &middot; ' + lst.length + (lst.length === 1 ? ' opera' : ' opere') + '</span><ul>';
+  lst.forEach(function(x) {
+    var o = x.o, meta = [];
+    if (o.y) meta.push(o.y);
+    if (o.c) meta.push(esc(o.c.split(';')[0]));
+    meta.push(x.tipi.indexOf('a') >= 0 && x.tipi.indexOf('r') >= 0 ? 'ambientazione e riprese' : (x.tipi === 'r' ? 'riprese' : 'ambientazione'));
+    h += '<li>' + link(o) + ' <span class="sub">(' + (o.k === 'l' ? 'libro' : (o.s ? 'serie TV' : 'film')) + ', ' + meta.join(' &middot; ') + (x.c === 'm' ? ', luogo da verificare' : '') + ')</span></li>';
+  });
+  return h + '</ul></div>';
+}
+function disegna() {
+  var f = filtri(); layer.clearLayers(); MARK = {}; var nl = 0, no = {};
+  Object.keys(LUOGHI).forEach(function(pid) {
+    var lst = opereDelLuogo(pid, f); if (!lst.length) return;
+    var nf_ = lst.filter(function(x) { return x.o.k === 'f'; }).length, nl_ = lst.filter(function(x) { return x.o.k === 'l'; }).length;
+    var col = nf_ && nl_ ? COL.fl : (nf_ ? COL.f : COL.l), L0 = LUOGHI[pid];
+    var m = L.circleMarker([L0.lat, L0.lon], {radius: Math.min(22, 5 + 2.6 * Math.sqrt(lst.length)), color: '#fff', weight: 1.5, fillColor: col, fillOpacity: .78});
+    m.bindPopup(function() { return popup(pid, filtri()); }, {maxWidth: 340});
+    m.addTo(layer); MARK[pid] = m; nl++; lst.forEach(function(x) { no[x.o.id] = 1; });
+  });
+  document.getElementById('mapn').textContent = nl + ' luoghi, ' + Object.keys(no).length + ' opere.';
+  top20(f);
+}
+function top20(f) {
+  var arr = Object.keys(LUOGHI).map(function(pid) {
+    var lst = opereDelLuogo(pid, f);
+    return {pid: pid, n: lst.length, f: lst.filter(function(x) { return x.o.k === 'f'; }).length, l: lst.filter(function(x) { return x.o.k === 'l'; }).length};
+  }).filter(function(x) { return x.n > 0; }).sort(function(a, b) { return b.n - a.n || LUOGHI[a.pid].n.localeCompare(LUOGHI[b.pid].n); }).slice(0, 20);
+  var h = '<tr><th>#</th><th>Luogo</th><th class="r">Opere</th><th class="r">Film/serie</th><th class="r">Libri</th><th></th></tr>';
+  arr.forEach(function(x, i) {
+    h += '<tr><td>' + (i + 1) + '</td><td>' + esc(LUOGHI[x.pid].n) + ' <span class="sub">' + esc(LUOGHI[x.pid].tl) + '</span></td><td class="r"><b>' + x.n + '</b></td><td class="r">' + x.f + '</td><td class="r">' + x.l + '</td><td><button class="lnk" data-p="' + x.pid + '">sulla mappa</button></td></tr>';
+  });
+  document.getElementById('ttop').innerHTML = h;
+}
+document.getElementById('ttop').addEventListener('click', function(e) {
+  var p = e.target.getAttribute && e.target.getAttribute('data-p'); if (!p || !MARK[p]) return;
+  document.getElementById('map').scrollIntoView({block: 'center'});
+  map.setView(MARK[p].getLatLng(), Math.max(map.getZoom(), 14)); MARK[p].openPopup();
+});
+
+function liste() {
+  var gruppi = {f: {}, l: {}, a: {}};
+  OPERE.forEach(function(o) { var k = decKey(o); (gruppi[o.k][k] = gruppi[o.k][k] || []).push(o); });
+  function nomi(o, t) {
+    var s = {}, out = [];
+    o.p.forEach(function(x) { if (x[1] === t && !s[x[0]]) { s[x[0]] = 1; out.push(LUOGHI[x[0]].n); } });
+    return out.length > 6 ? out.slice(0, 6).join(', ') + ' e altri ' + (out.length - 6) : out.join(', ');
+  }
+  function render(k, id) {
+    var chiavi = Object.keys(gruppi[k]).sort(function(a, b) { var o = {old: 0, nd: 9999}; return (a in o ? o[a] : +a) - (b in o ? o[b] : +b); });
+    var h = '';
+    chiavi.forEach(function(c) {
+      var arr = gruppi[k][c], con = arr.filter(function(o) { return o.p.length; }).length;
+      h += '<details><summary>' + decLabel(c) + ' <span>' + arr.length + ' opere, ' + con + ' con un luogo preciso</span></summary><ul class="op">';
+      arr.forEach(function(o) {
+        var m = [];
+        if (o.y) m.push(o.y); if (o.c) m.push(esc(o.c.split(';').slice(0, 2).join(', '))); if (o.s) m.push('serie TV');
+        var a = nomi(o, 'a'), r = nomi(o, 'r');
+        h += '<li>' + link(o) + (m.length ? ' <span class="sub">(' + m.join(' &middot; ') + ')</span>' : '') +
+             (a ? '<span class="m">ambientazione: ' + esc(a) + '</span>' : '') + (r ? '<span class="m">riprese: ' + esc(r) + '</span>' : '') + '</li>';
+      });
+      h += '</ul></details>';
+    });
+    document.getElementById(id).innerHTML = h || '<p>Nessuna.</p>';
+  }
+  render('f', 'lfilm'); render('l', 'llibri'); render('a', 'laltro');
+}
+function copertura() {
+  var s = ST, tot = {f: 0, l: 0}, con = {f: 0, l: 0}, wiki = {f: 0, l: 0}, per = {};
+  OPERE.forEach(function(o) {
+    if (o.k === 'a') return; tot[o.k]++; if (o.w) wiki[o.k]++; if (o.p.length) con[o.k]++;
+    var d = decKey(o); per[o.k + d] = per[o.k + d] || [0, 0]; per[o.k + d][0]++; if (o.p.length) per[o.k + d][1]++;
+  });
+  var pf = s.film.prima + s.serie_tv.prima, pl = s.libro.prima;
+  document.getElementById('intro').innerHTML = 'Wikidata dice per ogni film e libro ambientato a Milano soltanto &ldquo;Milano&rdquo;. Leggendo le trame e le sezioni sulle riprese degli articoli di Wikipedia, ' +
+    'per <b>' + con.f + ' film e serie TV</b> e <b>' + con.l + ' libri</b> si riconosce almeno un luogo preciso (una strada, una piazza, una stazione, un teatro, un quartiere), contro ' + pf + ' film e ' + pl + ' libri della sola Wikidata. I luoghi sono sulla mappa e negli elenchi qui sotto.';
+  document.getElementById('kpi').innerHTML =
+    '<div><span class="big" style="color:var(--film)">' + con.f + '</span><br>film e serie TV con un luogo preciso<br><span class="sub">su ' + tot.f + ' (prima: ' + pf + ')</span></div>' +
+    '<div><span class="big" style="color:var(--libri)">' + con.l + '</span><br>libri con un luogo preciso<br><span class="sub">su ' + tot.l + ' (prima: ' + pl + ')</span></div>' +
+    '<div><span class="big">' + s.luoghi_distinti + '</span><br>luoghi diversi<br><span class="sub">' + s.righe_luoghi + ' collegamenti opera-luogo</span></div>';
+  var decs = {}; OPERE.forEach(function(o) { if (o.k !== 'a') decs[decKey(o)] = 1; });
+  var ch = Object.keys(decs).sort(function(a, b) { var o = {old: 0, nd: 9999}; return (a in o ? o[a] : +a) - (b in o ? o[b] : +b); });
+  var h = '<tr><th>Decennio</th><th class="r">Film e serie: con luogo / totale</th><th class="r">Libri: con luogo / totale</th></tr>';
+  ch.forEach(function(d) {
+    var a = per['f' + d] || [0, 0], b = per['l' + d] || [0, 0];
+    h += '<tr><td>' + decLabel(d) + '</td><td class="r">' + (a[0] ? a[1] + ' / ' + a[0] : '&ndash;') + '</td><td class="r">' + (b[0] ? b[1] + ' / ' + b[0] : '&ndash;') + '</td></tr>';
+  });
+  h += '<tr><td><b>Totale</b></td><td class="r"><b>' + con.f + ' / ' + tot.f + '</b></td><td class="r"><b>' + con.l + ' / ' + tot.l + '</b></td></tr>';
+  document.getElementById('tcov').innerHTML = h;
+  var sel = '<option value="">tutti</option>'; ch.forEach(function(d) { sel += '<option value="' + d + '">' + decLabel(d) + '</option>'; });
+  document.getElementById('fdec').innerHTML = sel;
+  var pr = s.precisione, p1 = Math.round(100 * pr.ultimo_giro.giusti / pr.ultimo_giro.n), p2 = Math.round(100 * pr.tutti_i_giri.giusti / pr.tutti_i_giri.n);
+  document.getElementById('limiti').innerHTML =
+    '<p><b>Come sono stati trovati i luoghi.</b> Le opere vengono da Wikidata (ambientazione o luogo delle riprese a Milano) e dalle categorie di it.wikipedia (&ldquo;Film ambientati a Milano&rdquo; e simili), pi&ugrave; Open Library e Library of Congress per i libri. ' +
+    'Per ogni opera con un articolo su it.wikipedia o en.wikipedia (' + wiki.f + ' film e serie, ' + wiki.l + ' libri) un programma legge la trama, le sezioni sulle riprese e la parte iniziale, e cerca i nomi di luoghi di Milano: strade e piazze dal registro dei civici del Comune, quartieri (NIL), edifici e stazioni da OpenStreetMap, un elenco a mano di luoghi famosi, e i link verso pagine con coordinate dentro Milano. ' +
+    'Il luogo &egrave; &ldquo;ambientazione&rdquo; se la frase dice dove si svolge la storia, &ldquo;riprese&rdquo; se dice dove &egrave; stato girato; quando la frase non lo dice, vale il tipo della sezione.</p>' +
+    '<p><b>Quanto sono giusti.</b> Il controllo a mano di 30 luoghi presi a caso, dopo le ultime correzioni: <b>' + pr.ultimo_giro.giusti + ' giusti su ' + pr.ultimo_giro.n + ' (' + p1 + '%)</b>; sommando i quattro giri di controllo fatti mentre si correggeva le regole, ' + pr.tutti_i_giri.giusti + ' su ' + pr.tutti_i_giri.n + ' (' + p2 + '%). ' +
+    'Gli errori tipici: una frase che nomina due citt&agrave; (un luogo di Torino letto come Milano), un personaggio o una compagnia con il nome di un luogo, una strada con lo stesso nome di una strada fuori Milano. I luoghi segnati &ldquo;da verificare&rdquo; nel fumetto della mappa sono quelli a confidenza media. ' +
+    'La distinzione tra ambientazione e riprese si sbaglia pi&ugrave; spesso del luogo stesso.</p>' +
+    '<p><b>Cosa manca.</b> (1) Solo ' + con.f + ' film su ' + tot.f + ' e ' + con.l + ' libri su ' + tot.l + ' hanno un luogo: le trame di Wikipedia spesso dicono solo &ldquo;a Milano&rdquo;. (2) La maggior parte dei libri (Open Library, Library of Congress) non ha una pagina Wikipedia da leggere, quindi non ha luoghi; per i libri i conti per decennio dipendono da chi ha schedato. ' +
+    '(3) Le voci en.wikipedia sono state lette solo per le opere che ne hanno una; le categorie di en.wikipedia non sono state cercate. (4) Una strada &egrave; un punto solo (il civico centrale), non il tracciato. (5) Il lago Idroscalo e altri luoghi appena fuori dal Comune sono messi a Milano come li chiama la gente. (6) Gli anni delle opere vengono da Wikidata e Open Library e qualche volta sono quelli dell&rsquo;edizione, non della prima uscita. ' +
+    '(7) Il database delle location della Lombardia Film Commission non &egrave; stato usato: il suo robots.txt vieta i programmi.</p>' +
+    '<p class="src">Dati: <a href="data/opere.json">data/opere.json</a> (tutte le opere, con i luoghi), <a href="data/luoghi.json">data/luoghi.json</a>, <a href="data/luoghi.csv">data/luoghi.csv</a>.</p>';
+}
+Promise.all([
+  fetch('data/opere.json', {cache: 'no-cache'}).then(function(r) { return r.json(); }),
+  fetch('data/luoghi.json', {cache: 'no-cache'}).then(function(r) { return r.json(); }),
+  fetch('data/stats.json', {cache: 'no-cache'}).then(function(r) { return r.json(); })
+]).then(function(a) {
+  OPERE = a[0]; ST = a[2];
+  a[1].forEach(function(l) { LUOGHI[l.id] = l; });
+  OPERE.forEach(function(o) { o.p.forEach(function(x) { (PW[x[0]] = PW[x[0]] || []).push([o, x[1], x[2]]); }); });
+  copertura(); liste(); disegna();
+  ['fdec', 'ffilm', 'flibri', 'ftipo'].forEach(function(id) { document.getElementById(id).addEventListener('change', disegna); });
+}).catch(function(e) { document.getElementById('intro').textContent = 'Dati non caricati.'; });
+</script></body></html>

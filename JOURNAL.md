@@ -1436,3 +1436,12 @@ Attenzione: i conteggi dei libri dipendono molto da chi ha schedato (Wikidata + 
 - `pulito\film.csv`, `serie_tv.csv`, `libri.csv`, `altro.csv`: una riga per opera, colonne `fonte_wikidata_P840`, `fonte_wikidata_P915`, `fonte_itwiki_categoria`, `fonte_openlibrary`, `fonte_loc`, `fonte_sbn`, `imdb_id` (solo identificatore, nessun dato IMDb), `luogo_preciso`, `lat_lon_primo_luogo_preciso`.
 - `pulito\openlibrary_tutti.csv` (4.562 righe, con colonna `narrativa_probabile`), `pulito\_statistiche.json`.
 - Programmi in `scripts\`; `raw\` non va pubblicato intero (le parti Wikipedia/Open Library sono comunque ripubblicabili, vedi licenze sopra).
+
+### Fase 2 — luoghi e pagina (2026-10-30)
+
+- I luoghi precisi di Milano sono estratti dalle voci di Wikipedia (trama, produzione, riprese) con un elenco di luoghi preparato da noi (stradario, NIL, luoghi OSM, monumenti). Le opere con un luogo preciso passano da 14 a 185 (144 film e serie, 37 libri): 426 collegamenti opera-luogo, 179 luoghi diversi.
+- Precisione controllata a mano: 28 su 30 nell'ultimo giro, 111 su 120 su quattro giri.
+- Luoghi più raccontati: Stazione Centrale 26, Scala 26, Duomo 23, San Siro 13, San Vittore 12, San Babila 11.
+- Le frasi di Wikipedia restano solo sul PC (`pulito/_frasi_locali.csv`); nel sito ci sono solo fatti e link.
+- **Nome della sezione scelto da Davide: `milano-raccontata`** (pagina `docs/milano-raccontata/`); la cartella dei dati resta `film-e-libri/`.
+
