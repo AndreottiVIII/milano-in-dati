@@ -473,7 +473,7 @@ Tempi: scarico circa 66 minuti, estrazione circa 10 minuti, tabella Milano circa
 - **Correzioni**: 2 coordinate con latitudine e longitudine scambiate, corrette; una (Cascina Mirabello) cade fuori dal Comune e non è sulla mappa.
 - **Da verificare**:
   - Le 3.195 schede senza ente hanno tutte le coordinate di Brera; restano con l'ente "non indicata".
-  - I link alle schede (`https://catalogo.beniculturali.it/detail/<Classe>/<codice>`) non sono stati verificati: il catalogo ha un controllo anti-robot. Davide controlla a mano un link.
+  - Link alle schede (`https://catalogo.beniculturali.it/detail/<Classe>/<codice>`): **verificati da Davide il 29/10 alle 21:36**. Il link di prova (HistoricOrArtisticProperty/0100106854) apre la scheda giusta: "Circoncisione di Gesù Bambino", dipinto di Benvenuti Giovanni Battista detto l'Ortolano.
 - Pagina `docs/beni-culturali/`; dati derivati CC BY-SA 4.0 con attribuzione a ICCD (ArCo 2.0).
 
 ## 4. Elezioni milanesi
