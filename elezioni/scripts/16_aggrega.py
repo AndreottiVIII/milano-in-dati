@@ -1,6 +1,8 @@
 """Passo 3: aggrega per partito (lista) e per famiglia, territorio ed elezione; scrive i JSON del sito.
 Nel sito ogni elezione ha: fam (famiglie, per tabella sezioni e mappa), par (lista di [nome, indice famiglia]), city.v e terr[n].v (voti per partito, nell'ordine di par).
 Le liste sotto lo 0,5% dei voti di lista della citta (se almeno 2 nella stessa famiglia) sono unite in "Altre liste" della famiglia.
+Dal 2026-10-29 include anche le consultazioni 1946-1979 di Eligendo (pulito/milano_pre1979.csv): solo totale della citta, nessun territorio ne' sezione
+(flag pre=True, sistema=None, terr={}). Le coppie (tipo, data) gia' presenti nei dati del Comune (es. Camera 1979) non si duplicano.
 uso: python -I 16_aggrega.py <cartella elezioni> <cartella docs/elezioni>
 Scrive: pulito/aggregati_territorio.csv, docs/elezioni/data/index.json, docs/elezioni/data/e/<id>.json
 """
@@ -27,6 +29,36 @@ cat = cat[cat.nel_sito == 'si'].copy()
 voti = voti[voti.elezione_id.isin(cat.elezione_id)]
 ris = ris[ris.elezione_id.isin(cat.elezione_id)]
 
+
+# ---- consultazioni prima del 1979 (Eligendo, ministero dell'Interno): una "sezione" finta (0) = totale della citta
+PRE = {}
+pre = pd.read_csv(os.path.join(pul, 'milano_pre1979.csv'), encoding='utf-8-sig')
+pre['gruppo'] = pre.tipo.map({'comunali': 'comunali_consiglio', 'regionali': 'regionali_consiglio'}).fillna(pre.tipo)
+pre['qn'] = pre.quesito.fillna('').str.extract(r'^(\d+)')[0].fillna('0').astype(int)
+pre['eid'] = [e if q == 0 else '%s_q%d' % (e, q) for e, q in zip(pre.elezione_id, pre.qn)]
+dup = set(zip(cat.gruppo, cat.data))
+pre = pre[[(g, d) not in dup for g, d in zip(pre.gruppo, pre.data)]]
+LAB_PRE = {'costituente': 'Assemblea Costituente %s', 'camera': 'Politiche %s - Camera', 'senato': 'Politiche %s - Senato',
+           'regionali_consiglio': 'Regionali %s - Consiglio Regionale', 'comunali_consiglio': 'Comunali %s - Consiglio Comunale'}
+NOME_REF = {'referendum_1946-06-02_q1': 'Referendum istituzionale (Repubblica o Monarchia)',
+            'referendum_1974-05-12_q1': 'Referendum Abrogativo su Divorzio', 'referendum_1978-06-11_q1': 'Referendum Abrogativo su Ordine pubblico',
+            'referendum_1978-06-11_q2': 'Referendum Abrogativo su Finanziamento pubblico dei partiti'}
+cat_p, ris_p, voti_p = [], [], []
+for eid, g in pre.groupby('eid'):
+    x = g.iloc[0]
+    ref = x.gruppo == 'referendum'
+    lab = NOME_REF[eid] if ref else LAB_PRE[x.gruppo] % x.data[:4]
+    PRE[eid] = dict(label=lab, ref=ref, tipo=x.gruppo, liste=set(g.lista))
+    cat_p.append(dict(elezione_id=eid, gruppo=x.gruppo, etichetta=lab, data=x.data, anno=int(x.data[:4]), titolo=lab,
+                      ds_risultati=float(x.qn), sistema_territorio=None, nel_sito='si'))
+    ris_p.append(dict(elezione_id=eid, sezione=0, territorio=np.nan, elettori=x.elettori, votanti=x.votanti))
+    for r in g.itertuples():
+        l = {'SI': 'Sì', 'NO': 'No'}.get(r.lista, r.lista) if ref else r.lista
+        voti_p.append(dict(elezione_id=eid, sezione=0, territorio=np.nan, lista=l, voti=int(r.voti)))
+cat = pd.concat([cat, pd.DataFrame(cat_p)], ignore_index=True)
+ris = pd.concat([ris, pd.DataFrame(ris_p)], ignore_index=True)
+voti = pd.concat([voti, pd.DataFrame(voti_p)], ignore_index=True)
+
 # ---- mappa lista -> famiglia (con intervalli di anni)
 rules = {}
 for r in fam.itertuples():
@@ -50,6 +82,8 @@ voti['anno'] = voti.elezione_id.map(anno_el)
 key = voti[['lista', 'anno']].drop_duplicates()
 key['famiglia'] = [fam_of(l, a) for l, a in zip(key.lista, key.anno)]
 voti = voti.merge(key, on=['lista', 'anno'], how='left')
+_m = voti.elezione_id.isin([k for k, v in PRE.items() if v['ref']])
+voti.loc[_m, 'famiglia'] = voti.loc[_m, 'lista']
 
 # ---- mojibake nei titoli dei quesiti (trappola nei metadati del portale)
 def fix_title(t):
@@ -73,6 +107,7 @@ TIPI = {
     'comunali_ballottaggio': 'Comunali - Ballottaggio',
     'municipali_consiglio': 'Municipali - Consiglio',
     'circoscrizionali_liste': 'Circoscrizionali 2011 - Liste',
+    'costituente': 'Assemblea Costituente 1946',
     'camera': 'Politiche - Camera',
     'senato': 'Politiche - Senato',
     'europee': 'Europee',
@@ -94,6 +129,8 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
     # ---- partiti: nome lista, famiglia; le piccole (<0.5%) unite in "Altre liste" per famiglia
     vv = vv.copy()
     vv['nome'] = vv.famiglia if r.gruppo == 'referendum' else vv.lista.str.strip()
+    if eid.startswith('referendum_1946'):
+        vv['nome'] = vv.nome.map({'Sì': 'Repubblica', 'No': 'Monarchia'})
     g1 = vv.groupby(['nome', 'famiglia']).voti.sum().reset_index()
     g1 = g1[g1.voti > 0]
     tot_c = g1.voti.sum()
@@ -117,13 +154,15 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
     m[pcols] = m[pcols].fillna(0)
     m = m.reset_index().sort_values('sezione')
     # righe per sezione (solo famiglie: tabella piccola)
+    ispre = eid in PRE
     rows = []
-    for x in m.itertuples(index=False):
+    for x in ([] if ispre else m.itertuples(index=False)):
         d = x._asdict()
         rows.append([int(d['sezione']), None if pd.isna(d['territorio']) else int(d['territorio']),
                      None if pd.isna(d['elettori']) else int(d['elettori']),
                      None if pd.isna(d['votanti']) else int(d['votanti'])] + [int(d[f]) for f in fams])
-    json.dump({'id': eid, 'fam': fams, 'righe': rows}, open(os.path.join(docs, 'data', 'e', eid + '.json'), 'w'), separators=(',', ':'))
+    if not ispre:
+        json.dump({'id': eid, 'fam': fams, 'righe': rows}, open(os.path.join(docs, 'data', 'e', eid + '.json'), 'w'), separators=(',', ':'))
 
     def aggreg(g):
         e = g.elettori.sum(min_count=1)
@@ -133,16 +172,27 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
                     ns=int(g.sezione.nunique()))
     city = aggreg(m)
     terr = {}
-    for t, g in m.groupby('territorio'):
+    for t, g in ([] if ispre else m.groupby('territorio')):
         terr[str(int(t))] = aggreg(g)
         a = terr[str(int(t))]
         agg_rows.append(dict(elezione_id=eid, territorio=int(t), sistema=r.sistema_territorio, n_sezioni=a['ns'], elettori=a['e'], votanti=a['vt'],
                              **{f: v for f, v in zip(fams, a['fv'])}))
-    agg_rows.append(dict(elezione_id=eid, territorio=0, sistema='citta', n_sezioni=city['ns'], elettori=city['e'], votanti=city['vt'],
+    if not ispre: agg_rows.append(dict(elezione_id=eid, territorio=0, sistema='citta', n_sezioni=city['ns'], elettori=city['e'], votanti=city['vt'],
                          **{f: v for f, v in zip(fams, city['fv'])}))
     for a in [city] + list(terr.values()):
         del a['fv']
     note = []
+    fn = []
+    if ispre:
+        city['ns'] = None
+        if r.gruppo == 'senato':
+            fn.append('Senato fino al 1979: Eligendo divide Milano in 6 collegi (qui sommati) e conta solo gli elettori di 25 anni e più, quindi elettori e votanti sono meno di quelli della Camera e non si confrontano con le elezioni dopo il 1979.')
+        if PRE[eid]['liste'] & {'FR.DEMOCR.POPOLARE', 'SOCIALCOMUNISTI', 'PCI-PSIUP'}:
+            note.append('lista comune PCI-PSI (o PCI-PSIUP): non scomponibile')
+        if r.gruppo == 'camera' and r.data == '1953-06-07':
+            note.append('schede bianche non disponibili')
+        if eid.startswith('referendum_1974') or eid.startswith('referendum_1978'):
+            note.append('Sì = abrogare la legge')
     if city['e'] is None:
         note.append('affluenza non disponibile (campo Elettori a zero nel dataset)')
     elif city['vt'] is None:
@@ -155,6 +205,10 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
         note.append('data corretta: nel dataset c\'e la data del primo turno')
     if isinstance(r.nota_data, str) and r.nota_data.startswith('Sessione'):
         note.append('data corretta (nel dataset: %s)' % r.nota_data.split(': ')[1])
+    if ispre:
+        elez_out.append(dict(id=eid, tipo=r.gruppo, data=r.data, anno=int(r.anno), label=PRE[eid]['label'], sistema=None, pre=True,
+                             ds=[], fam=fams, par=par, city=city, terr=terr, note=note, fn=fn))
+        continue
     elez_out.append(dict(id=eid, tipo=r.gruppo, data=r.data, anno=int(r.anno), label=label(r), sistema=r.sistema_territorio,
                          ds=[int(r.ds_risultati)] + ([int(r.ds_voti)] if r.ds_voti == r.ds_voti and r.ds_voti != '' else []),
                          fam=fams, par=par, city=city, terr=terr, note=note))

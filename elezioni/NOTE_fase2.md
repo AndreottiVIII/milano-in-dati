@@ -23,3 +23,46 @@ Il sito ha una sezione "Open data" (`/eligendo/opendata.php`, info in `/eligendo
 - Politiche 2018/2022 e Regionali 2023 sono "dati ufficiosi" (segnalato nella pagina).
 - 2 sezioni dei referendum 1981 senza territorio; sezioni 9001-9011 del 2025 tenute.
 - Pagina senza grafica curata, come richiesto; la pagina e testata solo nel browser integrato (desktop), non su telefono.
+
+## Elezioni prima del 1979 (Eligendo)
+
+Data: 2026-10-29. Questa sezione corregge quella sopra intitolata "Prima del 1979": i file ci sono, si scaricano in blocco, e il livello e il Comune (una riga per lista).
+
+**Fonte.** Archivio storico del Ministero dell'Interno, https://elezionistorico.interno.gov.it/ , sezione "Open data" (`/eligendo/opendata.php`). L'elenco dei file e scritto dentro la pagina stessa. Ogni file e un ZIP con link diretto: `https://elezionistorico.interno.gov.it/daithome/documenti/opendata/<tipo>/<tipo>-<AAAAMMGG>.zip` (il sito rimanda poi a `dait.interno.gov.it`). Nessuna registrazione, nessun login. In tutto 315 file; il catalogo e salvato in `raw\eligendo\_pagine\dataset.json`.
+
+**File scaricati (29/10/2026).** 25 ZIP, 14,7 MB in totale, in `raw\eligendo\<tipo>\`:
+- Costituente 1946 (0,45 MB), referendum 1946, 1974, 1978 (0,16 + 0,16 + 0,33 MB);
+- Camera e Senato 1948, 1953, 1958, 1963, 1968, 1972, 1976 e 1979 (Camera 0,63-1,5 MB l'uno, Senato 0,32-0,60 MB l'uno);
+- Regionali 1970 e 1975 (0,47 + 0,45 MB);
+- Comunali 1964, 1970, 1975 (1,0-1,1 MB l'uno, formato Excel; gli altri sono testo con `;`).
+
+**Licenza.** Non l'ho trovata: ne le pagine Open data e Info del sito, ne la pagina open data del Dipartimento (dait.interno.gov.it) indicano una licenza. L'unica frase e che l'archivio e messo a disposizione "a puro scopo divulgativo", che i dati vengono dai verbali conservati dalla Direzione Centrale per i Servizi Elettorali e che sono "ufficiali" piu "ufficiosi" (comunicati dai comuni). Per ripubblicare conviene citare la fonte ("Ministero dell'Interno, Eligendo") e, se serve certezza, scrivere a elezioni.storico@interno.it.
+
+**Cosa c'e per Milano (`pulito\milano_pre1979.csv`, 231 righe, 25 consultazioni).**
+
+| Tipo | Anni |
+|---|---|
+| Assemblea Costituente | 1946 |
+| Referendum | 2/6/1946 (Repubblica/Monarchia), 12/5/1974 (divorzio), 11/6/1978 (2 quesiti) |
+| Camera | 1948, 1953, 1958, 1963, 1968, 1972, 1976, 1979 |
+| Senato | 1948, 1953, 1958, 1963, 1968, 1972, 1976, 1979 |
+| Regionali | 1970, 1975 |
+| Comunali (liste) | 1964, 1970, 1975 |
+
+Manca: Comunali 1946, 1951, 1956, 1960 (non sono nell'archivio). Non ci sono i sindaci (prima del 1993 non si eleggevano direttamente). Le Europee iniziano nel 1979 e sono gia nei dati del Comune. Colonne: elezione_id, tipo, data, quesito, lista, voti, seggi (solo Comunali), elettori, votanti, schede_bianche, somma_voti_liste, n_collegi, fonte. Elettori, votanti e bianche sono ripetuti su ogni riga della stessa consultazione. I voti validi non sono nel file: la somma delle liste e il 98-99% di (votanti meno bianche), la differenza sono le nulle.
+
+**Controllo con i dati del Comune (Camera 1979, `pulito\eligendo_confronto_camera1979.csv`).** Votanti identici (1.197.265). Somma dei voti di lista: Eligendo 1.160.750, sezioni del Comune 1.161.303, cioe 553 voti in meno (-0,05%). Per partito le differenze sono piccole: DC -95, PCI -241, PSI -83, PSDI -80, MSI -73, PLI -35, PRI +15, PDUP +20. Le liste minuscole differiscono di piu in percentuale (Operai Europei +28 su 699, PPI -8 su 425). Elettori Eligendo: 1.282.022 (nei dati del Comune per il 1979 gli elettori mancano). Le due fonti sono dunque coerenti: si possono attaccare le serie senza salto.
+
+**Trappole.**
+- I nomi delle liste cambiano da una fonte all'altra: Eligendo scrive `P.RAD`, `MSI-DN`, `NUOVA SIN.UNITA`, `DN-CD`, `POE`, `PARTITO POPOLARE ITALIANO`, `DEM.PROL`, il Comune `Part. Radicale`, `MSI`, `Nuova Sin. Unita`, `Dem. Nazionale`, `Part. Op. Eur.`, `PPI`, `Dem. Proletaria`. Anche dentro Eligendo lo stesso partito ha piu grafie (`PSIUP`/`PSI UP`, `MSI-DN`/`MSI DN`, `DEM.PROL`/`DEM. PROL.`, `PART MON NAZ`/`PART.MON.NAZ.`).
+- Senato: Milano e divisa in 6 collegi, ogni collegio e una riga a parte; il CSV li somma. Gli elettori del Senato sono solo i maggiori di 25 anni, quindi sono meno di quelli della Camera (es. 1976: 1.146.221 contro 1.287.015): non confrontarli.
+- Camera 1953: schede bianche a 0 (dato mancante, non vero zero).
+- Codifica dei file diversa da uno all'altro (alcuni UTF-8, altri Windows-1252): lo script prova prima UTF-8.
+- Referendum: i voti sono SI e NO. Nel 1946 SI = Repubblica (487.125 contro 231.711); nel 1974 SI = abrogare il divorzio (293.045 contro 812.955).
+- Alleanze: nel 1948 il Fronte Democratico Popolare (PCI+PSI) e liste comuni (PCI-PSIUP al Senato 1968-72, PSU 1968) sono una sola riga: non si scompongono.
+- Comunali 1964-1975: sono i voti di lista per il Consiglio comunale (come nei dati del Comune dal 1980), non i sindaci.
+- Il sito avverte che dati riepilogativi e somma dei comuni possono differire (fonti diverse) e che i votanti possono superare gli elettori.
+
+**Famiglie.** `famiglie_proposte_pre1979.csv` (60 liste non ancora in `famiglie_partiti.csv`, stesse colonne e stesse famiglie): 13 Sinistra, 11 Destra, 9 Centro, 2 Centrosinistra, 25 Altri. Regole: PCI, PSIUP, DP, Manifesto e marxisti-leninisti in Sinistra; PSU in Centrosinistra (da rivedere); socialdemocratici, repubblicani, liberali in Centro; MSI e monarchici in Destra. Uomo Qualunque 1946 e messo in Destra con `da_rivedere` (l'alternativa e Altri). Le righe con `da_rivedere = si` sono le dubbie (liste del 1946-1953 come Blocco Nazionale, Unione Democratica Nazionale, Unita Popolare, Fronte Democratico Popolare).
+
+**Script.** `30_eligendo_catalogo.py` (elenco file dalla pagina), `31_eligendo_scarica.py`, `32_eligendo_ispeziona.py`, `33_eligendo_milano.py`, `34_eligendo_confronto_1979.py`, `35_eligendo_famiglie.py`. Eseguire con `python -I` e le cartelle come argomenti.

@@ -7,6 +7,7 @@
 <style>
   :root { --ink:#111; --muted:#555; --line:#ccc; }
   * { box-sizing: border-box; }
+  [hidden] { display:none !important; }
   body { margin:0; background:#fff; color:var(--ink); font:15px/1.4 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
   .wrap { max-width:1100px; margin:0 auto; padding:16px; }
   h1 { font-size:22px; margin:0 0 4px; }
@@ -50,7 +51,7 @@
 <body>
 <div class="wrap">
   <h1>Milano in dati: le elezioni sezione per sezione</h1>
-  <p class="lead">Risultati per sezione elettorale dal 1979 al 2026, partito per partito, con il colore dello schieramento. Scegli il tipo di elezione, muovi il tempo e clicca un territorio sulla mappa.</p>
+  <p class="lead">Risultati delle elezioni dal 1946 al 2026 (per sezione elettorale dal 1979), partito per partito, con il colore dello schieramento. Scegli il tipo di elezione, muovi il tempo e, dal 1979, clicca un territorio sulla mappa.</p>
 
   <div class="bar">
     <label>Tipo di elezione <select id="tipo"></select></label>
@@ -72,8 +73,10 @@
       <h2 id="mapTitle">Mappa</h2>
       <svg id="map" viewBox="0 0 300 320"></svg>
       <div class="info" id="mapNote"></div>
+      <p class="info" id="preLine" hidden>Per le elezioni prima del 1979 ci sono solo i risultati di tutta la città (fonte: Ministero dell&rsquo;Interno, Eligendo).</p>
     </div>
   </div>
+  <p class="info" id="fnote" hidden></p>
 
   <div id="focus">
     <h2 id="focusTitle">Focus su un territorio</h2>
@@ -99,6 +102,7 @@
   <footer>
     <p><b>Fonte:</b> Comune di Milano, portale open data <a href="https://dati.comune.milano.it">dati.comune.milano.it</a> (Unit&agrave; Servizi Statistici), dataset <span id="dsAll">ds1123&ndash;ds2975</span>, licenza CC BY 4.0. Dati scaricati il 2026-10-29. Confini: ds379 (municipi), ds378 (le 20 ex zone di decentramento, cio&egrave; le circoscrizioni fino al 1997), ds153 (9 zone di decentramento; controllo: stessa superficie dei municipi).</p>
     <p><b>Partiti e schieramenti (famiglie provvisorie).</b> L&rsquo;emiciclo e la legenda mostrano i partiti con il nome che hanno nei dati; il colore indica lo schieramento (la famiglia) e i partiti della stessa famiglia hanno sfumature diverse, con il pi&ugrave; votato nel colore pieno. I colori seguono quelli storici: rosso per il PCI (Sinistra), rosa-rosso per PSI, PDS e PD (Centrosinistra), bianco per la DC (Centro, con il bordo grigio per vederlo sulla pagina), azzurro per Forza Italia (Centrodestra), verde per la Lega, nero per il MSI (Destra), giallo per il M5S. Ogni lista &egrave; assegnata a una famiglia con una tabella semplice e modificabile (<a href="data/famiglie_partiti.csv">famiglie_partiti.csv</a>); le liste senza regola finiscono in Altri. Da rivedere. Le liste sotto lo 0,5% dei voti della citt&agrave; sono unite in &ldquo;Altre liste&rdquo; della loro famiglia (se in quella famiglia ce n&rsquo;&egrave; pi&ugrave; di una). Nella mappa, nella tabella delle sezioni e nelle barre dell&rsquo;andamento il colore di un territorio &egrave; quello della famiglia pi&ugrave; votata (somma dei suoi partiti).</p>
+    <p><b>Elezioni prima del 1979.</b> Fonte: Ministero dell&rsquo;Interno, archivio storico delle elezioni (Eligendo, <a href="https://elezionistorico.interno.gov.it">elezionistorico.interno.gov.it</a>), open data messi a disposizione &ldquo;a scopo divulgativo&rdquo; (senza licenza esplicita), file scaricati il 2026-10-29. Sono risultati del solo comune di Milano, una riga per lista: niente territori n&eacute; sezioni. Comprendono Costituente 1946, referendum 1946, 1974 e 1978, Camera e Senato 1948-1979, regionali 1970 e 1975, comunali 1964, 1970 e 1975 (voti alle liste); mancano le comunali 1946-1960, che Eligendo non ha. Per il Senato non ci sono dati tra il 1979 e il 1996 (le elezioni 1983-1992 non sono nel dataset del Comune). Le liste comuni (Fronte Democratico Popolare 1948, PCI-PSIUP al Senato 1968 e 1972) sono una riga sola. Controllo di coerenza: per la Camera 1979 Eligendo ha 553 voti di lista in meno della somma delle sezioni del Comune (&minus;0,05%), con gli stessi votanti; per questo la Camera 1979 del grafico viene dal Comune e le due serie si attaccano senza salti.</p>
     <p>Prima del 1999 il territorio &egrave; la circoscrizione (20), dal 1999 la zona (9, con la stessa numerazione e gli stessi confini degli attuali municipi), dal 2016 il municipio (9). Le tre mappe non sono confrontabili tra loro. Nei referendum 1985-1997 la colonna "Zona" del dataset contiene in realt&agrave; le circoscrizioni.</p>
     <p>I seggi sono solo un modo di leggere le percentuali (100 seggi ripartiti tra i partiti col metodo dei resti pi&ugrave; alti, disposti da sinistra a destra per famiglia): non sono seggi reali.</p>
   </footer>
@@ -326,17 +330,22 @@ function setElezione(id){
   } else qb.hidden=true;
   el('anni').querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-d')===e.data); });
   // se cambia il sistema territoriale, il numero non e' piu' lo stesso territorio
-  if(state.terr!=null && state.sisTerr && state.sisTerr!==e.sistema){ state.terr=null; }
+  if(!e.pre && state.terr!=null && state.sisTerr && state.sisTerr!==e.sistema){ state.terr=null; }
   render();
 }
 function render(){
   var e=byId(state.id), sistemaNome={circoscrizione:'Circoscrizione',zona:'Zona',municipio:'Municipio'}[e.sistema];
-  el('info').innerHTML='<b>'+e.label+'</b> &middot; '+dataIt(e.data)+' &middot; dataset '+e.ds.map(function(d){return 'ds'+d;}).join(', ')+' &middot; sezioni: '+fmt(e.city.ns);
+  el('info').innerHTML='<b>'+e.label+'</b> &middot; '+dataIt(e.data)+' &middot; '+(e.pre ? 'fonte: Eligendo (Ministero dell&rsquo;Interno), solo totale della citt&agrave;' : 'dataset '+e.ds.map(function(d){return 'ds'+d;}).join(', ')+' &middot; sezioni: '+fmt(e.city.ns));
   el('avvisi').textContent=e.note.join(' - ');
   // citta
   paintHemi('hemiCity', e, e.city.v);
   legend('legCity', e, e.city.v);
   el('affCity').innerHTML='Affluenza: <b>'+pct(e.city.vt,e.city.e)+'</b> ('+fmt(e.city.vt)+' votanti su '+fmt(e.city.e)+' elettori)';
+  // elezioni prima del 1979: niente mappa, niente focus
+  var pre=!!e.pre;
+  el('map').style.display=pre?'none':''; el('mapTitle').hidden=pre; el('mapNote').hidden=pre; el('preLine').hidden=!pre; el('focus').hidden=pre;
+  var fn=e.fn||[]; el('fnote').hidden=!fn.length; el('fnote').textContent=fn.join(' ');
+  if(pre) return;
   // mappa
   drawMap(e.sistema);
   el('mapTitle').textContent='Mappa per '+sistemaNome.toLowerCase()+' ('+(e.sistema==='circoscrizione'?'20 circoscrizioni':'9 '+(e.sistema==='zona'?'zone':'municipi'))+')';
