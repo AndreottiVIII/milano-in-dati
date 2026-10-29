@@ -983,6 +983,11 @@ PC: Intel i5-12600K (10 core, 16 thread), 31,8 GB RAM, 78 GB liberi su disco, Wi
   - Provvisori fino alla taratura.
 - **Taratura**: `bici-auto-mezzi/tragitti_prova.csv` (20 tragitti, martedì 3/11/2026 alle 8:00, 12:00 e 21:00) con le istruzioni in `COME_CONTROLLARE.md`. Davide riempie i tempi di Google Maps.
 - **Incidenti**: su 500 righe di prova, il 74% si colloca bene sulla mappa (28,6% al civico esatto, 45,4% all'incrocio), il 17% solo con la via, l'8% non si trova.
+- 2026-10-29 sera — **Taratura su Google Maps**: un agente ha letto nel browser i tempi di Google Maps per i 20 tragitti (martedì 3/11/2026, senza account né controlli anti-robot; per l'auto il punto medio della forchetta indicata da Google). Mediana del rapporto nostra stima / Google:
+  - bici 1,45 (le nostre stime sono troppo lente);
+  - auto 0,87 (alle 8:00 1,05, alle 12:00 0,72, alle 21:00 0,75);
+  - mezzi 0,91.
+  - Dettagli in `bici-auto-mezzi/out/taratura_confronto.md`. Nel sito non si pubblicano i tempi di Google, solo i nostri errori in percentuale.
 
 ## 8. La Scala, cartellone dal 1778 a oggi
 
@@ -1075,6 +1080,7 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
   1. Davide salva le pagine dei risultati dal suo browser in `scala/locandine_salvate/`, e un programma le legge.
   2. La Scala manda un file con i dati, oppure toglie il controllo per il programma del progetto (eccezione per indirizzo o User-Agent). A quel punto la raccolta automatica, lenta e con citazione, è possibile.
   - Filone in pausa per decisione di Davide. L'agente della tabella unica (Cambiasi, Romani, Wikipedia) è stato fermato a metà, con lo stato salvato in `scala/STATO.md`.
+- 2026-10-29 sera — **PDF da Davide (iCloud)**, salvato in `scala/raw/programmi_davide/programmi_scala.pdf` (146 MB, 682 pagine). È Gatti, "Il Teatro alla Scala nella storia e nell'arte (1778-1963)", **volume 1** (il racconto), copia Internet Archive `owo_W8-BSY-089` della Seattle Public Library, con il testo già riconosciuto. Non contiene la cronologia: "Cronologia" compare una sola volta, a pagina 449, e la premessa rimanda al secondo volume. Come deciso all'inizio da Davide, il volume 1 non si usa come fonte di dati. Il libro è del 1964 e ancora protetto: resta solo sul PC. Per il cartellone 1906-1963 serve il volume 2.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 
