@@ -122,7 +122,7 @@ const doyStr = d => d === null || d === undefined ? '–' : new Date(Date.UTC(20
 const qfTxt = q => q ? ` <small>(flag NOAA ${q}: da verificare)</small>` : '';
 let D = {};
 
-Promise.all(NOMI_FILE.map(n => fetch(`data/${n}.json`).then(r => { if (!r.ok) throw new Error(`${n}.json: HTTP ${r.status}`); return r.json(); })))
+Promise.all(NOMI_FILE.map(n => fetch(`data/${n}.json`, {cache: 'no-cache'}).then(r => { if (!r.ok) throw new Error(`${n}.json: HTTP ${r.status}`); return r.json(); })))
   .then(v => { NOMI_FILE.forEach((n, i) => D[n] = v[i]); costruisci(); })
   .catch(e => {
     const el = $('#errore'); el.style.display = 'block';
@@ -144,7 +144,7 @@ function costruisci() {
 
 // ---------------------------------------------------------------- UN GIORNO A SCELTA
 const cacheDec = {}, cacheOrd = {};
-const caricaJson = (cache, url) => cache[url] || (cache[url] = fetch(url).then(r => { if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); }).catch(e => { delete cache[url]; throw e; }));
+const caricaJson = (cache, url) => cache[url] || (cache[url] = fetch(url, {cache: 'no-cache'}).then(r => { if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); }).catch(e => { delete cache[url]; throw e; }));
 const isoPiu = (iso, n) => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n)).toISOString().slice(0, 10);
 const dataLunga = iso => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10))).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
