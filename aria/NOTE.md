@@ -113,3 +113,39 @@ Sintesi (da `inventario_comune.csv`, campi `prima`, `ultima`; da `inventario_arp
 - Il confronto Comune-ARPA è fatto con tutti i giorni in comune ma non per ogni inquinante e per ogni anno a parte: i risultati per stazione sono in `out\confronto_comune_arpa.csv`.
 - Non ho verificato le posizioni dei punti con fonti esterne né la causa dell'asterisco nei nomi "via Pascal *" e "via Senato *".
 - Il significato esatto degli indicatori del Comune (max orario, max 8 ore) è dedotto dal confronto: da confermare con chi pubblica il dataset.
+
+---
+
+# FASE 2 (29/10/2026): pulizia dei dati e prima pagina
+
+Cartella `pulito\` (dati puliti), programmi `scripts\08` - `12`, pagina `docs\aria\index.html` con i dati piccoli in `docs\aria\data\`. Per rifare tutto: `python -I scripts\08_pulisci.py raw pulito`, poi `09_riepiloghi.py pulito`, `10_stazioni.py raw out pulito`, `11_prima_dopo.py pulito`, `12_sito.py pulito ..\docs\aria\data`.
+
+## 1. Cosa c'è in `pulito\`
+- `aria_giornaliera.csv` (22,9 MB, 337.417 righe, dal 1977 al 28/10/2026; **non** va sul sito, è troppo grande). Colonne: `data` (giorno della misura), `id_stazione` (codice ARPA, stabile), `stazione`, `inquinante` (NO2, PM10, PM25, O3, CO, C6H6), `statistica`, `valore`, `unita`, `n_valori` (ore valide; per il PM è 1; vuoto per il Comune), `fonte` (ARPA o Comune), `flag`.
+- Statistiche ufficiali: PM10 e PM2.5 = media giornaliera; NO2 = media giornaliera **e** massimo orario; ozono e CO = massimo giornaliero della media mobile su 8 ore; benzene = media giornaliera. Metalli, Black Carbon, ammoniaca, SO2, ossidi di azoto sono fuori da questo file (restano nei dati grezzi).
+- Regola: dati orari ARPA con `stato` = VA e valore diverso da -9999; un giorno vale con almeno 18 ore valide su 24 (75%); per le medie su 8 ore servono 6 ore su 8 per ogni media e 18 medie su 24 nel giorno. L'ora ARPA è "a fine ora": l'ora 00:00 conta nel giorno prima. Il dataset in tempo quasi reale (`ykhg-b8rs`) non è usato (niente campo `stato`).
+- Il Comune entra solo dove ARPA manca, con la data spostata di -1 giorno e solo per la statistica che coincide con la sua (NO2 massimo orario, CO 8 ore, PM, benzene). Giorni presi dal Comune: 4.836 su 337.417 (benzene Marche e Pascal 2018-2025, NO2 massimo orario 2017 e Pascal 2012, ecc.). L'ozono del Comune non si usa (è il massimo orario). Controllo dove le due fonti si sovrappongono: `confronto_fonti.csv` (PM10 coincide nel 99,0% dei giorni, PM2.5 99,1%, CO 96,2%, NO2 97,6%, benzene 75,7% con tolleranza 5%+0,5: per questo il benzene del Comune ha la bandiera `indicatore_da_verificare`).
+- Bandiere (`flag`): `cambio_stazione` su tutte le righe di Juvara e di Pascal; `da_comune_data_spostata_-1g` sulle righe del Comune.
+- `stazioni_storia.csv` (una riga per stazione: posizione ARPA e Comune, distanza, aperture, chiusure, sostituzioni, note), `stazioni_sensori.csv` (tutti i 71 sensori con date di registro e primo/ultimo dato valido; cambi di strumento di Black Carbon e ammoniaca).
+- `riepilogo_annuale.csv` (1.042 righe): per stazione, inquinante, statistica e anno: giorni validi, completezza, `anno_ok_75`, media annua, massimo, giorni sopra la soglia (PM10 > 50; NO2 massimo orario > 200; ozono > 120; CO > 10 mg/m³), limiti UE annui e valori OMS 2021 (PM2.5 5, PM10 15, NO2 10), colonne `sopra_limite_ue` e `sopra_who2021`.
+- `peggiori_2021_2025.csv`, `prima_dopo_areaC_areaB.csv`, `covid_finestra_per_anno.csv`, `covid_2020_vs_2017_2019.csv`, `controlli_giornaliera.csv` (NO2 e PM10 delle stazioni di controllo).
+- `problemi.md`: le trappole dei dati (23 punti), pronte per la rubrica.
+
+## 2. Un'aggiunta al download: stazioni di controllo
+Per il "prima e dopo" ho scaricato (ARPA, CC0, `raw\arpa_controllo\`, 7 sensori) NO2 e PM10 di cinque stazioni fuori Milano: Pioltello Limito (531), Magenta (546), Sesto San Giovanni (504), Rho (514), Cinisello Balsamo (529). Servono perché tutte le stazioni di Milano sono dentro Area B. Programma: `scripts\08a_download_controlli.py`.
+
+## 3. Prime risposte (solo numeri, nessuna causa)
+- **Dove si respira peggio, 2021-2025** (`peggiori_2021_2025.csv`): PM10 Senato 33,3 µg/m³ in media e 55,6 giorni all'anno sopra 50 (Marche 63,8 giorni, 4 anni validi); NO2 Marche 41,9 (sopra il limite UE 40; 4,2 volte il valore OMS 10); PM2.5 Senato 22,7 (4,5 volte il valore OMS 5); ozono Verziere 66 giorni all'anno sopra 120. Le stazioni sono poche e di tipo diverso.
+- **Area C** (16/1/2012, 12 mesi contro 12 mesi): NO2 -16,9% nelle due stazioni dentro (Senato, Verziere), -5,1% nelle cinque di Milano fuori, -6,7% nelle cinque fuori Milano; negli altri anni (2009-2019) lo stesso confronto per le stazioni del centro va da -9,2% a +9,5%. PM10 -13,6% (centro) contro -8,7% (fuori Milano), dentro l'intervallo degli altri anni.
+- **Area B** (25/2/2019): NO2 -9,1% a Milano contro -1,4% fuori Milano; PM10 -6,3% contro -2,6%; negli altri anni NO2 Milano da -6,3% a +9,2%.
+- **Lockdown** (9/3-3/5/2020 su 2017-2019): NO2 -37,8% a Milano e -39,0% fuori Milano (quasi uguali); PM10 -6,8% a Milano e +10,4% nelle due stazioni fuori Milano.
+- Nulla di questo è una stima causale: il tempo atmosferico non è stato analizzato (nessun dato meteo scaricato) e le stazioni confrontate sono pochissime. Il perimetro di Area C (Senato e Verziere dentro) è una mia lettura, da controllare.
+
+## 4. Pagina `docs\aria\index.html`
+Mappa Leaflet 1.9.4 (cdnjs, tile OpenStreetMap in grigio, attribuzione) con le nove stazioni (aperte: pallino pieno; chiuse: pallino bianco tratteggiato) e scheda al clic; per ogni inquinante un grafico SVG delle medie annue per stazione (stazioni chiuse tratteggiate, barre per Area C, Area B, Covid e il cambio Juvara-Pascal, linee dei limiti UE e dei valori OMS) con tabella dei giorni sopra soglia e tabella completa; lista "Dove si respira peggio"; sezione "Prima e dopo"; trappole; fonti. I dati si leggono con `fetch(..., {cache:'no-cache'})`. Dati del sito: 0,21 MB in totale (solo riepiloghi annuali e confronti; i dati giornalieri per stazione non sono sul sito). Provata con il server "milano-in-dati" (porta 8796): nessun errore in console, nessuno scorrimento orizzontale a 547 px di larghezza.
+
+## 5. Limiti
+- Medie annue "valide" con almeno il 75% dei giorni (la legge UE chiede il 90%); i giorni sopra soglia sono un minimo se l'anno è incompleto. Il 2026 è parziale e non è nei grafici.
+- Marche PM10 e PM2.5 non hanno il 2025 (ARPA) e Pascal NO2 non ha la media 2012 (solo il massimo orario dal Comune): vedi `problemi.md`.
+- Il tipo di sito (traffico o fondo) non è nei dati scaricati e non l'ho scritto.
+- Non verificato: il significato dell'asterisco in "via Pascal *" e "via Senato *"; se il metodo di misura del PM10 è cambiato nel tempo.

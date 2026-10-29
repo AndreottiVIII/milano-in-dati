@@ -765,6 +765,18 @@ Sintesi (da `inventario_comune.csv`, campi `prima`, `ultima`; da `inventario_arp
 - Non ho verificato le posizioni dei punti con fonti esterne né la causa dell'asterisco nei nomi "via Pascal *" e "via Senato *".
 - Il significato esatto degli indicatori del Comune (max orario, max 8 ore) è dedotto dal confronto: da confermare con chi pubblica il dataset.
 
+### Fase 2 — serie pulita e pagina (2026-10-29)
+
+- File pulito `aria/pulito/aria_giornaliera.csv` (337.417 righe giornaliere, 1977-28/10/2026; ARPA prima, Comune solo dove ARPA manca, con la data spostata di -1 giorno); storia delle stazioni in `stazioni_storia.csv`; trappole in `aria/pulito/problemi.md` (23).
+- Primi numeri (ARPA, CC0; nessuno è una stima di causa, mancano i dati meteo):
+  - PM10 2021-25: Senato ha una media di 33,3 µg/m³, con 55,6 giorni l'anno sopra 50 (la UE ne ammette 35). Ricalcolato dal coordinatore: torna.
+  - NO2 2021-25: Marche ha una media di 41,9, sopra il limite UE di 40 e 4,2 volte il valore OMS 2021.
+  - Area C, 12 mesi prima e dopo il 16/1/2012: NO2 -16,9% a Senato e Verziere (le due centraline dentro Area C), -5,1% nelle altre di Milano, -6,7% fuori Milano. Negli altri anni lo stesso confronto per il centro va da -9,2% a +9,5%.
+  - Lockdown 2020 contro 2017-19: NO2 -37,8% a Milano e -39,0% fuori Milano.
+- **Controllo del coordinatore**: sul poligono ufficiale di Area C (`area-c/raw/ds51.../disciplina_aree.geojson`, tipo AREA_C) cadono dentro solo Senato e Verziere, come ipotizzato dall'agente.
+- Scaricati anche NO2 e PM10 di 5 stazioni ARPA fuori Milano (Pioltello, Magenta, Sesto, Rho, Cinisello) come confronto: tutte le stazioni di Milano sono dentro Area B.
+- Ipotesi da ricordare: un anno conta come valido se ha almeno il 75% dei giorni (la UE chiede il 90%).
+
 ## 6. Ingressi in Area C
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `area-c/`._
@@ -993,6 +1005,10 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
 - Struttura: l'archivio storico non ha elenchi di stagioni ne' indirizzi fissi per spettacolo: si arriva ai dati solo da una maschera di ricerca (`/it/archivio/ricerca.html`) con filtri su tipo, titolo, autore, artista, luogo e stagioni (86 stagioni dalla 1943-44 alla 2025-26). Non ci sono servizi JSON dietro.
 - Problema: la ricerca funziona solo se il browser invia un codice "info" prodotto da uno script anti-bot (`etnobot.js`). Senza, il sito risponde "Non sono stati trovati spettacoli" (provato su stagione 1946 e su "Callas"). Falsificare quel codice vorrebbe dire aggirare l'anti-bot: non l'ho fatto.
 - Risultato: nessuna stagione ne' spettacolo raccolti, nessun `pulito/archivio_scala.csv`. Serve che la Scala tolga l'anti-bot per questa raccolta o mandi i dati direttamente (dettagli in STATO.md).
+- 2026-10-29 — **Locandine della Scala dal 1943 (archivio-storico-locandine)**: la ricerca funziona solo con il campo `info`, prodotto da uno script anti-robot (`etnobot.js`) con i movimenti del mouse e il tempo passato sulla pagina. Senza quel campo risponde "Non sono stati trovati oggetti" (prova del 29/10, una sola richiesta). Davide riferisce che la Scala permette la raccolta anche con Chrome "headless". Il coordinatore (Claude) non lo esegue: superare con un programma un controllo anti-robot ancora attivo è un'azione che non fa, nemmeno su richiesta o con un'autorizzazione riferita a voce. Strade possibili:
+  1. Davide salva le pagine dei risultati dal suo browser in `scala/locandine_salvate/`, e un programma le legge.
+  2. La Scala manda un file con i dati, oppure toglie il controllo per il programma del progetto (eccezione per indirizzo o User-Agent). A quel punto la raccolta automatica, lenta e con citazione, è possibile.
+  - Filone in pausa per decisione di Davide. L'agente della tabella unica (Cambiasi, Romani, Wikipedia) è stato fermato a metà, con lo stato salvato in `scala/STATO.md`.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 

@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · L'aria, stazione per stazione</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#0050b3;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef4fc}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em}
+h2{font-size:1.25rem;margin:2em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1.05rem;margin:1.6em 0 .3em}
+a{color:var(--acc)} code{font-size:.9em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top} th{font-size:.82rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} td.low{color:var(--mut)} td.over{background:var(--soft);font-weight:700}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut)}
+#map{height:60vh;min-height:360px;border:1px solid var(--ink)} #map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.legend{font-size:.9rem;margin:.4em 0} .legend i{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin:0 4px 0 12px;border:2px solid var(--ink)}
+.legend i.a{background:var(--acc);border-color:#fff;box-shadow:0 0 0 1px var(--ink)} .legend i.c{background:#fff;border-style:dashed}
+#card{margin-top:10px;border:1px solid var(--ink);padding:10px 14px;min-height:60px} #card h3{margin:.1em 0 .2em}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.scroll{max-height:440px;overflow:auto;border:1px solid var(--line)}
+.ch{width:100%;display:block;font:12px system-ui,Arial,sans-serif} .ch text{fill:#111} .ch .mu{fill:#666}
+.ch g.ln path.l{fill:none;stroke:#111;stroke-width:1.6} .ch g.ln circle{fill:#111} .ch g.ln.cl path.l{stroke-dasharray:6 4;stroke:#555} .ch g.ln.cl circle{fill:#555}
+.ch g.ln path.hit{fill:none;stroke:transparent;stroke-width:12;cursor:pointer} .ch g.ln text{font-size:11px;cursor:pointer}
+.ch.hl g.ln{opacity:.15} .ch.hl g.ln.on{opacity:1} .ch g.ln.on path.l{stroke:var(--acc);stroke-width:3} .ch g.ln.on circle{fill:var(--acc)} .ch g.ln.on text{fill:var(--acc);font-weight:700}
+.lg{display:flex;flex-wrap:wrap;gap:4px 8px;margin:.3em 0 .6em;font-size:.85rem}
+.lg button{font:inherit;border:1px solid var(--line);background:#fff;padding:2px 8px;border-radius:12px;cursor:pointer;color:var(--ink)}
+.lg button svg{vertical-align:middle;margin-right:4px} .lg button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lg button.cl{color:#555}
+ol.worst{padding-left:1.2em;margin:.3em 0} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:4px 4px;font-size:.88rem}}
+#peggio-box,#pd-box,#card,#anni-box{overflow-x:auto}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.big{font-size:1.5rem;font-weight:700;color:var(--acc)}
+</style></head><body><main>
+<h1>L'aria di Milano, stazione per stazione</h1>
+<p>Nove stazioni di misura, alcune chiuse da anni, alcune sostituite da altre. Qui sotto: dove sono, cosa misurano, come sono andati i numeri dal 1990 a oggi e dove si respira peggio. I numeri sono quelli delle centraline: la causa dei cambiamenti non si legge nei dati (tempo, traffico, riscaldamento, strumenti pesano tutti).</p>
+<p class="warn"><b>Prima di leggere i grafici.</b> Quando una stazione chiude o viene spostata, la sua linea si interrompe: le linee tratteggiate sono stazioni chiuse. <b>Juvara</b> (chiusa l'11 giugno 2007) e <b>Pascal</b> (aperta nel 2007, a 925 m) <b>non sono la stessa stazione</b>: non sono mai unite in una linea sola. Le tre barre verticali sono Area C (16/1/2012), Area B (25/2/2019) e il lockdown (9/3-3/5/2020).</p>
+
+<h2 id="mappa">Le stazioni</h2>
+<p class="legend"><i class="a"></i>aperta oggi <i class="c"></i>chiusa. Clic su una stazione per la scheda.</p>
+<div id="map" role="img" aria-label="Mappa delle stazioni di misura dell'aria a Milano"></div>
+<div id="card"><span class="sub">Scegli una stazione sulla mappa.</span></div>
+
+<h2 id="peggio">Dove si respira peggio</h2>
+<p>Media dei cinque anni 2021-2025, solo anni con almeno il 75% dei giorni validi. Si confrontano solo stazioni che misurano lo stesso inquinante: <b>le stazioni sono poche e di tipo diverso</b>, quindi è un confronto tra punti, non tra quartieri. Il limite UE è quello di legge; il valore OMS 2021 è la raccomandazione sanitaria, molto più bassa.</p>
+<div id="peggio-box"></div>
+
+<h2 id="anni">Anno per anno</h2>
+<p class="sub">Ogni linea è una stazione; per ogni anno la media dei valori giornalieri. Si disegnano solo gli anni con almeno il 75% di giorni validi e conclusi (il 2026 è in corso e non c'è). Passa il mouse (o tocca) su una linea o sul suo nome per evidenziarla. Linea tratteggiata = stazione chiusa. Linea blu tratteggiata = limite UE; linea grigia punteggiata = valore OMS 2021.</p>
+<div id="anni-box"></div>
+
+<h2 id="prima-dopo">Prima e dopo</h2>
+<div class="warn"><b>Non è una stima dell'effetto delle misure.</b> Il tempo atmosferico (vento, pioggia, giorni di ristagno) muove le medie di PM10 e NO2 di più di qualunque divieto, e cambia ogni anno. Qui si confrontano soltanto due periodi di 12 mesi (stessi mesi, stesse stagioni), tra stazioni di Milano e stazioni <b>fuori Milano</b> (Cinisello, Magenta, Pioltello, Rho, Sesto S. Giovanni), e si mette accanto quanto cambiano i numeri negli altri anni alla stessa data (&laquo;negli altri anni&raquo;). Sono pochissime stazioni.</div>
+<div id="pd-box"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="trappole">Trappole dei dati</h2>
+<ul>
+<li><b>La data del Comune è il giorno dopo la misura.</b> Spostata di un giorno, coincide con ARPA nel 99% dei giorni per PM10 e PM2.5; senza spostamento nel 10%.</li>
+<li><b>Il &laquo;valore giornaliero&raquo; del Comune cambia significato</b>: NO2 e ozono sono massimi orari, il CO è un massimo su 8 ore, le polveri sono medie. Qui si usa ARPA (orario, validato) e il Comune solo dove ARPA manca (4.836 giorni su 337.417).</li>
+<li><b>Dal 2016 il Comune pubblica solo i giorni feriali</b> e dal 2024 solo cinque stazioni.</li>
+<li><b>Juvara e Pascal</b>: due posti diversi a 925 m. Le coordinate di Pascal differiscono di 531 m tra Comune e ARPA.</li>
+<li><b>Chiusure del 2017</b> (Abbiategrasso, Parco Lambro, Zavattari): ARPA non ha niente dopo il 2016; il Comune scrive 31/8/2017, il registro ARPA 30/7/2018.</li>
+<li><b>ARPA manca di benzene a Marche e Pascal nel 2018-2025</b>, di PM10 e PM2.5 di Marche nel 2025, di NO2 medio a Pascal nel 2012.</li>
+<li><b>Gli inquinanti si accendono e si spengono</b> (CO a Liguria dal 2023, PM10 a Marche solo dal 2018): un anno senza dati non è un anno pulito.</li>
+</ul>
+<p>Elenco completo con i numeri: <a href="data/problemi.md">problemi.md</a>. Tabelle: <a href="data/riepilogo_annuale.csv">riepilogo_annuale.csv</a> (medie annue, completezza, giorni sopra soglia, limiti UE e OMS per stazione e anno), <a href="data/stazioni_storia.csv">stazioni_storia.csv</a>, <a href="data/stazioni_sensori.csv">stazioni_sensori.csv</a>, <a href="data/prima_dopo_areaC_areaB.csv">prima_dopo_areaC_areaB.csv</a>, <a href="data/covid_2020_vs_2017_2019.csv">covid_2020_vs_2017_2019.csv</a>, <a href="data/confronto_fonti.csv">confronto_fonti.csv</a>.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Dati orari delle centraline: <a href="https://www.dati.lombardia.it/">ARPA Lombardia, dati.lombardia.it</a> (dataset delle misure dei sensori e registro stazioni <code>ib47-atvt</code>), licenza CC0. Dati giornalieri e stazioni del Comune: <a href="https://dati.comune.milano.it/">Comune di Milano, dati aperti</a> (&laquo;Rilevazione qualità dell'aria&raquo;), licenza CC BY. Mappa: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors. Elaborazione: Milano in dati.</p>
+<p><b>Come sono costruiti i numeri.</b> Valore giornaliero da dati orari ARPA validi (campo <code>stato</code> = VA, mai il codice -9999), con almeno 18 ore su 24. PM10 e PM2.5: media giornaliera. NO2: media giornaliera e massimo orario. Ozono e CO: massimo giornaliero della media mobile su 8 ore. Benzene: media giornaliera. Limiti UE: PM10 40 µg/m³ in media annua e 50 µg/m³ al giorno (max 35 giorni); PM2.5 25; NO2 40 annuo e 200 orario; ozono 120 su 8 ore (obiettivo, max 25 giorni); CO 10 mg/m³ su 8 ore; benzene 5. Raccomandazioni OMS 2021 (medie annue): PM2.5 5, PM10 15, NO2 10 µg/m³. I &laquo;giorni sopra soglia&raquo; sono giorni contati nei dati disponibili: sono un minimo se l'anno è incompleto.</p>
+<p>Dati scaricati il 29 ottobre 2026. Ultimo giorno con dati: 28 ottobre 2026. Per il confronto sono state scaricate anche sette serie ARPA di stazioni fuori Milano. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+var ST=[],ANN={},PEG={},PD={},BYID={},SEL=null,HOV=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function f1(x){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})}
+function f0(x){return x==null?'':Number(x).toLocaleString('it-IT',{maximumFractionDigits:0})}
+function fp(x){return x==null?'':(x>0?'+':(x<0?'−':''))+Math.abs(x).toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})+'%'}
+var NAME={PM10:'PM10',PM25:'PM2.5',NO2:'NO2',O3:'ozono',CO:'CO',C6H6:'benzene'};
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([J('data/stazioni.json'),J('data/annuale.json'),J('data/peggiori.json'),J('data/prima_dopo.json')]).then(function(a){
+  ST=a[0];ANN=a[1];PEG=a[2];PD=a[3];ST.forEach(function(s){BYID[s.id]=s});
+  initMap();buildWorst();buildCharts();buildPD();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(buildCharts,200)});
+}).catch(function(e){document.getElementById('card').innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+
+/* ---------- highlight ---------- */
+function applyHL(){
+  var id=HOV||SEL;
+  document.querySelectorAll('svg.ch').forEach(function(sv){sv.classList.toggle('hl',!!id);
+    sv.querySelectorAll('g.ln').forEach(function(g){g.classList.toggle('on',!!id&&g.getAttribute('data-id')===id)})});
+  document.querySelectorAll('.lg button').forEach(function(b){b.classList.toggle('on',!!id&&b.getAttribute('data-id')===id)});
+}
+function hov(id){HOV=id;applyHL()}
+function sel(id){SEL=(SEL===id?null:id);applyHL();if(SEL)card(SEL)}
+
+/* ---------- mappa ---------- */
+var MK={};
+function initMap(){
+  var map=L.map('map').setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  ST.forEach(function(s){
+    var closed=s.stato==='chiusa';
+    var m=L.circleMarker([s.lat,s.lng],closed?{radius:10,color:'#111',weight:2,dashArray:'3 3',fillColor:'#fff',fillOpacity:1}:{radius:10,color:'#fff',weight:2,fillColor:'#0050b3',fillOpacity:1}).addTo(map);
+    m.bindTooltip(esc(s.nome)+(closed?' (chiusa)':''),{direction:'top'});
+    m.on('click',function(){SEL=s.id;applyHL();card(s.id)});
+    MK[s.id]=m;
+  });
+  card('705');SEL=null;
+}
+function d(x){return x?x.split('-').reverse().join('/'):''}
+function card(id){
+  var s=BYID[id],h='<h3>'+esc(s.nome)+' <span class="sub">'+esc(s.posizione)+' &middot; stazione ARPA '+esc(s.id)+' &middot; Comune '+s.id_comune+'</span></h3>';
+  if(s.stato==='chiusa') h+='<p><b>Chiusa.</b> Primo dato ARPA: '+d(s.primo_dato)+'. Ultimo dato ARPA: '+d(s.ultimo_dato)+(s.fine_comune?'; fine attività secondo il Comune: '+d(s.fine_comune):'')+(s.fine_registro_arpa?'; secondo il registro ARPA: '+d(s.fine_registro_arpa):'')+'.</p>';
+  else h+='<p><b>Aperta.</b> Primo dato ARPA: '+d(s.primo_dato)+'. Dati fino al 28/10/2026.</p>';
+  if(s.cambio) h+='<p class="warn"><b>Cambio di stazione:</b> '+(s.id==='502'?'Juvara è stata sostituita da Pascal nel 2007 (circa 925 m più in là). Non unire le due serie.':'Pascal ha sostituito Juvara nel 2007, a circa 925 m. Non unire le due serie.')+'</p>';
+  h+='<table><tr><th>Inquinante</th><th>Anni nel file</th><th class="r">Anni con 75% di giorni</th></tr>';
+  s.inquinanti.forEach(function(q){h+='<tr><td>'+esc(q.p)+'</td><td>'+q.da+'&ndash;'+q.a+'</td><td class="r">'+q.anni_ok+'</td></tr>'});
+  h+='</table>';
+  if(s.altri_sensori.length) h+='<p class="sub">Altri sensori (fuori da questa pagina): '+esc(s.altri_sensori.join(', '))+'.</p>';
+  h+='<p>'+esc(s.note)+'</p>';
+  if(s.dist_coord_m>200) h+='<p class="sub">Le coordinate del Comune e di ARPA distano '+s.dist_coord_m+' m: sulla mappa si usano quelle di ARPA.</p>';
+  document.getElementById('card').innerHTML=h;
+}
+
+/* ---------- dove peggio ---------- */
+function buildWorst(){
+  var order=['PM10','PM25','NO2','O3','CO','C6H6'],h='<div class="grid2">';
+  order.forEach(function(pc){
+    var A=ANN[pc],L=PEG[pc];if(!L||!L.length)return;var hs=L.some(function(r){return r.sopra!=null});
+    h+='<div><h3>'+esc(A.titolo)+'</h3><p class="sub">'+esc(A.descr)+', in '+esc(A.unita)+'</p><table><tr><th>#</th><th>Stazione</th><th class="r">Media 2021-25</th>'+(hs?'<th class="r">Giorni/anno &gt; '+A.soglia+'</th>':'')+'</tr>';
+    L.forEach(function(r,i){h+='<tr><td>'+(i+1)+'</td><td>'+esc(r.nome)+(r.n<5?' <span class="sub">('+r.n+' anni)</span>':'')+'</td><td class="r"><b>'+f1(r.media)+'</b></td>'+(hs?'<td class="r">'+(r.sopra==null?'':f1(r.sopra))+'</td>':'')+'</tr>'});
+    h+='</table>';
+    var top=L[0],note=[];
+    if(A.limite_ue!=null) note.push('limite UE '+A.limite_ue+(top.media>A.limite_ue?' (superato)':' (rispettato)'));
+    if(A.who!=null) note.push('OMS 2021: '+A.who+' ('+f1(top.media/A.who).replace(',0','')+' volte)');
+    h+='<p class="src">Valore più alto: '+esc(top.nome)+'. '+note.join('; ')+(L.length===1?'. <b>Una sola stazione</b>, nessun confronto.':'')+'</p></div>';
+  });
+  h+='</div><p class="src">Per il NO2 il confronto è sulla media annua. Per l\'ozono il valore è la media annua del massimo giornaliero su 8 ore (non è un limite di legge) e contano i giorni sopra 120. Per il benzene solo la stazione Senato ha anni completi nel 2021-2025 (Marche e Pascal: buco nei dati ARPA, il Comune ha solo i giorni feriali). Marche non ha il PM10 2025 e ha il PM2.5 solo 2022-2024.</p>';
+  document.getElementById('peggio-box').innerHTML=h;
+}
+
+/* ---------- grafici ---------- */
+var EV=[{x:2012+15/366,l:'Area C',s:'C',row:0,a:'start'},{x:2019+55/365,l:'Area B',s:'B',row:1,a:'start'},{x:2020+68/366,x2:2020+124/366,l:'Covid',s:'Cv',row:0,a:'end'}];
+var CHG={x:2007+162/365,l:'Juvara → Pascal',s:'J→P',row:0,a:'start'};
+function nice(max){var st=[1,2,5,10,20,50,100],i=0;while(max/st[i]>6&&i<st.length-1)i++;return st[i]}
+function buildCharts(){
+  var order=['PM10','PM25','NO2','O3','CO','C6H6'],box=document.getElementById('anni-box'),h='';
+  order.forEach(function(pc){h+='<h3 id="g-'+pc+'">'+esc(ANN[pc].titolo)+'</h3><p class="sub">'+esc(ANN[pc].descr)+' ('+esc(ANN[pc].unita)+')'+'</p><div class="lg" id="lg-'+pc+'"></div><div id="c-'+pc+'"></div><div id="t-'+pc+'"></div>'});
+  box.innerHTML=h;
+  order.forEach(function(pc){chart(pc);tables(pc)});
+  applyHL();
+}
+function chart(pc){
+  var A=ANN[pc],box=document.getElementById('c-'+pc),w=Math.max(280,box.clientWidth||600),narrow=w<600,H=narrow?300:370;
+  var ml=narrow?34:42,mr=narrow?8:112,mt=44,mb=24,pw=w-ml-mr,ph=H-mt-mb;
+  var series=[];
+  Object.keys(A.stazioni).forEach(function(id){
+    var pts=A.stazioni[id].filter(function(r){return r[3]===1&&r[5]===0&&r[0]>=1990});
+    if(pts.length)series.push({id:id,pts:pts,closed:BYID[id].stato==='chiusa'});
+  });
+  var lg=document.getElementById('lg-'+pc);
+  if(!series.length){box.innerHTML='<p class="sub">Nessuna stazione con anni completi.</p>';lg.innerHTML='';return}
+  var x0=Infinity,ymax=0;
+  series.forEach(function(s){s.pts.forEach(function(p){x0=Math.min(x0,p[0]);ymax=Math.max(ymax,p[1])})});
+  var x1=2026;x0=x0-0;
+  [A.limite_ue].forEach(function(v){if(v!=null)ymax=Math.max(ymax,v*1.08)});
+  if(pc==='CO'||pc==='O3'){/* nessun limite annuo */}
+  var step=nice(ymax),ym=Math.ceil(ymax/step)*step;
+  function X(y){return ml+(y-x0)/(x1-x0)*pw} function Y(v){return mt+ph-(v/ym)*ph}
+  var sv='<svg class="ch" viewBox="0 0 '+w+' '+H+'" width="'+w+'" height="'+H+'" role="img" aria-label="'+esc(A.titolo)+': '+esc(A.descr)+' per stazione">';
+  for(var v=0;v<=ym+1e-9;v+=step){sv+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e5e5e5"/><text class="mu" x="'+(ml-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>'}
+  var ts=Math.ceil((x0)/5)*5;
+  for(var yr=ts;yr<=2025;yr+=5){sv+='<line x1="'+X(yr+.5)+'" x2="'+X(yr+.5)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph+4)+'" stroke="#999"/><text class="mu" x="'+X(yr+.5)+'" y="'+(mt+ph+17)+'" text-anchor="middle">'+yr+'</text>'}
+  sv+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph)+'" stroke="#111"/>';
+  /* limiti */
+  if(A.who!=null&&A.who<=ym){sv+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+Y(A.who)+'" y2="'+Y(A.who)+'" stroke="#888" stroke-width="1.3" stroke-dasharray="1.5 3"/><text class="mu" x="'+(ml+pw-2)+'" y="'+(Y(A.who)-4)+'" text-anchor="end">OMS 2021: '+A.who+'</text>'}
+  if(A.limite_ue!=null){sv+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+Y(A.limite_ue)+'" y2="'+Y(A.limite_ue)+'" stroke="#0050b3" stroke-width="1.5" stroke-dasharray="7 4"/><text x="'+(ml+4)+'" y="'+(Y(A.limite_ue)-4)+'" style="fill:#0050b3">limite UE: '+A.limite_ue+'</text>'}
+  if(pc==='CO'){sv+='<text class="mu" x="'+(ml+4)+'" y="'+(mt+12)+'">limite UE 10 mg/m³ (fuori scala)</text>'}
+  /* eventi */
+  var evs=EV.slice();if(pc!=='CO'&&pc!=='C6H6'&&x0<2008)evs.push(CHG);
+  evs.forEach(function(e){
+    if(e.x<x0||e.x>x1)return; var xx=X(e.x),yl=mt-8-(e.row*13);
+    if(e.x2){sv+='<rect x="'+xx+'" y="'+mt+'" width="'+Math.max(2,X(e.x2)-xx)+'" height="'+ph+'" fill="#000" opacity=".12"/>'}
+    else sv+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(mt-4)+'" y2="'+(mt+ph)+'" stroke="#555" stroke-width="1" stroke-dasharray="2 3"/>';
+    sv+='<text class="mu" x="'+(e.a==='end'?xx:xx+3)+'" y="'+yl+'" text-anchor="'+e.a+'">'+esc(narrow?e.s:e.l)+'</text>';
+  });
+  /* linee */
+  var ends=[];
+  series.forEach(function(s){
+    var segs=[],cur=[];
+    s.pts.forEach(function(p,i){if(i>0&&p[0]!==s.pts[i-1][0]+1){segs.push(cur);cur=[]}cur.push(p)});segs.push(cur);
+    var g='<g class="ln'+(s.closed?' cl':'')+'" data-id="'+s.id+'">';
+    segs.forEach(function(sg){
+      var dd=sg.map(function(p,i){return(i?'L':'M')+X(p[0]+.5).toFixed(1)+' '+Y(p[1]).toFixed(1)}).join('');
+      g+='<path class="l" d="'+dd+'"/><path class="hit" d="'+dd+'"/>';
+    });
+    s.pts.forEach(function(p){g+='<circle cx="'+X(p[0]+.5).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="'+(s.closed?2.2:2.6)+'"><title>'+esc(BYID[s.id].nome)+' '+p[0]+': '+f1(p[1])+' '+esc(A.unita)+' ('+p[2]+'% giorni'+(p[6]>0?', '+p[6]+' dal Comune':'')+')</title></circle>'});
+    var last=s.pts[s.pts.length-1];
+    if(!narrow){
+      if(last[0]>=2025)ends.push({g:s,y:Y(last[1]),x:ml+pw+6,id:s.id,txt:BYID[s.id].nome});
+      else g+='<text x="'+(X(last[0]+.5)+5)+'" y="'+(Y(last[1])+4)+'" data-id="'+s.id+'">'+esc(BYID[s.id].nome)+'</text>';
+    }
+    s.html=g;
+  });
+  ends.sort(function(a,b){return a.y-b.y});
+  for(var i=1;i<ends.length;i++){if(ends[i].y-ends[i-1].y<12)ends[i].y=ends[i-1].y+12}
+  ends.forEach(function(e){e.g.html+='<text x="'+e.x+'" y="'+(e.y+4)+'" data-id="'+e.id+'">'+esc(e.txt)+'</text>'});
+  series.forEach(function(s){sv+=s.html+'</g>'});
+  sv+='</svg>';
+  box.innerHTML=sv;
+  var svg=box.firstChild;
+  svg.querySelectorAll('g.ln').forEach(function(g){var id=g.getAttribute('data-id');
+    g.addEventListener('mouseenter',function(){hov(id)});g.addEventListener('mouseleave',function(){hov(null)});g.addEventListener('click',function(){sel(id)})});
+  /* legenda */
+  var lh='';series.forEach(function(s){
+    lh+='<button type="button" data-id="'+s.id+'" class="'+(s.closed?'cl':'')+'"><svg width="26" height="8"><line x1="0" x2="26" y1="4" y2="4" stroke="'+(s.closed?'#555':'#111')+'" stroke-width="2"'+(s.closed?' stroke-dasharray="6 4"':'')+'/></svg>'+esc(BYID[s.id].nome)+(s.closed?' (chiusa)':'')+'</button>'});
+  lg.innerHTML=lh;
+  lg.querySelectorAll('button').forEach(function(b){var id=b.getAttribute('data-id');
+    b.addEventListener('mouseenter',function(){hov(id)});b.addEventListener('mouseleave',function(){hov(null)});b.addEventListener('click',function(){sel(id)});});
+}
+/* ---------- tabelle ---------- */
+function tables(pc){
+  var A=ANN[pc],el=document.getElementById('t-'+pc),ids=Object.keys(A.stazioni).sort(function(a,b){return BYID[a].nome<BYID[b].nome?-1:1});
+  var years={};ids.forEach(function(id){A.stazioni[id].forEach(function(r){if(r[0]>=1995)years[r[0]]=1})});
+  var ys=Object.keys(years).map(Number).sort(function(a,b){return b-a});
+  var h='';
+  if(A.soglia){
+    var extra=pc==='PM10'?' La legge ne permette al massimo 35 all\'anno (celle azzurre = oltre).':pc==='O3'?' L\'obiettivo UE è al massimo 25 giorni all\'anno, in media su 3 anni (azzurro = oltre).':pc==='NO2'?' Il limite UE è di 18 <i>ore</i> sopra 200 all\'anno: qui si contano i giorni con almeno un\'ora sopra.':'';
+    var maxv=pc==='PM10'?35:pc==='O3'?25:null,tot=0;
+    ids.forEach(function(id){A.stazioni[id].forEach(function(r){if(r[4])tot+=r[4]})});
+    h+='<details'+(tot>0?' open':'')+'><summary>Giorni sopra soglia: '+esc(A.soglia_descr)+'</summary>';
+    if(tot===0){h+='<p>Mai oltre la soglia in nessuna stazione e in nessun anno con dati.</p></details>'}
+    else{
+      h+='<p class="sub">Gli asterischi (*) segnano anni con meno del 75% di giorni validi (il numero vero può essere più alto) e il 2026 in corso.'+extra+'</p><div class="scroll"><table><tr><th>Anno</th>'+ids.map(function(id){return'<th class="r">'+esc(BYID[id].nome)+(BYID[id].stato==='chiusa'?' (chiusa)':'')+'</th>'}).join('')+'</tr>';
+      ys.forEach(function(y){
+        var row='',any=false;
+        ids.forEach(function(id){var r=A.stazioni[id].filter(function(q){return q[0]===y})[0];
+          if(!r||r[4]==null){row+='<td class="r low">&ndash;</td>';return}
+          any=true;var bad=(r[3]!==1||r[5]===1),over=maxv!=null&&r[4]>maxv&&!bad;
+          row+='<td class="r'+(bad?' low':'')+(over?' over':'')+'">'+r[4]+(bad?'*':'')+'</td>'});
+        if(any)h+='<tr><td><b>'+y+(y===2026?' (a ottobre)':'')+'</b></td>'+row+'</tr>';
+      });
+      h+='</table></div></details>';
+    }
+  }
+  h+='<details><summary>Tutte le medie annue (tabella)</summary><p class="sub">'+esc(A.descr)+', '+esc(A.unita)+'. In grigio: anni con meno del 75% di giorni validi o il 2026 in corso (non confrontabili). Tra parentesi la completezza.</p><div class="scroll"><table><tr><th>Anno</th>'+ids.map(function(id){return'<th class="r">'+esc(BYID[id].nome)+'</th>'}).join('')+'</tr>';
+  ys.forEach(function(y){
+    var row='';ids.forEach(function(id){var r=A.stazioni[id].filter(function(q){return q[0]===y})[0];
+      if(!r){row+='<td class="r low">&ndash;</td>';return}
+      var bad=(r[3]!==1||r[5]===1);row+='<td class="r'+(bad?' low':'')+'">'+f1(r[1])+' <span class="sub">('+r[2]+'%)</span></td>'});
+    h+='<tr><td><b>'+y+(y===2026?' (a ottobre)':'')+'</b></td>'+row+'</tr>';
+  });
+  h+='</table></div></details>';
+  el.innerHTML=h;
+}
+
+/* ---------- prima/dopo ---------- */
+function pdTable(ev,zonaHead){
+  var P=PD[ev],h='<table><tr><th>Inquinante e gruppo</th><th class="r">Stazioni</th><th class="r">Media prima</th><th class="r">Media dopo</th><th class="r">Variazione</th><th class="r">Negli altri anni, stessa data: da &hellip; a (mediana)</th></tr>';
+  P.gruppi.slice().sort(function(a,b){return a.inq<b.inq?-1:a.inq>b.inq?1:a.zona<b.zona?-1:1}).forEach(function(g){
+    h+='<tr><td><b>'+NAME[g.inq]+'</b> &middot; '+esc(g.zona)+'<br><span class="sub">'+esc(g.stazioni)+'</span></td><td class="r">'+g.n+'</td><td class="r">'+f1(g.prima)+'</td><td class="r">'+f1(g.dopo)+'</td><td class="r"><b>'+fp(g.var)+'</b></td><td class="r">'+(g.altri_n?fp(g.altri_min)+' &hellip; '+fp(g.altri_max)+' ('+fp(g.altri_med)+', '+g.altri_n+' anni)':'')+'</td></tr>'});
+  h+='</table>';
+  h+='<details><summary>Stazione per stazione</summary><div class="scroll"><table><tr><th>Inquinante</th><th>Stazione</th><th>Gruppo</th><th class="r">Prima</th><th class="r">Dopo</th><th class="r">Variazione</th><th class="r">Giorni validi prima / dopo</th></tr>';
+  P.dettaglio.forEach(function(r){h+='<tr><td>'+NAME[r.inq]+'</td><td>'+esc(r.staz)+'</td><td class="sub">'+esc(r.zona)+'</td><td class="r">'+f1(r.prima)+'</td><td class="r">'+f1(r.dopo)+'</td><td class="r">'+fp(r.var)+'</td><td class="r">'+r.gp+' / '+r.gd+'</td></tr>'});
+  h+='</table></div></details>';
+  return h;
+}
+function buildPD(){
+  var h='';
+  h+='<h3>Area C: dal 16 gennaio 2012</h3><p>Si confrontano i 12 mesi prima (16/1/2011-15/1/2012) e i 12 mesi dopo (16/1/2012-15/1/2013). Medie giornaliere in µg/m³, solo stazioni con almeno il 75% di giorni in entrambi i periodi. &laquo;Dentro Area C&raquo; = Senato e Verziere (lettura mia della posizione, non verificata sul perimetro ufficiale); tutte le altre stazioni di Milano sono fuori.</p>';
+  h+=pdTable('Area C');
+  h+='<p><b>Cosa si vede, in numeri.</b> Il NO2 scende del 16,9% nelle due stazioni dentro Area C, contro il 5,1% delle stazioni milanesi fuori e il 6,7% di quelle fuori Milano. In altri dieci anni (2009-2019), alla stessa data, la variazione delle stazioni del centro andava da −9,2% a +9,5%. Per il PM10 il calo nel centro (−13,6%) è vicino a quello delle stazioni fuori Milano (−8,7%) e dentro l\'intervallo degli altri anni. Due stazioni sono poche: un solo strumento guasto o spostato cambia il risultato.</p>';
+  h+='<h3>Area B: dal 25 febbraio 2019</h3><p>12 mesi prima (25/2/2018-24/2/2019) contro 12 mesi dopo (25/2/2019-24/2/2020, finisce prima del lockdown). Tutte le stazioni di Milano sono dentro Area B, quindi non c&rsquo;è un gruppo &laquo;fuori&raquo; a Milano: il confronto è con le stazioni fuori Milano.</p>';
+  h+=pdTable('Area B');
+  h+='<p><b>Cosa si vede, in numeri.</b> Il NO2 scende del 9,1% a Milano contro l\'1,4% fuori Milano; il PM10 del 6,3% contro il 2,6%. Ma negli altri anni, alla stessa data, il NO2 di Milano è variato tra −6,3% e +9,2% e il PM10 tra −13,3% e +9,6%. Le stazioni milanesi con Area B sono quattro-cinque.</p>';
+  var C=PD.Covid;
+  h+='<h3>Lockdown: 9 marzo - 3 maggio 2020</h3><p>Si confronta la media delle stesse 56 giornate (9/3-3/5) del 2020 con la media delle stesse giornate del 2017-2019 e del 2021, per stazione, poi si fa la media delle stazioni. Solo stazioni con dati validi in quel periodo in almeno due anni su tre del 2017-2019.</p>';
+  h+='<table><tr><th>Inquinante e gruppo</th><th class="r">Stazioni</th><th class="r">Media 2017-19</th><th class="r">Media 2020</th><th class="r">2020 su 2017-19</th><th class="r">2021 su 2017-19</th></tr>';
+  C.gruppi.slice().sort(function(a,b){return a.inq<b.inq?-1:a.inq>b.inq?1:a.zona<b.zona?-1:1}).forEach(function(g){
+    h+='<tr><td><b>'+NAME[g.inq]+'</b> &middot; '+esc(g.zona)+'<br><span class="sub">'+esc(g.stazioni)+'</span></td><td class="r">'+g.n+'</td><td class="r">'+f1(g.ref)+'</td><td class="r">'+f1(g.m2020)+'</td><td class="r"><b>'+fp(g.var2020)+'</b></td><td class="r">'+fp(g.var2021)+'</td></tr>'});
+  h+='</table>';
+  /* per anno */
+  var yrs=[];C.per_anno.forEach(function(r){if(yrs.indexOf(r.anno)<0)yrs.push(r.anno)});yrs.sort();
+  var cols=[['NO2','Milano'],['NO2','Fuori Milano (controllo)'],['PM10','Milano'],['PM10','Fuori Milano (controllo)']];
+  h+='<details><summary>Le stesse giornate (9/3-3/5) in tutti gli anni</summary><table><tr><th>Anno</th>'+cols.map(function(c){return'<th class="r">'+NAME[c[0]]+'<br>'+(c[1]==='Milano'?'Milano':'fuori Milano')+'</th>'}).join('')+'</tr>';
+  yrs.slice().reverse().forEach(function(y){h+='<tr><td><b>'+y+'</b></td>'+cols.map(function(c){var r=C.per_anno.filter(function(q){return q.anno===y&&q.inq===c[0]&&q.zona===c[1]})[0];return'<td class="r'+(y===2020?' over':'')+'">'+(r&&r.media!=null?f1(r.media):'&ndash;')+'</td>'}).join('')+'</tr>'});
+  h+='</table><p class="src">Solo le stazioni del confronto sopra. Gli anni prima del 2017 possono includere meno stazioni.</p></details>';
+  h+='<details><summary>Stazione per stazione</summary><div class="scroll"><table><tr><th>Inquinante</th><th>Stazione</th><th>Gruppo</th><th class="r">2017-19</th><th class="r">2020</th><th class="r">Variazione 2020</th></tr>';
+  C.dettaglio.forEach(function(r){h+='<tr><td>'+NAME[r.inq]+'</td><td>'+esc(r.staz)+'</td><td class="sub">'+esc(r.zona)+'</td><td class="r">'+f1(r.ref)+'</td><td class="r">'+f1(r.m2020)+'</td><td class="r">'+fp(r.var2020)+'</td></tr>'});
+  h+='</table></div></details>';
+  h+='<p><b>Cosa si vede, in numeri.</b> Il NO2 del 2020 nelle stesse giornate è più basso del 37,8% a Milano e del 39,0% nelle stazioni fuori Milano: quasi uguale. Il PM10 va nell\'altro senso: −6,8% a Milano, +10,4% nelle due stazioni fuori Milano (Magenta e Pioltello), quindi due gruppi che non si muovono insieme. Il PM2.5 (due stazioni) −11,9%. Nel 2021 il NO2 è ancora sotto la media 2017-19 (−19,1% Milano, −15,9% fuori).</p>';
+  document.getElementById('pd-box').innerHTML=h;
+}
+})();
+</script></body></html>
