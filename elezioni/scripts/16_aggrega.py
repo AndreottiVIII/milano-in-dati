@@ -1,4 +1,6 @@
-"""Passo 3: aggrega per famiglia, territorio ed elezione; scrive i JSON del sito.
+"""Passo 3: aggrega per partito (lista) e per famiglia, territorio ed elezione; scrive i JSON del sito.
+Nel sito ogni elezione ha: fam (famiglie, per tabella sezioni e mappa), par (lista di [nome, indice famiglia]), city.v e terr[n].v (voti per partito, nell'ordine di par).
+Le liste sotto lo 0,5% dei voti di lista della citta (se almeno 2 nella stessa famiglia) sono unite in "Altre liste" della famiglia.
 uso: python -I 16_aggrega.py <cartella elezioni> <cartella docs/elezioni>
 Scrive: pulito/aggregati_territorio.csv, docs/elezioni/data/index.json, docs/elezioni/data/e/<id>.json
 """
@@ -16,8 +18,10 @@ voti = pd.read_csv(os.path.join(pul, 'voti_sezione.csv'), encoding='utf-8-sig', 
 fam = pd.read_csv(os.path.join(base, 'famiglie_partiti.csv'), sep=';', encoding='utf-8-sig', dtype=str, keep_default_na=False)
 
 ORDER = ['Sinistra', 'Centrosinistra', 'M5S', 'Centro', 'Centrodestra', 'Lega', 'Destra', 'Altri']
-COLORI = {'Sinistra': '#b3202a', 'Centrosinistra': '#e8707a', 'M5S': '#e6b800', 'Centro': '#8a6fb5', 'Centrodestra': '#4a90d9',
-          'Lega': '#1f7a3a', 'Destra': '#1f3b73', 'Altri': '#9a9a9a', 'Sì': '#2e8b57', 'No': '#c0392b'}
+# colori guidati da quelli storici: PCI rosso, PSI/PDS/PD rosa-rosso, DC bianco, Forza Italia azzurro, Lega verde, MSI nero, M5S giallo
+COLORI = {'Sinistra': '#c1121f', 'Centrosinistra': '#ef6f6c', 'M5S': '#f2c500', 'Centro': '#ffffff', 'Centrodestra': '#3a8fd9',
+          'Lega': '#1e8a3c', 'Destra': '#222222', 'Altri': '#9a9a9a', 'Sì': '#2e8b57', 'No': '#c0392b'}
+SOGLIA = 0.005
 
 cat = cat[cat.nel_sito == 'si'].copy()
 voti = voti[voti.elezione_id.isin(cat.elezione_id)]
@@ -87,10 +91,32 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
     pf = vv.pivot_table(index='sezione', columns='famiglia', values='voti', aggfunc='sum', fill_value=0)
     fams = [f for f in (['Sì', 'No'] if r.gruppo == 'referendum' else ORDER) if f in pf.columns and pf[f].sum() > 0]
     pf = pf.reindex(columns=fams).fillna(0)
-    m = rr.set_index('sezione').join(pf, how='left')
+    # ---- partiti: nome lista, famiglia; le piccole (<0.5%) unite in "Altre liste" per famiglia
+    vv = vv.copy()
+    vv['nome'] = vv.famiglia if r.gruppo == 'referendum' else vv.lista.str.strip()
+    g1 = vv.groupby(['nome', 'famiglia']).voti.sum().reset_index()
+    g1 = g1[g1.voti > 0]
+    tot_c = g1.voti.sum()
+    piccole = g1[g1.voti < SOGLIA * tot_c]
+    unire = {f for f, n in piccole.famiglia.value_counts().items() if n >= 2}
+    mp = {(n, f): ('Altre liste' if (f in unire and v < SOGLIA * tot_c) else n) for n, f, v in g1.itertuples(index=False)}
+    vv['pnome'] = [mp.get((n, f)) for n, f in zip(vv.nome, vv.famiglia)]
+    vv = vv[vv.pnome.notna()]
+    g2 = vv.groupby(['pnome', 'famiglia']).voti.sum().reset_index()
+    g2['fi'] = g2.famiglia.map({f: i for i, f in enumerate(fams)})
+    g2['altre'] = (g2.pnome == 'Altre liste').astype(int)
+    g2 = g2.sort_values(['fi', 'altre', 'voti', 'pnome'], ascending=[True, True, False, True]).reset_index(drop=True)
+    par = [[n, int(fi)] for n, fi in zip(g2.pnome, g2.fi)]
+    pcols = ['P%d' % i for i in range(len(par))]
+    pidx = {(n, f): i for i, (n, f) in enumerate(zip(g2.pnome, g2.famiglia))}
+    vv['pi'] = [pidx[(n, f)] for n, f in zip(vv.pnome, vv.famiglia)]
+    pp = vv.pivot_table(index='sezione', columns='pi', values='voti', aggfunc='sum', fill_value=0).reindex(columns=range(len(par))).fillna(0)
+    pp.columns = pcols
+    m = rr.set_index('sezione').join(pf, how='left').join(pp, how='left')
     m[fams] = m[fams].fillna(0)
+    m[pcols] = m[pcols].fillna(0)
     m = m.reset_index().sort_values('sezione')
-    # righe per sezione
+    # righe per sezione (solo famiglie: tabella piccola)
     rows = []
     for x in m.itertuples(index=False):
         d = x._asdict()
@@ -102,7 +128,7 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
     def aggreg(g):
         e = g.elettori.sum(min_count=1)
         vt = g.votanti.sum(min_count=1)
-        return dict(v=[int(g[f].sum()) for f in fams],
+        return dict(v=[int(g[c].sum()) for c in pcols], fv=[int(g[f].sum()) for f in fams],
                     e=None if pd.isna(e) else int(e), vt=None if pd.isna(vt) else int(vt),
                     ns=int(g.sezione.nunique()))
     city = aggreg(m)
@@ -111,9 +137,11 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
         terr[str(int(t))] = aggreg(g)
         a = terr[str(int(t))]
         agg_rows.append(dict(elezione_id=eid, territorio=int(t), sistema=r.sistema_territorio, n_sezioni=a['ns'], elettori=a['e'], votanti=a['vt'],
-                             **{f: v for f, v in zip(fams, a['v'])}))
+                             **{f: v for f, v in zip(fams, a['fv'])}))
     agg_rows.append(dict(elezione_id=eid, territorio=0, sistema='citta', n_sezioni=city['ns'], elettori=city['e'], votanti=city['vt'],
-                         **{f: v for f, v in zip(fams, city['v'])}))
+                         **{f: v for f, v in zip(fams, city['fv'])}))
+    for a in [city] + list(terr.values()):
+        del a['fv']
     note = []
     if city['e'] is None:
         note.append('affluenza non disponibile (campo Elettori a zero nel dataset)')
@@ -129,7 +157,7 @@ for r in cat.sort_values(['data', 'ds_risultati']).itertuples():
         note.append('data corretta (nel dataset: %s)' % r.nota_data.split(': ')[1])
     elez_out.append(dict(id=eid, tipo=r.gruppo, data=r.data, anno=int(r.anno), label=label(r), sistema=r.sistema_territorio,
                          ds=[int(r.ds_risultati)] + ([int(r.ds_voti)] if r.ds_voti == r.ds_voti and r.ds_voti != '' else []),
-                         fam=fams, city=city, terr=terr, note=note))
+                         fam=fams, par=par, city=city, terr=terr, note=note))
 
 idx = dict(
     generato='2026-10-29',
