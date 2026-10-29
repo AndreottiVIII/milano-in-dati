@@ -10,6 +10,15 @@ Ogni problema trovato nei dati va annotato: diventa materiale per la rubrica "tr
 - 2026-10-29 — Regola licenze: se una fonte non permette di ripubblicare, nel repo vanno solo programmi e risultati, non i dati grezzi.
 - 2026-10-29 — Divisione del lavoro: Opus coordina e fa il delicato, Sonnet scrive il codice, Sonnet medio il meccanico, Haiku solo controlli di testo.
 
+- 2026-10-29 — **Idea in attesa: film e libri ambientati a Milano** (Davide: "dopo", prima si chiudono i filoni aperti). Fonti individuate:
+  - Wikidata: P840 "luogo dell'ambientazione" = Milano e, per i film, P915 "luogo delle riprese"; CC0, in blocco.
+  - Categorie di it.wikipedia: Film ambientati a / girati a Milano, Romanzi ambientati a Milano.
+  - Open Library e Library of Congress, con il soggetto "Milan (Italy) -- Fiction".
+  - Catalogo SBN, con i soggetti in italiano (accesso in blocco da verificare).
+  - Lombardia Film Commission ed eventuali permessi per le riprese del Comune (da verificare).
+  - Da non usare: IMDb, perché i luoghi delle riprese non sono nei file scaricabili e leggere il sito pagina per pagina non è permesso.
+  - Limite: le fonti dicono raramente dove, dentro Milano.
+
 ## 1. Temperature (Milano Brera, dal 1763)
 
 - **Fonti:** GHCN-Daily (NOAA, stazione ITE00100554), ECA&D (serie Maugeri 1763-2008 e fuse/omogeneizzate), ARPA Lombardia (sensore 5897 Milano v.Brera, dal 1990).
@@ -1241,3 +1250,10 @@ Dimensioni: tutta la cartella `raw\comune_milano` pesa circa 243 MB (il grosso s
 - **Classifiche**: entrano solo i NIL con almeno 30 civici e 1.000 abitanti (75 su 88).
 - **Dati personali**: il file dei medici di base (nomi e date di nascita, licenza CC BY-NC) non è pubblicato; nel sito ci sono solo i tempi a piedi aggregati.
 - Pagina `docs/citta-15-minuti/`, approvata da Davide dopo la "sorpresa".
+
+## 10. Violenza politica a Milano dal 1900
+
+_Fonti, date di scarico, licenze, scelte, problemi. Cartella `violenza-politica/`._
+
+- 2026-10-29 — Filone chiesto da Davide: dove e quando sono avvenuti gli attentati a Milano dal 1900, su una mappa collegata a Wikipedia. Si contano bombe, stragi e omicidi politici (scelta di Davide); non si contano ordigni inesplosi, incendi e gambizzazioni senza morti. Nome della cartella e della sezione: `violenza-politica` (scelta di Davide). Fonti: Wikidata e Wikipedia. La Global Terrorism Database (1970-2020) chiede la registrazione: non la usiamo, salvo che Davide si registri lui.
+
