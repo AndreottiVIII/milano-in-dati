@@ -647,13 +647,264 @@ Ogni voce nomina file e campo.
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `aria/`._
 
+### Fase 1 — scarico (2026-10-29)
+
+**Aria, stazione per stazione: note sul download (fase 1)**
+
+Scaricato il 29/10/2026. Nessuna analisi, nessuna pagina del sito. Cartella: `milano-in-dati\aria\`.
+Script in `scripts\` (01 ricerca, 02 scarico Comune, 03 scarico ARPA, 04-07 inventari e confronto). Risultati in `out\`.
+
+#### 1. Fonti scaricate
+
+##### A. Comune di Milano, dati aperti (CKAN, dati.comune.milano.it)
+- Ricerca: `package_search?q=Rilevazione qualità aria` (risultato salvato in `raw\ckan_search.json`).
+- Cartella: `raw\comune\` (36 file, 6,5 MB in totale; l'elenco con URL e date è in `raw\comune\_manifest.json`).
+- **Rilevazione qualità aria 2002-2026** (uno per anno, 25 file CSV, nomi `ds4xx_qaria_datoariagiornostazione_year-AAAA.csv` fino al 2020 e `qaria_datoariagiornostazione_<data>.csv` dal 2021). Colonne: `stazione_id;data;inquinante;valore`. Un valore al giorno per stazione e inquinante. Il file 2026 (`ds2969`, `qaria_datoariagiornostazione_2026-10-29.csv`) viene aggiornato ogni giorno: arriva fino al 28/10/2026.
+- **Report qualità aria 2005-2024** (20 file, `*_reportariagiorno_*.csv`). Colonne: `data;descrizione;previsione;tendenza`. Sono bollettini scritti a parole (per esempio "Superamento del Valore Limite per il PM10"), non numeri. Fermi al 16/04/2024 (`qaria_reportariagiorno_2024-05-08.csv`, 74 righe). Per il 2025 e il 2026 non esiste il report.
+- **Stazioni monitoraggio inquinanti** (`ds484`): `qaria_stazione.csv`, `qaria_stazione.geojson`, `qaria_stazione_shp.zip`. 9 stazioni, con coordinate, id Comune (`id_amat`), id ARPA (`id_arpa`), inizio e fine attività.
+- **Valori rilevati per i principali inquinanti 2004-2023** (`ds573_inquinanti_aria.csv`, 4,6 KB): solo riassunti annuali (media annua PM10 e NO2, giorni di superamento PM10 e O3). Utile come controllo, non come dato.
+- Licenza: CC-BY (campo `license_id` = `cc-by` in `raw\ckan_search.json`). I dati grezzi si possono ripubblicare citando la fonte (Comune di Milano).
+
+##### B. ARPA Lombardia, dati.lombardia.it (Socrata)
+- Registro stazioni: dataset `ib47-atvt` "Stazioni qualità dell'aria", 998 righe in tutta la Lombardia; salvato intero in `raw\arpa\ib47-atvt_stazioni_tutte.csv`. Le righe con `comune` = Milano sono 71 sensori su 9 stazioni. Esiste anche `9xaz-9vbz` (stazioni NRT, 222 righe): `raw\arpa\9xaz-9vbz_stazioni_NRT.csv`.
+- Dati orari/giornalieri dei sensori, scaricati solo per i 71 sensori di Milano, un file per sensore in ognuna di queste cartelle (`raw\arpa\<dataset>\sensore_<id>.csv`; 424 MB in totale, 8.838.896 righe):
+  - `evzn-32bs_fino1999` (Dati sensori aria fino al 1999): 134 MB, 2.792.469 righe
+  - `cthp-zqrr_2000-2009`: 122 MB, 2.536.542 righe
+  - `nr8w-tj77_2010-2017`: 97 MB, 2.026.524 righe
+  - `g2hp-ar79_dal2018` (2018-2025): 63 MB, 1.302.209 righe
+  - `nicp-bhqi_corrente` ("Dati sensori aria", 2026): 9 MB, 180.936 righe
+  - `ykhg-b8rs_NRT` (ultimi giorni, in tempo quasi reale): 1 MB, 216 righe. Sono doppioni degli ultimi giorni di `nicp-bhqi`.
+- Colonne dati: `idsensore, data, valore, stato, idoperatore`. Colonne registro: `idsensore, nometiposensore, unitamisura, idstazione, nomestazione, quota, provincia, comune, storico, datastart, datastop, utm_nord, utm_est, lat, lng`.
+- Licenza: CC0 (Creative Commons 1.0 Universal, dedica al pubblico dominio), attribuzione ARPA Lombardia (dai metadati Socrata `api/views/<id>.json`, campi `license` e `attribution`). Si possono ripubblicare i dati grezzi.
+- Nessuna registrazione, nessun accesso, nessuna accettazione di licenza richiesta, né per il Comune né per ARPA.
+
+#### 2. Le stazioni (9) e come si corrispondono
+
+Il Comune e ARPA usano **codici diversi**. Il legame va fatto a mano, con i nomi e le coordinate (distanza tra i due punti in metri, da `qaria_stazione.csv` e dal registro ARPA, campi lat/lng):
+
+| Comune `id_amat` | Nome Comune | ARPA `idstazione` | Nome ARPA | Distanza |
+|---|---|---|---|---|
+| 1 | p.le Abbiategrasso | 549 | P.zza Abbiategrasso | 12 m |
+| 2 | via Pascal * | 705 | Pascal Città Studi | **531 m** |
+| 3 | viale Liguria | 539 | v.Liguria | 123 m |
+| 4 | viale Marche | 501 | v.Marche | 8 m |
+| 5 | Parco Lambro | 547 | Parco Lambro | 3 m |
+| 6 | via Senato * | 548 | v.Senato | 36 m |
+| 7 | Verziere | 528 | Verziere | 17 m |
+| 8 | p.le Zavattari | 503 | P.zza Zavattari | 4 m |
+| 9 | via Juvara | 502 | v.Juvara | 149 m |
+
+Il campo `id_arpa` del Comune (126, 100, 107, 2, 124, 125, 85, 7, 7) **non coincide** con `idstazione` di ARPA, e il valore "7" è usato due volte (Zavattari e Juvara). Non va usato per fare il collegamento. Le due stazioni col asterisco (Pascal, Senato) nel nome: il significato non è spiegato nei dati.
+
+#### 3. Cosa c'è, stazione per stazione (inventario completo in file)
+- `out\inventario_stazioni_inquinanti.csv`: per ogni stazione e inquinante, prima/ultima data e buchi, per ARPA e per il Comune insieme.
+- `out\inventario_arpa.csv` (71 sensori: tipo, unità, prima/ultima data, passo, buco più lungo, stati) e `out\inventario_arpa_per_anno.csv` (valori validi per sensore e anno).
+- `out\inventario_comune.csv` (63 coppie stazione-inquinante: righe, validi, vuoti, prima/ultima data, buco più lungo) e `out\inventario_comune_per_anno.csv`.
+- `out\confronto_comune_arpa.csv`: confronto giorno per giorno.
+
+Sintesi (da `inventario_comune.csv`, campi `prima`, `ultima`; da `inventario_arpa.csv`):
+- Chiuse: Zavattari, Parco Lambro, Abbiategrasso (dati Comune fino al 31/08/2017 per NO2; ARPA registro `datastop` = 30/07/2018; i dati ARPA finiscono con il 2016). Juvara chiusa l'11/06/2007.
+- Aperte oggi: Pascal (ARPA 705), Senato (548), Marche (501), Verziere (528), Liguria (539, ma il CO è spento dal 03/10/2023, `inventario_arpa.csv` sensore 5823).
+- Inquinanti nel dato giornaliero del Comune: NO2, CO (CO_8h), PM10, PM25, O3, benzene (C6H6), SO2. In ARPA ci sono anche ossidi di azoto, Black Carbon, ammoniaca, metalli (arsenico, cadmio, nichel, piombo) e benzo(a)pirene, solo a Senato e Pascal.
+- Il Comune non ha dati di SO2 dopo il 2007 tranne Pascal (SO2, `inventario_comune.csv`, stazione 2, fino al 28/10/2026); gli altri SO2 sono righe sempre vuote.
+- Il NO2 ha la serie più lunga (ARPA: Marche dal 1980; Verziere dal 1988; Liguria dal 1991; Senato dal 1995; Pascal dal 2007). Il PM10 inizia a Juvara nel 1998 (ARPA sensore 6905), a Verziere nel 2001, a Senato nel 2007, a Pascal nel 2007, a Marche nel 2018.
+- Il PM2.5: Juvara 2005-2007 (sensore 9874), Pascal dal 2007, Senato dal 2012, Marche dal 2021 (sensore 20529; il registro dice 2022, i dati partono dal 30/09/2021).
+
+#### 4. Il Comune e ARPA si sovrappongono? Chi è più lungo?
+**Sì, sono le stesse misure.** Il Comune pubblica un riassunto giornaliero dei dati ARPA. Confronto fatto su tutti i giorni in comune (`out\confronto_comune_arpa.csv`):
+- **La data del Comune è il giorno dopo la misura.** Se spostiamo la data ARPA di un giorno avanti, il PM10 coincide nel 98-100% dei giorni (differenza entro ±1 µg/m³, colonna `uguali_1_mean`; per esempio stazione 6 PM10: 0,993, 4.740 giorni). Senza spostamento la coincidenza scende al 10%.
+- **Cosa rappresenta il valore giornaliero del Comune** (trovato per confronto, non dichiarato nei metadati):
+  - PM10 e PM2.5: media giornaliera (coincidenza 99%).
+  - NO2 e O3: **massimo orario del giorno**, non la media (coincidenza entro il 5%: 94-99% per il NO2, 90-99% per l'O3; colonne `uguali_5pc_max`).
+  - CO (`CO_8h`): massimo della media mobile su 8 ore (coincidenza 95-99%, colonna `uguali_1_max8h`).
+  - Benzene e SO2: più vicini alla media giornaliera (benzene entro 1 µg/m³ nel 82-95% dei giorni; SO2 solo 60-70%, da verificare in fase 2).
+- **Lunghezza**: ARPA è molto più lunga (NO2 dal 1977, SO2 dal 1971, polveri totali dal 1976, `inventario_arpa.csv`, campo `prima`; il Comune parte dal 2002) e ha il dato **orario**. Il Comune è più comodo (un valore al giorno già pronto) e **ha dati che ARPA non ha** in alcuni periodi (vedi trappole 9 e 10).
+- Consiglio per la fase 2: ARPA per le serie lunghe, per l'orario e per i metalli; il Comune per riempire i buchi di ARPA (trappole 15 e 16), dopo aver riallineato la data e l'indicatore.
+
+#### 5. Unità, medie, flag, codici di dato mancante
+- Unità (campo `unitamisura` del registro ARPA): µg/m³ per tutto tranne CO (mg/m³) e metalli/benzo(a)pirene (ng/m³). Il Comune non scrive le unità nei file: CO_8h è in mg/m³ (valori 0-10), gli altri in µg/m³.
+- ARPA: NO2, CO, SO2, O3, benzene, black carbon, ammoniaca, NOx sono **orari** (`inventario_arpa.csv`, `passo_mediano` = 0 days 01:00:00). PM10, PM2.5 e polveri totali sono **giornalieri** (passo 1 giorno). Metalli e benzo(a)pirene sono giornalieri a intervalli: passo mediano 3-6 giorni.
+- ARPA: l'ora è "a fine ora": la prima riga di ogni anno è alle 01:00 e l'ultima è alle 00:00 del 1° gennaio dell'anno dopo. Per questo ogni sensore ha 1 riga isolata nel primo giorno dell'anno successivo. Per i PM la data è il giorno stesso alle 00:00.
+- ARPA: codice di dato mancante **`-9999`** nel campo `valore` (380.679 righe su 8,8 milioni; sempre insieme a `stato` vuoto). `stato` vale `VA` (valido, 8.458.001 righe) oppure vuoto (380.895). `idoperatore` quasi sempre 1 (restano 51 righe con 39 e 29 con 10). Nessun altro valore negativo.
+- Il Comune: dato mancante = **cella vuota** nel campo `valore`; nessun flag di validazione. Decimali con il punto. Valori 0 presenti in 45 righe (benzene, CO, PM10: da guardare in fase 2, possono essere dati sotto soglia).
+- 22 righe ARPA hanno orari non tondi (per esempio 16:00:03).
+
+#### 6. Trappole dei dati (non sono cambiamenti dell'aria)
+
+**Cambi di stazione, strumento o posizione**
+1. **Juvara è stata sostituita da Pascal.** Juvara (Comune 9 / ARPA 502) chiude l'11/06/2007 (`datastop` ARPA dei sensori NO2, PM10; campo `fine_operativita` Comune); Pascal (Comune 2 / ARPA 705) apre il 16/06/2007 (NO2) a circa 925 m (calcolato sulle coordinate ARPA). Nel Comune la stazione 2 inizia il 12/06/2007 (PM10) e il 17/06/2007 (NO2). Una linea "unica" Juvara+Pascal mescola due posti diversi.
+2. **Le coordinate della stazione Pascal divergono di 531 m** tra Comune (45,4741 N; 9,2348 E, `qaria_stazione.csv`) e ARPA (45,4783 N; 9,2317 E). Per la mappa conviene usare ARPA.
+3. **Chiusure**: Abbiategrasso (1), Parco Lambro (5), Zavattari (8) chiudono nel 2017 (Comune; NO2 fino al 31/08/2017, O3 e CO fino al 28/12/2017). Il registro ARPA dice 30/07/2018 per le stesse. I loro dati ARPA finiscono con l'anno 2016.
+4. **Gli inquinanti si accendono e si spengono**: CO a Verziere fino al 04/07/2011; CO a Liguria fino al 03/10/2023; SO2 a Marche fino al 1999, a Liguria fino al 1999, a Verziere fino al 2004, a Abbiategrasso fino al 2003, a Zavattari fino al 2010; benzene a Senato dal 1999, a Zavattari dal 2000, a Marche e Pascal dal 12/09/2012; O3 a Parco Lambro fino al 01/01/2018 (registro ARPA).
+5. **Doppioni di sensori per lo stesso inquinante** (cambio strumento): Black Carbon a Marche (29001 fino al 2015; 20455 dal 2020), a Senato (20005 fino al 2019; 20465 dal 2020), a Pascal (20004 dal 2013; 20581 dal 2023); ammoniaca a Pascal (20020 dal 2007; 20484 dal 2020). Il codice del sensore cambia quando cambia lo strumento: la serie va ricomposta a mano. Le polveri totali sospese (PTS) finiscono tra 1996 e 2013 e sono sostituite dal PM10.
+6. **Il nome dello strumento per il PM10** è "PM10 (SM2005)" in tutte le stazioni (campo `nometiposensore`): i dati non dicono se il metodo di misura è cambiato nel tempo.
+7. Le date di inizio nel registro ARPA non sempre coincidono con i dati: PM2.5 Marche registro 01/01/2022, dati dal 30/09/2021 (sensore 20529); NO2 Pascal registro 16/06/2007, prima riga 16/06/2007 (ok); ammoniaca Pascal 20020 registro 30/03/2007, dati dal 15/06/2007.
+
+**Buchi e difetti nei file Comune** (da `out\inventario_comune.csv`, `_per_anno.csv`, e dai file annuali)
+8. **Dal 2016 i file del Comune contengono solo i giorni da lunedì a venerdì** (nelle date): 229-242 giorni distinti all'anno (2016: 229; 2017: 236; 2018: 242). Fa eccezione il 2019, completo (365 giorni). Il 2020 ha 271 giorni. Sabato e domenica quasi assenti. Poiché la data è il giorno dopo la misura, probabilmente mancano le misure di venerdì e sabato (deduzione, non verificata). Le medie annuali vanno calcolate con questo avvertimento (per questo conviene usare ARPA, che ha tutti i giorni).
+9. **2013: mancano 47 giorni** (`ds464`, 318 giorni distinti, ultimo 23/12/2013). 2014 e 2015 sono completi.
+10. **Dal 2024 il Comune ha solo 5 stazioni** (2, 3, 4, 6, 7) e pochi giorni: 139 giorni nel 2024 (ultimo 24/12/2024), 99 nel 2025 (7/1-17/12/2025), 57 nel 2026 (10/2-28/10/2026). Il file 2024 e 2025 non è completo.
+11. **Righe doppie con una cella vuota**: 56 coppie stazione-data-inquinante duplicate nei file del 2021, 2022 e 2025 (una riga col valore e una riga vuota). Se si legge il file senza eliminare i vuoti si contano giorni di troppo.
+12. Righe di "stazione-inquinante" che non esistono davvero (per esempio la stazione 1 con O3, PM10) appaiono con una sola riga vuota: sono segnaposto, non misure.
+13. Il valore del Comune non è lo stesso indicatore per tutti gli inquinanti (vedi sezione 4): non si può mettere NO2 del Comune (massimo orario) accanto a un NO2 medio ARPA.
+14. Il file 2020 e 2019 sono stati ricaricati il 30/04/2021 (campo `last_modified` in `_manifest.json`), 2002-2013 il 29/04/2019: ci sono versioni diverse dello stesso anno, non verificate.
+
+**Buchi nei file ARPA** (da `out\inventario_arpa_per_anno.csv`)
+15. **Il dataset 2018-2025 (`g2hp-ar79`) manca di alcuni sensori attivi.** Benzene (Marche 17127, Pascal 17126), Black Carbon Pascal (20004) e ammoniaca Pascal (20020) **non hanno nessun dato nel 2018-2025**, pur avendone prima e dal 2026 (verificato anche con una richiesta diretta: `g2hp-ar79`, `nicp-bhqi`, `nr8w-tj77` per il sensore 17127). Marche PM10 (20429), PM2.5 (20529), Black Carbon (20455 e Senato 20465), ammoniaca (20484) **non hanno il 2025**. Per il benzene di Marche il Comune ha invece i dati (`inventario_comune.csv`, stazione 4, C6H6, 2012-2026).
+16. **ARPA non ha il 2017 (e il 2018) per le stazioni chiuse nel 2017**: i dati di Zavattari, Parco Lambro, Abbiategrasso finiscono al 31/12/2016, mentre il Comune li ha fino all'agosto-dicembre 2017.
+17. **Vecchi anni con anni incompleti** (inizio e chiusura): NO2 Juvara 2007 solo 3.857 ore (fino all'11/06); sensori con buchi di anni all'inizio (1977, 1979, 1986 NO2 Juvara).
+18. **Buchi lunghi in singoli sensori**: i valori `max_buco_giorni` di `inventario_arpa.csv` arrivano a 2.922 giorni per i sensori citati al punto 15 e a 365 giorni per quelli recenti. NO2 di Marche ha un buco di 130 giorni; CO Senato 29 giorni (stesso campo).
+19. **Una riga isolata al 1° gennaio dell'anno dopo** per ogni sensore (vedi sezione 5). In `inventario_arpa_per_anno.csv` sembra un anno con 1 dato: non è un buco.
+20. **Sovrapposizioni tra archivi**: i dataset ARPA si sovrappongono sul confine (`nicp-bhqi` e `g2hp-ar79`, `ykhg-b8rs`): 17 righe duplicate per ogni sensore (`righe_duplicate_t` in `inventario_arpa.csv`). Vanno tolte prima di sommare.
+21. Il dataset `nicp-bhqi` ("Dati sensori aria") si aggiorna ogni giorno e contiene solo l'anno in corso (2026): il conteggio righe cambia a ogni scarico.
+
+#### 7. Cosa NON ho scaricato / limiti
+- ARPA: solo i 71 sensori con `comune` = Milano. Non ho scaricato le stazioni vicine (Pioltello, Cinisello, Rho, Limito…) né le stime comunali (`ysm5-jwrn` e simili), né i dati meteo.
+- Il file `out\_arpa_all.pkl` (535 MB) è stato cancellato; si rigenera con `python -I scripts\05_inventario_arpa.py raw\arpa out` (serve anche per rilanciare `scripts\06_confronto.py out`).
+- Il confronto Comune-ARPA è fatto con tutti i giorni in comune ma non per ogni inquinante e per ogni anno a parte: i risultati per stazione sono in `out\confronto_comune_arpa.csv`.
+- Non ho verificato le posizioni dei punti con fonti esterne né la causa dell'asterisco nei nomi "via Pascal *" e "via Senato *".
+- Il significato esatto degli indicatori del Comune (max orario, max 8 ore) è dedotto dal confronto: da confermare con chi pubblica il dataset.
+
 ## 6. Ingressi in Area C
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `area-c/`._
 
+### Fase 1 — scarico (2026-10-29)
+
+**Area C (ingressi nel centro di Milano) - note sul download, fase 1**
+
+Data del download: 29/10/2026. Nessuna analisi fatta: solo scaricamento e controllo dei file.
+Tutto in `area-c\raw\` (558 MB, 185 file). Scripts in `area-c\scripts\`. Controlli in `area-c\verifica\`.
+
+#### Fonte unica
+Open data del Comune di Milano (CKAN): https://dati.comune.milano.it/api/3/action/package_search?q=area%20c
+(ricerche fatte: area c, ecopass, area b, varchi, accessi, ztl, congestion, ingressi; il catalogo trovato e' in `raw\_catalogo\catalogo.json`).
+Gestore dei dati: AMAT (Agenzia Mobilita' Ambiente Territorio). Licenza di tutti i 175 dataset scaricati: **CC-BY (Creative Commons Attribution)**.
+Si possono ripubblicare anche i dati grezzi, citando "Comune di Milano / AMAT" come fonte.
+Nessuna registrazione o clic di licenza richiesti. Nessun errore di download (`raw\_download_log.tsv`).
+
+#### Cosa c'e' (tre serie diverse, con livelli di dettaglio diversi)
+
+##### A. 01/01/2012 - 18/09/2016: serie "vecchia", solo aggregata (niente varchi)
+- 5 anni x 7 tipi di tabella x 2 (giornaliere ds779-ds813, "orarie" ds814-ds848). I tipi: totale, per classe Euro, per categoria veicolo (persone, merci, bus, altro, NC), per autorizzati/non autorizzati, per residenti/non residenti, per alimentazione, per veicoli di servizio.
+- File: `raw\ds779_...` ... `raw\ds848_...` (CSV; i JSON uguali non sono stati scaricati).
+- Le tabelle "orarie" sono in realta' **a mezz'ora** (campo `data` + `timeIndex` 00:00, 00:30, ...; 48 righe al giorno). I giornalieri hanno `timeIndex` (data) e `totale`; il campo `areac` = 1 se Area C era attiva in quel momento.
+- Controllo: per ogni anno la somma dei giornalieri `totale` e' identica alla somma delle mezz'ore `totale` (es. 2012: 46.601.227 transiti in entrambi).
+
+##### B. 01/09/2016 - 31/12/2018: ds1085 (solo totale giornaliero)
+- `raw\ds1085_area-c-accessi-giornalieri-2016-2018\ds1085_ingressi_areac_precedenti.csv`: 850 righe, campi `data_giorno`, `numero_transiti_giornalieri`.
+
+##### C. 09/2016 - 11/2024: file mensili, a mezz'ora e PER VARCO
+- 99 zip, uno per mese (ds862-ds896, ds899-ds958, ds1070-ds2885), da settembre 2016 a novembre 2024, mesi tutti presenti. Ognuno contiene un CSV con le colonne: `dataora, id_varco, esenti, moto, residenti, veicoli_servizio, categoria_euro, tipologia_alimentazione, categoria_veicolo, classe_areac, fap, areac, numero_transiti` (13 colonne, uguali in tutti i mesi). Una riga = una mezz'ora x un varco x una combinazione di caratteristiche del veicolo; `numero_transiti` = quanti passaggi. 0,6-1,6 milioni di righe al mese, 5-7 MB per zip.
+- I codici dei campi sono decodificati in `raw\ds861_area-c-decodifica-dei-campi\ingressi_areac_decode.csv` (es. categoria_veicolo: 1 altro, 2 bus, 3 merci, 4 persone; classe_areac: 1 autorizzati, 2 ecologici, 3 paganti residenti, 4 paganti di servizio, 5 altri paganti, 6 moto; categoria_euro 0-7; tipologia_alimentazione 0-14).
+- Posizione dei varchi: `raw\ds82_varchi-area-c\ingressi_areac_varchi.csv` (+ geojson e shapefile): 42 varchi, `id_amat` 57-98, nome, longitudine, latitudine. **I dati mensili si collegano ai varchi**: `id_varco` mensile = `id_amat` (verificato: tutti gli id coincidono).
+- Orario: `dataora` e' ora locale con scostamento (+01 inverno, +02 estate); nel giorno del cambio d'ora di marzo 2024 ci sono 46 mezz'ore, come atteso.
+
+##### D. Serie giornaliera ufficiale 2019-2024 (ds1072), due file
+- `raw\ds1072_...\ingressi_areac_2019-2023_no_dic.csv`: 1781 righe, 01/01/2019 - 30/11/2023, solo totale (`numero_transiti_giornalieri`). Manca dicembre 2023 (da qui "no_dic").
+- `raw\ds1072_...\ingressi_areac_2025-01-17.csv`: 305 righe, 01/12/2023 - 30/11/2024, con totale h24 e dettaglio autoveicoli / ciclomotori-moto, nelle fasce 7.30-19.30 (Area C attiva), 00.00-7.29 e 19.30-23.59.
+
+##### E. Altri dataset utili (piccoli)
+- `raw\ds959_varchi-areab`: varchi di Area B (188 righe: nome, stato, atto autorizzativo, coordinate; 149 attivi e sanzionanti, 22 in pre-esercizio, 17 da programmare). Aggiornato 07/11/2023. **Non ci sono dati di accessi Area B.**
+- `raw\ds51_aree-pedonali-e-ztl`: poligoni di aree pedonali, ZTL, Area C e Area B (aggiornato 02/05/2023). La riga di Area C ha solo `val_inizio` 2000-01-01 e `val_fine` 2050-01-01: **valori segnaposto, non la vera data di inizio**. Nessuna ordinanza o tariffa e' indicata.
+- **Ecopass (2008-2011): nessun dataset trovato** nel portale (ricerca "ecopass" = 0 risultati). Il primo anno disponibile e' il 2012.
+
+#### Risposte alle domande della fase 1
+
+**Granularita'.** Cambia negli anni. 2012 - 18/09/2016: totale per mezz'ora o per giorno, con spaccati per tipo di veicolo, ma senza varco. Dal 09/2016: mezz'ora x varco x caratteristiche del veicolo (file mensili). Serie ds1072 2019-2024: solo giornaliera.
+
+**Copertura 2012 - 11/2024.**
+- Serie A, giorni mancanti nei giornalieri: 2012 31/3 e 1/4 (2 giorni); 2014 6/2, 1/6 e 4-17/8 (16); 2015 dal 25/10 al 15/12 (52); 2016 dall'8/1 al 29/1 tranne il 28/1 (21). 2013 completo. Le tabelle "orarie" hanno gli stessi giorni vuoti (NaN o zero) piu' alcuni giorni a zero (es. 30/5/2015, 24/10/2015) e restano vuote dopo il 18/9/2016, anche se i file arrivano a fine anno.
+- Dal 01/09/2016 i file mensili sono tutti presenti. Giorni senza nessun dato in nessuna serie: 27/01/2018, 29/07/2018, 20-26/12/2021, 25-31/12/2022 (16 giorni). La nota del dataset ds1072 dichiara solo gli ultimi due buchi (2021 e 2022).
+- Nei file mensili mancano anche 27-31/01/2020, 17-23/02/2020, 20-26/06/2022, 13-19/11/2022, 19-25/02/2023, 21-27/05/2023: ci sono pero' nella serie giornaliera ds1072. Per avere una serie giornaliera completa vanno unite ds1085 + ds1072 + mensili.
+- Il file ds1072 "nuovo" (12/2023-11/2024) manca di 61 giorni (2/5-1/6/2024 e 2-31/8/2024), presenti nei mensili.
+- Dopo il 30/11/2024: **nulla**. Mancano tutto il 2025 e il 2026 (ds1072 aggiornato al 17/01/2025).
+
+**Varchi.** 42 varchi (id 57-98) da 09/2016 a 05/2022. Da giugno 2022 i file mensili hanno 40 varchi: spariscono 87 (SANT'AGOSTINO) e 89 (OLIVETANI). Il file dei varchi li elenca ancora tutti e 42 (aggiornato 25/10/2026) e non dice quando sono stati tolti.
+
+**Date di cambio delle regole.** Nessun dataset le elenca. Pagina ufficiale citata dai dataset: https://www.comune.milano.it/aree-tematiche/mobilita/area-c (non consultata). Da verificare con fonti ufficiali prima di usarle: avvio di Area C (gennaio 2012), eventuali cambi di tariffa e divieti per classe Euro.
+
+#### Trappole dei dati
+1. **Rottura di livello nel 2016.** Fino a fine 2015 la serie A ha una media di circa 130.000-140.000 transiti/giorno (campo `totale`; con agosto piu' basso). Da gennaio 2016 la stessa serie scende a circa 45.000 (tutte le categorie, anche merci e bus, calano di circa 3 volte). Nei 18 giorni in comune (1-18/9/2016) la serie A dice 43.179 al giorno in media contro 162.262 di ds1085. Non spiegato nei dataset: probabilmente conteggio parziale (pochi varchi o solo alcuni transiti) da gennaio a settembre 2016. **Non unire la serie A del 2016 al resto senza correggerla.**
+2. Agosto e' ovunque molto basso (es. agosto 2012: 73.921 al giorno contro circa 137.000 dei mesi normali): e' reale, non un buco.
+3. Le tabelle "orarie" sono a mezz'ora.
+4. La somma dei mensili coincide con le serie giornaliere (rapporto 0,999-1,02; identico per il ds1072 nuovo). Scarti oltre l'1% in 6 giorni di ds1085 (dic 2017-mar 2018) e 23 giorni del ds1072 vecchio (soprattutto 2020). Vedi `verifica\` e script 04.
+5. Formati diversi: nei mensili 2024 i numeri sono tra virgolette, nei mensili 2020 la data ha le barre (`2020/03/01`), negli altri i trattini; nei file mensili 2016-2018 `id_varco` e' senza virgolette.
+6. Il ds1072 dice che "dall'anno 2024" c'e' il dettaglio auto/moto, ma la colonna `moto` esiste nei mensili da sempre. Il totale ds1072 comprende moto e ciclomotori.
+7. File non scaricati di proposito: i JSON identici ai CSV dei dataset 2012-2016.
+8. Il portale segna "ultima modifica" 08/05/2026 per quasi tutti i dataset, ma i dati finiscono nel 2024: la data di aggiornamento non indica nuovi dati.
+
+#### File di controllo
+`verifica\copertura_mensili.csv` (per mese: righe, giorni, varchi, transiti, giorni mancanti; le colonne `dt`, `n`, `day` non ci sono: la colonna `col` e' 16 perche' include 3 campi di servizio aggiunti dal controllo, il file originale ne ha 13), `verifica\varchi_per_mese.csv`, `verifica\giornaliero_da_mensili.csv` (totale, moto, auto per giorno sommando i varchi, 2016-2024).
+Script: 01_catalogo.py (catalogo), 02_scarica.py (download, riprendibile), 03_verifica.py, 04_confronto_giornaliero.py.
+
 ## 7. Bici contro auto contro mezzi
 
 _Fonti, date di scarico, licenze, ipotesi, scelte, problemi. Cartella `bici-auto-mezzi/`._
+
+### Fase 1 — scarico (2026-10-29)
+
+**NOTE - filone 7: bici contro auto contro mezzi pubblici (fase 1, solo scarico)**
+
+Scaricato il 29 ottobre 2026. Nessuna analisi fatta. Scripts in `scripts\`, dati in `raw\`.
+
+#### 1. Rete stradale OpenStreetMap
+- **Fonte**: estratto della Lombardia di openstreetmap.fr, `https://download.openstreetmap.fr/extracts/europe/italy/lombardia-latest.osm.pbf` (340 MB). Dati OSM aggiornati al **29/10/2026 ore 01:08 UTC** (file `lombardia.state.txt`, sequenza 7349062).
+- **Perche' questa strada**: Overpass (tutti i server provati) rispondeva "pieno/timeout"; Geofabrik "nord-ovest" (594 MB, 28/10/2026) funzionava ma e' piu' grande. Nessun programma di ritaglio (osmium) sul PC, quindi ho scritto un ritagliatore in Python (`scripts\clip_pbf.py`, usa solo numpy).
+- **Ritaglio**: rettangolo lat 45.350-45.572, lon 8.990-9.330 (Comune di Milano piu' circa 4 km intorno). File `raw\osm_milano\milano_buffer.osm.gz` (17,9 MB compresso, XML OSM standard, anche letto da molti programmi). Statistiche con `scripts\osm_stats.py`.
+- **Contenuto** (conteggi dal file, tag `highway`, `oneway`, `maxspeed`, ecc.): 181.476 strade/percorsi con tag `highway` (73.376 footway, 33.415 service, 24.802 residential, 9.519 tertiary, 6.716 cycleway, 2.838 pedestrian, ecc.); 779.196 nodi; `oneway=yes` su 39.964 strade, `oneway:bicycle` su 939 (no=469, yes=467, -1=3); `maxspeed` su 18.433 strade; 4.072 semafori (`highway=traffic_signals`), 40.175 attraversamenti pedonali (`highway=crossing`), 3.426 stop, 4.524 dare-precedenza. Relazioni: 4.380 divieti di svolta (`type=restriction`), 61 itinerari (`route=bicycle`), 28 multipoligoni stradali.
+- **Piste ciclabili**: `highway=cycleway` 6.716 strade; il conteggio "ciclabile" che esce dallo script (15.712) e' troppo largo perche' conta anche `cycleway:*=no`. Da rifare con regole precise in fase 2.
+- **Licenza**: ODbL 1.0, (c) contributori OpenStreetMap. Si puo' ripubblicare citando la fonte; chi ripubblica una versione modificata deve usare la stessa licenza.
+- **Trappole**: i nodi con tag sono tenuti solo se `highway`, `crossing`, `barrier`, `traffic_calming`; le strade sono troncate al rettangolo (nessun nodo fuori). Nel file ci sono anche strade `proposed`/`construction` (298) e `platform`/`corridor`: da scartare in fase 2. Il tag `maxspeed` c'e' solo su ~10% delle strade: per le altre servono velocita' tipiche per tipo di strada.
+
+#### 2. GTFS (orari mezzi pubblici)
+Nessun account, chiave o clic di accettazione necessari.
+- **ATM / Comune di Milano (AMAT)**: `https://dati.comune.milano.it/gtfs.zip` (scheda `ds929-orari-del-trasporto-pubblico-locale-nel-comune-di-milano-in-formato-gtfs`, mantenuto da AMAT, aggiornato ogni 2-4 settimane). File `raw\gtfs\gtfs_comune_milano_amat.zip`, 25,4 MB (la scheda dichiara 60 MB, errata). Estratto in `raw\gtfs\ext_comune\`.
+  - `feed_info.txt`: versione 424, inizio 16/10/2026. **Validita': 16/10/2026 - 20/11/2026** (`calendar_dates.txt`, 36 giorni; `calendar.txt` e' vuoto, tutto e' per data). Oggi (29/10) e' coperto, ma scade tra tre settimane: va riscaricato.
+  - Un solo ente (`agency.txt`: ATM). `routes.txt`: 169 linee = 5 metro (M1-M5, `route_type` 1), 17 tram (`route_type` 0), 147 bus/filobus (`route_type` 3). `stops.txt`: 4.915 fermate. `trips.txt`: 124.020 corse. `stop_times.txt`: 2.900.116 righe (307 MB estratto). Ha anche `shapes.txt`. Tutte le fermate sono dentro il rettangolo di Milano.
+  - **Non ci sono** treni suburbani/Passante, ne' linee extraurbane ATM: sono nell'altro file.
+  - Licenza: CC-BY (scheda CKAN "Creative Commons Attribution"): ripubblicabile citando Comune di Milano / AMAT.
+- **Trenord (treni regionali, S, RE, R)**: portale Regione Lombardia, scheda `3z4k-mxz9` "Orario Ferroviario Regionale Gtfs", `https://www.dati.lombardia.it/api/views/3z4k-mxz9/files/d893b62a-6f97-44fc-b31b-e92a9c37b057?download=true&filename=trenord_gtfs.zip`. File `raw\gtfs\trenord_gtfs.zip`, 1,66 MB, estratto in `ext_trenord\`.
+  - File datato 03/08/2026; **validita' fino al 12/12/2026** (`calendar_dates.txt`: 140 date da 26/07 al 12/12/2026, include oggi). Un ente (Trenord). 63 linee (60 `route_type` 2, 3 di tipo bus), 566 stazioni (38 nel rettangolo di Milano), 8.470 corse, 90.553 righe di `stop_times` (circa 10,7 fermate per corsa).
+  - Ci sono le S (S1-S13, S19, S30-S50), RE, R e RE51/RE54 per Malpensa. Non ho verificato se il Malpensa Express e' completo.
+  - Licenza: CC BY 4.0 (Trenord, via PoliS-Lombardia/Regione): ripubblicabile citando.
+- **Trappole**: il feed ATM non ha `calendar.txt` (solo date); il feed Trenord non ha ne' `calendar.txt` ne' `shapes`, ogni corsa ha un suo `service_id`. Le due fonti hanno ID fermate diversi: i trasferimenti metro-treno vanno costruiti a mano (distanza a piedi). Nessun orario in tempo reale. Le corse Trenord hanno poche fermate per corsa (mediana 10): da controllare in fase 2 che i tempi di percorrenza bastino.
+
+#### 3. BikeMi e incidenti
+##### BikeMi
+- Scheda `ds65_infogeo_aree_sosta_bike_sharing_localizzazione_` (Stazioni BikeMi). File `raw\bikemi\bikemi_stazioni.csv` (61 KB, separatore `;`) e `.geojson` (127 KB). Campi: `id_amat, stato, numero, nome, tipo, stalli, sede, indirizzo, zd_attuale, anno, LONG_X_4326, LAT_Y_4326`.
+- 325 stazioni, tutte `attiva` (264 monofacciali, 58 bifacciali, 3 virtuali), 9.452 stalli in totale; anno di installazione fino al **2021**. **Trappola**: i file risalgono a settembre 2022 (il Comune ha toccato la scheda il 08/05/2026 ma non i file): il numero attuale di stazioni potrebbe essere diverso. Niente disponibilita' in tempo reale (non richiesta). Licenza CC-BY.
+
+##### Incidenti stradali
+Nessuna fonte aperta con le coordinate di ogni incidente a Milano: ISTAT non le pubblica nei file aperti; il Comune pubblica solo conteggi mensili.
+- **Migliore con luogo (strada/civico)**: Regione Lombardia / PoliS-Lombardia, "Incidenti Stradali - Microdati - Anno AAAA" (dati ISTAT, rilevazione IST-00142, incidenti con lesioni a persone). Un file per anno, schede Socrata su dati.lombardia.it (ID in `scripts\incidenti_ids.json`; per es. 2024 = `san9-3hvn`). Scaricato solo il Comune di Milano (`denominazione_comune = MILANO`) per **2010-2024**: `raw\incidenti\lombardia_microdati\incidenti_microdati_lombardia_AAAA_MILANO.json`, 15 file, ~66 MB. Righe per anno: 12.085 (2010), 8.263 (2019), 4.856 (2020), 7.743 (2024). Script: `scripts\scarica_incidenti.py`. Il 2025 non c'e' ancora.
+  - Campi: anno, mese (niente giorno ne' ora), `nome_strada` (testo libero: "via Monte Rosa, 57", "via Padova, palo luce 124", "via Valtellina incrocio viale Jenner"), `tipo_strada`, `localizzazione_incidente`, `intersezione_nonintersezione`, `natura_incidente`, tipo veicolo A/B/(C), eta' conducenti, pedoni morti/feriti, morti entro 24 ore/30 giorni, feriti. **Niente coordinate**: per metterli su mappa serve geocodificare `nome_strada` (circa 46% ha civico o palo luce, 49% e' un incrocio). Granularita': via/incrocio.
+  - Licenza: CC BY 4.0 (PoliS-Lombardia - ISTAT). Ripubblicabile citando.
+- **Conteggi del Comune** (totali mensili, senza luogo preciso): `raw\incidenti\comune_milano\` - `ds175` per mese 2001-2025 (300 righe; campi `Anno, Mese, IncidentiMortali, IncidentiSoliFeriti, Morti, Feriti`), `ds176` per natura dell'incidente (2.698 righe), `ds177` per municipio 2020-2025 (703 righe), `ds179` per numero di veicoli (300 righe). Dati Polizia Locale; licenza CC-BY. Il 2025 e' completo fino a dicembre.
+- **Trappola dei numeri**: i due archivi non coincidono. 2024: Comune `ds175` 7.602 incidenti (IncidentiMortali + IncidentiSoliFeriti), 9.384 feriti; microdati 7.743 righe, 9.585 feriti. Il 2020 (Covid) ha circa meta' dei casi. I morti nei microdati vanno letti da `tot_morti_a_24ore_incidente` o `..._30gg`, che sono due definizioni diverse.
+
+#### 4. Strumenti di calcolo percorsi su questo PC (non installato nulla)
+PC: Intel i5-12600K (10 core, 16 thread), 31,8 GB RAM, 78 GB liberi su disco, Windows 11.
+- **Presenti**: Python 3.12.10 con numpy 2.5, scipy 1.18, networkx 3.6, pandas 3.1, numba 0.67, scikit-learn, matplotlib, lxml, requests; Git Bash con `pdftotext`.
+- **Assenti**: Java (`java -version` non trovato), Docker (non trovato), WSL (non installato); anche igraph, osmium, shapely, pyproj, geopandas, pyarrow, r5py, osmnx, pyrosm.
+- **Installabili da pip** (esistono pacchetti per Windows, non installati): r5py 1.1.7, pyvalhalla 3.9.1, igraph 1.0.0, osmium 4.3.2, shapely 2.2.0, pyproj 3.8.0, pandana 0.8, pyarrow 26.0.
+- **Valutazione**:
+  - r5py e OpenTripPlanner: vanno bene su carta (bici, piedi, GTFS insieme), ma servono Java (JDK 21 o simile) che qui non c'e'; l'OSM va in formato `.pbf` (si converte con osmium da pip). Pro: motore completo, mappe di tempi gia' pronte. Contro: installare Java, 4-8 GB RAM, poco controllo sulle ipotesi (semafori, auto).
+  - OSRM/Valhalla: OSRM ha bisogno di Docker (assente). Valhalla ha pacchetto pip per Windows (pyvalhalla), ma e' solo strade (bici/auto/piedi), non i mezzi pubblici.
+  - **Consigliato: approccio in Python puro** con `scipy.sparse.csgraph` (Dijkstra veloce) sui grafi bici, auto e piedi costruiti dal file OSM, piu' un percorso mezzi pubblici di tipo "connection scan / RAPTOR" scritto con numba sul GTFS, con camminata fino alla fermata e attesa. Pro: nessuna installazione grossa, tutte le ipotesi (velocita' per tipo di strada, semafori, sensi unici per bici, Area C, tempo di parcheggio) in chiaro e modificabili, mappe a colori per punto di partenza con un solo calcolo da un punto verso tutti. Contro: da scrivere e collaudare (alcune settimane di lavoro in piu'), serve `shapely/pyproj` o equivalenti per le coordinate (si possono evitare con formule semplici su Milano).
+  - Piano B se il Python puro e' troppo lento o impreciso: installare un JDK e usare r5py solo per i mezzi pubblici + piedi, tenendo bici e auto in Python.
+
+#### 5. Area C: tariffa e orari
+- **Tariffe**: PDF ufficiale del Comune "Area C: ticket in vigore dal 30 ottobre 2023", `https://www.comune.milano.it/documents/20118/35188/Area+C+nuove+tariffe+dal+2023+Area+C.pdf/5ee21a73-7301-60c7-d2fe-5e2f77e8a158?version=1.0&t=1746021538283&download=true`, salvato in `raw\areac\area_c_tariffe_2023.pdf` (45 KB). Valori: tutti i veicoli **7,50 euro**; residenti (e assimilati) con veicolo registrato **3,00 euro dal 51° accesso/anno**; veicoli "di servizio" 4,50; veicoli in sosta in autorimesse in Area C 4,50; pagamento tardivo (entro 7 giorni) 22,50; NCC oltre nove posti 60 / 97,50 / 150 secondo la lunghezza. Il PDF e' versione 1.0 caricata ad aprile 2025.
+- **Orari**: lunedi'-venerdi' 7:30-19:30, festivi esclusi; nel fine settimana non e' attiva. Un biglietto vale per tutti i passaggi dello stesso veicolo nel giorno. Fonte: riassunto dei risultati di ricerca sulle pagine FAQ ufficiali del Comune (`https://servizicrm.comune.milano.it/centro-supporto/KA-01151/Orari-di-attivazione-Area-C`, "Quando e' attiva Area C?"; `.../KA-01642/Costo-accesso-giornaliero-Area-C`; `.../KA-01156/Ingressi-gratuiti-residenti-Area-C`). **Non ho potuto leggere le pagine ufficiali**: il sito del Comune risponde "403 Forbidden" a qualsiasi programma (curl, WebFetch, anche la copia di web.archive.org). Gli orari vanno quindi verificati a mano su `https://www.comune.milano.it/aree-tematiche/mobilita/area-c` prima di usarli. Alcuni siti terzi indicano 5 euro: sono vecchi o sbagliati, vale il PDF.
+- Il confine di Area C (poligono) non e' scaricato qui: probabilmente e' nei dati del filone `area-c`.
+- Licenza del PDF: non indicata, non ripubblicare il file; i valori sono un fatto pubblico e si possono citare.
+
+#### Cosa manca / bloccato
+- Orari e regole Area C da pagina ufficiale (sito del Comune blocca i programmi); il poligono di Area C.
+- Incidenti con coordinate: non esiste in forma aperta; serve geocodificare le strade (fase 2).
+- Stazioni BikeMi aggiornate a oggi (file del 2022).
+- Velocita' reali del traffico auto: nessun dato aperto, come previsto.
 
 ## 8. La Scala, cartellone dal 1778 a oggi
 
@@ -662,8 +913,218 @@ _Fonti, date di scarico, licenze, scelte, problemi. Cartella `scala/`._
 - 2026-10-29 — **Archivio online della Scala (dal 1943-44)**: il robots.txt di teatroallascala.org vieta ai programmi le pagine dell'archivio, e al primo giro l'agente si è fermato. Davide comunica di aver ricevuto l'autorizzazione dal Teatro alla Scala: si raccoglie con un programma, lentamente (pause di alcuni secondi), citando la fonte "©Teatro alla Scala".
 - 2026-10-29 — **Cambiasi**: si usa l'edizione 1778-1881 (Internet Archive) più la cronologia di Romani 1862 per i confronti; la quinta edizione (1778-1906) è solo su HathiTrust, non accessibile dall'Italia, e va bene così (decisione di Davide).
 
+### Fase 1 — scarico (2026-10-29)
+
+**La Scala, spettacoli dal 1778 a oggi - note della fase 1 (scaricamento)**
+Aggiornato il 29/10/2026. Cartella: `scala\`. Fase 1 = solo scaricare e capire le fonti; nessuna analisi, nessuna pagina del sito.
+
+#### Riassunto
+- **1778-1881 (e 1862): fatto.** Le cronologie di Cambiasi (1872, 1881) e di Romani (1862) sono scaricate, libere, con testo OCR già pronto.
+- **1943-oggi: FERMATO.** L'archivio storico della Scala è nella parte del sito che `robots.txt` vieta ai programmi. Non ho raccolto nulla.
+- **1906-1943: buco.** Solo riempimento parziale da Wikidata e Wikipedia. Pista nuova: Marangoni-Vanbianchi copre 1906-1920.
+- **Cambiasi 5a edizione (1778-1906): non scaricabile dall'Italia** (HathiTrust la apre solo agli USA).
+
+#### 1. Cambiasi e le altre cronologie dell'Ottocento
+Tutto da Internet Archive (`https://archive.org/download/<id>/<file>`), scaricato il 29/10/2026 con `scripts\scarica_cambiasi.py`. Nessun account, nessun clic di licenza.
+
+| Cartella in `raw\` | Che cos'è | File (MB) |
+|---|---|---|
+| `cambiasi\teatroallascala100camb` | **Cambiasi, "Teatro alla Scala 1778-1881"** (Ricordi 1881), copia Getty/Internet Archive, 168 pagine, scansione 300 dpi. **È la copia migliore.** | pdf 12,5; testo OCR `_djvu.txt` 0,35; **hOCR con riquadri delle parole** 11,1; immagini JP2 (zip) 88,8 |
+| `cambiasi\teatroallascala00cambgoog` | Stessa edizione 1881, copia Google, più scadente | pdf 5,1; testo 0,34 |
+| `cambiasi\bub_gb_e864LY_9qOUC` | **Cambiasi, "Rappresentazioni date nei reali teatri di Milano 1778-1872"** (Ricordi 1872) | pdf 7,6; testo 0,27 |
+| `romani\teatroallascalac00romauoft` | **Luigi Romani, "Teatro alla Scala. Cronologia di tutti gli spettacoli" (1862)**, copia Toronto, 224 pagine. Seconda cronologia indipendente 1778-1862: serve per controllare Cambiasi | pdf 17,2; testo 0,47 |
+| `cambiasi\pdf24_merged-16` | **Marangoni e Vanbianchi, "La Scala. Studi e ricerche, note storiche e statistiche 1906-1920"** (1922). **Solo il testo OCR** (il pdf pesa 520 MB, non scaricato) | testo 1,35 |
+
+**Cosa copre e cosa no.**
+- Il volume 1881 non è un elenco di tutte le sere: è una *serie delle opere in musica* e una *serie dei balli*, per stagione (anno, stagione, mese, giorno, titolo, maestro, poeta, tipo, esecutori principali, esito). In una stagione ogni opera compare una volta (la riga "id." ripete la stagione), non con tutte le repliche. Vale lo stesso per il 1872.
+- La tabella delle opere occupa **due pagine affiancate**: a sinistra anno/stagione/mese/giorno/titolo/maestro (PDF pagina 25, hOCR pagina 24), a destra poeta/tipo/esecutori/esito (pagina seguente). Per fare una riga sola bisogna riunire le due metà in ordine.
+- La "Spiegazione delle abbreviature" (pag. 400 originale) dice: asterisco = opera scritta apposta per la Scala; esiti = ottimo, buonissimo, buono, mediocre, cattivo, pessimo; C. carnevale, Q. quaresima, P. primavera, E. estate, A. autunno, Aw. avvento. Le note a piè di pagina `(1)`, `(2)` sono mescolate nei campi data.
+- Romani (1862) è invece prosa per stagione: "1781 CARNEVALE / Antigono. D. s. Musica ..." con attori e balli, quindi più difficile da tabulare ma ricco di nomi.
+- Marangoni-Vanbianchi riporta i cartelloni delle stagioni 1906-1920 (titoli, autori, elenco artistico) in testo continuo. **È la prima pista concreta per il buco 1906-1943, ma solo fino al 1920.**
+
+**Prova OCR (8 pagine).** Tesseract **non è installato** (`tesseract: command not found`, nessuna cartella Program Files); non l'ho installato. Ho fatto così:
+1. Il testo e le coordinate di Internet Archive (motore ABBYY FineReader) esistono già per tutto il libro: per l'1881 non serve rifare l'OCR. L'hOCR dà ogni parola con il suo riquadro (pagina 24: 513 parole). Raggruppando per altezza si ricostruiscono bene le righe: x circa 680 anno, 840 stagione, 1090 mese, 1250 giorno, 1400 titolo, 2280 maestro. Difetti visti: nomi dei maestri storpiati ("Sftlieri" = Salieri, "Mjsliweczek" = Myslivecek, "Yaleutini" = Valentini), "id." a volte perso, accenti sporchi. Serve una lista di nomi (Wikidata) per correggere.
+2. Ho provato anche il **motore OCR integrato di Windows 11 (it-IT, senza installare nulla)** su 8 pagine (`test_layout\c1881_p*_winocr.txt` e immagini `.png`). Funziona ma peggio di ABBYY: legge colonna per colonna, sbaglia sulle colonne strette ("Rub:nelli", "Baldueci"). Va bene come ripiego, e per le foto di Gatti (script al punto 4).
+Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di Davide), oppure usare l'hOCR già pronto per Cambiasi.
+
+**Cambiasi 5a edizione 1778-1906** (Ricordi 1906, "completamente rifusa", 350 illustrazioni): è su HathiTrust (record 100371822, copia Harvard `hvd.32044082278698`, codice diritti `pdus` = pubblico dominio solo negli USA). Dall'Italia la pagina risponde 403 e l'Online Books Page scrive "US access only". Non l'ho aggirato. Una copia Google esisterebbe (scheda della Biblioteca Nazionale di Israele) ma l'API di Google Books oggi ha la quota esaurita. **Da fare**: cercare la copia 1906 su Google Books con "scarica PDF", o chiedere a una biblioteca (Braidense, Biblioteca del Museo Teatrale alla Scala) o a qualcuno negli USA.
+
+**Licenza.** Cambiasi e Romani sono morti da ben più di 70 anni: opere di pubblico dominio. Internet Archive segna `NOT_IN_COPYRIGHT` per Romani e per l'edizione Google 1881 e "Public Domain Mark 1.0" per il 1872. Le scansioni (Google, Getty, Toronto) chiedono in genere uso non commerciale e di non togliere le note di provenienza: **i pdf e le immagini non li ripubblicherei**; i *dati* estratti (titoli, date, nomi) sono fatti, citando la fonte. Marangoni-Vanbianchi: la licenza "CC BY-NC-ND" l'ha messa chi ha caricato il file (un privato), non gli autori, e non ho verificato le date di morte: **solo pista, nessuna ripubblicazione**. (Valutazione mia, non parere legale.)
+
+#### 2. Archivio storico della Scala dal 1943 - FERMATO
+- `https://www.teatroallascala.org/robots.txt` (letto il 29/10/2026): `User-agent: *` ... `Disallow: /it/archivio` e `Disallow: /en/archive` (più `/api/`, `/web/`). L'archivio storico è proprio su `/it/archivio/archivio-storico.html`.
+- Il dominio `www.archiviolascala.org` (citato dal sito come "DAM Digital Archive") **rimanda alla stessa pagina** vietata; `archivio.teatroallascala.org` non risponde.
+- Per il mandato ("se robots.txt o i termini lo vietano, STOP") **non ho raccolto stagioni né record**. Nota onesta: seguendo il rimando di archiviolascala.org ho scaricato una sola pagina (la maschera di ricerca, 116 kB) che sta nella zona vietata; non l'ho conservata e ne ho letto solo il menu (filtri per tipo di spettacolo, titolo, autore, artista, luogo; sezioni Locandine, Fotografie, Libretto, Opera in breve, Discografia, Costumi, Accessori). Non ho aperto il `disclaimer` (anch'esso sotto `/it/archivio/`).
+- Termini d'uso: le pagine `disclaimer` e `contatti` dell'archivio stanno nella zona vietata, quindi non le ho lette. **Strada giusta: chiedere il permesso e i dati direttamente alla Scala** (archivio storico / ufficio stampa). Il sito dice che la versione online è "limitata e semplificata" rispetto all'archivio completo. Copyright: ©Teatro alla Scala, da citare.
+- Stima del totale: non fatta (richiederebbe interrogare l'archivio).
+
+#### 3. Buco 1906-1943: riempimento parziale da fonti aperte
+**Wikidata** (CC0). Interrogazioni SPARQL del 29/10/2026 con `scripts\wikidata_scala.py` (Q5471 = Teatro alla Scala):
+- `raw\wikidata\premiere_p4647.json` (0,70 MB): 580 righe, 456 opere con "luogo della prima rappresentazione" (P4647) = Scala; 442 con data (P1191). Per decennio: 1900-09: 15, 1910: 15, 1920: 24, 1930: 22, 1940: 7. Tipi (P31): opera 489 righe, balletto 19.
+- `raw\wikidata\premiere_p276_event.json` (0,82 MB): 1248 righe, 1008 voci con "luogo" (P276) = Scala; **426 "stagione del Teatro alla Scala", 107 "serata inaugurale della stagione", 479 "produzione operistica", 59 "prima mondiale"**; solo 514 voci hanno la data (P585).
+- `raw\wikidata\premiere_location_any.json` (0,52 MB): 822 righe, 772 voci con data di prima e luogo Scala (P291/P276/P4647 uniti). Per decennio 1900: 48, 1910: 15, 1920: 33, 1930: 24, 1940: 6; nel 2010 ce ne sono 60 (produzioni recenti).
+- Le voci Wikidata Q52277762 / Q52277360 sono proprio il libro di Romani 1862.
+
+**Wikipedia italiana** (CC BY-SA 4.0), via API MediaWiki, `scripts\wikipedia_scala.py`, in `raw\wikipedia\`:
+- `Stagioni_liriche_del_Teatro_alla_Scala.json` (0,28 MB, revisione 152735080 del 03/10/2026): cronistoria 1778-2020 con opere per anno, direttore, interpreti, regia. Per 1906-1943 è **molto rado**: circa 2-5 titoli all'anno (es. 1930: Turandot, La Sagredo, La fanciulla del West), mentre le stagioni vere ne avevano molti di più. Contiene anche "Opere più rappresentate" e "Apertura della stagione lirica".
+- `Prime_stagionali_al_Teatro_alla_Scala.json` (rev. 150788130), `Stagioni_di_balletto_del_Teatro_alla_Scala.json` (rev. 148776796), `Teatro_alla_Scala.json` (rev. 152968485).
+- Il buco **non è chiuso**: l'unica fonte completa resta Gatti vol. 2 (carta) più, per 1906-1920, Marangoni-Vanbianchi.
+
+#### 4. Programma per le foto di Gatti (solo scheletro)
+`scripts\gatti_foto_ocr.py` + `scripts\winocr.ps1`: cartella di foto -> pretrattamento (grigi, contrasto, ingrandimento) -> OCR con riquadri (Tesseract se c'è, altrimenti motore Windows) -> righe -> due CSV (`gatti_grezzo.csv` righe con data, `gatti_da_rivedere.csv` il resto). Colonne comuni a tutto il progetto: fonte, pagina_o_foto, data_iso, stagione, luogo, tipo, titolo, compositore, direttore, interpreti, regia_coreografia, note, testo_riga, affidabilita_ocr. Provato su una pagina di prova (gira, 50 righe); il riconoscimento del formato di Gatti va adattato guardando 3-4 foto vere.
+
+#### 5. Come confrontare le fonti più avanti
+- **Cambiasi 1881 / 1872 / Romani 1862** (stessi anni 1778-1862): confronto per (anno, stagione, titolo normalizzato, maestro). Tre fonti indipendenti permettono di trovare errori di OCR e di stampa.
+- **Cambiasi vs Wikidata**: per ogni opera con P4647 = Scala e data, cercare nella serie di Cambiasi lo stesso anno + titolo normalizzato (senza articoli e accenti, varianti ortografiche) e controllare la data (Cambiasi dà mese e giorno della prima).
+- **Wikipedia (stagioni) vs Cambiasi**: per 1778-1881 trova i titoli che mancano in Wikipedia; per 1906-1943 il contrario.
+- **Dopo il 1943**: Wikipedia vs archivio Scala solo se la Scala concede i dati.
+- Il collegamento tra tutte è una tabella di titoli normalizzati e compositori (Wikidata ha anche gli alias).
+
+#### Trappole dei dati
+- Il libro 1881 elenca opere per stagione, non rappresentazioni: non si contano le sere di spettacolo.
+- Tabelle su due pagine; note `(1)`, `(2)` dentro le celle; "id." per ripetere la stagione.
+- Nomi storpiati dall'OCR; accenti e ligature diventano `�`.
+- La copia Google 1881 ha nel titolo "1776-1881" per errore del catalogo: l'inizio è il 1778.
+- Wikidata: lo stesso spettacolo può comparire come opera (P4647) e come produzione/evento (P276): contare per voce, non per riga (580 righe = 456 opere).
+- L'API di Google Books ha oggi la quota esaurita.
+
+#### Archivio Scala (fase 2, 29/10/2026) - in attesa
+- La Scala ha autorizzato la raccolta (vedi JOURNAL 29/10/2026). Citazione: "(c) Teatro alla Scala".
+- Struttura: l'archivio storico non ha elenchi di stagioni ne' indirizzi fissi per spettacolo: si arriva ai dati solo da una maschera di ricerca (`/it/archivio/ricerca.html`) con filtri su tipo, titolo, autore, artista, luogo e stagioni (86 stagioni dalla 1943-44 alla 2025-26). Non ci sono servizi JSON dietro.
+- Problema: la ricerca funziona solo se il browser invia un codice "info" prodotto da uno script anti-bot (`etnobot.js`). Senza, il sito risponde "Non sono stati trovati spettacoli" (provato su stagione 1946 e su "Callas"). Falsificare quel codice vorrebbe dire aggirare l'anti-bot: non l'ho fatto.
+- Risultato: nessuna stagione ne' spettacolo raccolti, nessun `pulito/archivio_scala.csv`. Serve che la Scala tolga l'anti-bot per questa raccolta o mandi i dati direttamente (dettagli in STATO.md).
+
 ## 9. Redditi e servizi: la città dei 15 minuti
 
 _Fonti, date di scarico, licenze, ipotesi (velocità a piedi 4,5 km/h), scelte, problemi. Cartella `citta-15-minuti/`._
 
 - 2026-10-29 — Punti di partenza: i numeri civici del Comune con coordinate (circa 51 mila), non una griglia (scelta di Davide). Media per quartiere (NIL) pesata sugli abitanti. Velocità a piedi: 4,5 km/h, lungo le strade.
+
+### Fase 1 — scarico (2026-10-29)
+
+**Città dei 15 minuti: note sulla fase 1 (scaricamento e controlli)**
+
+Data: 29 ottobre 2026. Cartella: `citta-15-minuti\`. Nessun calcolo di tempi a piedi fatto (è la fase 2).
+Come leggere: ogni numero dice da quale file e da quale campo viene. Dove non c'è scritto altro, i file sono in `raw\comune_milano\<cartella>\`.
+Tutti i controlli sono rifacibili con `scripts\controlli.py` e `scripts\analisi_collegamenti.py` (risultati in `controlli_risultati.json` e `collegamenti_risultati.json`).
+
+#### In breve (le cose che decidono il resto del lavoro)
+
+1. **I redditi sono per CAP, non per quartiere.** 38 CAP (da 20121 a 20162), 6 anni di imposta (2019-2024). Un CAP non coincide con un NIL: il confronto con i redditi si può fare con precisione solo a livello di CAP (38 zone), non di 88 NIL. Dettagli nel paragrafo "Redditi".
+2. **I punti (civici) ci sono e sono buoni:** 65.160 righe, 57.405 "applicati" (in vigore), 51.917 numeri civici distinti (via + numero + lettera): è questo il numero "circa 51.000" scelto da Davide.
+3. **Le poste ci sono nei dati del Comune** (85 uffici): OSM serve solo come controllo incrociato.
+4. **Gli asili nido sono vecchi** (anno scolastico 2018/19, l'ultimo) e per il 16,5% delle righe mancano le coordinate. Va segnalato nei risultati o integrato con OSM.
+5. **I parchi sono poligoni**, 1.065 pezzi, di cui 737 sotto i 500 m²: per "arrivare a un parco" non basta il centro del parco (le coordinate nel CSV sono centroidi). Servono i bordi/ingressi e una soglia di dimensione.
+6. **La rete pedonale c'è già:** la fase 1 della filiera "bici-auto-mezzi" (strand 7) ha già ritagliato OSM per Milano + circa 3 km di margine. Non copiato, solo referenziato (vedi "Rete pedonale").
+7. **Nessun blocco:** nessun sito ha chiesto registrazione o accettazione di licenze con un clic.
+
+---
+
+#### 1. Servizi con una posizione (portale dati del Comune, CKAN, `https://dati.comune.milano.it/api/3/action/package_show?id=<id>`)
+
+Scaricato il 29/10/2026. Per ogni cartella ci sono anche i metadati originali in `_metadati.json`. Le coordinate sono sempre gradi WGS84 (EPSG:4326), tranne dove scritto. La data "metadata_modified" è la data in cui il file è stato caricato sul portale (molti sono stati ricaricati in blocco l'8/5/2026): **non** dice quanto sono aggiornati i dati. Dove si legge un anno vero, è indicato.
+
+Controlli fatti su ogni set (script `scripts\controlli.py`): coordinate mancanti o a zero; punti fuori dal confine del Comune (`confine_comune`); NIL dichiarato nel file diverso dal NIL calcolato dal poligono (`nil_vigenti`); punti dentro un poligono di parco (`parchi`); duplicati (stesso nome+indirizzo, stesso punto, righe identiche).
+
+| Servizio | Dataset (id) | Cartella | Record | Dati di | Coordinate (campi) | Licenza |
+|---|---|---|---|---|---|---|
+| Farmacie | `ds501_farmacie-nel-comune-di-milano` | `farmacie` | 422 | elenco regionale, aggiornato 15/10/2026 | `LONGITUDINE`, `LATITUDINE` | CC0 |
+| Medici di medicina generale | `ds234-sociale-medici-medicina-generale` | `mmg` | 1.189 righe = 428 punti distinti | 29/10/2026 | `LONG_X_4326`, `LAT_Y_4326` | **CC BY-NC (non commerciale)** |
+| Asili nido | `ds47-istruzione-asili-nido-localizzazione-delle-strutture` | `nidi` | 1.790 righe (3 anni) | a.s. 2016/17, 2017/18, 2018/19 (`CODANNOSCOLASTICO`) | `LONG_WGS84`, `LAT_WGS84` | CC BY |
+| Scuole infanzia | `ds3014-...-2025-2026` (e storico `ds671`) | `scuole_infanzia_2025`, `scuole_infanzia_ds671` | 294 (a.s. 2025/26); `ds671` ha 3.640 righe = 12 anni | 2025/26 | `LONG_X_4326`, `LAT_Y_4326` | CC BY |
+| Scuole primarie | `ds40-infogeo-scuole-primarie-localizzazione` | `scuole_primarie` | 2.604 righe = 12 anni; ultimo anno 216 | 2025/26 | idem | CC BY |
+| Scuole secondarie I grado | `ds3016-...-2025-2026` (e storico `ds46`) | `scuole_sec1_2025`, `scuole_sec1_ds46` | 147 (2025/26); `ds46` 1.736 = 12 anni | 2025/26 | idem | CC BY |
+| Scuole secondarie II grado | `ds78_infogeo_scuole_secondarie_ii_grado_localizzazione_` | `scuole_sec2` | 174 righe = 109 punti distinti | anno non dichiarato | idem | CC BY |
+| Edifici scolastici statali (controllo) | `ds1863-...-as-2020-2021` | `scuole_edifici_statali_2020` | 560 | a.s. 2020/21 | idem | altro (attribuzione) |
+| Scuole paritarie (controllo) | `ds1582-...-2020-2021` | `scuole_paritarie_2020` | 461 | a.s. 2020/21 | `LONG_X_4326`, `LAT_Y_4326` (non controllate) | altro (attribuzione) |
+| Biblioteche | `ds1306-sistema-bibliotecario-milano` | `biblioteche_sistema` | 26 | caricato 10/7/2026 | `long`, `lat` | CC BY |
+| Biblioteche (vecchi, solo confronto) | `ds41...` (2007), `ds287` (2013-15, senza coordinate) | `biblioteche_loc_2007`, `biblioteche_rionali_2013` | 232 e 81 | 2007; 2013-2015 | non controllate | CC BY |
+| Mercati comunali coperti | `ds2471-mercati-comunali-coperti` | `mercati_coperti` | 26 (21 attivi, 5 no: Selinunte, Ca' Granda, Umbria, Gorla, QT8; campo `attivo`) | "mag24" nel nome file = maggio 2024 | `LONG_X_4326`, `LAT_Y_4326` | CC BY |
+| Mercati settimanali scoperti | `ds291-economia-mercati-settimanali-scoperti` | `mercati_settimanali` | 85 (tutti `status mss`=attivo) | maggio 2024 | idem | CC BY |
+| Mercati degli agricoltori | `ds2629-mercati-degli-agricoltori` | `mercati_agricoltori` | 9 | non dichiarato | `LONG_WGS84`, `LAT_WGS84` | CC BY |
+| Parchi e giardini | `ds89_infogeo_parchi_giardini_localizzazione_` | `parchi` | 1.065 poligoni | non dichiarato | GeoJSON (poligoni); CSV = centroidi `LONG_X_4326_CENTROID`, `LAT_Y_4326_CENTROID` | CC BY |
+| Impianti sportivi (punti) | `ds34_infogeo_impianti_sportivi_localizzazione_` | `sport_ds34` | 1.041 | non dichiarato | `LONG_X_4326`, `LAT_Y_4326` | CC BY |
+| Impianti sportivi (poligoni di campi) | `ds1640_infogeo_impianti_sportivi_localizzazione` | `sport_ds1640` | 502 poligoni; date dei rilievi da 23/11/2000 a 25/3/2024 (campo `data_ini`) | 2000-2024 | solo GeoJSON (il CSV non ha coordinate) | CC BY |
+| Uffici postali | `ds555_uffici_postali_milano` | `poste` | 85 (tutti `Ente`="Ufficio PT") | non dichiarato | `LONG_X_4326`, `LAT_Y_4326` | CC BY |
+| Esercizi di vicinato | `ds49-economia-esercizi-vicinato-sede-fissa` | `vicinato` | 28.131 righe = 13.370 punti distinti | caricato 31/8/2026 | `LONG_X_4326`, `LAT_Y_4326` | CC BY |
+
+Dimensioni: tutta la cartella `raw\comune_milano` pesa circa 243 MB (il grosso sono i 164 MB del CSV della popolazione estratto dallo zip da 13 MB e i 23 MB dei civici estratti).
+
+##### Problemi trovati ("trappole dei dati")
+
+- **Farmacie** (`farmacie`): pulite. 422 righe, 0 coordinate mancanti, 0 fuori confine, 0 dentro un parco, 0 duplicati, NIL dichiarato sempre uguale a quello del poligono. Confronto con OSM: 413 delle 422 hanno una farmacia OSM entro 100 m; OSM dentro Milano ne ha 451 (`collegamenti_risultati.json`, campi `farmacie_Comune_con_OSM_entro_100m`, `OSM_farmacie_dentro`).
+- **Medici di base** (`mmg`): il file è una riga per medico, non per ambulatorio. 1.189 righe ma solo 428 punti distinti (`duplicati_stesso_punto` = 761): contare i medici come "servizi" gonfierebbe le zone con ambulatori di gruppo. 154 medici hanno `attivo`=0 (1.035 attivi; 414 punti distinti attivi). 38 hanno `ambulatorioPrincipale`=0. 6 medici sono **fuori dal confine del Comune** (per esempio Via Stradivari, Via Ampere, Via Beatrice d'Este: indirizzi che sono a Milano, quindi coordinate sbagliate, spostate fino a lat 45,63) e hanno `ID_NIL` mancante; 5 cadono dentro un poligono di parco. **Il file contiene nomi, cognomi e data di nascita dei medici (`dataNascita`) e la licenza è CC BY-NC: non ripubblicare il file grezzo.** Il nome del file cambia ogni giorno (`20261029_mmg_final.csv`).
+- **Asili nido** (`nidi`): i dati arrivano solo fino all'a.s. 2018/19 (600 righe quell'anno, 377 nomi distinti, 295 punti distinti). **99 righe su 600 (anno 2018/19) non hanno coordinate né NIL né CAP** (in tutto 295 righe su 1.790). Una riga è una sezione/fascia d'età, non un edificio: bisogna ridurre a un punto per edificio. Non esiste un dataset più recente sul portale (cercato: "nidi", "servizi prima infanzia 0-3"; c'è anche `ds709` "servizi integrativi all'infanzia", non scaricato). Per i nidi serve OSM (`amenity=kindergarten` / `childcare`) o accettare il limite. 3 punti dentro un poligono di parco.
+- **Scuole infanzia/primarie/secondarie I grado**: i file storici (`ds671`, `ds40`, `ds46`) hanno una riga per scuola per anno scolastico (12 anni, 2014/15-2025/26): **va filtrato l'ultimo anno** (`ANNOSCOL`=2025/2026) o si contano le scuole 12 volte. Ultimo anno: infanzia 294 (166 comunali, 27 statali, 40 enti privati laici, 36 enti religiosi, 17 privati, 6 privati convenzionati, 2 privati accreditati), primarie 216 (215 punti distinti), secondarie I grado 147 (146 punti distinti). Il campo `NIL` dichiarato differisce dal poligono in 1 scuola infanzia, 2 secondarie I grado (ultimo anno). Dentro un parco: 4 infanzia, 0 secondarie (normale: scuole in giardino). Le **superiori** (`scuole_sec2`) hanno 174 righe ma 109 punti (65 righe sono "stesso punto", più istituti nello stesso edificio) e nessun anno scolastico dichiarato.
+- **Biblioteche** (`biblioteche_sistema`): solo 26 sedi del Sistema Bibliotecario Milanese. OSM ha 57 punti `amenity=library` dentro Milano (`collegamenti_risultati.json`, `OSM_library_dentro`), ma comprendono biblioteche di scuole/università/condominio: non sono confrontabili uno a uno. Una cade dentro un parco.
+- **Mercati**: coperti 26 righe di cui 5 inattivi (filtrare `attivo`='SI'); settimanali 85, tutti attivi ma ognuno funziona solo certi giorni (campi `LUNEDI`...`DOMENICA`, `giorno`, `orari`): un mercato aperto un giorno a settimana non è un servizio quotidiano; agricoltori 9. Dati di maggio 2024 per i primi due. OSM: 35 `amenity=marketplace` dentro Milano.
+- **Parchi** (`parchi`): 1.065 poligoni, area totale 7,74 milioni di m² (campo `AREA_MQ`, somma). Mediana 78 m², 737 poligoni sotto 500 m² (aiuole), 18 sopra 10 ha. Il più grande: Parco delle Cave (59,4 ha); lo stesso nome compare su più poligoni (non è un duplicato, il parco è diviso in pezzi: 991 righe hanno nome+codice ripetuto). 22 righe identiche e 22 punti duplicati. Il CSV ha solo centroidi: inutile per l'accessibilità a piedi, serve il GeoJSON. Non è dichiarato l'anno dei dati. Confronto: OSM ha 817 `leisure=park` + 879 `leisure=garden` dentro Milano.
+- **Impianti sportivi**: due set diversi. `ds34` (1.041 punti, tipo nel campo `info`: 232 centri sportivi, 159 calcio a 11, 113 pallacanestro, 93 ginnastica, 85 fitness, 77 tennis, 34 nuoto, 13 piscina...) e `ds1640` (502 poligoni di singoli campi pubblici, con 34 piste ciclabili, 26 piste di schettinaggio ecc., rilevati dal 2000 al 2024): **in `ds1640` ci sono piste ciclabili che non sono impianti sportivi nel senso del servizio**; filtrare per `descrizione_codice`. Nessun centroide fuori confine in nessuno dei due. Anno non dichiarato per `ds34`. Il problema "sport" dipende da cosa si intende: per la fase 2 conviene `ds34` come "luogo dove fare sport" e `ds1640` come "campo libero nel quartiere".
+- **Poste** (`poste`): pulite (85 righe, 0 problemi). Il Comune ha quindi gli uffici postali, **non serve OSM**. Controllo incrociato: 74 delle 85 hanno un punto OSM `amenity=post_office` entro 150 m; OSM ha 111 `post_office` dentro Milano, di cui 95 con operatore "Poste Italiane", 8 senza operatore e 8 di corrieri (DHL, GLS, Nexive, Mail Boxes Etc., Posta Express). Quindi OSM sembra contare anche sportelli/punti non ufficiali o uffici più recenti; i due elenchi non coincidono perfettamente.
+- **Esercizi di vicinato** (`vicinato`): 28.131 righe, 245 senza coordinate, 13.370 punti distinti (`duplicati_stesso_punto`=14.516: più negozi allo stesso civico), 8 dentro un parco. Il campo `settore_merceologico` è sporco: scritto in maiuscolo/minuscolo diverso e concatenato ("Non AlimentareAlimentare", "tabella speciale monopolio" = tabaccai, "tabella speciale farmacie", "tabella speciale carburanti"): per dire "negozio alimentare" serve normalizzare. Alimentari puri (`Alimentare`+`alimentare`): 5.005 righe; circa 10.557+8.130 sono non alimentari. Il campo `tipologia` è 'vicinato' in 28.039 righe, 'ND' in 91, 'media SV' in 1. `Area di Competenza` è sempre "VENDITA - In sede fissa". Il file è una fotografia dell'autorizzazione commerciale: negozi chiusi di fatto possono esserci ancora.
+- **Tutti i set con ID_NIL**: il NIL dichiarato coincide con il NIL calcolato dal poligono tranne i pochi casi indicati sopra (`nil_dichiarato_diverso_dal_poligono` in `controlli_risultati.json`).
+
+#### 2. Civici con coordinate (`ds634-numeri-civici-coordinate`, cartella `civici`)
+
+- File originale: `ds634_civici_coordinategeografiche_20261001_final_csv.zip` (4,6 MB), estratto in `civici\estratto\` (23 MB, 65.160 righe, 41 colonne, aggiornato al 1/10/2026). Licenza CC BY.
+- `STATOCIVICO`: Applicato 57.405; Iter in corso 7.649; In attesa Fine Lavori 106. `RESIDENZIALE`: 1 = 47.238, 0 = 17.917, vuoto 5. Livello stradale quasi sempre (65.123 su 65.160).
+- **Applicati**: 57.405 punti, tutti distinti; **numeri civici distinti** (chiave `CODICE_VIA`+`NUMERO`+`LETTERA`): 51.917, ed è questo il numero "circa 51.000". Applicati residenziali: 46.896. Mi sembra la scelta migliore tenere gli "Applicati" e decidere in fase 2 se partire da 51.917 (numeri) o da 57.405 (punti con i "barrati").
+- Coordinate in gradi: **`LONG_WGS84` / `LAT_WGS84`** (con il punto). **Trappola**: le colonne `WGS84_X`/`WGS84_Y` si chiamano "WGS84" ma contengono metri UTM 32N (es. `514817,0392`), con la virgola decimale; le colonne `GAUSSB_X/Y` sono Gauss-Boaga, `WEBMERC_X/Y` Web Mercator.
+- Controlli: 0 coordinate mancanti, 1 punto fuori dal confine del Comune, 2 senza `ID_NIL` (anche fuori da ogni poligono NIL), nessun `IDMASTER` duplicato, `ID_NIL` dichiarato = NIL del poligono per tutti. Applicati per NIL: da 12 a 2.902.
+- Nel file **non c'è il CAP**: per i redditi serve stimarlo (vedi sotto).
+
+#### 3. Redditi (Irpef sub-comunale) e come collegarli ai NIL
+
+- Dataset: `ds1590` (anno di imposta 2019), `ds1830` (2020), `ds2275` (2021), `ds2734` (2022), `ds2946` (2023), `ds3009` (2024, caricato 26/8/2026): cartelle `redditi_<anno>_ai<anno-imposta>`. CSV con 4 colonne: `Anno di imposta`, `CAP`, `Redditi e variabili Irpef`, `Importi`. Licenza CC BY. **Sono 6 anni (2019-2024); più indietro non c'è un dataset sub-comunale** (quelli del 2000-2018 sono solo a livello comunale: `ds941`...`ds1267`, non scaricati).
+- **Zone: 38 CAP**, da 20121 a 20162 (stessi 38 in tutti gli anni). Nessun dato per NIL, né per sezione di censimento.
+- 43 variabili nei primi cinque anni, 45 nel 2024: per ogni tipo di reddito un numero di contribuenti (`- Frequenza`) e un importo (`- Ammontare in euro`), più le classi di reddito complessivo (fino a 10.000, 10-15, 15-26, 26-55, 55-75, 75-120, oltre 120 mila euro). Il "reddito medio" non è dato: va calcolato come `Reddito complessivo - Ammontare in euro` / `Reddito complessivo - Frequenza` (o diviso per `Numero contribuenti`). Il "Numero contribuenti" è di chi presenta dichiarazione, non di tutti i residenti. Esempio 2024 (`ds3009`): `Numero contribuenti` da 13.625 (CAP 20136) a 46.726 (CAP 20146).
+- **Collegamento CAP → NIL.** Non ho trovato i confini dei CAP né sul portale (cercato "CAP") né in OSM (nessuna relazione `boundary=postal_code` per Milano: 0 risultati). Ho quindi usato i 27.721 punti (vicinato, farmacie, poste, medici) che hanno **sia CAP sia NIL** (`collegamento_CAP_NIL_tabella_punti.csv`) e i civici (`collegamento_CAP_NIL_tabella_civici_stimati.csv`, CAP del punto noto più vicino).
+  - La tabella CAP × NIL ha 186 celle non vuote (punti) o 233 (civici stimati): un NIL tocca più CAP e viceversa.
+  - Solo 1 CAP su 38 ha un NIL dominante ≥ 90%; in media il NIL più frequente di un CAP ne copre il 56,6% dei punti. Nell'altro verso (NIL → CAP) 44 NIL su 87 hanno un CAP che ne copre ≥ 90%, ma 44 NIL toccano due o più CAP con almeno il 10% ciascuno; in media il CAP dominante di un NIL copre l'81,9% dei punti (81,3% con i civici).
+  - Test sul CAP stimato col punto più vicino (12.839 punti distinti, ciascuno escluso da sé stesso): lo stesso CAP nel 96,6% dei casi. Dei 57.405 civici applicati, 47.901 hanno un punto con CAP noto entro 100 m (mediana 37 m, 95° percentile 192 m).
+  - **Conclusione:** il confronto con i redditi si fa **a livello di CAP (38 zone)**: punteggio dei servizi medio per CAP, calcolato sui civici assegnati a ciascun CAP (pesati con i residenti stimati), contro reddito per contribuente di quel CAP. Distribuire i redditi sui NIL richiederebbe ipotesi (peso per superficie o per residenti) e darebbe false precisioni; se serve, farlo come analisi secondaria e dichiararlo.
+- Il CAP stimato per i civici resta una stima (96,6%): i confini veri non sono scaricabili (Poste Italiane non li pubblica liberamente). Non fatto: ricerca di confini CAP su altre fonti (ISTAT, Regione Lombardia), da valutare se serve più precisione.
+
+#### 4. Popolazione per quartiere (NIL)
+
+- `ds27-popolazione-residenti-cittadinanza-quartiere-serie-storica` (cartella `pop_cittadinanza_quartiere`): `ds27_pop_sto_quartiere.zip` (13 MB), estratto `estratto\ds27_pop_sto_quartiere.csv` (164 MB, 3.131.527 righe). Campi: `Anno` (1999-2025), `IdNil`, `Nil`, `Eta` (0-99 e "100 e più"), `Genere`, `Cittadinanza`, `Residenti`. Licenza CC BY.
+  - **Ultimo anno: 2025, 1.399.079 residenti** (somma di `Residenti`, `Anno`=2025), in **87 NIL su 88**: manca il NIL 8 `PARCO SEMPIONE` (nessun residente). Per i NIL più piccoli i numeri sono bassi (min 38 residenti nel 2025, max 61.964).
+  - Si può ricavare per ogni NIL: totale, età (anno per anno), genere, cittadinanza. Non c'è il reddito.
+- `ds205-sociale-caratteristiche-demografiche-territoriali-quartiere` (cartella `pop_caratteristiche_quartiere`): 2011-2024, 1.243 righe, totale 2024 = 1.407.044 (campo `Totale`), con `Minori`, `Stranieri`, `65 e +`, `80 e +`, numero di scuole, `Area (metri quadrati)`. Ha 89 righe per anno: l'ultima è "N.D." (senza NIL, `Totale` vuoto). Utile per la superficie.
+- Differenza di data: ds27 arriva al 2025, ds205 al 2024, i redditi sono del 2024 (anno di imposta) → per un confronto coerente usare 2024 per tutti.
+
+#### 5. Confini
+
+- NIL vigenti (`ds964-nil-vigenti-pgt-2030`, cartella `nil_vigenti`): `ds964_nil_wm.geojson` (88 poligoni, 1 MB; nonostante "wm" nel nome le coordinate sono in gradi EPSG:4326) e `ds964_nil_wm_4326.csv` (centroidi). Valido dal 5/2/2020, fonte PGT Milano 2030. Licenza CC BY. Campi `ID_NIL`, `NIL`. Esiste anche la versione "OBSOLETI" (`ds61`, non scaricata).
+- Confine del Comune (`ds2841-confini-amministrativi-del-comune-di-milano`, cartella `confine_comune`): `confine_comune_milano_layer_0_confine_comune_milano.geojson`, 1 poligono, 1,9 MB, EPSG:4326, 19.553 vertici; la superficie calcolata dal poligono è circa 180,6 km². Attenzione: i campi `Shape_Area` (369.827.250) e `Shape_Length` (155.386) valgono circa il doppio e non sono in m² reali: non usarli. Licenza CC BY.
+
+#### 6. Rete pedonale (OpenStreetMap)
+
+- **Già scaricata dalla filiera 7** (`..\bici-auto-mezzi\`): non copiata, solo referenziata.
+  - `C:\Users\davide\Desktop\ClaudeTower\milano-in-dati\bici-auto-mezzi\raw\osm_milano\milano_buffer.osm.gz` (17,9 MB, formato XML OSM compresso). Riquadro: lat 45,350-45,572, lon 8,99-9,33 (dichiarato nell'intestazione `<bounds>`; i nodi vanno da 45,35 a 45,572 e da 8,99 a 9,33): copre tutto il Comune con circa 2,5-3 km di margine. Contiene 779.196 nodi, 181.476 strade (way con tag `highway`), 4.469 relazioni (restrizioni/rotte bici). Estratto da `lombardia-latest.osm.pbf` (356 MB, Geofabrik, nella stessa filiera in `raw\osm_lombardia\`, scaricato 29/10/2026 17:21).
+  - Percorribili a piedi: `footway` 73.376 tag, `residential` 24.802, `service` 33.415, `pedestrian` 2.866, `path` 2.927, `steps` 3.309, `crossing` (nodi) 40.175 ecc. (conteggio dei tag `highway=*` nel file, nodi e strade insieme). Le strade sono troncate al riquadro.
+  - Sistema di riferimento: lat/lon OSM. Licenza ODbL: attribuzione obbligatoria, ridistribuzione con la stessa licenza. Se serve ritagliare di nuovo: comando in `..\bici-auto-mezzi\STATO.md`.
+- **Limite:** il ritaglio tiene solo le strade e i nodi relativi (nessun punto d'interesse), per questo i servizi del bordo vanno presi dal file seguente.
+
+#### 7. Effetto bordo e punti di interesse OSM
+
+- File: `raw\osm_poi\overpass_poi_milano.json` (2,9 MB) = una sola interrogazione Overpass (`scripts\overpass_poi.py`), data base OSM 29/10/2026 16:36 UTC, rettangolo lat 45,36-45,56 / lon 9,00-9,32, 11.518 elementi. Tabella estratta e classificata: `raw\osm_poi\osm_poi_milano_estratto.csv` (campo `fascia`: dentro il Comune / fuori entro 1.500 m / fuori oltre).
+- **Comuni confinanti** (confini OSM `admin_level=8`, `raw\osm_poi\overpass_comuni_admin8.json`, 3 MB; confinante = un vertice a meno di 150 m dal confine): Rozzano, Opera, Assago, San Donato Milanese, Buccinasco, Cesano Boscone, Peschiera Borromeo, Settimo Milanese, Segrate, Pero, Sesto San Giovanni, Novate Milanese, Baranzate, Trezzano sul Naviglio, Cusago, Corsico, Rho, Vimodrone, Cologno Monzese, Cormano, Bresso, Arese, Bollate, Cornaredo (24). Vicini ma non confinanti (entro 3 km): San Giuliano Milanese (616 m), Cinisello Balsamo, Pieve Emanuele, Cusano Milanino, Locate di Triulzi, Bareggio, Pioltello, Gaggiano, Paderno Dugnano, Cernusco sul Naviglio, Cisliano, Pregnana Milanese, Basiglio, Zibido San Giacomo, Senago. (La verifica è fatta sui vertici, non è una verifica ufficiale dei confini.)
+- I servizi di questi comuni **non sono nei dati del Comune**. Chi abita al margine rischia un punteggio più basso solo perché il servizio più vicino è oltre il confine. OSM può riempire il bordo: nel rettangolo, fra 0 e 1.500 m fuori dal confine ci sono (campo `fascia`=`fuori_entro_1500m`, `collegamenti_risultati.json`, `OSM_poi_per_tag_e_fascia`): `amenity=pharmacy` 90, `amenity=school` 125, `amenity=kindergarten` 72, `amenity=library` 27, `amenity=doctors` 37, `amenity=post_office` 27, `amenity=marketplace` 10, `shop=supermarket` 77, `shop=bakery`/`butcher`/`greengrocer`/`convenience` (non riportati qui), `leisure=park` 337, `leisure=garden` 550, `leisure=sports_centre` 99, `leisure=swimming_pool` 107.
+- **Non riempito ancora**, come da mandato: solo valutazione. Limiti di OSM: le scuole con tag `amenity=school` includono scuole di ogni grado senza una distinzione unica; i medici di base di fuori non sono su OSM in modo completo (`doctors` 37 entro 1,5 km); `amenity=post_office` mescola uffici e punti Poste/corrieri. Per scuole e farmacie OSM è il candidato migliore per il bordo (le farmacie OSM coincidono con quelle del Comune per il 98%, 413/422).
+- Licenza OSM: ODbL (attribuzione, stessa licenza se si ripubblica).
+
+#### 8. Licenze e ripubblicazione
+
+- Dataset del Comune: **CC BY** (si può ripubblicare citando la fonte), eccetto: **farmacie CC0** (libere) e **medici di base CC BY-NC (uso non commerciale: non ripubblicare il grezzo, e comunque contiene nomi e date di nascita dei medici)**; `ds1863` e `ds1582` (scuole 2020/21) hanno licenza "altro (attribuzione)".
+- Il file `ds27` e il CSV dei civici sono grandi (164 MB e 23 MB estratti): se si ripubblica qualcosa, solo risultati aggregati, non il grezzo.
+- OSM: ODbL.
+
+#### 9. Cosa non ho fatto / aperto
+
+- Non ho scaricato i file JSON/RDF dei dataset (solo CSV e GeoJSON, che bastano).
+- Non ho cercato i confini dei CAP su fonti diverse da Comune e OSM.
+- Nessun calcolo di tempi di cammino (fase 2).
+- Non ho scaricato `ds709` (servizi integrativi all'infanzia), né le liste di scuole paritarie più recenti (esistono per anno scolastico: `ds2286` infanzia paritarie 2021/22, `ds1582` 2020/21 qui scaricata). Le paritarie recenti sono già nei file scuole 2025/26 (`PARITARIA`, `TIPO` privati/enti religiosi).
+- Il campo `Shape_Area` del confine comunale è circa il doppio della superficie vera (180,6 km² calcolati dal poligono): la superficie va calcolata dal poligono.
+- I file `scuole_paritarie_2020`, `biblioteche_loc_2007` e `biblioteche_rionali_2013` sono solo di confronto: non ho fatto i controlli geografici su di loro (colonne e righe sì).
