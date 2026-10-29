@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milano in dati: le elezioni per sezione</title>
+<style>
+  :root { --ink:#111; --muted:#555; --line:#ccc; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#fff; color:var(--ink); font:15px/1.4 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+  .wrap { max-width:1100px; margin:0 auto; padding:16px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  h2 { font-size:16px; margin:0 0 6px; }
+  p.lead { margin:0 0 12px; color:var(--muted); }
+  .bar { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; margin:10px 0; }
+  select, button { font:inherit; padding:5px 9px; border:1px solid #888; background:#fff; border-radius:3px; cursor:pointer; }
+  button.on { background:#111; color:#fff; border-color:#111; }
+  #anni { display:flex; flex-wrap:wrap; gap:4px; margin:6px 0 4px; }
+  #anni button { padding:3px 7px; font-size:13px; }
+  .grid { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:20px; margin-top:8px; }
+  @media (max-width:800px){ .grid { grid-template-columns:1fr; } }
+  svg { display:block; width:100%; height:auto; }
+  .hemi circle { transition: fill .7s ease; stroke:#fff; stroke-width:.6; }
+  #map path { stroke:#fff; stroke-width:.8; cursor:pointer; transition: fill .7s ease; vector-effect:non-scaling-stroke; }
+  #map path.sel { stroke:#000; stroke-width:3; }
+  #map text { font-size:11px; text-anchor:middle; pointer-events:none; fill:#fff; paint-order:stroke; stroke:#0006; stroke-width:2px; font-weight:600; }
+  .legend { display:grid; grid-template-columns:auto 1fr auto auto; gap:2px 8px; font-size:14px; margin-top:6px; }
+  .sw { width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:5px; }
+  .num { text-align:right; font-variant-numeric: tabular-nums; }
+  .info { color:var(--muted); font-size:13px; }
+  .note { color:#8a4b00; font-size:13px; }
+  #focus { border-top:2px solid #111; margin-top:22px; padding-top:10px; }
+  #tab { max-height:420px; overflow:auto; border:1px solid var(--line); }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { padding:3px 7px; border-bottom:1px solid #eee; text-align:right; white-space:nowrap; }
+  th { position:sticky; top:0; background:#f3f3f3; }
+  td:first-child, th:first-child { text-align:left; }
+  .lista { columns: 2 280px; font-size:14px; }
+  footer { margin-top:28px; padding-top:10px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+  footer p { margin:4px 0; }
+  .strip text { font-size:10px; }
+  .big { font-size:26px; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Milano in dati: le elezioni sezione per sezione</h1>
+  <p class="lead">Risultati per sezione elettorale dal 1979 al 2026, riassunti in poche famiglie di partiti. Scegli il tipo di elezione, muovi il tempo e clicca un territorio sulla mappa.</p>
+
+  <div class="bar">
+    <label>Tipo di elezione <select id="tipo"></select></label>
+    <span id="quesitoBox" hidden><label>Quesito <select id="quesito"></select></label></span>
+    <button id="play" title="Scorre le elezioni di questo tipo, una dopo l'altra">&#9654; Anima</button>
+  </div>
+  <div id="anni"></div>
+  <div id="info" class="info"></div>
+  <div id="avvisi" class="note"></div>
+
+  <div class="grid">
+    <div>
+      <h2>Tutta la città (100 seggi in proporzione ai voti)</h2>
+      <svg id="hemiCity" class="hemi" viewBox="0 0 200 108"></svg>
+      <div id="affCity" class="info"></div>
+      <div id="legCity" class="legend"></div>
+    </div>
+    <div>
+      <h2 id="mapTitle">Mappa</h2>
+      <svg id="map" viewBox="0 0 300 320"></svg>
+      <div class="info" id="mapNote"></div>
+    </div>
+  </div>
+
+  <div id="focus">
+    <h2 id="focusTitle">Focus su un territorio</h2>
+    <div id="focusEmpty" class="info">Clicca un territorio sulla mappa per vedere l'emiciclo, l'affluenza e le sezioni.</div>
+    <div id="focusBody" hidden>
+      <div class="grid">
+        <div>
+          <svg id="hemiTerr" class="hemi" viewBox="0 0 200 108"></svg>
+          <div id="affTerr"></div>
+          <div id="legTerr" class="legend"></div>
+        </div>
+        <div>
+          <h2>Andamento nel tempo (stesso tipo di elezione)</h2>
+          <svg id="strip" class="strip" viewBox="0 0 400 10"></svg>
+          <div class="info" id="stripNote"></div>
+        </div>
+      </div>
+      <h2 style="margin-top:16px">Le sezioni <span id="nSez" class="info"></span></h2>
+      <div id="tab"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p><b>Fonte:</b> Comune di Milano, portale open data <a href="https://dati.comune.milano.it">dati.comune.milano.it</a> (Unit&agrave; Servizi Statistici), dataset <span id="dsAll">ds1123&ndash;ds2975</span>, licenza CC BY 4.0. Dati scaricati il 2026-10-29. Confini: ds379 (municipi), ds378 (le 20 ex zone di decentramento, cio&egrave; le circoscrizioni fino al 1997), ds153 (9 zone di decentramento; controllo: stessa superficie dei municipi).</p>
+    <p><b>Famiglie provvisorie.</b> Ogni lista &egrave; assegnata a una famiglia con una tabella semplice e modificabile (<a href="data/famiglie_partiti.csv">famiglie_partiti.csv</a>). Il PCI sta nella Sinistra; PDS, DS e PD nel Centrosinistra, insieme al PSI. Le liste senza regola finiscono in Altri. Da rivedere.</p>
+    <p>Prima del 1999 il territorio &egrave; la circoscrizione (20), dal 1999 la zona (9, con la stessa numerazione e gli stessi confini degli attuali municipi), dal 2016 il municipio (9). Le tre mappe non sono confrontabili tra loro. Nei referendum 1985-1997 la colonna "Zona" del dataset contiene in realt&agrave; le circoscrizioni.</p>
+    <p>I seggi sono solo un modo di leggere le percentuali (100 seggi ripartiti col metodo dei resti pi&ugrave; alti): non sono seggi reali.</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+var IDX, GEO = {}, DETAIL = {};
+var state = { tipo: null, id: null, terr: null, playing: null };
+var COL = {};
+var FAMS = [];
+
+function fmt(n){ return n==null ? 'n.d.' : n.toLocaleString('it-IT'); }
+function pct(a,b,d){ if(a==null||!b) return 'n.d.'; return (100*a/b).toLocaleString('it-IT',{minimumFractionDigits:d==null?1:d,maximumFractionDigits:d==null?1:d})+'%'; }
+function el(id){ return document.getElementById(id); }
+function byId(id){ return IDX.elezioni.find(function(e){return e.id===id;}); }
+function dataIt(s){ var p=s.split('-'); return parseInt(p[2],10)+'/'+parseInt(p[1],10)+'/'+p[0]; }
+
+/* ---------- seggi: resti piu' alti ---------- */
+function seats(v, N){
+  var tot=v.reduce(function(a,b){return a+b;},0);
+  if(!tot) return v.map(function(){return 0;});
+  var q=v.map(function(x){return x*N/tot;}), s=q.map(Math.floor), left=N-s.reduce(function(a,b){return a+b;},0);
+  var ord=q.map(function(x,i){return [x-Math.floor(x),i];}).sort(function(a,b){return b[0]-a[0];});
+  for(var k=0;k<left;k++) s[ord[k][1]]++;
+  return s;
+}
+
+/* ---------- emiciclo ---------- */
+var HEMI = {};
+function buildHemi(svg){
+  var N=100, R=6, r0=42, r1=94, cx=100, cy=100, rows=[], sum=0, i, k;
+  for(k=0;k<R;k++){ var r=r0+(r1-r0)*k/(R-1); rows.push({r:r,n:0}); sum+=r; }
+  var left=N;
+  rows.forEach(function(w){ w.n=Math.floor(N*w.r/sum); left-=w.n; });
+  for(k=R-1; left>0; k=(k+R-1)%R, left--) rows[k].n++;
+  var pts=[];
+  rows.forEach(function(w){ for(i=0;i<w.n;i++){ var a=Math.PI*(1-(i+0.5)/w.n); pts.push({a:a,r:w.r}); } });
+  pts.sort(function(p,q){ return (q.a-p.a) || (p.r-q.r); });
+  var ns='http://www.w3.org/2000/svg', circles=[];
+  svg.innerHTML='';
+  pts.forEach(function(p){
+    var c=document.createElementNS(ns,'circle');
+    c.setAttribute('cx',(cx+p.r*Math.cos(p.a)).toFixed(2));
+    c.setAttribute('cy',(cy-p.r*Math.sin(p.a)).toFixed(2));
+    c.setAttribute('r','4.3'); c.setAttribute('fill','#ddd');
+    svg.appendChild(c); circles.push(c);
+  });
+  return circles;
+}
+function paintHemi(svgId, fams, votes){
+  if(!HEMI[svgId]) HEMI[svgId]=buildHemi(el(svgId));
+  var s=seats(votes,100), idx=0, c=HEMI[svgId];
+  for(var f=0; f<fams.length; f++) for(var j=0;j<s[f];j++) c[idx++].setAttribute('fill', COL[fams[f]]);
+  while(idx<c.length) c[idx++].setAttribute('fill','#ddd');
+}
+function legend(boxId, fams, votes){
+  var tot=votes.reduce(function(a,b){return a+b;},0), s=seats(votes,100), h='';
+  for(var i=0;i<fams.length;i++)
+    h+='<div><span class="sw" style="background:'+COL[fams[i]]+'"></span>'+fams[i]+'</div><div></div><div class="num">'+pct(votes[i],tot)+'</div><div class="num info">'+fmt(votes[i])+'</div>';
+  el(boxId).innerHTML=h;
+}
+
+/* ---------- mappa ---------- */
+var BB=null, PROJ=null;
+function project(geo){
+  var minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9, k=Math.cos(45.46*Math.PI/180);
+  geo.features.forEach(function(f){
+    var polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;
+    polys.forEach(function(p){ p[0].forEach(function(q){ var x=q[0]*k, y=-q[1]; if(x<minx)minx=x; if(x>maxx)maxx=x; if(y<miny)miny=y; if(y>maxy)maxy=y; }); });
+  });
+  var w=maxx-minx, h=maxy-miny, S=290/Math.max(w,h);
+  return { k:k, minx:minx, miny:miny, S:S, w:w*S, h:h*S };
+}
+function pathOf(f,P){
+  var polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates, d='';
+  polys.forEach(function(poly){ poly.forEach(function(ring){
+    ring.forEach(function(q,i){ d+=(i?'L':'M')+(((q[0]*P.k-P.minx)*P.S)+5).toFixed(1)+' '+(((-q[1]-P.miny)*P.S)+5).toFixed(1); });
+    d+='Z';
+  }); });
+  return d;
+}
+function centroid(f,P){
+  var polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates, best=null;
+  polys.forEach(function(p){ if(!best||p[0].length>best.length) best=p[0]; });
+  var x=0,y=0; best.forEach(function(q){x+=q[0];y+=q[1];});
+  x/=best.length; y/=best.length;
+  return [((x*P.k-P.minx)*P.S)+5, ((-y-P.miny)*P.S)+5];
+}
+var MAPKEY=null;
+function drawMap(sistema){
+  var key = sistema==='circoscrizione' ? 'circoscrizioni' : 'municipi';
+  if(MAPKEY===key) return;
+  MAPKEY=key;
+  var geo=GEO[key], P=project(geo), svg=el('map'), ns='http://www.w3.org/2000/svg';
+  svg.setAttribute('viewBox','0 0 '+(P.w+10).toFixed(0)+' '+(P.h+10).toFixed(0));
+  svg.innerHTML='';
+  geo.features.forEach(function(f){
+    var p=document.createElementNS(ns,'path'), n=f.properties.n;
+    p.setAttribute('d',pathOf(f,P)); p.setAttribute('fill','#ddd'); p.setAttribute('data-n',n);
+    p.addEventListener('click',function(){ selectTerr(String(n)); });
+    var t=document.createElementNS(ns,'title'); p.appendChild(t);
+    svg.appendChild(p);
+  });
+  geo.features.forEach(function(f){
+    var c=centroid(f,P), t=document.createElementNS(ns,'text');
+    t.setAttribute('x',c[0].toFixed(1)); t.setAttribute('y',(c[1]+4).toFixed(1)); t.textContent=f.properties.n; svg.appendChild(t);
+  });
+}
+function leader(fams, v){ var b=0; for(var i=1;i<v.length;i++) if(v[i]>v[b]) b=i; return fams[b]; }
+function paintMap(e){
+  var ps=el('map').querySelectorAll('path');
+  var nome = {circoscrizione:'Circoscrizione', zona:'Zona', municipio:'Municipio'}[e.sistema];
+  ps.forEach(function(p){
+    var n=p.getAttribute('data-n'), d=e.terr[n];
+    if(d && d.v.some(function(x){return x>0;})){
+      p.setAttribute('fill',COL[leader(e.fam,d.v)]);
+      var tot=d.v.reduce(function(a,b){return a+b;},0), top=Math.max.apply(null,d.v)/tot;
+      p.setAttribute('fill-opacity', (0.35+0.65*Math.max(0,Math.min(1,(top-0.3)/0.4))).toFixed(2));
+      var tt=nome+' '+n+': '+e.fam.map(function(f,i){return f+' '+pct(d.v[i],tot,0);}).join(', ');
+      p.querySelector('title').textContent=tt;
+    } else { p.setAttribute('fill','#ddd'); p.querySelector('title').textContent=nome+' '+n+': nessun dato'; }
+    p.classList.toggle('sel', String(state.terr)===n);
+  });
+}
+
+/* ---------- controlli ---------- */
+function tipoElezioni(t){ return IDX.elezioni.filter(function(e){return e.tipo===t;}); }
+function dateDelTipo(t){ var s=[]; tipoElezioni(t).forEach(function(e){ if(s.indexOf(e.data)<0) s.push(e.data); }); return s.sort(); }
+
+function buildTipo(){
+  var s=el('tipo');
+  IDX.tipi.forEach(function(t){ var o=document.createElement('option'); o.value=t.id; o.textContent=t.label+' ('+tipoElezioni(t.id).length+')'; s.appendChild(o); });
+  s.addEventListener('change',function(){ stop(); setTipo(s.value); });
+}
+function setTipo(t, id){
+  state.tipo=t; el('tipo').value=t;
+  var list=tipoElezioni(t);
+  var first = id ? byId(id) : list[list.length-1];
+  buildAnni(); setElezione(first.id);
+}
+function buildAnni(){
+  var box=el('anni'); box.innerHTML='';
+  var dates=dateDelTipo(state.tipo);
+  dates.forEach(function(d){
+    var b=document.createElement('button');
+    b.textContent = state.tipo==='referendum' ? d.slice(0,4) : (state.tipo==='comunali_ballottaggio'||state.tipo==='comunali_sindaco'||true ? d.slice(0,4) : d);
+    b.title=dataIt(d); b.setAttribute('data-d',d);
+    b.addEventListener('click',function(){ stop(); var l=tipoElezioni(state.tipo).filter(function(e){return e.data===d;}); setElezione(l[0].id); });
+    box.appendChild(b);
+  });
+}
+function setElezione(id){
+  state.id=id;
+  var e=byId(id);
+  var l=tipoElezioni(state.tipo).filter(function(x){return x.data===e.data;});
+  // quesiti
+  var qb=el('quesitoBox');
+  if(state.tipo==='referendum'){
+    qb.hidden=false;
+    var q=el('quesito'); q.innerHTML='';
+    l.forEach(function(x){ var o=document.createElement('option'); o.value=x.id; o.textContent=x.label; q.appendChild(o); });
+    q.value=id; q.onchange=function(){ stop(); setElezione(q.value); };
+  } else qb.hidden=true;
+  el('anni').querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-d')===e.data); });
+  // se cambia il sistema territoriale, il numero non e' piu' lo stesso territorio
+  if(state.terr!=null && state.sisTerr && state.sisTerr!==e.sistema){ state.terr=null; }
+  render();
+}
+function render(){
+  var e=byId(state.id), sistemaNome={circoscrizione:'Circoscrizione',zona:'Zona',municipio:'Municipio'}[e.sistema];
+  el('info').innerHTML='<b>'+e.label+'</b> &middot; '+dataIt(e.data)+' &middot; dataset '+e.ds.map(function(d){return 'ds'+d;}).join(', ')+' &middot; sezioni: '+fmt(e.city.ns);
+  el('avvisi').textContent=e.note.join(' - ');
+  // citta
+  paintHemi('hemiCity', e.fam, e.city.v);
+  legend('legCity', e.fam, e.city.v);
+  el('affCity').innerHTML='Affluenza: <b>'+pct(e.city.vt,e.city.e)+'</b> ('+fmt(e.city.vt)+' votanti su '+fmt(e.city.e)+' elettori)';
+  // mappa
+  drawMap(e.sistema);
+  el('mapTitle').textContent='Mappa per '+sistemaNome.toLowerCase()+' ('+(e.sistema==='circoscrizione'?'20 circoscrizioni':'9 '+(e.sistema==='zona'?'zone':'municipi'))+')';
+  el('mapNote').textContent = e.sistema==='circoscrizione' ? 'Colore = famiglia più votata (più intenso = più netta). Confini delle 20 ex zone di decentramento (ds378): assumo che il numero coincida con le circoscrizioni del dataset (la 1 contiene il Duomo).'
+     : e.sistema==='zona' ? 'Colore = famiglia più votata (più intenso = più netta). Le 9 zone 1999-2011 hanno gli stessi numeri e gli stessi confini degli attuali municipi (verificato sulle superfici).'
+     : 'Colore = famiglia più votata (più intenso = più netta).';
+  paintMap(e);
+  renderFocus();
+}
+function selectTerr(n){
+  state.terr = (String(state.terr)===n) ? null : n;
+  render();
+}
+var detailToken=0;
+function renderFocus(){
+  var e=byId(state.id), n=state.terr;
+  if(n==null || !e.terr[n]){
+    el('focusEmpty').hidden=false; el('focusBody').hidden=true;
+    el('focusTitle').textContent='Focus su un territorio';
+    state.sisTerr=null; return;
+  }
+  state.sisTerr=e.sistema;
+  var d=e.terr[n], nome={circoscrizione:'Circoscrizione',zona:'Zona',municipio:'Municipio'}[e.sistema]+' '+n;
+  el('focusEmpty').hidden=true; el('focusBody').hidden=false;
+  el('focusTitle').textContent='Focus: '+nome+' - '+e.label+' ('+dataIt(e.data)+')';
+  paintHemi('hemiTerr', e.fam, d.v);
+  legend('legTerr', e.fam, d.v);
+  el('affTerr').innerHTML='Affluenza: <b>'+pct(d.vt,d.e)+'</b> ('+fmt(d.vt)+' votanti su '+fmt(d.e)+' elettori) &middot; '+fmt(d.ns)+' sezioni';
+  strip(n, e);
+  // sezioni (caricate al bisogno)
+  var tok=++detailToken;
+  el('tab').innerHTML='<div class="info" style="padding:6px">Carico le sezioni...</div>';
+  getDetail(e.id).then(function(D){
+    if(tok!==detailToken) return;
+    var rows=D.righe.filter(function(r){return String(r[1])===n;});
+    el('nSez').textContent='('+rows.length+')';
+    var h='<table><thead><tr><th>Sezione</th><th>Elettori</th><th>Votanti</th><th>Affl.</th>'+D.fam.map(function(f){return '<th><span class="sw" style="background:'+COL[f]+'"></span>'+f+'</th>';}).join('')+'<th>Prima</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var v=r.slice(4), tot=v.reduce(function(a,b){return a+b;},0);
+      h+='<tr><td>'+r[0]+'</td><td>'+fmt(r[2])+'</td><td>'+fmt(r[3])+'</td><td>'+(r[2]?pct(r[3],r[2],0):'n.d.')+'</td>'+
+         v.map(function(x){return '<td>'+fmt(x)+(tot?' <span class="info">'+pct(x,tot,0)+'</span>':'')+'</td>';}).join('')+
+         '<td>'+(tot?'<span class="sw" style="background:'+COL[leader(D.fam,v)]+'"></span>':'')+'</td></tr>';
+    });
+    el('tab').innerHTML=h+'</tbody></table>';
+  }).catch(function(){ el('tab').textContent='Non riesco a caricare le sezioni.'; });
+}
+function getDetail(id){
+  if(DETAIL[id]) return Promise.resolve(DETAIL[id]);
+  return fetch('data/e/'+id+'.json').then(function(r){return r.json();}).then(function(j){ DETAIL[id]=j; return j; });
+}
+/* barre impilate per il territorio scelto, una per elezione dello stesso tipo */
+function strip(n, cur){
+  var list=tipoElezioni(state.tipo);
+  if(state.tipo==='referendum') list=list.filter(function(x){return x.data===cur.data;});
+  else list=list.filter(function(x){return x.sistema===cur.sistema;});
+  var svg=el('strip'), ns='http://www.w3.org/2000/svg', rowH=16, W=400, x0=(state.tipo==='referendum'?150:40), h='';
+  svg.setAttribute('viewBox','0 0 '+W+' '+(list.length*rowH+4));
+  list.forEach(function(x,i){
+    var y=i*rowH+2, d = x.sistema===cur.sistema ? x.terr[n] : null;
+    var lab = state.tipo==='referendum' ? x.label.replace(/^Referendum\s+\S+\s+(su\s+|sulla\s+)?/,'').slice(0,26) : x.data.slice(0,4);
+    h+='<text x="0" y="'+(y+11)+'" font-weight="'+(x.id===cur.id?'700':'400')+'">'+lab+'</text>';
+    if(d){
+      var tot=d.v.reduce(function(a,b){return a+b;},0), xx=x0;
+      x.fam.forEach(function(f,k){ var w=(W-x0)*d.v[k]/tot; if(w>0){ h+='<rect x="'+xx.toFixed(1)+'" y="'+y+'" width="'+w.toFixed(1)+'" height="'+(rowH-3)+'" fill="'+COL[f]+'"><title>'+f+' '+pct(d.v[k],tot)+'</title></rect>'; xx+=w; } });
+    } else h+='<text x="'+x0+'" y="'+(y+11)+'" fill="#999">altro sistema territoriale</text>';
+    h+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rowH+'" fill="transparent" style="cursor:pointer" data-id="'+x.id+'"></rect>';
+  });
+  svg.innerHTML=h;
+  svg.querySelectorAll('rect[data-id]').forEach(function(r){ r.addEventListener('click',function(){ stop(); setElezione(r.getAttribute('data-id')); }); });
+  el('stripNote').textContent = state.tipo==='referendum' ? 'Un quesito per riga (stessa data).' : 'Un’elezione per riga, solo con lo stesso sistema territoriale (circoscrizioni fino al 1997, zone 1999-2014, municipi dal 2016): i numeri non sono confrontabili tra sistemi. Clicca una riga per andarci.';
+}
+
+/* ---------- animazione ---------- */
+function stop(){ if(state.playing){ clearInterval(state.playing); state.playing=null; el('play').innerHTML='&#9654; Anima'; } }
+function play(){
+  if(state.playing){ stop(); return; }
+  var dates=dateDelTipo(state.tipo), cur=byId(state.id), i=dates.indexOf(cur.data);
+  if(i>=dates.length-1) i=-1;
+  el('play').innerHTML='&#10074;&#10074; Ferma';
+  state.playing=setInterval(function(){
+    i++;
+    if(i>=dates.length){ stop(); return; }
+    var l=tipoElezioni(state.tipo).filter(function(x){return x.data===dates[i];});
+    setElezione(l[0].id);
+  }, 1700);
+}
+
+/* ---------- avvio ---------- */
+Promise.all([
+  fetch('data/index.json').then(function(r){return r.json();}),
+  fetch('data/municipi.geojson').then(function(r){return r.json();}),
+  fetch('data/circoscrizioni.geojson').then(function(r){return r.json();})
+]).then(function(a){
+  IDX=a[0]; GEO.municipi=a[1]; GEO.circoscrizioni=a[2];
+  IDX.famiglie.forEach(function(f){ COL[f.nome]=f.colore; });
+  buildTipo();
+  el('play').addEventListener('click',play);
+  setTipo('comunali_consiglio');
+}).catch(function(err){
+  el('info').textContent='Non riesco a caricare i dati (apri la pagina da un server web, non da file): '+err;
+});
+</script>
+</body>
+</html>
