@@ -1157,3 +1157,28 @@ Dimensioni: tutta la cartella `raw\comune_milano` pesa circa 243 MB (il grosso s
 - Non ho scaricato `ds709` (servizi integrativi all'infanzia), né le liste di scuole paritarie più recenti (esistono per anno scolastico: `ds2286` infanzia paritarie 2021/22, `ds1582` 2020/21 qui scaricata). Le paritarie recenti sono già nei file scuole 2025/26 (`PARITARIA`, `TIPO` privati/enti religiosi).
 - Il campo `Shape_Area` del confine comunale è circa il doppio della superficie vera (180,6 km² calcolati dal poligono): la superficie va calcolata dal poligono.
 - I file `scuole_paritarie_2020`, `biblioteche_loc_2007` e `biblioteche_rionali_2013` sono solo di confronto: non ho fatto i controlli geografici su di loro (colonne e righe sì).
+
+### Fase 2 e 3 — calcolo e pagina (2026-10-29)
+
+- **Metodo**:
+  - Rete pedonale OSM del filone 7: 647 mila nodi, 12.299 km.
+  - 57.405 civici in vigore, agganciati alla rete (mediana 14,5 m).
+  - 4,5 km/h, quindi 15 minuti = 1.125 m lungo le strade.
+  - Un calcolo di distanza da tutti i servizi insieme per ogni tipo.
+  - **10 tipi** di servizio: i tre mercati contano come uno; l'"11" del mandato era un errore del coordinatore.
+  - Parchi da 5.000 m² in su, con l'ingresso dal bordo.
+  - Abitanti 2025 di ogni NIL distribuiti in parti uguali sui suoi civici residenziali.
+  - Dettagli in `citta-15-minuti/NOTE.md`, "FASE 2".
+- **Risultati**:
+  - Punteggio medio della città 8,97 su 10; il 35,2% dei residenti ha tutti e 10 i tipi entro 15 minuti.
+  - La biblioteca è il servizio che manca: la raggiunge il 46,5% dei residenti (59% con le biblioteche OSM).
+  - Redditi per CAP (38 zone, `cap_redditi_servizi.csv`): Spearman 0,54 (IC 95% 0,28-0,71) senza Cascina Merlata; il terzo più povero ha un punteggio di 8,7, il più ricco di 9,4; per la sola biblioteca la correlazione è 0,00.
+  - Meglio serviti: Tibaldi, Porta Vigentina, Guastalla, Ortomercato, XXII Marzo. Peggio serviti: Chiaravalle, Muggiano, Parco Forlanini, Figino, Monluè.
+- **Controlli**:
+  - La distanza lungo la rete non è mai minore di quella in linea d'aria.
+  - 20 civici ricalcolati uno per uno: differenza massima 0,005 minuti.
+  - L'effetto bordo (servizi OSM entro 1,5 km fuori dal Comune) è trascurabile, salvo nei NIL minuscoli di confine.
+- **Trappola Cascina Merlata** (controllo del coordinatore): nel registro dei civici del Comune ha solo 13 indirizzi, tutti in via Cristina Belgioioso. È il quartiere nuovo dell'ex villaggio Expo, e anche i servizi recenti mancano nei dati. Il suo punteggio di 0,33 non vale: è in grigio, fuori dalle classifiche e dal confronto con i redditi.
+- **Classifiche**: entrano solo i NIL con almeno 30 civici e 1.000 abitanti (75 su 88).
+- **Dati personali**: il file dei medici di base (nomi e date di nascita, licenza CC BY-NC) non è pubblicato; nel sito ci sono solo i tempi a piedi aggregati.
+- Pagina `docs/citta-15-minuti/`, approvata da Davide dopo la "sorpresa".
