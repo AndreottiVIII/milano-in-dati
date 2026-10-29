@@ -138,7 +138,7 @@ Fonti trovate: Maugeri, Buffoni e Chlistovsky 2002 (storia delle osservazioni, C
 - **Licenza**: nel sito solo valori aggregati; la serie giornaliera prima del 1995 (ECA&D/GHCN, non ridistribuibile) resta sul PC.
 
 - **2026-10-29, giorno singolo e 2026**: Davide ha deciso di pubblicare anche la serie giornaliera completa (pagina "Un giorno a scelta"), citando Maugeri et al. 2002, ECA&D (Klein Tank et al. 2002), NOAA GHCN-D e GSOD, ARPA; sito non commerciale. Il 2026 (dati fino al 28/10) entra in tutte le tabelle come anno in corso; nelle classifiche annuali c'è un confronto a parte "2026 finora", fatto sugli stessi 271 giorni di calendario per tutti gli anni.
-- **Da verificare**: il 2026 risulta il più caldo di sempre nello stesso periodo (19,3 °C contro i 18,7 del 2022). L'estate 2026 a Brera ha una media di 28,1 °C, contro i 27,4 del 2022. Il confronto con le stazioni vicine per il 2026 non è stato possibile: l'API di ARPA ha risposto "too many requests". Da rifare.
+- **Verificato il 29/10 sera** (`temperature/discrepanza/verifica_2026.md`): anche le stazioni vicine hanno l'estate 2026 più calda del 2022 (Juvara +0,62, Marche +0,50, Zavattari +0,84, Lambrate 0,00; Brera +0,63); Brera meno la media delle vicine nel 2026 = -0,11. Il record 2026 non è un difetto del sensore. Prima: il 2026 risulta il più caldo di sempre nello stesso periodo (19,3 °C contro i 18,7 del 2022). L'estate 2026 a Brera ha una media di 28,1 °C, contro i 27,4 del 2022. Il confronto con le stazioni vicine per il 2026 non è stato possibile: l'API di ARPA ha risposto "too many requests". Da rifare.
 
 ## 2. Donne nelle vie
 
@@ -657,6 +657,7 @@ Ogni voce nomina file e campo.
 - Tabella di corrispondenza circoscrizione (1–20) ↔ zona (1–9) per i confronti a cavallo del 1999.
 - Sezione → NIL: partire da ds939 (per civico) e ripetere con gli altri stradari (ds1614, ds1862, ds2169, ds2741, ds2922, ds2973) per vedere se la sezione cambia NIL negli anni; poi decidere la regola per le 345 sezioni a cavallo.
 - Valutare SIEL (ds23) per controllare i totali delle elezioni 1979–2000.
+- 2026-10-29 sera — **Senato 1983-1994** aggiunto da Eligendo (i 6 collegi di Milano sommati; votanti di almeno 25 anni; nel 1994 le "liste" sono coalizioni): la serie del Senato ora va dal 1948 al 2022 senza buchi. Le 28 liste nuove sono state rivedute dal coordinatore: Polo delle Libertà nel Centrodestra, Progressisti nel Centrosinistra, Patto per l'Italia nel Centro. Il sito ha 167 elezioni.
 
 ## 5. Qualità dell'aria, centralina per centralina
 
