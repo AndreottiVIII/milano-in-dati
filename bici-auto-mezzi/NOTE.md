@@ -202,3 +202,113 @@ Per la fase dopo: geocodificare tutte le 131.435 righe richiede pochi minuti con
 - Il tempo di ricerca del parcheggio e' lo stesso in tutte le fasce orarie (di sera in realta' si trova prima).
 - Le velocita' dell'auto per 12:00 e 21:00 sono ipotesi; quella delle 08:00 e' ancorata a TomTom, che e' una media di tutta la citta' nel 2025.
 - Il programma sceglie sempre il percorso piu' veloce: Google a volte consiglia percorsi piu' tranquilli per le bici.
+
+---
+
+<!-- FASE3 -->
+## Fase 3 - taratura con Google Maps e risultati (29 ottobre 2026; riscritta da `scripts\f3_note.py`)
+
+Taratura fatta con i tragitti di prova che hanno i tempi di Google Maps letti il 29/10/2026 per martedi 3/11/2026 (file: `tragitti_prova.csv`, `tragitti_prova_2.csv`). Tragitti usati: **120** (con valore Google: bici 120, auto 120, mezzi 120); ore 08:00 = 42, 12:00 = 39, 21:00 = 39. Divisione 70/30 per ora e distanza: **84 di taratura** (scelta dei parametri) e **36 di controllo** (solo per misurare l'errore, non toccati dalla taratura). Google e' un riferimento, non la verita': i suoi tempi di auto sono intervalli ("tipicamente X-Y min", usato il valore di mezzo), la bici e' un percorso consigliato, i mezzi sono il primo percorso proposto. I tempi di Google non sono pubblicati, solo i nostri errori in percentuale.
+
+### Cosa e' cambiato (valore vecchio -> valore nuovo, perche)
+| Parametro | Prima | Dopo | Perche |
+|---|---|---|---|
+| Bici su strada normale (km/h) | 13 | 17 | la nostra bici era sempre piu lenta di Google (rapporto mediano 1,403). Velocita su strada cercata tra 14 e 18 km/h: la prima per cui il rapporto mediano sui tragitti di taratura sta tra 0,95 e 1,05 (regola in `f3_calibra.py`) |
+| Bici su ciclabile o corsia (km/h) | 15 | 19 | strada + 2 km/h |
+| Bici su strada di servizio (km/h) | 12 | 16 | strada - 1 km/h |
+| Attesa media a un semaforo, bici (s) | 15 | 6 | la bici supera spesso le code e prende scorciatoie; si prova prima 6 s, poi 4 s, poi 2 s se la velocita da sola non basta |
+| Attraversamento senza semaforo di strada grande, bici (s) | 8 | 3 | meta dell'attesa al semaforo |
+| Bici: pedonale pedalabile, a mano, sterrato (km/h) | 10, 5, 10 | 10, 5, 10 | invariati (pochi tratti) |
+| Bici: lucchetto | 60 s | 60 s | invariato (Google non lo conta, il confronto con Google e' sulla sola pedalata) |
+| Auto: fattore di velocita ore 08:00 | 0,916 | 0,916 | invariato: ancorato a TomTom (38 min 43 s ogni 10 km) |
+| Auto: fattore di velocita ore 12:00 | 1,056 | 0,77 | prima era un'ipotesi (27 min ogni 10 km). Un moltiplicatore comune alle ore 12 e 21 portato a rapporto mediano 1 sui tragitti di taratura (esclusi quelli con meta a meno di 1 km, dove Google gira largo per le zone chiuse) |
+| Auto: fattore di velocita ore 21:00 | 1,158 | 0,845 | idem |
+| Mezzi: margine per cambiare mezzo (s) | 45 | 180 | i nostri mezzi erano ottimisti (Google propone il primo percorso, non il piu veloce in assoluto) |
+| Mezzi: tempo per scendere/salire al binario di metro e treno (s, all'inizio e alla fine) | 0 | 60 | la fermata del GTFS e' il binario, ma si parte dalla strada. Scelto con una griglia (margine 45-180 s x accesso 0-120 s) minimizzando errore medio + distorsione |
+| Mezzi: velocita a piedi, distanza massima a piedi | 4,5 km/h; 800 m / 300 m (400 m tra due stazioni, vedi correzioni mezzi) | invariati | non modificati: cambiano poco il risultato e sono scelte di principio |
+
+### Errori prima e dopo (nostra stima / Google: 1,00 = uguale; errore in % del tempo Google)
+| Mezzo | Gruppo | N | Rapporto mediano prima | dopo | Errore mediano prima | dopo | Errore medio prima | dopo |
+|---|---|---|---|---|---|---|---|---|
+| Bici | taratura | 84 | 1,414 | 1,028 | 41,4% | 7,6% | 46,6% | 15,1% |
+| Bici | controllo | 36 | 1,382 | 1,013 | 38,2% | 6,4% | 44,8% | 11,8% |
+| Bici | tutti | 120 | 1,403 | 1,02 | 40,3% | 7,4% | 46,1% | 14,1% |
+| Auto (solo guida) | taratura | 84 | 0,913 | 1,024 | 16,4% | 11,4% | 18% | 14,8% |
+| Auto (solo guida) | controllo | 36 | 0,875 | 1,024 | 17,4% | 9,9% | 17,7% | 14,4% |
+| Auto (solo guida) | tutti | 120 | 0,905 | 1,024 | 16,5% | 10,9% | 17,9% | 14,7% |
+| Mezzi | taratura | 84 | 0,91 | 1 | 10,4% | 6,9% | 10,7% | 8,7% |
+| Mezzi | controllo | 36 | 0,891 | 1,001 | 13,4% | 7,5% | 13,3% | 11,1% |
+| Mezzi | tutti | 120 | 0,906 | 1 | 11,5% | 7% | 11,5% | 9,4% |
+
+Auto per ora di partenza (tutti i tragitti), rapporto mediano prima -> dopo: 08:00 = 1,058 -> 1,058 (N=42); 12:00 = 0,872 -> 1,096 (N=39); 21:00 = 0,727 -> 0,914 (N=39).
+
+Attenzione: con pochi tragitti per ora (vedi N) l'errore sul gruppo di controllo e' molto incerto. Nella taratura 12:00 e 21:00 l'auto diventa lenta quasi quanto alle 08:00 sulle strade principali: probabilmente il valore di mezzo dell'intervallo di Google e' pessimista per le ore tranquille; con il valore basso l'auto vincerebbe di piu.
+
+### Risultati generali dopo la taratura (tutte le coppie cella-cella: 2.915 x 2.915 celle da 250 m, martedi 3/11/2026)
+Chi arriva prima porta a porta (bici con 1 min di lucchetto; auto con 2+2 min a piedi e ricerca del parcheggio; mezzi con attesa vera). Non conta il costo. Le celle senza fermate entro 800 m non danno vittorie ai mezzi.
+
+**Ore 08:00**
+| Distanza in linea retta | coppie | bici % | auto % | mezzi % | vittoria netta (>=10%) % | a piedi batte tutti % | mezzi non raggiungibili % |
+|---|---|---|---|---|---|---|---|
+| 0-1 km | 117938 | 96,5 | 1,9 | 1,7 | 97,2 | 3,4 | 18,4 |
+| 1-2 km | 361252 | 98,3 | 1,6 | 0,1 | 97,8 | 0,2 | 18,5 |
+| 2-4 km | 1245542 | 97,4 | 2,4 | 0,2 | 95,6 | 0 | 17,8 |
+| 4-6 km | 1642070 | 94,5 | 4,8 | 0,7 | 90,2 | 0 | 19,5 |
+| 6-8 km | 1725316 | 91,1 | 7,6 | 1,3 | 84,5 | 0 | 22,5 |
+| 8-12 km | 2570844 | 84,3 | 14 | 1,7 | 75,5 | 0 | 32,5 |
+| oltre 12 km | 831348 | 57 | 42,2 | 0,9 | 51,9 | 0 | 57,4 |
+| tutte | 8494310 | 87,7 | 11,3 | 1,1 | 82,1 | 0,1 | 27,5 |
+
+**Ore 12:00**
+| Distanza in linea retta | coppie | bici % | auto % | mezzi % | vittoria netta (>=10%) % | a piedi batte tutti % | mezzi non raggiungibili % |
+|---|---|---|---|---|---|---|---|
+| 0-1 km | 117938 | 96,4 | 2 | 1,6 | 97,1 | 3,4 | 18,4 |
+| 1-2 km | 361252 | 98 | 1,9 | 0,1 | 97,5 | 0,2 | 18,5 |
+| 2-4 km | 1245542 | 96,4 | 3,4 | 0,2 | 94 | 0 | 17,8 |
+| 4-6 km | 1642070 | 91,4 | 8 | 0,6 | 85 | 0 | 19,5 |
+| 6-8 km | 1725316 | 84,6 | 14,2 | 1,2 | 73,9 | 0 | 22,5 |
+| 8-12 km | 2570844 | 69,6 | 29 | 1,4 | 56,8 | 0 | 32,5 |
+| oltre 12 km | 831348 | 23,5 | 76,2 | 0,3 | 58,4 | 0 | 57,5 |
+| tutte | 8494310 | 77,9 | 21,3 | 0,9 | 73,6 | 0,1 | 27,4 |
+
+**Ore 21:00**
+| Distanza in linea retta | coppie | bici % | auto % | mezzi % | vittoria netta (>=10%) % | a piedi batte tutti % | mezzi non raggiungibili % |
+|---|---|---|---|---|---|---|---|
+| 0-1 km | 117938 | 95,9 | 2,6 | 1,6 | 96,5 | 3,4 | 19,1 |
+| 1-2 km | 361252 | 96,3 | 3,7 | 0,1 | 95,2 | 0,2 | 19,8 |
+| 2-4 km | 1245542 | 89,4 | 10,5 | 0,1 | 80,5 | 0 | 19,4 |
+| 4-6 km | 1642070 | 66,4 | 33,1 | 0,4 | 53,4 | 0 | 21,6 |
+| 6-8 km | 1725316 | 37,6 | 61,7 | 0,7 | 47,3 | 0 | 25,5 |
+| 8-12 km | 2570844 | 10,8 | 88,8 | 0,4 | 64,8 | 0 | 37,1 |
+| oltre 12 km | 831348 | 0,3 | 99,7 | 0 | 94,3 | 0 | 63,7 |
+| tutte | 8494310 | 42,3 | 57,3 | 0,4 | 66 | 0,1 | 30,8 |
+
+### Sensibilita alla velocita della bici (tutte le coppie; auto e mezzi invariati)
+Il risultato dipende molto dalla velocita della bici: la taratura su Google porta a circa 17-18 km/h su strada (veloce per una bici normale). Quote di vittoria su tutte le coppie:
+| Bici | ore | bici % | auto % | mezzi % |
+|---|---|---|---|---|
+| come tarata (17 km/h su strada, semaforo 6 s) | 08:00 | 87,7 | 11,3 | 1,1 |
+| come tarata (17 km/h su strada, semaforo 6 s) | 12:00 | 77,9 | 21,3 | 0,9 |
+| come tarata (17 km/h su strada, semaforo 6 s) | 21:00 | 42,3 | 57,3 | 0,4 |
+| bici 15 km/h su strada, 17 su ciclabile, semaforo 8 s | 08:00 | 71,4 | 24,7 | 3,9 |
+| bici 15 km/h su strada, 17 su ciclabile, semaforo 8 s | 12:00 | 55,5 | 41,7 | 2,8 |
+| bici 15 km/h su strada, 17 su ciclabile, semaforo 8 s | 21:00 | 24,6 | 74,5 | 0,9 |
+| bici 13 km/h su strada, 15 su ciclabile, semaforo 15 s (le ipotesi iniziali, prima della taratura) | 08:00 | 33,2 | 56,1 | 10,7 |
+| bici 13 km/h su strada, 15 su ciclabile, semaforo 15 s (le ipotesi iniziali, prima della taratura) | 12:00 | 23,6 | 70,3 | 6,2 |
+| bici 13 km/h su strada, 15 su ciclabile, semaforo 15 s (le ipotesi iniziali, prima della taratura) | 21:00 | 11,1 | 87,3 | 1,6 |
+
+I risultati della "Fase 2" in questo file (sezione 4) sono i primi, prima della taratura: valgono questi.
+
+Come rifare tutto: `STATO.md` (una riga: `scripts\f3_rifai.py`). Dati della pagina: `docs\bici-auto-mezzi\data\`.
+<!-- /FASE3 -->
+
+## Fase 3 - correzioni mezzi (29 ottobre 2026; scritta a mano, fuori dal blocco riscritto da `f3_note.py`)
+Rapporto completo con tabelle prima/dopo e prove: `out\verifica_mezzi.md`.
+- **Il 20% "mezzi non raggiungibili" non e' un errore**: sono le coppie in cui partenza o arrivo non ha nessuna fermata entro 800 m a piedi. 423 quadrati su 2.915 (14,5%), quasi tutti parchi, campagna, scali ferroviari e bordi della periferia (mappa `out\mappa_irraggiungibili.png`, numeri `out\irraggiungibili.json`). Se entrambi i quadrati hanno una fermata la coppia e' sempre raggiungibile. La pagina ora mostra anche le quote solo tra coppie servite (73% delle coppie).
+- **Errore 1 (corretto)**: in `f2_motore.py` le fermate "stazione" (tempo extra per il binario) erano `rtype >= 1`, cioe' anche tutti i bus. Ora solo metro (1) e treno (2): 573 fermate invece di 4.725.
+- **Errore 2 (corretto)**: mancavano i cambi tra stazioni oltre i 300 m (Loreto M1-M2, Centrale M2-treni, Porta Venezia M1-Passante). Ora: cambi ufficiali ATM (`transfers.txt`) sempre ammessi, e 400 m (`STATION_TRANSFER_M` in `f2_parametri.py`) tra due stazioni metro/treno. `f2_gtfs.py` salva anche `stop_gid`; `out\footpaths.npz` ha una versione (`FP_VERSION` in `f2_motore.py`) e si ricalcola da solo se cambia.
+- Effetto delle sole correzioni: piccolo (tempo mediano mezzi 53,7 -> 52,6 min su 120 partenze a caso alle 8). Il grosso della variazione nelle quote viene dalla nuova taratura con 56 tragitti Google (prima 20): bici 17 km/h e semaforo 6 s, auto 0,739 (12:00) e 0,81 (21:00), margine di cambio 180 s (bordo della griglia), tempo binario 0 s.
+- Quote 08:00 su tutte le coppie, prima -> dopo (bici/auto/mezzi): 91,2/8,3/0,6 -> 87,1/11,3/1,6. 21:00: 67,0/32,7/0,3 -> 46,6/52,7/0,7. Solo coppie servite 08:00: 91,7/6,2/2,2.
+- Prove di buon senso (`scripts\f3_verifica.py`, 10 tragitti, risultati in `out\f3_verifica_prima.json` e `out\f3_verifica_dopo.json`): tutte dentro l'intervallo atteso. Da stazione a stazione i mezzi battono la bici; sui tragitti solo bus in periferia la bici vince largamente.
+- Pagina: aggiunta la frase "solo coppie servite" sotto la tabella, frase "i mezzi vincono poco" scritta dai dati, nota sui cambi a 400 m, nota "nessun tempo in piu' per il binario" quando il valore e' 0. Testata con la preview "milano-in-dati" porta 8796 (`/bici-auto-mezzi/`): nessun errore, larghezza 375 px ok.
+- Da rifare con `f3_rifai.py` quando `tragitti_prova_2.csv` e' completo.

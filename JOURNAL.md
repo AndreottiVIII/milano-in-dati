@@ -997,6 +997,20 @@ PC: Intel i5-12600K (10 core, 16 thread), 31,8 GB RAM, 78 GB liberi su disco, Wi
   - auto 0,87 (alle 8:00 1,05, alle 12:00 0,72, alle 21:00 0,75);
   - mezzi 0,91.
   - Dettagli in `bici-auto-mezzi/out/taratura_confronto.md`. Nel sito non si pubblicano i tempi di Google, solo i nostri errori in percentuale.
+- 2026-10-30 notte — **Taratura finale e pubblicazione**:
+  - **Verifica dei mezzi** (`out/verifica_mezzi.md`): il 14,5% delle celle non ha una fermata a meno di 800 m a piedi (parchi, campi, scali, bordo della città). Non è un errore. Corretti due errori veri:
+    - un minuto di accesso "da stazione" applicato a ogni fermata d'autobus;
+    - mancavano i cambi tra linee oltre i 300 m (Loreto M1-M2, Centrale): ora si usa `transfers.txt` di ATM.
+  - **Taratura su 120 tragitti Google** (84 per tarare, 36 per controllare). Errore mediano sui 36 di controllo:
+    - bici dal 38% al 6%;
+    - auto dal 17% al 10%;
+    - mezzi dal 13% al 7,5%.
+  - **Parametri finali** in `docs/bici-auto-mezzi/data/taratura.json`:
+    - bici 16-19 km/h, con 6 s per semaforo;
+    - auto con fattori 0,92 alle 8:00, 0,77 alle 12:00, 0,85 alle 21:00;
+    - mezzi con 180 s di margine nei cambi e 60 s di accesso alle stazioni.
+  - **Risultati**: alle 8:00 la bici vince nell'88% delle coppie, l'auto nell'11%, i mezzi nell'1%; alle 21:00 l'auto nel 57%. Il risultato dipende molto dalla velocità della bici: la pagina lo dice.
+  - Nel sito non ci sono i tempi di Google, solo i nostri errori. Pagina `docs/bici-auto-mezzi/` pubblicata.
 
 ## 8. La Scala, cartellone dal 1778 a oggi
 

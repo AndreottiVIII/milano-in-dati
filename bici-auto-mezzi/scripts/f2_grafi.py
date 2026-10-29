@@ -77,28 +77,29 @@ def bike_attr(t):
     surf = t.get('surface', ''); sf = 1.0
     if surf in ('unpaved', 'gravel', 'dirt', 'ground', 'grass', 'sand', 'earth', 'mud', 'fine_gravel', 'compacted', 'pebblestone'): sf = 0.8
     elif surf in ('cobblestone', 'sett', 'unhewn_cobblestone', 'cobblestone:flattened'): sf = 0.85
-    if h == 'cycleway': v = P.BIKE_KMH_CYCLEWAY
+    # classi di velocita (Fase 3: le velocita si applicano in Motore.set_bike, qui si salva solo la classe)
+    # 0 ciclabile, 1 strada, 2 servizio, 3 pedonale pedalabile, 4 a mano, 5 sterrato
+    if h == 'cycleway': c = 0
     elif h == 'footway':
-        if bic in ('yes', 'permissive', 'designated'): v = P.BIKE_KMH_PEDESTRIAN_RIDE
-        elif bic == 'dismount': v = P.BIKE_KMH_WALKING
+        if bic in ('yes', 'permissive', 'designated'): c = 3
+        elif bic == 'dismount': c = 4
         else: return None
     elif h == 'pedestrian':
-        v = P.BIKE_KMH_PEDESTRIAN_RIDE if bic in ('yes', 'designated', 'permissive') else P.BIKE_KMH_WALKING
+        c = 3 if bic in ('yes', 'designated', 'permissive') else 4
     elif h == 'path':
-        v = P.BIKE_KMH_CYCLEWAY if bic == 'designated' else P.BIKE_KMH_PEDESTRIAN_RIDE
-    elif h == 'track': v = P.BIKE_KMH_TRACK
+        c = 0 if bic == 'designated' else 3
+    elif h == 'track': c = 5
     elif h == 'service':
         if t.get('service') in BAD_SERVICE: return None
-        v = P.BIKE_KMH_SERVICE
-    elif h == 'living_street': v = P.BIKE_KMH_SERVICE
+        c = 2
+    elif h == 'living_street': c = 2
     else:
-        v = P.BIKE_KMH_ROAD
+        c = 1
         for k, val in t.items():
             if k.startswith('cycleway') and not k.endswith('oneway') and not k.endswith('surface') and val in ('lane', 'track', 'opposite_lane', 'opposite_track', 'share_busway'):
-                v = P.BIKE_KMH_CYCLEWAY; break
-    v *= sf
+                c = 0; break
     d = oneway_dir(t, h, 'bike')
-    return (v if d >= 0 else 0), (v if d <= 0 else 0), (h in ROADS_CAR), (h in MAJOR)
+    return (d >= 0), (d <= 0), (h in ROADS_CAR), (h in MAJOR), c, sf
 def car_attr(t):
     h = t['highway']
     if h not in ROADS_CAR: return None
@@ -113,14 +114,14 @@ def car_attr(t):
 # ---------- attributi per strada
 nW = len(ways)
 walk_ok = np.zeros(nW, bool)
-bf = np.zeros(nW); bb = np.zeros(nW); b_road = np.zeros(nW, bool); b_major = np.zeros(nW, bool)
+bok_f = np.zeros(nW, bool); bok_b = np.zeros(nW, bool); b_cls = np.zeros(nW, np.int8); b_sf = np.ones(nW, np.float32); b_road = np.zeros(nW, bool); b_major = np.zeros(nW, bool)
 car_cls = ['none'] * nW; car_dir = np.zeros(nW, np.int8); car_ms = np.zeros(nW); car_ok = np.zeros(nW, bool)
 road_like = np.zeros(nW, bool); major_way = np.zeros(nW, bool)
 for i, (t, refs) in enumerate(ways):
     h = t['highway']
     walk_ok[i] = walkable(t)
     r = bike_attr(t)
-    if r is not None: bf[i], bb[i], b_road[i], b_major[i] = r
+    if r is not None: bok_f[i], bok_b[i], b_road[i], b_major[i], b_cls[i], b_sf[i] = r
     r = car_attr(t)
     if r is not None: car_cls[i], car_dir[i], car_ms[i] = r; car_ok[i] = True
     road_like[i] = h in ROADS_CAR
@@ -196,14 +197,15 @@ sigp = np.where(road_like[ww], sig_road[vv], sig_w[vv])
 tw = ll / (P.WALK_KMH * KM) + P.WALK_SIGNAL_S * sigp
 save_graph('walk', mw, [tw], strong=False)
 # ---- bici
-spd = np.where(isfwd, bf[ww], bb[ww]) * KM
-mb = spd > 0
+mb = np.where(isfwd, bok_f[ww], bok_b[ww])
+VTAB = np.array([P.BIKE_KMH_CYCLEWAY, P.BIKE_KMH_ROAD, P.BIKE_KMH_SERVICE, P.BIKE_KMH_PEDESTRIAN_RIDE, P.BIKE_KMH_WALKING, P.BIKE_KMH_TRACK])
+spd = np.where(mb, VTAB[b_cls[ww]] * b_sf[ww], 0) * KM
 sigb = np.where(b_road[ww], sig_road[vv], sig_w[vv])
 major_cross = (~b_major[ww]) & major_node[vv] & (sigb == 0)
 tb = ll / np.where(spd > 0, spd, 1) + P.BIKE_SIGNAL_S * sigb + P.BIKE_MAJOR_CROSS_S * major_cross
-infra = (spd >= P.BIKE_KMH_CYCLEWAY * KM * 0.79)   # veloce quanto una ciclabile (anche con sterrato)
+infra = (b_cls[ww] == 0) & mb   # classe 'ciclabile' (Fase 3: prima era una soglia di velocita)
 pen_b = P.BIKE_SIGNAL_S * sigb + P.BIKE_MAJOR_CROSS_S * major_cross
-save_graph('bike', mb, [tb], extra={'infra': infra, 'pen': pen_b.astype(np.float32), 'sigp': sigb.astype(np.float32), 'mcross': major_cross})
+save_graph('bike', mb, [tb], extra={'infra': infra, 'pen': pen_b.astype(np.float32), 'sigp': sigb.astype(np.float32), 'mcross': major_cross, 'vcls': b_cls[ww], 'sf': b_sf[ww]})
 # ---- auto
 cok = car_ok[ww]; dr = car_dir[ww]
 allowed = cok & ((dr == 0) | ((dr == 1) & isfwd) | ((dr == -1) & ~isfwd))

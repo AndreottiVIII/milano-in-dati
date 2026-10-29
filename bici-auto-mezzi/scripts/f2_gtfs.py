@@ -50,7 +50,7 @@ c = c[(c.arr >= c.dep)].sort_values(['dep', 'arr'], kind='stable').reset_index(d
 np.savez_compressed(O + 'gtfs_conn.npz', f=c.f.values.astype(np.int32), t=c.t.values.astype(np.int32), dep=c.dep.values.astype(np.int32),
                     arr=c.arr.values.astype(np.int32), trip=c.trip.values.astype(np.int32), rtype=c.rtype.values.astype(np.int8),
                     stop_lat=sp.stop_lat.astype(float).values, stop_lon=sp.stop_lon.astype(float).values,
-                    stop_name=np.array(sp.stop_name.tolist(), dtype='U'), stop_feed=np.array(sp.feed.tolist(), dtype='U'))
+                    stop_name=np.array(sp.stop_name.tolist(), dtype='U'), stop_gid=np.array(sp.gid.tolist(), dtype='U'), stop_feed=np.array(sp.feed.tolist(), dtype='U'))
 info['connessioni_totali'] = len(c); info['fermate_totali'] = len(sp)
 json.dump(info, open(O + 'gtfs_info.json', 'w'), indent=1, ensure_ascii=False)
 print(info, round(time.time() - t0), 's')

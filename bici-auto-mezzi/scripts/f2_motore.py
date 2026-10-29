@@ -19,6 +19,7 @@ KM = 1 / 3.6
 WALK_MS = P.WALK_KMH * KM
 TR = Transformer.from_crs(4326, 32632, always_xy=True)
 INF = np.inf
+FP_VERSION = 2   # cambia quando cambia il modo di calcolare i passaggi a piedi tra fermate (rifa out/footpaths.npz)
 
 def xy_of(lon, lat):
     a, b = TR.transform(np.asarray(lon, float), np.asarray(lat, float))
@@ -93,7 +94,7 @@ class Motore:
         self.w = {k: W[k] for k in W.files}; self.b = {k: B[k] for k in B.files}; self.c = {k: C[k] for k in C.files}
         n = len(self.w['x']); self.Gw = csr_matrix((self.w['t0'].astype(float), self.w['indices'], self.w['indptr']), shape=(n, n))
         self.Gw_len = self.w['len'].astype(np.float64)
-        n = len(self.b['x']); self.Gb = csr_matrix((self.b['t0'].astype(float), self.b['indices'], self.b['indptr']), shape=(n, n))
+        self.set_bike()
         self.set_car(self.scale)
         self.tw = cKDTree(np.c_[self.w['x'], self.w['y']]); self.tb = cKDTree(np.c_[self.b['x'], self.b['y']])
         # per l'auto: non agganciare a autostrade/tangenziali
@@ -118,6 +119,13 @@ class Motore:
         sx, sy = xy_of(self.g['stop_lon'], self.g['stop_lat']); self.sx, self.sy = sx, sy
         d, i = self.tw.query(np.c_[sx, sy])
         self.stop_node = i.astype(np.int64); self.stop_snap = d
+        # Fase 3: fermate di metro e treno (sotterranee / con binari): tempo in piu' per entrare (e per uscire) rispetto alla fermata di superficie
+        # CORREZIONE (verifica mezzi): prima era rtype >= 1, che includeva anche i bus (rtype 3): tutte le fermate bus pagavano il tempo da stazione.
+        # Metro = 1, treno = 2. (tram = 0 e bus = 3 non sono stazioni)
+        isst = (self.g['rtype'] == 1) | (self.g['rtype'] == 2)
+        st = np.zeros(self.ns, bool); st[self.g['f'][isst]] = True; st[self.g['t'][isst]] = True
+        self.stop_station = st
+        self.stop_extra = np.where(st, getattr(P, 'STATION_ACCESS_S', 0), 0.0)
         self.stop_ok = d <= P.STOP_SNAP_MAX_M
         # fermate per nodo (CSR)
         ok = np.where(self.stop_ok)[0]
@@ -128,6 +136,15 @@ class Motore:
         self._footpaths()
         self._buf = np.full(len(self.w['x']), np.inf); self._touch = np.zeros(len(self.w['x']), np.int64)
         if verbose: print('motore pronto', round(time.time() - t0, 1), 's', flush=True)
+
+    # ---------- bici: tempi dagli attributi salvati nel grafo (Fase 3: velocita e attese modificabili senza rifare il grafo)
+    def set_bike(self, v=None, sig_s=None, mc_s=None):
+        b = self.b; n = len(b['x'])
+        v = v if v is not None else (P.BIKE_KMH_CYCLEWAY, P.BIKE_KMH_ROAD, P.BIKE_KMH_SERVICE, P.BIKE_KMH_PEDESTRIAN_RIDE, P.BIKE_KMH_WALKING, P.BIKE_KMH_TRACK)
+        sig_s = P.BIKE_SIGNAL_S if sig_s is None else sig_s; mc_s = P.BIKE_MAJOR_CROSS_S if mc_s is None else mc_s
+        spd = np.asarray(v, float)[b['vcls']] * b['sf'] * KM
+        t = b['len'] / spd + sig_s * b['sigp'] + mc_s * b['mcross']
+        self.Gb = csr_matrix((t.astype(float), b['indices'], b['indptr']), shape=(n, n))
 
     # ---------- auto: tempi per fascia
     def set_car(self, scale):
@@ -143,18 +160,28 @@ class Motore:
             self.Gc.append(csr_matrix((t.astype(float), c['indices'], c['indptr']), shape=(n, n)))
         self.Gc_len = c['len'].astype(np.float64)
 
+    def _official_transfers(self):
+        import pandas as pd
+        fn = self.S + '/raw/gtfs/ext_comune_new/transfers.txt'
+        if not os.path.exists(fn): return []
+        gid = {str(x): i for i, x in enumerate(self.g['stop_gid'])} if 'stop_gid' in self.g else {}
+        t = pd.read_csv(fn, dtype=str); out = []
+        for a, b in zip(t.from_stop_id, t.to_stop_id):
+            if 'atm:' + a in gid and 'atm:' + b in gid: out.append((gid['atm:' + a], gid['atm:' + b]))
+        return out
+
     # ---------- passerelle a piedi tra fermate
     def _footpaths(self):
         fn = self.O + 'footpaths.npz'
         if os.path.exists(fn):
             z = np.load(fn)
-            if int(z['ns']) == self.ns:
+            if int(z['ns']) == self.ns and 'ver' in z.files and int(z['ver']) == FP_VERSION:
                 self.fp_ptr, self.fp_to, self.fp_w = z['ptr'], z['to'], z['w']; return
         w = self.w; ip, ix, ln = w['indptr'], w['indices'], self.Gw_len
         dist = np.full(len(w['x']), np.inf); touched = np.zeros(len(w['x']), np.int64)
         rows = [[] for _ in range(self.ns)]
         for s in np.where(self.stop_ok)[0]:
-            lim = P.TRANSFER_M - self.stop_snap[s]
+            lim = (P.STATION_TRANSFER_M if self.stop_station[s] else P.TRANSFER_M) - self.stop_snap[s]
             if lim < 0: continue
             cnt = ldij(ip, ix, ln, self.stop_node[s], lim, dist, touched)
             for u in touched[:cnt]:
@@ -162,11 +189,17 @@ class Motore:
                     s2 = self.nn_stop[k]
                     if s2 == s: continue
                     tot = dist[u] + self.stop_snap[s] + self.stop_snap[s2]
-                    if tot <= P.TRANSFER_M: rows[s].append((s2, tot / WALK_MS))
+                    if tot <= P.TRANSFER_M or (tot <= P.STATION_TRANSFER_M and self.stop_station[s] and self.stop_station[s2]):
+                        rows[s].append((s2, tot / WALK_MS))
             dist[touched[:cnt]] = np.inf
+        # CORREZIONE (verifica mezzi): cambi ufficiali ATM (transfers.txt: Loreto M1-M2, Cadorna M1-M2, Duomo M1-M3), anche se distano piu del limite a piedi
+        have = [{a for a, _ in r} for r in rows]
+        for a, b in self._official_transfers():
+            if b in have[a] or not (self.stop_ok[a] and self.stop_ok[b]): continue
+            rows[a].append((b, max(np.hypot(self.sx[a] - self.sx[b], self.sy[a] - self.sy[b]) * 1.3, 60) / WALK_MS)); have[a].add(b)
         ptr = np.zeros(self.ns + 1, np.int64); ptr[1:] = np.cumsum([len(r) for r in rows])
         to = np.array([a for r in rows for a, _ in r], np.int64); ww = np.array([b for r in rows for _, b in r], np.float64)
-        np.savez_compressed(fn, ptr=ptr, to=to, w=ww, ns=self.ns)
+        np.savez_compressed(fn, ptr=ptr, to=to, w=ww, ns=self.ns, ver=FP_VERSION)
         self.fp_ptr, self.fp_to, self.fp_w = ptr, to, ww
 
     # ---------- destinazioni
@@ -197,7 +230,7 @@ class Motore:
                         s = self.nn_stop[k]; tot = dist[u] + D.w_snap[c] + self.stop_snap[s]
                         if tot <= P.ACCESS_M and (s not in best or tot < best[s]): best[s] = tot
                 dist[touched[:cnt]] = np.inf
-                for s, tot in best.items(): st.append(s); wt.append(tot / WALK_MS)
+                for s, tot in best.items(): st.append(s); wt.append(tot / WALK_MS + self.stop_extra[s])
             ptr.append(len(st))
         D.eg_ptr = np.array(ptr, np.int64); D.eg_stop = np.array(st, np.int64); D.eg_w = np.array(wt, np.float64)
         return D
@@ -251,7 +284,7 @@ class Motore:
             t0 = tstart + off * 60
             ready = np.full(self.ns, 10 ** 9, np.int64); arrv = np.full(self.ns, 10 ** 9, np.int64)
             for s, tot in acc.items():
-                a = t0 + int(round(tot / WALK_MS)); ready[s] = min(ready[s], a); arrv[s] = min(arrv[s], a)
+                a = t0 + int(round(tot / WALK_MS + self.stop_extra[s])); ready[s] = min(ready[s], a); arrv[s] = min(arrv[s], a)
             trip_on = np.zeros(int(g['trip'].max()) + 1, np.bool_)
             start = int(np.searchsorted(g['dep'], t0))
             csa(g['f'], g['t'], g['dep'], g['arr'], g['trip'], start, t0 + P.MAX_TRIP_S, ready, arrv, trip_on,
