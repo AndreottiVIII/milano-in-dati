@@ -1090,6 +1090,12 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
   2. La Scala manda un file con i dati, oppure toglie il controllo per il programma del progetto (eccezione per indirizzo o User-Agent). A quel punto la raccolta automatica, lenta e con citazione, è possibile.
   - Filone in pausa per decisione di Davide. L'agente della tabella unica (Cambiasi, Romani, Wikipedia) è stato fermato a metà, con lo stato salvato in `scala/STATO.md`.
 - 2026-10-29 sera — **PDF da Davide (iCloud)**, salvato in `scala/raw/programmi_davide/programmi_scala.pdf` (146 MB, 682 pagine). È Gatti, "Il Teatro alla Scala nella storia e nell'arte (1778-1963)", **volume 1** (il racconto), copia Internet Archive `owo_W8-BSY-089` della Seattle Public Library, con il testo già riconosciuto. Non contiene la cronologia: "Cronologia" compare una sola volta, a pagina 449, e la premessa rimanda al secondo volume. Come deciso all'inizio da Davide, il volume 1 non si usa come fonte di dati. Il libro è del 1964 e ancora protetto: resta solo sul PC. Per il cartellone 1906-1963 serve il volume 2.
+- 2026-10-29 notte — **Fonti dopo il 1963** (`scala/FONTI_POST_1963.md`):
+  - (1) **Catalogo SBN**: programmi di sala, una scheda per produzione, 1964-2023, spesso con direttore, regista e cast; manca il giorno. Esempi: 18 produzioni nel 1975-76, 14 nel 1985-86, 13 nel 1965-66. Si legge dall'interfaccia JSON che il sito stesso usa (robots permette, nessuna chiave, nessun anti-robot). Licenza non indicata: si usano solo fatti, con citazione. Raccolta avviata, lenta (circa 300 richieste).
+  - (2) **Tintori, "Duecento anni di Teatro alla Scala"**, vol. 2, cronologia 1778-1977 (1979): solo su carta, in 55 biblioteche (anche Braidense e Biblioteche di Milano). Darebbe i giorni del 1964-77: Davide può fotografare le pagine.
+  - (3) **MusicBrainz** (CC0): utile solo per controllo, con 38 date.
+  - Non utilizzabili: gli archivi dei giornali, che non si raggiungono da questo PC, ed Europeana, che chiede una chiave.
+  - Per il 1978-2022 nessuna fonte libera dà le date dei singoli giorni.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 
