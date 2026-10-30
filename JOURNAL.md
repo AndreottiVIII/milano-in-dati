@@ -2303,3 +2303,11 @@ python -I scripts\inventario.py <cartella censimenti>
 - **Serie 2018-2025**: da demo.istat.it. Circa -50,6 mila del calo 2019-2021 sono una correzione statistica, non persone partite.
 - **Sorpresa**: nel 2023 Milano ha gli stessi residenti del 1991 (1.371.499 contro 1.369.231), ma 240.561 cittadini italiani in meno e 242.829 stranieri in più. E abita in 159.387 famiglie in più; le famiglie di una persona passano dal 32,0% al 55,6%. Attenzione: chi ha preso la cittadinanza italiana conta tra gli italiani.
 
+### Fase 3 — pagina (2026-10-30)
+
+- Pagina `docs/censimenti/` pubblicata, nel menu del sito. Contiene:
+  - la sorpresa in cima;
+  - la mappa degli 88 NIL dal 1991 al 2023, con gli indicatori da scegliere; i 22 NIL non robusti sono tratteggiati in grigio;
+  - le sezioni "più giovani o più vecchi" e "chi è arrivato";
+  - Milano dal 1861, con le annessioni.
+

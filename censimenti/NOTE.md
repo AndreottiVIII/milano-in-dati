@@ -143,3 +143,33 @@ python -I scripts\h9_convalida.py <cartella censimenti>
 ## 6. Aperto
 
 Ritocchi di confine dopo il 1923; laureati 1991 a Quarto Oggiaro (1,2%) non controllati con altra fonte; nessun dato per NIL prima del 1991; occupazione per NIL non armonizzata; l'80+ per NIL esiste solo 1991 e 2001 (record individuali), non usato.
+
+
+---
+
+# Fase 3 (30 ottobre 2026): la pagina
+
+Pagina `docs\censimenti\index.html` + `docs\censimenti\data\` (`dati.json` 41 KB, `nil.geojson` 79 KB; in tutto 120 KB). Stile di `docs\citta-15-minuti\` (bianco e nero + un colore, blu #1a56a8; Leaflet 1.9.4 da cdnjs con tessere OSM in grigio; SVG scritti a mano; `fetch(..., {cache:'no-cache'})`). Menu del sito: tag `menu.js` nella pagina e voce `censimenti/` "Censimenti" in fondo all'array `SEZIONI` di `docs\menu.js` (dopo "Acqua del sindaco"); l'elenco di `docs\index.html` lo aggiorna il coordinatore e deve avere la stessa voce in fondo.
+
+## Come e' fatta
+
+- **Programma:** `scripts\pagina_dati.py` (ripetibile: `python -I scripts\pagina_dati.py`) + modello `scripts\pagina_template.html`. Legge solo `pulito\` (e `raw\comune_annuale_nil\ds205...` per il confronto anagrafe/censimento) e scrive pagina e dati. Tutti i numeri del testo sono calcolati dal programma e messi nei segnaposto `{{...}}` del modello (nessun numero a mano, salvo le cifre dei decreti e le definizioni cambiate, copiate da `out\risultati.md`). Se un segnaposto manca il programma si ferma.
+- **NIL sulla mappa:** unione delle sezioni 2021 per COM_ASC2 (come in h1_raccordo.py, sezione fittizia 151468888888 compresa nella geometria), semplificate a 4 m e riproiettate EPSG:32632 -> WGS84.
+- **Sezioni della pagina:** sorpresa (barre SVG), mappa con indicatore (residenti, variazione dal 1991, eta' media, over 65, stranieri, laureati, famiglie di una persona, componenti per famiglia) e anno (cursore 1991-2023) con scheda del NIL e tabella; "Piu' giovani o piu' vecchi" (indice di vecchiaia 1991-2025, grafico eta' media 1991 contro 2023, tabelle); "Chi e' arrivato" (quota stranieri nel tempo, tabelle per NIL, cittadinanze per anno); "Milano dal 1861" (serie, annessioni 1873/1918/1923, aggiustamento statistico 2020-2021, tabella flussi 2019-2024); "Fonti e metodo".
+
+## Scelte da ricordare
+
+- **I 22 NIL non robusti** (campo `robusto`) sono in grigio tratteggiato sulla mappa; nella scheda mostrano solo i residenti e il motivo (meno di 2.000 residenti nel 1991 o 2023, oppure differenza di assegnazione >= 5%). Le graduatorie usano solo i 66 robusti. Il motivo e' ricostruito in `pagina_dati.py` ed e' verificato contro `robusto` (asserzione).
+- **Soglie dei colori fisse** per tutti gli anni (cosi' il cursore mostra davvero il cambiamento); per la variazione dal 1991 il 1991 vale zero per definizione e la mappa e' neutra.
+- **Laureati:** uso la quota sulla base 6+ (1991-2011) e 9+ (2021-2023), come in `risultati.md`, con avviso nella pagina. Componenti per famiglia: stima "approx" in tutti gli anni.
+- **Annuale 2018-2025:** nel file `annuale_milano_2018_2025.csv` l'anno e' `anno_fine_periodo` = 31 dicembre (la riga "1 gennaio 2019" e' il 31 dicembre 2018); i grafici usano il 31 dicembre, cosi' 2021 e 2023 coincidono con i censimenti permanenti. Il programma controlla che inizio + saldo naturale + saldo migratorio + aggiustamento = fine anno.
+- Il rialzo della quota di stranieri nel 2020 (20,1%) nella serie annuale e' un effetto del periodo precedente all'aggiustamento del 2021: non commentato oltre l'avviso "serie fino al 2020 non confrontabili".
+- Cittadinanze: 1991 e 2001 le dieci piu' numerose tra tutte (record individuali); 2011 e 2023 solo le dieci principali (circa 75% e 71%); nomi uniformati (Cina, Jugoslavia, Sri Lanka, Peru').
+
+## Provato
+
+Server "milano-in-dati" (porta 8796): pagina caricata senza errori in console, `dati.json` e `nil.geojson` 200; mappa, selettore indicatore, cursore anno, scheda da clic sulla mappa e dal menu, NIL grigio, bottoni cittadinanze; a 375 px nessuno scorrimento orizzontale della pagina (solo le tabelle larghe scorrono dentro il loro riquadro).
+
+## Aperto
+
+`docs\index.html`: aggiungere la voce "Censimenti" in fondo all'elenco (lo fa il coordinatore); `docs\MENU_README.md` parla di 16 sezioni (ora 17). Il testo non spiega perche' alcuni NIL come Giardini P.ta Venezia hanno meno di 100 abitanti oltre a "pochi residenti".

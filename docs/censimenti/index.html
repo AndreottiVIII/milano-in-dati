@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · I censimenti</title>
+<meta name="description" content="Milano nei censimenti 1991-2023, quartiere per quartiere, e la popolazione dal 1861: stessi abitanti, un'altra città.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#1a56a8;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef3fa}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} td.nw{white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut)} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.map{height:68vh;min-height:380px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.yrbox input[type=range]{accent-color:var(--acc)}
+.yrbox{margin:.5em 0;max-width:360px}.yrbox label{display:block}.yrbox input{display:block;width:100%;margin:6px 0 0}.ticks{display:flex;justify-content:space-between;width:100%;padding:0 2px;font-size:.8rem;color:var(--mut);margin:0}
+.ticks span{width:2.6em;text-align:center;margin:0 -.8em}.ticks span.on{color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.2em 0 .4em}
+.bar{display:inline-block;height:8px;background:var(--acc);vertical-align:middle;margin-right:6px}
+.bar.g{background:#333}
+td.cur,th.cur{background:var(--soft)} tr.sel td{background:var(--soft)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+svg.ch{width:100%;display:block;font:12px system-ui,Arial,sans-serif} svg.ch text{fill:#111} svg.ch .mu{fill:#666} svg.ch circle{cursor:pointer}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.3em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.lg2{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.3em 0} .lg2 i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Milano nei censimenti: stessi abitanti, un&rsquo;altra città</h1>
+<p>Dal 1991 al 2023 Milano ha cambiato quasi tutto tranne il numero di abitanti. Qui si vede dove, quartiere per quartiere, e come si colloca questo trentennio nella storia della città dal 1861. I dati sono dei censimenti ISTAT del 1991, 2001, 2011, 2021 e del censimento permanente 2023.</p>
+
+<div class="surp">
+<p>Nel 2023 Milano ha <b>gli stessi abitanti del 1991</b>: 1.371.499 contro 1.369.231 (+0,2%). Ma sono altre persone: <b>240.561 cittadini italiani in meno e 242.829 cittadini stranieri in più</b> (da 26.568 a 269.397: dall&rsquo;1,9% al 19,6%).</p>
+<p>Quegli stessi abitanti vivono in <b>159.387 famiglie in più</b> (da 583.889 a 743.276): le famiglie di una persona sono passate dal <b>32,0% al 55,6%</b> e la famiglia media da 2,32 a 1,82 persone.</p>
+<div id="sorp-svg"></div>
+</div>
+<p class="src">Fonte: ISTAT, censimento della popolazione 1991 e censimento permanente 31.12.2023 (licenza CC BY 4.0), somma su tutte le sezioni di censimento di Milano. Gli italiani sono calcolati come residenti meno stranieri.</p>
+<div class="warn"><b>Da sapere.</b> &laquo;Stranieri&raquo; sono i cittadini con passaporto straniero: chi ha preso la cittadinanza italiana (naturalizzati, figli di stranieri diventati italiani) conta come <b>italiano</b>, quindi i residenti di origine straniera sono più di quelli che qui si chiamano stranieri. Il 2023 è una stima del censimento permanente (registri più indagini a campione), non un conteggio porta a porta, e include 10.038 persone senza fissa dimora iscritte in una sezione fittizia (vedi sotto).</div>
+
+<h2 id="mappa">Quartiere per quartiere, 1991-2023</h2>
+<p>La mappa colora i 88 quartieri (NIL, Nuclei di Identità Locale) secondo l&rsquo;indicatore e l&rsquo;anno scelti: i confini sono quelli del 2021, e i dati dei vecchi censimenti sono stati ricondotti a questi confini (il metodo è in &laquo;Fonti e metodo&raquo;). Clic su un quartiere per la scheda con tutti gli indicatori negli anni.</p>
+<div class="ctl"><label class="sub" for="sel-ind">Indicatore:</label><select id="sel-ind" aria-label="Indicatore da mostrare sulla mappa"></select></div>
+<div class="yrbox"><label class="sub" for="yr">Anno del censimento: <b id="yr-v">2023</b></label><input type="range" id="yr" min="0" max="4" step="1" value="4" aria-label="Anno del censimento"><div class="ticks" id="yr-t" aria-hidden="true"></div></div>
+<div class="ctl"><label class="sub" for="sel-nil">Scheda di:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<div id="map1" class="map" role="img" aria-label="Mappa dei quartieri di Milano per l'indicatore e l'anno scelti"></div>
+<div class="lgd" id="lg1"></div>
+<p id="ind-nota" class="src"></p>
+<div id="card" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<details><summary>Tutti i quartieri in tabella (indicatore e anno scelti)</summary><div class="scroll" id="tutti"></div></details>
+<div class="warn"><b>Quartieri in grigio, persone senza fissa dimora.</b> 22 dei 88 NIL non sono confrontabili nel tempo e restano in grigio: parchi (Parco Sempione, Parco Nord, Parco delle Abbazie&hellip;), cascine e quartieri con poche centinaia di abitanti, oppure con confini 1991-2001 troppo incerti (Ortomercato, Farini, Tre Torri&hellip;). Insieme hanno 22.680 abitanti nel 1991 e 29.411 nel 2023; le loro percentuali oscillano troppo per essere lette. Restano 66 quartieri robusti, quelli su cui si fanno le graduatorie. Inoltre nei file ISTAT 2021 e 2023 una sezione fittizia (codice 151468888888, geograficamente dentro il NIL Duomo) raccoglie le persone senza fissa dimora iscritte in anagrafe (10.038 nel 2023): le ho tolte da tutti i quartieri e le conto solo nel totale della città. Lasciate dentro, Duomo risulterebbe cresciuto del 37,5% invece di calare del 15%.</div>
+
+<h2 id="eta">Più giovani o più vecchi</h2>
+<p>L&rsquo;età media di Milano è salita da 43,1 anni nel 1991 a 45,5 nel 2001 e 46,1 nel 2011, poi è scesa a 45,6 nel 2021 ed è ferma a 45,6 nel 2023. Gli over 65 erano il 18,2% nel 1991, il 25,0% nel 2011 e sono il 22,2% nel 2023. L&rsquo;indice di vecchiaia (over 65 ogni 100 under 15) è passato da 176 a 212 (2001, il massimo) a 196 (2011), è sceso a 182 (2021) e 188 (2023) con l&rsquo;arrivo di stranieri giovani e ha ripreso a salire: 193,7 a fine 2024 e 197,9 a fine 2025.</p>
+<p class="sub"><b>Indice di vecchiaia</b>: over 65 ogni 100 under 15 (nero tratteggiato: censimenti; blu: annuale al 31 dicembre)</p>
+<div id="iv-svg"></div>
+<p class="src">Fonti: indice 1991, 2001, 2011 dalle sezioni di censimento ISTAT; 2018-2025 da ISTAT, popolazione residente per età (demo.istat.it, POSAS), al 31 dicembre. Nel 2021 e 2023 coincidono con il censimento permanente.</p>
+<h3>Quali quartieri sono cambiati di più</h3>
+<p>Sul grafico ogni punto è un quartiere robusto: sull&rsquo;asse orizzontale l&rsquo;età media nel 1991, su quello verticale nel 2023. Sopra la diagonale il quartiere è invecchiato, sotto è ringiovanito.</p>
+<div id="eta-sc"></div>
+<p id="sc-info" class="sub" aria-live="polite">Passa il mouse o tocca un punto per vedere il quartiere.</p>
+<p><b>Invecchiano di più</b> (età media 1991 &rarr; 2023): <b>Trenno</b> da 36,6 a 50,6 anni (+14,0); <b>Quinto Romano</b> da 36,5 a 48,6 anni (+12,1); <b>Quarto Cagnino</b> da 38,5 a 47,7 anni (+9,3); <b>Barona</b> da 39,7 a 49,0 anni (+9,2). Sono quartieri che nel 1991 erano più giovani della media di Milano, riempiti da famiglie giovani nei decenni precedenti e rimaste sul posto: è un&rsquo;ipotesi, non l&rsquo;ho verificata.</p>
+<p><b>Ringiovaniscono</b> (solo 6 dei 66 quartieri robusti): <b>San Siro</b> da 46,7 a 44,4 anni (−2,2); <b>Maggiore - Musocco - Certosa</b> da 41,6 a 40,6 anni (−1,0); <b>Rogoredo - Santa Giulia</b> da 42,1 a 41,4 anni (−0,7); <b>QT 8</b> da 47,5 a 46,8 anni (−0,7); <b>Comasina</b> da 43,4 a 42,8 anni (−0,5); <b>Umbria - Molise - Calvairate</b> da 45,5 a 45,4 anni (−0,1).</p>
+<p>Nel 2023 il quartiere più vecchio è <b>Trenno</b> (50,6 anni, indice di vecchiaia 349), il più giovane <b>Maggiore - Musocco - Certosa</b> (40,6 anni, indice di vecchiaia 94).</p>
+<div class="grid2"><div><p class="sub"><b>I dieci che invecchiano di più</b></p><div class="scroll" id="t-inv"></div></div>
+<div><p class="sub"><b>Quelli che ringiovaniscono</b></p><div class="scroll" id="t-rin"></div></div></div>
+<div class="warn">L&rsquo;età media è calcolata dalle classi di cinque anni (come fa anche il Comune), con gli over 75 contati come 82 anni: è circa mezzo anno sopra l&rsquo;età media esatta. Le sezioni non distinguono gli over 80. Il confronto tra quartieri per il 1991 dipende da come le sezioni di allora sono state ricondotte ai NIL di oggi.</div>
+
+<h2 id="arrivati">Chi è arrivato</h2>
+<p>I cittadini stranieri residenti a Milano sono 26.568 nel 1991 (l&rsquo;1,9%) e 269.397 nel 2023 (il 19,6%). A fine 2025 sono il 19,7%: la crescita si è fermata.</p>
+<p class="sub"><b>Cittadini stranieri</b>, in % dei residenti (nero tratteggiato: censimenti; blu: annuale al 31 dicembre)</p>
+<div id="str-svg"></div>
+<p class="src">Fonti: stranieri residenti nelle sezioni di censimento ISTAT (1991, 2001, 2011, 2021, 2023); 2018-2025 ISTAT STRASA / POSAS (demo.istat.it), al 31 dicembre. Le serie annuali fino al 2020 non sono confrontabili con quelle dal 2021 (aggiustamento statistico: vedi &laquo;Milano dal 1861&raquo;).</p>
+<h3>Dove vivono</h3>
+<p>Nel 1991 nessun quartiere robusto superava il 4,0%. Nel 2023 11 quartieri su 66 sono sopra il 25% e 2 sotto il 10%. I più alti: <b>Comasina</b> 38,0%, <b>San Siro</b> 34,5%, <b>Bovisa</b> 30,7%, <b>Quarto Oggiaro - Vialba - Musocco</b> 30,6%, <b>Padova - Turro - Crescenzago</b> 30,5%. L&rsquo;aumento maggiore: <b>Comasina</b> dal 0,5% al 38,0% (+37,4 punti). Il più basso: <b>Trenno</b> (dal 0,7% al 9,0%).</p>
+<div class="grid2"><div><p class="sub"><b>Quota di stranieri, i dieci quartieri più alti nel 2023</b> (%)</p><div class="scroll" id="t-str"></div></div>
+<div><p class="sub"><b>Aumento 1991-2023, i dieci maggiori</b> (punti percentuali)</p><div class="scroll" id="t-aum"></div></div></div>
+<h3>Da dove vengono</h3>
+<p>Le cittadinanze più frequenti sono cambiate: nel 1991 erano poche migliaia di persone per paese, con l&rsquo;Egitto in testa seguito da Filippine, Francia, Germania e Giappone; nel 2001 e nel 2011 prime le Filippine; nel 2023 l&rsquo;Egitto torna primo con 42.023 persone (15,6% degli stranieri), 14 volte quelle del 1991 (2.934), mentre i filippini (35.906) sono cresciuti solo del 10% dal 2011 (32.594).</p>
+<div class="ctl"><span class="sub">Anno:</span><span id="cit-b"></span></div>
+<div class="scroll" id="t-cit"></div>
+<p id="cit-nota" class="src"></p>
+<div class="warn"><b>Stranieri non vuol dire &laquo;di origine straniera&raquo;.</b> Il censimento registra la cittadinanza, non l&rsquo;origine: chi ha acquisito la cittadinanza italiana conta tra gli italiani. Per questo la quota di stranieri non misura quanti milanesi siano nati all&rsquo;estero o abbiano genitori stranieri. Inoltre i dati per quartiere hanno solo la quota di stranieri, non le cittadinanze, che esistono solo per l&rsquo;intera città.</div>
+
+<h2 id="storia">Milano dal 1861</h2>
+<p>Milano aveva 196.109 abitanti nel censimento del 1861, entro i confini di allora; ne ha avuti 1.728.686 nel 1971, il massimo, 1.242.123 nel 2011, il minimo tra i censimenti, e 1.371.499 nel 2023. Dal 1971 al 2011 la città ha perso 486.563 abitanti (28,1%); dal 2011 al 2023 ne ha recuperati 129.376 (+10,4%).</p>
+<div id="st-svg"></div>
+<div class="lg2"><span><i style="border-color:#111"></i>censimenti, confini dell&rsquo;epoca</span><span><i style="border-color:#888;border-top-style:dashed"></i>ricostruzione ISTAT ai confini del 1991</span><span><i style="border-color:#1a56a8"></i>annuale 2018-2025 (31 dicembre)</span></div>
+<p class="src">Fonti: Comune di Milano, popolazione ai censimenti 1861-2011 (dataset ds303, dati ISTAT; manca il 1891, censimento non fatto, e il 1941, guerra; il 1936 esiste solo nella ricostruzione ISTAT); ISTAT, volume sui censimenti 1861-1991, tavola 3 (popolazione ai confini del 1991, ricostruita con proporzioni, non contata); 2021 e 2023 somma delle sezioni di censimento; 2018-2025 ISTAT demo.istat.it (POSAS).</p>
+<h3>Quando sono cambiati i confini</h3>
+<p>Le salite brusche del 1881 e del 1931 non sono nascite: sono annessioni. La linea tratteggiata per quegli intervalli indica che i due punti non sono confrontabili. Le tre annessioni, dalle fonti primarie (Normattiva):</p>
+<div class="scroll"><table>
+<tr><th>Segno</th><th>Atto</th><th>Che cosa</th><th class="r">Superficie, km&sup2;</th></tr>
+<tr><td><b>A</b></td><td>Regio decreto 8 giugno 1873, n. 1413 (dal 1&deg; settembre 1873)</td><td>Il comune dei Corpi Santi è unito a Milano</td><td class="r">9,7 &rarr; 72,9 (censimenti 1871-1881)</td></tr>
+<tr><td><b>B</b></td><td>Decreto luogotenenziale 31 gennaio 1918, n. 209</td><td>Turro Milanese è aggregato a Milano</td><td class="r">piccola, compresa nel 1921</td></tr>
+<tr><td><b>C</b></td><td>Regio decreto 2 settembre 1923, n. 1912 (Gazzetta Ufficiale n. 229 del 29 settembre 1923, in vigore dal 14 ottobre 1923)</td><td>Undici comuni riuniti a Milano: Affori, Baggio, Chiaravalle Milanese, Crescenzago, Gorla-Precotto, Greco Milanese, Lambrate, Musocco, Niguarda, Trenno, Vigentino</td><td class="r">76,3 &rarr; 187,2 (censimenti 1921-1931)</td></tr>
+</table></div>
+<p>Nella serie annuale del Comune il 1923 sale di 129.101 persone in un anno, da 697.368 a 826.469 (+18,5%), mentre negli anni vicini cresce dell&rsquo;1-2%: è l&rsquo;annessione. La popolazione ricostruita ai confini del 1991 dice quanto pesava il territorio annesso: nel 1921 sarebbe di 818.148 contro i 718.800 contati ai confini di allora, cioè circa 99.348 persone in più (differenza tra le due serie, stima nostra). Per questo la linea grigia tratteggiata è la più adatta a seguire la crescita, e quella nera a leggere i numeri dei censimenti. Ritocchi minori dopo il 1923 (1924, 1925, 1932) ci sono, ma li ho solo da Wikipedia e non li ho verificati. Ai confini del 1991 la popolazione era 267.618 nel 1861: il 2023 vale 512 se il 1861 vale 100, il massimo del 1971 647.</p>
+<h3>2018-2025: l&rsquo;aggiustamento statistico</h3>
+<p>Il calo della popolazione tra il 2019 e il 2021 (1.406.242 &rarr; 1.349.930, 56.312 persone) è quasi tutto statistico: i flussi veri (nati, morti, trasferimenti) sommano −5.754; il resto, 50.558, sono <b>aggiustamenti statistici</b> (&minus;27.193 nel 2020, &minus;23.365 nel 2021) con cui ISTAT allinea i registri anagrafici ai risultati del censimento permanente. I numeri prima del 2021 non sono confrontabili con quelli dopo. Ogni anno a Milano muoiono più persone di quante ne nascano; la città cresce solo se arrivano persone dall&rsquo;estero o da altri comuni.</p>
+<div id="an-svg"></div>
+<div class="scroll"><table id="t-an"></table></div>
+<p class="src">Fonte: ISTAT, demo.istat.it, bilancio demografico mensile (D7B) e popolazione per età (POSAS), file aperti. Il saldo migratorio comprende arrivi e partenze da altri comuni e dall&rsquo;estero. Al 31 dicembre 2021 e 2023 la popolazione coincide esattamente con il censimento permanente. Il registro anagrafico del Comune (dataset ds205) non si può confrontare con i censimenti: ha il 8,0% di residenti in più nel 2011 e il 3,4% nel 2023.</p>
+
+<h2 id="metodo">Fonti e metodo</h2>
+<ul class="m">
+<li><b>Fonti.</b> ISTAT: basi territoriali e variabili censuarie per sezione di censimento 1991, 2001, 2011, 2021, e censimento permanente 2023 (licenza CC BY 4.0, come dichiarato nella pagina delle note legali di ISTAT, letta il 30 ottobre 2026); ISTAT demo.istat.it per le serie annuali 2018-2025; Comune di Milano, dati aperti (licenza Creative Commons Attribution, CC BY) per le serie storiche 1861-2011, i collegamenti sezione-zona di 1991 e 2001, i record individuali dei censimenti 1991 e 2001 (usati per le cittadinanze) e le tabelle dei quartieri; Normattiva per i decreti di annessione; OpenStreetMap contributors per la base della mappa.</li>
+<li><b>Le sezioni di censimento cambiano da un censimento all&rsquo;altro.</b> Il codice di una sezione viene riutilizzato con confini diversi (tra 1991 e 2001, dei 5.509 codici in comune solo 14 hanno la stessa popolazione): non si possono confrontare per codice. Per confrontare nel tempo ho scelto la geografia più stabile, i 88 NIL del 2021.</li>
+<li><b>Come ho collegato le sezioni ai NIL.</b> I poligoni dei NIL sono ottenuti unendo le sezioni 2021. Ogni sezione del 1991, 2001 e 2011 è assegnata al NIL con cui ha più area in comune (sovrapposizione geometrica); dove il Comune o ISTAT hanno già un&rsquo;assegnazione ufficiale (NIL 2001, municipio 1991 e 2001, NIL 2021 e 2023) l&rsquo;ho usata. Nessuna sezione è stata unita senza che resti traccia della fonte. Convalide: il municipio ottenuto per sovrapposizione coincide con quello ufficiale per il 99,97% degli abitanti nel 1991 e il 100% nel 2001; il NIL coincide con il NIL del Comune per il 99,91% nel 2001. Come prova di robustezza ho ripetuto i conti ripartendo le sezioni per area invece di assegnarle intere: la popolazione di un NIL cambia di una mediana dell&rsquo;1,4% nel 1991, dello 0,2% nel 2001 e dello 0,01% nel 2011, con differenze grandi solo su parchi e quartieri piccoli.</li>
+</ul>
+<div class="scroll"><table>
+<tr><th>Anno</th><th class="r">Sezioni</th><th class="r">Popolazione in un NIL</th><th class="r">Senza fissa dimora (persone)</th><th class="r">In sezioni dubbie</th></tr>
+<tr><td>1991</td><td class="r">5.583</td><td class="r">100,00%</td><td class="r">0</td><td class="r">5,8%</td></tr>
+<tr><td>2001</td><td class="r">5.983</td><td class="r">99,90%</td><td class="r">1.225</td><td class="r">0,4%</td></tr>
+<tr><td>2011</td><td class="r">6.017</td><td class="r">99,98%</td><td class="r">266</td><td class="r">0,1%</td></tr>
+<tr><td>2021</td><td class="r">6.055</td><td class="r">99,37%</td><td class="r">8.545</td><td class="r">0,0%</td></tr>
+<tr><td>2023</td><td class="r">6.059</td><td class="r">99,27%</td><td class="r">10.038</td><td class="r">0,0%</td></tr>
+</table></div>
+<p class="src">&laquo;Senza fissa dimora&raquo;: persone iscritte in sezioni speciali, non collocabili in un NIL. &laquo;Sezioni dubbie&raquo;: quota di popolazione che sta in sezioni con meno del 90% dell&rsquo;area dentro un solo NIL.</p>
+<ul class="m">
+<li><b>NIL robusti.</b> 66 NIL hanno almeno 2.000 residenti nel 1991 e nel 2023 e meno del 5% di differenza tra i due modi di assegnare le sezioni del 1991 e del 2001. Gli altri 22 restano in grigio sulla mappa e fuori dalle graduatorie.</li>
+<li><b>Sezioni speciali e fittizie.</b> Nei file ISTAT i codici che cominciano per 8 (ad esempio 151468888888) sono le persone senza fissa dimora iscritte in anagrafe, non abitano in un luogo; i codici con 9 sono zone contese. Sono tolte da tutti i NIL e contate solo nel totale di Milano.</li>
+<li><b>Il 2021 e il 2023 sono un&rsquo;altra cosa.</b> Dal censimento permanente i numeri per sezione sono stime ottenute collegando registri amministrativi e indagini a campione, non conteggi porta a porta come nel 1991, 2001 e 2011: il confronto è tra metodi diversi.</li>
+</ul>
+<h3>Definizioni che cambiano tra un censimento e l&rsquo;altro</h3>
+<div class="scroll"><table>
+<tr><th>Indicatore</th><th>1991, 2001, 2011</th><th>2021 e 2023</th></tr>
+<tr><td>Età media</td><td colspan="2">Dalle classi di cinque anni, con 75 e più contato come 82 anni (circa 0,5 anni sopra l&rsquo;età media esatta). Uguale in tutti gli anni.</td></tr>
+<tr><td>Laureati</td><td>Titolo universitario su popolazione di 6 anni e più</td><td>Titoli terziari (compresi i dottori di ricerca) su 9 anni e più</td></tr>
+<tr><td>Stranieri</td><td>Stranieri residenti (2001 e 2011 anche apolidi)</td><td>Stranieri e apolidi</td></tr>
+<tr><td>Famiglie e componenti</td><td>Numero esatto di componenti</td><td>Stima: le famiglie da 6 persone in su contate come 6. Qui uso lo stesso calcolo in tutti gli anni.</td></tr>
+<tr><td>Abitazioni</td><td>Conteggio del censimento</td><td>Conteggio da registri (da 643.053 a 809.990 abitazioni): non è edilizia nuova, per questo qui non uso le abitazioni</td></tr>
+<tr><td>Occupati</td><td>15 anni e più</td><td>Solo 15-64 anni: per questo non uso l&rsquo;occupazione</td></tr>
+</table></div>
+<h3>Quello che non ho controllato</h3>
+<ul class="m">
+<li>La quota di laureati a Quarto Oggiaro nel 1991 (1,2%) è coerente con il 2001 (4,5%) ma non l&rsquo;ho confrontata con un&rsquo;altra fonte.</li>
+<li>Nel 1991 la sezione ha due campi sugli stranieri; uso &laquo;stranieri residenti&raquo; (26.568), che coincide con il conteggio dei record individuali del Comune. L&rsquo;altro campo, 39.710, forse comprende i non residenti: non verificato.</li>
+<li>Non ci sono dati per NIL prima del 1991. Le variazioni di confine dopo il 1923 sono solo da Wikipedia. La superficie di Milano nel 1981 nel dataset del Comune (171,7 km&sup2;) è quasi certamente un errore: non risulta nessuna variazione di confine tra il 1971 e il 1991.</li>
+</ul>
+<p>Programmi per rifare tutto: cartella <code>censimenti/scripts</code> del progetto (<code>pagina_dati.py</code> costruisce questa pagina).</p>
+
+<footer>Milano in dati · I censimenti. Dati ISTAT (CC BY 4.0) e Comune di Milano (CC BY), elaborati. Mappa: &copy; OpenStreetMap contributors. Fonti lette e dati scaricati il 30 ottobre 2026.</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,GJ=null,NB={},st={ind:'pop',yi:4,sel:null,cit:2023},map,lay={},selLayer=null;
+var ACC='#1a56a8',INK='#111',MU='#666';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)} function f2(x){return nf(x,2)}
+function sg(x,d){return x==null?'':(x>0?'+':x<0?'−':'')+(d===0?f0(Math.abs(x)):nf(Math.abs(x),d))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function $(id){return document.getElementById(id)}
+
+/* ---------- indicatori ---------- */
+var SEQ=['#e9f0fa','#c5d7f0','#98b8e3','#6290cc','#2f63ad','#0f2f63'];
+var DIV=['#2b2b2b','#7a7a7a','#ececec','#c5d7f0','#6290cc','#0f2f63'];
+var EXCL='#b9b9b9';
+var IND={
+ pop:{l:'Residenti',t:[5000,10000,15000,20000,30000],f:function(x){return f0(x)},sc:SEQ,
+   n:'Residenti nel quartiere (persone senza fissa dimora escluse).'},
+ var:{l:'Variazione dei residenti dal 1991',t:[-15,-5,5,25,60],f:function(x){return sg(x,1)+'%'},sc:DIV,
+   n:'Variazione percentuale rispetto al 1991. Il 1991 è l’anno di partenza: vale zero per tutti i quartieri.'},
+ eta:{l:'Età media',t:[40,42,44,46,48],f:function(x){return f1(x)+' anni'},sc:SEQ,
+   n:'Età media calcolata dalle classi di cinque anni, con 75 e più contato come 82 anni: circa mezzo anno sopra l’età media esatta.'},
+ p65:{l:'Quota di over 65',t:[12,16,20,24,28],f:function(x){return f1(x)+'%'},sc:SEQ,
+   n:'Residenti di 65 anni e più, in percentuale dei residenti.'},
+ str:{l:'Quota di cittadini stranieri',t:[2,5,10,20,30],f:function(x){return f1(x)+'%'},sc:SEQ,
+   n:'Cittadini con passaporto straniero in percentuale dei residenti; chi ha preso la cittadinanza italiana conta come italiano.'},
+ lau:{l:'Quota di laureati',t:[5,10,20,30,40],f:function(x){return f1(x)+'%'},sc:SEQ,
+   n:'Titolo universitario in percentuale dei residenti di 6 anni e più (1991-2011) o di 9 anni e più (2021-2023, titoli terziari): il confronto tra 2011 e 2021 è approssimato.'},
+ f1:{l:'Famiglie di una persona',t:[25,35,45,55,60],f:function(x){return f1(x)+'%'},sc:SEQ,
+   n:'Famiglie composte da una sola persona, in percentuale delle famiglie.'},
+ fm:{l:'Componenti per famiglia',t:[1.7,1.9,2.1,2.3,2.5],f:function(x){return f2(x)},sc:SEQ,
+   n:'Numero medio di componenti per famiglia. Famiglie da 6 persone in su contate come 6, stesso calcolo in tutti gli anni.'}
+};
+var ORD=['pop','var','eta','p65','str','lau','f1','fm'];
+function bin(k,x){var t=IND[k].t,b=0;for(var i=0;i<t.length;i++)if(x>=t[i])b=i+1;return b}
+function val(n,k,yi){return n.v[k][yi]}
+
+Promise.all([J('data/dati.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];GJ=a[1];
+  D.nil.forEach(function(n){NB[n.i]=n});
+  initMap();tabelle();grafici();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(grafici,200)});
+}).catch(function(e){var s=$('sorp-svg');if(s)s.innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+
+/* ---------- mappa ---------- */
+function style(f){
+  var n=NB[f.properties.i],yi=st.yi,col,sel=(st.sel===n.i);
+  if(!n.ok)return{fillColor:EXCL,fillOpacity:.7,color:'#555',weight:sel?3:1,dashArray:'3 3',opacity:1};
+  var x=val(n,st.ind,yi);
+  col=IND[st.ind].sc[bin(st.ind,x)];
+  return{fillColor:col,fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:1,opacity:1};
+}
+function tip(n){
+  if(!n.ok)return '<b>'+esc(n.n)+'</b><br>non confrontabile nel tempo<br>'+f0(n.v.pop[st.yi])+' residenti';
+  var x=val(n,st.ind,st.yi);
+  return '<b>'+esc(n.n)+'</b><br>'+esc(IND[st.ind].l)+' '+D.anni[st.yi]+': '+IND[st.ind].f(x);
+}
+function baseMap(el){
+  var m=L.map(el,{preferCanvas:true,zoomSnap:.25}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(m);
+  return m;
+}
+function initMap(){
+  map=baseMap('map1');
+  var g=L.geoJSON(GJ,{style:style,onEachFeature:function(f,l){
+    var n=NB[f.properties.i];lay[n.i]=l;
+    l.bindTooltip(function(){return tip(n)},{sticky:true});
+    l.on('click',function(){selNil(n.i,false)});
+  }}).addTo(map);
+  map.fitBounds(g.getBounds());
+  var si=$('sel-ind'),h='';ORD.forEach(function(k){h+='<option value="'+k+'">'+esc(IND[k].l)+'</option>'});si.innerHTML=h;
+  si.onchange=function(){st.ind=si.value;refresh()};
+  var yr=$('yr');yr.oninput=function(){st.yi=+yr.value;refresh()};
+  var t='';D.anni.forEach(function(y,i){t+='<span id="yt'+i+'">'+y+'</span>'});$('yr-t').innerHTML=t;
+  var sn=$('sel-nil'),o='<option value="">&mdash; scegli &mdash;</option>';
+  D.nil.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(n){o+='<option value="'+n.i+'">'+esc(n.n)+(n.ok?'':' (non confrontabile)')+'</option>'});
+  sn.innerHTML=o;sn.onchange=function(){if(sn.value)selNil(+sn.value,true)};
+  refresh();
+}
+function legend(){
+  var k=st.ind,I=IND[k],t=I.t,h='',lab=[];
+  function q(x){return I.f(x).replace(/(,\d)0(?!\d)/,'$1').replace(/,0(?!\d)/,'')}
+  lab.push('meno di '+q(t[0]));
+  for(var i=0;i<t.length-1;i++)lab.push(q(t[i])+' &ndash; '+q(t[i+1]));
+  lab.push(q(t[t.length-1])+' e più');
+  if(k==='var'){lab[0]='calo oltre '+q(-t[0]).replace('+','');}
+  I.sc.forEach(function(c,i){h+='<span><i style="background:'+c+'"></i>'+lab[i]+'</span>'});
+  h+='<span><i style="background:'+EXCL+';border:1px dashed #555"></i>grigio: quartiere non confrontabile</span>';
+  $('lg1').innerHTML=h;
+}
+function refresh(){
+  var yi=st.yi;$('yr-v').textContent=D.anni[yi];
+  D.anni.forEach(function(y,i){$('yt'+i).className=i===yi?'on':''});
+  Object.keys(lay).forEach(function(i){lay[i].setStyle(style({properties:{i:+i}}))});
+  if(st.sel&&lay[st.sel])lay[st.sel].bringToFront();
+  legend();
+  var nota=IND[st.ind].n+(yi>=3?' Per il 2021 e il 2023 il dato è una stima del censimento permanente.':'');
+  $('ind-nota').textContent=nota;
+  card();tutti();
+}
+function selNil(i,fly){
+  st.sel=i;$('sel-nil').value=i;
+  Object.keys(lay).forEach(function(k){lay[k].setStyle(style({properties:{i:+k}}))});
+  if(lay[i]){lay[i].bringToFront();if(fly)map.fitBounds(lay[i].getBounds(),{maxZoom:14})}
+  card();
+}
+function card(){
+  var el=$('card'),n=NB[st.sel];
+  if(!n){el.innerHTML='<span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span>';return}
+  var h='<h3>'+esc(n.n)+' <span class="sub">· Municipio '+n.m+' · '+f2(n.a)+' km&sup2;</span></h3>';
+  if(!n.ok){
+    h+='<p class="sub"><b>Quartiere non confrontabile nel tempo:</b> '+esc(n.mot)+'. Le percentuali sono instabili, quindi qui si mostrano solo i residenti.</p>';
+    h+='<div class="scroll"><table><tr><th></th>'+D.anni.map(function(y,i){return '<th class="r'+(i===st.yi?' cur':'')+'">'+y+'</th>'}).join('')+'</tr><tr><td>Residenti</td>'+n.v.pop.map(function(x,i){return '<td class="r'+(i===st.yi?' cur':'')+'">'+f0(x)+'</td>'}).join('')+'</tr></table></div>';
+    el.innerHTML=h;return;
+  }
+  h+='<div class="scroll"><table><tr><th>Indicatore</th>'+D.anni.map(function(y,i){return '<th class="r'+(i===st.yi?' cur':'')+'">'+y+'</th>'}).join('')+'<th class="r">Milano 2023</th></tr>';
+  ORD.forEach(function(k){
+    var I=IND[k];
+    h+='<tr><td>'+esc(I.l)+'</td>';
+    n.v[k].forEach(function(x,i){h+='<td class="r'+(i===st.yi?' cur':'')+'">'+I.f(x)+'</td>'});
+    h+='<td class="r">'+I.f(D.comune[k][4])+'</td></tr>';
+  });
+  h+='</table></div><p class="src">Milano 2023: tutta la città (per i residenti, compresi i senza fissa dimora). Definizioni e cambi di definizione in &laquo;Fonti e metodo&raquo;.</p>';
+  el.innerHTML=h;
+}
+function tutti(){
+  var k=st.ind,yi=st.yi,I=IND[k];
+  var rows=D.nil.slice().sort(function(a,b){
+    if(a.ok!==b.ok)return a.ok?-1:1;
+    return a.ok?val(b,k,yi)-val(a,k,yi):a.n.localeCompare(b.n,'it');
+  });
+  var h='<table><tr><th>Quartiere</th><th class="r">Municipio</th><th class="r">'+esc(I.l)+' '+D.anni[yi]+'</th></tr>';
+  rows.forEach(function(n){
+    h+='<tr class="'+(n.i===st.sel?'sel':'')+'"><td><a href="#mappa" data-nil="'+n.i+'">'+esc(n.n)+'</a></td><td class="r">'+n.m+'</td><td class="r">'+(n.ok?I.f(val(n,k,yi)):'non confrontabile')+'</td></tr>';
+  });
+  $('tutti').innerHTML=h+'</table>';
+}
+document.addEventListener('click',function(e){
+  var a=e.target.closest&&e.target.closest('a[data-nil]');
+  if(a&&D){e.preventDefault();selNil(+a.getAttribute('data-nil'),true);$('map1').scrollIntoView({behavior:'smooth',block:'start'})}
+});
+
+/* ---------- sorpresa: barre ---------- */
+function svgSorp(){
+  var w=Math.min($('sorp-svg').clientWidth||320,640),c=D.comune,h='';
+  var blocks=[
+   {t:'Residenti',rows:[
+     {y:1991,a:c.ita_n[0],b:c.stran_n[0],la:'italiani',lb:'stranieri'},
+     {y:2023,a:c.ita_n[4],b:c.stran_n[4],la:'italiani',lb:'stranieri'}],max:1400000},
+   {t:'Famiglie',rows:[
+     {y:1991,a:c.fam_n[0]-c.fam1_n[0],b:c.fam1_n[0],la:'con più persone',lb:'di una persona'},
+     {y:2023,a:c.fam_n[4]-c.fam1_n[4],b:c.fam1_n[4],la:'con più persone',lb:'di una persona'}],max:760000}];
+  var y=4;
+  blocks.forEach(function(B){
+    h+='<text x="0" y="'+(y+12)+'" font-weight="700">'+B.t+'</text>';y+=20;
+    B.rows.forEach(function(r){
+      var wa=r.a/B.max*w,wb=r.b/B.max*w;
+      h+='<text x="0" y="'+(y+12)+'" class="mu">'+r.y+': '+f0(r.a)+' '+r.la+' + <tspan style="fill:'+ACC+';font-weight:700">'+f0(r.b)+' '+r.lb+'</tspan></text>';y+=18;
+      h+='<rect x="0" y="'+y+'" width="'+wa.toFixed(1)+'" height="14" fill="#333"/><rect x="'+wa.toFixed(1)+'" y="'+y+'" width="'+Math.max(wb,1).toFixed(1)+'" height="14" fill="'+ACC+'"/>';y+=24;
+    });
+    y+=4;
+  });
+  $('sorp-svg').innerHTML='<svg class="ch" viewBox="0 0 '+w+' '+y+'" width="'+w+'" height="'+y+'" role="img" aria-label="Residenti e famiglie a Milano nel 1991 e nel 2023, divisi in italiani e stranieri e per tipo di famiglia">'+h+'</svg>';
+}
+
+/* ---------- tabelle ---------- */
+function nilLink(i){return '<a href="#mappa" data-nil="'+i+'">'+esc(NB[i].n)+'</a>'}
+function barW(x,m,w){return Math.max(1,Math.round(Math.abs(x)/m*w))}
+function tabelle(){
+  var inv=D.rank.invecchiano,rin=D.rank.ringiovaniscono,mx=0;
+  inv.concat(rin).forEach(function(i){mx=Math.max(mx,Math.abs(NB[i].v.eta[4]-NB[i].v.eta[0]))});
+  function te(ids,cls){
+    var h='<table><tr><th>Quartiere</th><th class="r">1991</th><th class="r">2023</th><th>Variazione</th></tr>';
+    ids.forEach(function(i){var e=NB[i].v.eta,d=e[4]-e[0];h+='<tr><td>'+nilLink(i)+'</td><td class="r">'+f1(e[0])+'</td><td class="r">'+f1(e[4])+'</td><td class="nw"><span class="bar'+cls+'" style="width:'+barW(d,mx,70)+'px"></span>'+sg(d,1)+'</td></tr>'});
+    return h+'</table>';
+  }
+  $('t-inv').innerHTML=te(inv,'');$('t-rin').innerHTML=te(rin,' g');
+  function ts(ids,mode){
+    var m=0;ids.forEach(function(i){var s=NB[i].v.str;m=Math.max(m,mode==='d'?s[4]-s[0]:s[4])});
+    var h='<table><tr><th>Quartiere</th><th class="r">1991</th><th class="r">2011</th><th class="r">2023</th><th></th></tr>';
+    ids.forEach(function(i){var s=NB[i].v.str,x=mode==='d'?s[4]-s[0]:s[4];
+      h+='<tr><td>'+nilLink(i)+'</td><td class="r">'+f1(s[0])+'</td><td class="r">'+f1(s[2])+'</td><td class="r">'+f1(s[4])+'</td><td class="nw"><span class="bar" style="width:'+barW(x,m,60)+'px"></span>'+(mode==='d'?sg(x,1):'')+'</td></tr>'});
+    return h+'</table>';
+  }
+  $('t-str').innerHTML=ts(D.rank.str_top,'v');$('t-aum').innerHTML=ts(D.rank.str_aumento,'d');
+  var yb='';[1991,2001,2011,2023].forEach(function(y){yb+='<button type="button" data-y="'+y+'" class="'+(y===st.cit?'on':'')+'">'+y+'</button> '});
+  $('cit-b').innerHTML=yb;
+  $('cit-b').onclick=function(e){var b=e.target.closest('button');if(!b)return;st.cit=+b.getAttribute('data-y');
+    Array.prototype.forEach.call($('cit-b').querySelectorAll('button'),function(x){x.className=(+x.getAttribute('data-y')===st.cit)?'on':''});cit()};
+  cit();
+  an();
+}
+function cit(){
+  var L_=D.cit[st.cit],mx=L_[0].p;
+  var h='<table><tr><th>Cittadinanza</th><th class="r">Persone</th><th class="r">% degli stranieri</th><th></th></tr>';
+  L_.forEach(function(r){h+='<tr><td>'+esc(r.n)+'</td><td class="r">'+f0(r.p)+'</td><td class="r">'+f1(r.q)+'</td><td class="nw"><span class="bar" style="width:'+barW(r.p,mx,90)+'px"></span></td></tr>'});
+  $('t-cit').innerHTML=h+'</table>';
+  var n=st.cit===1991||st.cit===2001?'Le dieci cittadinanze più numerose tra tutte, dai record individuali del censimento (Comune di Milano).':st.cit===2011?'Solo le dieci cittadinanze principali (circa il 75% degli stranieri): dati del Comune di Milano su base ISTAT.':'Solo le dieci cittadinanze principali (circa il 71% degli stranieri): ISTAT, censimento permanente 2023.';
+  $('cit-nota').textContent=n;
+}
+function an(){
+  var A=D.annuale.filter(function(a){return a.agg!=null});
+  var h='<tr><th>Anno</th><th class="r">Nati</th><th class="r">Morti</th><th class="r">Saldo naturale</th><th class="r">Saldo migratorio</th><th class="r">Aggiustamento statistico</th><th class="r">Residenti al 31.12</th></tr>';
+  A.forEach(function(a){h+='<tr><td>'+a.y+'</td><td class="r">'+f0(a.nati)+'</td><td class="r">'+f0(a.morti)+'</td><td class="r">'+sg(a.nat,0)+'</td><td class="r">'+sg(a.mig,0)+'</td><td class="r"><b>'+sg(a.agg,0)+'</b></td><td class="r">'+f0(a.pop)+'</td></tr>'});
+  $('t-an').innerHTML=h;
+}
+
+/* ---------- grafici ---------- */
+function frame(el,w,hgt,ml,mr,mt,mb,x0,x1,y0,y1){
+  var iw=w-ml-mr,ih=hgt-mt-mb;
+  return{w:w,h:hgt,x:function(v){return ml+(v-x0)/(x1-x0)*iw},y:function(v){return mt+ih-(v-y0)/(y1-y0)*ih},ml:ml,mr:mr,mt:mt,mb:mb,iw:iw,ih:ih};
+}
+function axes(F,xt,yt,yf,xf){
+  var h='';
+  yt.forEach(function(v){h+='<line x1="'+F.ml+'" x2="'+(F.w-F.mr)+'" y1="'+F.y(v)+'" y2="'+F.y(v)+'" stroke="#e5e5e5"/><text class="mu" x="'+(F.ml-5)+'" y="'+(F.y(v)+4)+'" text-anchor="end">'+yf(v)+'</text>'});
+  xt.forEach(function(v){h+='<line x1="'+F.x(v)+'" x2="'+F.x(v)+'" y1="'+(F.h-F.mb)+'" y2="'+(F.h-F.mb+4)+'" stroke="#999"/><text class="mu" x="'+F.x(v)+'" y="'+(F.h-F.mb+17)+'" text-anchor="middle">'+(xf?xf(v):v)+'</text>'});
+  h+='<line x1="'+F.ml+'" x2="'+(F.w-F.mr)+'" y1="'+(F.h-F.mb)+'" y2="'+(F.h-F.mb)+'" stroke="#999"/>';
+  return h;
+}
+function path(F,pts,col,wd,dash,dots){
+  var d='',h='';pts.forEach(function(p,i){d+=(i?'L':'M')+F.x(p[0]).toFixed(1)+' '+F.y(p[1]).toFixed(1)});
+  h+='<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+wd+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  if(dots)pts.forEach(function(p){h+='<circle cx="'+F.x(p[0]).toFixed(1)+'" cy="'+F.y(p[1]).toFixed(1)+'" r="'+dots+'" fill="'+col+'"/>'});
+  return h;
+}
+function put(id,w,hgt,inner,label){$(id).innerHTML='<svg class="ch" viewBox="0 0 '+w+' '+hgt+'" width="'+w+'" height="'+hgt+'" role="img" aria-label="'+esc(label)+'">'+inner+'</svg>'}
+function lab(F,x,y,t,col,anc,dy){return '<text x="'+F.x(x).toFixed(1)+'" y="'+(F.y(y)+(dy||-8)).toFixed(1)+'" text-anchor="'+(anc||'middle')+'" style="fill:'+(col||INK)+'">'+t+'</text>'}
+
+function grafici(){
+  if(!D)return;
+  svgSorp();
+  var w=Math.min($('iv-svg').clientWidth||340,900),hh=Math.round(Math.max(210,Math.min(280,w*.4)));
+  var ANN=D.annuale,C=D.comune,A=D.anni;
+  /* indice di vecchiaia */
+  var F=frame(null,w,hh,40,12,14,26,1990,2026,150,230),h=axes(F,[1991,2001,2011,2021],[160,180,200,220],function(v){return v},null);
+  h+=path(F,[[1991,C.iv[0]],[2001,C.iv[1]],[2011,C.iv[2]]],INK,2,'5 4',4);
+  h+=path(F,ANN.map(function(a){return[a.y,a.iv]}),ACC,2.5,null,3);
+  h+=lab(F,1991,C.iv[0],f0(C.iv[0]))+lab(F,2001,C.iv[1],f0(C.iv[1]))+lab(F,2011,C.iv[2],f0(C.iv[2]));
+  h+=lab(F,2018,ANN[0].iv,f0(ANN[0].iv),ACC,'end',16)+lab(F,2021,ANN[3].iv,f0(ANN[3].iv),ACC,'middle',-8)+lab(F,2025,ANN[7].iv,f0(ANN[7].iv),ACC,'end',-8);
+  put('iv-svg',w,hh,h,'Indice di vecchiaia di Milano dal 1991 al 2025');
+  /* stranieri */
+  w=Math.min($('str-svg').clientWidth||340,900);hh=Math.round(Math.max(210,Math.min(280,w*.4)));
+  F=frame(null,w,hh,40,12,14,26,1990,2026,0,24);h=axes(F,[1991,2001,2011,2021],[0,5,10,15,20],function(v){return v+'%'},null);
+  var cs=A.map(function(y,i){return[y,C.str[i]]});
+  h+=path(F,cs,INK,2,'5 4',4);h+=path(F,ANN.map(function(a){return[a.y,a.str]}),ACC,2.5,null,3);
+  cs.forEach(function(p,i){h+=lab(F,p[0],p[1],f1(p[1])+'%',INK,i===3?'middle':i===4?'end':'middle',i===3?20:-9)});
+  h+=lab(F,2025,ANN[7].str,f1(ANN[7].str)+'%',ACC,'end',20);
+  put('str-svg',w,hh,h,'Quota di cittadini stranieri a Milano dal 1991 al 2025');
+  /* scatter età */
+  w=Math.min($('eta-sc').clientWidth||340,720);hh=Math.round(Math.min(Math.max(w*.8,280),520));
+  F=frame(null,w,hh,40,14,12,34,34,52,34,52);h=axes(F,[36,40,44,48,52],[36,40,44,48,52],function(v){return v},null);
+  h+='<line x1="'+F.x(34)+'" y1="'+F.y(34)+'" x2="'+F.x(52)+'" y2="'+F.y(52)+'" stroke="#999" stroke-dasharray="4 4"/>';
+  h+='<text class="mu" x="'+(F.ml+F.iw/2)+'" y="'+(hh-4)+'" text-anchor="middle">Età media 1991</text><text class="mu" x="12" y="'+(F.mt+F.ih/2)+'" transform="rotate(-90 12 '+(F.mt+F.ih/2)+')" text-anchor="middle">Età media 2023</text>';
+  var lbl={};D.rank.invecchiano.slice(0,3).concat(D.rank.ringiovaniscono.slice(0,2)).forEach(function(i){lbl[i]=1});
+  D.nil.filter(function(n){return n.ok}).forEach(function(n){
+    var e=n.v.eta,up=e[4]>e[0];
+    h+='<circle data-n="'+n.i+'" cx="'+F.x(e[0]).toFixed(1)+'" cy="'+F.y(e[4]).toFixed(1)+'" r="'+(lbl[n.i]?5:4)+'" fill="'+(up?ACC:INK)+'" fill-opacity=".75" stroke="#fff"><title>'+esc(n.n)+': '+f1(e[0])+' &rarr; '+f1(e[4])+' anni</title></circle>';
+    if(lbl[n.i])h+='<text x="'+(F.x(e[0])+(e[4]>e[0]?-7:7)).toFixed(1)+'" y="'+(F.y(e[4])+(e[4]>e[0]?-3:14)).toFixed(1)+'" text-anchor="'+(e[4]>e[0]?'end':'start')+'" style="font-size:11px">'+esc(n.n.length>22?n.n.slice(0,20)+'…':n.n)+'</text>';
+  });
+  put('eta-sc',w,hh,h,'Età media dei quartieri di Milano nel 1991 e nel 2023');
+  Array.prototype.forEach.call($('eta-sc').querySelectorAll('circle'),function(c){
+    function f(){var n=NB[c.getAttribute('data-n')],e=n.v.eta;$('sc-info').innerHTML='<b>'+esc(n.n)+'</b>: età media '+f1(e[0])+' nel 1991, '+f1(e[4])+' nel 2023 ('+sg(e[4]-e[0],1)+' anni)'}
+    c.onmouseover=f;c.onclick=f;
+  });
+  storia();anno();
+}
+function storia(){
+  var S=D.storia,ANN=D.annuale;
+  var w=Math.min($('st-svg').clientWidth||340,980),hh=Math.round(Math.max(260,Math.min(380,w*.42)));
+  var F=frame(null,w,hh,48,12,44,26,1855,2030,0,1800000);
+  var h=axes(F,[1861,1901,1951,2001,2025],[0,500000,1000000,1500000],function(v){return v?(v/1e6).toFixed(1).replace('.',',')+' M':'0'},null);
+  /* annessioni */
+  [['A',1873,0],['B',1918,0],['C',1923,1]].forEach(function(m){
+    h+='<line x1="'+F.x(m[1])+'" x2="'+F.x(m[1])+'" y1="'+(F.mt-8)+'" y2="'+(hh-F.mb)+'" stroke="#999" stroke-dasharray="2 3"/>';
+    var yy=18+m[2]*15;
+    h+='<circle cx="'+F.x(m[1])+'" cy="'+yy+'" r="8" fill="#fff" stroke="'+INK+'"/><text x="'+F.x(m[1])+'" y="'+(yy+4)+'" text-anchor="middle" style="font-weight:700">'+m[0]+'</text>';
+    h+='<text class="mu" x="'+(F.x(m[1])+(m[2]?11:-11))+'" y="'+(yy+4)+'" text-anchor="'+(m[2]?'start':'end')+'" style="font-size:11px">'+m[1]+'</text>';
+  });
+  /* ricostruzione ai confini 1991 */
+  var rp=S.filter(function(s){return s.r!=null}).map(function(s){return[s.y,s.r]});
+  h+=path(F,rp,'#888',2,'6 4',0);
+  /* confini dell'epoca (+ 2021, 2023) */
+  var ep=S.filter(function(s){return s.e!=null||s.a!=null}).map(function(s){return{y:s.y,v:s.e!=null?s.e:s.a}});
+  for(var i=1;i<ep.length;i++){
+    var dash=(ep[i-1].y===1871&&ep[i].y===1881)||(ep[i-1].y===1921&&ep[i].y===1931);
+    h+=path(F,[[ep[i-1].y,ep[i-1].v],[ep[i].y,ep[i].v]],INK,2,dash?'3 4':null,0);
+  }
+  ep.forEach(function(p){h+='<circle cx="'+F.x(p.y).toFixed(1)+'" cy="'+F.y(p.v).toFixed(1)+'" r="3.5" fill="'+INK+'"><title>'+p.y+': '+f0(p.v)+'</title></circle>'});
+  h+=path(F,ANN.map(function(a){return[a.y,a.pop]}),ACC,2.5,null,2.5);
+  /* etichette */
+  var by={};S.forEach(function(s){by[s.y]=s});
+  h+=lab(F,1861,by[1861].e,f0(by[1861].e),INK,'start',19)+lab(F,1971,by[1971].e,f0(by[1971].e),INK,'middle',-9)+lab(F,2011,by[2011].e,f0(by[2011].e),INK,'middle',22)+lab(F,2023,by[2023].a,f0(by[2023].a),ACC,'end',-10);
+  put('st-svg',w,hh,h,'Popolazione di Milano ai censimenti dal 1861 al 2023 e annuale 2018-2025, con le annessioni del 1873, 1918 e 1923');
+}
+function anno(){
+  var A=D.annuale,w=Math.min($('an-svg').clientWidth||340,900),hh=Math.round(Math.max(210,Math.min(260,w*.36)));
+  var F=frame(null,w,hh,52,14,16,26,2017.6,2025.6,1340000,1420000);
+  var h=axes(F,[2018,2019,2020,2021,2022,2023,2024,2025],[1340000,1360000,1380000,1400000],function(v){return (v/1e6).toFixed(2).replace('.',',')+' M'},null);
+  h+=path(F,A.map(function(a){return[a.y,a.pop]}),ACC,2.5,null,3.5);
+  A.forEach(function(a){
+    var up=(a.y===2019||a.y===2023),r=(a.y===2020);
+    h+='<text x="'+(F.x(a.y)+(r?8:0)).toFixed(1)+'" y="'+(F.y(a.pop)+(up||r?-9:19)).toFixed(1)+'" text-anchor="'+(r?'start':a.y===2025?'end':'middle')+'">'+f0(a.pop)+'</text>';
+  });
+  h+='<text class="mu" x="'+F.ml+'" y="10">Residenti a Milano al 31 dicembre, 2018-2025</text>';
+  put('an-svg',w,hh,h,'Residenti a Milano al 31 dicembre dal 2018 al 2025');
+}
+})();
+</script>
+</body></html>
