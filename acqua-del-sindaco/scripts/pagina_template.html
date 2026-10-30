@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · L'acqua del rubinetto, zona per zona</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#0050b3;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef4fc}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em}
+h2{font-size:1.25rem;margin:2em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1.05rem;margin:1.6em 0 .3em}
+a{color:var(--acc)} code{font-size:.9em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top} th{font-size:.82rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut)}
+.back{font-size:.9rem;margin:.2em 0}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.scroll{overflow-x:auto}
+/* indirizzo */
+.form{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;margin:.6em 0}
+.form label{display:block;font-size:.85rem;color:var(--mut)} .form .f1{flex:1 1 280px;position:relative} .form .f2{flex:0 0 120px}
+input[type=text],select{font:inherit;padding:8px 10px;border:2px solid var(--ink);border-radius:0;width:100%;background:#fff;color:var(--ink)}
+button.go{font:inherit;font-weight:700;padding:9px 18px;border:2px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
+button.go:focus,input:focus,select:focus{outline:3px solid var(--acc);outline-offset:1px}
+#sug{list-style:none;margin:0;padding:0;position:absolute;left:0;right:0;top:100%;background:#fff;border:2px solid var(--ink);border-top:0;z-index:2000;max-height:300px;overflow:auto}
+#sug li{padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--line)} #sug li.on,#sug li:hover{background:var(--soft)}
+#esito{margin-top:10px} .zona-grande{font-size:1.5rem;font-weight:700;margin:.1em 0}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;padding:1px 8px;border:1px solid var(--ink);margin-left:6px;vertical-align:2px}
+.tag.st{background:var(--soft);border-color:var(--acc);color:var(--acc)}
+.sceglie button{font:inherit;display:block;margin:.2em 0;padding:4px 10px;border:1px solid var(--ink);background:#fff;cursor:pointer;text-align:left}
+/* etichetta */
+.etic{border:2px solid var(--ink);padding:8px 12px 10px;max-width:680px;margin-top:10px}
+.etic h3{margin:0;font-size:1.25rem;padding-bottom:3px;border-bottom:8px solid var(--ink)}
+.etic .sub2{font-size:.82rem;color:var(--mut);margin:.3em 0}
+.etic table td,.etic table th{padding:4px 6px} .etic tr.gr td{border-bottom:3px solid var(--ink);font-weight:700;padding-top:8px}
+.lim{font-size:.82rem} .lim b{font-weight:600}
+.ss{font-weight:600} .ssn{font-size:.78rem;color:var(--mut)}
+td.mia,th.mia{background:var(--soft)}
+/* mappa */
+#map{height:60vh;min-height:380px;border:1px solid var(--ink)} #map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ztip{background:none;border:0;box-shadow:none;font-weight:600;font-size:.85rem;text-align:center;line-height:1.25;color:#111;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 5px #fff,0 0 5px #fff;white-space:nowrap}
+.leaflet-tooltip.ztip:before{display:none}
+.mapctl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:.5em 0}
+.mapctl select{width:auto;min-width:230px}
+.grad{display:inline-block;width:160px;height:12px;vertical-align:-2px;border:1px solid var(--ink);background:linear-gradient(90deg,#dee9f8,#0050b3)}
+/* grafici */
+.ch{width:100%;display:block;font:12px system-ui,Arial,sans-serif} .ch text{fill:#111} .ch .mu{fill:#666}
+.ch g.ln path.l{fill:none;stroke:#111;stroke-width:1.6} .ch g.ln path.gp{fill:none;stroke:#888;stroke-width:1;stroke-dasharray:2 3}
+.ch g.ln circle{fill:#111} .ch g.ln circle.sus{fill:#fff;stroke:#111;stroke-width:1.4}
+.ch g.ln[data-z=NE] path.l{stroke-dasharray:7 3} .ch g.ln[data-z=SE] path.l{stroke-dasharray:2 3} .ch g.ln[data-z=SO] path.l{stroke-dasharray:10 3 2 3}
+.ch.hl g.ln{opacity:.18} .ch.hl g.ln.on{opacity:1} .ch g.ln.on path.l{stroke:var(--acc);stroke-width:3} .ch g.ln.on circle{fill:var(--acc)} .ch g.ln.on circle.sus{fill:#fff;stroke:var(--acc)}
+.ch .tri{fill:none;stroke:#111;stroke-width:1.3} .ch .tri.on{stroke:var(--acc);stroke-width:2}
+.ch .band{fill:#f0f0f0} .ch .bsus{fill:#e3ecf8}
+.ch .grid{stroke:#e6e6e6;stroke-width:1} .ch .lmt{stroke:var(--acc);stroke-width:1.2;stroke-dasharray:5 4}
+.lg{display:flex;flex-wrap:wrap;gap:4px 8px;margin:.3em 0 .6em;font-size:.85rem}
+.lg button{font:inherit;border:1px solid var(--line);background:#fff;padding:2px 8px;border-radius:12px;cursor:pointer;color:var(--ink)}
+.lg button svg{vertical-align:middle;margin-right:4px} .lg button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.chips span{display:inline-block;margin-right:12px;font-size:.85rem} .chips svg{vertical-align:middle;margin-right:3px}
+.big{font-size:1.5rem;font-weight:700;color:var(--acc)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:.6em 0}
+.cards div{border:1px solid var(--ink);padding:8px 10px} .cards .n{font-size:1.35rem;font-weight:700}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)}
+ul.n{padding-left:1.2em} ul.n li{margin:.25em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+@media(max-width:640px){th,td{padding:4px 4px;font-size:.88rem} h1{font-size:1.4rem} .form .f2{flex:1 1 90px}}
+</style></head><body><main>
+<p class="back"><a href="../">&larr; Milano in dati</a></p>
+<h1>L'acqua del rubinetto di Milano, zona per zona</h1>
+<p>MM pubblica ogni mese le analisi dell'acqua distribuita in <b>quattro grandi zone di rete</b>. In tutti i mesi pubblicati (da gennaio 2021 a {{ULTIMO_MESE}}) nessun valore supera un limite di legge: l'acqua è conforme in ogni zona. Qui i numeri sono letti come l'etichetta di un'acqua in bottiglia: che cosa contiene, quanto, e dove si trova il limite. Le differenze tra una zona e l'altra sono differenze tra acque diverse, tutte entro i limiti.</p>
+
+<h2 id="indirizzo">Scrivi il tuo indirizzo</h2>
+<p>Scrivi la via (anche solo il cognome: il Comune scrive i nomi come &laquo;Cognome Nome&raquo;, ma l'ordine non conta) e il numero civico. L'indirizzo resta nel tuo browser e non viene inviato a nessuno.</p>
+<div class="form" role="search">
+ <div class="f1"><label for="via">Via, viale, piazza&hellip;</label><input type="text" id="via" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sug" aria-autocomplete="list" placeholder="es. via Ettore Ciccotti" disabled><ul id="sug" role="listbox" hidden></ul></div>
+ <div class="f2"><label for="civ">Numero civico</label><input type="text" id="civ" autocomplete="off" inputmode="text" maxlength="10" placeholder="es. 8" disabled></div>
+ <div><button class="go" id="cerca" type="button" disabled>Cerca</button></div>
+</div>
+<p class="warn"><b>Centro storico.</b> Intorno al Duomo le quattro zone si incontrano, anche nella stessa piazza: il numero civico decide. Per <b>{{N_STIMATI}}</b> civici su {{N_CIVICI}} MM non ha indicato la zona e qui è <b>stimata</b> dai civici vicini: viene segnalato come &laquo;zona stimata&raquo;.</p>
+<div id="esito" aria-live="polite"><span class="sub" id="caric">Caricamento dell'elenco dei civici&hellip;</span></div>
+
+<h2 id="mappa">La mappa delle quattro zone</h2>
+<div class="mapctl"><label for="par-map"><b>Colora per</b></label><select id="par-map"></select></div>
+<p class="legend" id="map-leg"></p>
+<div id="map" role="img" aria-label="Mappa delle quattro zone di rete MM a Milano, colorate per il parametro scelto"></div>
+<p class="warn"><b>Confini approssimati, ricostruiti dai civici.</b> MM e il Comune non pubblicano i poligoni delle zone: qui sono stati disegnati a partire dalla zona assegnata a ciascun civico (celle di 100 m, levigate). Vicino ai confini, e nei parchi e nelle aree senza edifici, le linee possono essere sbagliate di qualche centinaio di metri. Per sapere la zona di un indirizzo usa la ricerca qui sopra, non la mappa. Il colore mostra il valore mediano degli ultimi 12 mesi ({{FIN_DA}} &ndash; {{FIN_A}}); fonte e mesi usati sono nelle schede qui sotto.</p>
+<p class="sub" id="map-nota"></p>
+
+<h2 id="schede">Le schede delle quattro zone</h2>
+<p>Come l'etichetta di un'acqua minerale: per ogni parametro, il valore tipico (mediana) e l'intervallo (minimo&ndash;massimo) degli ultimi 12 mesi, con accanto il limite indicato nei file di MM. Passa il mouse sul numero (o guarda &laquo;Mesi e file usati&raquo;) per vedere i mesi e il file da cui viene. Quando un valore è <b>sotto soglia</b> vuol dire che lo strumento ne ha trovato meno di quanto riesce a misurare: non è zero e non è la soglia.</p>
+<div id="conf" class="scroll"></div>
+<div id="conf-nota" class="src"></div>
+<details><summary>Altri parametri misurati (conducibilità, ammonio, nitriti, arsenico, manganese, cloro residuo)</summary><div id="conf2" class="scroll"></div></details>
+
+<h2 id="tempo">Nel tempo, mese per mese</h2>
+<div class="mapctl"><label for="par-tempo"><b>Parametro</b></label><select id="par-tempo"></select></div>
+<p class="sub" id="par-info"></p>
+<div class="lg" id="lg-z"></div>
+<div id="ch-tempo"></div>
+<p class="src" id="ch-nota"></p>
+<h3>C'è una stagionalità?</h3>
+<p class="sub">Ogni linea è un anno (2022&ndash;2026): se l'acqua avesse un andamento stagionale, le linee salirebbero e scenderebbero negli stessi mesi. Dicembre 2024 è escluso; il 2021 non è usato perché i suoi valori mensili sono a blocchi.</p>
+<div class="lg" id="lg-st"></div>
+<div id="ch-stag"></div>
+<p id="stag-txt"></p>
+<h3>Cose da sapere prima di leggere i grafici</h3>
+<ul class="n">
+<li><b>Dicembre 2024 è sospetto</b> (cerchi vuoti): ci sono solo 3 zone su 4 (manca il Sud-Ovest), il Sud-Est ha 12 parametri su 18, il campo di testo contiene un segnaposto (&laquo;Lorem ipsum&raquo;), la data di caricamento è di giugno 2024 e i caratteri speciali del file erano rovinati (riparati). Va letto come dato provvisorio.</li>
+<li><b>Il 2021 è a blocchi</b>: il 74% dei valori mensili del 2021 è identico a quello del mese prima (stessa zona, stesso parametro), cioè i dati sono in pratica trimestrali. Negli anni seguenti la quota di valori ripetuti va dal 14% al 49%. Non è un errore di lettura: è come il Comune pubblica. Un mese uguale al precedente non vuol dire che sia stato misurato due volte.</li>
+<li><b>Nel 2024 (e a gennaio 2025) i parametri sono misurati a mesi alterni</b>, in due gruppi: ogni mese ne manca uno dei due. Per calcio, magnesio e durezza ci sono quindi valori solo in alcuni mesi: le linee tratteggiate sottili uniscono punti non consecutivi. Il trattino &laquo;-&raquo; del file vuol dire &laquo;non misurato&raquo;, non zero.</li>
+<li><b>Le soglie sotto cui un valore è &laquo;sotto soglia&raquo; sono cambiate nel 2022</b> (cambia il metodo di analisi, non l'acqua): per questo i triangoli &laquo;sotto soglia&raquo; non sono mai disegnati come valori e le soglie di anni diversi non si confrontano.</li>
+<li><b>Mancano interi mesi</b>: novembre 2025 e maggio 2026 (fasce grigie); ottobre 2026 non c'è ancora.</li>
+</ul>
+
+<h2 id="perdite">Le perdite della rete</h2>
+<div id="perd"></div>
+
+<h2 id="fonti">Fonti e note</h2>
+<div id="fonti-box"></div>
+
+<footer>
+<p><b>Fonti e licenze.</b> Analisi dell'acqua mensili 2021&ndash;2026, civici per zona MM e perdite idriche: <a href="https://dati.comune.milano.it/">Comune di Milano, dati aperti</a> (dati di MM Spa), licenza CC BY 4.0 (perdite: CC BY 3.0 IT, fonte originale ISTAT). Mappa: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors. Elaborazione: Milano in dati.</p>
+<p>Dati scaricati il {{SCARICATO}}. Ultimo mese con dati: {{ULTIMO_MESE}}. Tabelle: <a href="data/analisi_mensile_zone.csv">analisi_mensile_zone.csv</a> (4.800 valori mensili, con file e riga di origine), <a href="data/perdite_2018.csv">perdite_2018.csv</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var A,IND=[],GJ,ZC=['NO','NE','SE','SO'],ZN={},PAR={},PL=[];
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fmt(x,dec){if(x==null)return '';dec=dec||0;return Number(x).toLocaleString('it-IT',{minimumFractionDigits:0,maximumFractionDigits:dec+1})}
+function fm(x){return Number(x).toLocaleString('it-IT',{maximumFractionDigits:3})}
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function mname(p){var a=p.split('-');return MESI[+a[1]-1]+' '+a[0]}
+function mshort(p){var a=p.split('-');return MESI[+a[1]-1].slice(0,3)+' '+a[0]}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u+' ('+r.status+')');return r.json()})}
+Promise.all([J('data/acqua.json'),J('data/zone_approx.geojson'),J('data/indirizzi.json')]).then(function(a){
+  A=a[0];GJ=a[1];
+  A.zone.forEach(function(z){ZN[z.c]=z});A.par.forEach(function(p){PAR[p.k]=p});
+  buildIndex(a[2]);
+  initMap();buildConf();buildTempo();buildPerdite();buildFonti();
+  $('via').disabled=false;$('civ').disabled=false;$('cerca').disabled=false;
+  $('caric').textContent='Elenco dei civici pronto ('+A.meta.n_voci.toLocaleString('it-IT')+' indirizzi in '+A.meta.n_strade.toLocaleString('it-IT')+' vie).';
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){drawTempo();drawStag()},200)});
+}).catch(function(e){$('esito').innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+
+/* ================= limiti e celle ================= */
+var ORDINE=['residuo_fisso_180','durezza','ph','calcio','magnesio','sodio','potassio','bicarbonati','solfati','cloruri','nitrati','fluoruri'];
+var ALTRI=['conducibilita','ammonio','nitriti','arsenico','manganese','cloro_residuo'];
+function limTxt(p){
+  if(p.k==='cloro_residuo')return '<span class="lim"><b>0,2 '+esc(p.u)+'</b> valore &laquo;consigliato&raquo; (da chiarire con MM)</span>';
+  if(p.tipo==='nessuno')return '<span class="lim">non previsto</span>';
+  var t=p.tipo==='legge'?'limite di legge':'valore consigliato',v;
+  if(p.lmin!=null&&p.lmax!=null)v=fm(p.lmin)+'&ndash;'+fm(p.lmax);else v='max '+fm(p.lmax);
+  return '<span class="lim"><b>'+v+(p.k==='ph'?'':' '+esc(p.u))+'</b> '+t+'</span>';
+}
+function thrTxt(s,p){var a=s.sg;return a[0]===a[1]?'&lt;'+fm(a[0]):'&lt;'+fm(a[0])+'&ndash;'+fm(a[1])}
+function srcTitle(s,z,p){
+  var t=p.n+', '+ZN[z].n+': ';
+  t+=(s.n?'mediana di '+s.n+' mesi':'')+(s.ns?(s.n?', ':'')+s.ns+' mesi sotto soglia':'')+'. Mesi: '+s.mesi.join(', ')+'. File: '+s.files.join(', ')+'.';
+  if(s.n)t+=' Minimo in '+s.pmin+', massimo in '+s.pmax+'.';
+  return t;
+}
+function cellVal(s,z,p){
+  var ti=' title="'+esc(srcTitle(s,z,p))+'"';
+  if(!s.n&&s.ns)return '<span class="ss"'+ti+'>sotto soglia</span> <span class="ssn">('+thrTxt(s,p)+' '+esc(p.u)+')</span>';
+  if(!s.n)return '<span class="ssn">non misurato</span>';
+  if(s.ns)return '<span class="ss"'+ti+'>sotto soglia in '+s.ns+' mesi su '+s.pub+'</span> <span class="ssn">(&lt;'+fm(s.sg[1])+'); negli altri '+s.n+': '+fmt(s.min,p.dec)+'&ndash;'+fmt(s.max,p.dec)+'</span>';
+  return '<b'+ti+'>'+fmt(s.med,p.dec)+'</b>';
+}
+function unitTxt(p){return p.k==='ph'?'':' <span class="sub">'+esc(p.u)+'</span>'}
+function cellRange(s,p){
+  if(!s.n||s.ns)return '<span class="ssn">&mdash;</span>';
+  if(s.min===s.max)return fmt(s.min,p.dec);
+  return fmt(s.min,p.dec)+'&ndash;'+fmt(s.max,p.dec);
+}
+function mancaTxt(){
+  var m=A.meta,d=m.mancanti.filter(function(p){return m.fin_mesi.indexOf(p)>=0}).map(mname);
+  return d.length?' Mancano '+d.join(' e ')+': il Comune non li ha pubblicati.':'';
+}
+function filesTxt(z){
+  var f={};ORDINE.forEach(function(k){A.sched[z][k].files.forEach(function(x){f[x]=1})});return Object.keys(f).sort().join(', ');
+}
+function etichetta(z){
+  var m=A.meta,S=A.sched[z],pub=S.durezza.pub;
+  var h='<div class="etic"><h3>Acqua del rubinetto &middot; zona '+esc(ZN[z].n)+'</h3>';
+  h+='<p class="sub2">Mediana e intervallo di '+pub+' mesi pubblicati su 12 ('+mname(m.fin[0])+' &ndash; '+mname(m.fin[1])+').'+mancaTxt()+'</p>';
+  h+='<div class="scroll"><table><tr><th>Parametro</th><th class="r">Valore</th><th class="r">Min&ndash;max</th><th>Limite nel file MM</th></tr>';
+  ORDINE.forEach(function(k){
+    var p=PAR[k],s=S[k];
+    h+='<tr><td>'+esc(p.n)+unitTxt(p)+'</td><td class="r">'+cellVal(s,z,p)+'</td><td class="r">'+cellRange(s,p)+'</td><td>'+limTxt(p)+'</td></tr>';
+  });
+  h+='</table></div>';
+  h+='<details><summary>Mesi e file usati</summary><p class="sub2">Mesi con almeno un valore: '+S.durezza.mesi.map(mname).join(', ')+'. File: '+esc(filesTxt(z))+'. Fonte: Comune di Milano / MM, dati.comune.milano.it, CC BY 4.0.</p></details>';
+  return h+'</div>';
+}
+
+/* ================= tabella di confronto ================= */
+var MIA=null,NOTA2='';
+function tabConf(lista){
+  var h='<table><tr><th rowspan="2">Parametro</th><th rowspan="2">Limite nel file MM</th>';
+  ZC.forEach(function(z){h+='<th class="r'+(z===MIA?' mia':'')+'">'+esc(ZN[z].n)+(z===MIA?' (la tua)':'')+'</th>'});
+  h+='</tr><tr>';ZC.forEach(function(z){h+='<th class="r'+(z===MIA?' mia':'')+'">valore <span style="font-weight:400">(min&ndash;max)</span></th>'});h+='</tr>';
+  lista.forEach(function(k){
+    var p=PAR[k];h+='<tr><td>'+esc(p.n)+unitTxt(p)+'</td><td>'+limTxt(p)+'</td>';
+    ZC.forEach(function(z){var s=A.sched[z][k];
+      h+='<td class="r'+(z===MIA?' mia':'')+'">'+cellVal(s,z,p)+(s.n&&!s.ns&&s.min!==s.max?'<br><span class="ssn">'+cellRange(s,p)+'</span>':'')+'</td>'});
+    h+='</tr>';
+  });
+  return h+'</table>';
+}
+function buildConf(){
+  var m=A.meta;
+  $('conf').innerHTML=tabConf(ORDINE);
+  NOTA2='<p class="sub"><b>Cloro residuo</b>: il file indica 0,2 mg/L come &laquo;valore massimo consigliato&raquo;, ma nella pratica quel numero è spesso citato come minimo: il significato esatto va chiarito con MM, perciò non è usato per giudicare i valori. Arsenico e manganese sono in &micro;g/L; per i parametri &laquo;sotto soglia&raquo; vale quanto scritto sopra.</p>';
+  $('conf2').innerHTML=tabConf(ALTRI)+NOTA2;
+  $('conf-nota').innerHTML='Mediana e intervallo dei mesi '+mname(m.fin[0])+' &ndash; '+mname(m.fin[1])+'.'+esc(mancaTxt())+' Fonte: Comune di Milano / MM, dati.comune.milano.it (CC BY 4.0), file '+esc(filesTxt('NO'))+'. Il limite è quello scritto nei file di MM (&laquo;limite di legge&raquo; o &laquo;valore consigliato&raquo;); dove il file scrive &laquo;non previsto&raquo; non c\'è limite.';
+}
+
+/* ================= mappa ================= */
+var MAP,POLY={},LAB={},PIN=null,MAPP=['durezza','residuo_fisso_180','calcio','magnesio','sodio','potassio','bicarbonati','solfati','cloruri','nitrati','fluoruri','ph','conducibilita'];
+function mix(a,b,t){return Math.round(a+(b-a)*t)}
+function colore(t){return 'rgb('+mix(222,0,t)+','+mix(233,80,t)+','+mix(248,179,t)+')'}
+function centroide(f){
+  var ring=f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates.reduce(function(a,b){return a[0].length>b[0].length?a:b})[0];
+  var A2=0,cx=0,cy=0;for(var i=0;i<ring.length-1;i++){var x0=ring[i][0],y0=ring[i][1],x1=ring[i+1][0],y1=ring[i+1][1],c=x0*y1-x1*y0;A2+=c;cx+=(x0+x1)*c;cy+=(y0+y1)*c}
+  return [cy/(3*A2),cx/(3*A2)];
+}
+function initMap(){
+  var sel=$('par-map');MAPP.forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=PAR[k].n+' ('+PAR[k].u+')';sel.appendChild(o)});
+  MAP=L.map('map').setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  var layer=L.geoJSON(GJ,{style:function(){return{color:'#111',weight:2,dashArray:'6 4',fillOpacity:.7,fillColor:'#ddd'}},onEachFeature:function(f,l){
+    POLY[f.properties.c]=l;l.on('click',function(){l.openPopup()});
+    LAB[f.properties.c]=L.marker(centroide(f),{opacity:0,interactive:false}).addTo(MAP).bindTooltip('',{permanent:true,direction:'center',className:'ztip'});
+  }}).addTo(MAP);
+  MAP.fitBounds(layer.getBounds());
+  sel.addEventListener('change',colora);sel.value='durezza';colora();
+}
+function colora(){
+  var k=$('par-map').value,p=PAR[k],vals=[],V={};
+  ZC.forEach(function(z){var s=A.sched[z][k];V[z]=s;if(s.n&&!s.ns)vals.push(s.med)});
+  var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);
+  ZC.forEach(function(z){
+    var s=V[z],ok=s.n&&!s.ns,t=ok?(hi>lo?(s.med-lo)/(hi-lo):.5):0;
+    POLY[z].setStyle({fillColor:ok?colore(.08+.92*t):'#eee'});
+    var txt=ok?fmt(s.med,p.dec)+' '+p.u:(s.ns&&!s.n?'sotto soglia':'dati parziali');
+    LAB[z].setTooltipContent('<b>'+esc(ZN[z].n)+'</b><br>'+esc(txt));
+    var tip='<b>Zona '+esc(ZN[z].n)+'</b><br>'+esc(p.n)+': '+(ok?'<b>'+fmt(s.med,p.dec)+' '+esc(p.u)+'</b> (mediana; min&ndash;max '+cellRange(s,p)+')':cellVal(s,z,p))+'<br>Limite: '+limTxt(p)+'<br><span class="sub">'+esc(srcTitle(s,z,p))+'</span>';
+    POLY[z].bindPopup(tip,{maxWidth:300});
+  });
+  var leg=vals.length?'<span class="grad"></span> da <b>'+fmt(lo,p.dec)+'</b> a <b>'+fmt(hi,p.dec)+'</b> '+esc(p.u)+' (più scuro = valore più alto tra le quattro zone)':'Nessuna zona ha un valore numerico: tutti i mesi sono sotto soglia ('+ZC.map(function(z){return ZN[z].n+' '+thrTxt(V[z],p)}).join('; ')+' '+esc(p.u)+').';
+  $('map-leg').innerHTML=leg;
+  var chk='',ok2=ZC.every(function(z){var s=V[z];return s.n&&!s.ns||(!s.n&&s.ns)});
+  if(p.tipo==='legge'&&ok2){var inLim=ZC.every(function(z){var s=V[z];return !s.n||((p.lmax==null||s.max<=p.lmax)&&(p.lmin==null||s.min>=p.lmin))});if(inLim)chk=' In tutte le zone e in tutti i mesi i valori sono entro il limite ('+limTxt(p).replace(/<[^>]+>/g,'')+').'}
+  else if(p.tipo==='consigliato'&&p.k!=='cloro_residuo'){var inL=ZC.every(function(z){var s=V[z];return !s.n||((p.lmax==null||s.max<=p.lmax)&&(p.lmin==null||s.min>=p.lmin))});if(inL)chk=' Tutti i valori sono dentro l\'intervallo indicato da MM ('+limTxt(p).replace(/<[^>]+>/g,'')+').'}
+  else if(p.tipo==='nessuno')chk=' Per questo parametro il file MM non indica un limite.';
+  $('map-nota').innerHTML=esc(p.n)+': '+esc(p.info)+chk;
+}
+function segnaPin(c,txt){
+  if(PIN)MAP.removeLayer(PIN);
+  PIN=L.circleMarker(c,{radius:9,color:'#fff',weight:3,fillColor:'#0050b3',fillOpacity:1}).addTo(MAP).bindTooltip(esc(txt),{direction:'top'});
+}
+
+/* ================= indirizzi ================= */
+var STOP={di:1,del:1,della:1,dei:1,delle:1,dello:1,degli:1,da:1,de:1,d:1,dell:1,al:1,alla:1,e:1,ai:1,in:1};
+function tok(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim().split(' ').filter(function(w){return w&&!STOP[w]})}
+function buildIndex(d){IND=d.s.map(function(s){return{disp:s[0],key:s[1],toks:tok(s[1]),raw:s[2],P:null}})}
+function cercaVie(q){
+  var t=tok(q);if(!t.length)return[];
+  var last=t[t.length-1],head=t.slice(0,-1);
+  var r=[];
+  IND.forEach(function(s){
+    for(var i=0;i<head.length;i++)if(s.toks.indexOf(head[i])<0)return;
+    var ok=s.toks.some(function(w){return w.indexOf(last)===0});if(!ok)return;
+    var sc=s.toks.length*10+(s.toks[0]===t[0]||s.toks[1]===t[0]?0:5)+(s.toks.indexOf(last)>=0?0:2);
+    r.push([sc,s]);
+  });
+  r.sort(function(a,b){return a[0]-b[0]||(a[1].disp<b[1].disp?-1:1)});
+  return r.slice(0,10).map(function(x){return x[1]});
+}
+function civLike(w){return /^\d+\s*[\/\-]?\s*[a-z]?$/i.test(w)}
+function splitQuery(v){
+  var m=v.trim().match(/^(.*\S)\s+(\d+\s*[\/\-]?\s*[a-zA-Z]?)$/);
+  return m?{via:m[1],civ:m[2]}:null;
+}
+function vieMatch(v){
+  var r=cercaVie(v);if(r.length)return{r:r,civ:null};
+  var sp=splitQuery(v);if(sp){r=cercaVie(sp.via);if(r.length)return{r:r,civ:sp.civ}}
+  return{r:[],civ:null};
+}
+function b36(s){return s?parseInt(s,36):NaN}
+function parse(s){
+  if(s.P)return s.P;
+  var P=[];s.raw.split(',').forEach(function(e){var a=e.split(':'),m=a[0].match(/^(\d+)(.*)$/),c=parseInt(a[1],16);
+    P.push({k:a[0],n:m?+m[1]:0,l:m?m[2]:'',z:c&3,est:(c>>2)&1,cf:(c>>3)&1,lon:isNaN(b36(a[2]))?null:9+b36(a[2])/1e4,lat:isNaN(b36(a[3]))?null:45.3+b36(a[3])/1e4})});
+  s.P=P;return P;
+}
+function normCiv(c){
+  c=(c||'').toLowerCase().replace(/^(n\.?|civico)\s*/,'');
+  var m=c.match(/^\s*(\d+)(.*)$/);if(!m)return null;
+  var rest=m[2].replace(/[\s\/\-.]/g,''),l=(rest.length===1&&/[a-z]/.test(rest))?rest:'';
+  return{n:+m[1],l:l,k:m[1]+l};
+}
+function runs(P){
+  var out=[];[1,0].forEach(function(par){
+    var L=P.filter(function(e){return e.n%2===par&&e.n>0}),cur=null,rs=[];
+    L.forEach(function(e){if(cur&&cur.z===e.z){cur.b=e.k}else{cur={a:e.k,b:e.k,z:e.z};rs.push(cur)}});
+    if(rs.length)out.push((par?'dispari':'pari')+': '+rs.slice(0,8).map(function(r){return (r.a===r.b?r.a:r.a+'&ndash;'+r.b)+' '+esc(ZN[ZC[r.z]].n)}).join(', ')+(rs.length>8?', &hellip;':''));
+  });
+  return out;
+}
+function distKm(lon,lat){var dx=(lon-9.19)*78.9,dy=(lat-45.4642)*111.2;return Math.sqrt(dx*dx+dy*dy)}
+function mostra(s,civ){
+  var P=parse(s),zs={};P.forEach(function(e){zs[e.z]=1});var nz=Object.keys(zs).length;
+  var e=null,nota='',stim=false,cf=false,viaSola=false,nome=s.disp;
+  var c=normCiv(civ);
+  if(c){
+    e=P.find(function(x){return x.k===c.k});
+    if(!e&&c.l)e=P.find(function(x){return x.n===c.n&&!x.l});
+    if(!e){e=P.find(function(x){return x.n===c.n})}
+    if(e&&e.k!==c.k)nota='Il civico '+esc(c.k.toUpperCase())+' non è nell\'elenco: uso il civico '+esc(e.k.toUpperCase())+' dello stesso numero.';
+    if(!e&&nz===1){e=P[0];viaSola=true;nota='Il civico '+esc(c.k.toUpperCase())+' non è nell\'elenco, ma tutta la via sta in un\'unica zona.'}
+    else if(!e){
+      var best=null;P.forEach(function(x){var d=Math.abs(x.n-c.n)+(x.n%2===c.n%2?0:0.5);if(!best||d<best.d)best={d:d,x:x}});
+      e=best.x;stim=true;nota='Il civico '+esc(c.k.toUpperCase())+' non è nell\'elenco del Comune: la zona è stimata dal civico più vicino ('+esc(e.k.toUpperCase())+').';
+    }
+    nome=s.disp+' '+c.k.toUpperCase();
+  }else if(nz===1){e=P[0]}
+  var h='';
+  if(!e){
+    h='<p><b>'+esc(s.disp)+'</b> attraversa <b>'+nz+' zone</b>: serve il numero civico.</p>';
+    h+='<ul class="n">'+runs(P).map(function(t){return '<li>'+t+'</li>'}).join('')+'</ul>';
+    $('esito').innerHTML=h;setMia(null);return;
+  }
+  var z=ZC[e.z];stim=stim||!!e.est;cf=!!e.cf;
+  h+='<p class="sub">'+esc(nome)+'</p><p class="zona-grande">Zona '+esc(ZN[z].n)+(stim?'<span class="tag st">zona stimata</span>':'')+'</p>';
+  if(c||nz===1)h+='<p class="sub">'+(stim?'La zona è stimata dai civici vicini, non assegnata da MM.':(viaSola||!c)?'Zona di tutta la via, assegnata da MM ai suoi civici (foto del 2022).':'Zona assegnata a questo civico nell\'elenco di MM (foto del 2022).')+'</p>';
+  if(nota)h+='<p class="warn">'+nota+'</p>';
+  if(cf)h+='<p class="warn">Questo indirizzo compare più volte nell\'elenco con zone diverse; qui è mostrata la più frequente.</p>';
+  if(nz>1)h+='<p class="warn"><b>Questa via attraversa '+nz+' zone: il numero civico decide.</b><br>'+runs(P).join('<br>')+'</p>';
+  if(e.lon!=null&&distKm(e.lon,e.lat)<1.0)h+='<p class="warn"><b>Sei nel centro storico</b>, dove le zone si incontrano: i confini sulla mappa sono approssimati, vale la zona del civico.</p>';
+  if(nz===1&&!c)h+='<p class="sub">Tutta la via sta in una sola zona.</p>';
+  h+=etichetta(z);
+  $('esito').innerHTML=h;
+  setMia(z);
+  if(e.lon!=null)segnaPin([e.lat,e.lon],nome);
+}
+function setMia(z){MIA=z;$('conf').innerHTML=tabConf(ORDINE);$('conf2').innerHTML=tabConf(ALTRI)+NOTA2}
+var SUGSEL=-1,SUGL=[];
+function chiudiSug(){$('sug').hidden=true;$('via').setAttribute('aria-expanded','false');SUGSEL=-1}
+function sceltaVia(s){$('via').value=s.disp;$('via').dataset.key=s.key;chiudiSug();$('civ').focus();
+  var P=parse(s),zs={};P.forEach(function(e){zs[e.z]=1});
+  if(Object.keys(zs).length===1)mostra(s,'');else mostra(s,'')}
+function mostraSug(){
+  var v=$('via').value;$('via').dataset.key='';
+  if(v.trim().length<2){chiudiSug();return}
+  var m=vieMatch(v);SUGL=m.r;SUGSEL=-1;
+  if(!SUGL.length){$('sug').innerHTML='<li class="sub" style="cursor:default">Nessuna via trovata</li>';$('sug').hidden=false;return}
+  $('sug').innerHTML=SUGL.map(function(s,i){return '<li role="option" data-i="'+i+'">'+esc(s.disp)+'</li>'}).join('');
+  $('sug').hidden=false;$('via').setAttribute('aria-expanded','true');
+}
+function cerca(){
+  var v=$('via').value,civ=$('civ').value.trim(),s=null;
+  if(!v.trim()){$('esito').innerHTML='<p>Scrivi una via.</p>';return}
+  var key=$('via').dataset.key;
+  if(key)s=IND.find(function(x){return x.key===key});
+  if(!s){
+    var m=vieMatch(v);if(m.civ&&!civ){civ=m.civ;$('civ').value=civ}
+    if(!m.r.length){$('esito').innerHTML='<p>Non trovo questa via nell\'elenco dei civici del Comune. Prova con meno parole (per esempio solo il cognome).</p>';return}
+    if(m.r.length>1){
+      var exact=m.r.filter(function(x){return tok(v).every(function(w){return x.toks.indexOf(w)>=0})});
+      if(exact.length===1)s=exact[0];
+      else{$('esito').innerHTML='<div class="sceglie"><p>Quale via intendi?</p>'+m.r.map(function(x,i){return '<button type="button" data-i="'+i+'">'+esc(x.disp)+'</button>'}).join('')+'</div>';
+        $('esito').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){var x=m.r[+b.dataset.i];$('via').value=x.disp;$('via').dataset.key=x.key;mostra(x,civ)})});return}
+    }else s=m.r[0];
+    $('via').value=s.disp;$('via').dataset.key=s.key;
+  }
+  chiudiSug();mostra(s,civ);
+}
+$('via').addEventListener('input',mostraSug);
+$('via').addEventListener('keydown',function(ev){
+  var li=$('sug').querySelectorAll('li[data-i]');
+  if(ev.key==='ArrowDown'&&li.length){ev.preventDefault();SUGSEL=Math.min(li.length-1,SUGSEL+1)}
+  else if(ev.key==='ArrowUp'&&li.length){ev.preventDefault();SUGSEL=Math.max(0,SUGSEL-1)}
+  else if(ev.key==='Enter'){ev.preventDefault();if(SUGSEL>=0&&!$('sug').hidden){sceltaVia(SUGL[SUGSEL])}else cerca();return}
+  else if(ev.key==='Escape'){chiudiSug();return}
+  else return;
+  li.forEach(function(x,i){x.classList.toggle('on',i===SUGSEL)});
+});
+$('sug').addEventListener('mousedown',function(ev){var li=ev.target.closest('li[data-i]');if(li){ev.preventDefault();sceltaVia(SUGL[+li.dataset.i])}});
+$('via').addEventListener('blur',function(){setTimeout(chiudiSug,150)});
+$('civ').addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();cerca()}});
+$('cerca').addEventListener('click',cerca);
+
+/* ================= grafici ================= */
+var PSEL='durezza',ZHL=null,ZSTAG='NO';
+var TRAT={NO:'',NE:'7 3',SE:'2 3',SO:'10 3 2 3'};
+function buildTempo(){
+  var sel=$('par-tempo');ORDINE.concat(ALTRI).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=PAR[k].n+' ('+PAR[k].u+')';sel.appendChild(o)});
+  sel.value=PSEL;sel.addEventListener('change',function(){PSEL=sel.value;drawTempo();drawStag()});
+  $('lg-z').innerHTML=ZC.map(function(z){return '<button type="button" data-z="'+z+'"><svg width="30" height="8"><line x1="0" y1="4" x2="30" y2="4" stroke="#111" stroke-width="2" '+(TRAT[z]?'stroke-dasharray="'+TRAT[z]+'"':'')+'/></svg>'+esc(ZN[z].n)+'</button>'}).join('');
+  $('lg-z').querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){ZHL=(ZHL===b.dataset.z?null:b.dataset.z);applyHL()});
+    b.addEventListener('mouseenter',function(){applyHL(b.dataset.z)});b.addEventListener('mouseleave',function(){applyHL()});});
+  var YC={2022:'#bbb',2023:'#999',2024:'#555',2025:'#111',2026:'#0050b3'};
+  $('lg-st').innerHTML=ZC.map(function(z){return '<button type="button" data-z="'+z+'">'+esc(ZN[z].n)+'</button>'}).join('')+'<span class="chips" style="margin-left:12px">'+[2022,2023,2024,2025,2026].map(function(y){return '<span><svg width="22" height="8"><line x1="0" y1="4" x2="22" y2="4" stroke="'+YC[y]+'" stroke-width="2.4"/></svg>'+y+'</span>'}).join('')+'</span>';
+  $('lg-st').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){ZSTAG=b.dataset.z;drawStag()})});
+  drawTempo();drawStag();
+}
+function applyHL(hov){
+  var id=hov||ZHL;
+  document.querySelectorAll('#ch-tempo svg').forEach(function(sv){sv.classList.toggle('hl',!!id);
+    sv.querySelectorAll('[data-z]').forEach(function(g){g.classList.toggle('on',!!id&&g.getAttribute('data-z')===id)})});
+  $('lg-z').querySelectorAll('button').forEach(function(b){b.classList.toggle('on',!!id&&b.dataset.z===id)});
+}
+function ticks(lo,hi){
+  var r=hi-lo,st=Math.pow(10,Math.floor(Math.log10(r/4))),f=r/4/st;st*=f<1.5?1:f<3?2:f<7?5:10;
+  var t=[];for(var v=Math.ceil(lo/st)*st;v<=hi+1e-9;v+=st)t.push(+v.toFixed(6));return t;
+}
+function dp(st){var s=String(st),i=s.indexOf('.');return i<0?0:s.length-i-1}
+function limitiParam(p){var a=[];if(p.lmin!=null)a.push(p.lmin);if(p.lmax!=null&&p.k!=='cloro_residuo')a.push(p.lmax);return a}
+function drawTempo(){
+  var k=PSEL,p=PAR[k],S=A.serie[k],cal=A.cal,N=cal.length;
+  $('par-info').innerHTML=esc(p.info)+(p.k==='cloro_residuo'?'':'');
+  var vals=[],thrAny=false,thrBy={},zeroq=false;
+  ZC.forEach(function(z){S[z].forEach(function(v,i){if(typeof v==='number')vals.push(v);else if(typeof v==='string'&&v[0]==='<'){thrAny=true;var y=cal[i].slice(0,4);(thrBy[y]=thrBy[y]||{})[v.slice(1)]=1}else if(v==='?0'){thrAny=true;zeroq=true}})});
+  var box=$('ch-tempo'),W=Math.max(300,box.clientWidth||640),L=46,R=10,T=18,PH=vals.length?250:0,AX=vals.length?26:0,ST=thrAny?22+ZC.length*14:0,H=T+PH+AX+ST+(vals.length?0:6);
+  var X=function(i){return L+i*(W-L-R)/(N-1)},bw=(W-L-R)/(N-1);
+  var svg='<svg class="ch'+(ZHL?' hl':'')+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Serie mensile di '+esc(p.n)+' per zona">';
+  var lo,hi,Y,notaLim='';
+  if(vals.length){
+    lo=Math.min.apply(null,vals);hi=Math.max.apply(null,vals);if(lo===hi){lo-=1;hi+=1}
+    var rg=hi-lo,lims=limitiParam(p),inc=[],fuori=[];
+    lims.forEach(function(x){if(x>=lo-rg&&x<=hi+rg){inc.push(x)}else fuori.push(x)});
+    inc.forEach(function(x){lo=Math.min(lo,x);hi=Math.max(hi,x)});
+    var pad=(hi-lo)*.06;lo-=pad;hi+=pad;if(p.k==='ph'||vals.every(function(v){return v>=0})){if(lo<0&&Math.min.apply(null,vals)>=0)lo=0}
+    Y=function(v){return T+PH-(v-lo)/(hi-lo)*PH};
+    // fasce
+    A.meta.mancanti.forEach(function(m){var i=cal.indexOf(m);if(i>=0)svg+='<rect class="band" x="'+(X(i)-bw/2)+'" y="'+T+'" width="'+bw+'" height="'+PH+'"><title>'+mname(m)+': mese non pubblicato dal Comune</title></rect>'});
+    A.meta.sospetto.forEach(function(m){var i=cal.indexOf(m);if(i>=0){svg+='<rect class="bsus" x="'+(X(i)-bw/2)+'" y="'+T+'" width="'+bw+'" height="'+PH+'"><title>'+mname(m)+': dato sospetto (3 zone su 4, testo segnaposto, data di caricamento anomala)</title></rect><text x="'+X(i)+'" y="'+(T-5)+'" text-anchor="middle" class="mu" font-size="10">dic 24</text>'}});
+    // assi
+    var tk=ticks(lo,hi),stp=tk.length>1?tk[1]-tk[0]:1,d=dp(stp);
+    tk.forEach(function(v){svg+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text class="mu" x="'+(L-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+fmt(v,d)+'</text>'});
+    cal.forEach(function(m,i){if(m.slice(5)==='01')svg+='<line class="grid" x1="'+X(i)+'" x2="'+X(i)+'" y1="'+T+'" y2="'+(T+PH)+'"/><text class="mu" x="'+(X(i)+3)+'" y="'+(T+PH+16)+'">'+m.slice(0,4)+'</text>'});
+    inc.forEach(function(x){svg+='<line class="lmt" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(x)+'" y2="'+Y(x)+'"/><text x="'+(W-R-2)+'" y="'+(Y(x)-4)+'" text-anchor="end" fill="#0050b3" style="fill:#0050b3;font-size:11px">'+(p.tipo==='legge'?'limite ':'valore consigliato ')+fm(x)+'</text>'});
+    if(fuori.length)notaLim=' Il limite ('+fuori.map(fm).join(' e ')+' '+esc(p.u)+') è fuori scala e non è disegnato.';
+    // linee
+    ZC.forEach(function(z){
+      var pts=[];S[z].forEach(function(v,i){if(typeof v==='number')pts.push({i:i,v:v})});
+      var d1='',d2='';
+      for(var j=1;j<pts.length;j++){var seg='M'+X(pts[j-1].i).toFixed(1)+' '+Y(pts[j-1].v).toFixed(1)+'L'+X(pts[j].i).toFixed(1)+' '+Y(pts[j].v).toFixed(1);if(pts[j].i-pts[j-1].i===1)d1+=seg;else d2+=seg}
+      svg+='<g class="ln'+(ZHL===z?' on':'')+'" data-z="'+z+'"><path class="gp" d="'+d2+'"/><path class="l" d="'+d1+'"/>';
+      pts.forEach(function(q){var m=cal[q.i],sus=A.meta.sospetto.indexOf(m)>=0;
+        svg+='<circle class="'+(sus?'sus':'')+'" cx="'+X(q.i).toFixed(1)+'" cy="'+Y(q.v).toFixed(1)+'" r="'+(sus?3.4:2.4)+'"><title>'+esc(ZN[z].n+' · '+mname(m)+': '+fmt(q.v,p.dec)+' '+p.u+' (file '+A.mese_file[m]+')'+(sus?' · dato sospetto':''))+'</title></circle>'});
+      svg+='</g>';
+    });
+  }else{
+    cal.forEach(function(m,i){if(m.slice(5)==='01')svg+='<text class="mu" x="'+(X(i)+3)+'" y="'+(T+12)+'">'+m.slice(0,4)+'</text>'});
+  }
+  if(thrAny){
+    var y0=T+PH+AX;
+    svg+='<text class="mu" x="'+L+'" y="'+(y0+10)+'" font-size="11">sotto soglia (&#9661;): il valore c\'è ma è troppo piccolo per essere misurato; non è zero'+(zeroq?' &middot; &#9661; tratteggiato: il file scrive &laquo;0&raquo;, quasi certamente un sotto soglia non marcato':'')+'</text>';
+    ZC.forEach(function(z,r){
+      var yy=y0+22+r*14;
+      svg+='<text class="mu" x="'+(L-6)+'" y="'+(yy+3)+'" text-anchor="end" font-size="10">'+z+'</text>';
+      S[z].forEach(function(v,i){var q=v==='?0';if(typeof v==='string'&&(v[0]==='<'||q)){var x=X(i),w=Math.max(1.6,Math.min(3.2,bw*.42));svg+='<g data-z="'+z+'"><path class="tri" '+(q?'stroke-dasharray="2 1.5" ':'')+'d="M'+(x-w)+' '+(yy-w)+'L'+(x+w)+' '+(yy-w)+'L'+x+' '+(yy+w*1.1)+'Z"><title>'+esc(ZN[z].n+' · '+mname(cal[i])+': '+(q?'il file scrive 0, quasi certamente un sotto soglia non marcato (non è uno zero misurato)':'sotto soglia (<'+fm(+v.slice(1))+' '+p.u+')')+', file '+A.mese_file[cal[i]])+'</title></path></g>'}});
+    });
+  }
+  svg+='</svg>';
+  box.innerHTML=svg;
+  var nt='';
+  if(thrAny){nt='Soglie di rilevabilità per anno ('+esc(p.u)+'): '+Object.keys(thrBy).sort().map(function(y){return y+' '+Object.keys(thrBy[y]).map(Number).sort(function(a,b){return b-a}).map(function(x){return '&lt;'+fm(x)}).join(' e ')}).join(' &middot; ')+'. La soglia cambia con il metodo di analisi, non con l\'acqua.'}
+  if(!vals.length)nt='In tutti i mesi pubblicati questo parametro è sotto soglia in tutte le zone: non c\'è nessun valore numerico da disegnare. '+nt;
+  $('ch-nota').innerHTML=nt+esc(notaLim)+' Fonte: Comune di Milano / MM, file getdatiqualitaacqua_2021&ndash;2026 (nome del file di ogni mese nel testo di ogni punto). Fasce grigie = mesi non pubblicati; cerchi vuoti = dicembre 2024 (dato sospetto); linee sottili tratteggiate = punti non consecutivi.';
+  applyHL();
+}
+function drawStag(){
+  var k=PSEL,p=PAR[k],S=A.serie[k][ZSTAG],cal=A.cal;
+  $('lg-st').querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.z===ZSTAG)});
+  var YC={2022:'#bbb',2023:'#999',2024:'#555',2025:'#111',2026:'#0050b3'};
+  var vals=[];S.forEach(function(v,i){if(typeof v==='number'&&cal[i]>='2022-01'&&cal[i]!=='2024-12')vals.push(v)});
+  var box=$('ch-stag'),r=A.stag[k].r;
+  if(!vals.length){box.innerHTML='<p class="sub">Per questo parametro non ci sono valori numerici da confrontare tra gli anni (tutti sotto soglia).</p>';$('stag-txt').innerHTML='';return}
+  var W=Math.max(300,box.clientWidth||640),L=46,R=10,T=10,PH=210,H=T+PH+24;
+  var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);if(lo===hi){lo-=1;hi+=1}var pad=(hi-lo)*.08;lo-=pad;hi+=pad;if(lo<0&&Math.min.apply(null,vals)>=0)lo=0;
+  var X=function(m){return L+m*(W-L-R)/11},Y=function(v){return T+PH-(v-lo)/(hi-lo)*PH};
+  var svg='<svg class="ch" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Stesso parametro, un anno per linea">';
+  var tk=ticks(lo,hi),d=dp(tk.length>1?tk[1]-tk[0]:1);
+  tk.forEach(function(v){svg+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text class="mu" x="'+(L-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+fmt(v,d)+'</text>'});
+  for(var m=0;m<12;m++)svg+='<text class="mu" x="'+X(m)+'" y="'+(T+PH+16)+'" text-anchor="middle">'+MESI[m].slice(0,3)+'</text>';
+  [2022,2023,2024,2025,2026].forEach(function(y){
+    var pts=[];for(var m=0;m<12;m++){var i=cal.indexOf(y+'-'+('0'+(m+1)).slice(-2));if(i<0||y+'-'+('0'+(m+1)).slice(-2)==='2024-12')continue;var v=S[i];if(typeof v==='number')pts.push({m:m,v:v,i:i})}
+    var d1='';pts.forEach(function(q,j){d1+=(j&&pts[j-1].m===q.m-1?'L':'M')+X(q.m).toFixed(1)+' '+Y(q.v).toFixed(1)});
+    svg+='<path d="'+d1+'" fill="none" stroke="'+YC[y]+'" stroke-width="'+(y===2026?2.6:1.8)+'"/>';
+    pts.forEach(function(q){svg+='<circle cx="'+X(q.m).toFixed(1)+'" cy="'+Y(q.v).toFixed(1)+'" r="2.4" fill="'+YC[y]+'"><title>'+esc(ZN[ZSTAG].n+' · '+mname(cal[q.i])+': '+fmt(q.v,p.dec)+' '+p.u+' (file '+A.mese_file[cal[q.i]]+')')+'</title></circle>'});
+  });
+  svg+='</svg>';box.innerHTML=svg;
+  var t='Zona '+esc(ZN[ZSTAG].n)+'. ';
+  if(r==null)t+='Non ci sono abbastanza mesi numerici per misurare la regolarità.';
+  else{
+    t+='Correlazione media tra gli anni, per le quattro zone: <b>'+r.toLocaleString('it-IT',{minimumFractionDigits:2})+'</b> (1 = ogni anno lo stesso andamento, 0 = nessun legame). ';
+    t+=r>=0.5?'Un andamento si ripete di anno in anno.':'<b>Nessun andamento stagionale regolare:</b> i mesi alti e bassi cambiano da un anno all\'altro. Con pochi anni, valori che restano uguali per più mesi e le lacune del 2024, una stagionalità debole non si potrebbe comunque vedere.';
+  }
+  $('stag-txt').innerHTML=t;
+}
+
+/* ================= perdite ================= */
+function buildPerdite(){
+  var q=A.perdite,n=function(x){return Number(x).toLocaleString('it-IT')};
+  var h='<p>Nel <b>2018</b> la rete di Milano ha immesso '+n(q.immessa_volume)+' e ne ha erogata '+n(q.erogata_volume)+' (migliaia di m&sup3;): la differenza, le <b>perdite</b>, è il <span class="big">'+Number(q.perdite_pct_dichiarata).toLocaleString('it-IT',{minimumFractionDigits:1})+'%</span> dell\'acqua immessa.</p>';
+  h+='<div class="cards"><div><span class="n">'+n(q.immessa_volume)+'</span><br><span class="sub">acqua immessa, migliaia di m&sup3;</span></div><div><span class="n">'+n(q.erogata_volume)+'</span><br><span class="sub">acqua erogata, migliaia di m&sup3;</span></div><div><span class="n">'+n(q.immessa_procapite)+' / '+n(q.erogata_procapite)+'</span><br><span class="sub">litri per abitante al giorno, immessi / erogati</span></div><div><span class="n">'+Number(q.perdite_pct_calcolata).toLocaleString('it-IT',{minimumFractionDigits:2})+'%</span><br><span class="sub">stesso calcolo rifatto qui: ('+n(q.immessa_volume)+' &minus; '+n(q.erogata_volume)+') / '+n(q.immessa_volume)+'</span></div></div>';
+  h+='<p class="warn"><b>Da leggere con cautela.</b></p><ul class="n"><li><b>Un solo anno</b>: il Comune ha pubblicato soltanto il 2018. Non c\'è una serie storica e non c\'è una suddivisione per zona, quindi non si può dire se le perdite siano cambiate né dove siano.</li><li><b>Le unità non sono scritte nel file</b>: sono state dedotte le unità &laquo;migliaia di m&sup3;&raquo; e &laquo;litri per abitante al giorno&raquo; perché i conti tornano (il 14,3% dichiarato esce dalla differenza, e i volumi diviso i litri pro capite danno circa 1,37 milioni di abitanti, in linea con Milano).</li><li>Le perdite riguardano la quantità di acqua, non la sua qualità: non c\'entrano con le analisi delle schede.</li></ul>';
+  h+='<p class="src">Fonte: Comune di Milano, dataset ds1571 (file '+esc(q.file_origine)+'), CC BY 3.0 IT; dati originali ISTAT, tavola 17 GMA 2021. Periodo: anno 2018 (dal 1&deg; gennaio al 31 dicembre).</p>';
+  $('perd').innerHTML=h;
+}
+
+/* ================= fonti ================= */
+function buildFonti(){
+  var m=A.meta,h='<h3 style="margin-top:.4em">Da dove vengono i numeri</h3><div class="scroll"><table><tr><th>Anno</th><th>Dataset sul portale</th><th>File</th><th class="r">Mesi pubblicati</th></tr>';
+  A.anni_file.forEach(function(f){h+='<tr><td>'+f.da.slice(0,4)+'</td><td>'+esc(f.ds)+'</td><td><code>'+esc(f.file.replace(/^ds\d+_/,''))+'</code></td><td class="r">'+f.mesi+' ('+f.da.slice(5)+'&ndash;'+f.a.slice(5)+')</td></tr>'});
+  h+='</table></div><p class="src">Il valore di ogni zona e parametro è una riga per mese in questi file (colonne: parametro, limite, valore, unità, zona, mese, anno). Le zone sono i quattro valori di <code>zonaNome</code>: Nord-Ovest (id 6), Sud-Ovest (15), Sud-Est (16), Nord-Est (18). Per gli indirizzi: dataset ds1827, civici aggregati per zona MM, 62.587 civici, foto del 2022; coordinate dei civici dal file civici del Comune (ottobre 2026). L\'elenco usato dalla ricerca ha '+m.n_civici.toLocaleString('it-IT')+' civici in '+m.n_strade.toLocaleString('it-IT')+' vie, di cui '+m.n_stimati.toLocaleString('it-IT')+' con zona stimata.</p>';
+  h+='<h3>Note e cautele</h3><ul class="n">';
+  h+='<li><b>Sotto soglia</b>: il 26,4% delle misure (1.239 su 4.699) è scritto &laquo;&lt;0,05&raquo; e simili. Qui resta &laquo;sotto soglia&raquo;: non è mai trasformato in 0 né nel valore della soglia. Ammonio, fluoruri e nitriti sono sotto soglia in tutti i mesi, il manganese nel 91% e il cloro residuo nel 56%.</li>';
+  h+='<li><b>Valori che non si leggono</b>: quattro valori di manganese (maggio-giugno 2023, Nord-Est, Nord-Ovest, Sud-Ovest) sono scritti &laquo;0&raquo; nel file ma quasi certamente sono &laquo;sotto soglia&raquo; non marcati: non sono disegnati come zeri. Due valori illeggibili (calcio Nord-Ovest, maggio 2022: &laquo;7&#39;&raquo;; cloro residuo Sud-Est, ottobre 2024: &laquo;&gt;0,04&raquo;) non sono usati.</li>';
+  h+='<li><b>Zone</b>: sono 4 grandi aree di rete, non quartieri. I confini della mappa sono ricostruiti dai civici e non sono ufficiali; il Comune e MM non pubblicano i poligoni.</li>';
+  h+='<li><b>Il limite è quello scritto nel file</b>. Per il sodio, MM scrive nel testo che 200 mg/L è un &laquo;valore massimo consigliato&raquo; con significato organolettico più che sanitario. Per durezza (15&ndash;50 &deg;F), residuo fisso (1.500 mg/L) e cloro residuo (0,2 mg/L) il file parla di valori consigliati, non di limiti di legge. Calcio, magnesio e bicarbonati: &laquo;non previsto&raquo;.</li>';
+  h+='<li><b>Cloro residuo</b>: lo 0,2 mg/L è indicato come &laquo;massimo consigliato&raquo;, ma spesso quel numero è citato come minimo. Da chiarire con MM prima di usarlo per giudicare un valore.</li>';
+  h+='<li><b>Caratteri</b>: il file di dicembre 2024 (e una parola del 2019) aveva gli accenti e i simboli (&micro;, &deg;, &agrave;) rovinati da una doppia codifica; sono stati riparati controllando ogni riga. Il file del 4&deg; trimestre 2018 non è UTF-8 ma Windows-1252.</li>';
+  h+='<li><b>La data di caricamento dei file non è affidabile</b> (ci sono mesi caricati prima di finire): non è usata per niente.</li>';
+  h+='<li><b>Le valutazioni dell\'acqua non sono qui</b>: la pagina mostra solo i valori pubblicati e i limiti scritti nei file. Non indica quale acqua sia &laquo;migliore&raquo;, perché sono tutte conformi.</li>';
+  h+='<li><b>Da chiedere a MM</b>: i confini ufficiali delle zone; perché nel 2024 i parametri sono misurati a mesi alterni; il significato dello 0,2 mg/L di cloro residuo; i trimestri 2018&ndash;2020 e gli altri anni di perdite, che non sono sul portale.</li></ul>';
+  h+='<p class="src">Esistono anche 7 valori trimestrali &laquo;Tutta Milano&raquo; (4&deg; trim. 2018, 2&deg; trim. 2019, 4&deg; trim. 2020, 4 trimestri 2021) senza zona né mese: non sono usati nei grafici. Sono nel file di lavoro e confrontati con la media mensile del 2021 (differenza mediana 0,9%).</p>';
+  $('fonti-box').innerHTML=h;
+}
+})();
+</script></body></html>

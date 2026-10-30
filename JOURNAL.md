@@ -2154,3 +2154,14 @@ Una sola riga, **anno 2018** (periodo 1/1-31/12/2018): acqua immessa 213.352, er
 #### 9. Come rifare tutto
 
 `python -I scripts\01_scarica.py <strand>` (download, riprendibile) -> `02_pulisci.py <strand>` -> `03_zone.py <strand> <...\citta-15-minuti\raw\comune_milano>` -> `04_perdite_inventario.py <strand>`. Controlli e log: `pulito\_controlli\`, `pulito\_log_pulizia.txt`, `pulito\_log_zone.txt`.
+
+### Fase 2 — pagina (2026-10-30)
+
+- Pagina `docs/acqua-del-sindaco/`:
+  - servizio "scrivi il tuo indirizzo" (l'indirizzo resta nel browser);
+  - mappa delle 4 zone (confini approssimati);
+  - schede per zona come le etichette delle acque in bottiglia;
+  - serie mensili 2021-2026.
+- Nessun valore oltre i limiti di legge in nessun mese pubblicato; nessuna stagionalità visibile.
+- Quattro valori di manganese scritti "0" (maggio-giugno 2023) sono trattati come probabili "sotto soglia", mai disegnati come zero.
+

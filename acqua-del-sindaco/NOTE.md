@@ -86,3 +86,23 @@ Una sola riga, **anno 2018** (periodo 1/1-31/12/2018): acqua immessa 213.352, er
 ## 9. Come rifare tutto
 
 `python -I scripts\01_scarica.py <strand>` (download, riprendibile) -> `02_pulisci.py <strand>` -> `03_zone.py <strand> <...\citta-15-minuti\raw\comune_milano>` -> `04_perdite_inventario.py <strand>`. Controlli e log: `pulito\_controlli\`, `pulito\_log_pulizia.txt`, `pulito\_log_zone.txt`.
+
+
+## 10. Fase 2: la pagina (docs\acqua-del-sindaco\)
+
+Script: `scripts\pagina_dati.py` (legge solo `pulito\*`, rifacibile) + `scripts\pagina_template.html` (pagina; il programma sostituisce pochi segnaposto e scrive `docs\acqua-del-sindaco\index.html` e `data\`). Stile come `docs\aria\` (bianco/nero + un blu, Leaflet 1.9.4, tasselli OSM in grigio, `fetch(...,{cache:'no-cache'})`).
+
+**Dati della pagina** (`data\`, ~1,7 MB in tutto): `acqua.json` (69 mesi x 4 zone x 18 parametri, schede degli ultimi 12 mesi, file di ogni mese, correlazione tra anni, perdite), `indirizzi.json` (883 KB: 4.039 vie, 55.236 civici; per ogni civico zona, flag "stimata"/"doppia", coordinate in base 36 a 1e-4 gradi), `zone_approx.geojson` (coordinate arrotondate a 5 decimali), `analisi_mensile_zone.csv` (4.800 righe con file e riga di origine), `perdite_2018.csv`.
+
+**Scelte di contenuto**
+- Valori: numero = misurato; stringa `"<0.15"` = sotto soglia (mai 0, mai disegnato come valore: nei grafici e' un triangolo in una fascia a parte, con la soglia nel testo); `null` = mese non pubblicato o `-`; `"!..."` = illeggibile (non usato); `"?0"` = i 4 manganese scritti 0 (probabile sotto soglia non marcato, tolti dalle statistiche e disegnati come triangolo tratteggiato).
+- Scheda "etichetta": mediana e min-max di ott 2025 - set 2026 (12 mesi di calendario, 10 pubblicati: mancano nov 2025 e mag 2026), limite del file accanto ("limite di legge" / "valore consigliato" / "non previsto"). Dove un parametro e' sotto soglia in tutti i mesi (fluoruri) si scrive "sotto soglia (<0,15 mg/L)"; se e' misto ("sotto soglia in N mesi su M") non si calcola la mediana. Ogni numero ha un tooltip con mesi usati e file; sotto la scheda c'e' "Mesi e file usati".
+- Mappa: colore = mediana dei 12 mesi, scala tra il minimo e il massimo delle 4 zone (blu chiaro -> scuro, un solo colore); selettore con 13 parametri; didascalia "confini approssimati, ricostruiti dai civici"; marcatore blu sull'indirizzo cercato.
+- Tempo: serie mensili 2021-2026 per parametro e zona, linee solide fra mesi consecutivi e sottili tratteggiate fra mesi non consecutivi, fasce grigie sui mesi mancanti, cerchi vuoti + fascia azzurra su dic 2024, linee dei limiti solo se vicine ai dati. Stagionalita': un grafico con una linea per anno (2022-2026). **Risultato: nessuna stagionalita' regolare**: correlazione media tra anni -0,2/+0,2 per tutti i parametri (durezza -0,01, nitrati -0,04, calcio 0,06, residuo fisso 0,20 il massimo). Con 4 anni, valori ripetuti e il buco 2024 una stagionalita' debole non si vedrebbe comunque: la pagina lo dice.
+- Ricerca indirizzo: elenco compatto, ricerca per parole in qualsiasi ordine ("ettore ciccotti" = "Ciccotti Ettore", si possono scrivere anche via e numero insieme); se il civico non c'e': se la via e' in una sola zona si usa quella, altrimenti zona stimata dal civico piu' vicino. Avvisi: centro storico (entro 1 km dal Duomo), via che attraversa piu' zone (elenco dei tratti pari/dispari), zona stimata (4.247 civici), indirizzi doppi con zone diverse (3 chiavi). I nomi delle vie sono scritti come nel Comune ("Via Ciccotti Ettore"), con gli apostrofi finali trasformati in accenti ("Pieta'" -> "Pietà").
+- Perdite: 14,3% (2018) con tre cautele (un anno solo, unita' dedotte, riguarda la quantita' non la qualita').
+- Tono: nessun "migliore/peggiore/rischio": solo differenze tra acque conformi. Cloro residuo 0,2 segnato "da chiarire con MM"; sodio: il testo di MM lo chiama "valore massimo consigliato" (annotato).
+
+**Test**: server `milano-in-dati` porta 8796; 3 indirizzi di prova ok; console senza errori; larghezza 375 px senza scorrimento orizzontale della pagina (le tabelle scorrono nel loro riquadro).
+
+**Non fatto / da decidere**: collegamento dalla home (docs\index.html non toccato); la pagina non mostra i 7 valori trimestrali "Tutta Milano" 2018-2021 (restano nei file di lavoro); le coordinate dei civici sono a ~10 m.
