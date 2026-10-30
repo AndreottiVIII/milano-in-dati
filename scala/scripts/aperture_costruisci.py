@@ -316,7 +316,7 @@ HAND = {
  1951: "Prima apertura il 7 dicembre voluta da Victor de Sabata (in precedenza la stagione cominciava il 26 dicembre); trionfo milanese di Maria Callas [it.wikipedia 'Teatro alla Scala']",
  1952: "Maria Callas, Enzo Mascherini, Gino Penno, Italo Tajo nella registrazione dal vivo del 7/12/1952 [SBN]",
  1953: "Prima del 1953: apertura con 'La Wally' diretta da Giulini [lista WP e Wikidata]",
- 1954: "Prima regia lirica di Luchino Visconti; Maria Callas protagonista [en.wikipedia 'La vestale']",
+ 1954: "Prima regia lirica di Luchino Visconti; Maria Callas protagonista [en.wikipedia 'La vestale']; direttore Antonino Votto, non De Sabata come scrive la cronistoria SL: lo confermano la registrazione dal vivo del 7/12/1954 (Warner Classics) e i cataloghi NYPL; Victor de Sabata era allora direttore artistico del teatro; esordio alla Scala di Franco Corelli",
  1955: "Registrazione dal vivo del 7/12/1955: Callas, Del Monaco, Simionato; direttore Antonino Votto [SBN]; la tabella precedente del sito non aveva il direttore",
  1957: "Registrazione dal vivo del 7/12/1957: Callas, Di Stefano, Bastianini, Simionato [SBN]",
  1958: "Registrazione dal vivo del 7/12/1958: Birgit Nilsson, Di Stefano, Carteri [SBN]",
@@ -326,7 +326,7 @@ HAND = {
  1968: "Primo di due Don Carlo diretti da Abbado il 7 dicembre (1968 e 1977) [sito Scala 2023]",
  1969: "Registrazione dal vivo del 7/12/1969: Domingo, Ghiaurov, Kabaivanska [SBN]",
  1977: "Secondo Don Carlo diretto da Abbado il 7 dicembre [sito Scala 2023]",
- 1978: "Wikipedia segnala che questa NON sarebbe un'inaugurazione ma una replica nella stagione del bicentenario; la 'Stagioni liriche' la dà invece come prima del 7 dicembre. Una scheda SBN data al 7/12/1978 un Boris Godunov (Abbado), ma il sito della Scala (2022) data il Boris di Abbado e Ljubimov al 7/12/1979. Da verificare con l'archivio della Scala",
+ 1978: "Ripresa dell'allestimento di Strehler del 1971, dopo la tournée all'Opéra di Parigi (ottobre-novembre 1978). Il programma di sala della Scala indica «Prima rappresentazione 7 dicembre 1978» [teatrodel900.it, programma di sala]. La nota della lista WP («replica») va letta come ripresa di un vecchio allestimento, non come serata non inaugurale. La scheda SBN che data al 7/12/1978 un Boris Godunov è un errore di data: il Boris di Abbado e Ljubimov è del 7/12/1979 [sito Scala 2022]",
  1979: "Boris Godunov di Abbado e Ljubimov il 7 dicembre 1979, ricordato dalla stessa Scala nella pagina del Boris 2022",
  1981: "Prima rappresentazione 7 dicembre (8 recite) [SL]",
  1984: "Trasmessa in diretta alle 19,50 su Raiuno [SL]",
@@ -362,6 +362,16 @@ for y, (cod, txt, fonte) in CAST_EXTRA.items():
         df51.loc[i, "controlli"] = (df51.loc[i, "controlli"] + "; " if df51.loc[i, "controlli"] else "") + "cast: " + fonte
         if cod in ("WEB", "WPI", "WPE") and y not in (1955, 1957, 1963):
             df51.loc[i, "direttore_fonti"] += "+" + cod
+# 30/10/2026: cast dei due dubbi risolti online
+for _y, _txt, _src in [
+    (1954, "Maria Callas (Giulia); Franco Corelli (Licinio); Ebe Stignani (la Gran Vestale); Enzo Sordello (Cinna); Nicola Rossi-Lemeni (il Sommo Sacerdote)", "registrazione dal vivo 7/12/1954 (Warner Classics; catalogo NYPL); Operadis"),
+    (1978, "Piero Cappuccilli (Simon Boccanegra); Mirella Freni (Amelia); Nicolai Ghiaurov (Fiesco); Veriano Luchetti (Gabriele Adorno); Felice Schiavi (Paolo)", "programma di sala della Scala 1978 (teatrodel900.it)")]:
+    _i = df51.index[df51.anno == _y][0]
+    df51.loc[_i, "interpreti"] = _txt; df51.loc[_i, "interpreti_fonte"] = "WEB"
+    df51.loc[_i, "fonti"] = df51.loc[_i, "fonti"] + "+WEB"
+    df51.loc[_i, "direttore_fonti"] = df51.loc[_i, "direttore_fonti"] + "+WEB"
+    df51.loc[_i, "controlli"] = (df51.loc[_i, "controlli"] + "; " if df51.loc[_i, "controlli"] else "") + "cast: " + _src
+df51.loc[df51.anno == 1978, "note"] = ""
 for y, n in NOTE_EXTRA.items(): HAND[y] = (HAND[y] + "; " + n) if y in HAND else n
 for y, n in HAND.items():
     i = df51.index[df51.anno == y]
@@ -372,10 +382,11 @@ for y, n in HAND.items():
 df51.loc[df51.anno == 1953, "note"] = df51.loc[df51.anno == 1953, "note"].str.replace("Prima del 1953: apertura con 'La Wally' diretta da Giulini [lista WP e Wikidata]", "", regex=False).str.strip("; ")
 
 # ---------------------------------------------------------------- livello di documentazione 1951-2026
-log(1978, "titolo", "la lista WP dice che il 7/12/1978 non fu un'inaugurazione ma una replica; la cronistoria SL dice che fu la prima del 7 dicembre; una scheda SBN data al 7/12/1978 un Boris Godunov (non verificabile senza l'archivio della Scala)")
+log(1978, "titolo", "RISOLTO 30/10/2026: la lista WP parla di replica, la cronistoria SL di prima del 7 dicembre; il programma di sala della Scala (teatrodel900.it) indica prima rappresentazione 7 dicembre 1978: fu l'apertura, con la ripresa dell'allestimento 1971. La scheda SBN del Boris al 7/12/1978 è un errore di data (Boris: 7/12/1979)")
+log(1954, "direttore", "RISOLTO 30/10/2026: Votto, confermato da registrazione Warner Classics del 7/12/1954 e cataloghi NYPL; De Sabata nella cronistoria SL è un errore (era direttore artistico)")
 CONFL = {}
 for _y, _c, _t in LOG:
-    if _c in ("direttore", "regia", "titolo", "data") and " dice " in _t: CONFL.setdefault(_y, []).append(_c)
+    if _c in ("direttore", "regia", "titolo", "data") and " dice " in _t and not _t.startswith("RISOLTO") and _y not in (1954, 1978): CONFL.setdefault(_y, []).append(_c)
 def livello(r):
     if r["anno"] in CONFL and r["anno"] != 2020: return "con disaccordi tra le fonti"
     n_dir = len(r["direttore_fonti"].split("+")) if r["direttore_fonti"] else 0

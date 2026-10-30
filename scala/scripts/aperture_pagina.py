@@ -151,8 +151,8 @@ for y in sorted(byy):
         L.append(f"- **{y}** ({c}): {t}")
 L.append("\n## 3. Disaccordi decisi a mano\n")
 HANDL = [
- "- **1954, direttore della Vestale.** La cronistoria SL dice Victor de Sabata; la lista WP e Wikidata dicono Antonino Votto; en.wikipedia (registrazione del 1954) scrive Votto. Tenuto Votto.",
- "- **1978.** La lista WP annota che questa serata non sarebbe un'inaugurazione ma una replica (Simon Boccanegra nella stagione del bicentenario); la cronistoria SL la da' come prima del 7 dicembre. Una scheda SBN (BID PAV0199737) data al 7/12/1978 una registrazione dal vivo di Boris Godunov (Abbado) mentre il sito della Scala (pagina del Boris 2022) e it.wikipedia datano il Boris di Abbado e Ljubimov al 7 dicembre 1979. Lasciato Boccanegra 1978 con riserva (affidabilita media); da verificare con l'archivio della Scala.",
+ "- **1954, direttore della Vestale.** La cronistoria SL dice Victor de Sabata; la lista WP, Wikidata, en.wikipedia, la registrazione dal vivo del 7/12/1954 (Warner Classics) e i cataloghi NYPL dicono Antonino Votto. Risolto il 30/10/2026: Votto (De Sabata era il direttore artistico del teatro).",
+ "- **1978.** La lista WP annota «replica», la cronistoria SL la da' come prima del 7 dicembre. Risolto il 30/10/2026: il programma di sala della Scala (copia su teatrodel900.it) scrive «Prima rappresentazione 7 dicembre 1978». Fu l'apertura, con la ripresa dell'allestimento di Strehler del 1971 dopo la tournée a Parigi. La scheda SBN (BID PAV0199737) che data un Boris Godunov al 7/12/1978 sbaglia l'anno: il Boris di Abbado e Ljubimov e' del 7 dicembre 1979.",
  "- **1960.** SBN scrive «Franco Cordelli» per Franco Corelli: refuso.",
  "- **1963.** it.wikipedia «L'amico Fritz» data la registrazione del dittico (Gavazzeni, Freni, Raimondi) al «7 dicembre 1962»; SBN la data 7/12/1963 e la lista WP mette il dittico nel 1963. Preso il 1963; il 1962 e' un refuso.",
  "- **2003, regia.** La lista WP scrive «Luigi Ronconi»: refuso per Luca Ronconi (anche le altre fonti). La tabella precedente del sito riportava l'errore.",

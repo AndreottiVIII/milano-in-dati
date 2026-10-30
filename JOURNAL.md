@@ -1175,6 +1175,11 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
   - **Prima del 1951**: 174 aperture (26 dicembre / Carnevale) dal 1778, con l'affidabilità segnata (69 alta, 73 media, 27 bassa, 5 stagioni con il teatro chiuso).
   - **Classifiche**: Verdi 36 prime; direttori Muti 20, Chailly 12 (compreso il gala 2020), Abbado 10, Gavazzeni 9.
   - **Aperti**: cast mancante per 34 prime; dubbi sul 1954 (direttore della Vestale) e sul 1978 (apertura o replica?) in `aperture_differenze.md`.
+- 2026-10-30 — **Prime: risolti i due dubbi con ricerca online.**
+  - **1954**: il direttore della Vestale è Antonino Votto. Lo confermano la registrazione dal vivo del 7/12/1954 (Warner Classics, cataloghi NYPL), Wikidata, la lista WP ed en.wikipedia. La cronistoria SL scrive De Sabata, che però era il direttore artistico del teatro. È anche l'esordio alla Scala di Franco Corelli.
+  - **1978**: fu una vera apertura. Il programma di sala della Scala (copia su teatrodel900.it) scrive «Prima rappresentazione 7 dicembre 1978»: Simon Boccanegra di Abbado e Strehler, ripresa dell'allestimento del 1971 dopo la tournée all'Opéra di Parigi (ottobre-novembre 1978). La «replica» della lista WP va letta come ripresa di un vecchio allestimento. La scheda SBN PAV0199737 (Boris Godunov datato 7/12/1978) sbaglia l'anno: il Boris è del 7/12/1979.
+  - Aggiunti i cast di entrambe (1978 dal programma di sala, 1954 dalla registrazione). Ora 43 prime complete, 31 senza cast, 0 disaccordi aperti. Modifiche in `scripts/aperture_costruisci.py` (voci HAND, cast, log «RISOLTO») e `scripts/aperture_pagina.py`.
+  - **Trappola**: «replica» nella lista WP non vuol dire «serata non inaugurale». A volte indica solo un allestimento ripreso.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 
