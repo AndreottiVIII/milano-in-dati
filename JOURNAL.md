@@ -1826,6 +1826,11 @@ Dopo le correzioni:
 - Marcatori dal 2000 al 2025: oltre a it.wikipedia c'e' solo RSSSF (non in tutte le stagioni: mancano i minuti per molte partite 2012-2025) e le pagine edizione per alcune coppe. Sono quindi i meno controllati.
 - I gol delle partite 2025-26 hanno come controllo il file `full` di openfootball (minuti concordano).
 
+### Fase 2 — pagina (2026-10-30)
+
+- Pagina `docs/derby/`: 246 derby (Inter 91, pareggi 71, Milan 84; gol 341-324). I 2 del 1944 sono contati come fa Wikipedia, con la nota "solo a titolo onorifico"; senza, i derby sono 244.
+- Le partite non ufficiali sono 72 (non 73: Perth vale 1); compare solo il totale.
+- Dati pubblicati con licenza CC BY-SA 4.0; i dati di football-data.co.uk sono usati solo per i controlli e tolti dai file pubblici.
 
 ## 16. Da chi prendono il nome le fermate
 

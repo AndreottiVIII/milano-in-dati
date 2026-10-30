@@ -74,3 +74,27 @@ Dopo le correzioni:
 - Punteggio/data senza nessun controllo indipendente da Wikipedia: le 3 Supercoppe (2011, 2022, gennaio 2025: solo it.wikipedia, en.wikipedia e la pagina dell'edizione). Tutto il resto ha almeno un'altra fonte non Wikipedia (Almanacco Inter fino al 27/1/2000, poi football-data, engsoccerdata, openfootball, RSSSF).
 - Marcatori dal 2000 al 2025: oltre a it.wikipedia c'e' solo RSSSF (non in tutte le stagioni: mancano i minuti per molte partite 2012-2025) e le pagine edizione per alcune coppe. Sono quindi i meno controllati.
 - I gol delle partite 2025-26 hanno come controllo il file `full` di openfootball (minuti concordano).
+
+
+---
+
+# Fase 2 - la pagina `docs\derby\` (30 ottobre 2026)
+
+Pagina pubblica semplice come `docs\aria\` (nero su bianco; blu Inter, rosso Milan e grigio per i pareggi solo come colori dei dati). Anteprima: server "milano-in-dati", porta 8796, `http://127.0.0.1:8796/derby/`. Nessun errore in console, nessuno scorrimento orizzontale a 375 px. `docs\index.html` NON toccato (il link dalla home non c'e' ancora).
+
+## Come si rifa
+
+`python -I scripts\pagina_dati.py` (da `derby\`; opzionali: cartella derby, cartella di uscita). Legge `pulito\derby.csv`, `marcatori.csv`, `differenze.md`, `non_ufficiali_riepilogo.csv`, usa il modello `scripts\pagina_template.html` e riscrive tutto in `docs\derby\`: `index.html` e `data\` (`partite.json` per grafico ed elenco; `derby.csv`, `marcatori.csv` pubblici; `differenze.md`). Ogni numero del testo e' calcolato dal programma; ci sono controlli (246 derby, 91-71-84, 341-324, 663 gol con marcatore + 2 a tavolino).
+
+## Cosa c'e' nella pagina
+
+In breve (totali e per competizione); saldo cumulato Inter-Milan 1909-oggi (grafico SVG con passaggio del mouse/dito, pause senza derby a righe) + fasi lunghe + tabella per decennio; serie record (vittorie, imbattuto, senza pareggi, pareggi di fila), vittorie larghe (scarto >= 4), partite con piu' gol (>= 8); "Conta giocare in casa?" (prima/dopo il 1 gennaio 1947, 53 contro 189 derby, esclusi 3 campi neutri e il 2005 a tavolino, margini d'errore dichiarati, controprova invertendo le 4 etichette contestate); marcatori (>= 5 gol, autogol a parte); elenco ricercabile dei 246 derby; fonti e differenze.
+
+## Scelte da ricordare
+
+- Serie e saldo contano tutti i 246 derby di Wikipedia, 1944 e 2005 compresi (il 2005 resta vittoria del Milan, perche' stava gia' vincendo 0-1). Nota in pagina: senza i due derby del 1944 la serie senza pareggi di 13 sarebbe 11.
+- "Casa" prima/dopo il 1947: per il colore delle barre NON si usano blu/rosso (sarebbero scambiati per Inter/Milan): nero = casa, grigio = pareggio, bianco = ospite.
+- **Correzione di un numero della fase 1**: `non_ufficiali_riepilogo.csv` dava 73 partite non ufficiali (Tournee a Perth = 2); il totale di it.wikipedia e' **72**, quindi Perth vale 1. Nella pagina uso 72 e lo dico. Il CSV di fase 1 non e' stato modificato.
+- Licenza dei file pubblici in `docs\derby\data\`: dichiarata CC BY-SA 4.0 (partono dai fatti di Wikipedia). `derby.csv` pubblico toglie `sources_list`, `report_url` (link all'Almanacco Inter) e `official`. `differenze.md` pubblico toglie le righe che citano football-data.co.uk. Nessun dato di football-data ne' dell'Almanacco Inter e' ripubblicato.
+- Decennio 1909-1919 unisce il solo derby del 1909 agli anni Dieci.
+- Da decidere con Davide: aggiungere il link dalla home `docs\index.html`; pubblicazione (GitHub Pages) non fatta, niente git.
