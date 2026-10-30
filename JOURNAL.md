@@ -1164,6 +1164,12 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
     - Da verificare di persona: Tintori, "Cronologia" [1993?], e gli annuari EDT "Opera '87-2012".
   - **Programmi di sala**: il Conservatorio Verdi ha i programmi del 62% delle produzioni 1964-2022.
   - **Visita consigliata**: la biblioteca del Conservatorio Verdi.
+- 2026-10-30 — **Scala, tre lavori aggiunti**:
+  - **Registrazioni dal vivo dal catalogo SBN**: scaricate tutte le 2.994 schede, senza blocchi. 111 sono serate alla Scala (68 con il giorno, 89 con il direttore, 76 con i solisti); 98 entrano nel cartellone. 145 schede "registrate alla Scala" non dicono se dal vivo e sono escluse come dubbie.
+  - **Balli di Cambiasi**: 871 balli in 104 anni su 104, controllati su 3 stagioni.
+  - **Programmi su Internet Archive**: ne sono aperti solo 14, non circa 40.
+  - **Copertura 1946-2022**: righe con il giorno da 907 a 951, con il direttore da 369 a 423, con i solisti da 170 a 214.
+  - In pagina il coordinatore ha corretto due frasi superate: la media del Cambiasi, ora 18 titoli l'anno tra opere e balli, e la legenda SBN.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 

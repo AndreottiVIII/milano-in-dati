@@ -29,13 +29,15 @@ SRC = {
     "marangoni_vanbianchi_1922":    ("M", 5),
     "wikipedia_it_stagioni_liriche": ("W", 6),
     "wikidata_prime":               ("D", 7),
+    "ia_programmi":                 ("I", 1),     # programmi di sala 2002-2011 su Internet Archive (+ "alla Scala dal..." storici)
+    "sbn_registrazioni":            ("V", 1),     # registrazioni sonore dal vivo alla Scala (Catalogo SBN)
 }
 CODE = {k: v[0] for k, v in SRC.items()}
 PRIO = {v[0]: v[1] for v in SRC.values()}
-TITLE_PRIO = "SBWDRGCM"          # da quale fonte prendere il titolo (piu' pulito prima)
-CAST_PRIO = "SBWCRG"
-DATE_PRIO = "SBDWC"
-SEASON_PRIO = "SBGMWCR"
+TITLE_PRIO = "SIBWDRGCVM"          # da quale fonte prendere il titolo (piu' pulito prima)
+CAST_PRIO = "SIVBWCRG"
+DATE_PRIO = "SIBVDWC"
+SEASON_PRIO = "SIBVGMWCR"
 WITHHELD_ROWS = {"M"}            # solo conteggi
 RESTRICTED_KEEP = ("titolo", "autore", "stagione", "anno", "direttore")   # per ripubblicabile=no
 
@@ -125,7 +127,7 @@ def kind_of(genere, tipo=""):
         return "ospiti"
     if "non distinto" in g:
         return "opera/balletto"
-    if "balletto" in g or "tersicore" in g or "choreograph" in g:
+    if "balletto" in g or g.startswith("ballo") or "tersicore" in g or "choreograph" in g:
         return "balletto"
     if "ragazzi" in g:
         return "ragazzi"
@@ -401,7 +403,7 @@ for rec in pub:
         published_by_src[c] += n
 
 # ------------------------------------------------------------------ copertura.json (grafico: ogni titolo una volta, colore = fonte migliore)
-CLASS = {"S": "S", "B": "B", "C": "C", "R": "C", "G": "G", "M": "G", "W": "W", "D": "W"}
+CLASS = {"S": "S", "B": "B", "I": "B", "V": "B", "C": "C", "R": "C", "G": "G", "M": "G", "W": "W", "D": "W"}
 cov = {y: collections.Counter() for y in range(Y0, Y1 + 1)}
 cov_src = {y: collections.defaultdict(set) for y in range(Y0, Y1 + 1)}
 for rec in ALLG:
@@ -438,7 +440,7 @@ json.dump(dict(anni=anni, periodi=periodi, anni_vuoti=vuoti), open(os.path.join(
           ensure_ascii=False, separators=(",", ":"))
 
 # ------------------------------------------------------------------ classifiche
-opere = [r for r in ALLG if r["kind"] not in ("concerto", "tournee", "ospiti") and r["nk"]]
+opere = [r for r in ALLG if r["kind"] not in ("concerto", "tournee", "ospiti") and r["nk"] and not (r["kind"] == "balletto" and r["anno"] <= 1881)]   # i balli di Cambiasi (1778-1881) non entrano nelle classifiche delle opere
 # cluster dei titoli (varianti ortografiche) per compositore; i gruppi senza compositore si agganciano al cluster piu' vicino nel tempo
 reps = []                     # (nk, ck, cid)
 byblock = collections.defaultdict(list)
@@ -562,9 +564,9 @@ FONTI = [
     dict(c="B", nome="Catalogo SBN - ICCU (programmi di sala)", dettaglio="schede bibliografiche dei programmi di sala della Scala, 1963-2024, cercate per anno e per stagione",
          licenza="Dati bibliografici del Servizio Bibliotecario Nazionale; citare: Catalogo SBN - ICCU (opac.sbn.it).", pubblicate="titolo, compositore, direttore, regia/coreografia, interpreti principali, data",
          note="Una riga per produzione, non per serata. Direttore, regia, coreografia e interpreti vengono dai nomi con ruolo della scheda e dal titolo: presenti solo per una parte dei programmi. Affidabilita media; bassa se l'anno viene solo dall'anno di stampa del programma o e' incerto. Non usati: %d libretti di stagione, %d schede da verificare, %d tournee, e le schede senza anno." % (sbn_info["libretti_stagione"], sbn_info["da_verificare"], sbn_info["tournee"])),
-    dict(c="C", nome="Cambiasi, Teatro alla Scala 1778-1881", dettaglio="serie delle opere in musica per stagione (Ricordi 1881), da testo OCR di Internet Archive",
-         licenza="Libro di pubblico dominio; si pubblicano i fatti estratti, non la scansione.", pubblicate="titolo, maestro, genere, data, interpreti (solo dove l'OCR e' buono)",
-         note="Non e' l'elenco delle sere: un titolo vale una volta per stagione. OCR con errori nei nomi; i balli non sono letti. Anni 1832 e 1835 vuoti."),
+    dict(c="C", nome="Cambiasi, Teatro alla Scala 1778-1881", dettaglio="serie delle opere in musica e serie dei balli per stagione (Ricordi 1881), da testo OCR di Internet Archive",
+         licenza="Libro di pubblico dominio; si pubblicano i fatti estratti, non la scansione.", pubblicate="opere: titolo, maestro, genere, data, interpreti (solo dove l'OCR e' buono); balli: titolo, coreografo, compositore, data",
+         note="Non e' l'elenco delle sere: un titolo vale una volta per stagione. OCR con errori nei nomi. Anni 1832 e 1835 vuoti per le opere. I balli (1778-1881, 104 anni su 104) sono letti dal testo a stagioni; controllo a mano su 3 stagioni; le prime ballerine non sono pubblicate."),
     dict(c="R", nome="Romani, Teatro alla Scala: cronologia di tutti gli spettacoli (1862)", dettaglio="stagione per stagione 1778-1862, da testo OCR",
          licenza="Libro di pubblico dominio; si pubblicano i fatti estratti.", pubblicate="titolo, maestro, genere", note="Letti 46 anni su 85: mancano quelli con intestazione illeggibile."),
     dict(c="G", nome="C. Gatti, Il Teatro alla Scala nella storia e nell'arte, vol. I (Ricordi, Milano 1964)", dettaglio="titoli citati come rappresentati nel racconto, 1882-1963",
@@ -579,6 +581,12 @@ FONTI = [
     dict(c="D", nome="Wikidata (query SPARQL del 29/10/2026)", dettaglio="'luogo della prima rappresentazione' (P4647) e 'luogo' (P276/P291) uguale al Teatro alla Scala, con data",
          licenza="CC0 (pubblico dominio).", pubblicate="titolo, compositore (dove c'e'), data, genere",
          note="Solo le voci con P4647 sono prime assolute (%d); le altre %d sono produzioni e sono segnate cosi'." % (sum(1 for r in rows if r["src"] == "D" and r["prima"] == 2), sum(1 for r in rows if r["src"] == "D" and r["prima"] != 2))),
+    dict(c="I", nome="Programmi di sala del Teatro alla Scala 2002-2011 (Internet Archive)", dettaglio="14 programmi aperti con testo OCR (opere, concerti, gala), piu' i capitoli 'alla Scala dal... al...' di 4 programmi (Carmen, Don Giovanni, L'elisir d'amore, Der Rosenkavalier) con data, direttore, regia di ogni produzione storica",
+         licenza="Edizioni del Teatro alla Scala, messe su Internet Archive: si pubblicano solo fatti (titolo, data, direttore, regia, solisti), non testi ne' pagine.", pubblicate="titolo, compositore, data, direttore, regia, interpreti (dove il testo li da' per ruolo)",
+         note="Affidabilita alta per i programmi, media per le produzioni storiche (OCR a colonne: i cast per ruolo non sono letti). La data e' quella della prima; le repliche sono lette solo dove l'OCR le tiene in ordine."),
+    dict(c="V", nome="Catalogo SBN - registrazioni sonore dal vivo alla Scala", dettaglio="schede di registrazioni sonore con la nota 'Registrazione dal vivo, Milano, Teatro alla Scala, <data>', lette per circa 3.000 candidati; tenute solo le esecuzioni alla Scala, non le incisioni in studio",
+         licenza="Dati bibliografici del Servizio Bibliotecario Nazionale; citare: Catalogo SBN - ICCU (opac.sbn.it).", pubblicate="titolo, compositore, data dell'esecuzione, direttore, interpreti",
+         note="E' la data dell'esecuzione registrata (una sera), non l'intera produzione. Affidabilita alta se la nota nomina il Teatro alla Scala e il giorno; media se il luogo e' solo 'Milano' con orchestra della Scala o la data e' solo mese/anno."),
 ]
 fonti = []
 for fd in FONTI:

@@ -7,7 +7,7 @@ import sys, os, csv, json, re, unicodedata, collections, datetime
 P = sys.argv[1]
 COLS = ["stagione", "data", "anno", "titolo", "autore", "genere", "direttore", "regista", "interpreti", "sala", "fonte", "affidabilita", "riga_fonte", "ripubblicabile"]
 rows = []
-def rd(fn): return list(csv.DictReader(open(os.path.join(P, fn), encoding="utf-8")))
+def rd(fn): return list(csv.DictReader(open(os.path.join(P, fn), encoding="utf-8-sig")))
 def add(**k):
     r = {c: "" for c in COLS}; r.update(k); rows.append(r)
 def title_case_name(s):
@@ -22,6 +22,49 @@ for x in rd("_cambiasi_pulito.csv"):
     aff = "media" if conf >= 45 else "bassa"
     add(stagione=x["stagione"], data=x["data"], anno=x["anno"], titolo=x["titolo"], autore=x["autore"], genere=x["genere"] + (" (scritta per la Scala)" if x["prima_per_la_scala"] else ""),
         interpreti=x["interpreti"], sala=SALA, fonte="cambiasi_1881", affidabilita=aff, riga_fonte=x["riga_fonte"], ripubblicabile="si")
+# ---- Cambiasi 1881, serie dei balli (scripts/parse_cambiasi_balli.py -> pulito/_cambiasi_balli.csv). Il coreografo va in 'regista' come "coreografia X" (come per SBN); le prime ballerine non si pubblicano.
+if os.path.exists(os.path.join(P, "_cambiasi_balli.csv")):
+    for x in rd("_cambiasi_balli.csv"):
+        t = x["titolo"]
+        junk = bool(re.search(r"\d", t)) or len(t) < 4
+        add(stagione=x["stagione"], data=x["data"], anno=x["anno"], titolo=t, autore="" if x["compositore"] == "vari autori" else x["compositore"], genere="ballo",
+            regista=("coreografia " + x["coreografo"]) if x["coreografo"] else "", sala=SALA, fonte="cambiasi_1881", affidabilita="bassa" if junk else "media",
+            riga_fonte=x["riga_fonte"], ripubblicabile="si")
+# ---- Programmi di sala 2002-2011 aperti su Internet Archive (pulito/ia_programmi_2002_2011.csv) + produzioni storiche "alla Scala dal..." in quei programmi
+def stag_da_data(d):
+    if not re.match(r"^\d{4}-\d\d", d or ""): return ""
+    y, mo = int(d[:4]), int(d[5:7])
+    return "%d-%02d" % (y if mo >= 9 else y - 1, (y + 1 if mo >= 9 else y) % 100) if y >= 1900 else ""
+if os.path.exists(os.path.join(P, "ia_programmi_2002_2011.csv")):
+    visti = set()
+    for x in rd("ia_programmi_2002_2011.csv"):
+        d = x["data_prima"]
+        if not re.match(r"^\d{4}-\d\d-\d\d$", d) or (x["titolo"], d) in visti: continue
+        visti.add((x["titolo"], d))
+        conc = x["tipo"] == "concerto"
+        add(stagione=stag_da_data(d), data=d, anno=d[:4], titolo=x["titolo"], autore=x["compositore"], genere="concerto (programma di sala)" if conc else "opera",
+            direttore=x["direttore"], regista=x["regia"], interpreti=x["interpreti"], sala="Teatro degli Arcimboldi" if "2002-2003" in x["identificativo"] else SALA,
+            fonte="ia_programmi", affidabilita="alta", riga_fonte="Internet Archive, programma di sala: " + x["url"], ripubblicabile="si")
+if os.path.exists(os.path.join(P, "ia_programmi_storico_alla_scala.csv")):
+    for x in rd("ia_programmi_storico_alla_scala.csv"):
+        d = x["data"] if re.match(r"^\d{4}-\d\d-\d\d$", x["data"]) else ""
+        add(stagione=stag_da_data(x["data"]), data=d, anno=x["anno"], titolo=x["opera"], autore=x["compositore"], genere="opera", direttore=x["direttore"], regista=x["regia"], sala=SALA,
+            fonte="ia_programmi", affidabilita="media", riga_fonte="Internet Archive, programma di sala (capitolo 'alla Scala dal...'): " + x["url"], ripubblicabile="si")
+# ---- Registrazioni dal vivo alla Scala (catalogo SBN; sbn/sbn_registrazioni.csv, solo esecuzioni al Teatro alla Scala con data o anno)
+RX_CONC = re.compile(r"^(sinfonia|concerto|messa|requiem|sonata|ouverture|pagine|recital|quartetto|serenata|suite|pezzi)\b", re.I)
+SBN_REG = os.path.join(P, "..", "sbn", "sbn_registrazioni.csv")
+if os.path.exists(SBN_REG):
+    for x in csv.DictReader(open(SBN_REG, encoding="utf-8-sig")):
+        if x["luogo_certezza"] not in ("esplicito", "esplicito (titolo)", "probabile") or x["data_tipo"] not in ("giorno", "mese", "anno"): continue
+        d = x["data_registrazione"]
+        anno = d[:4]
+        op = re.sub(r"\s*:\s.*$", "", x["opera"]).strip()
+        op = re.sub(r"\s*\[.*?\]", "", op).strip()
+        if not op or len(op) < 3: continue
+        aff = "alta" if (x["data_tipo"] == "giorno" and x["luogo_certezza"].startswith("esplicito")) else "media"
+        add(stagione=stag_da_data(d) if x["data_tipo"] != "anno" else "", data=d if x["data_tipo"] == "giorno" else "", anno=anno, titolo=op, autore=x["compositore"],
+            genere="concerto (registrazione dal vivo)" if RX_CONC.match(op) else "opera (registrazione dal vivo)", direttore=x["direttore"], interpreti=x["interpreti"],
+            sala=SALA, fonte="sbn_registrazioni", affidabilita=aff, riga_fonte="Catalogo SBN, registrazione sonora: " + x["url"], ripubblicabile="si")
 # ---- Romani 1862
 for x in rd("_romani_opere.csv"):
     add(stagione=(x["stagione_nome"] + " " + x["anno"]).strip(), anno=x["anno"], titolo=x["titolo"], autore=x["autore"], genere=x["genere"], sala=SALA,
@@ -113,7 +156,7 @@ for r in rows:
     except ValueError: continue
     k = key(r["titolo"])
     if len(k) >= 3: KEYSRC[a][r["fonte"]].add(k)
-fonti = ["cambiasi_1881", "romani_1862", "wikipedia_it_stagioni_liriche", "wikidata_prime", "marangoni_vanbianchi_1922", "gatti_vol1", "scala_sito_pubblico"]
+fonti = ["cambiasi_1881", "romani_1862", "wikipedia_it_stagioni_liriche", "wikidata_prime", "marangoni_vanbianchi_1922", "gatti_vol1", "scala_sito_pubblico", "ia_programmi", "sbn_registrazioni"]
 with open(os.path.join(P, "copertura.csv"), "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
     w.writerow(["anno", "titoli_distinti_tutte_le_fonti", "righe_tutte_le_fonti"] + ["titoli_" + s for s in fonti] + ["fonti_presenti", "nota"])
