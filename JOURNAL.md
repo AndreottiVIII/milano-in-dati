@@ -18,6 +18,7 @@ Ogni problema trovato nei dati va annotato: diventa materiale per la rubrica "tr
   - Lombardia Film Commission ed eventuali permessi per le riprese del Comune (da verificare).
   - Da non usare: IMDb, perché i luoghi delle riprese non sono nei file scaricabili e leggere il sito pagina per pagina non è permesso.
   - Limite: le fonti dicono raramente dove, dentro Milano.
+- 2026-10-30 — **Grafica della home**: 12 bozze quadrate in `bozze-home/`, fatte con la mappa vera dei NIL e i numeri del sito. Davide tiene da parte 1 mosaico, 2 metro, 6 tabellone di Centrale e 9 insegne al neon: "poi vediamo".
 
 ## 1. Temperature (Milano Brera, dal 1763)
 
