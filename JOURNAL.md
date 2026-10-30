@@ -1898,6 +1898,19 @@ Data del lavoro: 30/10/2026. FASE 1: raccolta e classificazione, nessun grafico,
 
 `cd nomi-fermate` poi `python -I scripts\01_metro.py raw\metro_stops_gtfs.csv` (come da STATO.md), poi 02, 03, 03b, 05, 07 (Wikidata), poi `06_build_metro.py`, `08_tram_stops.py raw\tram_stops_gtfs.csv`, `09_build_tram.py`, `10_riepilogo.py`.
 
+### Fase 2 — decisioni e pagina (2026-10-30)
+
+- Decisioni di Davide sulle 27 stazioni dubbie: tutti i consigli del coordinatore (`pulito/decisioni_davide.csv`, applicate da `scripts/11_applica_decisioni.py`).
+  - Località come luogo.
+  - Argonne, Coni Zugna, Moscova, Repubblica, Sesto 1° Maggio come evento.
+  - Bolivar, Dateo, Inganni, Sforza come persona.
+  - Romolo come persona leggendaria.
+  - Santa Sofia come santa.
+  - Cordusio e Tre Torri come edificio.
+  - Gelsomini e Tricolore come altro.
+- **Risultato**: tra le 33 persone reali c'è una sola donna (Veronica Gambara, M1) e ci sono 32 uomini. 5 santi e Romolo sono contati a parte. Su 125 stazioni, 33 (26,4%) ricordano una persona reale.
+- Tram: le 79 righe incerte restano "da verificare". Pagina `docs/nomi-fermate/` pubblicata.
+
 ## 17. Dove vanno i soldi del Comune
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `bilancio-comune/` (nome scelto da Davide)._

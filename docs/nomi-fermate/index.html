@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · A chi sono intitolate le fermate</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#c2185b;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} .big{font-size:2.2rem;font-weight:700;color:var(--acc);line-height:1.15} .sub{font-size:.85rem;color:var(--mut)}
+.src{font-size:.8rem;color:var(--mut)} a{color:var(--acc)} .back{font-size:.9rem;text-decoration:none}
+#map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)} #map{height:68vh;min-height:380px;border:1px solid var(--ink)}
+.scroll{overflow:auto;border:1px solid var(--line)} .scroll.tall{max-height:480px} tr.tot td{font-weight:700;border-top:2px solid var(--ink)}
+.lead{font-size:1.1rem} .head{border:2px solid var(--ink);padding:14px 16px;margin:14px 0}
+.leg{display:flex;flex-wrap:wrap;gap:6px 10px;margin:8px 0;padding:0;list-style:none}
+.leg button{font:inherit;font-size:.88rem;background:#fff;border:1px solid var(--ink);padding:3px 9px 3px 7px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--ink)}
+.leg button.off{opacity:.35;text-decoration:line-through}
+.sw{display:inline-block;width:12px;height:12px;flex:none;border:2px solid var(--ink)}
+.sw.donna{background:var(--acc);border-color:var(--acc);border-radius:50%}
+.sw.uomo{background:#111;border-radius:50%}
+.sw.leggendaria{background:#fff;border-radius:50%;border-style:dashed}
+.sw.santo{background:#777;border-color:#777;transform:rotate(45deg) scale(.85)}
+.sw.luogo{background:#d4d4d4;border-color:#999;border-radius:50%}
+.sw.evento{background:#999;border-color:#999;transform:rotate(45deg) scale(.85)}
+.sw.edificio{background:#fff;border-color:#111}
+.sw.altro{background:#fff;border-color:#999;border-radius:50%}
+.mk{display:block;border:2px solid #111;width:12px;height:12px;box-sizing:border-box}
+.mk.donna{background:var(--acc);border-color:#fff;border-radius:50%;width:20px;height:20px;box-shadow:0 0 0 2px var(--acc)}
+.mk.uomo{background:#111;border-color:#fff;border-radius:50%;box-shadow:0 0 0 1px #111}
+.mk.leggendaria{background:#fff;border-radius:50%;border-style:dashed}
+.mk.santo{background:#777;border-color:#fff;transform:rotate(45deg);box-shadow:0 0 0 1px #777}
+.mk.luogo{background:#d4d4d4;border-color:#888;border-radius:50%;width:10px;height:10px}
+.mk.evento{background:#999;border-color:#fff;transform:rotate(45deg);box-shadow:0 0 0 1px #999}
+.mk.edificio{background:#fff;border-color:#111}
+.mk.altro{background:#fff;border-color:#999;border-radius:50%;width:10px;height:10px}
+.pop b{font-size:1rem} .pop .c{color:var(--mut);font-size:.85rem} .pop .ch{margin:4px 0;font-size:.88rem} .pop i{color:var(--mut)}
+details{margin:.6em 0} summary{cursor:pointer;font-weight:600}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+@media(max-width:640px){.big{font-size:1.7rem} th,td{padding:5px 4px;font-size:.86rem}}
+</style></head><body><main>
+<a class="back" href="../">&larr; Milano in dati</a>
+<h1>A chi sono intitolate le fermate di Milano?</h1>
+<p class="lead">Il nome di una fermata del metro ricorda spesso una persona, ma di rado una donna. Qui il conto per le 125 stazioni del metro, la mappa e un confronto con il tram.</p>
+
+<div class="head" id="head">Caricamento&hellip;</div>
+
+<h2>La mappa delle stazioni</h2>
+<p class="src">Ogni punto &egrave; una stazione, colorata per categoria. Clic su un punto per vedere a chi (o a che cosa) &egrave; intitolata e come il nome arriva alla stazione. I pulsanti accendono e spengono le categorie; le stazioni dell&rsquo;hinterland (Cernusco, Gessate, Gorgonzola, Rho, Assago&hellip;) sono fuori dall&rsquo;inquadratura iniziale.</p>
+<ul class="leg" id="leg"></ul>
+<div id="map" role="img" aria-label="Mappa del metro di Milano con le stazioni colorate per categoria del nome"></div>
+
+<h2>Per categoria e per linea</h2>
+<div class="scroll"><table id="t-cat"></table></div>
+<p class="src" id="t-cat-n"></p>
+
+<h2>Le persone: mestiere e secolo di nascita</h2>
+<p class="src">Solo le persone reali (senza i santi e senza Romolo). Per ogni gruppo: uomini / donne. Il mestiere &egrave; il primo citato nella descrizione su Wikidata (o nel registro delle vie), raggruppato per parole chiave: &egrave; un&rsquo;approssimazione. Il tram &egrave; contato per denominazione di strada, non per fermata.</p>
+<div class="scroll"><table id="t-mes"></table></div>
+<br>
+<div class="scroll"><table id="t-sec"></table></div>
+
+<h2>E il tram?</h2>
+<div id="tram"></div>
+<div class="scroll tall"><table id="t-tram"></table></div>
+<p class="src" id="tram-n"></p>
+<p>Per un confronto con le strade di tutta la citt&agrave; vedi <a href="../vie/">Quante vie di Milano sono intitolate a donne?</a></p>
+
+<h2>I casi incerti</h2>
+<details><summary id="sum-metro">Metro: stazioni dubbie, decise a mano</summary>
+<p class="src">Dubbi emersi nella raccolta, risolti con una decisione esplicita. Dove la decisione cambia la categoria rispetto alla regola automatica lo dice la colonna &laquo;Prima&raquo;.</p>
+<div class="scroll tall"><table id="t-dec"></table></div></details>
+<details><summary id="sum-tram">Tram: righe ancora da verificare (non decise)</summary>
+<p class="src">Queste righe restano segnalate: sono incluse nei conteggi con la categoria provvisoria indicata.</p>
+<div class="scroll tall"><table id="t-dub"></table></div></details>
+
+<h2>Fonti e metodo</h2>
+<ul class="src">
+<li><b>Fermate</b>: orari ATM (GTFS) pubblicati dal Comune di Milano, licenza CC BY, versione del 26/10/2026. Metro = linee M1-M5, 130 fermate fisiche unite in 125 stazioni; tram = 17 linee, 724 fermate fisiche.</li>
+<li><b>A chi &egrave; intitolato</b>: Wikidata (CC0), propriet&agrave; &laquo;intitolato a&raquo; (P138). Si segue la catena stazione &rarr; via o piazza &rarr; persona, solo attraverso vie, piazze, porte e stazioni ferroviarie. Una stazione intitolata a un quartiere o a un edificio resta luogo o edificio.</li>
+<li><b>Controllo e tram</b>: il registro delle vie e le decisioni del filone <a href="../vie/">vie intitolate a donne</a> (da dati del Comune e OpenStreetMap, ODbL). I nomi delle fermate del tram sono incroci: ogni strada &egrave; contata una volta come denominazione.</li>
+<li><b>Mappa</b>: tasselli &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (ODbL).</li>
+<li><b>Santi</b> contati a parte; <b>Romolo</b> (figura leggendaria) a parte dalle persone reali. Si contano le stazioni, non i passeggeri. Dati: <a href="data/stazioni_metro.csv">stazioni_metro.csv</a>, <a href="data/riepilogo.json">riepilogo.json</a>, <a href="data/tram.json">tram.json</a>.</li>
+</ul>
+<footer>Milano in dati &middot; filone &laquo;a chi sono intitolate le fermate&raquo; &middot; dati del 30/10/2026.</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
+function $(id) { return document.getElementById(id); }
+function J(u) { return fetch(u, {cache: 'no-cache'}).then(function(r) { if (!r.ok) throw new Error(u); return r.json(); }); }
+function nf(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function pct(a, b) { return b ? (100 * a / b).toFixed(1).replace('.', ',') + '%' : ''; }
+var CAT = [
+  ['donna', 'persona: donna'], ['uomo', 'persona: uomo'], ['leggendaria', 'persona leggendaria (Romolo)'], ['santo', 'santo / santa'],
+  ['luogo', 'luogo'], ['evento', 'evento / data'], ['edificio', 'edificio / istituzione'], ['altro', 'altro']
+];
+var CATN = {}; CAT.forEach(function(c) { CATN[c[0]] = c[1]; });
+var SECO = ['prima di Cristo', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'];
+function secOrd(s) { return s === 'non noto' ? 99 : SECO.indexOf(s.replace(' secolo', '')); }
+function vita(v) {
+  if (!v) return '';
+  var p = v.split('–');
+  function f(x) { if (!x) return '?'; var n = parseInt(x, 10); return n < 0 ? (-n) + ' a.C.' : String(n); }
+  return f(p[0]) + '–' + f(p[1]);
+}
+
+function headline(R) {
+  var s = R.santi, sant = s.uomini + s.donne;
+  $('head').innerHTML = '<span class="big">1 donna su ' + R.persone_reali + ' persone</span>' +
+    '<p style="margin:.3em 0 0">Tra le persone a cui sono intitolate le stazioni del metro di Milano c&rsquo;&egrave; ' + (R.donne === 1 ? 'una sola donna' : R.donne + ' donne') +
+    ': <b>' + esc(R.donne_nomi.join(', ')) + '</b> (stazione Gambara, M1). Gli uomini sono ' + R.uomini + '.</p>' +
+    '<p class="sub" style="margin:.4em 0 0">Sono contati a parte ' + sant + ' santi (' + s.uomini + ' uomini e ' + s.donne + ' ' + (s.donne === 1 ? 'santa: ' : 'sante: ') + esc(s.donne_nomi.join(', ')) + ') e ' +
+    esc(R.leggendarie.join(', ')) + ', figura leggendaria. Le altre stazioni sono intitolate a luoghi, eventi, edifici e simili. Su 125 stazioni, ' + R.persone_reali + ' (' + pct(R.persone_reali, R.stazioni) + ') ricordano una persona reale.</p>';
+}
+
+function tabCat(R) {
+  var L = ['M1', 'M2', 'M3', 'M4', 'M5'];
+  var h = '<tr><th>Categoria del nome</th><th class="r">Stazioni</th>' + L.map(function(l) { return '<th class="r">' + l + '</th>'; }).join('') + '</tr>';
+  CAT.forEach(function(c) {
+    var t = R.tab[c[0]];
+    h += '<tr><td><span class="sw ' + c[0] + '"></span> ' + c[1] + '</td><td class="r">' + t.tot + '</td>' + L.map(function(l) { return '<td class="r">' + t[l] + '</td>'; }).join('') + '</tr>';
+  });
+  h += '<tr class="tot"><td>Tutte le stazioni</td><td class="r">' + R.stazioni + '</td>' + L.map(function(l) { return '<td class="r">' + R.linee_tot[l] + '</td>'; }).join('') + '</tr>';
+  $('t-cat').innerHTML = h;
+  $('t-cat-n').textContent = 'Una stazione che serve due linee (per esempio Cadorna: M1 e M2) è contata in entrambe le colonne di linea, ma una volta sola nel totale.';
+}
+
+function merge(a, b, ord) {
+  var m = {};
+  a.forEach(function(x) { m[x[0]] = {k: x[0], mu: x[1], md: x[2], tu: 0, td: 0}; });
+  b.forEach(function(x) { m[x[0]] = m[x[0]] || {k: x[0], mu: 0, md: 0, tu: 0, td: 0}; m[x[0]].tu = x[1]; m[x[0]].td = x[2]; });
+  var arr = Object.keys(m).map(function(k) { return m[k]; });
+  arr.sort(ord);
+  return arr;
+}
+function tabMerge(id, first, rows, tot) {
+  var h = '<tr><th>' + first + '</th><th class="r">Metro uomini</th><th class="r">Metro donne</th><th class="r">Tram uomini</th><th class="r">Tram donne</th></tr>';
+  var s = [0, 0, 0, 0];
+  rows.forEach(function(r) {
+    h += '<tr><td>' + esc(r.k) + '</td><td class="r">' + r.mu + '</td><td class="r">' + (r.md ? '<b style="color:var(--acc)">' + r.md + '</b>' : 0) + '</td><td class="r">' + r.tu + '</td><td class="r">' + (r.td ? '<b style="color:var(--acc)">' + r.td + '</b>' : 0) + '</td></tr>';
+    s[0] += r.mu; s[1] += r.md; s[2] += r.tu; s[3] += r.td;
+  });
+  h += '<tr class="tot"><td>Totale</td>' + s.map(function(x) { return '<td class="r">' + x + '</td>'; }).join('') + '</tr>';
+  $(id).innerHTML = h;
+}
+function tabMestSec(R, T) {
+  var m = merge(R.mestieri, T.mestieri, function(a, b) { return (b.mu + b.md + b.tu + b.td) - (a.mu + a.md + a.tu + a.td); });
+  var nc = m.filter(function(r) { return r.k === 'non classificato'; });
+  m = m.filter(function(r) { return r.k !== 'non classificato'; }).concat(nc);
+  tabMerge('t-mes', 'Mestiere (gruppo)', m);
+  var s = merge(R.secoli, T.secoli, function(a, b) { return secOrd(a.k) - secOrd(b.k); });
+  tabMerge('t-sec', 'Secolo di nascita', s);
+}
+
+function tramSez(T) {
+  function cnt(k) { return T.categorie.filter(function(c) { return c[0] === k; })[0][1]; }
+  $('tram').innerHTML = '<p>Le fermate del tram hanno nomi di incroci. Le ' + nf(T.fermate_fisiche) + ' fermate danno <b>' + T.denominazioni + ' nomi di strade e luoghi</b>. Tra le <b>' + T.persone + ' strade intitolate a persone</b>, ' + T.donne + ' ricordano donne (' + pct(T.donne, T.persone) + '): ' + esc(T.donne_nomi.join(', ')) + '. ' +
+    'Tra i santi: ' + T.santi.uomini + ' uomini e ' + T.santi.donne + ' sante.</p>' +
+    '<p class="src"><b>Quanto &egrave; incerto</b>: ' + T.dubbi + ' denominazioni su ' + T.denominazioni + ' (' + pct(T.dubbi, T.denominazioni) + ') sono ancora da verificare, e ' + T.persone_dubbie + ' delle ' + T.persone + ' persone. Qui non c&rsquo;&egrave; stata una revisione a mano come per il metro. ' +
+    'Le ' + cnt('non classificato') + ' denominazioni non classificate e le ' + cnt('luogo/altro (non persona)') + ' di &laquo;luogo / altro&raquo; potrebbero contenere altre persone: la quota di donne &egrave; quindi indicativa.</p>';
+  var h = '<tr><th>Categoria (tram)</th><th class="r">Denominazioni</th><th class="r">Fermate che le contengono</th><th class="r">Da verificare</th><th class="r">Quota incerta</th></tr>';
+  var td = 0, tf = 0, tb = 0;
+  T.categorie.forEach(function(c) {
+    h += '<tr><td>' + esc(c[0]) + '</td><td class="r">' + c[1] + '</td><td class="r">' + c[2] + '</td><td class="r">' + c[3] + '</td><td class="r">' + pct(c[3], c[1]) + '</td></tr>';
+    td += c[1]; tf += c[2]; tb += c[3];
+  });
+  h += '<tr class="tot"><td>Tutte</td><td class="r">' + td + '</td><td class="r">' + tf + '</td><td class="r">' + tb + '</td><td class="r">' + pct(tb, td) + '</td></tr>';
+  $('t-tram').innerHTML = h;
+  $('tram-n').textContent = 'Una fermata d’incrocio compare in due denominazioni, quindi la somma delle fermate supera le ' + T.fermate_fisiche + ' fisiche.';
+}
+
+function decise(R) {
+  $('sum-metro').textContent = 'Metro: ' + R.decise + ' stazioni dubbie, decise a mano';
+  var h = '<tr><th>Stazione</th><th>Categoria decisa</th><th>Motivo</th></tr>';
+  R.decise_elenco.forEach(function(d) { h += '<tr><td>' + esc(d[0]) + '</td><td>' + esc(d[1]) + '</td><td>' + esc(d[2]) + '</td></tr>'; });
+  $('t-dec').innerHTML = h;
+}
+function dubbi(T) {
+  $('sum-tram').textContent = 'Tram: ' + T.dubbi + ' righe ancora da verificare (non decise)';
+  var h = '<tr><th>Denominazione</th><th>Linee</th><th>Categoria provvisoria</th><th>Persona</th><th>Dubbio</th></tr>';
+  T.dubbi_elenco.forEach(function(d) { h += '<tr><td>' + esc(d[0]) + '</td><td>' + esc(d[1]) + '</td><td>' + esc(d[2]) + '</td><td>' + esc(d[3]) + '</td><td>' + esc(d[4]) + '</td></tr>'; });
+  $('t-dub').innerHTML = h;
+}
+
+function popup(s) {
+  var h = '<div class="pop"><b>' + esc(s.n) + '</b> <span class="c">' + esc(s.l.join(', ')) + '</span><br><span class="c">' + esc(CATN[s.k]) + (s.sc && s.k !== 'donna' && s.k !== 'uomo' ? ' &middot; ' + esc(s.sc) : '') + '</span>';
+  if (s.p) {
+    h += '<br><b>' + esc(s.p) + '</b>';
+    var v = vita(s.v); if (v) h += ' (' + esc(v) + ')';
+    if (s.m) h += '<br>' + esc(s.m.split(',').slice(0, 3).join(','));
+  }
+  if (s.catena.length > 1) h += '<div class="ch">' + s.catena.map(esc).join(' &rarr; ') + '</div>';
+  var lk = [];
+  if (s.wp) lk.push('<a href="' + esc(s.wp) + '" target="_blank" rel="noopener">Wikipedia' + (s.p ? '' : ': ' + esc(s.wpt)) + '</a>');
+  if (s.qid) lk.push('<a href="https://www.wikidata.org/wiki/' + esc(s.qid) + '" target="_blank" rel="noopener">Wikidata ' + esc(s.qid) + '</a>');
+  if (lk.length) h += '<div>' + lk.join(' &middot; ') + '</div>';
+  if (s.qid && s.qtipo !== 'persona' && s.p === '') h += '<div class="c">il link porta alla voce collegata al nome, non sempre alla persona</div>';
+  if (s.dec) h += '<div class="c"><i>caso dubbio, classificato a mano: ' + esc(s.dec) + '</i></div>';
+  return h + '</div>';
+}
+
+function mappa(S) {
+  var map = L.map('map').setView([45.4642, 9.19], 11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  var groups = {}, on = {}, pts = [];
+  CAT.forEach(function(c) { groups[c[0]] = L.layerGroup().addTo(map); on[c[0]] = true; });
+  S.forEach(function(s) {
+    var big = s.k === 'donna' ? 20 : (s.k === 'luogo' || s.k === 'altro' ? 10 : 12);
+    var ic = L.divIcon({className: '', html: '<span class="mk ' + s.k + '"></span>', iconSize: [big, big], iconAnchor: [big / 2, big / 2]});
+    var m = L.marker([s.lat, s.lon], {icon: ic, title: s.n, zIndexOffset: s.k === 'donna' ? 1000 : (s.k === 'luogo' ? 0 : 400), keyboard: true});
+    m.bindPopup(popup(s), {maxWidth: 300});
+    m.addTo(groups[s.k]); pts.push([s.lat, s.lon]);
+  });
+  map.setView([45.4700, 9.1750], 12);
+  var n = {}; S.forEach(function(s) { n[s.k] = (n[s.k] || 0) + 1; });
+  $('leg').innerHTML = CAT.map(function(c) { return '<li><button type="button" data-k="' + c[0] + '" aria-pressed="true"><span class="sw ' + c[0] + '"></span>' + c[1] + ' (' + (n[c[0]] || 0) + ')</button></li>'; }).join('');
+  $('leg').addEventListener('click', function(e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var k = b.getAttribute('data-k'); on[k] = !on[k];
+    if (on[k]) groups[k].addTo(map); else map.removeLayer(groups[k]);
+    b.classList.toggle('off', !on[k]); b.setAttribute('aria-pressed', on[k]);
+  });
+}
+
+Promise.all([J('data/riepilogo.json'), J('data/tram.json'), J('data/stazioni.json')]).then(function(a) {
+  var R = a[0], T = a[1], S = a[2];
+  headline(R); tabCat(R); tabMestSec(R, T); tramSez(T); decise(R); dubbi(T); mappa(S);
+}).catch(function(e) {
+  $('head').textContent = 'Dati non caricati.';
+  if (window.console) console.warn(e);
+});
+</script></body></html>

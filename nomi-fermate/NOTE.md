@@ -1,6 +1,6 @@
 # NOTE - A chi sono intitolate le fermate (filone 16)
 
-Data del lavoro: 30/10/2026. FASE 1: raccolta e classificazione, nessun grafico, nessuna pagina.
+Data del lavoro: 30/10/2026. FASE 1: raccolta e classificazione. FASE 2: decisioni di Davide e pagina (in fondo).
 
 ## Fonti usate
 
@@ -55,3 +55,17 @@ Data del lavoro: 30/10/2026. FASE 1: raccolta e classificazione, nessun grafico,
 ## Come rifare tutto
 
 `cd nomi-fermate` poi `python -I scripts\01_metro.py raw\metro_stops_gtfs.csv` (come da STATO.md), poi 02, 03, 03b, 05, 07 (Wikidata), poi `06_build_metro.py`, `08_tram_stops.py raw\tram_stops_gtfs.csv`, `09_build_tram.py`, `10_riepilogo.py`.
+
+
+## FASE 2 (30/10/2026): decisioni di Davide e pagina
+
+- **Decisioni** (click di Davide, 29-30/10) sulle 27 stazioni dubbie: `pulito\decisioni_davide.csv` (una riga per stazione, con la nota). Le applica `scripts\11_applica_decisioni.py` (da lanciare dopo 06): scrive `pulito\fermate_metro_nomi_finale.csv` e `pulito\da_verificare_finale.csv` (ora vuoto). Si blocca se un dubbio non ha decisione. Mai modificare a mano gli output.
+- Cambiano di categoria solo: Argonne, Coni Zugna, Moscova (luogo -> evento/data) e Romolo (persona -> "persona leggendaria", contata a parte). Le altre 23 confermano la regola automatica.
+- **Conteggio dopo le decisioni**: 33 persone reali = 32 uomini + 1 donna (Veronica Gambara, M1). Piu' 5 santi (4 uomini, Santa Sofia) e Romolo a parte. Nota: il "33 uomini" del brief contava Romolo; senza Romolo gli uomini sono 32.
+- **Tram**: i 79 dubbi restano segnalati ("da verificare"), non decisi; la pagina ne mostra quota ed elenco.
+- `scripts\12_sitelinks.py`: link Wikipedia (it, poi en) dei QID, da Wikidata API -> `raw\wd_sitelinks.json`. Per luoghi/edifici il QID e' a volte quello dell'elemento collegato (via, stazione), non del luogo: la pagina scrive il titolo della pagina Wikipedia e avverte.
+- `scripts\13_dati_pagina.py`: costruisce `..\docs\nomi-fermate\data\` (stazioni.json con coordinate medie delle fermate GTFS, riepilogo.json, tram.json, stazioni_metro.csv). I numeri della pagina sono calcolati li' o nel JS, nessuno a mano.
+- **Pagina** `docs\nomi-fermate\index.html`: stile come `docs\vie\` (bianco/nero + un colore, Leaflet 1.9.4 cdnjs, tasselli OSM in grigio, fetch no-cache). Titolo, mappa con filtri per categoria, tabella categoria x linea, mestiere e secolo (metro e tram affiancati), tram con quota incerta, elenco casi incerti, fonti. Provata sul server "milano-in-dati" (8796), nessun errore in console. `docs\index.html` non toccato (il collegamento dalla home va aggiunto a parte).
+- Da sapere: il registro del filone 2 ha ancora Bolivar, Dateo e Romolo come "non persona" (non toccato). Dateo non ha anno di nascita certo: nella tabella dei secoli sta in "non noto".
+
+Per rifare la fase 2: 06, poi `python -I scripts\11_applica_decisioni.py`, `12_sitelinks.py` (solo se cambiano i QID), `13_dati_pagina.py`.
