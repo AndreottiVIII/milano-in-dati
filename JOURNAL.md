@@ -1358,6 +1358,13 @@ Dimensioni: tutta la cartella `raw\comune_milano` pesa circa 243 MB (il grosso s
 - **Reddito**: legame (Spearman, per CAP) di 0,54 con i servizi essenziali e di 0,88 con i soli extra. Il reddito conta poco per i servizi di base e molto per quelli in più. È un'associazione, non una causa.
 - **Trappole**: il file ospedali della Regione ha x e y scambiate, è del 2018 e ha 3 sedi sbagliate. Le posizioni sono prese dal Comune (ds683, 2023); l'indicazione del pronto soccorso viene da OSM ed è incompleta.
 
+- 2026-10-30 — **Esagoni cliccabili, esagoni premium, esagoni e reddito** (richiesta di Davide: i NIL restano la vista principale).
+  - Clic su un esagono: scheda con punteggio su 10 e su 20, civici, CAP e reddito del CAP, minuti mediani per ognuno dei 20 servizi.
+  - **Premium** = esagono in cui tutti i civici hanno 20 su 20 (media dei civici = 20). Sono 305 su 10.776, con 3.190 civici (5,6%). Sono in oro sulla mappa, in tutte e due le modalità.
+  - Programma `scripts/f5_esagoni_reddito.py`: CAP dell'esagono = quello della maggioranza dei civici. Esce `docs/citta-15-minuti/data/esagoni_cap.json` e `out/esagoni_cap_reddito.csv`.
+  - Risultati (Cascina Merlata esclusa): Spearman esagono-reddito del CAP 0,30 con i 10 essenziali e 0,71 con gli extra. Tutti i 305 premium sono nel terzo di esagoni con il reddito più alto: nessuno nei CAP sotto i 36.027 euro. Il 20122 Guastalla da solo ne ha 123. Quota della variabilità che sta tra un CAP e l'altro: 21% (10 essenziali), 53% (con gli extra).
+  - **Trappole**: il reddito è del CAP, non dell'esagono (legame «ecologico»); i CAP ricchi sono anche quelli centrali, quindi il reddito non si separa dalla centralità. Scritto sulla pagina.
+
 ## 10. Violenza politica a Milano dal 1900
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `violenza-politica/`._
