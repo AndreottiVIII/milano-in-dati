@@ -110,3 +110,36 @@ Fatta per sovrapposizione di aree (UTM 32N), con `scripts\05_zone_corrispondenza
 8. NTN: due serie con piccole differenze nel 2011-2016; 2025-2026 provvisorio; 2026 con soli 2 trimestri.
 9. Download delle quotazioni: una volta sola, entro 7 giorni.
 10. M2 Abbiategrasso: due date diverse nella stessa voce Wikipedia.
+
+
+---
+
+# Fase 2 (30/10/2026): quotazioni OMI prese dal servizio PUBBLICO, senza SPID
+
+## In breve
+1. **Le quotazioni OMI di Milano si possono avere senza SPID** dalla pagina pubblica "Banca dati delle quotazioni immobiliari - Risultato" del servizio di mappa GEOPOI (quella che si apre cliccando una zona e scegliendo la destinazione d'uso). Nessun login, nessun captcha, nessun controllo anti-robot visto. Scaricate il 30/10/2026 tra le 9:00 e le 16:20, una richiesta alla volta, pausa 2,5 s (circa 2,9 s per richiesta), nessun errore, nessun "troppe richieste".
+2. **Coperti 41 semestri, dal 2006/1 al 2026/1** (non 45): per 2004/1, 2004/2, 2005/1, 2005/2 la pagina risponde "Non sono presenti risultati" per tutte le 55 zone e per le quattro destinazioni. Il servizio pubblico non ha quotazioni prima del 2006/1; la pagina "Forniture dati OMI" dice "dal 1° semestre 2004" per i file SPID. I 4 semestri mancanti si possono avere solo con SPID (o non esistere).
+3. **Zone:** 55 fino al 2013/2 (anche per il 2006/1-2010/1: stessi codici, stessi LinkZona e stessi nomi, verificati; prima del 2010/2 i perimetri non esistono), 40 con valori dal 2014/1 al 2024/1 (la 41ª, R2, rurale, non ha quotazioni), 42 con valori dal 2024/2.
+4. **24.556 righe** di quotazioni in 41 semestri, quattro destinazioni (residenziale, commerciale, terziaria, produttiva), 12 tipologie (abitazioni civili/economiche/signorili, ville, box, negozi, magazzini, uffici, uffici strutturati, capannoni tipici/industriali, laboratori). Nessuna riga doppia, nessun minimo > massimo, nessun valore 0 o vuoto (`pulito\omi_controlli.txt`).
+5. **Controllo a mano su 5 valori casuali** (seme 30102026), aprendo la stessa pagina nel browser e leggendola (sola lettura, 30/10/2026): tutti uguali alle nostre tabelle (vendita min/max e affitto min/max): 2006/2 zona D14 magazzini normale 500-650 e 3-3,8; 2009/1 E01 ville e villini normale 1.600-2.050 e 5-6,5; 2011/1 D19 ville e villini normale 1.700-2.100 e 5,5-6,5; 2015/1 D33 abitazioni di tipo economico normale 1.750-2.100 e 5-6; 2015/2 C15 abitazioni civili normale 2.450-3.100 e 7-8,5. Il controllo conferma che la conversione non altera i numeri della pagina; non conferma che la pagina sia identica ai file SPID (non ne abbiamo).
+
+## Come funziona il servizio (per rifarlo)
+- `https://www1.agenziaentrate.gov.it/servizi/geopoi_omi/stampaomi.php?F205/<LINK_ZONA>/<AAAAS>/<R|C|T|P>/<zona>/9.19/45.46`: pagina HTML con intestazione (fascia, nome zona, tipologia prevalente) e tabella (tipologia, stato conservativo, compravendita min/max €/m², superficie L/N, locazione min/max €/m² al mese, superficie L/N). L'interrogazione è per **LinkZona + semestre**: il codice zona nell'URL è decorativo. Lo stato conservativo in MAIUSCOLO è quello prevalente (legenda della pagina). Un asterisco = valore rettificato (non incontrato).
+- `https://www1.agenziaentrate.gov.it/servizi/geopoi_omi/zoneomi.php?richiesta=8&codcom=F205&semestre=<S>&zo=<codice>` (JSON): codice zona → LinkZona, solo se la zona esiste in quel semestre. Altre chiamate della mappa: `richiesta=3` (zone attuali, con LinkZona e nome), `richiesta=5` (semestri), `richiesta=6` (perimetri JSON, già usata), `richiesta=7` (KML, risponde per i semestri dal 2010/2).
+- robots.txt di www1.agenziaentrate.gov.it: risposta "pagina non esiste" (nessuna regola). Il sito www.agenziaentrate.gov.it dà "Access Denied" a curl: non toccato, nessun aggiramento. Sul servizio non c'è una pagina di termini d'uso; i dati sono CC BY 4.0 (pagina Forniture dati OMI), da citare «Agenzia delle Entrate – OMI».
+- Programmi (`scripts\`): `08a_omi_pubblico_zone.py` (mappa codice→LinkZona, 956 richieste), `08b_omi_pubblico_scarica.py` (7.992 pagine, riprendibile), `08c_omi_pubblico_csv.py` (CSV nel formato SPID in `raw\omi_pubblico\`, con `README.md`), `09_crescita_e_m4.py` (crescite e confronto M4). `esegui_pipeline.py` accetta ora una seconda cartella (le quotazioni). Cache delle risposte originali: `raw\omi_pubblico_cache\` (113 MB, 7.992 pagine HTML + 956 JSON + `jobs.json`, `zone_link_map.json`, log).
+
+## Cosa dicono i dati (abitazioni civili, stato prevalente, centro min-max, euro 2025 con FOI)
+- Mediana NON pesata fra le zone: 3.363 euro/m² nel 2006/1, 3.032 nel 2013/2 (-10%), 3.274 nel 2014/2, 3.206 nel 2021/2, 3.929 nel 2026/1 (+22% dal 2021/2). Fonte: `pulito\prezzi_zona_semestre_prevalente.csv`, campo `compr_centro_reale_2025`.
+- Rapporto affitto/prezzo (resa lorda) mediano: 3,9% nel 2006/1, 3,8% nel 2013/2, 3,8% nel 2021/2, 4,0% nel 2026/1 (campo `resa_lorda_annua`): stabile.
+- Crescita reale 2014/2-2026/1 per le 31 zone confrontabili uno-a-uno (`pulito\crescita_zone_2014_2026.csv`): mediana +27%; da -1% (B12, Duomo) a +54% (C19, Tabacchi-Sarfatti).
+- Uffici e capannoni (nuovi con questa fase): uffici -12% reale 2006→2026 (2.943 → 2.603 euro/m²), uffici strutturati -15%, capannoni industriali -38% (1.261 → 786). Attenzione: il numero di zone con quel tipo cambia (capannoni industriali 43 → 24 zone), quindi la mediana cambia anche per composizione.
+- Confronto M4: vedi `out\sorpresa.md`. Piccoli numeri, zone grandi: confronto, non prova.
+
+## Trappole dei dati (nuove)
+1. Il servizio pubblico non ha 2004-2005 (vuoto). Tutto il resto dei semestri è completo.
+2. **LinkZona non è un'identità geometrica stabile**: 85 LinkZona distinti nelle abitazioni civili, solo 13 presenti in tutti i 41 semestri; 20 `id_serie` su 110 hanno più di un LinkZona e 39 LinkZona su 85 stanno in più di una `id_serie` (`pulito\link_vs_geometria.txt`). Quindi **non conferma** né smentisce le corrispondenze di `zone_non_1a1.csv`: restano valide quelle per area.
+3. Salto 2014/1 → 2014/2: la mediana nominale passa da 2.463 a 2.700 (+10%) mentre il codice zona cambia per 21 zone: coincide con la revisione delle zone, non è un rialzo di mercato da leggere come tale.
+4. Il codice zona della pagina (`Codice zona`) è copiato dall'indirizzo richiesto: i nostri codici vengono dalle chiamate `richiesta=8` e dai perimetri GEOPOI.
+5. Gli intervalli OMI sono stime dell'Agenzia, non prezzi di vendita (come in fase 1).
+6. Il `Cod_Tip` e le colonne territoriali nei CSV ricostruiti sono ricavati (vedi `raw\omi_pubblico\README.md`); `Microzona` = 0.

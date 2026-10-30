@@ -1,4 +1,4 @@
-# Milano in dati: stato del progetto (30 ottobre 2026, pomeriggio)
+# Milano in dati: stato del progetto (30 ottobre 2026, sera)
 
 Sito: https://andreottiviii.github.io/milano-in-dati/ (Ctrl+F5 se una pagina sembra vecchia)
 
@@ -8,8 +8,6 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 
 1. **Grafica della home**: scegliere tra le quattro bozze tenute da parte (1 mosaico, 2 metro, 6 tabellone, 9 insegne al neon). Le bozze sono in `bozze-home/`.
 2. **Bilancio del Comune**: decidere se farne una pagina (la fase 1 è fatta: consuntivi 2015-2025).
-3. **Prezzi delle case**: decidere sulla pagina quando sarà pronta la sintesi (OMI dalla consultazione pubblica, senza SPID).
-4. **Scala, cast mancanti**: decidere se cercarli online (31 prime dal 1951 non hanno ancora i cantanti).
 
 ## Filone per filone
 
@@ -26,7 +24,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 9 | Città dei 15 minuti | Online, con 10 servizi extra |
 | 10 | Violenza politica | Online, 84 eventi |
 | 11 | Milano raccontata (film e libri) | Online |
-| 12 | Prezzi delle case | In corso: quotazioni OMI 2006-2026 dalla consultazione pubblica (2004-2005 senza valori) |
+| 12 | Prezzi delle case | Online: case, negozi, uffici e capannoni 2006-2026 (OMI, consultazione pubblica; 2004-2005 senza valori) |
 | 13 | Neve e nebbia | Online |
 | 14 | Cinema spariti | Online |
 | 15 | Derby | Online |

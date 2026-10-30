@@ -1,5 +1,5 @@
 """Esegue in ordine tutta la pipeline dei prezzi OMI, con i file di Davide in omi_da_davide\\quotazioni\\.
-Uso: python -I esegui_pipeline.py <cartella prezzi-case>
+Uso: python -I esegui_pipeline.py <cartella prezzi-case> [cartella con i file VALORI/ZONE, default omi_da_davide\\quotazioni]
 Passi: 03 indice ISTAT -> 04 NTN -> 05 corrispondenza zone -> 06 lettura OMI -> 07 prezzi.
 Si ferma con un messaggio chiaro se mancano i file di Davide. Non scarica nulla.
 """
@@ -8,7 +8,7 @@ import os, sys, subprocess, glob
 base = os.path.abspath(sys.argv[1])
 S = os.path.join(base, 'scripts')
 pulito = os.path.join(base, 'pulito')
-quot = os.path.join(base, 'omi_da_davide', 'quotazioni')
+quot = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(base, 'omi_da_davide', 'quotazioni')  # 2o argomento facoltativo: es. raw\omi_pubblico
 
 
 def run(*args):

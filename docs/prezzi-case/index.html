@@ -401,11 +401,12 @@ function altre(){
   var X=D.altre;if(!X||!X.length)return;
   el('altre').hidden=false;
   setH('altre-testo','<p>Oltre alle case, l&rsquo;Agenzia stima prezzi e affitti anche di uffici e capannoni. Qui il prezzo tipico (mediana tra le zone che hanno quel tipo di immobile, in euro 2025) nel tempo. Non tutte le zone hanno quel tipo di immobile: leggere solo l&rsquo;andamento generale.</p>');
-  var h='';X.forEach(function(x,k){h+='<h3>'+esc(x.tipologia)+'</h3><div class="grid2"><div><p class="sub">Prezzo (&euro;/m&sup2;, euro 2025)</p><div class="ch" id="ch-alt'+k+'a"></div></div><div><p class="sub">Affitto (&euro;/m&sup2; al mese, euro 2025)</p><div class="ch" id="ch-alt'+k+'b"></div></div></div>'});
+  var h='';X.forEach(function(x,k){var s=x.serie.filter(function(r){return r.reale!=null}),a=s[0],b=s[s.length-1];
+    h+='<h3>'+esc(x.tipologia)+'</h3><p class="sub">Dal '+a.s+' al '+b.s+', in euro 2025: prezzo '+ps(b.reale/a.reale-1)+', affitto '+ps(b.aff_reale/a.aff_reale-1)+'. Zone con questo tipo di immobile: '+a.n+' all&rsquo;inizio, '+b.n+' alla fine.</p><div class="grid2"><div><p class="sub">Prezzo (&euro;/m&sup2;, euro 2025)</p><div class="ch" id="ch-alt'+k+'a"></div></div><div><p class="sub">Affitto (&euro;/m&sup2; al mese, euro 2025)</p><div class="ch" id="ch-alt'+k+'b"></div></div></div>'});
   setH('altre-grafici',h);
   function draw(){X.forEach(function(x,k){var s=x.serie.filter(function(r){return r.reale!=null}),lb=s.map(function(r){return r.s});
     lineChart(el('ch-alt'+k+'a'),{labels:lb,h:200,series:[{color:ACC,w:2.4,vals:s.map(function(r){return r.reale})}],tip:function(i){return '<b>'+s[i].s+'</b> ('+s[i].n+' zone)<br>'+f0(s[i].reale)+' €/m²'}});
-    lineChart(el('ch-alt'+k+'b'),{labels:lb,h:200,series:[{color:'#8a4a10',w:2.4,vals:s.map(function(r){return r.aff_reale})}],yf:function(v){return f0(v)},tip:function(i){return '<b>'+s[i].s+'</b> ('+s[i].n+' zone)<br>'+f1(s[i].aff_reale)+' €/m² al mese'}})})}
+    lineChart(el('ch-alt'+k+'b'),{labels:lb,h:200,series:[{color:'#8a4a10',w:2.4,vals:s.map(function(r){return r.aff_reale})}],yf:function(v){return v%1?f1(v):f0(v)},tip:function(i){return '<b>'+s[i].s+'</b> ('+s[i].n+' zone)<br>'+f1(s[i].aff_reale)+' €/m² al mese'}})})}
   draw();RD.push(draw);
 }
 

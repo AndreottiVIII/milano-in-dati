@@ -1630,6 +1630,10 @@ Fatta per sovrapposizione di aree (UTM 32N), con `scripts\05_zone_corrispondenza
   - Anni di affitto per pagare la casa: circa 25, sempre tra 25 e 27 dal 2006; per zona da 19 a 30. Negozi: prezzo reale −4%, affitto +27%. Compravendite (NTN): minimo 14.575 nel 2012, massimo 28.617 nel 2022.
   - **Trappola**: tra 2014/1 e 2014/2 la mediana sale del 9,6% nominale, ma le 35 zone rimaste uguali sono ferme (+0,0%). Il salto è un effetto del cambio delle zone, non dei prezzi; è scritto sulla pagina. Nel 2024/2, invece, sulle zone uguali la crescita è in parte vera (+4,1% reale).
   - **Da fare**: quando finiscono gli scarichi di uffici (T) e capannoni (P), rilanciare 08c, la pipeline, `09_crescita_e_m4.py` e `10_pagina.py`. La sezione "Uffici e capannoni" compare da sola (soglia: 8 semestri e 10 zone).
+- 2026-10-30 — **Uffici e capannoni aggiunti.** Scarichi finiti: 7.992 pagine, 24.556 righe, 41 semestri, quattro classi (abitazioni, negozi, uffici, capannoni), nessun errore, 5 controlli a mano su 5 uguali. Rilanciati 08c, pipeline, 09 e 10: sono cambiati solo `riepilogo.json` e `serie_citta.csv`; i numeri di case e negozi sono identici.
+  - Dal 2006/1 all'ultimo semestre, in euro 2025 (mediana delle zone che hanno quel tipo): uffici prezzo −12% e affitto +12%; uffici strutturati −15% / −10%; laboratori −25% / −15%; capannoni tipici (fino al 2024/1) −26% / −18%; capannoni industriali −38% / −31%.
+  - **Trappola**: le zone con capannoni industriali passano da 43 a 24 (le aree industriali spariscono o vengono riclassificate). La mediana cambia anche perché cambiano le zone: si legge solo l'andamento generale. La pagina scrive sotto ogni tipo quante zone ci sono all'inizio e alla fine.
+  - Pagina: aggiunta per ogni tipo una riga con prezzo, affitto e numero di zone; sistemati i numeri dell'asse degli affitti (prima 6,5 appariva come "6").
 
 ## 13. La neve (e la nebbia) a Milano
 
