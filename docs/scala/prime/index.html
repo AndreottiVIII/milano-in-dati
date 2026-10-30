@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Le prime della Scala</title>
+<style>
+:root{--acc:#a3122a;--acc2:#d98f9b;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#f6f6f6}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} .big{font-size:2.2rem;font-weight:700;color:var(--acc);line-height:1.1} .sub{font-size:.85rem;color:var(--mut)}
+.src{font-size:.8rem;color:var(--mut)} a{color:var(--acc)} code{font-size:.9em}
+.scroll{max-height:640px;overflow:auto;border:1px solid var(--line)} .scroll th{position:sticky;top:0;background:#fff}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;margin:.6em 0;align-items:end} .ctl label{display:flex;flex-direction:column;font-size:.8rem;color:var(--mut);gap:2px}
+.ctl select,.ctl input{font:inherit;font-size:1rem;padding:6px 8px;border:1px solid var(--ink);border-radius:0;background:#fff;color:var(--ink);min-width:0}
+.ctl input[type=text]{width:min(100%,22rem)}
+button{font:inherit;padding:6px 12px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:0;cursor:pointer} button:hover{background:var(--ink);color:#fff}
+.chip{display:inline-block;min-width:1.35em;text-align:center;font-size:.72rem;font-weight:700;border:1px solid var(--ink);padding:0 4px;margin:0 2px 2px 0;line-height:1.3;cursor:help}
+.chip.alta{background:var(--ink);color:#fff} .chip.media{background:#bbb;border-color:#bbb} .chip.bassa{background:#fff;border-color:var(--acc);color:var(--acc)} .chip.chiuso{background:var(--soft);border-color:#999;color:#666}
+.chip.completa{background:var(--ink);color:#fff} .chip.parz{background:#bbb;border-color:#bbb} .chip.dis{background:#fff;border-color:var(--acc);color:var(--acc)}
+.lg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.85rem;margin:.4em 0} .lg i{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px}
+svg{display:block;width:100%;height:auto} svg text{font-family:system-ui,Arial,sans-serif}
+.gap{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.4em 0;font-size:.92rem} .gap b{color:var(--acc)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px} .four{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:.8em 0}
+.kpi .sub{display:block;margin-top:2px}
+.note{font-size:.88rem;color:var(--mut)} .err{color:var(--acc);font-weight:700}
+.cast{font-size:.82rem;color:var(--mut)} .nt{font-size:.8rem;color:var(--mut);margin-top:3px}
+.strip{display:flex;flex-wrap:wrap;gap:2px;margin:.5em 0}.strip span{flex:1 0 9px;height:22px;background:var(--ink);cursor:help}
+.strip span.arc{background:var(--acc)} .strip span.gala{background:#bbb} .strip span.prg{background:#fff;border:1px dashed var(--ink)}
+@media(min-width:701px){.mcomp{display:none}}
+@media(max-width:700px){td,.cast,.nt{overflow-wrap:anywhere}.co{display:none}.two{grid-template-columns:1fr}.four{grid-template-columns:1fr 1fr}.big{font-size:1.7rem} th,td{padding:5px 4px;font-size:.88rem}}
+</style><script src="../../menu.js" defer></script></head><body><main>
+<h1>Le prime della Scala: ce le abbiamo tutte?</h1>
+<p>La &laquo;Prima&raquo; &egrave; l&rsquo;opera con cui il Teatro alla Scala apre la stagione. Dal 1951 &egrave; la sera del 7 dicembre, Sant&rsquo;Ambrogio; prima, per tradizione, si cominciava il 26 dicembre, Santo Stefano, con la stagione di Carnevale. Qui c&rsquo;&egrave; l&rsquo;elenco di tutte le aperture che abbiamo trovato, dal 1778 a oggi, con titolo, direttore, regia, cantanti e la fonte di ciascun dato. <a href="../">Torna alla pagina sul cartellone della Scala</a>.</p>
+<p id="errore" class="err" hidden></p>
+
+<h2>Ce le abbiamo tutte?</h2>
+<p id="riga" class="note"></p>
+<div class="four" id="kpi"></div>
+<h3>Dal 1951: che cosa manca</h3>
+<div id="lacune"></div>
+<h3>Prima del 1951: quanto ci possiamo fidare</h3>
+<div id="prima-cov"></div>
+
+<h2>Le 76 prime dal 1951 al 2026</h2>
+<p class="note">Una riga per anno. Il cast &egrave; quello che le fonti dicono: dove non ci sono i ruoli, sono i soli nomi; dove la riga &egrave; vuota non l&rsquo;abbiamo trovato. Il 2026 &egrave; la serata programmata (7 dicembre 2026), non ancora avvenuta; il 2020 &egrave; il gala televisivo senza opera.</p>
+<div class="ctl">
+ <label>Cerca<input id="q1" type="text" placeholder="titolo, compositore, direttore, cantante, regista" autocomplete="off"></label>
+ <label>Decennio<select id="d1"><option value="">tutti</option></select></label>
+ <label>Documentazione<select id="c1"><option value="">tutte</option><option value="completa">completa (con cast)</option><option value="senza cast">senza cast</option><option value="disaccordi">disaccordi tra le fonti</option><option value="cast">solo con cast</option></select></label>
+ <button id="r1" type="button">Azzera</button>
+</div>
+<p class="note" id="n1"></p>
+<div class="scroll"><table id="t1"></table></div>
+
+<h2>Che cosa si apre di pi&ugrave;</h2>
+<div class="two"><div><h3>Compositori pi&ugrave; presenti alle prime (1951-2026)</h3><div id="g-comp"></div></div><div><h3>Direttori con pi&ugrave; prime (1951-2026)</h3><div id="g-dir"></div></div></div>
+<p class="src">Una barra = una serata di apertura (compresa quella programmata per il 2026). Il gala del 2020 non conta per i compositori; per i direttori conta (Chailly, 12 prime, include il 2020: la stessa Scala lo conta come sua nona apertura nel 2022). Per i compositori vale il primo autore dell&rsquo;apertura (Turandot: Puccini, con il finale di Alfano).</p>
+<h3>Le opere che si ripetono</h3>
+<div id="rep"></div>
+<h3>Italiano o straniero, decennio per decennio</h3>
+<div id="g-naz"></div>
+<div class="lg"><span><i style="background:#a3122a"></i>compositore italiano</span><span><i style="background:#111"></i>compositore straniero</span></div>
+<p class="src">Conta il paese del compositore, non la lingua dell&rsquo;esecuzione. Salieri, Spontini, Cherubini sono italiani; Mozart, Gluck, Wagner, Bizet, Beethoven, Musorgskij, &Scaron;ostakovi&ccaron; no. Il gala del 2020 non &egrave; contato.</p>
+<h3>Dove si &egrave; aperta la stagione</h3>
+<div class="strip" id="strip"></div>
+<div class="lg"><span><i style="background:#111"></i>Teatro alla Scala (Piermarini)</span><span><i style="background:#a3122a"></i>Teatro degli Arcimboldi</span><span><i style="background:#bbb"></i>gala senza opera (2020)</span><span><i style="background:#fff;border:1px dashed #111"></i>programmata (2026)</span></div>
+<p class="src" id="sala-nota"></p>
+
+<h2>Le aperture prima del 1951</h2>
+<p>Dal 1778 la stagione cominciava di norma il 26 dicembre con il Carnevale (dal 1817 &laquo;Carnevale e Quaresima&raquo;); nel 1778 il teatro stesso si inaugur&ograve; il 3 agosto con L&rsquo;Europa riconosciuta. Tra gli anni Venti e Trenta del Novecento le fonti indicano spesso aperture a novembre. Qui il &laquo;titolo di apertura&raquo; &egrave; il primo della stagione di Carnevale, come lo d&agrave; la lista di Wikipedia, controllato con il Cambiasi (1881) e il Romani (1862) per l&rsquo;Ottocento e con il Marangoni-Vanbianchi e il Gatti per il Novecento. L&rsquo;<b>affidabilit&agrave;</b> dice quante fonti indipendenti confermano: <span class="chip alta">alta</span> il primo titolo coincide con una fonte primaria o con un giornale dell&rsquo;epoca; <span class="chip media">media</span> una sola conferma debole; <span class="chip bassa">bassa</span> una sola fonte, oppure le fonti litigano (la riga dice con chi).</p>
+<div class="ctl">
+ <label>Cerca<input id="q0" type="text" placeholder="titolo, compositore, direttore, anno" autocomplete="off"></label>
+ <label>Periodo<select id="p0"><option value="">tutti</option><option value="1778-1850">1778-1850</option><option value="1851-1881">1851-1881</option><option value="1882-1920">1882-1920</option><option value="1921-1950">1921-1950</option></select></label>
+ <label>Affidabilit&agrave;<select id="a0"><option value="">tutte</option><option value="alta">alta</option><option value="media">media</option><option value="bassa">bassa</option><option value="chiuso">teatro chiuso</option></select></label>
+ <button id="r0" type="button">Azzera</button>
+</div>
+<p class="note" id="n0"></p>
+<div class="scroll"><table id="t0"></table></div>
+<p class="src">I titoli ricostruiti dal Cambiasi o dal Romani (stagioni assenti dalla lista di Wikipedia) sono letti con l&rsquo;OCR e vanno controllati sul libro. Per il Cambiasi in alcuni anni il programma di lettura ha assegnato l&rsquo;anno in modo sfalsato: &egrave; segnato nella colonna dei controlli.</p>
+
+<h2>Fonti e limiti</h2>
+<div class="scroll" style="max-height:none"><table id="fonti"></table></div>
+<ul>
+<li><b>Il cast &egrave; la parte pi&ugrave; incompleta.</b> Per gli anni senza cantanti le fonti aperte non li riportano: servirebbero l&rsquo;archivio storico della Scala (che non abbiamo usato: la sua ricerca &egrave; protetta da un controllo anti-bot e il file robots.txt ne vieta la raccolta) o i programmi di sala.</li>
+<li><b>Ruoli.</b> Dove una registrazione dal vivo &egrave; catalogata in SBN, di solito i cantanti principali ci sono ma senza il ruolo.</li>
+<li><b>Disaccordi.</b> Dove le fonti litigano (per esempio il 1978, o il direttore della Vestale del 1954) lo diciamo nella riga e li elenchiamo uno per uno nel file <code>pulito/aperture_differenze.md</code>.</li>
+<li><b>Diritti.</b> Wikipedia (CC BY-SA 4.0) e Wikidata (CC0): fatti con citazione. Dai libri ancora protetti (Gatti, Marangoni) non c&rsquo;&egrave; testo: solo se il titolo vi compare nella stagione. Le pagine del sito della Scala sono citate come &laquo;(c) Teatro alla Scala&raquo; con la sua autorizzazione.</li>
+</ul>
+<footer>Dati: <a href="data/aperture.json">aperture.json</a> &middot; <a href="data/statistiche.json">statistiche.json</a>. Costruiti da <code>scala/scripts/aperture_costruisci.py</code> e <code>aperture_pagina.py</code>. <span id="gen"></span></footer>
+</main>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+function get(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u+' '+r.status);return r.json()})}
+var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+var SRC={};
+function dstr(d,y){if(!d||d.length<10)return String(y);return parseInt(d.slice(8,10),10)+' '+MESI[parseInt(d.slice(5,7),10)-1]+' '+d.slice(0,4)}
+function chips(f){return String(f||'').split('+').filter(Boolean).map(function(c){return '<span class="chip" title="'+esc(SRC[c]?SRC[c][0]:c)+'">'+esc(c)+'</span>'}).join('')}
+Promise.all([get('data/aperture.json'),get('data/statistiche.json')]).then(function(r){
+  var A=r[0],S=r[1];SRC=A.meta.fonti;
+  $('gen').textContent='Aggiornato il '+A.meta.generato+'.';
+  kpi(A);t1(A.dal1951);t0(A.prima1951,A.cov);charts(S,A.dal1951);fonti(A.meta.fonti);
+}).catch(function(e){var el=$('errore');el.hidden=false;el.textContent='Non riesco a caricare i dati ('+e.message+').'});
+
+/* ---------- copertura ---------- */
+function kpi(A){
+  var c=A.cov;
+  $('riga').innerHTML='<b>Dal 1951: '+c.totale+' prime su '+c.totale+'.</b> Per ognuna abbiamo titolo, compositore, data, direttore e regia; il direttore &egrave; confermato da almeno due fonti in '+c.con_direttore_2_fonti+' casi; <b>'+c.completa+'</b> sono documentate a pieno (anche con il cast). Prima del 1951 le aperture sono '+c.prima_totale+' righe (l’inaugurazione del teatro nel 1778 e le stagioni dal 1778/79 al 1950/51): per '+c.prima_con_titolo+' abbiamo un titolo, '+c.prima_chiuse+' stagioni il teatro era chiuso.';
+  var k=[[c.totale+'/'+c.totale,'aperture 1951-2026 con titolo e data'],[c.con_direttore+'/'+c.totale,'con direttore ('+c.con_direttore_2_fonti+' con due fonti)'],[c.con_cast+'/'+c.totale,'con almeno alcuni cantanti'],[c.completa+'/'+c.totale,'documentate a pieno']];
+  $('kpi').innerHTML=k.map(function(x){return '<div class="kpi"><div class="big">'+x[0]+'</div><span class="sub">'+x[1]+'</span></div>'}).join('');
+  var byc={};c.lacune.forEach(function(g){g[2].split(', ').forEach(function(m){(byc[m]=byc[m]||[]).push(g[0])})});
+  var h='<table><tr><th>Che cosa manca</th><th class="r">Quante</th><th>Anni</th></tr>';
+  Object.keys(byc).forEach(function(m){h+='<tr><td>'+esc(m)+'</td><td class="r">'+byc[m].length+'</td><td class="sub">'+byc[m].join(', ')+'</td></tr>'});
+  $('lacune').innerHTML=h+'</table>';
+  var a=c.prima_aff;
+  $('prima-cov').innerHTML='<table><tr><th>Affidabilit&agrave;</th><th class="r">Stagioni</th></tr><tr><td><span class="chip alta">alta</span> primo titolo confermato</td><td class="r">'+(a.alta||0)+'</td></tr><tr><td><span class="chip media">media</span></td><td class="r">'+(a.media||0)+'</td></tr><tr><td><span class="chip bassa">bassa</span> una sola fonte o fonti in disaccordo</td><td class="r">'+(a.bassa||0)+'</td></tr><tr><td><span class="chip chiuso">chiuso</span> teatro chiuso</td><td class="r">'+(a.chiuso||0)+'</td></tr></table><p class="note">Con la data del giorno: '+c.prima_con_data+' stagioni su '+c.prima_totale+'. Con il nome del direttore: '+c.prima_con_direttore+'. Per tutto l&rsquo;Ottocento le fonti non nominano un direttore dell&rsquo;orchestra distinto dal compositore.</p>';
+}
+
+/* ---------- tabella 1951+ ---------- */
+var R1=[];
+function t1(rows){
+  R1=rows.map(function(r){return {r:r,h:norm([r.t,r.c,r.dir,r.reg,r.cast,r.n,r.y].join(' '))}});
+  var dec={};rows.forEach(function(r){dec[Math.floor(r.y/10)*10]=1});
+  $('d1').innerHTML='<option value="">tutti</option>'+Object.keys(dec).map(function(d){return '<option value="'+d+'">anni '+d+'</option>'}).join('');
+  ['d1','c1'].forEach(function(i){$(i).addEventListener('change',draw1)});$('q1').addEventListener('input',draw1);
+  $('r1').addEventListener('click',function(){$('q1').value='';$('d1').value='';$('c1').value='';draw1()});
+  draw1();
+}
+function cmpChip(r){var k=r.cmp;if(k==='completa')return '<span class="chip completa" title="titolo, data, direttore (2+ fonti), regia e cast">completa</span>';
+  if(k.indexOf('disaccordi')>=0)return '<span class="chip dis" title="le fonti non concordano: vedi la nota">disaccordo</span>';
+  if(k.indexOf('gala')===0)return '<span class="chip completa" title="nessuna opera in scena">gala</span>';
+  return '<span class="chip parz" title="'+esc(k)+'">'+(k==='senza cast'?'senza cast':'parziale')+'</span>'}
+function draw1(){
+  var q=norm($('q1').value).trim().split(/\s+/).filter(Boolean),d=$('d1').value,c=$('c1').value;
+  var v=R1.filter(function(x){var r=x.r;
+    if(d&&Math.floor(r.y/10)*10!=d)return false;
+    if(c==='completa'&&r.cmp!=='completa')return false;
+    if(c==='senza cast'&&r.cmp!=='senza cast')return false;
+    if(c==='disaccordi'&&r.cmp.indexOf('disaccordi')<0)return false;
+    if(c==='cast'&&!r.cast)return false;
+    for(var i=0;i<q.length;i++){if(x.h.indexOf(q[i])<0)return false}return true});
+  $('n1').textContent=v.length+(v.length===1?' prima':' prime')+' (su '+R1.length+')';
+  var h='<tr><th>Data</th><th>Titolo</th><th class="co">Direttore e regia</th><th>Cantanti e note</th></tr>';
+  v.forEach(function(x){var r=x.r;
+    var dr=[];if(r.dir)dr.push('dir. '+esc(r.dir));if(r.reg)dr.push('regia '+esc(r.reg));
+    h+='<tr><td class="r"><b>'+r.y+'</b><div class="sub">'+(r.dt==='programmata'?'programmata':dstr(r.d,r.y).replace(' '+r.y,''))+'</div></td>'+
+    '<td><b>'+esc(r.t)+'</b><div class="sub">'+esc(r.c)+'</div><div class="sub mcomp">'+dr.join(' &middot; ')+'</div><div style="margin-top:3px">'+cmpChip(r)+'</div></td>'+
+    '<td class="co">'+dr.join('<br>')+'<div class="sub">'+esc(r.sala==='Teatro alla Scala (Piermarini)'?'':r.sala)+'</div></td>'+
+    '<td>'+(r.cast?'<div class="cast">'+esc(r.cast.replace(/;\s*/g,'; '))+'</div>':'<div class="cast">cast non trovato</div>')+(r.n?'<div class="nt">'+esc(r.n)+'</div>':'')+'<div class="nt">fonti: '+chips(r.f)+'</div></td></tr>'});
+  if(!v.length)h+='<tr><td colspan="4">Nessuna prima con questi filtri.</td></tr>';
+  $('t1').innerHTML=h;
+}
+
+/* ---------- tabella prima del 1951 ---------- */
+var R0=[];
+function t0(rows,cov){
+  R0=rows.map(function(r){return {r:r,h:norm([r.t,r.c,r.dir,r.reg,r.st,r.n,r.alt,r.dx].join(' '))}});
+  ['p0','a0'].forEach(function(i){$(i).addEventListener('change',draw0)});$('q0').addEventListener('input',draw0);
+  $('r0').addEventListener('click',function(){$('q0').value='';$('p0').value='';$('a0').value='';draw0()});
+  draw0();
+}
+function draw0(){
+  var q=norm($('q0').value).trim().split(/\s+/).filter(Boolean),p=$('p0').value,a=$('a0').value;
+  var v=R0.filter(function(x){var r=x.r;
+    if(p){var lim=p.split('-');if(r.y<+lim[0]||r.y>+lim[1])return false}
+    if(a&&r.aff!==a)return false;
+    for(var i=0;i<q.length;i++){if(x.h.indexOf(q[i])<0)return false}return true});
+  $('n0').textContent=v.length+(v.length===1?' stagione':' stagioni')+' (su '+R0.length+')';
+  var h='<tr><th>Stagione e data</th><th>Titolo</th><th class="co">Direttore</th><th>Affidabilit&agrave; e controlli</th></tr>';
+  v.forEach(function(x){var r=x.r;
+    var when=r.d?dstr(r.d,r.y):(r.dx?esc(r.dx):'data non trovata');
+    h+='<tr><td class="r"><b>'+esc(r.st)+'</b><div class="sub">'+when+'</div></td>'+
+    '<td>'+(r.t?'<b>'+esc(r.t)+'</b><div class="sub">'+esc(r.c)+'</div>':'<span class="sub">'+(r.aff==='chiuso'?'teatro chiuso':'titolo non trovato')+'</span>')+(r.dir?'<div class="sub mcomp">dir. '+esc(r.dir)+'</div>':'')+(r.cast?'<div class="cast">'+esc(r.cast.replace(/;\s*/g,'; '))+'</div>':'')+'</td>'+
+    '<td class="co">'+esc(r.dir)+(r.reg?'<div class="sub">regia '+esc(r.reg)+'</div>':'')+'</td>'+
+    '<td><span class="chip '+esc(r.aff)+'">'+esc(r.aff)+'</span> '+chips(r.f)+(r.ctl?'<div class="nt">controlli: '+esc(r.ctl)+'</div>':'')+(r.alt?'<div class="nt"><b>Disaccordo:</b> '+esc(r.alt)+'</div>':'')+(r.n?'<div class="nt">'+esc(r.n)+'</div>':'')+(r.sala&&r.sala!=='Teatro alla Scala (Piermarini)'?'<div class="nt">Sala: '+esc(r.sala)+'</div>':'')+'</td></tr>'});
+  if(!v.length)h+='<tr><td colspan="4">Nessuna stagione con questi filtri.</td></tr>';
+  $('t0').innerHTML=h;
+}
+
+/* ---------- grafici ---------- */
+function short(n){var p=n.split(' ');var l=p[p.length-1];if(p.length>2&&/^(de|van|von|da|di)$/.test(p[p.length-2]))l=p[p.length-2]+' '+l;return l}
+function bars(el,data,color,lw){
+  var W=500,rh=24,H=data.length*rh+8,max=0;data.forEach(function(d){if(d[1]>max)max=d[1]});
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img">';
+  data.forEach(function(d,i){var y=4+i*rh,w=(W-lw-40)*d[1]/max;
+    s+='<text x="'+(lw-6)+'" y="'+(y+15)+'" font-size="13" text-anchor="end" fill="#111">'+esc(short(d[0]))+'</text>'+
+       '<rect x="'+lw+'" y="'+(y+3)+'" width="'+w+'" height="'+(rh-8)+'" fill="'+color+'"><title>'+esc(d[0])+': '+d[1]+'</title></rect>'+
+       '<text x="'+(lw+w+5)+'" y="'+(y+15)+'" font-size="13" fill="#111">'+d[1]+'</text>'});
+  return s+'</svg>';
+}
+function charts(S,rows){
+  $('g-comp').innerHTML=bars($('g-comp'),S.compositori_1951,'#a3122a',118);
+  $('g-dir').innerHTML=bars($('g-dir'),S.direttori_1951,'#111',118);
+  var h='<table><tr><th>Opera</th><th class="r">Aperture</th><th>Anni</th></tr>';
+  S.ripetute.forEach(function(x){h+='<tr><td><b>'+esc(x[0])+'</b></td><td class="r">'+x[1]+'</td><td class="sub">'+(S.ripetute_anni[x[0]]||[]).join(', ')+'</td></tr>'});
+  $('rep').innerHTML=h+'</table>';
+  // italiano/straniero per decennio
+  var W=700,H=230,L=40,B=30,T=14,n=S.decenni.length,bw=(W-L-10)/n,s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Aperture con compositore italiano e straniero per decennio">';
+  [0,5,10].forEach(function(v){var y=T+(H-T-B)*(1-v/10);s+='<line x1="'+L+'" x2="'+(W-5)+'" y1="'+y+'" y2="'+y+'" stroke="#ddd"/><text x="'+(L-5)+'" y="'+(y+4)+'" font-size="11" fill="#666" text-anchor="end">'+v+'</text>'});
+  S.decenni.forEach(function(d,i){var x=L+i*bw+bw*.18,w=bw*.64,hi=(H-T-B)*d[1]/10,he=(H-T-B)*d[2]/10,y0=H-B;
+    s+='<rect x="'+x+'" y="'+(y0-hi)+'" width="'+w+'" height="'+hi+'" fill="#a3122a"><title>anni '+d[0]+': italiani '+d[1]+'</title></rect>';
+    s+='<rect x="'+x+'" y="'+(y0-hi-he)+'" width="'+w+'" height="'+he+'" fill="#111"><title>anni '+d[0]+': stranieri '+d[2]+'</title></rect>';
+    if(d[1])s+='<text x="'+(x+w/2)+'" y="'+(y0-hi/2+4)+'" font-size="12" fill="#fff" text-anchor="middle">'+d[1]+'</text>';
+    if(d[2])s+='<text x="'+(x+w/2)+'" y="'+(y0-hi-he/2+4)+'" font-size="12" fill="#fff" text-anchor="middle">'+d[2]+'</text>';
+    s+='<text x="'+(x+w/2)+'" y="'+(H-10)+'" font-size="12" text-anchor="middle" fill="#111">'+d[0]+(d[0]==='2020'?'-26':'s')+'</text>'});
+  $('g-naz').innerHTML=s+'</svg>';
+  // venue
+  var st='';rows.forEach(function(r){var cl=/Arcimboldi/.test(r.sala)?'arc':(r.dt==='programmata'?'prg':(r.y===2020?'gala':''));
+    st+='<span class="'+cl+'" title="'+r.y+': '+esc(r.t)+(cl==='arc'?' (Arcimboldi)':'')+'"></span>'});
+  $('strip').innerHTML=st;
+  $('sala-nota').textContent='Una casella per anno, dal 1951 al 2026. Nel 2002 e nel 2003 la serata si tenne al Teatro degli Arcimboldi perché il Piermarini era in ristrutturazione; il 7 dicembre 2004 la Scala riaprì con L’Europa riconosciuta. Prima del 1951: nel 1943-44 l’apertura fu al Teatro Sociale di Como, nel 1944-45 e 1945-46 al Teatro Lirico di Milano (il teatro fu distrutto dai bombardamenti dell’agosto 1943 e riaperto l’11 maggio 1946).';
+}
+function fonti(f){
+  var h='<tr><th></th><th>Fonte</th><th>Licenza</th></tr>';
+  Object.keys(f).forEach(function(k){h+='<tr><td><span class="chip">'+esc(k)+'</span></td><td>'+esc(f[k][0])+'</td><td class="sub">'+esc(f[k][1])+'</td></tr>'});
+  $('fonti').innerHTML=h;
+}
+})();
+</script></body></html>

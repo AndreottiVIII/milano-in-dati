@@ -1170,6 +1170,11 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
   - **Programmi su Internet Archive**: ne sono aperti solo 14, non circa 40.
   - **Copertura 1946-2022**: righe con il giorno da 907 a 951, con il direttore da 369 a 423, con i solisti da 170 a 214.
   - In pagina il coordinatore ha corretto due frasi superate: la media del Cambiasi, ora 18 titoli l'anno tra opere e balli, e la legenda SBN.
+- 2026-10-30 — **Focus sulle prime di stagione** (`scala/pulito/aperture.csv`, pagina `docs/scala/prime/`):
+  - **Dal 1951**: 76 prime del 7 dicembre su 76, con titolo, compositore, data, direttore e regia. Il direttore è confermato da almeno due fonti in 74 casi; 41 prime sono documentate anche con il cast. Il 2020 è il gala TV "A riveder le stelle", senza opera; il 2026 è la serata in programma.
+  - **Prima del 1951**: 174 aperture (26 dicembre / Carnevale) dal 1778, con l'affidabilità segnata (69 alta, 73 media, 27 bassa, 5 stagioni con il teatro chiuso).
+  - **Classifiche**: Verdi 36 prime; direttori Muti 20, Chailly 12 (compreso il gala 2020), Abbado 10, Gavazzeni 9.
+  - **Aperti**: cast mancante per 34 prime; dubbi sul 1954 (direttore della Vestale) e sul 1978 (apertura o replica?) in `aperture_differenze.md`.
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 

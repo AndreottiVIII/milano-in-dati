@@ -47,7 +47,8 @@
   var current = null;
   var isHome = (here === rootPath);
   for (var j = 0; j < SEZIONI.length; j++) {
-    if (here === rootPath + SEZIONI[j].path) { current = SEZIONI[j].path; break; }
+    // la pagina e' nella sezione se il suo percorso comincia con quello della sezione (vale anche per le sottopagine, es. scala/prime/)
+    if (here === rootPath + SEZIONI[j].path || here.indexOf(rootPath + SEZIONI[j].path) === 0) { current = SEZIONI[j].path; break; }
   }
 
   var css =

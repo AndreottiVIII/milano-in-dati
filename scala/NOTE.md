@@ -305,3 +305,26 @@ Per rifare tutto (dalla cartella scala/): `python -I -X utf8 scripts/parse_cambi
 | 1946-2022 | 1.276 -> 1.318 | 907 -> 951 | 369 -> 423 | 480 -> 504 | 170 -> 214 |
 Balli 1778-1881: da 55 (sola Wikipedia/Wikidata/SBN) a **864 balli nella pagina** (871 righe nel cartellone), 104 anni su 104, **8,4 balli per anno** (2-16). Titoli totali della pagina 4.636 -> 5.502. Il guadagno dopo il 1946 viene soprattutto dalle registrazioni (date e solisti 1950-1969) e dai capitoli storici dei programmi IA (direttore e regia 1946-2009); il buco 1964-2022 (cast e giorno per giorno) resta quello descritto sopra.
 Backup dei dati di ieri: `pulito\_backup_prima_balli\`.
+
+
+---
+
+# Prime di stagione (30/10/2026)
+Cartella `pulito\`. Tabella `aperture.csv` (250 righe: 76 aperture dal 7/12/1951 al 7/12/2026 + 174 righe prima del 1951, colonna `blocco`), registro `aperture_differenze.md`, pagina `docs\scala\prime\` (dati in `data\aperture.json` e `statistiche.json`).
+
+## Copertura
+- **Prima:** 72 serate su 76 con data 7 dicembre nei dati (mancavano 2017, 2018, 2020, 2021). **Ora: 76 su 76** con titolo, compositore, data, direttore e regia. Il 2020 e' il gala televisivo «A riveder le stelle» (nessuna opera); il 2026 e' programmato (non ancora avvenuto al 30/10/2026).
+- Direttore: 76 su 76 (1955 e 1959: Antonino Votto); confermato da 2+ fonti in 74 casi. Regia: 76 su 76. Cast: 42 su 76 (con ruoli per circa la metà). **Documentate a pieno (titolo, data, direttore 2+ fonti, regia, cast): 41.** Disaccordo non risolto: 1954 (direttore) e 1978 (inaugurazione o replica?).
+- Prima del 1951: 174 righe (inaugurazione 3/8/1778 + stagioni 1778/79-1950/51). Affidabilita: alta 69, media 73, bassa 27, teatro chiuso 5 (1897/98, 1917/18-1920/21). Data del giorno per 95 righe; direttore per 79.
+
+## Come e' fatta (scripts\)
+`aperture_scarica.py` / `aperture_scarica_it.py` (wikitesto en/it di 45+ opere, raw\aperture_wp), `aperture_wikidata.py` (107 voci «serata inaugurale» con direttore P3300, regia P57, cast P161, raw\aperture_wikidata), `aperture_scala_vecchie.py` (prova di 16 indirizzi del sito Scala: solo la pagina del Boris 2022 esiste ancora; le altre 404 o pagina generica), `aperture_scala_cast.py` (ruolo per ruolo 2022-2026), `aperture_parse_wp.py` (lista it.wikipedia «Prime stagionali»), `aperture_pre1951.py` (primo incrocio), `aperture_costruisci.py` (tabella), `aperture_pagina.py` (json della pagina + differenze.md), `aperture_lib.py`.
+Rifare: dalla cartella `scala\`: parse_wp, scala_cast, costruisci, pagina (nell'ordine; la rete serve solo per i primi tre).
+
+## Trappole
+- Lista WP e cronistoria SL (stessa Wikipedia) si contraddicono (1954 direttore; 1978; 2021 «4 dicembre»); Wikidata ha «serata inaugurale» al 26 dicembre anche dove la lista WP ha un'apertura a novembre (1923, 1928, 1930).
+- Cambiasi: anno ricavato dal programma di lettura, in alcuni tratti sfalsato di uno (1861-1868); le righe ricostruite dal libro sono OCR («A demira»).
+- SBN: «Franco Cordelli» (1960); registrazione del Boris datata 7/12/1978 mentre la Scala data il Boris di Abbado al 1979. it.wikipedia «L'amico Fritz»: «7 dicembre 1962» (refuso per 1963).
+- Arcimboldi: solo 2002 e 2003 (il 2004 e' la riapertura del Piermarini), non 2002-2004 come scritto nel mandato.
+- Cast dalla stampa (2007-2009, 2013, 2014, 2016-2019, 2021): fonti web citate nella colonna `controlli` di aperture.csv; i ruoli mancano dove non li dice la fonte. Operadis e' stato usato solo per controllo (colonna locale in `_aperture_cast_operadis_LOCALE.csv`, mai nel json).
+- menu.js: la sezione corrente ora si riconosce anche dalle sottopagine (`scala/prime/`).
