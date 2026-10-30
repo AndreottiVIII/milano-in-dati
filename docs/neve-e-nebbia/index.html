@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Neve e nebbia</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--acc:#0050b3;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef4fc}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.4em 0 .2em}
+h2{font-size:1.25rem;margin:2em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1.05rem;margin:1.6em 0 .3em}
+a{color:var(--acc)} code{font-size:.9em}
+.back{font-size:.9rem;margin:.2em 0}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top} th{font-size:.82rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} td.low{color:var(--mut)} td.hl{background:var(--soft);font-weight:700}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warn ol{margin:.3em 0;padding-left:0;list-style:none} .warn li{margin:.25em 0}
+.bd{display:inline-block;min-width:1.5em;text-align:center;background:#d9d9d9;border-radius:3px;font-weight:700;margin-right:.4em;padding:0 .2em}
+.scroll{max-height:440px;overflow:auto;border:1px solid var(--line)} .wx{overflow-x:auto}
+.ch{width:100%;display:block;font:12px system-ui,Arial,sans-serif} .ch text{fill:#111} .ch .mu{fill:#666}
+.lg{display:flex;flex-wrap:wrap;gap:4px 16px;margin:.3em 0 .4em;font-size:.85rem}
+.lg span{display:inline-flex;align-items:center} .lg svg{flex:none;margin-right:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:4px 4px;font-size:.88rem}}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)}
+ul.t{padding-left:1.2em} ul.t li{margin:.3em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.big{font-size:1.5rem;font-weight:700;color:var(--acc)}
+#err{display:none;border:2px solid var(--ink);padding:8px 12px;margin:.6em 0}
+</style></head><body><main>
+<p class="back"><a href="../">&larr; Milano in dati</a></p>
+<h1>Neve e nebbia a Milano</h1>
+<p>Quanti giorni di neve e di nebbia ci sono stati a Milano, dagli anni Cinquanta a oggi, secondo le osservazioni degli aeroporti di <b>Linate</b> (serie principale) e <b>Malpensa</b> (confronto). Qui sotto: le medie per decennio, i grafici inverno per inverno e anno per anno, il legame con la temperatura di Brera, gli inverni più nevosi e tutti i controlli sui dati.</p>
+<div id="err"></div>
+
+<h2 id="inbreve">In breve</h2>
+<div class="warn"><b>Prima di leggere i numeri.</b> Il modo in cui gli aeroporti registrano il tempo è cambiato più volte (più o meno osservazioni al giorno, codici nuovi, sensori automatici). Questi cambi possono creare salti nei conteggi che <b>non sono clima</b>. Su ogni grafico i periodi dubbi sono le <b>bande grigie con una lettera</b>:
+<ol id="chiave"></ol>
+Un giorno è contato come &laquo;giorno di neve&raquo; (o di nebbia) se in almeno una osservazione di quel giorno UTC c'è il fenomeno: se si osserva più spesso, è più facile trovarlo. Per questo le bande esistono, e per questo sotto c'è anche il controllo con le sole 8 osservazioni ogni 3 ore, uguali in tutti gli anni.</div>
+<div id="sommario"></div>
+<p class="sub" id="regola"></p>
+
+<h2 id="neve">I giorni di neve, inverno per inverno</h2>
+<p>Ogni barra è un inverno (novembre-marzo) a Linate; l'etichetta è l'anno di gennaio, quindi &laquo;2012&raquo; è novembre 2011 - marzo 2012. In blu i giorni con neve in atto; in nero, sopra, quelli in cui c'è anche un codice di <b>neve forte</b> (sono pochi: 0-3 per inverno). Barre grigie a righe = inverni <b>incompleti</b> (pochi dati), non contano nelle medie. Linea nera tratteggiata = media del decennio.</p>
+<div class="lg" id="lg-neve"></div>
+<div id="c-neve"></div>
+<p class="src" id="note-neve"></p>
+
+<h2 id="nebbia">I giorni di nebbia, anno per anno</h2>
+<p>Linate, anno solare. Si conta come nebbia: nello stesso rapporto, un codice di nebbia <b>e</b> una visibilità sotto 1000 m (la definizione internazionale). È la serie in blu, <b>quella da usare per confrontare gli anni</b>. La linea nera tratteggiata conta invece ogni giorno con un qualsiasi codice di nebbia: dopo il 2005 il codice comprende anche la nebbia a banchi (banda <b>E</b>), e le due linee si separano. I cerchi vuoti grigi sono anni incompleti. Trattini neri = media del decennio della serie blu.</p>
+<div class="lg" id="lg-nebbia"></div>
+<div id="c-nebbia"></div>
+<p class="src" id="note-nebbia"></p>
+
+<h2 id="confronto">Linate e Malpensa</h2>
+<p>Due aeroporti, uno a est e uno a nord-ovest di Milano, sempre con le stesse regole di conteggio e gli stessi anni completi. Se le due linee si muovono insieme, è probabile che sia il tempo; se si separano di colpo, può essere lo strumento o il modo di registrare.</p>
+<h3>Nebbia (visibilità sotto 1 km), giorni all'anno</h3>
+<div class="lg" id="lg-conf-nebbia"></div>
+<div id="c-conf-nebbia"></div>
+<p class="src" id="note-conf-nebbia"></p>
+<h3>Neve, giorni per inverno</h3>
+<div class="lg" id="lg-conf-neve"></div>
+<div id="c-conf-neve"></div>
+<p class="src" id="note-conf-neve"></p>
+
+<h2 id="temperatura">Neve e temperatura</h2>
+<p>Ogni punto è un inverno: in orizzontale la temperatura media di novembre-marzo a <b>Brera</b> (la serie della pagina <a href="../temperature/">Temperature</a>), in verticale i giorni di neve a Linate. Solo inverni completi. I cerchi vuoti sono gli inverni 2008-2016, quando il sensore di Brera segnava circa 0,65 &deg;C in più delle stazioni vicine (spiegato nella pagina Temperature; qui i dati sono quelli misurati, senza correzione).</p>
+<div id="c-scatter"></div>
+<p id="txt-corr"></p>
+<p class="warn"><b>È un'associazione, non una spiegazione.</b> Il grafico dice solo che negli inverni più freddi i giorni di neve tendono a essere di più. Non dice quanta parte del calo sia dovuta al riscaldamento: dipende anche da precipitazioni, venti e dal modo di osservare (bande grigie). La retta tratteggiata serve solo a guidare l'occhio.</p>
+
+<h2 id="ricordare">Le nevicate da ricordare</h2>
+<p>Classifiche fatte con i dati, senza descrizioni dei singoli eventi: nei dati NOAA c'è solo se in un giorno c'è stata neve e se c'è stato un codice di neve forte, <b>non</b> quanta ne è caduta (la profondità della neve nei dati è inaffidabile: vedi Trappole). Quindi qui si ordinano gli inverni per numero di giorni di neve e le serie di giorni consecutivi.</p>
+<div class="grid2">
+<div><h3>Gli inverni con più giorni di neve, Linate</h3><div class="wx" id="r-linate"></div></div>
+<div><h3>Gli inverni con più giorni di neve, Malpensa</h3><div class="wx" id="r-malpensa"></div></div>
+</div>
+<p class="src">Solo inverni completi. &laquo;Forte&raquo; = giorni con almeno un codice di neve forte. Gli inverni sono indicati come novembre-marzo. Una lettera grigia accanto a un inverno o a una data segnala che cade in un periodo dubbio (bande A-F in alto): il numero va letto con cautela.</p>
+<div class="grid2">
+<div><h3>Le serie più lunghe di giorni consecutivi con neve, Linate</h3><div class="wx" id="s-linate"></div></div>
+<div><h3>&hellip; e Malpensa</h3><div class="wx" id="s-malpensa"></div></div>
+</div>
+<p class="src">Giorni UTC consecutivi con neve in atto. Una serie può essere interrotta da un giorno in cui la neve c'è stata ma non è stata osservata, o da un giorno senza dati: sono durate minime.</p>
+<details><summary>Gli inverni con meno neve, Linate</summary><div class="wx" id="r-minimi"></div></details>
+<details><summary>I giorni con un codice di neve forte (Linate e Malpensa)</summary>
+<p class="sub">Un codice di neve forte (WMO 74-75 e equivalenti automatici) in almeno un'osservazione del giorno UTC. Il numero di ore indica quante ore del giorno hanno almeno un rapporto: con poche ore (3 o 8) il giorno è meno documentato.</p>
+<div class="grid2"><div class="wx" id="f-linate"></div><div class="wx" id="f-malpensa"></div></div></details>
+
+<h2 id="tabelle">Tabelle</h2>
+<details><summary>Medie per decennio con tutte le definizioni (controllo)</summary><div id="t-dec"></div></details>
+<details><summary>Tutti gli inverni (neve, Linate e Malpensa)</summary><div class="scroll" id="t-inverni"></div></details>
+<details><summary>Tutti gli anni (nebbia, Linate e Malpensa)</summary><div class="scroll" id="t-anni"></div></details>
+
+<h2 id="fonti">Fonti, licenza e trappole dei dati</h2>
+<h3>Fonti</h3>
+<ul class="t">
+<li><b>NOAA NCEI, Integrated Surface Database (ISD)</b>, versione completa: osservazioni orarie o ogni 3 ore, con tempo presente e visibilità. <code>https://www.ncei.noaa.gov/pub/data/noaa/</code>.</li>
+<li><b>NOAA NCEI, Global Summary of the Day (GSOD)</b>: riassunto giornaliero, usato per i confronti e i controlli. <code>https://www.ncei.noaa.gov/data/global-summary-of-the-day/</code>.</li>
+<li>Stazioni: <b>Milano Linate</b>, identificativo USAF-WBAN 160800-99999 (WMO 16080, ICAO LIML, 107 m); <b>Milano Malpensa</b>, 160660-99999 (WMO 16066, ICAO LIMC, 234 m). Storia delle stazioni: <code>isd-history.csv</code>.</li>
+<li>Temperatura di Brera: la serie unica della pagina <a href="../temperature/">Temperature</a>.</li>
+<li>Dati scaricati il <b id="m-scarico"></b>. Ultimo giorno con dati: <b id="m-ultimo"></b>, perciò l'inverno 2026 e il 2026 non ci sono, e il 2025 è incompleto.</li>
+</ul>
+<h3>Licenza</h3>
+<p>I dati NOAA sono pubblici e gratuiti per la ricerca. Ma i dati delle stazioni <b>non statunitensi</b> (compresi quelli italiani) sono soggetti alla <b>Risoluzione 40 dell'Organizzazione meteorologica mondiale (WMO)</b>: NOAA scrive che non possono essere ridistribuiti ad altri utenti. Per questo qui <b>non sono pubblicate le osservazioni né la tabella giorno per giorno</b>: solo conteggi derivati (giorni per inverno e per anno, medie per decennio, elenchi di date con una bandiera). Elaborazione: Milano in dati.</p>
+<h3>Come sono contati i giorni</h3>
+<ul class="t">
+<li><b>Giorno</b> = giorno UTC (come in GSOD), non quello locale: una nevicata notturna può essere spezzata tra due giorni.</li>
+<li><b>Giorno di neve</b>: almeno un'osservazione con neve in atto (tempo presente WMO 70-75, 77, 78, 85, 86; codici automatici 70-73, 85-87; METAR automatico con neve o granuli di neve). Esclusi diamond dust e ice pellets. Nei controlli: &laquo;larga&raquo; aggiunge pioggia e neve mista e la neve dell'ora precedente; &laquo;8 ore&raquo; usa solo le osservazioni delle ore 00, 03, &hellip; 21 UTC.</li>
+<li><b>Neve forte</b>: almeno un'osservazione con codice di intensità forte (74-75 e automatici). Non è una misura della quantità di neve.</li>
+<li><b>Giorno di nebbia</b> (serie consigliata): un'osservazione con codice di nebbia (41-49, 30-35 automatici, FG nel METAR automatico) e con visibilità sotto 1000 m nello stesso rapporto. Alternative nei controlli: solo il codice; il codice sulle sole 8 ore sinottiche con visibilità sotto 1000 m; il flag nebbia di GSOD.</li>
+<li><b>Inverno</b> = novembre-marzo; l'etichetta è l'anno di gennaio. <b>Anno</b> = anno solare.</li>
+<li id="li-regola"></li>
+<li>Osservazioni con codice di qualità sospetto o errato (2, 3, 6, 7) scartate.</li>
+</ul>
+<h3>Trappole</h3>
+<ul class="t">
+<li><b>Quante osservazioni al giorno cambia molto</b>: da 1 a 24, più il buco di 1994-98 e il periodo 1983-90 solo ogni 3 ore (bande sopra).</li>
+<li><b>Il significato di &laquo;nessun codice&raquo; cambia</b>: fino al 2004 quasi ogni rapporto METAR ha un codice di tempo presente anche se non succede nulla (circa il 90%), dal 2006 il codice c'è solo quando c'è un fenomeno (circa 30%). Il testo METAR completo compare nei dati dal 2006. Per questo il codice mancante non si può usare come misura di completezza dei dati.</li>
+<li><b>Nebbia: codice contro visibilità.</b> Dal 2006 i giorni &laquo;con codice di nebbia&raquo; a Linate salgono e quelli con visibilità sotto 1 km no; a Malpensa lo stesso scarto si vede dal 2016-18. Anche il flag nebbia di GSOD segue il codice largo (10-30 giorni in più).</li>
+<li><b>Linate e Malpensa differiscono a tratti</b> per la nebbia in modo che il tempo non spiega da solo (Malpensa più alta di 28-70 giorni negli anni 1982-94, quasi uguale nel 1998-2005, Linate più alta di 15-30 giorni dal 2006): possibili cambi di strumenti, non documentati nei dati. Le coordinate delle due stazioni in ISD cambiano più volte.</li>
+<li><b>Dal 2018</b> a Linate compaiono METAR automatici (AUTO): l'1% nel 2018, il 23% nel 2020, poi l'1-5%, quasi tutti di notte. In un controllo sulle notti nov-feb 2019-2025 la visibilità sotto 1 km c'è nel 22% dei METAR AUTO e nell'11,6% degli altri: non c'è sottostima evidente, ma il campione AUTO è piccolo. Non c'è nessun file che dica quando i sensori sono entrati in servizio: andrebbe chiesto a ENAV o ad ARPA.</li>
+<li><b>2013-2017</b>: la visibilità manca nel 18-36% dei rapporti di Linate (e fino al 45% a Malpensa), probabilmente i CAVOK. Non tocca la nebbia con visibilità sotto 1 km, perché con nebbia la visibilità c'è.</li>
+<li><b>La profondità della neve non è usata</b>: nei dati ISD tutti i rapporti di profondità hanno il codice &laquo;mancante&raquo; anche con un valore, e ci sono valori impossibili (264 e 287 cm a Linate a gennaio 1991, 225 cm a febbraio 1985). GSOD li copia. Per questo non si può dire quanta neve è caduta, né se gli episodi sono diventati meno frequenti ma più forti.</li>
+<li><b>Anni mancanti</b> a Linate: 1939-1950, 1962-63, 1972 (e 1959-61 con una sola osservazione al giorno); a Malpensa il 1972. Le 8 osservazioni sinottiche e le altre definizioni sono nella tabella di controllo.</li>
+<li><b>Il testo METAR dà qualche giorno di neve in più del codice</b> (126 contro 115 giorni a Linate da giugno 2006), perché la neve mista e le segnalazioni &laquo;SG&raquo; non sempre diventano codici. Anche per questo i conteggi sono &laquo;almeno&raquo;.</li>
+<li>Una sola stazione per aeroporto, a quote e in luoghi diversi dal centro di Milano: è la neve e la nebbia dei due aeroporti, non una media della città.</li>
+<li>Una seconda fonte per la neve (ARPA Lombardia, Osservatorio di Brera) non è ancora stata confrontata.</li>
+</ul>
+<p class="src">Note complete e programmi (scarico, estrazione, costruzione delle tabelle): <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>, cartella <code>neve-e-nebbia</code>.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> NOAA National Centers for Environmental Information, Integrated Surface Database e Global Summary of the Day, stazioni Milano Linate e Milano Malpensa; dati non statunitensi soggetti alla Risoluzione 40 WMO (qui solo conteggi derivati, nessuna ridistribuzione delle osservazioni). Temperatura: pagina <a href="../temperature/">Temperature</a>. Elaborazione: Milano in dati.</p>
+</footer>
+</main>
+<script>
+(function(){
+var ACC='#0050b3',CORR,MET,INV,ANN,DEC,RIC,CNT=0;
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function f1(x){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})}
+function f2(x){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}).replace('-','−')}
+function f0(x){return x==null?'':Number(x).toLocaleString('it-IT',{maximumFractionDigits:0})}
+function fd(s){return s?s.split('-').reverse().join('/'):''}
+function wl(w){return (w-1)+'-'+String(w).slice(-2)}
+function dl(d){return 'anni '+(d===1950?'Cinquanta':d===1960?'Sessanta':d===1970?'Settanta':d===1980?'Ottanta':d===1990?'Novanta':d===2000?'Duemila':d===2010?'Duemiladieci':'Venti')}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+var ST=['LINATE','MALPENSA'],NM={LINATE:'Linate',MALPENSA:'Malpensa'};
+Promise.all([J('data/meta.json'),J('data/inverni.json'),J('data/anni.json'),J('data/decenni.json'),J('data/ricordi.json')]).then(function(a){
+  MET=a[0];INV=a[1].inverni;CORR=a[1].correlazione;ANN=a[2];DEC=a[3];RIC=a[4];
+  testi();build();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(build,200)});
+}).catch(function(e){var el=$('err');el.style.display='block';el.innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+
+function ranges(a){a=a.slice().sort(function(x,y){return x-y});var o=[],i=0;while(i<a.length){var j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(j>i?a[i]+'-'+a[j]:''+a[i]);i=j+1}return o.join(', ')}
+function bl(x,st){var o=[];MET.bande.forEach(function(b){if(b.st.indexOf(st)>=0&&x>=b.da&&x<b.a)o.push(b.id)});return o.length?' <span class="bd">'+o.join('')+'</span>':''}
+function dx(d){var p=d.split('-');return +p[0]+(+p[1]-1)/12+(+p[2]-1)/365}
+function find(arr,k,v){for(var i=0;i<arr.length;i++)if(arr[i][k]===v)return arr[i];return null}
+
+/* ---------- testi e tabelle ---------- */
+function testi(){
+  $('m-scarico').textContent=fd(MET.scaricato);$('m-ultimo').textContent=fd(MET.ultimo_giorno);
+  var h='';MET.bande.forEach(function(b){
+    var per=(function(){var a=b.da,z=b.a;function fm(x){var y=Math.floor(x+1e-6),m=Math.round((x-y)*12)+1,n=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];return n[m-1]+' '+y}
+      return z>=2026?'dal '+fm(a):fm(a)+' - '+fm(z-1/12)})();
+    h+='<li><span class="bd">'+b.id+'</span><b>'+esc(per)+'</b> ('+b.st.map(function(s){return NM[s]}).join(' e ')+'): '+esc(b.txt)+'</li>'});
+  $('chiave').innerHTML=h;
+  var rg='Regola di completezza: un inverno (nov-mar) o un anno è <b>completo</b> se in almeno il '+MET.soglia_completo+'% dei suoi giorni ci sono 4 ore o più con osservazioni. Solo i completi entrano nelle medie per decennio (decennio = decennio dell\'etichetta). Linate: '+MET.n_inverni_completi.LINATE+' inverni e '+MET.n_anni_completi.LINATE+' anni completi dal 1950; Malpensa: '+MET.n_inverni_completi.MALPENSA+' inverni e '+MET.n_anni_completi.MALPENSA+' anni.';
+  $('regola').innerHTML=rg;$('li-regola').innerHTML='<b>Completezza</b>: '+rg.replace('Regola di completezza: ','');
+  /* sommario */
+  function dm(s,tipo,m,d){var a=DEC[tipo][s][m];return find(a,'d',d)}
+  var decs=[1950,1960,1970,1980,1990,2000,2010,2020];
+  var h2='<div class="wx"><table><tr><th rowspan="2">Decennio</th><th class="r" colspan="2">Giorni di neve per inverno</th><th class="r" colspan="2">Giorni di nebbia all\'anno (visibilità &lt; 1 km)</th></tr><tr><th class="r">Linate</th><th class="r">Malpensa</th><th class="r">Linate</th><th class="r">Malpensa</th></tr>';
+  decs.forEach(function(d){
+    h2+='<tr><td><b>'+d+'</b></td>';
+    [['inverni','n','LINATE'],['inverni','n','MALPENSA'],['anni','v','LINATE'],['anni','v','MALPENSA']].forEach(function(q){
+      var r=dm(q[2],q[0],q[1],d);h2+=r?'<td class="r"><b>'+f1(r.m)+'</b> <span class="sub">('+r.n+')</span></td>':'<td class="r low">&ndash;</td>'});
+    h2+='</tr>'});
+  h2+='</table></div><p class="src">Media dei soli inverni/anni completi; tra parentesi quanti sono. Il decennio 2020 ha solo gli inverni 2020-2025 e gli anni 2020-2024. Il decennio 1950 di Linate comprende il 1958 (4 osservazioni al giorno, banda A). Malpensa ha dati ogni 3 ore dal 1966 e orari dal 1973.</p>';
+  function mm(s,tipo,m){var a=DEC[tipo][s][m],mx=a[0],mn=a[0];a.forEach(function(r){if(r.m>mx.m)mx=r;if(r.m<mn.m)mn=r});return{mx:mx,mn:mn,last:a[a.length-1]}}
+  var ln=mm('LINATE','inverni','n'),mn_=mm('MALPENSA','inverni','n'),lf=mm('LINATE','anni','v'),mf=mm('MALPENSA','anni','v');
+  var ls=mm('LINATE','anni','syn'),ms=mm('MALPENSA','anni','syn');
+  h2+='<ul class="t">'+
+   '<li><b>Neve.</b> A Linate la media va da '+f1(ln.mx.m)+' giorni per inverno ('+dl(ln.mx.d)+', '+ln.mx.n+' inverni) a '+f1(ln.mn.m)+' ('+dl(ln.mn.d)+', '+ln.mn.n+' inverni). Non scende in modo regolare: ci sono decenni che risalgono rispetto al precedente (vedi tabella). Da un inverno all\'altro la variazione è enorme: da 0 a 21 giorni a Linate. A Malpensa il massimo è '+f1(mn_.mx.m)+' ('+dl(mn_.mx.d)+') e l\'ultimo decennio '+f1(mn_.last.m)+'.</li>'+
+   '<li><b>Nebbia.</b> A Linate la media passa da '+f0(lf.mx.m)+' giorni all\'anno ('+dl(lf.mx.d)+') a '+f0(lf.last.m)+' ('+dl(lf.last.d)+', '+lf.last.n+' anni); a Malpensa sale fino a '+f0(mf.mx.m)+' ('+dl(mf.mx.d)+') e poi scende a '+f0(mf.last.m)+'. I due aeroporti non partono dallo stesso livello e non scendono negli stessi anni (vedi la sezione Linate e Malpensa).</li>'+
+   '<li><b>Controllo con le sole 8 osservazioni ogni 3 ore</b> (le stesse in tutti gli anni): anche così la nebbia diminuisce, da '+f0(ls.mx.m)+' ('+dl(ls.mx.d)+') a '+f0(ls.last.m)+' a Linate e da '+f0(ms.mx.m)+' a '+f0(ms.last.m)+' a Malpensa. Questo toglie l\'effetto del numero di osservazioni, non quello di strumenti e codifica: il confronto tra i decenni resta quindi prudente, soprattutto a cavallo delle bande grigie.</li></ul>';
+  $('sommario').innerHTML=h2;
+  /* correlazione */
+  var C=CORR,L=C.LINATE,M=C.MALPENSA;
+  $('txt-corr').innerHTML='Correlazione tra giorni di neve e temperatura media nov-mar, inverno per inverno: a Linate <b>'+f2(L.tutti.r)+'</b> (Spearman '+f2(L.tutti.rho)+', '+L.tutti.n+' inverni); senza gli inverni 2008-2016 '+f2(L.senza_2008_2016.r)+' ('+L.senza_2008_2016.n+'); fino al 1999 '+f2(L.fino_1999.r)+' ('+L.fino_1999.n+') e dal 2000 '+f2(L.dal_2000.r)+' ('+L.dal_2000.n+'). A Malpensa '+f2(M.tutti.r)+' ('+M.tutti.n+' inverni). Il segno meno vuol dire che a inverni più caldi corrispondono in media meno giorni di neve.';
+  /* tabelle di ricordo */
+  function tb(head,rows){return '<table><tr>'+head.map(function(x){return'<th'+(x[1]?' class="r"':'')+'>'+x[0]+'</th>'}).join('')+'</tr>'+rows.join('')+'</table>'}
+  $('r-linate').innerHTML=tb([['#'],['Inverno'],['Neve',1],['Forte',1],['Malpensa',1],['T Brera',1]],RIC.inverni_linate.map(function(r,i){return'<tr><td>'+(i+1)+'</td><td><b>'+wl(r.w)+'</b>'+bl(r.w+.04,'LINATE')+'</td><td class="r"><b>'+r.n+'</b></td><td class="r">'+r.h+'</td><td class="r">'+(r.mal==null?'&ndash;':r.mal)+'</td><td class="r">'+f1(r.t)+' &deg;C</td></tr>'}));
+  $('r-malpensa').innerHTML=tb([['#'],['Inverno'],['Neve',1],['Forte',1],['Linate',1],['T Brera',1]],RIC.inverni_malpensa.map(function(r,i){return'<tr><td>'+(i+1)+'</td><td><b>'+wl(r.w)+'</b>'+bl(r.w+.04,'MALPENSA')+'</td><td class="r"><b>'+r.n+'</b></td><td class="r">'+r.h+'</td><td class="r">'+(r.lin==null?'&ndash;':r.lin)+'</td><td class="r">'+f1(r.t)+' &deg;C</td></tr>'}));
+  $('r-minimi').innerHTML=tb([['Inverno'],['Neve Linate',1],['T Brera',1]],RIC.minimi_linate.map(function(r){return'<tr><td><b>'+wl(r.w)+'</b>'+bl(r.w+.04,'LINATE')+'</td><td class="r">'+r.n+'</td><td class="r">'+f1(r.t)+' &deg;C</td></tr>'}));
+  ST.forEach(function(s){
+    var k=s.toLowerCase();
+    $('s-'+k).innerHTML=tb([['#'],['Dal'],['Al'],['Giorni',1],['di cui forte',1]],RIC.serie[s].map(function(r,i){return'<tr><td>'+(i+1)+'</td><td>'+fd(r.da)+bl(dx(r.da),s)+'</td><td>'+fd(r.a)+'</td><td class="r"><b>'+r.n+'</b></td><td class="r">'+r.h+'</td></tr>'}));
+    $('f-'+k).innerHTML='<p class="sub"><b>'+NM[s]+'</b>, '+RIC.forte[s].length+' giorni</p>'+tb([['Data'],['Ore con rapporti',1]],RIC.forte[s].map(function(r){return'<tr><td>'+fd(r.data)+'</td><td class="r'+(r.ore<4?' low':'')+'">'+r.ore+(r.ore<4?' *':'')+'</td></tr>'}))+(s==='LINATE'?'<p class="src">* meno di 4 ore osservate nel giorno.</p>':'');
+  });
+  /* tabella decenni */
+  var t='';ST.forEach(function(s){
+    t+='<h3>'+NM[s]+'</h3><div class="wx"><table><tr><th>Decennio</th><th class="r">Inverni</th><th class="r">Neve (osservazioni)</th><th class="r">Neve larga</th><th class="r">Neve 8 ore</th><th class="r">Neve flag GSOD</th><th class="r">Anni</th><th class="r">Nebbia vis. &lt;1 km</th><th class="r">Nebbia solo codice</th><th class="r">Nebbia 8 ore vis. &lt;1 km</th><th class="r">Nebbia flag GSOD</th></tr>';
+    decs.forEach(function(d){
+      var a=find(DEC.inverni[s].n,'d',d),b=find(DEC.anni[s].v,'d',d);if(!a&&!b)return;
+      function c(tp,m){var r=find(DEC[tp][s][m],'d',d);return'<td class="r">'+(r?f1(r.m):'&ndash;')+'</td>'}
+      t+='<tr><td><b>'+d+'</b></td><td class="r">'+(a?a.n:'')+'</td>'+c('inverni','n')+c('inverni','wide')+c('inverni','syn')+c('inverni','gs')+'<td class="r">'+(b?b.n:'')+'</td>'+c('anni','v')+c('anni','code')+c('anni','syn')+c('anni','gs')+'</tr>'});
+    t+='</table></div>'});
+  t+='<p class="src">Medie dei soli inverni e anni completi. Il flag GSOD segna nebbia anche per i casi larghi (nebbia a banchi, nebbia nell\'ora precedente) e per la neve include anche i granuli di ghiaccio: è un controllo, non la serie di riferimento.</p>';
+  $('t-dec').innerHTML=t;
+  /* tutti gli inverni */
+  var ys={};ST.forEach(function(s){INV[s].forEach(function(r){ys[r.w]=ys[r.w]||{};ys[r.w][s]=r})});
+  var ws=Object.keys(ys).map(Number).sort(function(a,b){return b-a}),ti='<table><tr><th>Inverno</th><th class="r">Linate</th><th class="r">forte</th><th class="r">giorni con dati</th><th class="r">Malpensa</th><th class="r">forte</th><th class="r">giorni con dati</th><th class="r">T Brera</th></tr>';
+  ws.forEach(function(w){var L=ys[w].LINATE,M=ys[w].MALPENSA,t_=(L||M).t;
+    function c(r,f){return r?'<td class="r'+(r.c?'':' low')+'">'+f(r)+(r.c?'':'*')+'</td>':'<td class="r low">&ndash;</td>'}
+    function pc(r){return r?'<td class="r low">'+r.pct+'%</td>':'<td class="r low">&ndash;</td>'}
+    ti+='<tr><td><b>'+wl(w)+'</b></td>'+c(L,function(r){return r.n})+c(L,function(r){return r.h})+pc(L)+c(M,function(r){return r.n})+c(M,function(r){return r.h})+pc(M)+'<td class="r">'+(t_==null?'':f1(t_))+'</td></tr>'});
+  $('t-inverni').innerHTML=ti+'</table><p class="src">* inverno incompleto (meno del '+MET.soglia_completo+'% dei giorni con 4 ore o più): non confrontabile e non entra nelle medie. &laquo;Giorni con dati&raquo; = quota di giorni con 4 ore o più.</p>';
+  var ya={};ST.forEach(function(s){ANN[s].forEach(function(r){ya[r.y]=ya[r.y]||{};ya[r.y][s]=r})});
+  var yy=Object.keys(ya).map(Number).sort(function(a,b){return b-a}),ta='<table><tr><th>Anno</th><th class="r">Linate vis.&lt;1 km</th><th class="r">solo codice</th><th class="r">giorni con dati</th><th class="r">Malpensa vis.&lt;1 km</th><th class="r">solo codice</th><th class="r">giorni con dati</th></tr>';
+  yy.forEach(function(y){var L=ya[y].LINATE,M=ya[y].MALPENSA;
+    function c(r,k){return r&&r[k]!=null?'<td class="r'+(r.c?'':' low')+'">'+r[k]+(r.c?'':'*')+'</td>':'<td class="r low">&ndash;</td>'}
+    function pc(r){return r?'<td class="r low">'+r.pct+'%</td>':'<td class="r low">&ndash;</td>'}
+    ta+='<tr><td><b>'+y+'</b></td>'+c(L,'v')+c(L,'code')+pc(L)+c(M,'v')+c(M,'code')+pc(M)+'</tr>'});
+  $('t-anni').innerHTML=ta+'</table><p class="src">* anno incompleto. Il 2025 arriva solo al 24 agosto.</p>';
+}
+
+/* ---------- grafici ---------- */
+function nice(max){var st=[1,2,5,10,20,25,50,100],i=0;while(max/st[i]>6&&i<st.length-1)i++;return st[i]}
+function frame(box,x0,x1,ymax,o){
+  o=o||{};var w=Math.max(280,box.clientWidth||700),narrow=w<600,H=o.H||(narrow?270:330);
+  var c={w:w,H:H,narrow:narrow,ml:narrow?30:38,mr:narrow?8:14,mt:24,mb:o.mb||26,x0:x0,x1:x1};
+  c.pw=w-c.ml-c.mr;c.ph=H-c.mt-c.mb;
+  var st=nice(ymax);c.step=st;c.ym=Math.ceil(ymax/st)*st;
+  c.X=function(v){return c.ml+(v-x0)/(x1-x0)*c.pw};c.Y=function(v){return c.mt+c.ph-v/c.ym*c.ph};
+  return c;
+}
+function axes(c,xt){
+  var s='';for(var v=0;v<=c.ym+1e-9;v+=c.step){s+='<line x1="'+c.ml+'" x2="'+(c.ml+c.pw)+'" y1="'+c.Y(v)+'" y2="'+c.Y(v)+'" stroke="#e5e5e5"/><text class="mu" x="'+(c.ml-5)+'" y="'+(c.Y(v)+4)+'" text-anchor="end">'+v+'</text>'}
+  return s;
+}
+function xaxis(c){
+  var s='',y=Math.ceil(c.x0/10)*10;
+  for(;y<=c.x1;y+=10){s+='<line x1="'+c.X(y)+'" x2="'+c.X(y)+'" y1="'+(c.mt+c.ph)+'" y2="'+(c.mt+c.ph+4)+'" stroke="#999"/><text class="mu" x="'+c.X(y)+'" y="'+(c.mt+c.ph+17)+'" text-anchor="middle">'+y+'</text>'}
+  return s+'<line x1="'+c.ml+'" x2="'+(c.ml+c.pw)+'" y1="'+(c.mt+c.ph)+'" y2="'+(c.mt+c.ph)+'" stroke="#111"/>';
+}
+function bande(c,sts){
+  var s='';MET.bande.forEach(function(b){
+    if(sts&&!b.st.some(function(x){return sts.indexOf(x)>=0}))return;
+    var a=Math.max(b.da,c.x0),z=Math.min(b.a,c.x1);if(z<=a)return;
+    var xa=c.X(a),xb=c.X(z);
+    s+='<g><title>'+esc(b.id+': '+b.brev+' ('+b.st.map(function(q){return NM[q]}).join(', ')+')')+'</title><rect x="'+xa+'" y="'+c.mt+'" width="'+(xb-xa)+'" height="'+c.ph+'" fill="#000" opacity=".11"/><text x="'+((xa+xb)/2)+'" y="'+(c.mt-8)+'" text-anchor="middle" style="font-weight:700;fill:#444">'+b.id+'</text></g>'});
+  return s;
+}
+function legend(id,items){
+  $(id).innerHTML=items.map(function(it){return'<span><svg width="'+(it.w||24)+'" height="12">'+it.svg+'</svg>'+it.t+'</span>'}).join('');
+}
+var HAT='<defs><pattern id="hat" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#fff"/><line x1="0" y1="0" x2="0" y2="5" stroke="#888" stroke-width="2"/></pattern></defs>';
+function svgOpen(c,label){return'<svg class="ch" viewBox="0 0 '+c.w+' '+c.H+'" width="'+c.w+'" height="'+c.H+'" role="img" aria-label="'+esc(label)+'">'}
+function means(c,arr,off,half){
+  var s='';arr.forEach(function(r){var a=r.da+off-half,z=r.a+off+half;
+    s+='<line x1="'+c.X(a)+'" x2="'+c.X(z)+'" y1="'+c.Y(r.m)+'" y2="'+c.Y(r.m)+'" stroke="#111" stroke-width="2.2" stroke-dasharray="5 3"><title>'+esc(r.d+': media '+f1(r.m)+' ('+r.n+')')+'</title></line>'});
+  return s;
+}
+
+function build(){
+  /* neve: barre Linate */
+  (function(){
+    var box=$('c-neve'),R=INV.LINATE,x0=1950,x1=2026,ymax=0;R.forEach(function(r){ymax=Math.max(ymax,r.n)});
+    var c=frame(box,x0,x1,ymax);
+    var s=svgOpen(c,'Giorni di neve per inverno a Linate, con le bande di periodi dubbi')+HAT+axes(c)+bande(c,['LINATE']);
+    var bw=Math.max(2,(c.X(1)-c.X(0))*.72);
+    R.forEach(function(r){
+      var xc=c.X(r.w+.04)-bw/2,tt=wl(r.w)+(r.c?'':' (incompleto, '+r.pct+'% dei giorni con dati)')+': '+r.n+' giorni di neve'+(r.h?', di cui '+r.h+' con neve forte':'');
+      if(!r.c){s+='<rect x="'+xc+'" y="'+c.Y(r.n)+'" width="'+bw+'" height="'+Math.max(0,c.Y(0)-c.Y(r.n))+'" fill="url(#hat)" stroke="#888" stroke-width="1"><title>'+esc(tt)+'</title></rect>';return}
+      s+='<rect x="'+xc+'" y="'+c.Y(r.n-r.h)+'" width="'+bw+'" height="'+Math.max(0,c.Y(0)-c.Y(r.n-r.h))+'" fill="'+ACC+'"><title>'+esc(tt)+'</title></rect>';
+      if(r.h)s+='<rect x="'+xc+'" y="'+c.Y(r.n)+'" width="'+bw+'" height="'+(c.Y(r.n-r.h)-c.Y(r.n))+'" fill="#111"><title>'+esc(tt)+'</title></rect>';
+    });
+    s+=means(c,DEC.inverni.LINATE.n,.04,.42)+xaxis(c)+'</svg>';
+    box.innerHTML=s;
+    legend('lg-neve',[{svg:'<rect width="14" height="12" fill="'+ACC+'"/>',w:14,t:'giorni con neve'},{svg:'<rect width="14" height="12" fill="#111"/>',w:14,t:'di cui con codice di neve forte'},{svg:'<defs><pattern id="hat2" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#fff"/><line x1="0" y1="0" x2="0" y2="5" stroke="#888" stroke-width="2"/></pattern></defs><rect width="14" height="12" fill="url(#hat2)" stroke="#888"/>',w:14,t:'inverno incompleto'},{svg:'<line x1="0" x2="24" y1="6" y2="6" stroke="#111" stroke-width="2.2" stroke-dasharray="5 3"/>',t:'media del decennio'},{svg:'<rect width="14" height="12" fill="#000" opacity=".11"/>',w:14,t:'periodo dubbio (lettere sopra)'}]);
+    var miss=[];for(var w=1951;w<=2025;w++)if(!find(R,'w',w))miss.push(w);
+    $('note-neve').innerHTML='Inverni senza nessun dato NOAA a Linate (spazi vuoti): '+ranges(miss)+'. Inverni incompleti: '+ranges(MET.inverni_esclusi.LINATE)+'. Prima del 1950 il grafico non parte: nel 1931-38 ci sono solo 1-2 osservazioni al giorno. Passa il mouse sulle barre per i numeri.';
+  })();
+
+  /* nebbia Linate */
+  (function(){
+    var box=$('c-nebbia'),R=ANN.LINATE,ymax=0;R.forEach(function(r){ymax=Math.max(ymax,r.v,r.code||0)});
+    var c=frame(box,1950,2026,ymax);
+    var s=svgOpen(c,'Giorni di nebbia per anno a Linate, due definizioni')+axes(c)+bande(c,['LINATE']);
+    function path(key,color,dash){
+      var segs=[],cur=[],prev=null;
+      R.forEach(function(r){if(!r.c||r[key]==null){if(cur.length)segs.push(cur);cur=[];prev=null;return}
+        if(prev!==null&&r.y-prev>1){segs.push(cur);cur=[]}cur.push(r);prev=r.y});
+      if(cur.length)segs.push(cur);
+      var o='';segs.forEach(function(sg){
+        if(sg.length>1)o+='<path d="'+sg.map(function(r,i){return(i?'L':'M')+c.X(r.y+.5).toFixed(1)+' '+c.Y(r[key]).toFixed(1)}).join('')+'" fill="none" stroke="'+color+'" stroke-width="'+(key==='v'?2:1.4)+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+        if(key==='v')sg.forEach(function(r){o+='<circle cx="'+c.X(r.y+.5).toFixed(1)+'" cy="'+c.Y(r[key]).toFixed(1)+'" r="2.2" fill="'+color+'"><title>'+r.y+': '+r.v+' giorni (visibilità &lt; 1 km); solo codice: '+r.code+'</title></circle>'})});
+      return o;
+    }
+    s+=path('code','#111','2 3')+path('v',ACC);
+    R.forEach(function(r){if(!r.c)s+='<circle cx="'+c.X(r.y+.5).toFixed(1)+'" cy="'+c.Y(r.v).toFixed(1)+'" r="3" fill="#fff" stroke="#888" stroke-width="1.4"><title>'+r.y+' (incompleto, '+r.pct+'% dei giorni con dati): '+r.v+' giorni (visibilità &lt; 1 km)</title></circle>'});
+    s+=means(c,DEC.anni.LINATE.v,.5,.45)+xaxis(c)+'</svg>';
+    box.innerHTML=s;
+    legend('lg-nebbia',[{svg:'<line x1="0" x2="24" y1="6" y2="6" stroke="'+ACC+'" stroke-width="2"/><circle cx="12" cy="6" r="2.4" fill="'+ACC+'"/>',t:'codice di nebbia e visibilità &lt; 1 km (consigliata)'},{svg:'<line x1="0" x2="24" y1="6" y2="6" stroke="#111" stroke-width="1.4" stroke-dasharray="2 3"/>',t:'qualunque codice di nebbia'},{svg:'<circle cx="8" cy="6" r="3.2" fill="#fff" stroke="#888" stroke-width="1.4"/>',w:16,t:'anno incompleto'},{svg:'<line x1="0" x2="24" y1="6" y2="6" stroke="#111" stroke-width="2.2" stroke-dasharray="5 3"/>',t:'media del decennio'}]);
+    $('note-nebbia').innerHTML='Anni incompleti (cerchi vuoti, fuori dalle medie): '+ranges(MET.anni_esclusi.LINATE)+'. Il 2025 arriva solo al 24 agosto. Mancano del tutto 1962, 1963 e 1972.';
+  })();
+
+  /* confronto: linee */
+  function confronto(id,lgid,noteid,key,keyx,off,label){
+    var box=$(id),ymax=0;ST.forEach(function(s){(keyx==='w'?INV:ANN)[s].forEach(function(r){ymax=Math.max(ymax,r[key])})});
+    var c=frame(box,1950,2026,ymax),s=svgOpen(c,label)+axes(c)+bande(c,ST);
+    var cols={LINATE:'#111',MALPENSA:ACC};
+    ST.forEach(function(st){
+      var R=(keyx==='w'?INV:ANN)[st],segs=[],cur=[],prev=null;
+      R.forEach(function(r){var x=r[keyx];if(!r.c){if(cur.length)segs.push(cur);cur=[];prev=null;return}
+        if(prev!==null&&x-prev>1){segs.push(cur);cur=[]}cur.push(r);prev=x});
+      if(cur.length)segs.push(cur);
+      segs.forEach(function(sg){
+        if(sg.length>1)s+='<path d="'+sg.map(function(r,i){return(i?'L':'M')+c.X(r[keyx]+off).toFixed(1)+' '+c.Y(r[key]).toFixed(1)}).join('')+'" fill="none" stroke="'+cols[st]+'" stroke-width="1.7"/>';
+        sg.forEach(function(r){s+='<circle cx="'+c.X(r[keyx]+off).toFixed(1)+'" cy="'+c.Y(r[key]).toFixed(1)+'" r="2.1" fill="'+cols[st]+'"><title>'+NM[st]+' '+(keyx==='w'?wl(r.w):r.y)+': '+r[key]+' giorni</title></circle>'})});
+    });
+    s+=xaxis(c)+'</svg>';box.innerHTML=s;
+    legend(lgid,[{svg:'<line x1="0" x2="24" y1="6" y2="6" stroke="#111" stroke-width="1.7"/><circle cx="12" cy="6" r="2.2" fill="#111"/>',t:'Linate'},{svg:'<line x1="0" x2="24" y1="6" y2="6" stroke="'+ACC+'" stroke-width="1.7"/><circle cx="12" cy="6" r="2.2" fill="'+ACC+'"/>',t:'Malpensa'},{svg:'<rect width="14" height="12" fill="#000" opacity=".11"/>',w:14,t:'periodo dubbio (lettere sopra; B, D, E per entrambi, A, C, F solo Linate)'}]);
+  }
+  confronto('c-conf-nebbia','lg-conf-nebbia','note-conf-nebbia','v','y',.5,'Giorni di nebbia per anno, Linate e Malpensa');
+  confronto('c-conf-neve','lg-conf-neve','note-conf-neve','n','w',.04,'Giorni di neve per inverno, Linate e Malpensa');
+  (function(){
+    var A={},B={};ANN.LINATE.forEach(function(r){A[r.y]=r});
+    function mean(y0,y1){var d=[];ANN.MALPENSA.forEach(function(r){var l=A[r.y];if(r.c&&l&&l.c&&r.y>=y0&&r.y<=y1)d.push(l.v-r.v)});return d.length?{m:d.reduce(function(a,b){return a+b},0)/d.length,n:d.length,mn:Math.min.apply(null,d),mx:Math.max.apply(null,d)}:null}
+    function fs(x){return(x>0?'+':x<0?'−':'')+f0(Math.abs(x))}
+    var p=[[1966,1978],[1982,1994],[1998,2005],[2006,2024]],t=p.map(function(q){var m=mean(q[0],q[1]);return m?q[0]+'-'+q[1]+': '+fs(m.m)+' (da '+fs(m.mn)+' a '+fs(m.mx)+')':''}).join('; ');
+    $('note-conf-nebbia').innerHTML='Differenza Linate meno Malpensa, in giorni l\'anno, negli anni completi in entrambi: '+t+'. Un segno meno vuol dire più nebbia a Malpensa. La differenza cambia segno e dimensione più volte (attorno al 1979, al 1995-98 e al 2006), in parte vicino alle bande C (a Linate solo osservazioni ogni 3 ore), D ed E. Un clima che cambia così in due aeroporti vicini è improbabile: fa pensare a cambi di strumento o di registrazione, ma i dati NOAA non lo documentano. Per questo conviene guardare le variazioni dentro ogni aeroporto più che il livello di uno contro l\'altro.';
+    var SA={};INV.LINATE.forEach(function(r){SA[r.w]=r});
+    function sm(y0,y1){var d=[];INV.MALPENSA.forEach(function(r){var l=SA[r.w];if(r.c&&l&&l.c&&r.w>=y0&&r.w<=y1)d.push(l.n-r.n)});return d.length?{m:d.reduce(function(a,b){return a+b},0)/d.length,n:d.length}:null}
+    var q1=sm(1967,1983),q2=sm(1984,1990),q3=sm(1991,2025);
+    $('note-conf-neve').innerHTML='Differenza media Linate meno Malpensa, in giorni di neve per inverno: 1967-83 '+fs(q1.m)+' ('+q1.n+' inverni), 1984-90 '+fs(q2.m)+' ('+q2.n+'), 1991-2025 '+fs(q3.m)+' ('+q3.n+'). Le due serie si muovono insieme da un inverno all\'altro; nel 1984-90, quando a Linate ci sono solo osservazioni ogni 3 ore (banda C) e a Malpensa orarie, Linate ne conta meno.';
+  })();
+
+  /* scatter */
+  (function(){
+    var box=$('c-scatter'),pts=INV.LINATE.filter(function(r){return r.c&&r.t!=null});
+    var w=Math.max(280,box.clientWidth||700),narrow=w<600,H=narrow?300:380,ml=narrow?32:44,mr=10,mt=14,mb=42,pw=w-ml-mr,ph=H-mt-mb;
+    var tm=pts.map(function(r){return r.t}),ymax=Math.max.apply(null,pts.map(function(r){return r.n}));
+    var x0=Math.floor(Math.min.apply(null,tm)-.3),x1=Math.ceil(Math.max.apply(null,tm)+.3),step=nice(ymax),ym=Math.ceil(ymax/step)*step;
+    function X(v){return ml+(v-x0)/(x1-x0)*pw}function Y(v){return mt+ph-v/ym*ph}
+    var s='<svg class="ch" viewBox="0 0 '+w+' '+H+'" width="'+w+'" height="'+H+'" role="img" aria-label="Giorni di neve a Linate contro la temperatura media di novembre-marzo a Brera, un punto per inverno">';
+    for(var v=0;v<=ym+1e-9;v+=step)s+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e5e5e5"/><text class="mu" x="'+(ml-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>';
+    for(var t=x0;t<=x1;t++)s+='<line x1="'+X(t)+'" x2="'+X(t)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph+4)+'" stroke="#999"/><text class="mu" x="'+X(t)+'" y="'+(mt+ph+17)+'" text-anchor="middle">'+t+'</text>';
+    s+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph)+'" stroke="#111"/><text class="mu" x="'+(ml+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">temperatura media novembre-marzo, Brera (°C)</text><text class="mu" x="10" y="'+(mt+ph/2)+'" text-anchor="middle" transform="rotate(-90 10 '+(mt+ph/2)+')">giorni di neve a Linate</text>';
+    var n=pts.length,mx=tm.reduce(function(a,b){return a+b},0)/n,my=pts.reduce(function(a,r){return a+r.n},0)/n,sxy=0,sxx=0;
+    pts.forEach(function(r){sxy+=(r.t-mx)*(r.n-my);sxx+=(r.t-mx)*(r.t-mx)});var b=sxy/sxx,a=my-b*mx;
+    var ta=Math.min.apply(null,tm),tz=Math.max.apply(null,tm);
+    s+='<line x1="'+X(ta)+'" x2="'+X(tz)+'" y1="'+Y(Math.max(0,a+b*ta))+'" y2="'+Y(Math.max(0,a+b*tz))+'" stroke="#111" stroke-width="1.4" stroke-dasharray="6 4"/>';
+    pts.forEach(function(r){var bias=r.w>=2008&&r.w<=2016;
+      s+='<circle cx="'+X(r.t).toFixed(1)+'" cy="'+Y(r.n).toFixed(1)+'" r="4" fill="'+(bias?'#fff':ACC)+'" fill-opacity="'+(bias?1:.75)+'" stroke="'+ACC+'" stroke-width="'+(bias?1.8:.8)+'"><title>Inverno '+wl(r.w)+': '+f1(r.t)+' °C, '+r.n+' giorni di neve</title></circle>'});
+    $('c-scatter').innerHTML=s+'</svg>';
+  })();
+}
+})();
+</script></body></html>

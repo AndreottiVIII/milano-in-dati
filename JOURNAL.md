@@ -286,7 +286,7 @@ Tutti i numeri vengono da `copertura.json` (calcolato da `scripts/09_coverage.py
   - Non contano: Emilia, Postumia, Sabina e Teano sono luoghi; Zuccaro, Braschi e Garofalo sono uomini; Costanza, Letizia e Marinella sono persone non identificate.
   - Via Santa Croce è stata tolta dal gruppo delle sante dal coordinatore: è la croce, non una persona.
 - **Nuove percentuali**: tra le vie intitolate a persone, donne **6,6%** (140 su 2.110); senza sante **5,1%** (103 su 2.009). Su tutte le vie 3,3%. Contando le 486 vie incerte, quasi tutte di uomini, la quota scende a 5,4%.
-
+- 2026-10-30 — **Isabella d'Aragona confermata da Davide**: è la duchessa di Milano (1470-1524), moglie di Gian Galeazzo Sforza (`decisioni_davide.csv`); pagina delle vie ripubblicata.
 
 ## 3. Opere d'arte e beni culturali
 
@@ -1696,6 +1696,11 @@ Conseguenza pratica: **NON ripubblicare i file raw** (`raw\`) né, per prudenza,
 - Anni mancanti 1939-1950, 1962-1963, 1972; l'inverno 2026 (nov 2025 - mar 2026) non esiste ancora nei dati (ultimo giorno 24/08/2025).
 - Non è stata fatta nessuna analisi di tendenza e nessun grafico (fase 2).
 
+### Fase 2 — pagina (2026-10-30)
+
+- Pagina `docs/neve-e-nebbia/`: si pubblicano solo conteggi derivati (WMO Resolution 40), mai le osservazioni grezze.
+- Sei periodi dubbi (A-F, cambi nel modo di registrare il tempo) segnati in grigio su ogni grafico; regola di completezza: 90% dei giorni.
+- Il legame con Brera è presentato come associazione, con la nota sul periodo 2008-2016.
 
 ## 14. I cinema spariti di Milano
 

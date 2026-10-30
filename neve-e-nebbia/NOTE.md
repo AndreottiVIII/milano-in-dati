@@ -1,7 +1,7 @@
 # Neve e nebbia a Milano - note della fase 1 (raccolta e controllo)
 
 Domanda: a Milano nevica meno, o in modo diverso (meno episodi ma più forti)? E "che fine ha fatto la nebbia?".
-Stato: fase 1 finita il 30/10/2026. Nessun grafico, nessuna pagina. Tutto scaricato in blocco con programmi (nessun login, nessuna registrazione).
+Stato: fase 1 (raccolta e controllo) finita il 30/10/2026; fase 2 (pagina) fatta il 30/10/2026, vedi la sezione "Fase 2" in fondo. Tutto scaricato in blocco con programmi (nessun login, nessuna registrazione).
 
 ## 1. Fonti, indirizzi, data di scarico (30/10/2026)
 
@@ -111,4 +111,20 @@ Conseguenza pratica: **NON ripubblicare i file raw** (`raw\`) né, per prudenza,
 - Una seconda fonte di verifica per la neve e la profondità (ARPA Lombardia, Osservatorio di Brera, Servizio Meteorologico AM): il progetto "temperature" ha già Brera per la temperatura.
 - Informazioni ufficiali su quando Linate e Malpensa hanno cambiato strumenti di visibilità/tempo presente (non nei dati NOAA).
 - Anni mancanti 1939-1950, 1962-1963, 1972; l'inverno 2026 (nov 2025 - mar 2026) non esiste ancora nei dati (ultimo giorno 24/08/2025).
-- Non è stata fatta nessuna analisi di tendenza e nessun grafico (fase 2).
+- (Fase 1: nessuna analisi di tendenza né grafico. La fase 2 ha fatto la pagina, ma NON una vera analisi di tendenza: solo medie per decennio e confronti.)
+
+## 10. Fase 2: la pagina (30/10/2026)
+
+Pagina: `docs/neve-e-nebbia/index.html` (statica, legge `docs/neve-e-nebbia/data/*.json` con `fetch(...,{cache:'no-cache'})`), stile uguale a `docs/aria`. Non toccato `docs/index.html` (la voce in home va aggiunta a parte). Si rifanno i dati con `python -I scripts/pagina_dati.py [<cartella strand> [<cartella uscita>]]` (di default legge `pulito/` e scrive in `../docs/neve-e-nebbia/data`). Anteprima: server "milano-in-dati" (porta 8796), `http://127.0.0.1:8796/neve-e-nebbia/`; nessun errore in console, nessuno scorrimento orizzontale a 375 px.
+
+File di dati pubblicati (solo conteggi derivati, mai osservazioni né il file giornaliero, per la Risoluzione 40 WMO): `inverni.json` (per stazione e inverno: giorni di neve strict/forte/larga/8 ore/GSOD, completezza, temperatura Brera nov-mar; correlazioni), `anni.json` (per anno: nebbia vis<1 km, solo codice, 8 ore con vis<1 km, GSOD), `decenni.json` (medie dei soli completi), `ricordi.json` (classifiche inverni, serie di giorni consecutivi con neve, elenco dei giorni con codice di neve forte), `meta.json` (bande, regola, date).
+
+Scelte:
+- Completezza: inverno o anno completo se almeno il 90% dei giorni ha 4 ore o più di osservazioni (stessa regola di `winter_complete_isd`). Solo i completi entrano nelle medie per decennio (decennio dell'etichetta; inverno = anno di gennaio). Linate 65 inverni e 63 anni completi dal 1950; Malpensa 57 e 57. Il grafico parte dal 1950 (nel 1931-38 ci sono 1-2 osservazioni al giorno).
+- Neve: definizione principale `snow_obs_strict`; "forte" impilata sopra. Nebbia: due serie, `fog_code_vis_lt1km` (consigliata) e solo codice (`fog_code_strict`). Controllo con le 8 ore sinottiche (nebbia vis<1 km calcolata dal file giornaliero) nella tabella a scomparsa.
+- Bande grigie con lettera su ogni grafico, ricavate dalle ore osservate al giorno: A ott 1956 - dic 1961 (Linate 1-4 osservazioni al giorno), B ago 1964 - mar 1971 (ogni 3 ore), C ago 1983 - nov 1990 (Linate solo SYNOP: inizio e fine sono quelli veri dei dati, non "1984-89"), D lug 1993 - dic 1998 (da 24 a 16-20 ore al giorno; tempo presente 40-50% nel 1994-98), E 2005-06 (cambio codifica), F dal 2018 (METAR AUTO, solo Linate). A e B sono aggiunte rispetto alla richiesta, perché i dati le mostrano.
+- Neve e temperatura: correlazione Linate -0,62 (Spearman -0,65, 65 inverni), -0,66 senza gli inverni 2008-2016 (anni in cui Brera segna circa 0,65 gradi in più, vedi pagina Temperature), Malpensa -0,60. Detta solo come associazione; gli inverni 2008-2016 sono cerchi vuoti nel grafico.
+- "Da ricordare": nei dati le bandiere giornaliere sono 0/1, quindi non si possono ordinare le nevicate per quantità; la pagina ordina gli inverni per giorni di neve e mostra le serie di giorni consecutivi e i giorni con codice di neve forte, con la lettera della banda accanto se cadono in un periodo dubbio. Nessuna descrizione inventata, nessun valore grezzo (né pioggia né profondità) pubblicato.
+- Cosa si vede nei numeri (non ancora spiegato): Linate neve 10,5 / 8,0 / 10,5 / 9,0 / 5,8 / 7,1 / 8,3 / 2,0 giorni per inverno (decenni 1950-2020), non monotona; nebbia (vis<1 km) 121 / 121 / 108 / 85 / 79 / 62 / 53 / 52. Differenza Linate meno Malpensa per la nebbia: +18 (1966-78), -46 (1982-94), +5 (1998-2005), +18 (2006-24): troppo variabile per essere solo clima, fa pensare a cambi di strumento o di registrazione.
+
+Da fare: voce in `docs/index.html` (non toccato qui); seconda fonte per la neve (ARPA/Brera); chiedere a ENAV/ARPA le date dei cambi di sensore; eventuale decisione di Davide su tabelle scaricabili (per ora nessuna).
