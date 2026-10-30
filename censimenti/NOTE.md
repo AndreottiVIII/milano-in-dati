@@ -49,7 +49,7 @@ Piu' le righe 2001, 2011, 2021, 2023 (somma delle sezioni). La serie annuale cal
 
 Cambi di confine che si vedono nei dati:
 - Tra 1871 e 1881 la superficie passa da 9,7 a 72,9 km2 e la popolazione da 199.009 a 321.839: e' l'annessione dei Corpi Santi (ricavata dai dati; la data 1873 e' dalla mia memoria, da verificare).
-- Tra 1921 e 1931 la superficie passa da 76,3 a 187,2 km2 e la serie annuale salta da 697.368 (1922) a 826.469 (1923): sono le annessioni del 1923. Dalla mia memoria: undici comuni (Affori, Baggio, Chiaravalle Milanese, Crescenzago, Gorla Primo, Greco Milanese, Lambrate, Musocco, Niguarda, Trenno, Vigentino). **Elenco e decreto da verificare con una fonte in fase 2**, non li ho trovati in nessun file scaricato.
+- Tra 1921 e 1931 la superficie passa da 76,3 a 187,2 km2 e la serie annuale salta da 697.368 (1922) a 826.469 (1923): sono le annessioni del 1923. Dalla mia memoria: undici comuni (Affori, Baggio, Chiaravalle Milanese, Crescenzago, Gorla Primo, Greco Milanese, Lambrate, Musocco, Niguarda, Trenno, Vigentino). **Verificato in fase 2** su Normattiva (R.D. 2 settembre 1923 n. 1912, in vigore dal 14/10/1923): 11 comuni, ma 'Gorla-Precotto' e non 'Gorla Primo' (vedi sezione Fase 2).
 - Tra 1971 e 1981 la superficie scende da 181,7 a 171,7 km2 e poi risale a 181,6 nel 1991: dato strano nel file ds303, da controllare (puo' essere un errore di misura o un cambiamento di metodo).
 - Mancano il 1891 (censimento non fatto) e il 1941 (guerra); il 1936 e' nel volume ISTAT ma non in ds303.
 
@@ -69,7 +69,7 @@ Cambi di confine che si vedono nei dati:
 
 - **Volumi digitalizzati dei censimenti 1861-2011 (ebiblio.istat.it)**: il sito oggi risponde 403 e rimanda a avvisi.istat.it. Per il solo volume 1861-1991 ho usato la copia salvata da Internet Archive (6 ottobre 2026). Gli altri volumi (per es. popolazione residente e presente 1861-1981, volumi provinciali 1961/1971/1981) non sono stati scaricati. Non ho tabelle per comune di famiglie, abitazioni o professioni prima del 1991 se non gli aggregati di Milano dei dataset ds300-302.
 - **Serie 1951-2011 per comune ai confini 2011 (8milaCensus)**: il sito e' fermo; Internet Archive era momentaneamente fuori servizio quando ho provato. Non fondamentale per Milano.
-- **Dati annuali del censimento permanente 2018-2024 per comune**: sono su IstatData (esploradati.istat.it), che si interroga con un'API che non ha risposto (nessuna risposta in tre tentativi, fino a 120 s). Un terzo tentativo con un'identita' di browser finta e' stato bloccato dal sistema e non l'ho fatto. Per Milano abbiamo comunque il 2021 e il 2023 per sezione. **Da decidere con Davide**: scaricare a mano dal browser, oppure cercare un altro percorso.
+- **Dati annuali del censimento permanente 2018-2024 per comune**: sono su IstatData (esploradati.istat.it), che si interroga con un'API che non ha risposto (nessuna risposta in tre tentativi, fino a 120 s). Un terzo tentativo con un'identita' di browser finta e' stato bloccato dal sistema e non l'ho fatto. Per Milano abbiamo comunque il 2021 e il 2023 per sezione. **Risolto in fase 2** con demo.istat.it (file aperti, nessun login): vedi sezione Fase 2.
 - **Tabella di corrispondenza sezioni tra censimenti**: non trovata (cercata sul sito ISTAT e nelle note).
 - **Censimenti per ACE/sezione prima del 1991** (1951, 1961, 1971, 1981): nessun dato digitale trovato (la ricerca "censimento 1951/1971" sul portale del Comune da' 0 risultati).
 - Il file regionale 2023 (`Dati_regionali_2023.zip`, 261 MB) e' scaricato ma non aperto: Milano e' gia' nel file dei capoluoghi.
@@ -93,3 +93,53 @@ python -I scripts\build_popolazione.py <cartella censimenti>
 python -I scripts\inventario.py <cartella censimenti>
 ```
 (Il filtro dei pacchetti con "censim" e' stato fatto a mano in una riga e non e' salvato come script; il risultato e' in `raw\comune_ckan\pacchetti_censimento.json`.)
+
+
+---
+
+# Fase 2 (30 ottobre 2026): armonizzazione, indicatori, storia dal 1861, anni 2018-2025
+
+Niente pagine, niente git. Risultati leggibili: `out\sorpresa.md` (la sorpresa in due righe) e `out\risultati.md` (numeri principali per le quattro storie, con file e campo di ogni numero e le cautele). Script `scripts\h1_...` - `h9_...`, dati in `pulito\`.
+
+## 1. Armonizzazione: sezioni -> 88 NIL e 9 municipi (2021)
+
+- **Metodo.** Le sezioni cambiano da un censimento all'altro, quindi la geografia stabile e' quella dei NIL 2021. I poligoni dei 88 NIL e dei 9 municipi sono ottenuti unendo le sezioni 2021 per COM_ASC2 / COM_ASC1 (`h1_raccordo.py`). Ogni sezione 1991, 2001 e 2011 va al NIL con cui ha piu' area in comune. Per ogni sezione salvo purezza (area nel NIL scelto / area sezione) e copertura (`raccordo_sezioni_<anno>.csv`) e le quote di area in ogni NIL (`raccordo_quote_area_<anno>.csv`). Nessuna sezione e' stata unita in silenzio: `sezioni_armonizzate.csv` ha una riga per sezione e anno con il NIL, il municipio e la **fonte** dell'assegnazione.
+- **Dove esiste un'assegnazione ufficiale la uso:** 1991 municipio = Zona9 del Comune (ds1635; il NIL non esiste); 2001 NIL = CodNIL e municipio = Zona9 (ds1529); 2011 municipio = CODASC ISTAT; 2021 e 2023 NIL e municipio dai campi COM_ASC2 / COM_ASC1. Altrimenti sovrapposizione.
+- **Copertura** (`copertura_raccordo.csv`): popolazione collocata in un NIL 100% (1991), 99,90% (2001), 99,98% (2011), 99,37% (2021), 99,27% (2023). Il resto sono le sezioni speciali 'senza fissa dimora' (codici 8xxxxxx: 24 sezioni nel 2001 con 1.225 persone, 6 nel 2011 con 266, 1 nel 2021 con 8.545, 1 nel 2023 con 10.038): le tengo fuori da tutti i NIL e le conto nel totale del comune. **Trappola:** nei file ISTAT 2021 e 2023 la sezione fittizia 151468888888 ha COM_ASC2 = Duomo; se non la si toglie, Duomo risulta +37,5% invece di -15%.
+- **Qualita' della sovrapposizione.** Il 5,8% della popolazione 1991 sta in sezioni con meno del 90% dell'area dentro un solo NIL (2001: 0,4%; 2011: 0,1%). Convalide: il municipio per sovrapposizione coincide con la Zona9 del Comune per il 99,97% degli abitanti 1991 e il 100% nel 2001; il NIL per sovrapposizione coincide con il CodNIL del Comune per il 99,91% nel 2001. Alternativa 'ripartizione per area' (`sensibilita_ripartizione_area.csv`): differenza mediana sulla popolazione di un NIL 1,4% (1991), 0,2% (2001), 0,01% (2011); i casi grossi sono parchi e NIL con meno di 1.000 abitanti. Per le graduatorie uso solo i 66 'NIL robusti' (campo `robusto` in `variazioni_NIL_1991_2023.csv`).
+- **Record individuali 1991/2001** (`h3_micro.py`): letti in streaming dagli zip, aggregati per CodSez in `micro_sezioni_<anno>.csv` e `micro_cittadinanza_<anno>.csv`; i totali coincidono con ISTAT (1.369.231 e 1.256.211). Servono per: eta' media esatta (42,54 nel 1991; 44,98 nel 2001), 80+ (57.471 e 69.357), cittadinanze del comune. Non li ho usati per i NIL (il codice sezione del Comune coincide con quello ISTAT per circa il 97-99% delle sezioni: non mescolo le due fonti).
+
+## 2. Indicatori (`indicatori_NIL.csv`, `indicatori_municipi.csv`, `indicatori_comune.csv`; anni 1991, 2001, 2011, 2021, 2023)
+
+Colonne: popolazione, quote 0-14, 65+, 75+, indice di vecchiaia, eta' media, stranieri (numero e quota), laureati (due denominatori), famiglie e componenti medi, famiglie di un componente, abitazioni totali / occupate da residenti / non occupate da residenti, occupati e tasso di occupazione. Convalida contro gli indicatori pubblicati dal Comune (`convalida_indicatori_Comune.csv`): coincidono entro 0,1 punti (eta' media, famiglie di una persona, stranieri, componenti medi, occupazione 1991 e 2011); occupazione 2001 +0,7.
+
+**Dove le definizioni cambiano** (tabella completa in `out\risultati.md`): l'80+ non e' nelle sezioni di nessun anno (solo 75+); eta' media da classi di 5 anni con 75+ fissato a 82 anni, circa 0,5 anni sopra l'eta' media esatta; laureati su 6+ anni (1991-2011) e su 9+ (2021-2023); occupati dal 2021 solo 15-64 anni; abitazioni dal 2021 conteggiate con i registri (salto da 643.053 a 809.990, non e' edilizia); componenti per famiglia 2021-2023 stimati; 1991 stranieri = ST16 (ST15 e' un altro campo, 39.710, non verificato); 2021 e 2023 sono stime del censimento permanente.
+Cittadinanze: comune 1991 e 2001 dai record individuali, 2011 da ds386 (10 cittadinanze), 2023 dalle colonne CIT_* (10 cittadinanze); per NIL solo la quota di stranieri (il dettaglio per cittadinanza non c'e' in tutti gli anni). L'occupazione per NIL e' calcolata ma con definizioni diverse (vedi sopra): non la uso nei risultati.
+
+## 3. Milano dal 1861 (`serie_milano_1861_2023.csv`, `variazioni_confini_milano.csv`, `eta_storica_milano_1881_2011.csv`, `serie_annuale_milano_1880_2025_flag.csv`)
+
+- **Fonti primarie lette su Normattiva il 30/10/2026** (pagine salvate in `raw\storia_confini\`): R.D. 8 giugno 1873 n. 1413 (Corpi Santi uniti a Milano dal 1 settembre 1873); D.L. luogotenenziale 31 gennaio 1918 n. 209 (Turro Milanese); **R.D. 2 settembre 1923 n. 1912**, GU n. 229 del 29/09/1923, in vigore dal 14/10/1923, art. 1: *Affori, Baggio, Chiaravalle Milanese, Crescenzago, Gorla-Precotto, Greco Milanese, Lambrate, Musocco, Niguarda, Trenno, Vigentino*. Il dataset ISTAT 'Variazioni amministrative dal 1861' non e' scaricabile come file (SITUAS e' un'applicazione web con API che non ho usato; il file Excel ISTAT copre solo 1991-2025).
+- Ritocchi dopo il 1923 (1924 Lorenteggio e Ronchetto, 1925 Morsenchio, 1932 cessione a San Donato): solo da Wikipedia italiana (estratto in `raw\storia_confini\`), segnati 'da verificare'.
+- La serie annuale del Comune ha il salto del 1923 (+129.101, +18,5%): e' l'annessione, marcato nel file. La superficie 1981 di ds303 (171,7 km2) resta sospetta.
+
+## 4. Popolazione annuale 2018-2025 (`annuale_milano_2018_2025.csv`)
+
+Da demo.istat.it, file aperti senza login (note legali ISTAT, CC BY 4.0): POSAS (residenti per eta' e sesso al 1 gennaio, 2019-2026), STRASA (stranieri per eta'), D7B (bilancio demografico mensile 2019-2024, tutti i comuni). Scaricati in `raw\istat_demo\` con `h4_dl_demo.sh` (2 secondi di pausa, User-Agent dichiarato, nessuna identita' finta). Il file del 1 gennaio 2018 non esiste (404). **La popolazione al 1 gennaio 2022 e 2024 coincide esattamente con il censimento permanente 2021 e 2023.** Trappola: tra le righe del bilancio c'e' 'aggiustamento statistico' (-27.193 nel 2020, -23.365 nel 2021), che spiega quasi tutto il calo apparente del 2020-2021. Il file `raw\comune_annuale_nil\ds205_dati_quartieri_2011_2024_.csv` (Comune, quartieri/NIL 2011-2024, registro anagrafico) e' scaricato dal CKAN del Comune: e' del registro, non confrontabile con i censimenti (3,4% in piu' nel 2023, 8,0% nel 2011).
+
+## 5. Comandi per rifare la fase 2
+
+```
+python -I scripts\h1_raccordo.py <cartella censimenti>
+python -I scripts\h3_micro.py <cartella censimenti>
+bash scripts\h4_dl_demo.sh <cartella censimenti>
+python -I scripts\h5_indicatori.py <cartella censimenti>
+python -I scripts\h6_storia.py <cartella censimenti>
+python -I scripts\h7_annuale.py <cartella censimenti>
+python -I scripts\h8_risultati.py <cartella censimenti>
+python -I scripts\h9_convalida.py <cartella censimenti>
+```
+(ds205: `https://dati.comune.milano.it/dataset/fcddb7d2-b106-48f5-9a2a-64d3136621dc/resource/084457a7-ec4b-4a6b-b463-d8ab53c64fbb/download/ds205_dati_quartieri_2011_2024_.csv`, scaricato con curl; non e' in uno script.)
+
+## 6. Aperto
+
+Ritocchi di confine dopo il 1923; laureati 1991 a Quarto Oggiaro (1,2%) non controllati con altra fonte; nessun dato per NIL prima del 1991; occupazione per NIL non armonizzata; l'80+ per NIL esiste solo 1991 e 2001 (record individuali), non usato.

@@ -2270,3 +2270,19 @@ python -I scripts\inventario.py <cartella censimenti>
 (Il filtro dei pacchetti con "censim" e' stato fatto a mano in una riga e non e' salvato come script; il risultato e' in `raw\comune_ckan\pacchetti_censimento.json`.)
 
 - 2026-10-30 — Storie scelte da Davide: com'è cambiata Milano 1991-2023 quartiere per quartiere; Milano dal 1861; dove invecchia o ringiovanisce; chi è arrivato. La serie annuale 2018-2024 si cerca per vie aperte, senza chiedere scarichi a Davide.
+
+### Fase 2 — confronti e sorpresa (2026-10-30)
+
+- **Sezioni portate sugli 88 NIL** con la sovrapposizione geometrica: popolazione collocata dal 99,3% al 100% secondo l'anno.
+  - Le sezioni dei "senza dimora" sono tenute fuori.
+  - La sezione fittizia del 2023 (10.038 persone, codificata nel Duomo) è esclusa: altrimenti il Duomo segnerebbe +37,5% invece di -15%.
+  - Gli indicatori coincidono con quelli del Comune entro 0,1 punti.
+- **Numeri principali** (`censimenti/out/risultati.md`):
+  - Rogoredo-Santa Giulia passa da 4.208 a 11.443 abitanti (+172%); Barona -22%.
+  - Trenno: età media da 36,6 a 50,6 anni.
+  - Stranieri: dall'1,9% al 19,6% (Comasina dallo 0,5% al 38%).
+  - Laureati: dal 9,3% al 31,7%.
+- **Annessione 1923**: R.D. 2/9/1923 n. 1912 (Normattiva), 11 comuni.
+- **Serie 2018-2025**: da demo.istat.it. Circa -50,6 mila del calo 2019-2021 sono una correzione statistica, non persone partite.
+- **Sorpresa**: nel 2023 Milano ha gli stessi residenti del 1991 (1.371.499 contro 1.369.231), ma 240.561 cittadini italiani in meno e 242.829 stranieri in più. E abita in 159.387 famiglie in più; le famiglie di una persona passano dal 32,0% al 55,6%. Attenzione: chi ha preso la cittadinanza italiana conta tra gli italiani.
+
