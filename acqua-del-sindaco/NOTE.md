@@ -106,3 +106,24 @@ Script: `scripts\pagina_dati.py` (legge solo `pulito\*`, rifacibile) + `scripts\
 **Test**: server `milano-in-dati` porta 8796; 3 indirizzi di prova ok; console senza errori; larghezza 375 px senza scorrimento orizzontale della pagina (le tabelle scorrono nel loro riquadro).
 
 **Non fatto / da decidere**: collegamento dalla home (docs\index.html non toccato); la pagina non mostra i 7 valori trimestrali "Tutta Milano" 2018-2021 (restano nei file di lavoro); le coordinate dei civici sono a ~10 m.
+
+
+## 11. Fase 3 - PFAS (sezione `#pfas` della pagina)
+
+Approvata da Davide: solo fatti e fonti, tono neutro (sotto il limite = conforme). Ricerca in `PFAS.md`; dati in `raw\pfas\`.
+
+**Cosa c'e'**: nella pagina, dopo le perdite e prima di "Fonti e note", la sezione "I PFAS nell'acqua di Milano": limite di legge; MM 2025 (1.260 analisi, massimo 0,087, mediana 0,016, 48 NQ = 3,8%, 0 sopra 0,10, istogramma per fasce con linea del limite); ATS Milano 2025 (160 campioni, 3 sopra 0,10, area metropolitana, senza luoghi); Greenpeace autunno 2024 (3 campioni a Milano, massimo 90,1 ng/L); ARPA falda (etichettata "non e' acqua del rubinetto", soglia ambientale 30 ng/L: PFOS 42 ng/L in un pozzo di Milano il 6/5/2024; dati aperti 2018-2021: 2 pozzi, PFOS 85 ng/L il 8/4/2019); fonti con link, accesso 30/10/2026. La pagina carica `data\pfas.json` (329 byte, solo riepiloghi).
+
+**Come si rifa**: `scripts\pagina_dati.py` legge `raw\pfas\MM_*.csv` e scrive `data\pfas.json` (conteggi, massimo, minimo, mediana, 10 fasce da 0,01) e i segnaposto `{{PF_*}}` del template; il grafico e' disegnato dal JS (`buildPfas`/`drawPfas`). ATS, Greenpeace, ARPA e norme sono testo fisso nel template (non vengono da file): se si cambia una cifra, cambiarla li' e in `PFAS.md`.
+
+**Licenze**: le tabelle MM (PDF) non dichiarano licenza -> in `docs\` NON ci sono le righe, solo i riepiloghi (`pfas.json`); `raw\pfas\*.csv` restano locali nel progetto. ARPA dati aperti CC0. Gli altri sono solo citati con link.
+
+**Controlli fatti il 30/10/2026**
+- Trascrizioni CSV contro i PDF: tutte le 1.260 righe (data, punto, valore) coincidono (confronto con le posizioni delle parole nel PDF).
+- Testi di legge letti dalla Gazzetta Ufficiale (D.Lgs. 18/2023, D.Lgs. 102/2025). **Correzioni rispetto a PFAS.md**: (1) il "PFAS totale" 0,50 µg/L NON e' piu' in vigore: l'art. 21 del D.Lgs. 102/2025 lo toglie dall'art. 24 e l'allegato I parte B non lo contiene piu'; (2) l'elenco di sostanze del testo 2023 ne ha 24 (non 20), il D.Lgs. 102/2025 ne ha 30 (aggiunge 6 cloro-perfluoropolieteri carbossilati); (3) il D.Lgs. 102/2025 sposta il controllo obbligatorio al 13 gennaio 2026 (adeguamento entro il 12) e aggiunge somma di 4 PFAS 0,02 µg/L e TFA (termine 12/1/2027). Il rinvio di sei mesi dei 4 PFAS (legge di bilancio 2026, c. 622) NON e' verificato sul testo di legge: in pagina e' scritto "secondo la stampa".
+- ATS 2025: riletto il PDF della Regione (160 campioni: 25/112/15/5/3; 4 PFAS: 83/52/9/4/12).
+- ARPA open data: riletti i valori di Milano (161 righe, 2 pozzi, 9 date, 95 "<"; PFOS 85 ng/L isolato, gli altri PFOS dello stesso pozzo 6-13 ng/L, dell'altro pozzo 4-5).
+
+**Non verificato**: Greenpeace (90,1 ng/L dalla tabella p. 31 del report, non riletto), risposta di MM (da Il Fatto Alimentare, non da MM), rapporto ARPA 2025 (42 ng/L), nomi dei punti = centrali (deduzione, scritto come tale), 1.286 vs 1.260 (non spiegato).
+
+**Test**: server `milano-in-dati` porta 8796; sezione e grafico ok a 375 px e a larghezza piena, nessun scorrimento orizzontale, console senza errori; il resto della pagina (ricerca, mappa, grafici, schede) invariato.

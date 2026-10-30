@@ -2311,3 +2311,12 @@ python -I scripts\inventario.py <cartella censimenti>
   - le sezioni "più giovani o più vecchi" e "chi è arrivato";
   - Milano dal 1861, con le annessioni.
 
+### Fase 3 — PFAS (2026-10-30)
+
+- **Sezione PFAS** nella pagina dell'acqua (`#pfas`, `acqua-del-sindaco/PFAS.md`). Solo fatti con le fonti, dati di sintesi in `data/pfas.json`; le tabelle di MM non sono ricopiate.
+  - **MM 2025**: 1.260 analisi, massimo 0,087 µg/L, tutte sotto il limite di 0,10.
+  - **ATS** (area metropolitana): nel 2025 3 campioni su 160 sopra 0,10.
+  - **Greenpeace**, autunno 2024: massimo 90,1 ng/L.
+  - **Falda ARPA**: PFOS 42 ng/L nel 2024 contro una soglia ambientale di 30 (acqua grezza, non del rubinetto).
+- **Correzione del coordinatore**, dopo il controllo dei testi in Gazzetta Ufficiale: il limite "PFAS totale" di 0,50 µg/L è stato tolto dal D.Lgs. 102/2025, e l'elenco del 2023 conta 24 sostanze, non 20. Il rinvio per 4 PFAS riportato dalla stampa non è verificato ed è segnato come tale in pagina.
+

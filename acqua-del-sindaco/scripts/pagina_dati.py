@@ -200,6 +200,36 @@ json.dump(dict(type="FeatureCollection", features=feats), open(os.path.join(dat,
 zr = {r["zona_codice"]: r for r in csv.DictReader(open(os.path.join(pul, "zone_riepilogo.csv"), encoding="utf-8"), delimiter=";")}
 zone = [dict(c=c, n=n, id=i, km2=float(zr[c]["area_km2"]), q_area=float(zr[c]["quota_area"]), q_civici=float(zr[c]["quota_civici"])) for c, n, i in ZONE]
 
+# ------------------------------------------------------------------ PFAS (fase 3): solo riepiloghi, mai le righe
+# Le tabelle MM (PDF senza licenza dichiarata) sono trascritte in raw\pfas\*.csv (trascrizione controllata riga per riga col PDF).
+# Alla pagina vanno soltanto conteggi, massimo, minimo, mediana e il numero di analisi per fascia.
+pf_dir = os.path.join(base, "raw", "pfas")
+pf = []   # (origine, data, punto, valore o None se "NQ")
+for fn, orig in (("MM_rete_distribuzione_2025.csv", "rete"), ("MM_rubinetto_controllo_qualita_2025.csv", "cq")):
+    for r in csv.DictReader(open(os.path.join(pf_dir, fn), encoding="utf-8"), delimiter=";"):
+        v = r["somma_pfas_ug_l"].strip()
+        pf.append((orig, r["data_prelievo"], r["punto_prelievo"], None if v == "NQ" else float(v.replace(",", "."))))
+pf_val = sorted(x[3] for x in pf if x[3] is not None)
+pf_nq = sum(1 for x in pf if x[3] is None)
+pf_tutti = [0.0] * pf_nq + pf_val          # NQ = sotto il limite di quantificazione, messi in fondo alla scala solo per la mediana
+pf_med = statistics.median(pf_tutti)
+pf_date = sorted(x[1][6:] + x[1][3:5] + x[1][:2] for x in pf)   # aaaammgg
+def pf_d(s):   # aaaammgg -> "8 gennaio 2025"
+    mesi_ = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
+    return "%d %s %s" % (int(s[6:]), mesi_[int(s[4:6]) - 1], s[:4])
+pf_fasce = [sum(1 for v in pf_val if int(round(v * 1000)) // 10 == i) for i in range(10)]   # 0,00x ... 0,09x
+pf_sopra = sum(1 for v in pf_val if v > 0.10)
+assert sum(pf_fasce) + pf_sopra == len(pf_val)
+pf_sotto005 = pf_nq + sum(1 for v in pf_val if v < 0.05)
+pfas = dict(n=len(pf), n_rete=sum(1 for x in pf if x[0] == "rete"), n_cq=sum(1 for x in pf if x[0] == "cq"),
+            punti_rete=len(set(x[2] for x in pf if x[0] == "rete")), punti_cq=len(set(x[2] for x in pf if x[0] == "cq")),
+            nq=pf_nq, max=max(pf_val), min=min(pf_val), mediana=pf_med, limite=0.10, sopra_limite=pf_sopra,
+            sotto_005=pf_sotto005, dal=pf_d(pf_date[0]), al=pf_d(pf_date[-1]), n_2026=sum(1 for x in pf if x[1].endswith("/2026")),
+            fasce=pf_fasce, fonte="MM SpA, tabelle PDF 'Dati 2025 PFAS' (riepilogo calcolato qui)")
+json.dump(pfas, open(os.path.join(dat, "pfas.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+def f3(x): return ("%.3f" % x).replace(".", ",")
+def pct(a, b): return ("%.1f" % (100.0 * a / b)).replace(".", ",")
+
 # ------------------------------------------------------------------ acqua.json
 meta = dict(ultimo=ultimo, fin=[fin[0], fin[-1]], fin_mesi=fin, mancanti=mancanti, sospetto=["2024-12"],
             n_civici=n_civici, n_stimati=n_stimati, n_strade=len(strade), n_voci=n_voci,
@@ -220,7 +250,11 @@ MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", 
 def mname(p): return MESI[int(p[5:7]) - 1] + " " + p[:4]
 def it(n): return "{:,}".format(n).replace(",", ".")
 sost = {"N_CIVICI": it(n_civici), "N_STIMATI": it(n_stimati), "N_STRADE": it(len(strade)),
-        "ULTIMO_MESE": mname(ultimo), "SCARICATO": "30 ottobre 2026", "FIN_DA": mname(fin[0]), "FIN_A": mname(fin[-1])}
+        "ULTIMO_MESE": mname(ultimo), "SCARICATO": "30 ottobre 2026", "FIN_DA": mname(fin[0]), "FIN_A": mname(fin[-1]),
+        "PF_N": it(pfas["n"]), "PF_N_RETE": it(pfas["n_rete"]), "PF_N_CQ": it(pfas["n_cq"]), "PF_PT_RETE": pfas["punti_rete"], "PF_PT_CQ": pfas["punti_cq"],
+        "PF_NQ": pfas["nq"], "PF_NQ_PCT": pct(pfas["nq"], pfas["n"]), "PF_MAX": f3(pfas["max"]), "PF_MIN": f3(pfas["min"]), "PF_MED": f3(pfas["mediana"]),
+        "PF_SOTTO005": it(pfas["sotto_005"]), "PF_SOTTO005_PCT": pct(pfas["sotto_005"], pfas["n"]), "PF_DAL": pfas["dal"], "PF_AL": pfas["al"],
+        "PF_N2026": pfas["n_2026"], "PF_SOPRA": pfas["sopra_limite"]}
 for k, v in sost.items(): tpl = tpl.replace("{{" + k + "}}", str(v))
 open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(tpl)
 
