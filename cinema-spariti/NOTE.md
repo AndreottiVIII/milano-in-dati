@@ -27,3 +27,17 @@ Chiusure per decennio (fine dell'ultimo periodo): 1930: 20; 1940: 7; 1950: 3; 19
 - Cinema attivi nel passato e ancora aperti nel 2017; sale parrocchiali, arene, cinema a luci rosse non elencati; numero di sale storico.
 - "Cosa c'è ora" confermato; coordinate esatte per 58 cinema.
 - Verifica indipendente delle date (Wikidata deriva forse dalla stessa lista). Possibili aggiunte: CineMi (Roaro, fino al 1955), dati Anec, Google Books.
+
+
+## Fase 2 (30/10/2026): la pagina
+Pagina: docs\cinema-spariti\index.html (+ data\cinema.json, data\serie.json). Costruita da scripts\pagina_dati.py con scripts\pagina_template.html; Leaflet 1.9.4, tessere OSM in grigio, un colore (arancio), mappa con cursore per decennio (1890-2010 e "oggi") e tasto Avvia, grafico a aree delle sale attive per anno, istogramma di aperture e chiusure per decennio, elenco ricercabile, sezione "Fonti e limiti".
+
+Cosa è stato deciso o trovato:
+- **Licenza**: dall'elenco spazioCinema 2017 si pubblicano solo nome, altri nomi, indirizzo e anni; niente testo originale (campo periodo_testo_originale escluso), niente PDF, niente CSV scaricabile. Resta da chiedere ad Anteo il permesso. Rischio da tenere presente: pubblicare tutte le 170 righe potrebbe contare come estrazione sostanziale di una banca dati; per questo la richiesta ad Anteo resta aperta.
+- **Posizioni**: Wikidata e OSM = esatte (43 chiusi); Nominatim = "posizione approssimata" (116, cerchio vuoto sulla mappa); 12 senza posizione, fuori mappa.
+- **Cinema ancora aperti con anno di apertura** (da Wikidata, Wikipedia, OSM): Cinema Centrale via Torino 1907 (tag OSM start_date, non verificato), Odeon 1929, Ducale 1938 (Wikidata P1619), Ariosto 1948 (ex sala parrocchiale anni '30), Beltrade circa 1925 ("anni venti"), Plinius 1967 (da allora solo cinema, prima teatro), Anteo 1979, Anteo CityLife 2017. Per gli altri 20 aperti oggi l'anno non si trova: compaiono solo nel passo "oggi". Wikidata ha una sola data di apertura utile (Ducale); le altre vengono da Wikipedia (CC BY-SA).
+- **Odeon**: OSM lo segnala attivo, ma è chiuso dal 31/07/2023 (riconversione, 5 schermi e galleria commerciale; lo dice anche la descrizione OSM). Spostato tra le sale chiuse (171 in tutto) e tolto dagli aperti (28). UCI Certosa ha chiuso il 5/5/2024 ma è stata rilevata da Cinelandia: tenuta tra gli aperti.
+- **Esclusi** 4 luoghi solo Wikidata senza date: Cinema Prada (probabile doppione del Cinema Godard di Fondazione Prada), Pussycat, Teatro Trianon, Teatro Ciak.
+- **Numeri**: massimo di sale attive nel 1960 = 119 poi chiuse + 4 aperte con anno noto = 123 (la stampa dice circa 160 negli anni Settanta; il nostro 1970 è 111+5). Chiusure per decennio: 1980: 50, 2000: 31, 1970: 21, 1930: 20. Riferimenti stampa sul grafico etichettati come stime: 110 nel 1950 (VareseNews 2019), circa 160 anni Settanta e 29 nel 2022 (Il Giorno).
+- **Trappola grafica**: la curva delle sale poi chiuse scende per forza vicino al presente (si vedono solo le chiuse): la pagina lo dice sotto il grafico.
+- Trappola tecnica: con python -I il terminale Windows stampa in cp1252; per stampare accenti usare sys.stdout.reconfigure(encoding="utf-8").

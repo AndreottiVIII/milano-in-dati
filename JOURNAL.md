@@ -1740,6 +1740,13 @@ Chiusure per decennio (fine dell'ultimo periodo): 1930: 20; 1940: 7; 1950: 3; 19
 - "Cosa c'è ora" confermato; coordinate esatte per 58 cinema.
 - Verifica indipendente delle date (Wikidata deriva forse dalla stessa lista). Possibili aggiunte: CineMi (Roaro, fino al 1955), dati Anec, Google Books.
 
+### Fase 2 — pagina (2026-10-30)
+
+- Pagina `docs/cinema-spariti/`:
+  - 171 sale chiuse: le 170 dell'elenco spazioCinema/Anteo 2017, più l'Odeon, chiuso nel 2023 anche se OSM lo dà aperto;
+  - 28 cinema aperti oggi (OSM), di cui solo 7 con l'anno di apertura;
+  - massimo di 123 sale attive nel 1960 (almeno).
+- **Decisione di Davide**: pubblicare tutte le sale citando la fonte, sapendo che pubblicare l'intero elenco potrebbe contare come estrazione di una banca dati (diritto sui generis UE). Il coordinatore aveva consigliato di pubblicare solo i conteggi e le sale confermate da altre fonti. Il PDF e il testo dell'elenco non sono pubblicati. Se l'Anteo chiede di togliere i dati, si torna alla versione con conteggi e sale confermate.
 
 ## 15. Il derby Inter-Milan dal 1909
 

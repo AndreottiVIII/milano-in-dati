@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · I cinema scomparsi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#d84315;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r{text-align:right;white-space:nowrap} .big{font-size:2.2rem;font-weight:700;color:var(--acc);line-height:1.1} .sub{font-size:.85rem;color:var(--mut)}
+.src{font-size:.82rem;color:var(--mut)} a{color:var(--acc)} .back{margin:.2em 0}
+.nums{display:flex;flex-wrap:wrap;gap:8px 28px;margin:1em 0}.nums div{min-width:120px}
+#map{height:62vh;min-height:360px;border:1px solid var(--ink)} #map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:.6em 0}
+.ctl button{font:inherit;border:1px solid var(--ink);background:var(--bg);color:var(--ink);padding:6px 14px;cursor:pointer;min-width:96px}
+.ctl button:hover{background:var(--ink);color:var(--bg)}
+.ctl input[type=range]{flex:1;min-width:180px;accent-color:var(--acc)} #lab{font-weight:700;font-size:1.25rem;min-width:7.5em}
+.leg{font-size:.85rem;color:var(--mut);margin:.4em 0}.leg span{white-space:nowrap;margin-right:14px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+.d1{background:#111}.d2{background:#fff;border:2px solid #111}.d3{background:#999;opacity:.45}.d4{background:var(--acc)}
+.chart{width:100%;margin:.4em 0} .chart svg{display:block;width:100%;height:auto;touch-action:pan-y} .info{min-height:1.6em;font-size:.95rem}
+.scroll{max-height:560px;overflow:auto;border:1px solid var(--line)} .scroll th{position:sticky;top:0;background:#fff;z-index:1;border-bottom:2px solid var(--ink)}
+.flt{display:flex;flex-wrap:wrap;gap:10px;margin:.6em 0;align-items:center} .flt input,.flt select{font:inherit;padding:6px 8px;border:1px solid var(--ink);background:#fff;color:var(--ink)} .flt input{flex:1;min-width:180px}
+td.nm b{font-weight:600} .ap{font-style:italic;color:var(--mut)} .circa{color:var(--mut)}
+details{margin:.8em 0} summary{cursor:pointer;color:var(--acc)} ul.cols{columns:2;column-gap:28px;padding-left:1.1em;font-size:.92rem} ul.cols li{break-inside:avoid;margin-bottom:3px}
+.leaflet-popup-content{font:14px/1.4 system-ui,Arial,sans-serif;margin:10px 12px}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.hl{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.err{border:1px solid var(--acc);padding:10px;color:var(--acc)}
+@media(max-width:640px){.big{font-size:1.7rem} th,td{padding:5px 4px;font-size:.88rem} ul.cols{columns:1} #lab{min-width:0;width:100%}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style></head><body><main>
+<p class="back"><a href="../">&larr; Milano in dati</a></p>
+<h1>I cinema scomparsi di Milano</h1>
+<p>A Milano le sale cinematografiche sono aumentate fino agli anni Sessanta e poi sono diminuite molto. Qui si vede dove erano, quando hanno aperto e chiuso e che cosa c&rsquo;è oggi al loro posto. Sono <b>{{N_CHIUSI}} sale chiuse</b> (170 dall&rsquo;elenco di spazioCinema del 2017, più l&rsquo;Odeon, chiuso nel 2023) e <b>{{N_APERTI}} cinema aperti oggi</b> (OpenStreetMap, 29/10/2026).</p>
+<div class="nums">
+<div><span class="big">{{N_CHIUSI}}</span><br><span class="sub">sale chiuse, 1896&ndash;2023</span></div>
+<div><span class="big" id="npicco">&hellip;</span><br><span class="sub">sale attive nel <span id="apicco"></span>, l&rsquo;anno di massimo (almeno)</span></div>
+<div><span class="big">{{N_APERTI}}</span><br><span class="sub">cinema aperti oggi</span></div>
+</div>
+
+<h2 id="mappa">1. La mappa nel tempo</h2>
+<p>Scegli un decennio, o premi Avvia. Ogni punto è un cinema attivo in almeno un anno di quel decennio.</p>
+<div class="ctl"><button id="play" type="button">&#9654; Avvia</button><input id="sl" type="range" min="0" max="0" value="0" aria-label="Decennio"><span id="lab"></span></div>
+<div id="cap" class="info" aria-live="polite"></div>
+<div id="map" role="application" aria-label="Mappa dei cinema di Milano"></div>
+<p class="leg"><span><i class="dot d1"></i>chiuso, attivo nel decennio</span><span><i class="dot d2"></i>cerchio vuoto: posizione approssimata</span><span><i class="dot d3"></i>chiuso nei 20 anni prima (sbiadito)</span><span><i class="dot d4"></i>aperto oggi</span></p>
+<p class="src">Posizione esatta (Wikidata o OpenStreetMap) per {{N_ESATTE}} cinema chiusi; <b>posizione approssimata</b> (solo geocodifica Nominatim, anche solo la via) per {{N_APPROX}}; {{N_SENZA_POS}} non compaiono sulla mappa perché senza posizione. Per i cinema aperti oggi senza anno di apertura noto il punto appare solo nel passo «oggi».</p>
+
+<h2>2. Quanti cinema c&rsquo;erano</h2>
+<p>Sale attive anno per anno, tra le sale poi chiuse (nero) e le sale ancora aperte di cui si conosce l&rsquo;anno di apertura (colore). I rombi sono <b>stime della stampa</b>, non nostri dati.</p>
+<div id="infoA" class="info" aria-live="polite"></div>
+<div id="chartA" class="chart"></div>
+<p class="leg"><span><i class="dot" style="background:#333;border-radius:2px"></i>solo sale poi chiuse</span><span><i class="dot d4" style="border-radius:2px"></i>sale ancora aperte con anno di apertura noto (solo {{N_APERTI_NOTI}}, minimo)</span><span>&#9671; stima della stampa</span><span><i class="dot d4"></i>aperti oggi (OSM)</span></p>
+<p class="src"><b>Attenzione.</b> La curva nera scende per forza verso il presente: l&rsquo;elenco comprende solo le sale che hanno chiuso, e quelle chiuse da poco sono poche. Non è un crollo reale. Il vero conteggio è più alto, perché mancano le sale ancora aperte di cui non si sa l&rsquo;anno di apertura, le sale parrocchiali e le arene. Il massimo che si ricava qui è <b>{{PICCO_N}} sale nel {{PICCO_ANNO}}</b> ({{PICCO_CHIUSE}} poi chiuse), contro circa 160 dichiarate dalla stampa per gli anni Settanta. L&rsquo;elenco 2017 non registra le chiusure dopo il 2017.</p>
+<table id="tabSnap" style="max-width:640px"><tr><th>Anno</th><th>Sale poi chiuse</th><th>+ ancora aperte (anno noto)</th><th>Totale minimo</th></tr></table>
+<h3 style="font-size:1rem;margin:1.6em 0 .2em">Aperture e chiusure per decennio</h3>
+<div id="chartB" class="chart"></div>
+<p class="leg"><span><i class="dot" style="background:#bbb;border-radius:2px"></i>aperture (sale chiuse e aperte con anno noto)</span><span><i class="dot d1" style="border-radius:2px"></i>chiusure (anno di fine dell&rsquo;ultimo periodo di attività)</span></p>
+<p class="src">Per i cinema con più periodi (chiusi e poi riaperti) la chiusura è quella dell&rsquo;ultimo periodo. Un decennio come «1980» comprende il 1980-1989. L&rsquo;ultima colonna (2020) conta solo l&rsquo;Odeon.</p>
+
+<h2>3. L&rsquo;elenco delle sale scomparse</h2>
+<div class="flt"><input id="q" type="search" placeholder="Cerca" aria-label="Cerca"><select id="ord" aria-label="Ordina"><option value="c">Ordina per anno di chiusura</option><option value="a">Ordina per anno di apertura</option><option value="n">Ordina per nome</option></select><span class="sub" id="cnt"></span></div>
+<div class="scroll"><table id="tab"><thead><tr><th>Cinema</th><th>Anni di attività</th><th>Cosa c&rsquo;è ora (candidato OpenStreetMap, da verificare)</th><th>Fonti</th></tr></thead><tbody></tbody></table></div>
+<p class="src">«ca.» = data approssimata nella fonte. «Cosa c&rsquo;è ora» è solo un <b>candidato</b>: i negozi o locali che OpenStreetMap indica entro 30 m dall&rsquo;indirizzo, che non è detto siano nel palazzo del vecchio cinema; manca per i cinema senza posizione precisa. Fonti: A = elenco spazioCinema 2017 (anni, indirizzo); B = Wikidata, OpenStreetMap, Nominatim (posizione, candidato); C = Wikipedia (anni dei cinema oggi aperti).</p>
+<details><summary>I {{N_APERTI}} cinema aperti oggi (elenco OpenStreetMap)</summary><ul class="cols" id="oggi"></ul></details>
+
+<h2>4. Fonti e limiti</h2>
+<table>
+<tr><th>Voto</th><th>Fonte</th><th>A cosa serve</th></tr>
+<tr><td><b>A</b></td><td>Elenco «Sale cinematografiche milanesi che hanno cessato l&rsquo;attività», spazioCinema (Anteo), 2017, <a href="https://www.spaziocinema.info/cinema/notizie/scegli-il-nome-delle-nuove-sale-di-anteo-tra-le-insegne-di-storici-cinema-milanesi">pagina</a>, consultata il 30/10/2026</td><td>nomi, indirizzi e anni delle 170 sale chiuse. Sono pubblicati solo questi fatti, con la fonte: né il testo né il PDF, che restano © spazioCinema. Buon accordo con le date note da altre fonti, ma senza autore né fonti proprie.</td></tr>
+<tr><td><b>B</b></td><td><a href="https://www.wikidata.org">Wikidata</a> (CC0)</td><td>coordinate esatte di {{N_ESATTE}} cinema chiusi e anno di apertura del Ducale. Nota: parte delle voci sembra derivata da una lista simile all&rsquo;elenco A, quindi l&rsquo;accordo non è una verifica indipendente.</td></tr>
+<tr><td><b>B</b></td><td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (ODbL), estrazione del 29/10/2026</td><td>i cinema aperti oggi e il candidato «cosa c&rsquo;è ora». OSM non conserva la storia (solo 2 cinema marcati come dismessi).</td></tr>
+<tr><td><b>B</b></td><td>Nominatim (OpenStreetMap)</td><td>posizioni <b>approssimate</b> di {{N_APPROX}} cinema chiusi; non verificate una per una.</td></tr>
+<tr><td><b>C</b></td><td><a href="https://it.wikipedia.org">Wikipedia in italiano</a> (CC BY-SA)</td><td>anni di apertura dei cinema oggi aperti (Odeon, Ariosto, Beltrade, Plinius, Anteo, CityLife) e la chiusura dell&rsquo;Odeon nel 2023.</td></tr>
+<tr><td><b>C</b></td><td>Stampa: <a href="https://www.ilgiorno.it/milano/cronaca/cinema-e297abe2">Il Giorno, 17/12/2022</a> (Anec Lombardia); <a href="https://www.varesenews.it">VareseNews, 3/2/2019</a> (ricerca CineMi di E. Roaro)</td><td>solo punti di riferimento sul grafico: circa 160 cinema negli anni Settanta, 29 strutture nel 2022, 110 sale nel 1950. Sono stime giornalistiche, senza serie pubblicata.</td></tr>
+<tr><td>&ndash;</td><td>Comune di Milano, dati aperti (CKAN)</td><td>nessun elenco di sale cinematografiche: non usato per i conteggi.</td></tr>
+</table>
+<h3 style="font-size:1rem;margin:1.4em 0 .3em">Cosa manca o non è sicuro</h3>
+<ul>
+<li><b>Sale parrocchiali, arene estive e cinema a luci rosse</b>: l&rsquo;elenco non li include tutti. Il conto delle sale attive è quindi per difetto.</li>
+<li><b>Cinema ancora aperti</b>: l&rsquo;anno di apertura è noto solo per {{N_APERTI_NOTI}} di {{N_APERTI}}. Gli altri non entrano nella storia del grafico né nei decenni sulla mappa.</li>
+<li><b>Date incerte</b>: {{N_CIRCA}} sale chiuse hanno almeno una data «ca.» nella fonte. Chiusure e riaperture temporanee sono nei periodi di attività, ma la data di chiusura usata nel grafico è quella finale.</li>
+<li><b>Elenco fermo al 2017</b>: le chiusure successive (tranne l&rsquo;Odeon, 2023) non sono registrate. L&rsquo;Odeon è stato aggiunto perché OpenStreetMap lo segnala chiuso e Wikipedia ne dà la data.</li>
+<li><b>Nessun numero di schermi</b>: non esiste una serie storica delle sale per cinema; l&rsquo;unico dato (schermi) è quello di OpenStreetMap per alcuni cinema aperti oggi.</li>
+<li><b>Posizioni</b>: {{N_APPROX}} sono approssimate (geocodifica) e {{N_SENZA_POS}} mancano; alcuni indirizzi della fonte A sembrano incoerenti. Altri {{N_WD_SOLI}} luoghi che compaiono solo su Wikidata (due teatri, due cinema senza date) sono stati lasciati fuori.</li>
+<li>Per le sale fino al 1955 la ricerca d&rsquo;archivio più completa è il progetto CineMi, che non è scaricabile e quindi non è usato qui.</li>
+</ul>
+
+<footer>
+<p><b>Licenze.</b> Posizioni, cinema aperti e «cosa c&rsquo;è ora»: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, ODbL; i dati derivati qui pubblicati (<a href="data/cinema.json">data/cinema.json</a>, <a href="data/serie.json">data/serie.json</a>) seguono la stessa licenza, con attribuzione. Wikidata: CC0. Wikipedia: CC BY-SA. Anni, nomi e indirizzi dell&rsquo;elenco A: fatti riportati con citazione della fonte. Mappa di base: tessere OpenStreetMap, rese in grigio.</p>
+<p>Aggiornato al {{GENERATO}}. Progetto Milano in dati.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+var ACC='#d84315', INK='#111';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function $(i){return document.getElementById(i);}
+function fail(e){var d=document.createElement('p');d.className='err';d.textContent='Impossibile caricare i dati: '+e;$('cap').parentNode.insertBefore(d,$('cap'));}
+var FONTI={A:'Elenco spazioCinema 2017 (A)',W:'Wikidata (B)',O:'OpenStreetMap (B)',N:'Nominatim (B)',P:'Wikipedia (C)'};
+var SHORT={A:'A',W:'B Wikidata',O:'B OSM',N:'B Nominatim',P:'C Wikipedia'};
+var D=null,S=null,map=null,layer=null,markers={},step=0,timer=null;
+var STEPS=[];for(var y=1890;y<=2010;y+=10)STEPS.push(y);STEPS.push('oggi');
+
+function anniTxt(c){
+  if(!c.per.length)return 'anno di apertura non noto';
+  if(c.st==='aperto')return 'dal '+(c.ac?'ca. ':'')+c.per[0][0];
+  return c.per.map(function(p,i){return (i===0&&c.ac?'ca. ':'')+p[0]+'–'+(i===c.per.length-1&&c.cc?'ca. ':'')+p[1];}).join('; ');
+}
+function stato(c,s){ // stato di un cinema nel passo s: 'att', 'f1', 'f2' o ''
+  var d=(s==='oggi')?2020:s, fine=(s==='oggi')?ANNO_OGGI:s+9;
+  if(s==='oggi'&&c.st==='aperto')return 'att';
+  if(!c.per.length)return '';
+  var att=false,ultimo=null,inizio=false;
+  for(var i=0;i<c.per.length;i++){var a=c.per[i][0],b=c.per[i][1];
+    if(a<=fine&&b>=d)att=true; else if(b<d){if(ultimo===null||b>ultimo)ultimo=b;}
+    if(a<d)inizio=true;}
+  if(att)return 'att';
+  if(ultimo!==null){var g=d-ultimo; if(g<=10)return 'f1'; if(g<=20)return 'f2';}
+  return '';
+}
+var ANNO_OGGI=2026;
+function stile(c,t){
+  var open=c.st==='aperto';
+  if(t==='f1')return {radius:5,color:'#999',weight:1,fillColor:'#999',fillOpacity:.35,opacity:.5};
+  if(t==='f2')return {radius:4,color:'#999',weight:1,fillColor:'#999',fillOpacity:.15,opacity:.25};
+  if(open)return {radius:7,color:'#fff',weight:1.5,fillColor:ACC,fillOpacity:.95,opacity:1};
+  if(c.pos==='a')return {radius:5,color:INK,weight:1.6,fillColor:'#fff',fillOpacity:.9,opacity:1};
+  return {radius:5,color:'#fff',weight:1,fillColor:INK,fillOpacity:.85,opacity:1};
+}
+function popup(c){
+  var h='<b>'+esc(c.n)+'</b>';
+  if(c.alt)h+='<br><span class="sub">anche: '+esc(c.alt)+'</span>';
+  if(c.ind)h+='<br>'+esc(c.ind);
+  h+='<br>'+(c.st==='aperto'?'aperto oggi':esc(anniTxt(c)));
+  if(c.st==='chiuso'&&c.cosa)h+='<br><span class="sub">ora (candidato OSM): '+esc(c.cosa)+'</span>';
+  if(c.nota)h+='<br><span class="sub">'+esc(c.nota)+'</span>';
+  if(c.sale)h+='<br><span class="sub">'+c.sale+' schermi (OSM)</span>';
+  if(c.pos==='a')h+='<br><i class="sub">posizione approssimata</i>';
+  return h;
+}
+function label(s){return s==='oggi'?'Oggi (2026)':s+'–'+(s+9);}
+function render(){
+  var s=STEPS[step],n=0,sbiad=0,cnt=0,senza=0,aper=0;
+  $('lab').textContent=label(s);$('sl').value=step;
+  D.cinema.forEach(function(c){
+    var t=stato(c,s),m=markers[c.id];
+    if(t==='att'){cnt++;if(c.st==='aperto')aper++;if(!c.pos)senza++;}
+    else if(t&&c.pos)sbiad++;
+    if(!m)return;
+    if(!t){if(layer.hasLayer(m))layer.removeLayer(m);return;}
+    m.setStyle(stile(c,t));if(!layer.hasLayer(m))layer.addLayer(m);
+    if(t==='att')m.bringToFront();
+  });
+  var txt=(s==='oggi')?(aper+' cinema aperti oggi'):(cnt+' cinema attivi in questo decennio'+(aper?' (di cui '+aper+' ancora aperti oggi)':''));
+  if(sbiad)txt+='; '+sbiad+' sbiaditi (chiusi nei 20 anni prima)';
+  if(senza)txt+='; '+senza+' non sulla mappa (senza posizione)';
+  $('cap').textContent=txt+'.';
+}
+function setStep(i){step=Math.max(0,Math.min(STEPS.length-1,i));render();}
+function stop(){if(timer){clearInterval(timer);timer=null;}$('play').innerHTML='&#9654; Avvia';}
+function play(){
+  if(timer){stop();return;}
+  if(step>=STEPS.length-1)setStep(0);
+  $('play').innerHTML='&#10074;&#10074; Pausa';
+  timer=setInterval(function(){if(step>=STEPS.length-1){stop();return;}setStep(step+1);},1100);
+}
+function initMap(){
+  map=L.map('map',{preferCanvas:true}).setView([45.4642,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  layer=L.layerGroup().addTo(map);
+  D.cinema.forEach(function(c){
+    if(c.lat==null)return;
+    var m=L.circleMarker([c.lat,c.lon],stile(c,'att'));m.bindPopup(function(){return popup(c);});
+    m.bindTooltip(c.n,{direction:'top'});markers[c.id]=m;
+  });
+  $('sl').max=STEPS.length-1;
+  $('sl').addEventListener('input',function(){stop();setStep(+this.value);});
+  $('play').addEventListener('click',play);
+  setStep(5);
+}
+/* ---------- grafici ---------- */
+function chartA(){
+  var el=$('chartA'),W=Math.max(300,el.clientWidth),H=W<520?270:330,m={l:36,r:12,t:22,b:26};
+  var x0=1893,x1=2030,ymax=180;
+  function X(v){return m.l+(v-x0)/(x1-x0)*(W-m.l-m.r);} function Y(v){return H-m.b-v/ymax*(H-m.t-m.b);}
+  var an=S.anni,ch=S.chiuse,op=S.aperte_note,i0=an.indexOf(1896),i1=an.length-1;
+  var g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Sale attive per anno">';
+  [0,30,60,90,120,150,180].forEach(function(v){g+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e5e5e5"/><text x="'+(m.l-5)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#666" text-anchor="end">'+v+'</text>';});
+  for(var yy=1900;yy<=2020;yy+=20)g+='<text x="'+X(yy)+'" y="'+(H-8)+'" font-size="11" fill="#666" text-anchor="middle">'+yy+'</text>';
+  var topc='',botc='',topo='';
+  for(var i=i0;i<=i1;i++){topc+=(i===i0?'M':'L')+X(an[i]).toFixed(1)+' '+Y(ch[i]).toFixed(1);topo+=(i===i0?'M':'L')+X(an[i]).toFixed(1)+' '+Y(ch[i]+op[i]).toFixed(1);}
+  var base='L'+X(an[i1]).toFixed(1)+' '+Y(0)+' L'+X(an[i0]).toFixed(1)+' '+Y(0)+' Z';
+  g+='<path d="'+topo+base+'" fill="'+ACC+'" opacity=".9"/><path d="'+topc+base+'" fill="#333" opacity=".92"/>';
+  // 2017: fine dell'elenco
+  g+='<line x1="'+X(2017)+'" x2="'+X(2017)+'" y1="'+m.t+'" y2="'+(H-m.b)+'" stroke="#999" stroke-dasharray="3 3"/><text class="hl" transform="translate('+(X(2017)-5)+' '+Y(100)+') rotate(-90)" font-size="11" fill="#666" text-anchor="middle">elenco fermo al 2017</text>';
+  // stampa
+  S.stampa.forEach(function(p){
+    var lbl=p.etichetta+' (stampa)';
+    if(p.anno_da){var xa=X(p.anno_da),xb=X(p.anno_a+1),yv=Y(p.valore);
+      g+='<line x1="'+xa+'" x2="'+xb+'" y1="'+yv+'" y2="'+yv+'" stroke="'+INK+'" stroke-width="2"/><line x1="'+xa+'" x2="'+xa+'" y1="'+(yv-4)+'" y2="'+(yv+4)+'" stroke="'+INK+'"/><line x1="'+xb+'" x2="'+xb+'" y1="'+(yv-4)+'" y2="'+(yv+4)+'" stroke="'+INK+'"/>';
+      g+='<text x="'+Math.min(xa,W-m.r-150)+'" y="'+(yv-8)+'" font-size="11" class="hl" fill="'+INK+'">'+esc(lbl)+'</text>';
+    } else {var xc=X(p.anno),yc=Y(p.valore),a=p.anno>2000;
+      g+='<path d="M'+xc+' '+(yc-6)+' L'+(xc+6)+' '+yc+' L'+xc+' '+(yc+6)+' L'+(xc-6)+' '+yc+' Z" fill="#fff" stroke="'+INK+'" stroke-width="1.6"/>';
+      g+='<text class="hl" x="'+(xc-9)+'" y="'+(a?yc-24:yc-9)+'" font-size="11" fill="'+INK+'" text-anchor="end">'+esc(lbl)+'</text>';}
+  });
+  // oggi
+  var xo=X(2026),yo=Y(S.aperti_oggi_totale);
+  g+='<circle cx="'+xo+'" cy="'+yo+'" r="5.5" fill="'+ACC+'" stroke="#fff" stroke-width="1.5"/><text x="'+(xo-9)+'" y="'+(yo+16)+'" class="hl" font-size="11" fill="'+ACC+'" text-anchor="end">'+S.aperti_oggi_totale+' aperti oggi (OSM)</text>';
+  g+='<line id="cur" x1="0" x2="0" y1="'+m.t+'" y2="'+(H-m.b)+'" stroke="'+INK+'" visibility="hidden"/>';
+  g+='<rect id="ov" x="'+m.l+'" y="'+m.t+'" width="'+(W-m.l-m.r)+'" height="'+(H-m.t-m.b)+'" fill="transparent"/></svg>';
+  el.innerHTML=g;
+  var cur=el.querySelector('#cur'),ov=el.querySelector('#ov');
+  function show(ev){var r=ov.getBoundingClientRect(),px=(ev.clientX-r.left)/r.width*(W-m.l-m.r)+m.l;
+    var yr=Math.round(x0+(px-m.l)/(W-m.l-m.r)*(x1-x0));if(yr<1896)yr=1896;if(yr>2026)yr=2026;
+    var i=an.indexOf(yr);cur.setAttribute('x1',X(yr));cur.setAttribute('x2',X(yr));cur.setAttribute('visibility','visible');
+    $('infoA').innerHTML='<b>'+yr+'</b>: '+ch[i]+' sale poi chiuse + '+op[i]+' ancora aperte (anno noto) = <b>'+(ch[i]+op[i])+'</b> almeno';}
+  ov.addEventListener('pointermove',show);ov.addEventListener('pointerdown',show);
+}
+function chartB(){
+  var el=$('chartB'),W=Math.max(300,el.clientWidth),H=W<520?250:290,narrow=W<560,m={l:34,r:8,t:18,b:narrow?42:28};
+  var dec=S.decenni,n=dec.length,ap=S.aperture,ch=S.chiusure,ymax=60,pw=(W-m.l-m.r)/n,bw=Math.min(18,pw*.4);
+  function Y(v){return H-m.b-v/ymax*(H-m.t-m.b);}
+  var g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Aperture e chiusure per decennio">';
+  [0,20,40,60].forEach(function(v){g+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e5e5e5"/><text x="'+(m.l-5)+'" y="'+(Y(v)+4)+'" font-size="11" fill="#666" text-anchor="end">'+v+'</text>';});
+  dec.forEach(function(d,i){var cx=m.l+pw*(i+.5);
+    g+='<rect x="'+(cx-bw-1)+'" y="'+Y(ap[i])+'" width="'+bw+'" height="'+(Y(0)-Y(ap[i]))+'" fill="#bbb"/><rect x="'+(cx+1)+'" y="'+Y(ch[i])+'" width="'+bw+'" height="'+(Y(0)-Y(ch[i]))+'" fill="'+INK+'"/>';
+    if(ch[i])g+='<text x="'+(cx+1+bw/2)+'" y="'+(Y(ch[i])-3)+'" font-size="11" fill="'+INK+'" text-anchor="middle" font-weight="700">'+ch[i]+'</text>';
+    if(ap[i]&&!narrow)g+='<text x="'+(cx-1-bw/2)+'" y="'+(Y(ap[i])-3)+'" font-size="11" fill="#666" text-anchor="middle">'+ap[i]+'</text>';
+    if(narrow)g+='<text transform="translate('+(cx+3)+' '+(H-m.b+12)+') rotate(-50)" font-size="11" fill="#666" text-anchor="end">'+d+'</text>';
+    else g+='<text x="'+cx+'" y="'+(H-8)+'" font-size="11" fill="#666" text-anchor="middle">'+d+'</text>';
+  });
+  g+='</svg>';el.innerHTML=g;
+}
+function tabSnap(){
+  var t=$('tabSnap'),h='';
+  S.istantanee.forEach(function(r){var tot=r.chiuse+r.aperte_note;
+    h+='<tr><td>'+(r.anno===2026?'oggi (2026)':r.anno)+'</td><td class="r">'+r.chiuse+'</td><td class="r">'+r.aperte_note+'</td><td class="r"><b>'+tot+'</b>'+(r.anno===2026?' <span class="sub">(aperti oggi in tutto: '+S.aperti_oggi_totale+')</span>':'')+'</td></tr>';});
+  t.insertAdjacentHTML('beforeend',h);
+}
+/* ---------- elenco ---------- */
+function fontiTxt(c){return c.fo.map(function(k){return '<span title="'+esc(FONTI[k]||k)+'">'+esc(SHORT[k]||k)+'</span>';}).join(', ');}
+function lista(){
+  var q=$('q').value.trim().toLowerCase(),o=$('ord').value;
+  var rows=D.cinema.filter(function(c){return c.st==='chiuso';});
+  if(q)rows=rows.filter(function(c){return (c.n+' '+c.alt+' '+c.ind).toLowerCase().indexOf(q)>=0;});
+  rows.sort(function(a,b){return o==='n'?a.n.localeCompare(b.n,'it'):(o==='a'?a.a-b.a:a.c-b.c)||a.n.localeCompare(b.n,'it');});
+  var h='';
+  rows.forEach(function(c){
+    var nm='<b>'+esc(c.n)+'</b>'+(c.alt?'<br><span class="sub">anche: '+esc(c.alt)+'</span>':'')+'<br><span class="sub">'+esc(c.ind||'indirizzo non noto')+'</span>';
+    nm+='<br>'+(c.lat!=null?'<a class="go" href="#mappa" data-id="'+esc(c.id)+'">vedi sulla mappa</a>'+(c.pos==='a'?' <span class="ap">(posizione approssimata)</span>':''):'<span class="ap">senza posizione</span>');
+    var ann=esc(anniTxt(c)).replace(/ca\./g,'<span class="circa">ca.</span>');
+    var cosa=c.cosa?esc(c.cosa):'<span class="sub">—</span>';
+    if(c.nota)cosa+='<br><span class="sub">'+esc(c.nota)+'</span>';
+    h+='<tr><td class="nm">'+nm+'</td><td>'+ann+'</td><td>'+cosa+'</td><td class="sub">'+fontiTxt(c)+'</td></tr>';
+  });
+  document.querySelector('#tab tbody').innerHTML=h||'<tr><td colspan="4">Nessun risultato.</td></tr>';
+  $('cnt').textContent=rows.length+' sale';
+  Array.prototype.forEach.call(document.querySelectorAll('a.go'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();focus_(this.getAttribute('data-id'));});});
+}
+function focus_(id){
+  var c=D.cinema.filter(function(x){return x.id===id;})[0],m=markers[id];if(!c||!m)return;
+  stop();
+  if(!stato(c,STEPS[step])||stato(c,STEPS[step])!=='att'){
+    var d=c.per.length?Math.floor(c.per[c.per.length-1][1]/10)*10:'oggi';
+    var k=STEPS.indexOf(d);if(k<0)k=STEPS.length-2;
+    if(d>=2020)k=STEPS.indexOf(2010);
+    setStep(k);
+  }
+  if(!layer.hasLayer(m))layer.addLayer(m);
+  document.getElementById('mappa').scrollIntoView({behavior:'smooth'});
+  map.setView([c.lat,c.lon],16);m.openPopup();
+}
+function oggiLista(){
+  var h='';D.cinema.filter(function(c){return c.st==='aperto';}).sort(function(a,b){return a.n.localeCompare(b.n,'it');}).forEach(function(c){
+    h+='<li><b>'+esc(c.n)+'</b>'+(c.ind?', <span class="sub">'+esc(c.ind)+'</span>':'')+(c.per.length?' <span class="sub">(dal '+(c.ac?'ca. ':'')+c.per[0][0]+')</span>':'')+'</li>';});
+  $('oggi').innerHTML=h;
+}
+function init(){
+  var pk=S.chiuse.map(function(v,i){return v+S.aperte_note[i];}),mx=Math.max.apply(null,pk);
+  $('npicco').textContent=mx;$('apicco').textContent=S.anni[pk.indexOf(mx)];
+  initMap();chartA();chartB();tabSnap();lista();oggiLista();
+  $('q').addEventListener('input',lista);$('ord').addEventListener('change',lista);
+  var rt=null;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){chartA();chartB();},150);});
+}
+Promise.all([
+  fetch('data/cinema.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
+  fetch('data/serie.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+]).then(function(v){D=v[0];S=v[1];init();}).catch(function(e){fail(e);});
+})();
+</script></body></html>
