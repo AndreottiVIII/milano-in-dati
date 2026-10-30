@@ -26,7 +26,8 @@
     { path: 'nomi-fermate/',      label: 'Nomi delle fermate' },
     { path: 'cinema-spariti/',    label: 'Cinema spariti' },
     { path: 'acqua-del-sindaco/', label: 'Acqua del sindaco' },
-    { path: 'censimenti/',       label: 'Censimenti' }
+    { path: 'censimenti/',       label: 'Censimenti' },
+    { path: 'prezzi-case/',      label: 'Prezzi delle case' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

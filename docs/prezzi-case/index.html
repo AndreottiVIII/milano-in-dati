@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Prezzi delle case</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(90px,38%) 1fr 52px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .bars .tr{background:#f1f1f1;height:10px} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+#tab-m4,#tab-m4b,#tab-tempo{min-width:540px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quanto costano le case a Milano?</h1>
+<p>Dal 2006 a oggi, zona per zona. Ogni semestre l&rsquo;Agenzia delle Entrate stima, per ogni zona di Milano, un prezzo minimo e uno massimo (al metro quadro) per comprare una casa e per affittarla. Qui usiamo il valore di mezzo tra i due, per le abitazioni civili. <b>Sono stime dell&rsquo;Agenzia, non i prezzi pagati davvero</b> nelle vendite. I prezzi &laquo;in euro 2025&raquo; sono corretti per l&rsquo;inflazione, cos&igrave; si possono confrontare anni diversi.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="tempo">Il prezzo tipico, dal 2006 a oggi</h2>
+<p>Il prezzo &laquo;tipico&raquo; qui &egrave; la <b>mediana</b> tra le zone: il valore di mezzo, met&agrave; delle zone costa meno e met&agrave; di pi&ugrave;. Ogni zona conta uno, grande o piccola che sia.</p>
+<div class="lgd" id="lg-tempo"></div>
+<div class="ch" id="ch-tempo" role="img" aria-label="Grafico del prezzo mediano delle case a Milano per metro quadro, dal 2006 al 2026, in euro correnti e in euro 2025"></div>
+<p class="src">Le quotazioni OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Fonte: Agenzia delle Entrate &ndash; OMI (CC BY 4.0); inflazione: ISTAT, indice FOI senza tabacchi. Passa il mouse o tocca il grafico per i valori di ogni semestre.</p>
+<div id="tempo-testo"></div>
+<details><summary>Tabella dei valori del grafico</summary><div class="scroll tabmax"><table id="tab-tempo"></table></div></details>
+
+<h2 id="mappa">La mappa delle zone</h2>
+<p>Scegli che cosa colorare. Clic su una zona per la scheda, con il suo grafico nel tempo. Dati dell&rsquo;ultimo semestre (<span id="ult-sem">2026/1</span>).</p>
+<div class="ctl"><span class="sub">Colora per:</span>
+<button type="button" data-m="prezzo" class="on">Prezzo di vendita</button><button type="button" data-m="crescita">Crescita dal 2014</button><button type="button" data-m="affitto">Affitto</button><button type="button" data-m="resa">Resa dell&rsquo;affitto</button>
+<label class="sub" for="sel-zona">Scheda di:</label><select id="sel-zona" aria-label="Scegli una zona"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa delle zone OMI di Milano colorate secondo il valore scelto"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Le quotazioni OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Mappa &copy; OpenStreetMap contributors; zone: Agenzia delle Entrate &ndash; OMI, servizio GEOPOI.</p>
+<div id="scheda" class="card"><span class="sub">Scegli una zona sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="affitto">Comprare o affittare?</h2>
+<div id="affitto-testo"></div>
+<h3>Com&rsquo;&egrave; cambiato nel tempo</h3>
+<div class="lgd" id="lg-anni"></div>
+<div class="ch" id="ch-anni" role="img" aria-label="Anni di affitto necessari per pagare una casa a Milano, mediana tra le zone, dal 2006 al 2026"></div>
+<p class="src">Le quotazioni OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Anni di affitto = prezzo diviso affitto di un anno (12 mesi), mediana tra le zone.</p>
+<h3>Zona per zona (<span class="ult-sem">2026/1</span>)</h3>
+<div class="grid2"><div><p class="sub"><b>Servono meno anni di affitto</b> (la casa costa poco rispetto all&rsquo;affitto)</p><div class="bars" id="an-low"></div></div>
+<div><p class="sub"><b>Servono pi&ugrave; anni di affitto</b></p><div class="bars" id="an-high"></div></div></div>
+<details><summary>Tutte le zone, dalla pi&ugrave; alla meno &laquo;cara&raquo; rispetto all&rsquo;affitto</summary><div class="bars" id="an-all"></div></details>
+<p class="src">Le quotazioni OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. L&rsquo;affitto &egrave; lordo: non tiene conto di tasse, spese, case sfitte o lavori.</p>
+
+<h2 id="m4">La metro M4 ha fatto salire i prezzi?</h2>
+<div id="m4-testo"></div>
+<div class="lgd" id="lg-m4"></div>
+<div class="ch" id="ch-m4" role="img" aria-label="Variazione reale del prezzo per gruppo di zone, prima e dopo l'apertura della M4"></div>
+<p class="src">Le quotazioni OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Il grafico mostra la variazione mediana, in euro 2025, delle zone di ciascun gruppo.</p>
+<div class="scroll"><table id="tab-m4"></table></div>
+<div class="warn"><b>Correlazione non vuol dire causa.</b> &Egrave; un confronto tra gruppi di zone, non una prova che la M4 abbia (o non abbia) fatto salire i prezzi. Le zone con la M4 erano gi&agrave; un po&rsquo; avanti prima che aprisse. I numeri sono piccoli (da 5 a 21 zone per gruppo), le zone sono grandi e la fermata ne tocca solo una parte, e la M4 &egrave; aperta del tutto solo da ottobre 2024: i prezzi non hanno avuto molto tempo per reagire. Nelle stesse zone pesano anche altre cose (lavori, nuove case, la ripresa di tutta la citt&agrave;).</div>
+
+<h2 id="negozi">I negozi</h2>
+<div id="negozi-testo"></div>
+<div class="grid2"><div><h3>Prezzo di vendita (&euro;/m&sup2;, euro 2025)</h3><div class="ch" id="ch-neg1" role="img" aria-label="Prezzo mediano dei negozi a Milano, in euro 2025"></div></div>
+<div><h3>Affitto (&euro;/m&sup2; al mese, euro 2025)</h3><div class="ch" id="ch-neg2" role="img" aria-label="Affitto mediano dei negozi a Milano, in euro 2025"></div></div></div>
+<p class="src">Le quotazioni OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Negozi, stato prevalente, centro tra minimo e massimo, mediana non pesata tra le zone che hanno i negozi.</p>
+
+<h2 id="vendite">Quante case si vendono</h2>
+<div id="ntn-testo"></div>
+<div class="lgd" id="lg-ntn"></div>
+<div class="ch" id="ch-ntn" role="img" aria-label="Compravendite di abitazioni a Milano per trimestre, dal 2004"></div>
+<p class="src">Fonte: Agenzia delle Entrate &ndash; OMI, volumi di compravendita (NTN), abitazioni, Comune di Milano. Questi sono conteggi di atti, non quotazioni: ma i prezzi di questa pagina restano stime.</p>
+<details><summary>Totali per anno</summary><div class="scroll"><table id="tab-ntn"></table></div></details>
+
+<section id="altre" hidden>
+<h2 id="uffici">Uffici e capannoni</h2>
+<div id="altre-testo"></div>
+<div id="altre-grafici"></div>
+<p class="src">Le quotazioni OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali.</p>
+</section>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista">
+<li><b>Le quotazioni OMI sono stime, non prezzi pagati.</b> L&rsquo;Osservatorio del Mercato Immobiliare dell&rsquo;Agenzia delle Entrate pubblica ogni semestre, per ogni zona, un intervallo (minimo e massimo) per comprare e per affittare. Sono valori indicativi stimati dall&rsquo;Agenzia, non i prezzi degli atti.</li>
+<li><b>Il valore usato &egrave; il centro dell&rsquo;intervallo</b>: (minimo + massimo) / 2. Tipologia: abitazioni civili, stato di conservazione prevalente (quello che l&rsquo;Agenzia indica come pi&ugrave; diffuso nella zona). I negozi sono nella categoria commerciale.</li>
+<li><b>Mediana non pesata.</b> Il prezzo &laquo;tipico&raquo; della citt&agrave; &egrave; la mediana tra le zone, ogni zona conta uno. Non &egrave; il prezzo medio pagato a Milano: non esistono i pesi (quante case ci sono in ogni zona).</li>
+<li><b>Le zone cambiano.</b> <span id="m-zone"></span> Il codice di una zona da solo non basta per seguirla nel tempo: per questo le crescite per zona usano solo le zone che si sovrappongono (per almeno il 90% dell&rsquo;area) a una sola zona del periodo precedente, calcolate sui perimetri ufficiali. Sono <span id="m-31"></span> su <span id="m-42"></span>; le altre sono in grigio sulla mappa.</li>
+<li><b>Il salto del 2014.</b> Tra 2014/1 e 2014/2 la mediana della citt&agrave; sale di quasi il 10% in un semestre, in coincidenza con la revisione delle zone; ma sulle zone rimaste uguali i prezzi non si muovono. Per questo le crescite per zona partono dal 2014/2.</li>
+<li><b>Non ci sono i dati 2004-2005.</b> Il servizio pubblico dell&rsquo;Agenzia ha le quotazioni dal 2006/1 (<span id="m-sem"></span> semestri); per il 2004-2005 le pagine sono vuote. Fino al 2010/1 i perimetri non sono pubblici: si assume che le zone fossero quelle del 2010/2, che hanno gli stessi codici e gli stessi identificativi.</li>
+<li><b>Inflazione.</b> Gli &laquo;euro 2025&raquo; usano l&rsquo;indice ISTAT dei prezzi al consumo per famiglie di operai e impiegati (FOI) senza tabacchi, media del semestre. &Egrave; l&rsquo;inflazione generale, non quella specifica dei costi della casa.</li>
+<li><b>Resa e anni di affitto.</b> Resa lorda = affitto di un anno (12 mesi) diviso prezzo di vendita. Anni di affitto = il suo inverso. &Egrave; un conto sul prezzo e sull&rsquo;affitto stimati dall&rsquo;Agenzia, prima di tasse, spese, sfitto e lavori: non dice quanto si guadagna davvero.</li>
+<li><b>M4.</b> Ogni fermata &egrave; assegnata alla zona che la contiene (posizione delle fermate: GTFS del Comune di Milano; date di apertura: Wikipedia). Una zona &egrave; &laquo;con M4&raquo; se contiene almeno una fermata M4 (aperte dal 26/11/2022 al 12/10/2024). Le zone &laquo;con altra metro&raquo; hanno una fermata M1, M2, M3 o M5 aperta prima del 2022 e nessuna M4. Il confronto &egrave; sulle zone confrontabili uno a uno nei due periodi.</li>
+<li><b>Compravendite.</b> Il NTN (numero di transazioni normalizzate) conta gli atti di compravendita, con le quote di propriet&agrave;: un acquisto di met&agrave; casa vale 0,5. Per Milano esiste solo il totale del Comune, non per zona. Due serie dell&rsquo;Agenzia sono unite: archivio 2004-2010, serie definitiva 2011-2024; 2025-2026 &egrave; provvisorio.</li>
+<li><b>Pagina costruita da un programma</b> (<code>prezzi-case/scripts/10_pagina.py</code>) che legge i file puliti e scrive i file di questa pagina: si pu&ograve; rilanciare quando arrivano nuovi dati.</li>
+</ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/serie_citta.csv">serie_citta.csv</a> (prezzi, affitti, resa e anni di affitto mediani della citt&agrave; per semestre), <a href="data/zone_ultimo_semestre.csv">zone_ultimo_semestre.csv</a> (valori e crescita di ogni zona), <a href="data/serie_zone.csv">serie_zone.csv</a> (serie di ogni zona dal 2014/2), <a href="data/m4_confronto.csv">m4_confronto.csv</a> (confronto M4, zona per zona), <a href="data/compravendite_milano.csv">compravendite_milano.csv</a> (compravendite per trimestre), <a href="data/zone.geojson">zone.geojson</a> (perimetri e valori dell&rsquo;ultimo semestre), <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Sono tutti valori aggregati per zona o per citt&agrave;.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Quotazioni immobiliari (prezzi di vendita e affitti per zona), perimetri delle zone e volumi di compravendita: Agenzia delle Entrate &ndash; Osservatorio del Mercato Immobiliare (OMI), licenza CC BY 4.0, consultazione pubblica del servizio GEOPOI, dati scaricati il 30 ottobre 2026. Inflazione: ISTAT, indice dei prezzi al consumo FOI senza tabacchi (CC BY 4.0). Fermate della metro: GTFS del Comune di Milano (AMAT); date di apertura da Wikipedia (CC BY-SA). Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,ZF=null,SZ=null,RD=[];
+var ACC='#00695c',GRY='#8a8a8a',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)} function f2(x){return nf(x,2)}
+function pc(x,d){return x==null?'':nf(x*100,d==null?0:d)+'%'}
+function ps(x,d){if(x==null)return '';var v=Math.round(Math.abs(x)*Math.pow(10,(d||0)+2))/Math.pow(10,(d||0)+2);return (x<0&&v>0?'−':'+')+nf(v*100,d||0)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function eur(x){return f0(x)+' €'}
+
+Promise.all([J('data/riepilogo.json'),J('data/zone.geojson'),J('data/serie_zone.json')]).then(function(a){
+  D=a[0];ZF=a[1];SZ=a[2];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  var ab=D.abitazioni,M=D.meta;
+  sorpresa();tempo();metodo();mappa();affitto();m4();negozi();ntn();altre();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- motore dei grafici a linee ---------- */
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||250,m={l:o.ml||46,r:12,t:o.mt||16,b:24},n=o.labels.length;
+  var all=[];o.series.forEach(function(s){s.vals.forEach(function(v){if(v!=null)all.push(v)})});
+  if(!all.length){box.innerHTML='<p class="sub">Dati non disponibili.</p>';return}
+  var lo=o.ymin!=null?o.ymin:Math.min.apply(null,all),hi=o.ymax!=null?o.ymax:Math.max.apply(null,all);
+  if(hi===lo){hi=lo+1}
+  var st=niceStep((hi-lo)/4);lo=Math.floor(lo/st+1e-9)*st;hi=Math.ceil(hi/st-1e-9)*st;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(i){return m.l+(n>1?i*pw/(n-1):pw/2)} function Y(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  (o.bands||[]).forEach(function(b){s+='<rect x="'+X(b.i1)+'" y="'+m.t+'" width="'+Math.max(2,X(b.i2)-X(b.i1))+'" height="'+ph+'" fill="#f6dcc0" opacity=".7"/>'});
+  for(var v=lo;v<=hi+st/2;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>'}
+  var y0=parseInt(o.labels[0],10),step=W<480?4:2,last=-99;
+  o.labels.forEach(function(l,i){var y=parseInt(l,10);
+    if(/\/1$/.test(l)&&((y-y0)%step===0||(y-y0+1)%step===0&&i===0)&&X(i)-last>26){last=X(i);s+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle">'+y+'</text>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  var placed=[];
+  (o.marks||[]).forEach(function(k){var x=X(k.i),right=x>W*0.55,w=k.text.length*5.6,x1=right?x-4-w:x+4,x2=right?x-4:x+4+w,row=0;
+    while(placed.some(function(q){return q.row===row&&x1<q.x2+4&&x2>q.x1-4}))row++;
+    placed.push({x1:x1,x2:x2,row:row});k.dy=row*12;
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+(m.t-2)+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="4 3"/><text x="'+(right?x-4:x+4)+'" y="'+(m.t+10+(k.dy||0))+'" text-anchor="'+(right?'end':'start')+'" style="fill:'+'#8a4a10'+'">'+esc(k.text)+'</text>'});
+  o.series.forEach(function(se){var d='',pen=false;
+    se.vals.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+' stroke-linejoin="round"/>'});
+  s+='<g id="hv" style="display:none"><line y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#444" stroke-width="1"/>';
+  o.series.forEach(function(se){s+='<circle r="4" fill="'+se.color+'" stroke="#fff" stroke-width="2"/>'});
+  s+='</g><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  if(!o.tip)return;
+  var svg=box.firstChild,g=svg.querySelector('#hv'),ln=g.firstChild,cs=g.querySelectorAll('circle'),tip=box.lastChild,rect=svg.querySelector('rect:last-of-type');
+  function show(ev){
+    var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width);
+    var i=Math.round((px-m.l)/pw*(n-1));i=Math.max(0,Math.min(n-1,i));
+    g.style.display='';ln.setAttribute('x1',X(i));ln.setAttribute('x2',X(i));
+    o.series.forEach(function(se,k){var v=se.vals[i];if(v==null){cs[k].style.display='none'}else{cs[k].style.display='';cs[k].setAttribute('cx',X(i));cs[k].setAttribute('cy',Y(v))}});
+    tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=X(i)*(r.width/W)+10;if(left+tw>r.width)left=X(i)*(r.width/W)-tw-10;if(left<0)left=0;
+    tip.style.left=left+'px';tip.style.top='4px';
+  }
+  function hide(){g.style.display='none';tip.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function barChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||230,m={l:46,r:8,t:12,b:24},n=o.vals.length,pw=W-m.l-m.r,ph=H-m.t-m.b;
+  var hi=Math.max.apply(null,o.vals),st=niceStep(hi/4);hi=Math.ceil(hi/st)*st;
+  function Y(v){return m.t+ph-v/hi*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=hi+st/2;v+=st)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var bw=pw/n,last=-99,y0=o.years[0];
+  o.vals.forEach(function(v,i){var x=m.l+i*bw;
+    s+='<rect x="'+(x+bw*0.12).toFixed(1)+'" y="'+Y(v).toFixed(1)+'" width="'+(bw*0.76).toFixed(2)+'" height="'+(m.t+ph-Y(v)).toFixed(1)+'" fill="'+o.colors[i]+'" data-i="'+i+'"/>';
+    if(o.q[i]===1&&(o.years[i]-y0)%(W<480?4:2)===0&&x-last>26){last=x;s+='<text class="mu" x="'+(x+bw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.years[i]+'</text>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/><rect id="hr" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('#hr');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width);
+    var i=Math.max(0,Math.min(n-1,Math.floor((px-m.l)/bw)));tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=(m.l+i*bw+bw/2)*(r.width/W)+10;if(left+tw>r.width)left-=tw+20;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function idx(arr,sem){for(var i=0;i<arr.length;i++)if(arr[i].s===sem)return i;return -1}
+
+/* ---------- la cosa piu' sorprendente ---------- */
+function sorpresa(){
+  var S=D.sorpresa,t=S.top,h='';
+  h+='<p>In termini reali il prezzo &laquo;tipico&raquo; di una casa a Milano nel <b>'+S.sem_sotto+'</b> era ancora <b>sotto quello del '+S.primo+'</b>: '+f0(S.reale_sotto)+' contro '+f0(S.reale_primo)+' &euro;/m&sup2; (in euro 2025). Tutta la crescita &egrave; arrivata dopo: <b>'+ps(S.var_sotto_ultimo,1)+'</b> in meno di cinque anni, fino a '+f0(S.reale_ultimo)+' &euro;/m&sup2; nel '+S.ultimo+'. Contando gli euro di allora il prezzo tipico &egrave; salito del '+pc(S.var_nom_primo_ultimo)+' ('+f0(S.nom_primo)+' &rarr; '+f0(S.nom_ultimo)+'), ma in euro 2025 &egrave; solo '+ps(S.var_primo_ultimo)+': il resto &egrave; inflazione.</p>';
+  h+='<p>Dal '+S.base_crescita+' il centro (<b>'+esc(S.centro.nome)+'</b>) &egrave; fermo (<b>'+ps(S.centro.var)+'</b> in termini reali) mentre le zone semicentrali crescono molto: <b>'+esc(t[0].nome)+' '+ps(t[0].var)+'</b>, '+esc(t[1].nome)+' '+ps(t[1].var)+', '+esc(t[2].nome)+' '+ps(t[2].var)+'. Per met&agrave; delle '+S.n_zone_2014_ultimo+' zone confrontabili la crescita &egrave; sopra '+ps(S.mediana_var_2014_ultimo)+'.</p>';
+  var q=D.m4.periodi[1].gruppi,q0=D.m4.periodi[0].gruppi;
+  h+='<p>E le zone con le nuove fermate M4 hanno fatto <b>meno</b> delle altre dal 2021 (<b>'+ps(q.A.var_reale)+'</b> contro '+ps(q.B.var_reale)+' e '+ps(q.C.var_reale)+'): un confronto tra gruppi, non una prova (<a href="#m4">vedi sotto</a>).</p>';
+  h+='<p class="src">Prima e dopo il 2014 le zone sono diverse, quindi il confronto tra 2006 e 2021 &egrave; di massima. Controllo sulle stesse zone: dal '+S.primo+' al 2013/2 la mediana delle '+S.n_zone_2006_2013+' zone &egrave; '+ps(S.mediana_var_2006_2013)+' reale; dal 2014/2 al 2021/2 (le '+S.stesse_zone_2014_2_2021_2.n+' zone uguali) &egrave; '+ps(S.stesse_zone_2014_2_2021_2.reale,1)+'. Fonte: Agenzia delle Entrate &ndash; OMI (CC BY 4.0), stime e non prezzi di vendite reali; inflazione ISTAT FOI. Abitazioni civili, mediana non pesata tra le zone.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- grafico nel tempo ---------- */
+function tempo(){
+  var ab=D.abitazioni,S=D.sorpresa;
+  var labs=ab.map(function(r){return r.s});
+  var marks=[],bands=[];
+  D.meta.cambi_zone.forEach(function(c,k){var i=idx(ab,c.sem);if(i>=0)marks.push({i:i,text:c.sem+': zone da '+c.da+' a '+c.a})});
+  var i14=idx(ab,'2014/1'),i14b=idx(ab,'2014/2');if(i14>=0&&i14b>=0)bands.push({i1:i14,i2:i14b});
+  setH('lg-tempo',lgdLine([{color:ACC,t:'Euro 2025 (corretti per l’inflazione)'},{color:GRY,dash:1,t:'Euro del momento'}])+'<span><i style="background:#f6dcc0"></i>salto 2014/1 &rarr; 2014/2</span>');
+  function draw(){
+    lineChart(el('ch-tempo'),{labels:labs,h:290,mt:20,series:[{color:GRY,dash:1,w:1.8,vals:ab.map(function(r){return r.nom})},{color:ACC,w:2.6,vals:ab.map(function(r){return r.reale})}],ymin:2000,marks:marks,bands:bands,
+      yf:function(v){return f0(v)},
+      tip:function(i){var r=ab[i];return '<b>'+r.s+'</b> ('+r.n+' zone)<br>euro 2025: <b>'+f0(r.reale)+'</b> &euro;/m&sup2;<br>euro del momento: '+f0(r.nom)+' &euro;/m&sup2;'}});
+  }
+  draw();RD.push(draw);
+  var j=S.salto_2014,k=S.salto_2024,h='';
+  h+='<p>Prezzo in &euro; al metro quadro (valore centrale dell&rsquo;intervallo OMI). <b>Due volte le zone cambiano</b>: nel 2014 da 55 a 40 zone, e nel 2024/2 da 40 a 42 (spariscono 2 zone, ne nascono 4).</p>';
+  h+='<div class="warm"><b>Il salto 2014/1 &rarr; 2014/2 coincide con la revisione delle zone.</b> In quel semestre la mediana sale del '+ps(j.mediana_nom,1)+' (euro del momento), ma le '+j.stesse_zone.n+' zone che restano uguali nei due semestri '+(Math.abs(j.stesse_zone.nom)<0.005?'restano ferme (variazione mediana '+ps(j.stesse_zone.nom,1)+')':'si muovono solo del '+ps(j.stesse_zone.nom,1))+': il salto viene dalla composizione delle zone, non da un rialzo dei prezzi. Anche nel 2024/2, con le zone nuove, la mediana sale del '+ps(k.mediana_reale,1)+' reale; sulle '+k.stesse_zone.n+' zone uguali la salita &egrave; del '+ps(k.stesse_zone.reale,1)+': in parte crescita vera, in parte cambio di zone.</div>';
+  setH('tempo-testo',h);
+  table('tab-tempo',['Semestre','Zone','Euro 2025 &euro;/m&sup2;','Euro del momento &euro;/m&sup2;','Affitto euro 2025 &euro;/m&sup2; mese'],ab.map(function(r){return [r.s,r.n,f0(r.reale),f0(r.nom),f2(r.aff_reale)]}));
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,MET={},CUR='prezzo',SEL=null;
+function qbreaks(vals,k,step){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]/step)*step);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
+function mappa(){
+  var F=ZF.features,P=F.map(function(f){return f.properties});
+  var nulls=P.filter(function(p){return p.var_reale_2014_2_ultimo==null}).length;
+  el('ult-sem').textContent=D.meta.ultimo;Array.prototype.forEach.call(document.querySelectorAll('.ult-sem'),function(e){e.textContent=D.meta.ultimo});
+  function vals(k){return P.map(function(p){return p[k]}).filter(function(v){return v!=null})}
+  var bp=qbreaks(vals('compr_centro'),6,250),ba=qbreaks(vals('loc_centro'),6,1),br=qbreaks(vals('resa_lorda_annua'),6,0.0025);
+  MET={
+   prezzo:{k:'compr_centro',b:bp,c:pick(bp.length+1),f:function(v){return f0(v)},u:' €/m²',t:'Prezzo di vendita in €/m² (centro dell’intervallo, euro del momento).'},
+   crescita:{k:'var_reale_2014_2_ultimo',b:[0,0.1,0.2,0.3,0.4],c:['#e0a96d','#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#052e29'],f:function(v){return Math.round(v*100)+'%'},u:'',sg:true,t:'Di quanto è cambiato il prezzo, in euro 2025, tra '+D.meta.base_crescita+' e '+D.meta.ultimo+'. Solo le '+D.meta.n_zone_confrontabili+' zone che si possono confrontare uno a uno; le altre '+nulls+' sono in grigio (zone nate o ridisegnate dopo il '+D.meta.base_crescita+', soprattutto nel 2024).'},
+   affitto:{k:'loc_centro',b:ba,c:pick(ba.length+1),f:function(v){return f0(v)},u:' €/m² al mese',t:'Affitto in € per metro quadro al mese (centro dell’intervallo).'},
+   resa:{k:'resa_lorda_annua',b:br,c:pick(br.length+1),f:function(v){return nf(v*100,1)+'%'},u:'',t:'Resa lorda: affitto di un anno diviso prezzo di vendita. Più è alta, meno anni di affitto servono per pagare la casa.'}
+  };
+  MAP=L.map('map').setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(ZF,{style:sty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){var p=f.properties,m=MET[CUR],v=p[m.k];return '<b>'+esc(p.nome_breve)+'</b> ('+p.zona+')<br>'+(v==null?'non confrontabile':(m.sg?ps(v):m.f(v)+m.u))},{sticky:true});
+    l.on('click',function(){scegli(f.properties.zona)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-zona'),h='<option value="">— scegli —</option>';
+  P.slice().sort(function(a,b){return a.nome_breve.localeCompare(b.nome_breve,'it')}).forEach(function(p){h+='<option value="'+p.zona+'">'+esc(p.nome_breve)+' ('+p.zona+')</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(sel.value)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  RD.push(function(){if(SEL)scheda(SEL)});
+}
+function colore(v,m){if(v==null)return '#bdbdbd';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function sty(f){var m=MET[CUR],sel=SEL===f.properties.zona;return {fillColor:colore(f.properties[m.k],m),fillOpacity:.82,color:sel?'#000':'#fff',weight:sel?3:1}}
+function ricolora(){
+  var m=MET[CUR];LAY.setStyle(sty);if(SEL)LAY.eachLayer(function(l){if(l.feature.properties.zona===SEL)l.bringToFront()});
+  var h='';m.c.forEach(function(c,i){var t;
+    if(i===0)t='meno di '+(m.sg?m.b[0]*100+'%':m.f(m.b[0]));else if(i===m.b.length)t='oltre '+(m.sg?Math.round(m.b[i-1]*100)+'%':m.f(m.b[i-1]));else t=(m.sg?Math.round(m.b[i-1]*100):m.f(m.b[i-1]))+' – '+(m.sg?Math.round(m.b[i]*100)+'%':m.f(m.b[i]));
+    h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+  h+='<span><i style="background:#bdbdbd"></i>grigio: non confrontabile</span>';
+  setH('lg-map',h);setH('map-desc',m.t);
+}
+function scegli(z){SEL=z;el('sel-zona').value=z;LAY.setStyle(sty);LAY.eachLayer(function(l){if(l.feature.properties.zona===z)l.bringToFront()});scheda(z)}
+function scheda(z){
+  var p=null;ZF.features.forEach(function(f){if(f.properties.zona===z)p=f.properties});if(!p)return;
+  var M4={A:'ha almeno una fermata della M4',B:'ha una fermata di un’altra linea di metro (aperta prima del 2022)',C:'non ha fermate di metro'};
+  var h='<h3>'+esc(p.nome)+' <span class="sub">('+p.zona+', fascia '+esc(p.fascia.toLowerCase())+')</span></h3>';
+  h+='<div class="scroll"><table><tbody>';
+  h+='<tr><td>Prezzo di vendita</td><td class="r">'+f0(p.compr_min)+' – '+f0(p.compr_max)+' €/m² (centro '+f0(p.compr_centro)+')</td></tr>';
+  h+='<tr><td>Affitto</td><td class="r">'+f1(p.loc_min)+' – '+f1(p.loc_max)+' €/m² al mese (centro '+f1(p.loc_centro)+')</td></tr>';
+  h+='<tr><td>Resa lorda dell’affitto</td><td class="r">'+nf(p.resa_lorda_annua*100,1)+'% all’anno: servono '+f0(p.anni_di_affitto)+' anni di affitto</td></tr>';
+  if(p.var_reale_2014_2_ultimo!=null)h+='<tr><td>Crescita dal '+D.meta.base_crescita+' (euro 2025)</td><td class="r">prezzo '+ps(p.var_reale_2014_2_ultimo)+', affitto '+ps(p.var_affitto_reale_2014_2_ultimo)+'</td></tr>';
+  else h+='<tr><td>Crescita dal '+D.meta.base_crescita+'</td><td>non calcolabile: la serie di questa zona comincia nel '+p.serie_dal+' (zona nata o ridisegnata)</td></tr>';
+  if(p.gruppo_metro)h+='<tr><td>Metro</td><td class="r">la zona '+M4[p.gruppo_metro]+'</td></tr>';
+  h+='</tbody></table></div><p class="sub">Abitazioni civili, stato prevalente, '+D.meta.ultimo+'. Le quotazioni OMI sono stime dell’Agenzia delle Entrate, non prezzi di vendite reali.</p>';
+  var s=SZ[z];
+  if(s&&s.s.length>=4){h+='<p class="sub" style="margin-bottom:0"><b>Prezzo nel tempo</b> (€/m², dal '+s.s[0]+')</p><div class="lgd">'+lgdLine([{color:ACC,t:'euro 2025'},{color:GRY,dash:1,t:'euro del momento'}])+'</div><div class="ch" id="ch-zona"></div><p class="src">Le quotazioni OMI sono stime, non prezzi di vendite reali.</p>'}
+  else h+='<p class="sub">Serie troppo breve per un grafico ('+(s?s.s.length:0)+' semestri): la zona esiste in questa forma da poco.</p>';
+  setH('scheda',h);
+  if(s&&s.s.length>=4){lineChart(el('ch-zona'),{labels:s.s,h:190,mt:10,ml:46,series:[{color:GRY,dash:1,w:1.6,vals:s.nom},{color:ACC,w:2.4,vals:s.reale}],
+    tip:function(i){return '<b>'+s.s[i]+'</b><br>euro 2025: <b>'+f0(s.reale[i])+'</b><br>euro del momento: '+f0(s.nom[i])}})}
+  SEL=z;
+}
+
+/* ---------- comprare o affittare ---------- */
+function barrette(id,P,col){
+  var mx=Math.max.apply(null,P.map(function(p){return p.anni_di_affitto}));
+  setH(id,P.map(function(p){return '<div class="row"><span class="nm" title="'+esc(p.nome)+'">'+esc(p.nome_breve)+' <span class="sub">'+p.zona+'</span></span><span class="tr"><span class="fill" style="width:'+(p.anni_di_affitto/mx*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+f0(p.anni_di_affitto)+' anni</span></div>'}).join(''));
+}
+function affitto(){
+  var ab=D.abitazioni,P=ZF.features.map(function(f){return f.properties}).filter(function(p){return p.anni_di_affitto!=null}).sort(function(a,b){return a.anni_di_affitto-b.anni_di_affitto});
+  var an=ab.map(function(r){return r.anni}),mn=Math.min.apply(null,an),mx=Math.max.apply(null,an),u=ab[ab.length-1];
+  var h='<p>Una domanda semplice: se affittassi la casa invece di abitarla, <b>quanti anni di affitto servirebbero per pagarla?</b> &Egrave; il prezzo diviso l&rsquo;affitto di un anno. Nel '+u.s+' il valore tipico (mediana tra le zone) &egrave; <b>'+f0(u.anni)+' anni</b>, cio&egrave; una resa lorda del '+pc(u.resa,1)+' all&rsquo;anno. Dal 2006 il numero &egrave; rimasto tra '+f0(mn)+' e '+f0(mx)+' anni: prezzi e affitti sono saliti insieme.</p>';
+  h+='<p>Tra le zone la forbice &egrave; ampia: da <b>'+f0(P[0].anni_di_affitto)+' anni</b> ('+esc(P[0].nome_breve)+') a <b>'+f0(P[P.length-1].anni_di_affitto)+' anni</b> ('+esc(P[P.length-1].nome_breve)+'). Non &egrave; un consiglio su cosa convenga: il conto &egrave; lordo e non dice nulla su tasse, mutuo, spese, sfitto o su quanto crescer&agrave; la casa.</p>';
+  setH('affitto-testo',h);
+  setH('lg-anni',lgdLine([{color:ACC,t:'Anni di affitto per pagare la casa (mediana tra le zone)'}]));
+  function draw(){lineChart(el('ch-anni'),{labels:ab.map(function(r){return r.s}),h:230,series:[{color:ACC,w:2.4,vals:an}],yf:function(v){return f0(v)},ymin:Math.floor(mn)-2,ymax:Math.ceil(mx)+2,
+    marks:D.meta.cambi_zone.map(function(c){return {i:idx(ab,c.sem),text:c.sem+': cambio zone'}}).filter(function(m){return m.i>=0}),
+    tip:function(i){var r=ab[i];return '<b>'+r.s+'</b><br><b>'+f1(r.anni)+'</b> anni di affitto<br>resa lorda '+pc(r.resa,1)}})}
+  draw();RD.push(draw);
+  barrette('an-low',P.slice(0,6));barrette('an-high',P.slice(-6).reverse(),'#8a4a10');
+  barrette('an-all',P);
+}
+
+/* ---------- M4 ---------- */
+function m4(){
+  var m=D.m4,E=m.etichette,pe=m.periodi,a=pe[0].gruppi,b=pe[1].gruppi;
+  var g=['A','B','C'];
+  var h='<p>A Milano la M4 (la linea blu, da Linate a San Cristoforo) &egrave; stata aperta a tratti: i primi 6 scali il 26/11/2022, altri due nel luglio 2023, il resto il 12/10/2024. Abbiamo diviso le zone in tre gruppi: quelle con una fermata M4 ('+b.A.n+' zone), quelle che hanno un&rsquo;altra metro gi&agrave; aperta prima del 2022 ('+b.B.n+') e quelle senza metro ('+b.C.n+'). Poi abbiamo guardato come &egrave; cambiato il prezzo, in euro 2025, <b>prima</b> (2016/2 &rarr; 2021/2) e <b>dopo</b> (2021/2 &rarr; 2026/1).</p>';
+  h+='<p><b>Prima</b>, le zone con la M4 erano gi&agrave; un po&rsquo; avanti: '+ps(a.A.var_reale,1)+' contro '+ps(a.B.var_reale,1)+' (altra metro) e '+ps(a.C.var_reale,1)+' (senza metro). <b>Dopo</b>, tutte salgono, e le zone M4 salgono di <b>meno</b>: '+ps(b.A.var_reale,1)+' contro '+ps(b.B.var_reale,1)+' e '+ps(b.C.var_reale,1)+'. Da questo confronto non si pu&ograve; dire che la M4 abbia fatto salire i prezzi, e nemmeno che li abbia frenati: pu&ograve; essere solo che le zone M4 sono pi&ugrave; centrali, e il centro cresce poco (<a href="#tempo">vedi sopra</a>).</p>';
+  setH('m4-testo',h);
+  setH('lg-m4','<span><i style="background:#b9b9b9"></i>prima dell&rsquo;M4 (2016/2 &rarr; 2021/2)</span><span><i style="background:'+ACC+'"></i>dopo (2021/2 &rarr; 2026/1)</span><span class="sub">sotto le barre: numero di zone prima / dopo</span>');
+  var short={A:'Con fermata M4',B:'Con altra metro',C:'Senza metro'};
+  function draw(){
+    var box=el('ch-m4');box.innerHTML='';
+    var W=box.clientWidth||320,H=260,mm={l:46,r:8,t:22,b:46},pw=W-mm.l-mm.r,ph=H-mm.t-mm.b;
+    var vs=[];g.forEach(function(k){vs.push(a[k].var_reale,b[k].var_reale)});
+    var lo=Math.min(0,Math.min.apply(null,vs)),hi=Math.max.apply(null,vs),st=niceStep((hi-lo)/4);lo=Math.floor(lo/st)*st;hi=Math.ceil(hi/st)*st;
+    function Y(v){return mm.t+ph-(v-lo)/(hi-lo)*ph}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+    for(var v=lo;v<=hi+st/2;v+=st)s+='<line x1="'+mm.l+'" x2="'+(W-mm.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+(Math.abs(v)<1e-9?'#888':'#e3e3e3')+'"/><text class="mu" x="'+(mm.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+Math.round(v*100)+'%</text>';
+    var gw=pw/3,bw=Math.min(46,gw*0.3);
+    g.forEach(function(k,i){var cx=mm.l+gw*i+gw/2;
+      [[a[k],cx-bw-1,'#b9b9b9'],[b[k],cx+1,ACC]].forEach(function(z){var v=z[0].var_reale,y=Y(Math.max(v,0)),hh=Math.abs(Y(v)-Y(0));
+        s+='<rect x="'+z[1]+'" y="'+(v>=0?Y(v):Y(0))+'" width="'+bw+'" height="'+hh+'" fill="'+z[2]+'"/><text x="'+(z[1]+bw/2)+'" y="'+(v>=0?Y(v)-4:Y(v)+12)+'" text-anchor="middle" style="font-weight:700">'+ps(v,1)+'</text>'});
+      s+='<text x="'+cx+'" y="'+(H-26)+'" text-anchor="middle">'+short[k]+'</text><text class="mu" x="'+cx+'" y="'+(H-12)+'" text-anchor="middle">'+'zone: '+a[k].n+' / '+b[k].n+'</text>'});
+    box.innerHTML=s+'</svg>';
+  }
+  draw();RD.push(draw);
+  var rows=[];g.forEach(function(k){rows.push([E[k],a[k].n,ps(a[k].var_reale,1),ps(a[k].var_affitto,1),b[k].n,ps(b[k].var_reale,1),ps(b[k].var_affitto,1)])});
+  table('tab-m4',['Gruppo di zone','N. prima','Prezzo prima','Affitto prima','N. dopo','Prezzo dopo','Affitto dopo'],rows);
+  var fr=[];g.forEach(function(k){['centro+semicentro','periferia+suburbana'].forEach(function(f){var x=a[k].fasce[f],y=b[k].fasce[f];fr.push([short[k]+', '+(f==='centro+semicentro'?'centro e semicentro':'periferia'),x?x.n:0,x?ps(x.var_reale,1):'–',y?y.n:0,y?ps(y.var_reale,1):'–'])})});
+  var d=document.createElement('details');d.innerHTML='<summary>Lo stesso confronto, separando centro e periferia</summary><p class="sub">Dove c’è una sola zona (n = 1) il numero non vuol dire nulla. Mediana delle variazioni reali dei prezzi.</p><div class="scroll"><table id="tab-m4b"></table></div>';
+  var sc=el('tab-m4').parentNode;sc.insertAdjacentElement('afterend',d);
+  table('tab-m4b',['Gruppo','N. prima','Prezzo prima','N. dopo','Prezzo dopo'],fr);
+  var pz=document.createElement('p');pz.className='src';pz.innerHTML='Variazione mediana tra le zone del gruppo, per prezzo e per affitto, in euro 2025. Zone con M4 ('+m.zone_M4.length+'): '+m.zone_M4.join(', ')+'. Le quotazioni OMI sono stime, non prezzi di vendite reali.';
+  sc.insertAdjacentElement('afterend',pz);
+}
+
+/* ---------- negozi ---------- */
+function negozi(){
+  var ng=D.negozi;if(!ng||!ng.length){el('negozi-testo').innerHTML='<p>Dati non disponibili.</p>';return}
+  var f=ng[0],l=ng[ng.length-1];
+  var h='<p>Anche per i negozi l&rsquo;Agenzia stima un prezzo e un affitto al metro quadro, zona per zona. Il prezzo tipico di un negozio nel '+l.s+' &egrave; di <b>'+f0(l.reale)+' &euro;/m&sup2;</b> (euro 2025), contro '+f0(f.reale)+' nel '+f.s+': <b>'+ps(l.reale/f.reale-1)+'</b>. L&rsquo;affitto, invece, &egrave; salito: da '+f1(f.aff_reale)+' a <b>'+f1(l.aff_reale)+' &euro;/m&sup2; al mese</b> ('+ps(l.aff_reale/f.aff_reale-1)+'), e la resa lorda tipica da '+pc(f.resa,1)+' a '+pc(l.resa,1)+' all&rsquo;anno. Numeri da prendere con cautela: le zone con i negozi sono '+f.n+' nel '+f.s+' e '+l.n+' oggi, e il cambio delle zone del 2014 si vede anche qui.</p>';
+  setH('negozi-testo',h);
+  var labs=ng.map(function(r){return r.s}),marks=D.meta.cambi_zone.map(function(c){return {i:idx(ng,c.sem),text:c.sem}}).filter(function(m){return m.i>=0});
+  function draw(){
+    lineChart(el('ch-neg1'),{labels:labs,h:210,series:[{color:ACC,w:2.4,vals:ng.map(function(r){return r.reale})}],marks:marks,yf:f0,
+      tip:function(i){var r=ng[i];return '<b>'+r.s+'</b> ('+r.n+' zone)<br><b>'+f0(r.reale)+'</b> €/m² (euro 2025)'}});
+    lineChart(el('ch-neg2'),{labels:labs,h:210,series:[{color:'#8a4a10',w:2.4,vals:ng.map(function(r){return r.aff_reale})}],marks:marks,yf:function(v){return f0(v)},
+      tip:function(i){var r=ng[i];return '<b>'+r.s+'</b> ('+r.n+' zone)<br><b>'+f1(r.aff_reale)+'</b> €/m² al mese (euro 2025)'}});
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- compravendite ---------- */
+function ntn(){
+  var N=D.ntn,A=D.ntn_annui,yrs=Object.keys(A).map(Number).sort();
+  var mn=yrs[0],mx=yrs[0];yrs.forEach(function(y){if(A[y]<A[mn])mn=y;if(A[y]>A[mx])mx=y});
+  var lastY=yrs[yrs.length-1];
+  var h='<p>Quante case cambiano di mano? L&rsquo;Agenzia conta le compravendite di abitazioni nel Comune di Milano, trimestre per trimestre (le quote di propriet&agrave; contano pro quota: acquistare met&agrave; casa vale 0,5). Il minimo degli anni completi &egrave; il <b>'+mn+'</b> con '+f0(A[mn])+' compravendite, il massimo il <b>'+mx+'</b> con '+f0(A[mx])+'. Nel '+lastY+' (dati provvisori) sono '+f0(A[lastY])+'. Dopo il massimo del '+mx+' le vendite sono scese, mentre i prezzi reali sono continuati a salire: i due andamenti non coincidono.</p>';
+  setH('ntn-testo',h);
+  setH('lg-ntn','<span><i style="background:'+ACC+'"></i>dati definitivi</span><span><i style="background:#7fc0b4"></i>dati provvisori (2025-2026)</span>');
+  function draw(){barChart(el('ch-ntn'),{vals:N.map(function(r){return r[2]}),years:N.map(function(r){return r[0]}),q:N.map(function(r){return r[1]}),colors:N.map(function(r){return /provv/.test(r[3])?'#7fc0b4':ACC}),h:230,
+    tip:function(i){var r=N[i];return '<b>'+r[0]+', trimestre '+r[1]+'</b><br>'+f0(r[2])+' compravendite'+(/provv/.test(r[3])?' (provvisorio)':'')}})}
+  draw();RD.push(draw);
+  table('tab-ntn',['Anno','Compravendite di abitazioni'],yrs.map(function(y){return [y,f0(A[y])]}));
+}
+
+/* ---------- uffici e capannoni (solo se i dati ci sono) ---------- */
+function altre(){
+  var X=D.altre;if(!X||!X.length)return;
+  el('altre').hidden=false;
+  setH('altre-testo','<p>Oltre alle case, l&rsquo;Agenzia stima prezzi e affitti anche di uffici e capannoni. Qui il prezzo tipico (mediana tra le zone che hanno quel tipo di immobile, in euro 2025) nel tempo. Non tutte le zone hanno quel tipo di immobile: leggere solo l&rsquo;andamento generale.</p>');
+  var h='';X.forEach(function(x,k){h+='<h3>'+esc(x.tipologia)+'</h3><div class="grid2"><div><p class="sub">Prezzo (&euro;/m&sup2;, euro 2025)</p><div class="ch" id="ch-alt'+k+'a"></div></div><div><p class="sub">Affitto (&euro;/m&sup2; al mese, euro 2025)</p><div class="ch" id="ch-alt'+k+'b"></div></div></div>'});
+  setH('altre-grafici',h);
+  function draw(){X.forEach(function(x,k){var s=x.serie.filter(function(r){return r.reale!=null}),lb=s.map(function(r){return r.s});
+    lineChart(el('ch-alt'+k+'a'),{labels:lb,h:200,series:[{color:ACC,w:2.4,vals:s.map(function(r){return r.reale})}],tip:function(i){return '<b>'+s[i].s+'</b> ('+s[i].n+' zone)<br>'+f0(s[i].reale)+' €/m²'}});
+    lineChart(el('ch-alt'+k+'b'),{labels:lb,h:200,series:[{color:'#8a4a10',w:2.4,vals:s.map(function(r){return r.aff_reale})}],yf:function(v){return f0(v)},tip:function(i){return '<b>'+s[i].s+'</b> ('+s[i].n+' zone)<br>'+f1(s[i].aff_reale)+' €/m² al mese'}})})}
+  draw();RD.push(draw);
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var c=D.meta.cambi_zone,t='Le zone OMI di Milano sono ';
+  var ab=D.abitazioni;
+  t+=ab[0].n+' fino al 2013/2, ';
+  c.forEach(function(x,i){t+=x.a+' dal '+x.sem+(i<c.length-1?', ':'. ')});
+  t+='Nel 2014 quasi nessuna zona vecchia resta uguale a una nuova (su 55 solo 2 si ritrovano uno a uno); nel 2024/2 spariscono due zone e ne nascono quattro.';
+  el('m-zone').textContent=t;
+  el('m-sem').textContent=D.meta.n_semestri;el('m-31').textContent=D.meta.n_zone_confrontabili;el('m-42').textContent=D.meta.n_zone_ultimo;
+}
+})();
+</script>
+</body></html>

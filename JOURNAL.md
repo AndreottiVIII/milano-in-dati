@@ -1622,6 +1622,15 @@ Fatta per sovrapposizione di aree (UTM 32N), con `scripts\05_zone_corrispondenza
 10. M2 Abbiategrasso: due date diverse nella stessa voce Wikipedia.
 
 
+- 2026-10-30 — **Quotazioni OMI dalla consultazione pubblica, senza SPID.** Fonte: le pagine "stampaomi.php" del servizio GEOPOI, CC BY 4.0, una richiesta ogni 2,5-3 s (dettagli in `prezzi-case/STATO.md`). Il servizio pubblico non ha valori per il 2004 e il 2005, quindi la serie parte dal 2006/1: 41 semestri.
+- 2026-10-30 — **Pagina pubblicata** (`docs/prezzi-case/`, programma `scripts/10_pagina.py`; Davide ha detto sì prima della fine degli scarichi di uffici e capannoni).
+  - Sorpresa: in euro 2025 la mediana delle zone (abitazioni civili) è 3.363 €/m² nel 2006/1, 3.206 nel 2021/2 e 3.929 nel 2026/1 (+22,5% in meno di cinque anni). In euro del momento 2.400 → 4.000 (+67%), in euro 2025 solo +17%.
+  - Dal 2014/2 il centro (B12) fa −1,3%; C19 Tabacchi-Sarfatti +53%, C16 +48%, C18 +45%; mediana delle 31 zone confrontabili +27%.
+  - M4 (confronto, non prova): dopo il 2021 +13,9% contro +20,8% (altra metro) e +18,1% (senza metro). Prima del 2021 le zone M4 erano già avanti: +4,2% / +1,2% / −0,2%.
+  - Anni di affitto per pagare la casa: circa 25, sempre tra 25 e 27 dal 2006; per zona da 19 a 30. Negozi: prezzo reale −4%, affitto +27%. Compravendite (NTN): minimo 14.575 nel 2012, massimo 28.617 nel 2022.
+  - **Trappola**: tra 2014/1 e 2014/2 la mediana sale del 9,6% nominale, ma le 35 zone rimaste uguali sono ferme (+0,0%). Il salto è un effetto del cambio delle zone, non dei prezzi; è scritto sulla pagina. Nel 2024/2, invece, sulle zone uguali la crescita è in parte vera (+4,1% reale).
+  - **Da fare**: quando finiscono gli scarichi di uffici (T) e capannoni (P), rilanciare 08c, la pipeline, `09_crescita_e_m4.py` e `10_pagina.py`. La sezione "Uffici e capannoni" compare da sola (soglia: 8 semestri e 10 zone).
+
 ## 13. La neve (e la nebbia) a Milano
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `neve-e-nebbia/`._

@@ -26,4 +26,4 @@ I link "← Milano in dati" che stavano in alcune pagine sono stati tolti: li so
 - `cinema-spariti/scripts/pagina_template.html` (usato da `pagina_dati.py`)
 - `derby/scripts/pagina_template.html` (usato da `pagina_dati.py`)
 
-Le altre pagine (temperature, elezioni, aria, area-c, citta-15-minuti, scala, violenza-politica, milano-raccontata, neve-e-nebbia, nomi-fermate, bici-auto-mezzi) sono scritte a mano: i programmi di quelle cartelle producono solo `data/`. `bici-auto-mezzi/scripts/f4_inserisci.py` inserisce soltanto una sezione dentro la pagina esistente e non tocca il `<head>`.
+Le altre pagine (temperature, elezioni, aria, area-c, citta-15-minuti, scala, violenza-politica, milano-raccontata, neve-e-nebbia, nomi-fermate, bici-auto-mezzi, prezzi-case) sono scritte a mano: i programmi di quelle cartelle producono solo `data/`. `bici-auto-mezzi/scripts/f4_inserisci.py` inserisce soltanto una sezione dentro la pagina esistente e non tocca il `<head>`.
