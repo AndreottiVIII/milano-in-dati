@@ -1457,11 +1457,244 @@ _Fonti, date di scarico, licenze, scelte, problemi. Cartella `prezzi-case/` (nom
   - Niente SPID per Claude: gli scarichi con SPID li fa Davide.
 - Avvio: si fa solo la parte senza SPID (Davide, consumo oltre il 90%).
 
+### Fase 1 — raccolta (2026-10-30)
+
+**Prezzi delle case a Milano dal 2004: note sulla fase 1 (scaricamento e preparazione)**
+
+Data: 30 ottobre 2026. Cartella: `prezzi-case\`. Nessuna analisi dei prezzi fatta: mancano ancora le quotazioni OMI (servono lo SPID di Davide, vedi `COSA_SCARICARE.md`).
+Come leggere: ogni numero dice da quale file e da quale campo viene. Tutti i programmi sono in `scripts\`, il comando per rifare tutto è in `STATO.md`.
+Nessun servizio con SPID o con registrazione è stato usato. Pause di 2-5 secondi tra le richieste, User-Agent dichiarato, nessun errore "troppe richieste".
+
+#### In breve
+
+1. **Le quotazioni OMI (prezzi di vendita e affitti per zona) si possono avere solo con SPID/CIE/credenziali Entratel/Fisconline.** Disponibili dal 1° semestre 2004 (pagina "Forniture dati OMI", aggiornata 5/10/2026), ultimo semestre pubblicato: 2026/1. Licenza CC BY 4.0. Tocca a Davide: `COSA_SCARICARE.md`.
+2. **I perimetri delle zone per Milano li ho presi io, senza login**, dal servizio di mappa pubblico: 32 semestri, dal 2010/2 al 2026/1. Prima del 2010/2 non esistono.
+3. **Le zone cambiano molto**: 55 zone fino al 2013/2, 41 dal 2014/1, 43 dal 2024/2. Solo 2 zone su 55 sono confrontabili uno-a-uno dal 2010 a oggi; dal 2014/1 in poi 29 zone su 43 sì. Niente viene unito in silenzio: `pulito\zone_non_1a1.csv`.
+4. **Compravendite (NTN) di Milano**: serie trimestrale 2004-2026, aperta, solo per tutto il comune. Per zona OMI non esiste.
+5. **Inflazione ISTAT** (FOI senza tabacchi) raccordata tra le basi: mensile dal 12/2003 al 9/2026, annuale 1996-2025.
+6. **Fermate metro con data di apertura**: 134 fermate (M1-M5), `pulito\fermate_metro.csv`.
+7. **Pipeline pronta** e provata su un campione FINTO e su 6 semestri veri (copie di terzi, solo come prova): legge i semestri, tiene solo Milano, calcola centro e ampiezza, reale, rapporto affitto/prezzo.
+
+---
+
+#### 1. Quotazioni OMI (NON scaricate: serve lo SPID)
+
+- Pagina: https://www.agenziaentrate.gov.it/portale/it/web/guest/schede/fabbricatiterreni/omi/forniture-dati-omi (letta il 30/10/2026, salvata in `raw\pagine_ae\forniture.html`).
+- Dice: download gratuito delle quotazioni "a partire dal 1° semestre 2004"; perimetri (file KML) "dal 2° semestre 2010" per tutta l'Italia, una provincia o un comune; volumi di compravendita (NTN) per comune "dall'annualità 2011" (esclusi i comuni dei territori col sistema tavolare). Accesso: "utenti che accedono ai servizi telematici nell'area riservata". Licenza: CC BY 4.0, da citare «Agenzia delle Entrate – OMI».
+- Come funziona (articolo Eutekne del 6/4/2018, da riverificare perché vecchio): ambito = Italia / area / regione / provincia / comune; risultato = un .zip con 2 CSV, `VALORI` e `ZONE`; ogni richiesta si scarica **una sola volta, entro 7 giorni**.
+- Formato di un file vero (visto su copie di terzi, 2016-2018): separatore `;`, prima riga di titolo, intestazione `Area_territoriale;Regione;Prov;Comune_ISTAT;Comune_cat;Sez;Comune_amm;Comune_descrizione;Fascia;Zona;LinkZona;Cod_Tip;Descr_Tipologia;Stato;Stato_prev;Compr_min;Compr_max;Sup_NL_compr;Loc_min;Loc_max;Sup_NL_loc;`, numeri con la virgola. Milano = `Comune_cat` `F205`. Nome file: `QI_<numero richiesta>_1_<anno><semestre>_VALORI.csv` / `_ZONE.csv`.
+- Per i semestri **prima del 2016** il "tracciato ante 2016" dell'Agenzia (https://github.com/ondata/quotazioni-immobiliari-agenzia-entrate/blob/master/doc/Tracciato_record_dati_ante2016.pdf, copia di terzi di un documento dell'Agenzia, salvato in `raw\ondata_mirror_schema\`) descrive campi separati da `|` con nomi diversi (`VALMIN`, `VALMAX`, `LOCMIN`, `LOCMAX`, `COD_TIP_PREV`...). **Non ho visto un file vero di quel periodo**: il lettore è scritto sul tracciato ma non provato su dati veri.
+- Il manuale OMI 2025 (PDF) dice che il volume è proprietà dell'Agenzia e non si riproduce senza autorizzazione: vale per il testo del manuale, non per i dati (che sono CC BY 4.0).
+- **Copia di terzi** (6 semestri 2016/1-2018/2, 12 MB): repository "ondata/quotazioni-immobiliari-agenzia-entrate" su GitHub, `rawData\2016-1.zip ... 2018-2.zip`, scaricati il 30/10/2026 in `raw\ondata_mirror_rawdata\`. Il progetto scrive che la licenza non è chiarita (ma i dati originali sono CC BY 4.0 per l'Agenzia). Non verificabile contro gli originali. Servono come prova del programma, non come fonte finale.
+
+#### 2. Perimetri delle zone OMI di Milano (scaricati, senza login)
+
+- Fonte: servizio di mappa pubblico dell'Agenzia, `https://www1.agenziaentrate.gov.it/servizi/geopoi_omi/zoneomi.php?richiesta=6&codcom=F205&semestre=<AAAAS>` (è la stessa chiamata che usa la mappa; l'ho trovata leggendo `js\cittadino.js` della pagina, salvato in `raw\geopoi_probe\`). Scaricato il 30/10/2026.
+- File: `raw\geopoi\F205_<AAAAS>.json`, 32 file, circa 35 MB. Da `20102` (2010 2° sem.) a `20261` (2026 1° sem.). Per `20101` e prima la risposta è vuota (coerente con "dal 2° semestre 2010").
+- Il menu della mappa elenca solo 2016/1-2026/1 (campo `SEMESTRE` di `zoneomi.php?richiesta=5`), ma il servizio risponde anche per i semestri 2010/2-2015/2: li ho usati. Non è una funzione dichiarata: andrà citato come "servizio di mappa GEOPOI".
+- Licenza: banche dati OMI CC BY 4.0 (stessa pagina "Forniture"). Ripubblicabile citando la fonte.
+- **Il download ufficiale in KML/GML (`perimetri.php?...&formato=kml`) non funziona oggi**: 4 prove su Milano (2016/1, 2025/2, formato kml e gml) hanno dato errore 500 con il testo "Impossibile creare l'archivio ZIP". Ho usato i dati JSON della mappa. Se Davide vuole i KML ufficiali: stessa pagina "Forniture dati OMI", sezione "Perimetri di Zona" (SPID).
+- **Trappola dei dati:** ogni zona arriva come un solo `Polygon` con più anelli, dove gli anelli sono spesso pezzi staccati, non buchi. Letto come GeoJSON normale, l'area totale di Milano scende a circa 100 km² (e per qualche semestre a 52 km²) invece di 181,8 km². Il programma `05_zone_corrispondenza.py` usa la regola pari/dispari sugli anelli: l'area torna a 181,3-181,8 km² in tutti i 32 semestri (campo `area_totale_km2` in `pulito\zone_periodi.csv`).
+- Controllo con file veri: per il 2018/2 i 41 codici zona dei perimetri coincidono esattamente con i 41 codici del file `ZONE` ufficiale (copia di terzi). Le zone con valori sono 40: la zona rurale `R2` non ha quotazioni.
+
+#### 3. Corrispondenza tra zonizzazioni (`pulito\zone_*.csv`)
+
+Fatta per sovrapposizione di aree (UTM 32N), con `scripts\05_zone_corrispondenza.py`. Soglie: una zona è "uguale" se si sovrappone per almeno il 90% a una sola zona dell'altro periodo, in entrambe le direzioni.
+
+| Periodo | Semestri | Zone | Nota (da `zone_periodi.csv`) |
+|---|---|---|---|
+| P1 | 2010/2 - 2013/2 (7) | 55 | zonizzazione "vecchia" |
+| P2 | 2014/1 (1) | 41 | prima zonizzazione con 41 zone (codici come `B15`, `R2`) |
+| P3 | 2014/2 - 2019/2 (11) | 41 | perimetri quasi uguali a P2, ma 21 codici zona rinumerati |
+| P4 | 2020/1 (1) | 41 | ritocco: una zona (`B21`) con sovrapposizione 0,86 |
+| P5 | 2020/2 - 2021/2 (3) | 41 | ritocco: sovrapposizione minima 0,86 |
+| P6 | 2022/1 - 2024/1 (5) | 41 | ritocchi, minima 0,93 |
+| P7 | 2024/2 - 2026/1 (4) | 43 | revisione 2024: sparite `D15`, `D30`; nuove `D37`-`D40` |
+
+- Da P1 a P2 (revisione del 2014): su 55 zone vecchie, solo 2 sono uno-a-uno (`zone_non_1a1.csv`: 29 "complessa", 21 "accorpata", 1 "divisa", 4 "perimetro cambiato" fra zona vecchia e nuova). **Non si può fare una serie per zona che attraversi il 2013/2-2014/1**: per quel salto serve un altro metodo (per esempio prezzi riportati su una griglia fissa con pesi d'area, da dichiarare come stima).
+- Dal 2014/1 al 2026/1: 29 delle 43 zone di oggi hanno una serie uno-a-uno continua (30 se si accettano i ritocchi, colonna `id_serie_larga`).
+- Il codice zona da solo **non identifica** la zona: `D38` può essere un'area diversa in due periodi. Usare `id_serie`, non il codice.
+- Semestri 2004/1-2010/1: nessun perimetro. Il programma `07_prezzi.py` lascia `id_serie` vuoto; se i codici zona del file ZONE coincidono con quelli del 2010/2 si può assumere lo stesso disegno (da verificare e dichiarare).
+- Il file ZONE ufficiale ha anche `LinkZona` (es. `MI00003228`): potrebbe essere un identificativo stabile. Da verificare quando arrivano i file di Davide (se resta uguale quando cambia il codice zona, è una conferma ufficiale delle corrispondenze).
+
+#### 4. Compravendite (NTN), Comune di Milano
+
+- Serie nuova 2011-2024 (definitiva): `raw\omi_ntn\RESIDENZIALE_DEFINITIVO_2011_2024.zip` (146 kB), file `RES.csv`; provvisoria 2025-2026: `raw\omi_ntn\RESIDENZIALE_2025_2026_PROVV.zip` (49 kB). Anche non residenziale (`NON_RESIDENZIALE_*.zip`, 255 kB e 63 kB), non elaborato. Pagina: https://www.agenziaentrate.gov.it/portale/schede/fabbricatiterreni/omi/banche-dati/volumi-di-compravendita (letta il 30/10/2026). Link diretti, nessun login.
+- Serie vecchia 2004-2016: `raw\omi_ntn_archivio\Residenziale_<anno>.xls` (13 file + `Residenziale_2000-2003.xls`, 2 MB), dalla pagina "Archivio volumi di compravendita". Foglio 1 = trimestrale.
+- Livello: provincia e capoluogo (campo `Cap` = `cap`, riga `Prov` = `MI`). Il capoluogo di Milano è il Comune di Milano. **Non c'è dato per zona OMI né per quartiere.**
+- Elaborato in `pulito\ntn_milano_trimestrale.csv` (114 righe), campi `anno`, `trimestre`, `serie`, `ntn_capoluogo`, `ntn_provincia`. Le serie NON sono fuse: dove si sovrappongono (2011-2016) `pulito\ntn_milano_confronto_2011_2016.csv` mostra le differenze: media -0,25%, da -1,27% a +0,87% (24 trimestri). Per il 2011-2016 conviene la serie nuova.
+- Totali annui capoluogo (campo `ntn_capoluogo`, somma dei trimestri): 2004: 24.966; 2008: 18.977; 2012: 14.575 (minimo, serie nuova); 2019: 26.232; 2020: 21.650; 2022: 28.617; 2024: 24.003; 2025 (provvisorio): 25.173. Il 2026 ha solo 2 trimestri (12.388).
+- Licenza: la pagina non la scrive per questi file; la pagina "Forniture dati OMI" dice che le banche dati OMI sono CC BY 4.0. Da citare «Agenzia delle Entrate – OMI».
+
+#### 5. Inflazione ISTAT (FOI senza tabacchi)
+
+- Fonte: ISTAT, servizio SDMX `https://esploradati.istat.it/SDMXWS/rest/data/IT1,<flusso>,1.0/<chiave>`, scaricato il 30/10/2026 in `raw\istat\`:
+  - `169_748_DF_DCSP_FOI1B2025_1.m.csv` (906 kB): mensile, 4 basi concatenate, 2003-12 -> 2026-09; `169_748_DF_DCSP_FOI1B2025_2.m.csv` (874 kB): la stessa serie in versione "tutte le basi 1996-2025" (non usato); `169_745_DF_DCSP_FOI1B2015_1.m.csv` (444 kB): base 2015 fino al 2025 (non usato, serve da controllo);
+  - `169_750_DF_DCSP_FOI2B2025_1.csv` (62 kB): medie annue 1996-2025.
+- Voce usata: `ECOICOP_2` = `00ST` (tutti i prodotti senza tabacchi), `MEASURE` = 4 (indice). Basi: 1995, 2010, 2015, 2025 (mensile: campo `DATA_TYPE` 4, 11, 55, 101; annuale: 5, 12, 56).
+- Raccordo (`scripts\03_istat_foi.py`): il coefficiente tra una base e la precedente è la media dell'anno-base nella serie precedente diviso 100, come fa ISTAT; poi tutto è portato a 2025 = 100. Risultato in `pulito\foi_mensile.csv` e `pulito\foi_annuale.csv` (indice originale e raccordato).
+- Controllo: le variazioni a 12 mesi ricalcolate coincidono con quelle pubblicate da ISTAT (campo `MEASURE` 7): 12/2010 1,92% (ISTAT 1,9), 1/2026 0,81% (0,8), 9/2026 4,04% (4,0); annuale 2025 su 2024 +1,4%. Media 2025 dei mesi = 100,00.
+- Licenza: CC BY 4.0 (https://www.istat.it/note-legali/, letta il 30/10/2026). Ripubblicabile citando ISTAT.
+- Trappola: il server ISTAT con chiave "tutto" non risponde entro 90 secondi per i flussi mensili; con chiave `M.IT.....` e `startPeriod=2003-12` ha risposto in circa 2 minuti.
+
+#### 6. Fermate della metro con data di apertura
+
+- Fermate, nomi e coordinate: GTFS del Comune (AMAT) già scaricato dalla filiera 7, letto in sola lettura (`..\bici-auto-mezzi\raw\gtfs\ext_comune_new`, versione 425 del 26/10/2026); estratto l'ordine delle fermate in `raw\gtfs_metro_estratto\metro_stop_ordine.csv`.
+- Date di apertura: tabelle "Apertura" e "Le date delle aperture" delle voci it.wikipedia Linea M1-M5 (lette via API, `raw\wikipedia_metro\`), controllate con en.wikipedia (Line 4 e 5) e articoli di stampa. Le date sono fatti, ma la fonte è Wikipedia (CC BY-SA): il testo non va copiato, i fatti sì.
+- Risultato: `pulito\fermate_metro.csv`, 134 fermate (M1 38, M2 35, M3 21, M4 21, M5 19), campi `linea`, `fermata`, `lat`, `lon`, `data_apertura`, `tratta`, `fonte`. Tutte le fermate del GTFS hanno una data; nessuna senza. Alcune fermate sono fuori dal Comune di Milano (es. Rho, Pero, Sesto, Cologno, Gessate, Assago): da filtrare nel passo spaziale. Nello stesso nome la stazione di interscambio compare una volta per linea.
+- **Date M4** (campo `data_apertura`): 26/11/2022 Linate Aeroporto, Repetti, Stazione Forlanini, Argonne, Susa, Dateo; 4/7/2023 Tricolore, San Babila; 12/10/2024 le altre 13 (Sforza-Policlinico ... San Cristoforo). Confermate da it.wikipedia, en.wikipedia, VareseNews/Il Giorno.
+- **Date M5**: 10/2/2013 Bignami-Zara (7 fermate); 1/3/2014 Isola e Garibaldi FS; 29/4/2015 Domodossola, Lotto, Segesta, San Siro Ippodromo, San Siro Stadio; poi Portello 6/6/2015, Cenisio 20/6/2015, Gerusalemme 26/9/2015, Monumentale 11/10/2015, Tre Torri 14/11/2015.
+- **Aperture dopo il 2004 sulle linee vecchie**: M1 Rho Fieramilano 14/9/2005 (provvisoria dal 30/3/2005) e Pero 19/12/2005; M2 Abbiategrasso 17/4/2005 (**dubbio**: la voce it.wikipedia scrive 17 aprile nel testo e 17 marzo nell'elenco; scelto aprile perché è una domenica) e Assago Milanofiori Nord e Forum 20/2/2011; M3 Dergano, Affori Centro, Affori FN, Comasina 26/3/2011.
+- Non verificate con fonti ufficiali del Comune/ATM/MM: le pagine ufficiali non sono state lette (nessuna è servita per decidere). Per le date a giorno preciso delle aperture pre-2004 non ho fatto controlli incrociati: non servono per l'analisi dal 2004.
+
+#### 7. Riuso di materiale di altri filoni (solo riferimenti, niente copie)
+
+`pulito\riferimenti_riuso.csv` elenca i percorsi assoluti: parchi, servizi e punteggi "15 minuti" (filone 9), redditi per CAP (filone 9: attenzione, sono per CAP e non per quartiere), confine del Comune e NIL vigenti (filone 9), varchi e ingressi di Area C (filone 6), GTFS (filone 7).
+
+#### 8. Pipeline pronta (codice)
+
+- Programmi in `scripts\` (Python 3.12, `python -I`): `01_metro_da_gtfs.py`, `02_fermate_metro.py`, `03_istat_foi.py`, `04_ntn_milano.py`, `05_zone_corrispondenza.py`, `06_leggi_omi.py`, `07_prezzi.py`, `esegui_pipeline.py`. Prova: `scripts\test\make_fake.py` crea un campione finto in `test_finto\`.
+- Cosa calcola `07_prezzi.py`: per ogni semestre/zona/tipologia/stato, **centro = (min+max)/2**, **ampiezza = max-min** e ampiezza relativa; versione **reale in euro 2025** (media FOI del semestre); **resa lorda annua = affitto centro × 12 / prezzo centro** e anni di affitto per pagare il prezzo; riga di stato prevalente (`Stato_prev` = P); mediana NON pesata fra le zone (non è il prezzo medio della città: non esistono pesi per zona).
+- Un valore 0 o vuoto vuol dire "dato assente", non zero: diventa vuoto e la riga è segnalata (`flag_compr`, `flag_loc`).
+- Prove fatte: (a) campione finto di 4 semestri (3 nel formato `;`, 1 nel formato `|` inventato, uno dentro uno zip in cp1252, con righe di un altro comune da scartare e una zona divisa in due) → tutto letto, zona divisa segnalata in `zone_non_1a1.csv`; (b) 6 semestri veri 2016/1-2018/2 (copie di terzi): 2.811 righe di Milano, nessun duplicato, nessun minimo > massimo, 40 zone con valori per semestre; esempio zona `B12`, abitazioni civili, stato prevalente: 8.100 euro/m² nel 2016/1 e 8.150 nel 2018/2 (centro di min e max; campo `Compr_min`, `Compr_max`), che in euro 2025 sono 9.866 e 9.660.
+- Controlli scritti in chiaro in `pulito\omi_controlli.txt` dopo ogni lettura: buchi di semestri, righe doppie, minimo > massimo, zeri, cambi dei codici zona.
+
+#### Trappole dei dati (riassunto)
+
+1. Perimetri GEOPOI: anelli multipli letti come buchi → area errata (vedi sezione 2).
+2. Il download KML ufficiale ha dato errore 500 il 30/10/2026.
+3. Codici zona rinumerati nel 2014 (2014/1 → 2014/2 senza cambio di disegno) e di nuovo nel 2024: il codice non basta.
+4. Ritocchi di perimetro tra semestri (fino al 14% di area in una zona, 2020/1).
+5. Revisione decennale 2014: 55 → 41 zone, quasi nessuna zona confrontabile prima/dopo.
+6. Le quotazioni sono intervalli indicativi stimati dall'Agenzia, non prezzi di vendita (lo dice la pagina "Forniture dati OMI").
+7. Affitti a 0 = mancanti (il progetto "ondata" stima circa il 10% di righe con affitto 0 nelle copie 2016-2018; nelle 2.811 righe di Milano che ho letto non ce n'è).
+8. NTN: due serie con piccole differenze nel 2011-2016; 2025-2026 provvisorio; 2026 con soli 2 trimestri.
+9. Download delle quotazioni: una volta sola, entro 7 giorni.
+10. M2 Abbiategrasso: due date diverse nella stessa voce Wikipedia.
+
+
 ## 13. La neve (e la nebbia) a Milano
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `neve-e-nebbia/`._
 
 - 2026-10-30 — Filone chiesto da Davide (nella sua richiesta numerato 11; rinumerato perché 10-12 erano già occupati). Domanda: quanti giorni di neve per inverno dagli anni '50, se nevica meno o diversamente; con la stessa fonte (NOAA, Linate e Malpensa) i giorni di nebbia. Attenzione ai cambi di strumento (osservatore umano poi sensori automatici). Nomi delle cartelle scelti da Davide ("cinema" diventa `cinema-spariti`). Fase 1: solo raccolta, poi un riassunto e la cosa più sorprendente prima di grafici e pagine.
+
+### Fase 1 — raccolta (2026-10-30)
+
+**Neve e nebbia a Milano - note della fase 1 (raccolta e controllo)**
+
+Domanda: a Milano nevica meno, o in modo diverso (meno episodi ma più forti)? E "che fine ha fatto la nebbia?".
+Stato: fase 1 finita il 30/10/2026. Nessun grafico, nessuna pagina. Tutto scaricato in blocco con programmi (nessun login, nessuna registrazione).
+
+#### 1. Fonti, indirizzi, data di scarico (30/10/2026)
+
+| Fonte | Indirizzo | Cosa è | File scaricati |
+|---|---|---|---|
+| NOAA ISD (Integrated Surface Database), versione completa (non "Lite": la Lite non ha il tempo presente) | https://www.ncei.noaa.gov/pub/data/noaa/AAAA/USAF-WBAN-AAAA.gz | osservazioni orarie/tri-orarie, un file per stazione e anno | `raw\noaa\isd\160800-99999\` (80 file, 21 MB), `raw\noaa\isd\160660-99999\` (60 file, 22 MB), `raw\noaa\isd\160810-99999\` (9 file, 1,4 MB) |
+| NOAA GSOD (Global Summary of the Day) | https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/AAAA/16080099999.csv | riassunto giornaliero (flag FRSHTT, SNDP, VISIB, PRCP, TEMP) | `raw\noaa\gsod\16080099999\` (69 file, 5,5 MB), `...\16066099999\` (60 file, 4,9 MB), `...\16081099999\` (9 file, 0,4 MB) |
+| Storia delle stazioni ISD | https://www.ncei.noaa.gov/pub/data/noaa/isd-history.csv (e .txt) | date di inizio/fine, coordinate, quota | `raw\isd_history\isd-history.csv` (2,9 MB) |
+| Inventario ISD | https://www.ncei.noaa.gov/pub/data/noaa/isd-inventory.txt | n. osservazioni per mese | `raw\isd_history\isd-inventory.txt` (17,8 MB). TRAPPOLA: per queste stazioni mostra solo il 2020-2025, non è usabile per gli anni vecchi; i conteggi veri li ho fatti io dai file |
+| Documentazione | isd-format-document.pdf, isd readme, gsod readme (stessa cartella NOAA) | codici e licenza | `raw\isd_history\` |
+
+Totale scaricato: circa 55 MB. Download riprendibile: `python -I scripts\scarica_isd_gsod.py <percorso_assoluto>\raw\noaa` (salta i file già presenti). Registro: `raw\noaa\log_download.txt`. Nessun errore, solo i 404 degli anni in cui NOAA non ha il file.
+
+Stazioni (da isd-history.csv):
+- **LINATE**: USAF-WBAN 160800-99999, WMO 16080, ICAO LIML, 107 m, inizio record 1931. È la serie principale.
+- **MALPENSA**: 160660-99999, WMO 16066, ICAO LIMC, 234 m, inizio 1965. Serve di confronto.
+- **LINATE_160810**: 160810-99999, "MILANO/LINATE", solo SYNOP 2005-2009 e 2015-2018 (1480 giorni). Duplicato del SYNOP di Linate sotto un altro numero. NON usato nei totali; tenuto nel file giornaliero con il nome `LINATE_160810`.
+- Brera (strand 1) non esiste in ISD: per la temperatura uso `..\temperature\serie\serie_unica.csv` (solo lettura).
+
+GSOD di Linate 1975-2025 era già in `..\temperature\raw\gsod_linate\`: ho verificato che i 51 file sono identici byte per byte a quelli che ho riscaricato (stesso hash). Il programma legge la mia copia, ma sono gli stessi dati.
+
+#### 2. Copertura (da `pulito\completezza_per_anno.csv`)
+
+LINATE ISD (giorni con almeno 4 ore di osservazioni, per anno):
+- 1931-1938: solo 1-2 osservazioni al giorno, con buchi (167-356 giorni/anno). Non utilizzabile per contare giorni di neve/nebbia.
+- 1939-1950: NESSUN file.
+- 1951-1955: ogni ora (24 ore/giorno), anno completo (il 1951 solo da ottobre). 1956 completo a metà (274 giorni). 1957: 2,5 osservazioni/giorno, mezzo anno. 1958: 4/giorno. 1959-1961: UNA osservazione al giorno (non basta). 1962-1963: nessun file. 1964: solo 113 giorni.
+- 1965-1970: ogni 3 ore (8/giorno), anni completi. 1971: solo gennaio-marzo. 1972: nessun file.
+- 1973-1983: ogni ora (METAR + SYNOP), completo.
+- 1984-1989: solo SYNOP ogni 3 ore (i METAR mancano nell'ISD, anche se l'aeroporto li emetteva), completo ma più rado.
+- 1990-2025: ogni ora, completo. Dal 1994 al 1998 le osservazioni orarie sono circa 16-20 al giorno (mancano alcune ore, soprattutto di notte). 2019: 351 giorni; 2024: 359; 2025 solo fino al 24 agosto.
+- Inverni (novembre-marzo) con dati sufficienti (almeno 90% dei giorni con 4 ore o più): 65 inverni a Linate (1952-1956, 1958, 1965-1971, 1974-2025, mancano 1957, 1959-1964, 1972, 1973 e prima del 1952).
+
+MALPENSA ISD: 1965 (solo 14 giorni), 1966-1971 (3-orario), 1972 mancante, 1973-2025 ore. 57 inverni sufficienti (1967-1971, 1974-2025).
+
+GSOD Linate: 1951-1958, 1964-1971, 1973-2025 (mancano 1959-1963 e 1972). GSOD Malpensa: 1965, 1966-1971, 1973-2025 (manca 1972).
+
+#### 3. Tabelle prodotte (`pulito\`)
+
+- `giorni_neve_nebbia.csv` - una riga per stazione e giorno (50.313 righe; Linate 27.600, Malpensa 21.233, LINATE_160810 1.480). Il "giorno" è il giorno UTC (come in GSOD), non quello locale. Colonne principali: `isd_n_obs`, `isd_n_hours` (ore diverse con almeno un rapporto), `isd_n_synoptic_hours` (ore 00,03,...,21 UTC), le bandiere di neve e nebbia (sotto), `min_vis_m`, le bandiere GSOD (`gsod_snow`, `gsod_fog`, `gsod_sndp_cm`, `gsod_prcp_mm`, `gsod_tmean_c`) e `report_types` (quanti rapporti per tipo). Vuoto = dato non esistente per quel giorno (ISD o GSOD assente), non zero.
+- `inverni_neve_nebbia.csv` - totali per stazione e inverno (novembre-marzo, etichetta = anno di gennaio: inverno 2012 = nov 2011 - mar 2012). Contiene giorni attesi, giorni con dati (`pct_days_ge4h`, `winter_complete_isd` = "si" se almeno 90%), tutte le definizioni, profondità massima, pioggia equivalente nei giorni di neve GSOD, temperatura media nov-mar di Brera (`brera_tmean_nov_mar`, dalla serie unica del strand 1) e di Linate (GSOD).
+- `totali_annuali.csv` - lo stesso per anno solare (la nebbia c'è anche in ottobre e aprile).
+- `completezza_per_anno.csv` - per stazione e anno: giorni con dati, ore medie al giorno, quota di osservazioni con tempo presente e con visibilità, n. rapporti SYNOP e METAR/SPECI, rapporti con testo METAR completo, quota di METAR "AUTO", n. rapporti di profondità neve.
+- `isd\isd_giorni_*.csv` e `isd\isd_diagnostica_*.csv` - passaggio intermedio (un file per stazione ISD). Programmi: `scripts\estrai_isd.py` poi `scripts\costruisci_giorni.py` (si rifà tutto con `python -I scripts\estrai_isd.py <abs>\raw\noaa\isd <abs>\pulito\isd` e `python -I scripts\costruisci_giorni.py <abs cartella strand>`).
+
+#### 4. Definizioni (tutte mantenute, mai mescolate)
+
+Neve (un giorno conta se c'è almeno una osservazione che soddisfa):
+- `snow_obs_strict`: tempo presente "neve in atto" - codici WMO 4677 (MW) 70-75, 77, 78, 85, 86; codici automatici (AW) 70-73, 85-87; METAR automatico (AU) neve o granuli di neve. Esclusi diamond dust (76) e ice pellets (79). QUESTA è la definizione principale.
+- `snow_obs_wide`: strict + pioggia e neve mista (MW 68, 69, 83, 84; AW 45, 46, 67, 68) + neve nell'ora precedente (MW 22, 23, 26; AW 24).
+- `snow_heavy_obs`: neve forte (MW 74-75, AW 73/87, AU intensità forte). Pochissimi casi, serve solo come indizio per "meno episodi ma più forti".
+- `snow_synoptic_hours`: come strict ma contando solo le osservazioni delle ore 00,03,...,21 UTC (al massimo 8 al giorno): campione omogeneo nel tempo, utile per confrontare anni con 8 e anni con 24 osservazioni al giorno.
+- `snow_metar_text`: neve letta direttamente nel testo del METAR (SN, SG; esclusi BLSN e DRSN), solo dal 2006.
+- `snow_depth_isd_gt0` e `gsod_snow_depth_gt0`: profondità di neve al suolo maggiore di zero (campo ISD AJ1 e GSOD SNDP).
+- `gsod_snow`: flag neve/ice pellets di GSOD (terza cifra di FRSHTT).
+- Nelle tabelle inverno c'è anche `snow_days_union_any` = neve strict OPPURE profondità > 0 OPPURE flag GSOD.
+
+Nebbia:
+- `fog_code_strict`: almeno un'osservazione con codice di nebbia sulla stazione (MW 41-49, AW 30-35, AU nebbia FG senza descrittore).
+- `fog_code_wide`: strict + nebbia nell'ora precedente, nebbia lontana, nebbia bassa (MW 28, 40, 11, 12; AW 20; AU qualunque FG).
+- `fog_code_vis_lt1km`: nebbia (wide) nello stesso rapporto con visibilità sotto 1000 m. **Consigliata per confrontare gli anni**, perché la definizione internazionale di nebbia è visibilità < 1 km.
+- `vis_lt1km_any`: la visibilità minima del giorno è sotto 1000 m, a prescindere dal codice (comprende anche foschia fitta, pioggia/neve forte).
+- `fog_synoptic_code` e `fog_synoptic_code_vis_lt1km`: come sopra, solo ore sinottiche.
+- `fog_metar_text` (FG/BCFG/MIFG/PRFG/FZFG nel testo) e `fog_metar_text_dense` (FG, FZFG, PRFG): dal 2006.
+- `gsod_fog`: flag nebbia GSOD (prima cifra di FRSHTT).
+- Qualità: scartati i valori con codice di qualità 2, 3, 6, 7 (sospetto/errato).
+
+#### 5. Risultati preliminari (solo numeri, nessuna interpretazione; inverni completi, medie per decennio dell'etichetta)
+
+Linate, giorni di neve per inverno nov-mar (`snow_days_strict`): anni 1950 (1952-56,58): 10,5; 1960 (1965-69): 8,0; 1970: 10,5; 1980: 9,0; 1990: 5,8; 2000: 7,1; 2010: 8,3; 2020 (2020-2025): 2,0. Singoli inverni: da 0 (1990, 2025) a 21 (1986). Neve forte (codici "forte"): 0-3 giorni per inverno, mai oltre. Correlazione inverno per inverno tra giorni di neve e temperatura media nov-mar di Brera: circa -0,6 (Linate, 65 inverni).
+Linate, giorni di nebbia per anno solare (`fog_code_vis_lt1km`, anni con dati completi): 1950: 121; 1960: 121; 1970: 108; 1980: 85; 1990: 79; 2000: 62; 2010: 53; 2020-2024: 52.
+Malpensa: neve strict 7, 11, 12, 7, 9, 10, 2 (decenni 1960-2020); nebbia (vis<1 km) 90, 101, 123, 106, 55, 34, 32 giorni per anno.
+Questi numeri sono preliminari: vedi le trappole sotto prima di usarli.
+
+#### 6. Cambi di strumenti/modalità trovati (non è clima)
+
+1. **1984-1989, Linate**: nell'ISD ci sono solo i SYNOP ogni 3 ore (i METAR mancano). I conteggi con l'insieme completo delle osservazioni sono quindi meno sensibili; per questo ho creato le colonne "sinottiche" (stesse 8 ore in tutti gli anni).
+2. **1994-1998, entrambe le stazioni**: le osservazioni scendono a circa 9.000 l'anno (da 20.000-27.000) e la quota di rapporti con "tempo presente" scende al 40%; dal 1999 risale al 98%. In quegli stessi anni i giorni di nebbia calano insieme a Linate e a Malpensa (Malpensa: 142 giorni nel 1994, 95 nel 1995, 58 nel 1998). Sospetto di cambio di codifica/di flusso dati, non solo di clima.
+3. **1999-2004**: quasi ogni rapporto METAR ha un codice di tempo presente anche se non c'è nulla (92%); dal 2006 il codice c'è solo quando c'è un fenomeno (circa 30%). Quindi "assenza di codice" non vuol dire "dato mancante" dopo il 2005, ma lo vuol dire prima. Per questo non ho usato la quota di tempo presente come misura di completezza dei giorni.
+4. **2006**: nell'ISD compare per la prima volta il testo completo del METAR (campo REM). Da lì i giorni di nebbia per codice di Linate salgono (SYNOP a ore sinottiche: 46 nel 2005, 69 nel 2006) mentre i giorni con codice di nebbia E visibilità < 1 km non salgono: dal 2006 il codice nebbia comprende anche nebbia a banchi (BCFG, MIFG) con visibilità sopra 1 km. A Malpensa lo stesso stacco si vede dal 2016-2018. Per questo motivo `fog_code_vis_lt1km` è più omogenea di `fog_code_strict` e di `gsod_fog`.
+5. **Differenza Linate-Malpensa (giorni di nebbia con vis<1 km)**: Malpensa ha 28-70 giorni in più per anno nel 1982-1994, differenza vicino a zero nel 1998-2005, poi Linate ha 15-30 giorni in più dal 2006. Salti a 1982, 1995-1998, 2006: sono candidati a cambi non climatici (strumenti di visibilità, metadati: Malpensa ha quota 211/234 m e coordinate che cambiano nel 1981, nel 1998 e nel 2013; Linate cambia coordinate nel 1986, 1998-2000, 2010, 2013).
+6. **Automazione**: nell'ISD i METAR di Linate con la parola AUTO compaiono dal 2018 (1,1% nel 2018, 5,1% nel 2019, 23,1% nel 2020, 11,6% nel 2021, poi 1-5%). Sono quasi tutti emessi di notte (ore 21-04 UTC). Nello stesso periodo compaiono i gruppi AW (tempo presente automatico: 77 rapporti nel 2018, 500 nel 2020). Controllo fatto sulle notti nov-feb 2019-2025: nei METAR AUTO la visibilità è sotto 1 km nel 22% dei casi e nel testo c'è FG nel 19,5%; nei METAR non automatici 11,6% e 11,3%. Non c'è quindi sottostima da parte dei sensori, ma il campione AUTO è piccolo e non confrontabile (periodi di chiusura notturna/Covid). Il tipo di rapporto "AUTO" nel campo tipo (non nel testo) compare solo 8 volte (2005-2012). Non c'è nessun file che dichiari quando i sensori sono entrati in servizio: andrebbe chiesto a ENAV/Aeronautica o all'ARPA.
+7. **2013-2017**: la visibilità manca nel 18-36% dei rapporti ISD di Linate (probabilmente i CAVOK); torna a posto nel 2018. Non tocca `vis_lt1km_any` (se c'è nebbia c'è la visibilità).
+8. **Coordinate Linate**: SYNOP e METAR hanno posizioni diverse in ISD dal 2010 (SYNOP 45,450 N 9,267 E, 104 m; METAR 45,445 N 9,277 E, 108 m): due punti di osservazione o due codifiche. Prima del 1956 la quota era 120 m, poi 103-107 m.
+
+Nessun salto improvviso "pulito" è stato attribuito al clima prima di aver escluso questi cambi; la parte di analisi spetta alla fase 2.
+
+#### 7. Trappole dei dati
+
+- **Profondità della neve inaffidabile**: tutti i rapporti ISD di profondità (campo AJ1, 11.011 rapporti) hanno il codice di condizione "9 = mancante" anche con un valore presente, e compaiono valori assurdi (264, 287 cm a Linate nel gennaio 1991; 225 cm nel febbraio 1985; 179 e 269 cm nel 2002-2003 in giorni senza neve). GSOD SNDP copia questi valori. Nel file giornaliero i valori oltre 60 cm sono tolti da `snow_depth_isd_cm` e `gsod_sndp_cm` (restano in `snow_depth_isd_cm_raw` e segnalati con `snow_depth_suspect_gt60`). Dal 2012 quasi non ci sono più rapporti. Non usare la profondità per la frase "episodi più forti" senza un'altra fonte (ARPA/Brera).
+- **Giorno UTC**, non locale: alcune nebbie/nevicate notturne vengono spezzate tra due giorni.
+- **Numero di ore osservate cambia molto** (da 1 a 24 al giorno, vedi sezione 2): un conteggio "giorni con almeno una osservazione di nebbia" favorisce gli anni con più osservazioni. Usare `isd_n_hours`, le colonne sinottiche e la colonna `winter_complete_isd`.
+- **Inverni incompleti**: gli inverni con meno del 90% dei giorni utili hanno `winter_complete_isd` = "no"; i totali ci sono lo stesso nella tabella ma non vanno confrontati. Sono tutti i 1931-1938, 1957, 1959-1964, 1972, 1973 (solo gennaio-marzo) a Linate.
+- **GSOD ≠ ISD per la nebbia**: GSOD segnala nebbia con una regola che comprende anche i casi larghi (nebbia a banchi, ora precedente). Dal 2006 i giorni di nebbia GSOD sono 10-30 più alti di quelli con vis<1 km. Per la neve, GSOD e ISD strict concordano quasi sempre (GSOD un po' più alto perché comprende ice pellets).
+- Il testo METAR dà qualche giorno di neve in più del codice ISD (126 contro 115 giorni a Linate da giugno 2006): nei METAR le nevicate miste (RASN) e le segnalazioni "SG" non sempre diventano codici ISD.
+- **Inventario ISD inutilizzabile** per gli anni vecchi (vedi sezione 1).
+- **Neve in Linate 1988-1990** (1, 1, 0 giorni): inverni davvero poveri di neve, ma in quegli anni il campione è solo sinottico ogni 3 ore; non confrontare direttamente con gli anni a 24 ore senza usare le colonne sinottiche.
+- Anni non coperti da ISD né GSOD: 1939-1950, 1962-1963, 1972 (Linate); 1972 (Malpensa).
+
+#### 8. Licenza
+
+I dati NOAA sono pubblici e gratuiti per uso di ricerca e non commerciale. Ma NOAA scrive (readme ISD): "The non-U.S. data in ISD are subject to WMO Resolution 40 restrictions, and cannot be redistributed to other users or customers" e (readme GSOD) che per i dati non statunitensi "the data or any derived product shall not be provided to other users or be used for the re-export of commercial services". I dati italiani sono quindi dati WMO Risoluzione 40.
+Conseguenza pratica: **NON ripubblicare i file raw** (`raw\`) né, per prudenza, il file giornaliero completo sul sito pubblico. Sul sito si possono mostrare grafici e totali per inverno/anno con citazione "NOAA NCEI, Integrated Surface Database e Global Summary of the Day, stazioni Milano Linate e Malpensa". Il punto "prodotti derivati" va deciso da Davide prima di pubblicare tabelle scaricabili.
+
+#### 9. Cosa manca / da fare
+
+- Una seconda fonte di verifica per la neve e la profondità (ARPA Lombardia, Osservatorio di Brera, Servizio Meteorologico AM): il progetto "temperature" ha già Brera per la temperatura.
+- Informazioni ufficiali su quando Linate e Malpensa hanno cambiato strumenti di visibilità/tempo presente (non nei dati NOAA).
+- Anni mancanti 1939-1950, 1962-1963, 1972; l'inverno 2026 (nov 2025 - mar 2026) non esiste ancora nei dati (ultimo giorno 24/08/2025).
+- Non è stata fatta nessuna analisi di tendenza e nessun grafico (fase 2).
 
 
 ## 14. I cinema spariti di Milano
@@ -1470,12 +1703,123 @@ _Fonti, date di scarico, licenze, scelte, problemi. Cartella `cinema-spariti/`._
 
 - 2026-10-30 — Filone chiesto da Davide (nella sua richiesta numerato 12; rinumerato perché 10-12 erano già occupati). Domanda: quante sale c'erano e dove, decennio per decennio; quando e dove sono sparite e cosa c'è al loro posto. Fonti: OSM (anche disused/was:amenity=cinema), Wikipedia, Wikidata, Comune; elenchi storici solo dopo averne verificato l'affidabilità. Nomi delle cartelle scelti da Davide ("cinema" diventa `cinema-spariti`). Fase 1: solo raccolta, poi un riassunto e la cosa più sorprendente prima di grafici e pagine.
 
+### Fase 1 — raccolta (2026-10-30)
+
+**NOTE - cinema scomparsi di Milano (fase 1)**
+Data: 30/10/2026. Cartella: milano-in-dati\cinema-spariti. Nessun grafico, nessuna pagina.
+
+#### Risultato in due righe
+Abbiamo un elenco di 170 cinema milanesi chiusi (anni di apertura e chiusura, indirizzo) più 29 cinema aperti oggi (OpenStreetMap). Mancano i cinema che erano attivi nel passato e sono ancora aperti, le sale parrocchiali e il numero di sale dei cinema chiusi.
+
+#### Fonti
+1. **Elenco spazioCinema (Anteo)**. Pagina: https://www.spaziocinema.info/cinema/notizie/scegli-il-nome-delle-nuove-sale-di-anteo-tra-le-insegne-di-storici-cinema-milanesi ; PDF alla stessa pagina, link "at_download/programma". Scaricato 30/10/2026. File: raw\storiche\spaziocinema\programma.pdf (251 KB), tabella_grezza.csv (170 righe: campi sala, periodo, indirizzo). Periodo coperto: 1896-2017. Licenza: copyright Anteo, nessuna licenza aperta: il PDF non va ripubblicato. Trappola: il testo estratto "a righe" mescola le colonne, si legge bene solo con l'estrazione per tabella (script 05).
+2. **OpenStreetMap (Overpass)**, estrazione del 29/10/2026 23:28 UTC, area del comune di Milano. File: raw\osm\cinema_attuali_e_storici.json (15 KB, 37 elementi), raw\osm\teatri.json (26 KB), raw\osm\oggi_vicino.json e oggi_vicino_grezzo.json (negozi e locali entro 30 m dai cinema chiusi). Campi: amenity, disused:amenity, screen (numero schermi), start_date. Trappola: solo 2 cinema "disused" e nessun "was:": OSM non ha la storia. Licenza ODbL (ripubblicabile citando OSM). Il file del settore 7 (bici-auto-mezzi) ha solo strade, quindi non usato.
+3. **Wikidata (SPARQL)**, 30/10/2026. File: raw\wikidata\a_cinema_inMilano_P131.json (76 KB, 59 cinema), b_cinema_box.json (stessi 59), c_teatri_box.json (136 KB, 90 teatri). Campi: inception P571, dissolved P576, coordinate P625, indirizzo P6375. Trappola: l'anno di chiusura c'è per 1 cinema, l'apertura per 6. Licenza CC0.
+4. **Wikipedia italiana (API)**, 30/10/2026. File: raw\wikipedia\categorie.json, wikitext.json (413 KB, 37 voci della categoria "Teatri di Milano"). Trappola: le categorie sui cinema di Milano non esistono. Licenza CC BY-SA.
+5. **Comune di Milano, dati aperti (CKAN)**, 30/10/2026. File in raw\comune: ds157 (ingressi e spettacoli per tipo, 1995-2010, CSV 2 KB), ds252 (295 locali di pubblico spettacolo, CSV 62 KB, nessun cinema), ds59 (pubblici esercizi fuori piano, CSV 845 KB, non rilevante), _metadati.json. Licenza CC-BY. Trappola in ds157: anni 2004-2005 con campi vuoti.
+6. **Nominatim (OSM)** per le coordinate: raw\storiche\geocode_nominatim.json (163 indirizzi, 12 senza risultato).
+7. **Archive.org**: le guide "Milano Scelta" 1905 e 1907 (raw\storiche\archive_org, circa 2 MB l'una) quasi non parlano di cinema. Google Books: quota esaurita.
+
+#### File puliti (cartella pulito)
+- `cinema.csv` (203 righe): 170 dall'elenco, 29 cinema aperti solo da OSM, 4 solo da Wikidata. Campi: id, nome, altri_nomi, indirizzo, lat, lon, precisione_posizione, fonte_posizione, anno_apertura, anno_chiusura, apertura_incerta e chiusura_incerta (1 = data "circa"), periodi_attivita, periodo_testo_originale, n_sale (solo 15 cinema aperti con tag screen), stato_2026, wikidata, osm_id, cosa_c_ora, fonti.
+- `elenco_spaziocinema_parsed.csv`, `conteggi_decenni_preliminari.csv`, `wikipedia_frasi_cinema.csv` (30 frasi), `fonti_valutate.md`.
+- Posizione dei 170 cinema dell'elenco: 42 con coordinate Wikidata, 70 Nominatim con civico (da controllare), 46 solo via, 12 senza.
+- `cosa_c_ora`: 93 candidati OSM (negozi o locali entro 30 m), da confermare a mano; mancano per gli altri.
+
+#### Conteggi preliminari (cinema dell'elenco attivi a gennaio dell'anno; file conteggi_decenni_preliminari.csv)
+1910: 23; 1920: 52; 1930: 82; 1940: 82; 1950: 98; 1960: 118; 1970: 110; 1980: 101; 1990: 50; 2000: 35; 2010: 4. Sono solo sale poi chiuse: vanno aggiunte quelle ancora aperte. Oggi (OSM 2026): 29 cinema.
+Chiusure per decennio (fine dell'ultimo periodo): 1930: 20; 1940: 7; 1950: 3; 1960: 11; 1970: 21; 1980: 50; 1990: 17; 2000: 31; 2010: 4.
+
+#### Cosa manca
+- Cinema attivi nel passato e ancora aperti nel 2017; sale parrocchiali, arene, cinema a luci rosse non elencati; numero di sale storico.
+- "Cosa c'è ora" confermato; coordinate esatte per 58 cinema.
+- Verifica indipendente delle date (Wikidata deriva forse dalla stessa lista). Possibili aggiunte: CineMi (Roaro, fino al 1955), dati Anec, Google Books.
+
 
 ## 15. Il derby Inter-Milan dal 1909
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `derby/`._
 
 - 2026-10-30 — Filone chiesto da Davide (nella sua richiesta numerato 13; rinumerato perché 10-12 erano già occupati). Domanda: tutti i derby ufficiali con risultati, marcatori e competizione; epoche, serie più lunghe, effetto "casa" nello stesso stadio dal 1947. Almeno due fonti incrociate; amichevoli e campionati di guerra tenuti a parte. Nomi delle cartelle scelti da Davide ("cinema" diventa `cinema-spariti`). Fase 1: solo raccolta, poi un riassunto e la cosa più sorprendente prima di grafici e pagine.
+
+### Fase 1 — raccolta (2026-10-30)
+
+**NOTE - derby di Milano dal 1909 (filone 15, fase 1: solo raccolta e controllo)**
+
+Cartella: `milano-in-dati\derby\`. Data del lavoro: 30 ottobre 2026. Nessun grafico, nessuna pagina, niente git.
+
+#### Che cosa c'e' di pronto
+
+| File | Che cosa contiene |
+|---|---|
+| `pulito\derby.csv` | una riga per partita giocata: 246 derby (244 ufficiali + 2 del campionato di guerra 1944). Colonne: id, data, stagione, competizione, turno, stato (ufficiale / `wartime_honorary`), squadra di casa e ospite (e il nome di allora: Ambrosiana, Ambrosiana-Inter, Milano), gol, vincitore, stadio, stadio neutro, arbitro, note sul risultato, quante fonti hanno controllato e quante concordano, `home_label_disputed` |
+| `pulito\marcatori.csv` | una riga per gol: 663 righe (partita, squadra a cui va il gol, giocatore, minuto, autogol, rigore, club del giocatore) |
+| `pulito\differenze.md` | tutte le differenze trovate tra le fonti (data, punteggio, casa, stadio, arbitro, marcatori) |
+| `pulito\differenze_marcatori.csv` | stesso elenco dei marcatori, in forma di tabella |
+| `pulito\non_ufficiali_riepilogo.csv` | le 72 partite non ufficiali: SOLO i totali per torneo (le singole partite non le ho trovate in fonti libere) |
+| `pulito\_*.csv` | file intermedi (uno per fonte), si rigenerano con gli script |
+| `scripts\01..12` | gli script (si rilanciano con `python -I`; ordine: 01, 02, 03, 04, 05, 06, 07, 08, 09, 11, 12, poi 10) |
+| `raw\` | i file scaricati, intatti |
+
+Totali (identici alla tabella riassuntiva di it.wikipedia): 246 derby ufficiali in senso largo = 91 vittorie Inter, 71 pareggi, 84 vittorie Milan; gol Inter 341, gol Milan 324.
+Per competizione (derby / Inter-pari-Milan): Prima Categoria 14 (5-2-7); Divisione Nazionale 1926-28 e 1945-46 8 (3-1-4); Serie A 184 (70-57-57); Coppa Italia 29 (9-9-11); Supercoppa 3 (1-0-2); Champions League 6 (2-2-2); Campionato Alta Italia 1944 2 (1-0-1, stato `wartime_honorary`, riconosciuto solo a titolo onorifico).
+Non incluse: la partita del 31 ottobre 2026 (domani, Serie A 2026-27) e quella di febbraio 2027, che it.wikipedia gia' elenca come "da giocare".
+
+#### Le fonti (URL, data di scarico, file, periodo, licenza)
+
+Scarico: 30 ottobre 2026. User-Agent con contatto, pause di 1-3 secondi, nessun login, nessuna registrazione.
+
+1. **it.wikipedia, "Derby di Milano"** - API MediaWiki, revisione 153044197 del 24/10/2026. File `raw\wikipedia\it_Derby_di_Milano.json` e `.wiki` (203 KB). Lista completa dal 1909: data, stadio, competizione, squadra di casa, punteggio, marcatori (con minuto, rigori, autogol), arbitro, link al referto. Ho tolto le 2 partite future. **E' la spina dorsale** di `derby.csv`. Licenza CC BY-SA 4.0: si prendono solo i fatti (date, punteggi, nomi), non il testo; citare "Wikipedia, CC BY-SA".
+2. **en.wikipedia, "Derby della Madonnina"** - revisione 1382484836 del 28/10/2026 (`raw\wikipedia\en_Derby_della_Madonnina.*`, 99 KB). Data, competizione con turno, casa, punteggio; note a pie' di pagina (partita sospesa 2005, supplementari 2017). Stessa licenza. E' un'altra pagina ma scritta dalla stessa comunita': non e' un controllo del tutto indipendente.
+3. **35 pagine di edizione di it.wikipedia** (campionati 1909-1928, 1944, 1945-46; Coppa Italia; Supercoppa; Champions) in `raw\wikipedia\seasons\`. Dove c'e' il riquadro "Incontro di club" danno turno, stadio, arbitro, marcatori: 23 partite controllate (Coppa Italia 1958-2000 e Supercoppa).
+4. **engsoccerdata** (James Curley) - `https://raw.githubusercontent.com/jalapic/engsoccerdata/master/data-raw/italy.csv`, 1,9 MB, 28.824 partite di Serie A 1929-30 / 2024-25 (186 derby). Licenza del pacchetto: GPL (>= 2) (file `raw\engsoccerdata\DESCRIPTION`). Uso solo come controllo; non ripubblicare il file grezzo. Tratta la Divisione Nazionale 1945-46 come Serie A; non ha le stagioni di guerra.
+5. **football-data.co.uk** - 31 CSV 1993-94 / 2023-24 dalla copia `footballcsv/cache.footballdata` (CC0 per la copia) + 3 CSV 2024-26 direttamente dal sito (`raw\footballdata\`, 0,9 MB). **Attenzione ai termini del sito**: dati gratuiti ma "solo per privati, non per prodotti commerciali o di addestramento con bot/scraper/IA". Qui servono solo a controllare data e punteggio di 66 partite; non vanno ripubblicati e non fanno parte dei file finali.
+6. **openfootball/italy** (CC0, pubblico dominio) - `https://github.com/openfootball/italy`, stagioni 2013-14 / 2026-27 (anche Serie B e C, scaricate per errore, inutili). 31 derby controllati (campionato 2013-26 + Coppa Italia 2020-25). Il file `2025-26_1-seriea-full.txt` ha marcatori con minuto e spettatori dei 2 derby 2025-26.
+7. **RSSSF** (Rec.Sport.Soccer Statistics Foundation) - `https://www.rsssf.org/tablesi/ital{AA}.html`, 107 pagine di stagione dal 1925-26 + pagine Coppa dei Campioni (`raw\rsssf\`, 6 MB). robots.txt assente (404). Licenza: "libera copia citando RSSSF". Elenchi partita per partita con data della giornata e marcatori. Il mio programma non legge le pagine 2012, 2026, 81 e 83 (nel 1980-81 e 1982-83 il Milan era in B: niente derby). Pagine Champions League: confermano i 3 incroci.
+8. **Almanacco nerazzurro di interfc.it**, copia di web.archive.org del febbraio 2017 (link nella colonna "Referto" di it.wikipedia): data, risultato, marcatori con minuto, arbitro delle partite ufficiali dell'Inter fino al 2000. Contenuto dell'Inter: serve solo come controllo dei fatti, non si ripubblica. Scaricate 149 pagine (circa 17 KB l'una) in `raw\interfc_archive\`, con pause di 3 secondi.
+9. **Wikidata** (SPARQL, `raw\wikidata\`): provato, **non utilizzabile**. Le partite non sono modellate: ci sono solo le stagioni dei campionati, 3 finali di Coppa Italia/Supercoppa e un elemento "derby". Nessun dato partita per partita.
+10. **footballcsv/italy**: nel repository ci sono solo la specifica del formato e la licenza (CC0), nessun dato.
+
+#### Come concordano le fonti
+
+Confronto partita per partita con la lista di it.wikipedia (dettaglio in `pulito\differenze.md`). Prima ho **corretto 4 voci di it.wikipedia** dove 3 fonti indipendenti da Wikipedia (engsoccerdata, RSSSF, Almanacco Inter) dicono la stessa cosa contro it.wikipedia ed en.wikipedia:
+- 1931-03-19 -> 1931-03-15 (il 19 marzo 1931 era un giovedi', festa di San Giuseppe); 1948-10-16 -> 1948-10-17;
+- 1955-10-16 e 1956-03-11: la squadra "di casa" era invertita in tutte e due (e i link "Referto" sono scambiati). Giusto: 16/10/1955 Milan-Inter 1-2; 11/3/1956 Inter-Milan 2-1.
+Dopo le correzioni:
+- **Almanacco Inter (archive.org)**: 149 partite (tutte le ufficiali dal 1909 al 27/1/2000 con link), 149 concordano su data, casa e punteggio. Differenze: 1 arbitro (1993-02-10), 3 minuti di gol.
+- **engsoccerdata** (186): 177 identiche; 9 diverse: 4 con casa/ospite invertiti (1960-11-20, 1961-03-26, 1964-11-15, 1965-03-28) e 5 date (1948-04-15, 1963-11-03 invece del 1964-01-19, 1974-11-04, 1995-04-14, 2001-05-13).
+- **RSSSF** (196 lette dal programma): 188 identiche; 8 diverse: 2 con casa invertita (1964-11-15, 1965-03-28) e 6 date (di giornata, vedi trappole).
+- **football-data** (66): 65 identiche; 1 data (1995-04-14 invece del 15).
+- **openfootball** (31): tutte identiche.
+- **en.wikipedia** (246): 238 identiche; 8 diverse: le 2 partite 1955-56 (stesso errore di it.wikipedia) e 6 date diverse (1931-03-19, 1948-10-16, 1958-06-16, 1972-06-08, 1975-05-16, 1999-10-24).
+- **Pagine edizione it.wikipedia** (23 Coppa Italia/Supercoppa): 22 identiche; 1 data (1972-06-08). Stadio: 1909-01-10 (Arena Civica contro Porta Monforte); arbitri scritti in modo diverso.
+- **RSSSF Champions League**: i 6 punteggi confermati.
+- Il punteggio e' concorde tra tutte le fonti su 240 partite su 246. Le 6 eccezioni sono solo di **etichetta casa/ospite** (il vincitore non cambia mai): le 2 del 1955-56 (en.wikipedia ripete l'errore di it.wikipedia, corretto sopra) e le 4 del 1960-61 e 1964-65: per il 1960-61 RSSSF e Almanacco stanno con it.wikipedia contro engsoccerdata; per il 1964-65 it.wikipedia, en.wikipedia e Almanacco Inter contro engsoccerdata e RSSSF (ho lasciato la versione di it.wikipedia). Colonna `home_label_disputed` = 1 se almeno una fonte discorda.
+- **Marcatori**: i gol di it.wikipedia tornano col punteggio in tutte le partite (tranne la assegnata del 2005). Confronto con RSSSF, Almanacco e pagine edizione: 23 segnalazioni, quasi tutte differenze di 1 minuto; casi piu' grossi: 1946-05-30 (ultimo gol al 75' in Wikipedia, al 47' in RSSSF e Almanacco), 1956-10-21 (12' e 16' contro 17' e 17'), 1983-11-06, 1999-10-23. Non corretti, solo segnalati.
+
+#### Trappole dei dati (da non dimenticare)
+
+1. **"Casa" nel derby e' un'etichetta**: dal 1947 le due squadre dividono San Siro, e anche prima il calendario assegnava la "casa" a una delle due ma non sempre si giocava nel suo stadio (anni 1930-40: partite col Milan "di casa" all'Arena Civica). Per studiare l'effetto campo servono la colonna `venue` e le 6 partite con etichetta contestata (4 dopo le correzioni: 1960-11-20, 1961-03-26, 1964-11-15, 1965-03-28; piu' le 2 del 1955-56 gia' corrette).
+2. **Stadi**: Campo Milan di Porta Monforte (6), Arena Civica (23), Campo di via Goldoni (5, campo dell'Ambrosiana), San Siro (208), 3 stadi esteri per le Supercoppe (`neutral_venue` = 1: Pechino 2011, Riad 2023 e 2025). La partita del 1909-01-10: it.wikipedia dice Porta Monforte, la pagina del campionato 1909 dice Arena Civica (differenza registrata). Una partita (1921-01-30) non ha lo stadio.
+3. **Nomi**: Inter si chiama Ambrosiana (4 partite, 1929-31) e Ambrosiana-Inter (26 partite, 1931-44); il Milan si chiama Milano (10 partite, 1939-44). Colonne `home_club_name`, `away_club_name`.
+4. **Partita assegnata a tavolino**: Inter-Milan 12/4/2005, Champions (quarti, ritorno). Sospesa al 73' sullo 0-1 per i fumogeni; UEFA ha dato 0-3. In `derby.csv` il risultato e' 0-3 (come nelle statistiche ufficiali, che sommano 246 partite e 341-324 gol), nei marcatori c'e' solo il gol vero (Sevcenko 30'). Per questo i gol in `marcatori.csv` sono 663 e non 665.
+5. **Campionato Alta Italia 1944** (guerra, gironi regionali): riconosciuto solo a titolo onorifico. L'ho tenuto a parte: `status = wartime_honorary`, `official = 0`. Con lui il totale e' 246 come Wikipedia; senza, 244. RSSSF lo mostra come un solo incrocio con andata e ritorno e concorda.
+6. **Interruzione 1915-1920**: nessun derby tra il 2/5/1915 (Prima Categoria) e il 19/12/1920. Poi nessuno fino al 3/4/1927; nel 1928-29 non si sono incontrati (nelle fonti non c'e' nessun derby).
+7. **Stagioni**: "Coppa Italia 1958" e' l'edizione 1957-58 giocata a giugno-luglio 1958 (idem altre edizioni "estive" 1968, 1972, 1975, 1977, 1985). Nel campo `season` ho usato l'edizione. Il campionato 1909 e' una stagione solo (gennaio-aprile 1909).
+8. **Tornei interrotti da piu' fasi** (Coppa Italia a gironi 1958, 1968, 1981...) hanno il turno in `round` (da en.wikipedia) e in `round_it_box` (dalle pagine edizione). Per il campionato di Serie A non ho il numero di giornata.
+9. **Punteggi dopo supplementari/rigori**: solo il derby di Coppa Italia 27/12/2017 e' finito dopo i supplementari (1-0, gol di Cutrone al 104'); nei dati non risulta nessun derby deciso ai rigori.
+10. **Marcatori**: i gol sono assegnati alla squadra che li ha segnati sul tabellino (autogol compresi: `team_credited`); `scorer_club` dice di che squadra era il giocatore. 14 gol del 1911-1914 non hanno minuto. `penalty = some` quando in una riga con piu' gol c'e' un solo rigore e non si sa quale. Gli accenti dei nomi (Sevcenko/Ševčenko) cambiano tra fonti.
+11. **Date RSSSF**: RSSSF usa la data della giornata; partite spostate hanno data diversa. Le differenze di data della sola RSSSF non vanno considerate errori.
+12. **engsoccerdata e 1945-46**: contiene i 4 derby della Divisione Nazionale 1945-46 come "Serie A" (livello 1); in `derby.csv` restano "Divisione Nazionale" come in it.wikipedia. Non ha le stagioni di guerra.
+13. **football-data.co.uk**: termini d'uso restrittivi (solo privati). Tenerlo come controllo, non come fonte del sito.
+
+#### Cosa manca
+
+- Le **72 partite non ufficiali** (amichevoli, tornei minori, coppe di guerra, Mundialito, ecc.): ho solo i totali per torneo (`non_ufficiali_riepilogo.csv`), non le singole partite. Non esiste una lista libera e completa; servirebbe il PDF dell'almanacco di magliarossonera.it (fonte citata da Wikipedia) o altre ricerche.
+- Il **numero di giornata** per le partite di campionato e il **turno** per la Coppa Italia delle prime edizioni.
+- Punteggio/data senza nessun controllo indipendente da Wikipedia: le 3 Supercoppe (2011, 2022, gennaio 2025: solo it.wikipedia, en.wikipedia e la pagina dell'edizione). Tutto il resto ha almeno un'altra fonte non Wikipedia (Almanacco Inter fino al 27/1/2000, poi football-data, engsoccerdata, openfootball, RSSSF).
+- Marcatori dal 2000 al 2025: oltre a it.wikipedia c'e' solo RSSSF (non in tutte le stagioni: mancano i minuti per molte partite 2012-2025) e le pagine edizione per alcune coppe. Sono quindi i meno controllati.
+- I gol delle partite 2025-26 hanno come controllo il file `full` di openfootball (minuti concordano).
 
 
 ## 16. Da chi prendono il nome le fermate
@@ -1556,6 +1900,129 @@ _Fonti, date di scarico, licenze, scelte, problemi. Cartella `bilancio-comune/` 
   - Nessun giudizio sulla spesa.
   - Anni più vecchi (OpenBilanci, BDAP): prima dire a Davide se vale la pena.
 
+### Fase 1 — raccolta (2026-10-30)
+
+**Filone 17 - Dove vanno i soldi del Comune (FASE 1: raccolta e controlli)**
+
+Scaricato il 29-30 ottobre 2026. Niente grafici, niente pagine, nessun giudizio sulla spesa. Tutti gli script sono in `scripts/` (si lanciano da questa cartella con `python -I scripts/<nome>.py`). Dati grezzi in `raw/`, tabelle pulite in `pulito/`.
+
+#### 1. Cosa c'e' (in breve)
+
+- **Bilancio del Comune di Milano, anni di rendiconto 2015-2025** (11 anni) a livello di singolo capitolo, con missione e programma per le uscite. Dieci "edizioni" (dataset), una per anno, ognuna con 2 anni di rendiconto + 3 anni di previsione.
+- **Anni 2012, 2013**: solo spesa corrente (2012 a programma, 2013 piu' dettagliato) e, per il 2013, entrate correnti. **2014: manca il consuntivo** (c'e' solo una previsione di febbraio 2014).
+- **Prima del 2012**: non sul portale del Comune. Esiste per via diversa (vedi punto 5): Ministero dell'Interno dal 1998.
+- **Licenza**: tutti i dataset del Comune sono CC-BY 4.0 ("Creative Commons Attribution" nel catalogo). Si possono ripubblicare citando la fonte (Comune di Milano, dati.comune.milano.it). Quindi anche i file grezzi si possono ripubblicare.
+
+#### 2. Fonti e file (ogni dato dice il suo file)
+
+Tutte le fonti del Comune sono su `https://dati.comune.milano.it/api/3/action/package_search?q=...` (CKAN). Ricerca fatta con 21 parole chiave (bilancio, rendiconto, spesa, entrate, PEG, missioni, tributi, sanzioni...), 687 dataset trovati in tutto; elenco in `raw/search_all.json`. Tutto in `pulito/inventario.csv` (39 righe).
+
+| id | cosa | anni | dettaglio | file in raw/ |
+|---|---|---|---|---|
+| ds397 | Bilancio comunale, rendiconto 2015-16 e previsioni 2017-19 | rend. 2015, 2016 | capitolo PEG | ckan_ds397 |
+| ds396 | idem, rendiconto 2016-17, previsioni 2018-20 | rend. 2016, 2017 | capitolo | ckan_ds396 |
+| ds399 | idem, 2017-18, previsioni 2019-21 | rend. 2017, 2018 | capitolo | ckan_ds399 |
+| ds400 | idem, 2018-19, previsioni 2020-22 | rend. 2018, 2019 | capitolo | ckan_ds400 |
+| ds401 | idem, 2019-20, previsioni 2021-23 | rend. 2019, 2020 | capitolo | ckan_ds401 |
+| ds1936 | idem, 2020-21, previsioni 2022-24 | rend. 2020, 2021 | capitolo | ckan_ds1936 |
+| ds2352 | idem, 2021-22, previsioni 2023-25 | rend. 2021, 2022 | capitolo | ckan_ds2352 |
+| ds2738 | idem, 2022-23, previsioni 2024-26 | rend. 2022, 2023 | capitolo | ckan_ds2738 |
+| ds2956 | idem, 2023-24, previsioni 2025-27 | rend. 2023, 2024 | capitolo | ckan_ds2956 |
+| ds3013 | idem, 2024-25, previsioni 2026-28 (aggiornato 21/8/2026) | rend. 2024, 2025 | capitolo | ckan_ds3013 |
+| ds227 | Bilancio trasparente: spesa corrente per missioni e programmi | consuntivo 2012; assestato 2013; previsione 2014 | missione/programma (solo nomi) | ckan_ds227 |
+| ds284 | PEG spese correnti, consuntivo 2013 | 2013 | titolo/macroaggregato/missione/programma/centro di costo | ckan_ds284 |
+| ds285 | PEG entrate correnti, consuntivo 2013 | 2013 | titolo/tipologia/voce | ckan_ds285 |
+
+Ogni dataset ha CSV + JSON (i piu' recenti anche ODS). Scaricati tutti: 102 MB circa per questi 13. I JSON e gli ODS sono copie degli stessi dati, non servono.
+
+**Altri file scaricati (utili ma secondari):**
+- SIOPE spese del Comune: 2017 e 2018 (annuale), poi 62 file mensili da settembre 2019 a luglio 2025 (`raw/ckan_siope_spese/`, `raw/ckan_ds738`, `ckan_ds739`). Sono PAGAMENTI (cassa) per codice SIOPE (natura economica), NON per missione. Servono solo come controllo. **Mesi che nel catalogo non esistono**: nov 2019, feb-mar-apr 2020, set-ott 2020, giu 2023, ago 2023, dic 2023; niente dopo luglio 2025 (cercati uno per uno, non trovati). Le colonne cambiano da un file all'altro (`importo_2017`, `imp_uscite_att`...).
+- ds478 (pernottamenti con imposta di soggiorno, non euro), ds312 (addizionale IRPEF dovuta per anno d'imposta), ds697 (incassi PagoPA), ds633 (bilancio partecipativo: NON e' il bilancio del Comune, da ignorare).
+- Popolazione: `raw/ckan_pop/` (ds71, ds73).
+- Indici prezzi NIC di Milano per gruppi di spesa: `raw/ckan_nic/` (ds240, ds241, ds1431, ds2977). **Non hanno la riga "indice generale"**: per deflazionare conviene l'indice nazionale FOI gia' scaricato dal filone 12 (vedi punto 6).
+
+#### 3. Come e' fatto il dato del Comune (colonne, unita')
+
+Colonne comuni alle dieci edizioni: Tipo (ENTRATE/USCITE); PDC-Missione, PDC-Programma (solo uscite); PDC-Livello1..4 (per le uscite: titolo, macroaggregato...; per le entrate: titolo, tipologia, categoria, IV livello) con descrizioni; Centro di costo; Capitolo (+ Articolo, Numero fino a ds2956); Centro di responsabilita'; **due colonne Rendiconto, tre Stanziamento, una Stanziamento di cassa**; Direzione. Importi in euro (non migliaia). Ogni riga e' un capitolo di bilancio: ~5.200-6.700 righe per edizione (ds1936: 6.699; ds3013: 5.183).
+
+**Prevision vs consuntivo - come l'ho separato.** Nelle tabelle pulite c'e' sempre la colonna `fase`:
+- `consuntivo` = colonne "Rendiconto" (misura `rendiconto`; per le entrate sono accertamenti, per le uscite impegni - il dataset non lo dice, lo deduco dal fatto che nelle entrate il totale supera le uscite di 0,5-0,9 miliardi e dal confronto col Ministero, vedi sotto);
+- `previsione` = colonne "Stanziamento" (misura `stanziamento_competenza`) e "Stanziamento di cassa" (misura `stanziamento_cassa`, solo primo anno);
+- colonna `anni_dopo_ultimo_rendiconto` (1, 2, 3) dice quanto lontano e' lo stanziamento.
+- colonna `da_usare` = 1 sulle righe consigliate per non contare due volte la stessa cosa (rendiconto: edizione piu' recente che contiene quell'anno; previsione: solo il primo anno di stanziamento).
+
+#### 4. Tabelle pulite (cartella `pulito/`)
+
+- `spesa_missioni.csv` (8.826 righe): anno, fase, misura, titolo di spesa (1 correnti, 2 conto capitale, 3 attivita' finanziarie, 4 rimborso prestiti, 5 anticipazioni, 7 conto terzi), missione, programma, importo in euro. Contiene anche ds227 (2012-2014) e ds284 (2013) con i codici ricostruiti dai nomi. Separatore `;`, punto decimale. **Per "quanto spende il Comune" filtrare titolo = 1 (spese correnti) e/o escludere titolo 7 (partite di giro).**
+- `entrate.csv` (5.690 righe): anno, fase, titolo/tipologia/categoria/IV livello con descrizioni, importo. Per il 2013 (ds285) i livelli numerici sono -1 e ci sono solo i nomi.
+- `bilancio_capitoli.csv` (245 mila righe, 33 MB): tutti i capitoli con importo diverso da zero, entrate e uscite, tutte le edizioni - serve per cercare voci precise (Area C, multe, ...). Descrizione capitolo come nel dato.
+- `inventario.csv`: tutte le risorse, con anni, fase, dettaglio, unita', codifica, formato numeri, licenza, URL.
+- `controllo_coerenza.csv`: i controlli del punto 7.
+- `corrispondenza_funzioni_missioni.csv`: vecchia classificazione (DPR 194/1996) -> nuova (D.Lgs. 118/2011), a mano, con "1:1 / 1:n / n:1 / nessuna".
+- `popolazione_milano.csv`: abitanti per anno (due definizioni, vedi sotto).
+- `indice_prezzi_annuo_FOI_da_strand12.csv`: copia (non modificata) dal filone 12.
+
+**Entrate che interessano alla domanda (livello capitolo, in `bilancio_capitoli.csv`, rendiconto in milioni di euro):**
+- Area C (capitolo "PROVENTI DA ZTL AREA C"): 2016 64,6; 2019 65,7; 2023 57,6; 2025 33,7. Dal 2023 compare anche "PROVENTI DA ZTL - NUOVA TARIFFAZIONE ACCESSO AL CENTRO STORICO" (1,7; 1,0).
+- Sanzioni codice della strada: 2016 556,6; 2019 487,9; 2023 488,1 (+33,4 "esercizi precedenti"); 2025 260,8 (+33,6). Nel 2013 (ds285) "AMMENDE PER CONTRAVV." 410,5. Il nome del capitolo cambia quasi ogni anno: **per le serie storiche serve un elenco di capitoli equivalenti, da fare in fase 2**.
+- "Recupero spese postali notifica verbali" 2016 60,3; 2023 92,7; 2025 39,5 (e' un'entrata per rimborso spese, non una multa).
+- Imposta di soggiorno: 2016 82,8; 2019 118,2; 2023 125,3 + 2,7; 2025 114,0 + 0,1.
+- Tributi, trasferimenti, extratributarie: livello titolo/tipologia in `entrate.csv`.
+
+#### 5. Anni piu' vecchi: verdetto
+
+**Conviene? Si', ma con il Ministero dell'Interno, non con OpenBilanci.** Da decidere con Davide.
+
+1. **Ministero dell'Interno - Finanza locale - "Certificati Consuntivi"** (`finanzalocale.interno.gov.it/apps/floc.php/certificati/index/codice_ente/1030491450/cod/4/anno/ANNO/md/0/cod_modello/CCOU/tipo_modello/U/cod_quadro/QUADRO`, codice ente di Milano = 1030491450). Accesso libero senza login, ma e' **una pagina HTML per anno e per quadro**, nessun file da scaricare in blocco. Provato: Milano ha dati dal **1998** (1996 = "dati assenti"; 1997 non provato) al 2015 almeno. Quadro 3 = riepilogo spese per titolo (impegni, pagamenti); Quadro 4 = spese correnti per **funzione e servizio** x **intervento** (personale, beni, servizi, trasferimenti, interessi...); Quadro 5 = investimenti. Scaricate 8 pagine di prova in `raw/ministero_interno_campione/`.
+   - Controllo: Titolo I 2013 = 2.615.331.335,35 euro = esattamente la somma di ds284. Titolo I 2015 = 2.793.159.486,27 = ds397 (2.793,2 M). Quindi i due mondi si agganciano.
+   - 2014 (anno mancante nel Comune): Titolo I impegni 2.626,9 M; 2012: 2.505,3 M (ds227 dice 2.443,7 M: 61,6 M di differenza, da capire).
+   - Licenza: la pagina non dice nulla. E' dato pubblico del Ministero, ma **da chiedere/verificare prima di ripubblicare i file grezzi**; i numeri si possono citare con la fonte.
+   - Costo per fare tutta la serie: circa 18 anni x 3-4 quadri = ~70 pagine; con pause educate e' una mezz'ora.
+2. **BDAP Open Data** (`bdap-opendata.rgs.mef.gov.it`, CKAN anche questo, licenza CC-BY). Ha dataset "20NN - Regione - Gestione finanziaria Entrate/Spese Enti Locali" per **2013, 2014, 2015 soltanto** (vecchia classificazione), un file per regione e anno: la Lombardia entrate pesa 46 MB per anno (Milano = 96 righe). **Le SPESE della Lombardia non ci sono** (19 regioni su 20), le entrate si'. Quindi: per le entrate 2013-2015 va bene (con risorsa per risorsa: ad es. 2013 Codice della strada 408,2 M, TPL 376,4 M, addizionale IRPEF 177,4 M, tutto coerente con ds285), per le spese no. Dal 2016 in poi i rendiconti armonizzati non sono su questo CKAN (c'e' un altro portale `openbdap.rgs.mef.gov.it`, a interfaccia web, non verificato). Scaricato: solo l'estratto di Milano 2013 (`raw/bdap_campione/entrate_2013_MILANO_estratto.csv`). Il file della Lombardia intero l'ho tenuto solo in streaming e cancellato.
+3. **OpenBilanci** (Openpolis): non ha API pubblica (`/api/` = 404); riporta gli stessi certificati del Ministero (dichiarato nella pagina licenze); serie vecchia fino al 2015, nuova classificazione dal 2016; copertura dichiarata 2005-2022 (preventivi), consuntivi fino al 2021. **Licenza CC BY-NC-SA 4.0**: non commerciale e "condividi allo stesso modo" - scomoda per un sito. Verdetto: non serve, il Ministero e' la fonte originale e dal Ministero si ha di piu'.
+
+#### 6. Denominatori
+
+- **Abitanti**: Comune di Milano ds71/ds73 = "popolazione calcolata ISTAT" a fine anno, 1880-2024 (**manca il 2025**). `pulito/popolazione_milano.csv` mette accanto la somma dei quartieri dell'anagrafe (ds205, del filone 15 minuti, letta senza modificarla). **Trappola: le due serie non coincidono** (2012: 1.263.087 calcolata vs 1.366.409 anagrafe, differenza 103 mila perche' la serie "calcolata" ha la rottura del censimento 2011; 2024: 1.365.698 vs 1.407.044). BDAP riporta per il 2013 "Popolazione ISTAT" = 1.345.851, che nel file del Comune e' il valore del 2015: serie ancora diversa. Per il "pro capite" bisogna scegliere una definizione e dirlo. Per il 2025 si puo' prendere ISTAT (demo.istat.it) quando serve.
+- **Prezzi**: `indice_prezzi_annuo_FOI_da_strand12.csv` = FOI (famiglie operai e impiegati) senza tabacchi, Italia, medie annue 1996-2025 raccordate tra le basi, 2025 = 100 (es. 2015 = 82,372; 2025 = 100). Fatto dal filone 12, non rifatto. E' nazionale, non di Milano.
+
+#### 7. Controlli di coerenza (dettaglio in `pulito/controllo_coerenza.csv`)
+
+1. **Stesso anno di rendiconto in due edizioni**: per 2016-2023 i valori sono identici capitolo per capitolo (differenza 0,00 euro, totali di entrate e uscite uguali). Per il **2024** i totali sono uguali (uscite 4.401,6 M; entrate 4.960,7 M) ma l'edizione 2024-2028 ha rinumerato tutti i capitoli (3.059 su 5.263 diversi) e ha spostato **90,4 M da 12/1 (Infanzia, minori, nidi) al nuovo programma 12/11 (Asili nido)**. Quindi 12/1 + 12/11 vanno sommati per avere continuita'.
+2. **Pareggio delle previsioni**: in ogni edizione e anno, stanziamento entrate = stanziamento uscite (differenza 0,0 M). Quindi i totali previsti (6-11 miliardi) comprendono tutto, anche prestiti, fondi, partite di giro, anticipazioni.
+3. **Previsione contro consuntivo (solo titolo 1, spese correnti)**: la previsione del primo anno e' sempre sopra il consuntivo: es. 2017 previsione 3.161 vs consuntivo 2.679; 2025 3.711 vs 3.209 (milioni). Dentro la previsione ci sono accantonamenti (fondo crediti di dubbia esigibilita' ecc.) e capitoli non impegnati. **Non vanno confrontati come se fossero la stessa cosa.**
+4. **Stesso anno di previsione in edizioni diverse**: cambia molto (es. uscite 2022: 6.472 M nell'edizione 2018-22, 11.629 M in 2019-23, 10.266 M in 2020-24). Il "terzo anno" di ogni edizione e' una cifra di programmazione, non confrontabile con il resto. Usare solo il primo anno (flag `da_usare`).
+5. **ds227 (milioni) vs ds284 (euro) per il 2013**: spesa corrente "assestato" 2.911,0 M (include 338,8 M di fondo svalutazione crediti) contro impegni a consuntivo 2.615,3 M. Coerente se si toglie il fondo (2.572 M, 43 M sotto: non e' lo stesso istante). In ds227 il TOTALE di ogni missione e il TOTALE generale quadrano con la somma dei programmi (differenza 0,00).
+6. **PEG vs Ministero**: Titolo I 2013 e 2015 coincidono (punto 5). Il Ministero parla di "spese correnti al netto della spesa per alimentazione del fondo di solidarieta' comunale (FSC)" per 2013-2015: il trattamento del FSC cambia nel tempo, da verificare nei PEG.
+
+#### 8. Trappole dei dati (da non dimenticare)
+
+1. **Formati dei numeri diversi per edizione**: ds397, ds396, ds399, ds400 usano "3.800.930,47" (punto migliaia, virgola decimale); ds401 usa "19,406.40" (virgola migliaia, punto decimale); ds1936 e successive "12222.22". ds399 ha "-" al posto di zero; ds396 ha celle di soli spazi (8.251). Parsing per file in `scripts/common.py`. Letto male = errori di 1000x.
+2. **Codifiche diverse**: ds397, ds399, ds400, ds227, ds284, ds285 sono cp1252/ASCII; ds396, ds401 e le piu' recenti UTF-8. In ds227/ds284/ds285 accenti e apostrofi sono persi ("COMPETITIVIT+", "MOBILITA").
+3. **Intestazioni delle colonne cambiano ogni anno** ("RENDICONTO 2015", "Rendiconto 2024", "STANZIAMENTO  2018" con doppio spazio, " RENDICONTO 2016 " con spazi in ds396; ds401 ha "ASSESTATO DI CASSA" senza anno; ds3013 ha 27 colonne, non 29).
+4. **Codici di missione/programma scritti "1" o "01"** a seconda dell'edizione: vanno convertiti in numeri (fatto).
+5. **Il rimborso dei prestiti (Titolo 4) e' distribuito su molte missioni**: nel rendiconto 2015 la missione 10 (trasporti) vale 1.324 M con tutti i titoli, ma solo 952 M di spese correnti (Titolo 1); 90 M sono rimborso prestiti (Titolo 4), nel 2025 99 M. Dal 2018 compare anche la missione 50 "Debito pubblico" che raccoglie solo una parte del Titolo 4 (41 M nel 2018, 31 M nel 2023, 109 M nel 2025 su 279 M di Titolo 4 totale). **Per sapere "quanto va ai trasporti" usare il Titolo 1 (e il Titolo 2 per gli investimenti), non il totale della missione.**
+6. **Missione 99 (conto terzi/partite di giro)** vale 280-624 M all'anno e salta a 623,7 M nel 2023 (era 280,6 M nel 2022 e 357,2 M nel 2024). Non e' spesa del Comune.
+7. **I totali di spesa del rendiconto cambiano di molto nel tempo** (4,0 miliardi 2015 -> 4,7 miliardi 2025) ma includono capitale, prestiti e partite di giro: per le serie da chiamare "spesa" usare spese correnti (Titolo 1: 2,8 -> 3,2 miliardi).
+8. **Riclassificazioni possibili tra anni consecutivi** (non verificate): a rendiconto missione 1 sale da 285 M (2018) a 337 M (2019) e missione 3 scende da 216 a 177 M; la missione 14 (sviluppo economico) scende da 96 M (2015) a 14 M (2016) nel Titolo 1. Probabilmente cambio di assegnazione di costi (personale, trasferimenti) non cambiamento di spesa: controllare prima di commentare.
+9. **Programmi che compaiono o spariscono**: 12/11 "Asili nido" ha importi solo nell'edizione 2024-2028 (88,3 M nel 2024, 90,8 M nel 2025, in Titolo 1), mentre 12/1 scende di conseguenza; 10/1 (ferroviario) e 10/4 (altre modalita') esistono come codici solo in alcune edizioni ma senza spese correnti; 12/5, 17/1, 20/3 hanno importi quasi nulli. Per l'elenco dei programmi per edizione vedere `pulito/spesa_missioni.csv`.
+10. **Il "rendiconto" non e' denominato come tipo di dato**: le tabelle non dicono se sono impegni/accertamenti o pagamenti. Il confronto col Ministero (impegni) quadra al centesimo per il Titolo 1 2013 e 2015, quindi sono impegni/accertamenti di competenza.
+11. **Il primo stanziamento di ogni edizione non e' dichiarato come "iniziale" o "assestato"**: l'edizione e' pubblicata a primavera dell'anno dopo il rendiconto, senza data di riferimento. Per il 2013 ds227 dice esplicitamente "assestato"; per il 2014 "al 27/02/2014".
+12. **Il solo anno 2012 in ds227** ha 61,6 M in meno del Ministero (2.443,7 vs 2.505,3): non spiegato.
+13. **Date di aggiornamento**: ds397 (2019), ds396 (2018/2022 JSON), alcuni JSON piu' recenti dei CSV: CSV e JSON potrebbero non coincidere. Ho usato i CSV.
+14. **Le tabelle non hanno la "Direzione" stabile**: ds3013 ha codici tipo "2_C", prima codici "DIR14"; la riorganizzazione degli uffici impedisce confronti per direzione.
+15. **Popolazione**: due definizioni e una rottura nel 2012 (punto 6).
+16. **Pro capite 2025**: manca la popolazione del 2025 in ds71/ds73.
+
+#### 9. Cosa manca / cosa resta da decidere
+
+- Consuntivo **2014** per missione: solo dal Ministero (Quadro 4, per funzioni vecchie) o dal PEG 2014 non pubblicato come dato aperto.
+- Anni 2012-2013: solo spesa corrente (e 2013 entrate correnti); niente spese in conto capitale nelle fonti del Comune.
+- Anni prima del 2012: decidere se fare la raccolta dal Ministero (70 pagine HTML) - con la corrispondenza vecchio/nuovo in `corrispondenza_funzioni_missioni.csv`: molte righe sono 1:1 o n:1, ma **non esiste una corrispondenza 1:1 per**: personale (interventi vs macroaggregati), assistenza/beneficenza (si spezza in 5-6 programmi), biblioteche/musei, anagrafe/statistica, farmacie e servizi produttivi, affissioni e pubblicita', e per le voci nuove (fondi, debito, giovani, lavoro, sicurezza urbana). Inoltre dal 2015 cambia il metodo di contabilizzazione (competenza finanziaria potenziata): le spese in conto capitale (3,0 miliardi di impegni nel 2008, 0,75 nel 2015) non sono confrontabili.
+- Popolazione 2025.
+- Elenco dei capitoli equivalenti per le serie storiche di multe, Area C, sosta, imposta di soggiorno.
+
+
 ## 18. L'acqua del rubinetto, zona per zona
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `acqua-del-sindaco/` (nome scelto da Davide)._
@@ -1567,3 +2034,93 @@ _Fonti, date di scarico, licenze, scelte, problemi. Cartella `acqua-del-sindaco/
   - L'acqua sotto i limiti di legge è acqua a norma: le differenze tra zone non vanno presentate come rischi.
   - Servizio "scrivi il tuo indirizzo" con i civici aggregati per zona.
 
+### Fase 1 — raccolta (2026-10-30)
+
+**NOTE - L'acqua del sindaco, zona per zona (fase 1: raccolta e controllo)**
+
+Data di lavoro: 30 ottobre 2026. Nessun grafico, nessuna pagina. Tutto in locale, niente git.
+Regola di tono: se un valore e' sotto il limite di legge, l'acqua e' conforme. Mai linguaggio di rischio.
+
+#### 1. Le fonti (tutte dal portale dati.comune.milano.it, CKAN, senza login)
+
+Ricerca fatta con l'API `package_search` (parole: "analisi dell'acqua", "trimestre", "perdite", "acquedotto", "potabile", "rete idrica") e con `package_list` (2.611 dataset in tutto). Ho scaricato 15 dataset = 30 file (CSV + JSON di ognuno, il JSON di ds1827 e' uno zip), totale 13,3 MB in `raw\<dataset>\`. Elenco con dimensioni e licenze: `pulito\inventario_fonti.csv`; elenco grezzo: `raw\_inventario.json`. Comando per rifare: `scripts\01_scarica.py`.
+
+| Dataset (CKAN) | Che cosa contiene | Periodo | File (byte) |
+|---|---|---|---|
+| ds1828, ds1829, ds1861, ds1915, ds1948, ds2970 "Analisi dell'acqua 2021 ... 2026" | un valore per parametro, zona MM, mese (colonne `parametroMisurato, limitiLegge, valoreRilevato, unitaMisura, zonaNome, zonaId, mese, anno, dataCaricamento, info`) | gen 2021 - set 2026 (67 mesi su 69 attesi, vedi sotto) | CSV da 142.791 a 215.103 byte, 576-864 righe ciascuno |
+| ds679 (4T 2018), ds737 (2T 2019), ds712 (4T 2020), ds1586/1605/1646/1670 (1T-4T 2021) "Ambiente: Analisi dell'acqua N trimestre" | un solo valore per parametro per tutta Milano ("Acqua di Milano"), senza zona e senza mese (colonne `Parametro, Limiti di legge, Acqua di Milano, Unita' di misura`) | 7 trimestri sparsi: 2018-Q4, 2019-Q2, 2020-Q4, 2021-Q1..Q4 | CSV di ~590 byte, 18 righe ciascuno |
+| ds1827 "civici aggregati per zone MM" | civico -> zona MM (+ municipio, NIL, coordinate) | foto del 2022 | `civici_zone_mm_no_dupl.csv`, 8.258.347 byte, 62.587 righe |
+| ds1571 "Acqua immessa, erogata e perdite idriche - Anno 2018" | 1 sola riga | 2018 | CSV 220 byte |
+
+Non esistono altri trimestri (1T-3T 2018, 1T/3T/4T 2019, 1T-3T 2020): non ci sono sul portale. Non esiste un dataset con i **poligoni** delle zone MM (cercato per "zone", "milanoblu", "acquedotto"): le zone vanno ricostruite dai civici (vedi sotto).
+Extra visti ma NON scaricati (fuori mandato): ds502 fontanelle, ds625 case dell'acqua, ds523 consumo di acqua pro capite 2000-2011.
+
+**Licenza.** Tutti i dataset sono `cc-by` su CKAN; per le analisi e per ds1827 la risorsa dichiara CC BY 4.0 (A21_CCBY40), per ds1571 CC BY 3.0 IT (A23_CCBY30IT): la fonte vera dei dati di ds1571 e' ISTAT (tavola 17 GMA 2021), il Comune li ha estratti. Si possono ripubblicare citando la fonte ("Comune di Milano - dati.comune.milano.it, CC BY 4.0"; per le perdite anche ISTAT). Il file dei civici del Comune (ds634, in `citta-15-minuti`) e' letto soltanto, non copiato.
+
+#### 2. Il problema degli accenti (per il JOURNAL)
+
+Controllati byte per byte tutti i CSV e JSON di dati. Risultato: **solo 3 file hanno un problema**, gli altri sono UTF-8 pulito (nessun "Ã¨" da nessuna parte; il "\x88" non c'e').
+
+1. **`getdatiqualitaacqua_2024.csv` (e anche il suo .json)**, solo le righe di **dicembre 2024** (48 righe, 16 campi): doppia codifica **cp850 -> letto come cp1252 -> salvato in UTF-8**. Segni: "µ" appare come `æ` (cp850 0xE6), "°" come `ø` (0xF8), "à" come `…` (0x85, che in cp1252 e' i puntini). Esempi: `æg/l`, `æS/cm`, `øF`, `Residuo Fisso A 180ø`, `Conducibilit…`, `Unit… pH`. Riparazione: `testo.encode('cp1252').decode('cp850')` applicata ai campi che contengono uno di quei tre caratteri.
+2. **`ds737_qualita_acqua_.csv`** (2T 2019): una sola parola, `conducibilitŕ` (ŕ = U+0155). E' una "à" scritta in cp1252 e letta come cp1250. Riparazione: `encode('cp1250').decode('cp1252')`. (Lo stesso difetto e' nel .json di ds679, che non uso.)
+3. **`ds679_analisi_acqua.csv`** (4T 2018): non e' UTF-8 ma **cp1252** (byte singoli 0xE0, 0xB0, 0xB5). Letto come cp1252 e' corretto. Il suo .json invece e' UTF-8 corretto (tranne la parola del punto 2).
+
+Altre sporcizie di testo: spazi non separabili (U+00A0) nei limiti ("valori consigliati", "da  6,5 a 9,5": ripuliti); `Unita'` e `conducibilita'` con apostrofo al posto della "à" nei trimestrali 2020-2021 (normalizzati al nome del parametro); l'unita' della conducibilita' nei mensili e' scritta `µS/cm a 20°` (manca la "C"). Dopo le riparazioni nei campi tenuti restano solo `°`, `à`, `µ`, tutti attesi (controllo automatico nello script). Dettaglio: `pulito\_controlli\codifica_riparazioni.csv`, `pulito\_log_pulizia.txt`.
+
+#### 3. Valori sotto la soglia di rilevabilita' ("<0,05")
+
+Tengo il testo originale (`valore_testo`), poi `sotto_soglia` = 1, `soglia` = numero dopo il "<", e `valore` VUOTO. Mai convertito in 0 e mai nella soglia.
+- Sul totale: 1.239 righe su 4.699 misurate sono sotto soglia = **26,4%** (nei soli mensili 1.200 su 4.573 = 26,2%).
+- Per parametro (quota sotto soglia sulle misurate): ammonio 100%, fluoruri 100%, nitriti 100% (in tutta la serie non c'e' mai un numero), manganese 91%, cloro residuo 56%, arsenico 33%; tutti gli altri 0%. File: `pulito\_controlli\sotto_soglia_per_parametro.csv`.
+- **Trappola: la soglia cambia nel tempo** (cambia il laboratorio/metodo, non l'acqua). Ammonio da <0,10 a <0,05; nitriti da <0,20 a <0,05; fluoruri da <0,5 a <0,15; cloro residuo da <0,01 a <0,04; manganese da <1 a <1,25 (sale!). Il cambio e' nel 2022 (convivono nello stesso anno). Quindi la "quota sotto soglia" per anno non si puo' confrontare e non si puo' mai fare un grafico delle soglie come se fossero valori. File: `soglie_sotto_limite_per_parametro_anno.csv`.
+- Scritti anche con il punto ("<0.10", "<0.5") nei file 2021, 2024 (e dic 2024): tutti letti.
+- 4 valori di manganese "0" (mag-giu 2023, NE/NO/SO): sono quasi certamente "sotto soglia" scritti 0. Li tengo come numero ma con una nota (`nota_valore`).
+
+#### 4. La tavola pulita `pulito\analisi.csv` (4.926 righe, 33 colonne, separatore `;`, UTF-8)
+
+- 4.800 righe mensili per zona (2021-01 .. 2026-09) + 126 righe trimestrali "Tutta Milano" (7 trimestri x 18 parametri). Le righe trimestrali hanno `periodo_tipo = trimestre`, `zona_codice = MI`, `zona_id` vuoto; NON si sommano ai mensili (nel 2021 si sovrappongono).
+- Colonne chiave: `periodo` (2024-03 o 2021-Q2), `anno`, `mese`, `trimestre`, `data_riferimento`, `zona_codice/nome/id`, `parametro` (nome normalizzato), `valore`, `unita`, `sotto_soglia`, `soglia`, `qualita_dato` (ok / sotto_soglia / non_misurato / anomalo), `valore_testo` (originale), `limite_testo`, `limite_tipo` (legge / consigliato / nessuno), `limite_min`, `limite_max`, `entro_limite_legge`, `entro_valore_consigliato`, `data_caricamento`, `file_origine`, `riga_origine`.
+- **18 parametri** (nomi uniformati; unita' uniformate): pH; residuo fisso a 180 °C (mg/L); durezza (°F); conducibilita' a 20 °C (µS/cm); calcio, magnesio, sodio, potassio, bicarbonati, cloruri, solfati, fluoruri, nitrati, nitriti, ammonio, cloro residuo (mg/L); arsenico, manganese (µg/L). Nomi: nei trimestrali sono minuscoli e "bicarbonato", nei mensili "Bicarbonati"; "Cloro Residuo" ecc. Nessun parametro e' cambiato nome o unita' in modo sostanziale (controllo automatico: 1 sola unita' per parametro dopo la normalizzazione). `pulito\parametri_info.csv` contiene la spiegazione in italiano di ogni parametro (colonna `info` dei file, un solo testo per parametro).
+- **Limiti.** Cloruri 250, solfati 250, sodio 200, potassio 10, nitrati 50, nitriti 0,5, ammonio 0,5, fluoruri 1,5, arsenico 10, manganese 50, conducibilita' 2500, pH 6,5-9,5 sono "limiti di legge" come li chiama il file. Durezza 15-50 °F, residuo fisso 1500 mg/L (asterisco) e cloro residuo 0,2 (asterisco) sono solo **valori consigliati** (i trimestrali lo scrivono: "valori consigliati", "valore max consigliato", "valore consigliato 0,2"). Calcio, magnesio, bicarbonati: "non previsto". Per questo ho due colonne separate, `entro_limite_legge` e `entro_valore_consigliato`. Il cloro residuo 0,2: il file dice "massimo consigliato", ma nella pratica quel valore e' spesso citato come minimo: **da verificare con MM prima di scriverlo in pagina**. Due valori (1,43 mg/L ott 2024 NE; 1,33 mg/L set 2026 SO) sono sopra quel 0,2 consigliato: sono valori di cloro, non un superamento di legge.
+- Valori fuori dai limiti di legge in tutta la tavola: **zero** (controllo: `valori_oltre_limite.csv` contiene solo i 2 casi di cloro "consigliato"). Nessuna riga sotto soglia con soglia piu' alta del limite.
+- Duplicati: nessuno (chiave periodo + zona + parametro; nessuna riga identica).
+- Valori estremi (z robusto > 6): 14, quasi tutti cloruri/solfati di singoli mesi e i due cloro sopra; elencati in `valori_estremi_z_robusto_oltre_6.csv`, NON tolti.
+
+#### 5. Trappole dei dati (da non dimenticare)
+
+1. **Lacune nei mesi**: mancano **novembre 2025** e **maggio 2026** per intero. Ottobre 2026 non c'e' ancora. Il 2026 va da gennaio a settembre.
+2. **Dicembre 2024 e' strano**: solo 3 zone (manca Sud-Ovest), Sud-Est ha 12 parametri su 18, il campo `info` contiene "Lorem ispum" (testo finto), data di caricamento 15/06/2024 (sei mesi PRIMA del mese a cui si riferisce) e proprio queste righe hanno la codifica sbagliata. Va trattato come dato sospetto/provvisorio, non come serie regolare.
+3. **`dataCaricamento` non e' una data di pubblicazione affidabile**: ottobre 2021-aprile 2022 risultano caricati tra marzo e maggio 2021, dicembre 2025 risulta caricato il 14/01/2025 (probabile refuso per 2026), ecc. Elenco in `caricamento_prima_della_fine_del_mese.csv`. Non usarla per niente. Settembre 2021 ha una data diversa quasi per ogni riga (dal 9 ottobre al 28 dicembre 2021): date evidentemente generate.
+4. **Il 2024 e' un anno "a metà" per i parametri**: il 24% delle righe del 2024 e' `-` (non misurato; 227 righe in tutto, di cui 24 a gennaio 2025). Nel 2024 (e a gennaio 2025) i parametri sono misurati a rotazione, in due gruppi: gruppo A = ammonio, cloruri, fluoruri, nitrati, nitriti, solfati (6); gruppo B = arsenico, calcio, durezza, magnesio, manganese, potassio, sodio (7). Ogni mese ne manca uno dei due gruppi (si misurano 11 o 12 parametri su 18; pH, residuo fisso, conducibilita', bicarbonati e cloro sempre). Quindi per calcio, magnesio e durezza nel 2024 ci sono valori solo in alcuni mesi (e per zona in modo diverso, vedi `parametri_misurati_per_mese_zona.csv`). `-` NON e' zero: e' "non misurato" (`qualita_dato = non_misurato`).
+5. **Valori ripetuti**: nel 2021 il 74% dei valori e' identico a quello del mese prima (stessa zona, stesso parametro): i valori mensili 2021 sono a blocchi di 2-3 mesi uguali, cioe' sono in pratica trimestrali. Nel 2022 il 15%, 2023 30%, 2024 14%, 2025 44%, 2026 49% (es. gennaio e febbraio 2025 hanno gli stessi calcio e durezza). Non e' un errore di lettura: e' come il Comune pubblica. Impatto: la "stagionalita'" mensile non e' misurata mese per mese in tutti gli anni. Controllo: `valori_uguali_al_mese_precedente_per_anno.csv`.
+6. Due valori non leggibili tenuti ma NON numerici (`qualita_dato = anomalo`): calcio NO maggio 2022 = `7'`; cloro residuo SE ottobre 2024 = `>0,04` (probabile "<0,04" scritto male). Non li ho "corretti".
+7. Decimali con virgola e con punto mescolati (es. "0,2*" e "0.2*", "Da 6.5 a 9.5"); asterischi sui limiti; tutti normalizzati ma il testo originale e' in `valore_testo` / `limite_testo`.
+8. Ordine delle righe: nei JSON 2021-2024 le righe sono in ordine diverso dai CSV. Confrontati per chiave: CSV e JSON sono identici in tutti i campi di dati (0 celle diverse). Uso i CSV.
+9. Controllo di coerenza: le medie mensili 2021 delle 4 zone sono vicine ai 4 valori trimestrali "Tutta Milano" 2021 (differenza mediana 0,9%, massima 12,5% su potassio che vale 1-2 mg/L, quindi arrotondamento). `confronto_2021_trimestrale_vs_mensile.csv`.
+10. I valori sono di **4 zone**, non dei singoli quartieri: ogni zona e' una grande area di rete (Nord-Ovest id 6, Sud-Ovest id 15, Sud-Est id 16, Nord-Est id 18). I codici id non sono mai cambiati nel tempo e i nomi coincidono con quelli dei civici ("Milano Nord Ovest" = "Nord-Ovest").
+11. Sulle differenze tra zone: sono differenze tra acque diverse tutte conformi (durezza tra 20 e 36 °F in tutta la serie, sempre dentro 15-50). Vietato dire "peggiore/migliore" o "a rischio".
+
+#### 6. Zone e indirizzi
+
+- **4 zone MM**, nessun poligono ufficiale. Il file dei civici (ds1827, 62.587 civici, 8 senza zona) assegna ogni civico a una zona. Municipio -> zone: il 4 e' tutto Sud-Est, l'8 e il 9 tutto Nord-Ovest, il 6 tutto Sud-Ovest; il 1 contiene tutte e 4 le zone, il 2/3/5/7 ne hanno due.
+- Le zone sono **spazialmente compatte**: controllo a vicini (7 civici piu' vicini): il 99,68% dei civici ha la stessa zona della maggioranza dei vicini; solo lo 0,18% ha il vicino piu' prossimo in un'altra zona. Quindi i confini esistono davvero e si possono ricostruire. File: `zone_civici_incoerenti_con_i_vicini.csv` (quelli che non tornano).
+- **Centro storico**: il confine passa dentro il quartiere: il NIL Duomo ha civici in tutte e 4 le zone (50% Sud-Ovest), Stazione Centrale 52%/48%, Guastalla 73%, Magenta-S.Vittore 64%, Stadio-Ippodromi 60%. 72 NIL su 88 sono interamente in una zona. In centro anche la stessa piazza (Piazza del Duomo) ha civici in zone diverse: con il solo quartiere non si puo' rispondere, serve l'indirizzo. `nil_zone.csv`.
+- **Zone approssimate**: celle di 100 m classificate con i 15 civici piu' vicini, levigate, ritagliate sul confine del Comune: `zone_approx.geojson` (4 poligoni, EPSG:4326, etichettati come APPROSSIMATI) e `zone_celle.csv` (18.802 celle con confidenza). Aree: Nord-Ovest 60,7 km2 (33%), Sud-Ovest 56,6 (31%), Sud-Est 51,4 (28%), Nord-Est 14,1 (8%). Il Nord-Est ha l'8% dell'area ma il 16% dei civici (edificato fitto). Sono ricostruzioni, **non confini ufficiali**: 292 celle (1,6%) hanno confidenza < 0,7 (aree di confine) e 491 celle sono a oltre 500 m dal civico piu' vicino (parchi, aree non edificate: zona assegnata per vicinanza). Chiedere a MM i confini veri se si vuole una mappa definitiva.
+- **Tavola per "scrivi il tuo indirizzo"**: `civici_zone.csv` (66.826 civici: 62.579 con zona MM ufficiale, 4.247 con zona STIMATA dai vicini perche' non erano in ds1827 o avevano zona vuota; colonna `fonte_zona` e `confidenza`; 4.199 hanno confidenza >= 0,9), `indirizzi_zona.csv` (55.242 coppie via + numero + lettera, ignorando le barre/interni, con zona prevalente: 3 soli indirizzi hanno civici in piu zone), `strade_zona.csv` (4.039 vie: 80 attraversano piu' zone; per queste una via sola non basta, serve il numero). Chiavi di ricerca senza accenti e minuscole: `chiave_via` (es. "via ciccotti ettore") e `chiave_via_token` (parole ordinate, senza "di/del/della": "via ettore ciccotti" e "via ciccotti ettore" danno lo stesso). Le coordinate arrivano dal file civici del Comune di ottobre 2026 (ds634, unite per `IDMASTER`: 60.921 civici su 62.587 combaciano); per gli altri 1.666 restano quelle di ds1827 (probabilmente civici soppressi). Le coordinate dei due file coincidono entro pochi cm (mediana).
+- **Trappole indirizzi**: i civici contengono "barre" tipo `15N05`, `1M01`, `93P01` (negozi/interni): il numero che scrive un cittadino e' il numero base. 150 nomi di via compaiono in piu' municipi (vie lunghe che li attraversano o omonime): i 6 indirizzi che risultano in due municipi vanno disambiguati. I nomi nel Comune sono "COGNOME NOME" (es. "CICCOTTI ETTORE") mentre la gente scrive "Ettore Ciccotti".
+- I 4.239 civici del file Comune senza zona in ds1827: 2.856 "Iter in corso", 1.298 "Applicato", 85 "In attesa fine lavori".
+
+#### 7. Perdite idriche (`pulito\perdite.csv`)
+
+Una sola riga, **anno 2018** (periodo 1/1-31/12/2018): acqua immessa 213.352, erogata 182.776, pro capite 426 e 365, perdite 14,3%. Le unita' NON sono scritte nel file: ho dedotto **migliaia di m3** (volume) e **litri per abitante al giorno** (pro capite) perche' tornano i conti: (213.352-182.776)/213.352 = 14,33% (= 14,3 dichiarato) e 213.352.000 m3 / (426 L x 365 g) = 1.372.127 abitanti (Milano ha circa 1,37 milioni). Fonte: ISTAT tavola 17 GMA 2021. Niente serie storica, niente suddivisione per zona. Solo un numero di contesto.
+
+#### 8. Quello che manca / da chiedere
+
+- Un confine ufficiale delle 4 zone (MM / Comune): da chiedere.
+- Perche' nel 2024 meta' dei parametri manca a mesi alterni (cambio del piano di controlli? da chiedere).
+- Il significato esatto di 0,2 mg/L di cloro residuo ("massimo" o "minimo consigliato").
+- Altri trimestri 2018-2020 e altri anni di perdite: non pubblicati.
+
+#### 9. Come rifare tutto
+
+`python -I scripts\01_scarica.py <strand>` (download, riprendibile) -> `02_pulisci.py <strand>` -> `03_zone.py <strand> <...\citta-15-minuti\raw\comune_milano>` -> `04_perdite_inventario.py <strand>`. Controlli e log: `pulito\_controlli\`, `pulito\_log_pulizia.txt`, `pulito\_log_zone.txt`.

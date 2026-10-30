@@ -201,3 +201,68 @@ Una stagione tipica della Scala ha 15-20 produzioni tra opere e balletti (più i
 - 71 righe "da_verificare" (recital, gala, titoli senza parole chiave) e gruppi di concerti dei quali non ho scaricato le schede complete (solo ricerca: senza biblioteche né note).
 - Doppioni residui possibili (stesso titolo scritto in modo diverso) e raggruppamenti sbagliati (stesso titolo, due produzioni nello stesso anno): controllare con `bid_altri`.
 - Per un paio di minuti due copie del programma di scarico sono girate insieme (due richieste ogni 3 secondi invece di una): nessun errore.
+
+
+## SBN nomi e altre fonti (30/10/2026)
+Richiesta di Davide: "di programmi Scala puoi trovare qualcosa in più?". Risposta breve: dai dati SBN già scaricati si ricava un po' di più (nomi con ruolo), ci sono due fonti nuove di controllo (registrazioni dal vivo); i veri buchi (cartellone 1964-2022 giorno per giorno) restano.
+
+### 1. Nomi con ruolo nelle schede SBN (nessun nuovo scarico)
+**Che cosa c'è nelle schede complete** (`raw\sbn\full\*.json`, 1.240 programmi). Il campo `nomi` è una lista di nomi con l'etichetta del ruolo tra parentesi quadre: `[Compositore]`, `[Librettista]`, `[Regista]`, `[Direttore d'orchestra]`, `[Coreografo]`, `[Scenografo]`, `[Costumista]`, `[Interprete]`, `[Cantante]`, `[Strumentista]` e altri; per qualche cantante c'è anche la voce (`[590S=Soprano]`). Molti nomi però non hanno etichetta (1.623 occorrenze) e allora il ruolo si ricava dal titolo o dalle note ("regia di ...", "direttore d'orchestra ...", "interpreti principali ..."). Le note contengono anche le date ("Prima rappresentazione: 19 giugno 2012").
+**Programma:** `scripts\sbn_nomi.py` (da lanciare dopo `sbn_parse.py`). Scrive:
+- `sbn\sbn_persone.csv`: 5.088 righe (BID della riga, BID della scheda, nome, ruolo, dettaglio, **fonte**, etichetta originale, persona/ente). Fonte = `nomi` (etichetta della scheda; 3.059 righe), `nomi+titolo` (nome senza etichetta a cui titolo/note danno il ruolo; 907), `titolo` (999) o `note` (123) per nomi che stanno solo nel testo. 1.632 nomi di persona diversi. Ruoli più frequenti: compositore 803, interprete 779, librettista 776, direttore 340, coreografo 340, regista 233, scenografo 168, costumista 162. Nomi senza ruolo noto: 297 (restano "nome senza ruolo").
+- `sbn\sbn_programmi.csv` arricchito (colonne vecchie intatte; nuove: `scenografo`, `costumista`, `librettista`, `fonte_ruoli`, `data_prima`, `data_tipo`, `date_scala`, `mese_rappr`, `data_fonte`, `n_ordine`). Regola: se ci sono nomi strutturati, sostituiscono il valore ricavato dal titolo (e si aggiungono i nomi del solo testo con cognome diverso); altrimenti resta il valore vecchio, ripulito. **Ogni cambio è in `sbn\sbn_nomi_log.csv`** (1.654 righe: programma, campo, prima, dopo, fonte). Copia di sicurezza della versione di ieri: `sbn\_sbn_programmi_v1_backup.csv`.
+
+**Errore corretto in `sbn_parse.py`:** il numero d'ordine del programma ("3: I due Foscari", "12. Falstaff") finiva nel titolo, o lo troncava a "3". Ora viene tolto e messo nella colonna `n_ordine` (295 righe); resta intatto "9. sinfonia". I programmi che prima sembravano diversi per quel numero ora si uniscono: 1.725 → 1.707 righe. Le registrazioni sonore non entrano più tra i programmi (3 righe uscite).
+
+**Nuova copertura** (`sbn\sbn_nomi_copertura.csv`, produzioni + ospiti = 911 righe):
+
+| Campo | Prima | Dopo |
+|---|---|---|
+| Direttore | 130 (14,3%) | 199 (21,8%) |
+| Regia | 144 (15,8%) | 226 (24,8%) |
+| Coreografia | 171 (18,8%) | 199 (21,8%) |
+| Interpreti | 36 (4,0%) | 86 (9,4%) |
+| Scenografo / costumista (nuovi) | 0 | 154 / 150 |
+| Librettista (nuovo) | 0 | 561 |
+| Giorno (data_iso) | 676 (74,2%) | 679 (74,5%) |
+| Giorno della prima rappresentazione (data_prima, nuovo) | 0 | 609 (66,8%) |
+
+Concerti (498 righe; di loro non ho le schede complete, solo il titolo): direttore 0 → 120 (24%), interpreti (solisti: "Dino Ciani, pianista") 0 → 217 (44%). Dopo il passaggio 519 produzioni su 911 non hanno ancora né direttore né regia né coreografia né interpreti: **le schede non li scrivono, non c'è altro da estrarre**.
+
+**Date.** Il giorno c'era già per il 74% delle produzioni; ora si evita di prendere la data di un altro teatro ("prima rappresentazione 7 ottobre 1994 al Teatro Ponchielli di Cremona, 14 ottobre 1994 al Teatro alla Scala" → 14 ottobre), si prende il primo giorno degli elenchi ("17 e 28 aprile 1985" → 17) e si distingue la prima rappresentazione (`data_tipo` = prima, 611 righe) da una data qualunque (296). Solo mese: 29 righe ("Rappresentazioni: marzo-aprile 2011") in `mese_rappr`. 45 `data_iso` e 6 stagioni sono cambiate, tutte nel log.
+
+**Limiti.** (a) Le etichette sono dei catalogatori: `[Regista]` è messo anche al coreografo-regista (Nureyev 20 volte come regista) e, per balletti tratti da film, al regista del film (La strada: Fellini). (b) Due nomi con lo stesso cognome nello stesso ruolo si fondono se vengono dal testo. (c) Gli enti (Teatro alla Scala, Corpo di ballo...) non sono nelle colonne, solo in `sbn_persone.csv` con tipo_nome = ente. (d) Nelle liste del titolo con "A, B soprano" si prende solo il nome davanti al ruolo.
+
+**Sito.** `scripts\pagina_dati.py` rilanciato: `docs\scala\data\*.json` ora usano direttore, regia e interpreti arricchiti (anche i solisti dei concerti); layout invariato, nota della fonte SBN aggiornata in `fonti.json`; nessun git.
+
+### 2. Internet Archive (nessun login; ricerca avanzata + API metadata, 3 s tra richieste)
+Programmi: `scripts\ia_cerca.py`, `ia_cerca2.py`, `ia_metadati.py`. Uscite in `raw\ia_scala\`: `tutti.json`, `tutti2.json` (circa 400 risultati unici), `ia_elementi_scala.csv` (41 elementi controllati: accesso, testo OCR, MB), `testi\` (2 testi aperti di prova, 1,2 MB).
+Esito: **nessuna cronologia di stagioni dopo il 1881 è aperta su IA**. Elementi utili:
+
+| Elemento (identifier) | Anni | Accesso | Testo | A cosa serve |
+|---|---|---|---|---|
+| `teatroallascala00cambgoog`, `teatroallascala100camb` (Cambiasi 1881) | 1778-1881 | aperto | OCR sì | già usato |
+| `teatroallascalac00romauoft` e 3 copie (Romani 1862) | 1778-1861 | aperto | OCR sì | già usato |
+| `pdf24_merged-16` (Marangoni-Vanbianchi) | 1906-1920 | aperto | OCR sì (1,8 MB) | già in raw |
+| `bwb_W8-BSY-089` (Gatti, Il Teatro alla Scala nella storia e nell'arte 1778-1963, ed. 1964) | 1778-1963 | **prestito** (serve account) | OCR esiste, non scaricabile | la cronologia completa 1882-1963; non usata |
+| `la-scala-rivista-s.-b.-47.56` (rivista "La Scala", Branzi) | 1956-1960 | **prestito** | OCR 18 kB | un solo volume; la rivista 1949-1963 non c'è aperta |
+| `lascala0000arru` (Arruga 1975), `lascala00lott` (Lotti 1979), `lecartedellascal0000giaz` (Giazotto 1990), `lascalaencyclope0000bagn` (Bagnoli 1993), `massimomilaallas0000mila` | 1975-1993 | **prestito** | | libri di storia, non cronologie |
+| `teatro-alla-scala` (Secchi, Il Teatro alla Scala 1778-1978: architettura, tradizione, società) | 1977 | aperto ("public domain mark") | OCR 0,8 MB | letto: architettura e saggi, **nessuna lista di stagioni** (OCR sporco) |
+| circa 40 programmi "Teatro alla Scala - [opera] - Stagione 2009-2010 / 2010-2011" e 2002-2003 | 2002-2011 | aperto | OCR sì (40-750 kB) | cast e saggi per produzione; scaricato 1 campione (Don Giovanni 2009, 0,4 MB); si può collegare a SBN |
+
+Non trovati su IA: "Musica d'oggi", Tintori (la cronologia 1778-1977 esiste solo in carta), "Duecento anni". Molti LP/CD dal vivo (Callas, Karajan...) con l'anno ma senza il giorno.
+
+### 3. Archivi di giornali (solo verifica, nessuna raccolta di massa)
+- **La Stampa** (`archiviolastampa.it`): da questo PC il sito in HTTPS ha un certificato che non corrisponde al nome (errore `SEC_E_WRONG_PRINCIPAL`): **non l'ho forzato**. In HTTP semplice funziona. `robots.txt`: vieta solo Googlebot e cartelle tecniche, gli altri sono ammessi. Condizioni d'uso: sul sito non ci sono (solo il rimando alle note legali generiche della Regione Piemonte); gli articoli sono di Editrice La Stampa. Ricerca: modulo web (POST) con testo, data esatta o intervallo, testata; la risposta è HTML leggibile con titolo, data, numero, pagina e anteprima di circa 300 caratteri. **Prova unica per il 7 dicembre**: ricerca "Scala" l'8/12/1976 → 317 articoli, in prima pagina l'inviato racconta la serata del 7 dicembre. I PDF delle pagine si scaricano solo dopo aver copiato le lettere di un'immagine (CAPTCHA): non usati. Il giornale arriva al 2005. File: `raw\giornali\`. Conclusione: **utile per controllare a mano o a campione la serata del 7 dicembre, non per costruire il cartellone** (nessuna API, testi con errori OCR, diritti non chiariti: per pubblicare bisognerebbe chiedere a La Stampa).
+- **l'Unità**: `archivio.unita.news`, `archivio.unita.it` e il sito dell'archivio storico presso la Fondazione Gramsci **non si risolvono (DNS)** da questo PC; `www.unita.it` risponde ma non ha l'archivio storico. Bloccato, non provato altro.
+
+### 4. Registrazioni dal vivo alla Scala (fonti di controllo, non programmi)
+**a) SBN, registrazioni sonore.** Programmi: `scripts\sbn_registrazioni_cerca.py`, `scripts\sbn_registrazioni.py` -> `sbn\sbn_registrazioni.csv`. Stesso cliente di `sbn_lib` (3 s, cache). 7 ricerche (circa 160 pagine) con "orchestra e coro del teatro alla scala" ecc.: in cache ora 7.494 registrazioni sonore, 2.994 con "Scala" nel titolo, nell'autore o nell'editore. Per non fare 3.000 richieste ho scaricato la scheda completa (con le note "Registrazione dal vivo, Milano, Teatro alla Scala, 10 maggio 1961") solo dei **377** candidati con parole come live/dal vivo/inedito, un anno nel titolo o un'etichetta nota per i dal vivo (Melodram, Myto, Arkadia, Foyer, Urania, Musicom...). Esito: **412 schede con la Scala** (alcune sono antologie), **68 dal vivo, 25 con il giorno**, 320 con direttore, 281 con interpreti. Esempi: Beatrice di Tenda 10/5/1961 (Votto, Sutherland), Semiramide 17/12/1962 (Santini), Macbeth 7/12/1952 (Callas), Werther 12/2/1976 (Prêtre, Kraus), Rigoletto 13/5/1994 (Muti). Solo 2 date coincidono con una data già nei programmi di sala. Le ricerche sulle registrazioni sono tenute fuori dai programmi (elenco `SALTA` in `sbn_parse.py`). Non ho scaricato le altre circa 2.600 schede: si può fare in seguito (riprendibile, stesso comando).
+**b) Operadis (CLOR)**, discografia ferma al 2009, `www.operadis-opera-discography.org.uk`: `robots.txt` vieta solo SemrushBot e MJ12bot, nessuna condizione d'uso scritta, ma i dati sono il lavoro di un compilatore: **uso solo per controllo, nei file locali, non per ripubblicare**. 632 pagine (una per opera, 27 MB, `raw\discografie\operadis\`), programmi `scripts\operadis_scala.py` (scarico) e `scripts\operadis_parse.py` (lettura dalla cache) -> `raw\discografie\operadis_scala.csv`. **452 registrazioni con orchestra o coro della Scala, 296 dal vivo (LI), 212 con il commento "performance at La Scala", 239 con una data scritta** (anno, direttore, cast ruolo per ruolo, a volte il giorno: "Fidelio 10 dicembre 1974, Böhm"). Per decennio (dal vivo): anni '50 54, '60 46, '70 64, '80 45, '90 47, 2000-09 39. Attenzione: alcune dal vivo sono in tournée (Bruxelles 1958) e il giorno scritto può essere quello di una recensione.
+**c) MusicBrainz** (già in `FONTI_POST_1963.md`): 3.933 registrazioni, dopo il 1963 solo 38 date. **d) Internet Archive audio**: decine di LP/CD con l'anno ma senza giorno; non raccolti.
+Per le serate del 7 dicembre e per controllare il cartellone: le date dal vivo SBN + Operadis + MusicBrainz sono un controllo, non una fonte da cui costruire il cartellone.
+
+### Cose da sapere (trappole)
+- Due programmi di scarico di Operadis sono girati insieme per circa 25 minuti (due richieste ogni 3 secondi invece di una) e per un paio di minuti due copie di `sbn_registrazioni_cerca.py`; nessun errore né blocco, ma da non ripetere. Un solo errore di rete (connessione interrotta) con ripresa automatica.
+- Errore mio, corretto: in alcuni programmi `\b` era diventato un carattere invisibile e le espressioni non trovavano nulla; i numeri riportati sopra sono quelli dopo la correzione.
+- Ordine per rifare tutto: `sbn_parse.py` → `sbn_nomi.py` → `pagina_dati.py`. Rilanciare `sbn_nomi.py` due volte senza `sbn_parse.py` in mezzo falserebbe il "prima/dopo".

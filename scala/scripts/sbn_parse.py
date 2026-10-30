@@ -9,7 +9,11 @@ MESI = "gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|otto
 
 def load():
     recs = {}
+    # le ricerche per le REGISTRAZIONI sonore (sbn_registrazioni_cerca.py) restano fuori dai programmi di sala
+    SALTA = ("orchestra_e_coro_", "coro_del_teatro", "live_teatro", "milano_teatro_alla_scala_live", "teatro_alla_scala_live", "teatro_alla_scala_dal_vivo",
+             "scala_di_milano_dal_vivo", "registrazione_dal_vivo", "orchestra_del_teatro_alla_scala", "orchestra_teatro_alla_scala")
     for f in sorted(glob.glob(os.path.join(RAW, "search", "*.json"))):
+        if os.path.basename(f).startswith(SALTA): continue
         for r in json.load(open(f, encoding="utf8")).get("briefRecords", []):
             recs.setdefault(r["codiceIdentificativo"], r)
     full = {}
@@ -54,6 +58,8 @@ def stagione_esplicita(text):
     return ""
 
 def classifica(r):
+    if (r.get("tipo") or "").lower().startswith("registrazione sonora"):
+        return "registrazione"   # registrazioni sonore: non sono programmi di sala (le tratta sbn_registrazioni.py)
     t = r["titolo"]; pub = r.get("pubblicazione") or ""; aut = r.get("autorePrincipale") or ""
     blob = t + " " + pub + " " + aut
     if not re.search(r"scala", pub + " " + aut, re.I):
@@ -79,6 +85,16 @@ def classifica(r):
     if re.search(r"^\s*(\d{4}[-/]\d{2,4}|ente autonomo|programma|libretto|notiziario|bollettino)", t, re.I):
         return "altro"
     return "produzione"
+
+def ordine_libretto(t):
+    """Toglie il numero d'ordine del programma ("3: I due Foscari", "12. Falstaff"). Ritorna (numero o '', resto).
+    Correzione 30/10/2026: prima split_title tagliava a "3" oppure lasciava "3: ..." nel titolo."""
+    m = re.match(r"^\s*(\d{1,2})\s*:\s+(.*)$", t, re.S)
+    if m: return m.group(1), m.group(2)
+    m = re.match(r"^\s*(\d{1,2})\s*\.\s+(.*)$", t, re.S)
+    if m and not re.match(r"(sinfonia|sonata|suite|serenata)\b", m.group(2), re.I):
+        return m.group(1), m.group(2)
+    return "", t
 
 def clean_title(s):
     s = s.replace("*", "")
@@ -161,9 +177,10 @@ def main():
         anno, flag = anno_di(r)
         f = full.get(bid, {})
         allrows.append([bid, cls, anno or "", r["titolo"], r.get("pubblicazione", "")])
-        if cls in ("fuori_scala", "altro_museo_libro", "altro") or not anno or not (1963 <= anno <= 2024):
+        if cls in ("fuori_scala", "altro_museo_libro", "altro", "registrazione") or not anno or not (1963 <= anno <= 2024):
             continue
-        t = r["titolo"]
+        t_orig = r["titolo"]
+        n_ord, t = ordine_libretto(t_orig)
         if cls in ("produzione",):
             cls = riclassifica(t)
             if cls == "altro": continue
@@ -189,7 +206,7 @@ def main():
             interpreti=c["interpreti"], sala=sala(r, cls), data=data_in(note) or data_in(t), data_iso=iso, stagione_da=stag_da,
             nota_scheda=note, bid=bid, biblioteche="; ".join(biblio), n_biblioteche=len(biblio),
             url="https://opac.sbn.it/bid/" + bid_corto(bid),
-            titolo_originale=t, pubblicazione=r.get("pubblicazione", ""), editore_anno_originale=r.get("pubblicazione", ""),
+            titolo_originale=t_orig, n_ordine=n_ord, pubblicazione=r.get("pubblicazione", ""), editore_anno_originale=r.get("pubblicazione", ""),
             scheda_completa="si" if f else "no"))
     # dedupe: stessa produzione, stesso anno
     groups = collections.OrderedDict()
@@ -215,7 +232,7 @@ def main():
     out.sort(key=lambda x: (x["anno"], x["tipo"], norm(x["titolo"])))
     cols = ["stagione", "stagione_da", "anno", "anno_nota", "tipo", "titolo", "compositore", "direttore", "regista", "coreografo", "interpreti",
             "sala", "data", "data_iso", "nota_scheda", "bid", "bid_altri", "n_record", "biblioteche", "n_biblioteche", "url", "scheda_completa",
-            "titolo_originale", "pubblicazione"]
+            "titolo_originale", "pubblicazione", "n_ordine"]
     with open(os.path.join(OUT, "sbn_programmi.csv"), "w", newline="", encoding="utf-8-sig") as fh:
         w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore"); w.writeheader(); w.writerows(out)
     with open(os.path.join(OUT, "_tutti_record_classificati.csv"), "w", newline="", encoding="utf-8-sig") as fh:
