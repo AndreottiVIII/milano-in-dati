@@ -1180,6 +1180,14 @@ Opzioni se serve di meglio: installare Tesseract con i dati `ita` (decisione di 
   - **1978**: fu una vera apertura. Il programma di sala della Scala (copia su teatrodel900.it) scrive «Prima rappresentazione 7 dicembre 1978»: Simon Boccanegra di Abbado e Strehler, ripresa dell'allestimento del 1971 dopo la tournée all'Opéra di Parigi (ottobre-novembre 1978). La «replica» della lista WP va letta come ripresa di un vecchio allestimento. La scheda SBN PAV0199737 (Boris Godunov datato 7/12/1978) sbaglia l'anno: il Boris è del 7/12/1979.
   - Aggiunti i cast di entrambe (1978 dal programma di sala, 1954 dalla registrazione). Ora 43 prime complete, 31 senza cast, 0 disaccordi aperti. Modifiche in `scripts/aperture_costruisci.py` (voci HAND, cast, log «RISOLTO») e `scripts/aperture_pagina.py`.
   - **Trappola**: «replica» nella lista WP non vuol dire «serata non inaugurale». A volte indica solo un allestimento ripreso.
+- 2026-10-30 — **Prime: cast cercati online per le 32 serate che non li avevano** (due agenti Sonnet, file `scala/pulito/_cast_web_A.csv` 1953-1983 e `_cast_web_B.csv` 1984-2003, letti da `aperture_costruisci.py`).
+  - 22 serate con fonte datata al 7 dicembre: registrazioni dal vivo (Operadis), programmi di sala (teatrodel900.it), Opera Annals, Parterre, video RAI, schede di registrazioni Radio3/RAI su YouTube. Per 1984, 1990, 1991, 1996 e 1998 la data viene da schede di appassionati o da OperaOnVideo: fonti più deboli, annotate nella colonna `nota` dei file.
+  - 10 serate con il solo «cast della produzione», segnato nella nota della riga sulla pagina: 1974, 1982, 1983, 1986, 1987, 1988, 1997, 1999, 2002 e 2003. Nel 1999 ci sono solo Meier e Moser.
+  - Sostituzioni nella serata: nel 1965 Cappuccilli canta solo il primo atto, poi Meliciani (Sky TG24); nel 1985 Amonasro passa da Cappuccilli a Juan Pons (Le Salon Musical).
+  - 1973: Abbado confermato anche dal programma di sala e da Operadis (seconda fonte).
+  - Risultato: 75 prime su 76 con il cast, il 2020 è il gala; 0 disaccordi aperti.
+  - Da tenere d'occhio: per il 1970 un articolo dell'Unità del 1989, letto solo nel riassunto della ricerca, darebbe la regia dei Vespri a Pizzi. Probabile confusione: Pizzi era lo scenografo abituale di De Lullo. Tenuto De Lullo.
+  - Fonti non raggiungibili: archivio.unita.news (dominio non risolto il 30/10/2026); Repubblica, Corriere e La Stampa bloccati dallo strumento di ricerca. L'archivio storico della Scala non è stato toccato (anti-bot).
 
 ## 9. Redditi e servizi: la città dei 15 minuti
 

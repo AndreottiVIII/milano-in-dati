@@ -372,6 +372,21 @@ for _y, _txt, _src in [
     df51.loc[_i, "direttore_fonti"] = df51.loc[_i, "direttore_fonti"] + "+WEB"
     df51.loc[_i, "controlli"] = (df51.loc[_i, "controlli"] + "; " if df51.loc[_i, "controlli"] else "") + "cast: " + _src
 df51.loc[df51.anno == 1978, "note"] = ""
+# 30/10/2026: cast cercati online dagli agenti (file _cast_web_A/B.csv), dopo il controllo del coordinatore
+for _f in ("_cast_web_A.csv", "_cast_web_B.csv"):
+    _p = P("pulito", _f)
+    if not os.path.exists(_p): continue
+    for _, _r in pd.read_csv(_p, encoding="utf-8-sig", dtype=str).fillna("").iterrows():
+        if _r["certezza"] not in ("serata", "produzione") or not _r["interpreti"].strip(): continue
+        _ix = df51.index[df51.anno == int(_r["anno"])]
+        if not len(_ix) or df51.loc[_ix[0], "interpreti"]: continue
+        _i = _ix[0]
+        df51.loc[_i, "interpreti"] = _r["interpreti"].strip(); df51.loc[_i, "interpreti_fonte"] = "WEB"
+        df51.loc[_i, "fonti"] = df51.loc[_i, "fonti"] + "+WEB"
+        df51.loc[_i, "controlli"] = (df51.loc[_i, "controlli"] + "; " if df51.loc[_i, "controlli"] else "") + "cast: " + _r["fonti"] + (" " + _r["url"] if _r["url"] else "")
+        if int(_r["anno"]) == 1973: df51.loc[_i, "direttore_fonti"] += "+WEB"  # Abbado confermato da programma di sala (teatrodel900.it) e Operadis
+        if _r["certezza"] == "produzione":
+            HAND[int(_r["anno"])] = ((HAND[int(_r["anno"])] + "; ") if int(_r["anno"]) in HAND else "") + "Cast della produzione di quella stagione: non è certo che sia identico la sera del 7 dicembre"
 for y, n in NOTE_EXTRA.items(): HAND[y] = (HAND[y] + "; " + n) if y in HAND else n
 for y, n in HAND.items():
     i = df51.index[df51.anno == y]

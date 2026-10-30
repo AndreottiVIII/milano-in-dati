@@ -68,7 +68,7 @@ cov = dict(
 gaps = []
 for _, r in b51.iterrows():
     miss = []
-    if not r.interpreti: miss.append("cast")
+    if not r.interpreti and r.anno != 2020: miss.append("cast")  # 2020: gala senza opera
     if r.direttore_fonti.count("+") < 1 and r.anno != 2020: miss.append("seconda fonte per il direttore")
     if r.completezza == "con disaccordi tra le fonti": miss.append("disaccordo tra le fonti")
     if miss: gaps.append([int(r.anno), r.titolo, ", ".join(miss)])
