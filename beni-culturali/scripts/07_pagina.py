@@ -132,7 +132,7 @@ def main(src, outdir, problemi_md):
 
     def righe_ist():
         top = per_ist.most_common(20)
-        mx = top[0][1]
+        mx = max(top[0][1], nonind)  # stessa scala per tutte le barre, compresa "non indicata"
         out = [f"<tr class='mut'><td>non indicata nel catalogo</td><td class='r'>{it(nonind)}</td><td class='r'>{pct(nonind, N)}</td><td class='bar'><i class='g' style='width:{100 * nonind / mx:.1f}%'></i></td></tr>"]
         for nome, n in top:
             out.append(f"<tr><td>{esc(nome)}</td><td class='r'>{it(n)}</td><td class='r'>{pct(n, N)}</td><td class='bar'><i style='width:{100 * n / mx:.1f}%'></i></td></tr>")
