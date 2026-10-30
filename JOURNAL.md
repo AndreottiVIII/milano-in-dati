@@ -1324,6 +1324,23 @@ Dimensioni: tutta la cartella `raw\comune_milano` pesa circa 243 MB (il grosso s
 - **Dati personali**: il file dei medici di base (nomi e date di nascita, licenza CC BY-NC) non è pubblicato; nel sito ci sono solo i tempi a piedi aggregati.
 - Pagina `docs/citta-15-minuti/`, approvata da Davide dopo la "sorpresa".
 
+### Fase 3 — servizi extra (2026-10-30)
+
+- **Dieci servizi extra scelti da Davide**, con la quota di residenti entro 15 minuti:
+  - aree gioco 99,6%;
+  - aree cani 99,1%;
+  - supermercati 96,4%;
+  - metro 74,1%;
+  - teatri e musei 72,5%;
+  - BikeMi (dato 2022) 69,6%;
+  - librerie 67,2%;
+  - piscine 44,2%;
+  - cinema 35,2% (29 aperti);
+  - ospedali 32,5%.
+- Il punteggio a 10 resta invariato (8,967). Punteggio esteso: in media 15,9 su 20; solo il 3,8% dei residenti li ha tutti e 20.
+- **Reddito**: legame (Spearman, per CAP) di 0,54 con i servizi essenziali e di 0,88 con i soli extra. Il reddito conta poco per i servizi di base e molto per quelli in più. È un'associazione, non una causa.
+- **Trappole**: il file ospedali della Regione ha x e y scambiate, è del 2018 e ha 3 sedi sbagliate. Le posizioni sono prese dal Comune (ds683, 2023); l'indicazione del pronto soccorso viene da OSM ed è incompleta.
+
 ## 10. Violenza politica a Milano dal 1900
 
 _Fonti, date di scarico, licenze, scelte, problemi. Cartella `violenza-politica/`._
