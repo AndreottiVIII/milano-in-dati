@@ -32,7 +32,8 @@
     { path: 'appalti/',          label: 'Appalti pubblici' },
     { path: 'affitti-brevi/',    label: 'Affitti brevi' },
     { path: 'case-servizi-reddito/', label: 'Servizi e prezzi delle case' },
-    { path: 'alberi/',           label: 'Alberi della città' }
+    { path: 'alberi/',           label: 'Alberi della città' },
+    { path: 'cani/',             label: 'Cani di Milano' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

@@ -7,7 +7,6 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 ## Decisioni aperte per Davide
 
 1. **Grafica della home**: 24 bozze in `bozze-home/`. Davide vuole una copertina di tutte le ricerche; "forse la 21 (tessere), ma per ora non scegliamo".
-2. **Cani di Milano**: decidere che fare (solo aree cani aperte, nessun dato sui cani).
 
 ## Filone per filone
 
@@ -37,7 +36,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 22 | Alberi | Online |
 | 23 | Affitti brevi | Online |
 | 24 | Nomi dei bambini | In pausa: Milano non pubblica i nomi |
-| 25 | Cani | Fase 1 fatta: solo aree cani |
+| 25 | Cani | Online: aree cani (nessun dato aperto sui cani) |
 | — | In corso (fase 1) | Biblioteche, scuole, matrimoni, morti giorno per giorno, luoghi più cercati, redditi dal 2000, pioggia e caldo, costo della vita |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 

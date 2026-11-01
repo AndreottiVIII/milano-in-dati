@@ -2407,7 +2407,7 @@ python -I scripts\inventario.py <cartella censimenti>
 
 - 2026-11-01 — Fase 1 in `nomi-bambini/`. Il Comune di Milano non pubblica i nomi dei nati (cercati 2.611 dataset): ci sono solo classifiche parziali date alla stampa. ISTAT "Conta nomi" non ha un file scaricabile. Bergamo (dati.lombardia.it, CC0) ha tutti i nomi dal 1987, Rozzano 2007-2017. Davide ha deciso di lasciar stare il filone.
 
-## 25. Cani di Milano (fase 1)
+## 25. Cani di Milano
 
 - 2026-11-01 — Fase 1 in `cani/`. Aperte solo le 423 aree cani (ds52, CC BY). Quanti cani, di che razza e dove: nessun dato aperto (anagrafe canina ATS non pubblicata); solo due totali dalla stampa (104.067 nel 2018, 118.292 "animali registrati" nel 2020). Trappola: `data_ini` di ds52 è la data della scheda, non dell'apertura.
-
+- 2026-11-01 — Pagina `docs/cani/` (programma `cani/scripts/pagina.py`), voluta da Davide: mappa delle 423 aree, aree per 100.000 abitanti per NIL (da 4,6 De Angeli-Monte Rosa a 79,2 Lorenteggio; i sei più poveri sono centrali o vicini al centro), crescita per anno di scheda con l'avvertenza, riquadro "quello che non sappiamo" con i totali di stampa dichiarati come tali.
