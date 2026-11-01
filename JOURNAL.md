@@ -2449,3 +2449,11 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: infanzia −19,6% dal picco, primaria −9,6%; i nati sono −26% dal 2012 (le scuole si svuotano soprattutto per questo); primaria statale −11,1%, paritaria −1,6% (2015-2024); il 54% dei bambini di primaria va a scuola fuori dal proprio NIL. Sorpresa: indice di dissimilarità 0,415 tra scuole contro 0,29 tra quartieri, uguale dal 2012.
 - Trappole: Comune e Ministero divergono per le statali dal 2020 (primaria 26,1% contro 30,4%), causa non trovata; il Ministero non ha le private non paritarie; salto dell'infanzia nel 2020/21; fusioni di scuole; dati fermi al 2024/25.
 
+## 31. Pioggia e caldo (due pagine)
+
+- 2026-11-01 — Fase 1 in `pioggia-e-caldo/`, pagine `docs/pioggia/` e `docs/caldo/` (Davide ha voluto due pagine separate). Dettagli in `pioggia-e-caldo/NOTE.md`.
+- Fonti: ARPA Lombardia (dati.lombardia.it, CC0): 95 sensori entro 36 km dal Duomo, 58,9 milioni di righe; non esistono zip annuali, scaricato per blocchi con filtro sui sensori (il portale risponde 429 alle raffiche). ECA&D pioggia Milano 1858-2008 (solo ricerca non commerciale: in pagina solo aggregati annuali e pochi giorni citati). NOAA GSOD Linate per controllo.
+- Pioggia: metà della pioggia dell'anno cade nell'1% delle ore (circa 88); nessuna tendenza distinguibile da zero 2003-2025; totale piatto 1858-2008 (media 986 mm). Sorpresa: la pioggia è molto locale (26/9/2007 Parco Nord 131 mm, Brera ECA&D 15) e un "record" di 212 mm (Juvara, 21/10/1999) sparisce al controllo coi vicini. Le date delle esondazioni del Seveso non sono nei dati: non collegate.
+- Caldo (2017-2025): di giorno città e campagna pari (−0,1/−0,4 °C), di notte +2 °C (fino a +3 al centro); notti tropicali per estate Juvara 68, Lambrate 38; estate 2026 da record (79-80 notti su 92 al centro). Alberi entro 500 m: confronto su 6 punti, non prova.
+- Trappole: buco 2011-2020 in 16 pluviometri su 47 (tra cui Juvara); pluviometri che "inventano" (regola: giorno ≥40 mm non confermato dai vicini → tolto, 100 giorni); Brera pioggia solo da luglio 2016; salti dei termometri (Parco Nord, Lambrate, Zavattari 2019, Feltre); notti tropicali prima del 1996 sospette; campagna scelta da noi (±0,5 °C); ora = fine osservazione in ora solare.
+

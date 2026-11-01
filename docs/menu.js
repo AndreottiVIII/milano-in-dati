@@ -38,7 +38,9 @@
     { path: 'matrimoni/',        label: 'Matrimoni e separazioni' },
     { path: 'biblioteche/',      label: 'Biblioteche' },
     { path: 'redditi/',          label: 'Redditi dal 2000' },
-    { path: 'scuole/',           label: 'Scuole' }
+    { path: 'scuole/',           label: 'Scuole' },
+    { path: 'pioggia/',          label: 'Quanto piove' },
+    { path: 'caldo/',            label: 'Il quartiere più caldo' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

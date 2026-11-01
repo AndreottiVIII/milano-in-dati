@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quanto piove a Milano</title>
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:3px;margin-right:4px}
+.scroll{overflow-x:auto}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,30%) 1fr 130px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)} .bars .rg{position:absolute;top:3px;height:4px;background:#c26a1b}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.iv .row{display:grid;grid-template-columns:minmax(120px,34%) 1fr 210px;gap:8px;align-items:center;font-size:.88rem;padding:5px 0;border-bottom:1px solid var(--line)}
+.iv .tr{height:18px;position:relative} .iv .ln{position:absolute;top:8px;height:3px;background:var(--acc)} .iv .dt{position:absolute;top:4px;width:10px;height:10px;border-radius:5px;background:var(--acc);margin-left:-5px}
+.iv .z{position:absolute;top:0;height:18px;border-left:1px solid #666} .iv .v{font-variant-numeric:tabular-nums} .iv .ok .ln{background:#c26a1b} .iv .ok .dt{background:#c26a1b}
+@media(max-width:760px){th,td{padding:5px 4px;font-size:.88rem} .iv .row{grid-template-columns:1fr} .bars .row{grid-template-columns:1fr 1fr} .bars .tr{grid-column:1/3;order:3}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.tabmax{max-height:340px;overflow:auto}
+#tab-giorni{min-width:760px} #tab-nc{min-width:420px} #tab-per{min-width:640px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quanto piove a Milano</h1>
+<p>Piove di più, o più forte, o tutto insieme, rispetto a una volta? Per rispondere ci sono due fonti: <b>i pluviometri di ARPA Lombardia</b> (dal 1990 a oggi; a Milano la maggior parte dopo il 2003) e <b>la serie storica di Milano dal 1858 al 2008</b> (ECA&amp;D). Qui sotto ci sono i numeri, con i loro limiti. Vedi anche <a href="../caldo/">Il quartiere più caldo</a> (stessa fonte) e <a href="../temperature/">le temperature di Brera dal 1763</a>.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Un pluviometro misura la pioggia in un punto. Quando due pluviometri a pochi chilometri danno valori molto diversi, uno dei due può essere guasto, e in questi dati succede: per questo abbiamo controllato ogni giorno con più di 40 mm confrontandolo con le stazioni vicine (<a href="#metodo">come</a>). Le serie sono corte (al massimo 24 anni interi per i pluviometri di Milano): le tendenze hanno intervalli larghi, e va bene così.</div>
+
+<h2 id="anni">Anno per anno: il totale non cambia</h2>
+<div id="anni-testo"></div>
+<div class="ch" id="ch-tot" role="img" aria-label="Grafico: pioggia totale di ogni anno, Milano 1858-2008 e media dei pluviometri ARPA 2003-2025"></div>
+<div class="lgd" id="lg-tot"></div>
+<p class="src">Linea grigia: Milano, serie storica ECA&amp;D (1858–2008), un punto per anno. Linea verde: media dei pluviometri ARPA di Milano attivi quell&rsquo;anno (da 1 a 7, solo anni con almeno il 90% delle ore), dal 1990; i pluviometri cambiano da un anno all&rsquo;altro, quindi la linea verde non è una serie omogenea. Linea tratteggiata: media 1858–2008 (<span id="media-eca"></span> mm).</p>
+<h3>Giorni di pioggia</h3>
+<div class="ch" id="ch-g1" role="img" aria-label="Grafico: giorni con almeno 1 mm di pioggia per anno"></div>
+<div class="lgd" id="lg-g1"></div>
+<p class="src">Giorni con almeno 1 mm di pioggia. Le due fonti non misurano allo stesso modo (il giorno di misura della serie storica non coincide con il giorno solare dei pluviometri): confronta ogni linea con se stessa, non con l&rsquo;altra.</p>
+<div id="dec-testo"></div>
+<div class="scroll"><table id="tab-dec"></table></div>
+<p class="src">Medie per decennio della serie ECA&amp;D, solo anni con almeno 330 giorni di dati (tutti i 151). L&rsquo;ultima riga raccoglie 9 anni (2000–2008).</p>
+
+<h2 id="ore">Metà della pioggia dell&rsquo;anno cade in meno di 90 ore</h2>
+<div id="ore-testo"></div>
+<div class="bars" id="b-quota"></div>
+<p class="src">Per ogni pluviometro: quota della pioggia annuale caduta nell&rsquo;1% delle ore dell&rsquo;anno con più pioggia (88 ore su 8.760). Barra verde: media degli anni completi; segno arancione: dal minimo al massimo tra gli anni. Fonte: ARPA Lombardia (CC0), calcoli nostri.</p>
+
+<h2 id="giorni">I dieci giorni più piovosi della città</h2>
+<div id="giorni-testo"></div>
+<div class="scroll"><table id="tab-giorni"></table></div>
+<p class="src">Millimetri caduti in un giorno solare (ora solare, da mezzanotte a mezzanotte) a ogni pluviometro di Milano attivo quel giorno, con almeno 20 ore di dati. «Mediana» = valore centrale tra i pluviometri attivi (almeno 3). «Isola» = pluviometro di via Confalonieri fino al 2012, di via Rosellini dopo (450 m più in là). ARPA Lombardia (CC0). Ultime colonne: Milano nella serie storica ECA&amp;D (fino al 2008) e Linate (NOAA GSOD, giorno UTC), solo per questi dieci giorni; «–» = non c&rsquo;era il dato. «Ora più forte» = l&rsquo;ora con più pioggia di un pluviometro di Milano quel giorno.</p>
+<div class="warn"><b>Alluvioni del Seveso.</b> Le date delle esondazioni del Seveso non sono nei nostri dati e non le abbiamo collegate a questi giorni. Non diciamo quindi quale di questi giorni abbia fatto esondare il fiume: servirebbe una fonte per le date.</div>
+
+<h2 id="confronto">Due anni, stessi pluviometri: 2022 e 2024</h2>
+<div id="conf-testo"></div>
+<div class="bars" id="b-conf"></div>
+<p class="src">Pioggia totale dell&rsquo;anno (mm), anni con almeno il 90% delle ore. Barra verde: 2024; barra arancione sopra: 2022. ARPA Lombardia (CC0).</p>
+
+<h2 id="tendenze">Piove più forte? Nessuna tendenza distinguibile da zero</h2>
+<div id="tend-testo"></div>
+<div class="iv" id="iv-tend"></div>
+<p class="src">Pendenza per decennio (punto) con intervallo al 95% (linea): metodo di Theil–Sen con 2.000 ricampionamenti degli anni. Per ogni pluviometro si calcola lo scarto dalla sua media (rapporto per totale e giorni di pioggia), poi si fa la media tra i pluviometri attivi: 23 anni, 2003–2025, pluviometri di Milano (senza Segrate). Il segno verticale è lo zero: se la linea lo attraversa non si distingue da nessun cambiamento. Arancione = intervallo che esclude lo zero.</p>
+<div id="tend-nota"></div>
+<h3>Una sola misura su otto esce dal caso</h3>
+<div id="tend-uno"></div>
+<h3>La serie lunga, 1858–2008</h3>
+<div id="eca-testo"></div>
+<div class="scroll"><table id="tab-eca"></table></div>
+<p class="src">Serie ECA&amp;D di Milano, 151 anni. Pendenza per decennio con intervallo al 95%, stesso metodo. Il modo di misurare è cambiato nel tempo (nei metadati ECA&amp;D: «intervallo di misura non noto»), quindi è un&rsquo;indicazione, non una misura precisa.</p>
+<h3>Per periodo</h3>
+<div class="scroll"><table id="tab-per"></table></div>
+<p class="src">Medie per pluviometro e anno dei pluviometri di Milano (solo anni completi). Il numero di pluviometri cambia nel tempo (2, 5, 6): i periodi non sono confrontabili con precisione.</p>
+
+<h2 id="metodo">Metodo e trappole</h2>
+<ul class="m" id="metodo-lista"></ul>
+<details><summary>Elenco dei giorni con almeno 40 mm non confermati</summary><div class="scroll tabmax"><table id="tab-nc"></table></div>
+<p class="src">Su <span id="n40"></span> giorni di pluviometri vicini a Milano con almeno 40 mm. «Riferimento» = il valore più alto tra le altre stazioni entro 15 km (e, per Milano, ECA&amp;D e Linate). File: <a href="data/giorni_non_confermati.csv">giorni_non_confermati.csv</a>.</p></details>
+
+<h2 id="fonti">Fonti, licenze, file</h2>
+<ul class="m" id="fonti-lista"></ul>
+<p><a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina, con campo <code>origine</code>), <a href="data/arpa_sensore_anno.json">arpa_sensore_anno.json</a> (pluviometri ARPA di Milano, sensore per anno), <a href="data/eca_annuale.json">eca_annuale.json</a> (aggregati annuali ECA&amp;D), <a href="data/giorni_non_confermati.csv">giorni_non_confermati.csv</a>.</p>
+
+<footer>
+<p>Pagina costruita da un programma (<code>pioggia-e-caldo/scripts/pagina.py</code>) che legge le tabelle pulite e scrive i file di <code>data/</code>. Programmi, note e trappole: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var D=null,E=null;
+var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'–':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'–':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function sg(x,d){if(x==null)return '–';var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?0:d)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+var MESI=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function DT(d){var a=d.split('-');return parseInt(a[2],10)+' '+MESI[parseInt(a[1],10)]+' '+a[0]}
+var RD=[];
+Promise.all([J('data/riepilogo.json'),J('data/eca_annuale.json')]).then(function(a){
+  D=a[0];E=a[1];
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();anni();ore();giorni();confronto();tendenze();metodo();fonti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function stByName(c,sub){var r=null;c.stazioni.forEach(function(s){if(s.nome.indexOf(sub)>=0)r=s});return r}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var R=D.riep,c7=D.casi['2007-09-26'],c9=D.casi['1999-10-21'];
+  var pn=stByName(c7,'Parco Nord'),cf=stByName(c7,'Confalonieri'),zv=stByName(c7,'Zavattari');
+  var ju=stByName(c9,'Juvara');
+  var altri=c9.stazioni.filter(function(s){return s.nome.indexOf('Juvara')<0}).map(function(s){return s.mm});
+  var mn=Math.min.apply(null,altri),mx=Math.max.apply(null,altri);
+  var h='<p><b>La pioggia è molto locale.</b> Il 26 settembre 2007 il pluviometro di Parco Nord (Cinisello Balsamo) ha misurato <b>'+nf(pn.mm,0)+' mm</b> in un giorno, quello di via Confalonieri, a 6 km, '+nf(cf.mm,0)+' mm, quello di piazza Zavattari '+nf(zv.mm,0)+' mm. Nella serie storica di Milano (ECA&amp;D, pluviometro di Brera) lo stesso giorno sono scritti <b>'+nf(c7.eca,0)+' mm</b> (attenzione: il «giorno» della serie storica può non coincidere con il giorno solare dei pluviometri ARPA).</p>';
+  h+='<p><b>Un record che sparisce al controllo.</b> Il 21 ottobre 1999 il pluviometro di via Juvara ha registrato <b>'+nf(ju.mm,0)+' mm</b> in un giorno: sarebbe il giorno più piovoso dei dati ARPA di Milano. Ma la serie storica di Milano dice '+nf(c9.eca,0)+' mm, Linate '+nf(c9.linate,0)+' mm e gli altri pluviometri ARPA (da 7 a 30 km) da '+nf(mn,0)+' a '+nf(mx,0)+' mm. Lo abbiamo tolto dalle statistiche.</p>';
+  h+='<p><b>Metà della pioggia in 88 ore.</b> In media il <b>'+nf(R.quota_media*100,0)+'%</b> della pioggia di un anno cade nell&rsquo;1% delle ore (circa 88 su 8.760).</p>';
+  h+='<p><b>E la tendenza?</b> Nei 23 anni 2003–2025 né il totale, né i giorni di pioggia, né l&rsquo;ora più forte, né le ore da 20 mm o più cambiano in modo distinguibile da zero. Più indietro, dal 1858 al 2008, il totale annuo è piatto e i giorni di pioggia calano lentamente.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- grafico a linee ---------- */
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||260,m={l:46,r:12,t:14,b:30};
+  var all=[];o.series.forEach(function(s){s.pts.forEach(function(p){all.push(p)})});
+  var x0=Math.min.apply(null,all.map(function(p){return p[0]})),x1=Math.max.apply(null,all.map(function(p){return p[0]}));
+  var y0=0,y1=Math.max.apply(null,all.map(function(p){return p[1]}));
+  var sy=niceStep(y1/5);y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var sx=niceStep((x1-x0)/(W<480?4:8)),last=-99;
+  for(v=Math.ceil(x0/sx)*sx;v<=x1+0.01;v+=sx){var xx=X(v);if(xx-last>36){last=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+Math.round(v)+'</text>'}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.hline!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.hline)+'" y2="'+Y(o.hline)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/>';
+  s+='<text class="mu" x="'+m.l+'" y="'+(m.t-3)+'">'+o.yl+'</text>';
+  o.series.forEach(function(se){
+    var d=se.pts.map(function(p,i){return (i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)}).join('');
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||1.2)+'"/>';
+    if(se.dots)se.pts.forEach(function(p){s+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3" fill="'+se.color+'"/>'});
+  });
+  s+='<line id="gl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,gl=svg.querySelector('#gl'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,xv=x0+(px-m.l)/pw*(x1-x0),yr=Math.round(xv),h='';
+    o.series.forEach(function(se){var best=null;se.pts.forEach(function(p){if(p[0]===yr)best=p});if(best)h+='<div><span style="color:'+se.color+'">■</span> '+se.nm+': <b>'+o.f(best[1])+'</b>'+(best[2]?' <span class="sub">('+best[2]+')</span>':'')+'</div>'});
+    if(!h){tip.style.display='none';gl.style.display='none';return}
+    gl.setAttribute('x1',X(yr));gl.setAttribute('x2',X(yr));gl.style.display='';
+    tip.innerHTML='<b>'+yr+'</b>'+h;tip.style.display='';var tw=tip.offsetWidth,left=X(yr)/k+10;if(left+tw>r.width)left=X(yr)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='10px'}
+  function hide(){tip.style.display='none';gl.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- anni ---------- */
+function anni(){
+  var R=D.riep,A=E.anni,M=D.arpa_media;
+  el('media-eca').textContent=f0(R.eca_media);
+  setH('anni-testo','<p>Dal 1858 al 2008 a Milano sono caduti in media <b>'+f0(R.eca_media)+' mm</b> di pioggia all&rsquo;anno. L&rsquo;anno più secco è stato il <b>'+R.secco.a+'</b> ('+nf(R.secco.mm,1)+' mm), il più piovoso il <b>'+R.umido.a+'</b> ('+nf(R.umido.mm,1)+' mm): un anno può portare meno della metà o una volta e mezza la pioggia media. Nei pluviometri ARPA di Milano la media di un anno va da 840 a 1.085 mm a seconda del pluviometro.</p>');
+  function draw(){
+    lineChart(el('ch-tot'),{series:[{nm:'Milano, serie storica',color:GRY,pts:A.map(function(r){return [r.a,r.tot]})},{nm:'Media pluviometri ARPA',color:ACC,w:2,dots:true,pts:M.map(function(r){return [r.a,r.tot,r.n+(r.n===1?' pluviometro':' pluviometri')]})}],f:function(v){return f0(v)+' mm'},yl:'mm in un anno',hline:R.eca_media});
+    lineChart(el('ch-g1'),{series:[{nm:'Milano, serie storica',color:GRY,pts:A.map(function(r){return [r.a,r.g1]})},{nm:'Media pluviometri ARPA',color:ACC,w:2,dots:true,pts:M.map(function(r){return [r.a,r.g1,r.n+(r.n===1?' pluviometro':' pluviometri')]})}],f:function(v){return f0(v)+' giorni'},yl:'giorni con almeno 1 mm'});
+  }
+  draw();RD.push(draw);
+  var lg='<span><i style="border-top-color:'+GRY+'"></i>Milano, serie storica (ECA&amp;D)</span><span><i style="border-top-color:'+ACC+'"></i>media pluviometri ARPA</span>';
+  setH('lg-tot',lg+'<span><i style="border-top-color:'+WARM+';border-top-style:dashed"></i>media 1858–2008</span>');setH('lg-g1',lg);
+  var d=D.eca_decenni;
+  var early=d.filter(function(x){return x.d>=1880&&x.d<=1910}),ea=0;early.forEach(function(x){ea+=x.g1});ea/=early.length;
+  var a1=d[d.length-1];
+  setH('dec-testo','<p>I giorni di pioggia calano lentamente: nel 1880–1919 erano in media <b>'+nf(ea,0)+'</b> all&rsquo;anno, nel 2000–2008 <b>'+nf(a1.g1,0)+'</b>. Il totale invece resta intorno a 1.000 mm, e i giorni con 30 mm o più restano tra 4 e 9 all&rsquo;anno senza una direzione: piove un po&rsquo; meno spesso, non più forte.</p>');
+  table('tab-dec',['Decennio','Anni','Totale annuo (mm)','Giorni di pioggia (≥ 1 mm)','Giorni ≥ 30 mm'],d.map(function(x){return [x.d+'–'+(x.d+9>2008?2008:x.d+9),x.anni,f0(x.tot),nf(x.g1,1),nf(x.g30,1)]}));
+}
+
+/* ---------- ore ---------- */
+function ore(){
+  var R=D.riep,S=D.arpa_sensori;
+  setH('ore-testo','<p>Quanto è concentrata la pioggia? Mettiamo le ore dell&rsquo;anno in ordine di pioggia caduta e guardiamo l&rsquo;1% più bagnato: circa <b>88 ore su 8.760</b>. In quelle 88 ore cade in media il <b>'+nf(R.quota_media*100,0)+'%</b> della pioggia dell&rsquo;anno (media su '+R.sensore_anni+' anni di pluviometro; da un minimo del '+nf(R.quota_min*100,0)+'% a un massimo del '+nf(R.quota_max*100,0)+'%). Il resto arriva in centinaia di ore di pioggia leggera.</p>');
+  var rows=S.slice().sort(function(a,b){return b.q-a.q}).map(function(s){
+    return '<div class="row"><span>'+esc(s.nome)+' <span class="sub">('+s.anni+' anni)</span></span><span class="tr"><span class="fill" style="width:'+(s.q*100)+'%"></span><span class="rg" style="left:'+(s.qmin*100)+'%;width:'+((s.qmax-s.qmin)*100)+'%"></span></span><span class="v">'+nf(s.q*100,0)+'% <span class="sub">('+nf(s.qmin*100,0)+'–'+nf(s.qmax*100,0)+')</span></span></div>'}).join('');
+  setH('b-quota',rows);
+}
+
+/* ---------- giorni ---------- */
+function giorni(){
+  var G=D.giorni;
+  var v1=Object.keys(G[1].stazioni).map(function(k){return G[1].stazioni[k]});
+  setH('giorni-testo','<p>Per ogni giorno abbiamo preso i pluviometri di Milano attivi (da 3 a 7) e il loro valore centrale. Il giorno più piovoso è il <b>'+DT(G[0].g)+'</b> (valore centrale '+nf(G[0].mediana,0)+' mm); il <b>'+DT(G[1].g)+'</b> è l&rsquo;evento più esteso: in tutti i pluviometri da '+nf(Math.min.apply(null,v1),0)+' a '+nf(Math.max.apply(null,v1),0)+' mm, e a Linate '+nf(G[1].linate,0)+' mm. L&rsquo;ora più forte confermata è del '+DT('2009-07-07')+': <b>78 mm in un&rsquo;ora</b> a via Juvara, tra le 5 e le 6 del mattino (ora solare).</p>');
+  var cols=[['Brera',['19373']],['Juvara',['5908']],['Isola',['8149','14121']],['Zavattari',['9341']],['Lambrate',['2006']],['Corsico',['5902']],['Parco Nord',['4065']]];
+  var head=['Giorno','Mediana'].concat(cols.map(function(c){return c[0]})).concat(['ECA&amp;D Milano','Linate','Ora più forte']);
+  var rows=G.map(function(g){
+    var r=[DT(g.g),'<b>'+nf(g.mediana,0)+'</b>'];
+    cols.forEach(function(c){var v=null;c[1].forEach(function(k){if(g.stazioni[k]!=null)v=g.stazioni[k]});r.push(v==null?'–':nf(v,0))});
+    r.push(g.eca==null?'–':nf(g.eca,0));r.push(g.linate==null?'–':nf(g.linate,0));
+    r.push(g.ora_mm==null?'–':nf(g.ora_mm,0)+' mm <span class="sub">'+esc(g.ora_st)+', ore '+(g.ora_h-1)+'–'+g.ora_h+'</span>');
+    return r});
+  table('tab-giorni',head,rows);
+}
+
+/* ---------- confronto ---------- */
+function confronto(){
+  var C=D.arpa_2022_2024,z=C[0],mx=Math.max.apply(null,C.map(function(c){return c.t24}));
+  var lo=Math.min.apply(null,C.map(function(c){return c.rapporto})),hi=Math.max.apply(null,C.map(function(c){return c.rapporto}));
+  setH('conf-testo','<p>Nel 2022 a piazza Zavattari sono caduti <b>'+f0(z.t22)+' mm</b>; due anni dopo, nel 2024, <b>'+f0(z.t24)+' mm</b>: '+nf(z.rapporto,1)+' volte. Lo stesso scarto si vede in tutti i pluviometri di Milano con i due anni completi (da '+nf(lo,1)+' a '+nf(hi,1)+' volte). Prima di cercare una tendenza, bisogna ricordare quanto cambia la pioggia da un anno all&rsquo;altro.</p>');
+  setH('b-conf',C.map(function(c){return '<div class="row"><span>'+esc(c.nome)+'</span><span class="tr"><span class="fill" style="width:'+(c.t24/mx*100)+'%"></span><span class="rg" style="left:0;width:'+(c.t22/mx*100)+'%;top:0;height:10px;background:'+WARM+'"></span></span><span class="v">'+f0(c.t22)+' → '+f0(c.t24)+'</span></div>'}).join(''));
+}
+
+/* ---------- tendenze ---------- */
+function tendenze(){
+  var T=D.tendenze;
+  setH('tend-testo','<p>Per sapere se piove di più o più forte serve una tendenza. Con 23 anni la risposta onesta è che <b>nessuna delle misure si distingue da zero</b>, tranne una. Per ciascuna sono scritti il valore per decennio e, tra parentesi, l&rsquo;intervallo in cui sta il vero valore con il 95% di fiducia.</p>');
+  var h='';
+  T.forEach(function(t){
+    var dec=1;
+    var lo=Math.min(t.lo,0),hi=Math.max(t.hi,0),pad=(hi-lo)*0.08,a=lo-pad,b=hi+pad;
+    function P(v){return ((v-a)/(b-a)*100).toFixed(1)}
+    h+='<div class="row'+(t.esclude0?' ok':'')+'"><span>'+esc(t.nome)+'</span><span class="tr"><span class="z" style="left:'+P(0)+'%"></span><span class="ln" style="left:'+P(t.lo)+'%;width:'+(P(t.hi)-P(t.lo))+'%"></span><span class="dt" style="left:'+P(t.pend)+'%"></span></span><span class="v">'+sg(t.pend,dec)+' <span class="sub">('+sg(t.lo,dec)+' / '+sg(t.hi,dec)+') '+esc(t.unita==='% della media del sensore'?'%':t.unita)+' per decennio</span></span></div>';
+  });
+  setH('iv-tend',h);
+  var q=T.filter(function(t){return t.esclude0})[0];
+  setH('tend-nota','<p class="sub">Lettura: «Totale annuo +8,8 (−16,8 / +22,7) %» vuol dire che il totale potrebbe essere cresciuto fino al 23% o calato del 17% ogni dieci anni, e il nostro dato non sa dire quale. Non vuol dire che non cambi nulla: vuol dire che con questi dati non lo vediamo.</p>');
+  setH('tend-uno','<p>Una misura ha l&rsquo;intervallo tutto sopra lo zero: la <b>quota della pioggia che cade nell&rsquo;1% delle <i>ore bagnate</i> più forti</b> ('+sg(q.pend,1)+' punti percentuali per decennio, intervallo da '+sg(q.lo,1)+' a '+sg(q.hi,1)+'). Su otto misure provate, una che esce «significativa» è quello che ci si aspetta anche dal solo caso: non va letta come una scoperta. La stessa idea misurata sull&rsquo;1% di <i>tutte</i> le ore ('+sg(T.filter(function(t){return t.v==='quota_top1pct_ore'})[0].pend,1)+' punti) non esce.</p>');
+  var L=D.tendenze_eca,nm={tot_mm:'Totale annuo (mm)',giorni_piovosi_1mm:'Giorni di pioggia (≥ 1 mm)',max_giornaliera_mm:'Giorno più piovoso dell\'anno (mm)',giorni_ge30mm:'Giorni con almeno 30 mm'};
+  var g=L.filter(function(x){return x.v==='giorni_piovosi_1mm'})[0];
+  setH('eca-testo','<p>Sul periodo più lungo c&rsquo;è un solo cambiamento che l&rsquo;intervallo distingue dal caso: <b>i giorni di pioggia calano di circa un giorno per decennio</b> ('+sg(g.pend,2)+', da '+sg(g.lo,2)+' a '+sg(g.hi,2)+'). Totale, giorno più piovoso e giorni con 30 mm o più non cambiano in modo distinguibile.</p>');
+  table('tab-eca',['Misura','Media 1858–2008','Pendenza per decennio','Intervallo al 95%'],L.map(function(x){return [nm[x.v],nf(x.media,1),sg(x.pend,2),sg(x.lo,2)+' / '+sg(x.hi,2)+(x.esclude0?' <b>(esclude lo zero)</b>':'')]}));
+  table('tab-per',['Periodo','Pluviometri','Anni di pluviometro','Totale (mm)','Giorni ≥ 1 mm','Ora più forte media (mm)','Ore ≥ 20 mm','Ore ≥ 30 mm','Giorni ≥ 50 mm','Quota 1% ore'],D.periodi.map(function(p){return [p.p,p.sensori,p.sa,f0(p.tot),f0(p.g1),nf(p.mxh,1),nf(p.h20,1),nf(p.h30,2),nf(p.g50,1),nf(p.q*100,0)+'%']}));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var R=D.riep,K=D.copertura;
+  var cop=K.map(function(k){return esc(k.nome)+': '+k.anni+' anni ('+k.da+'–'+k.a+')'+(k.buchi?', '+k.buchi+' mancanti in mezzo':'')}).join('; ');
+  setH('n40',f0(R.giorni_ge40));
+  var L=[
+   '<b>Pluviometri usati.</b> '+cop+'. «Anno completo» = almeno il 90% delle ore dell&rsquo;anno. Segrate Milano Due (1994–2004) è escluso: i suoi giorni estremi non sono mai confermati dai vicini.',
+   '<b>Buco 2011–2020.</b> Il blocco di dati ARPA «Precipitazioni dal 2011 al 2020» contiene 232 pluviometri su 325. Di 47 pluviometri attivi vicino a Milano (entro 36 km) 16 non hanno nessuna riga in quel blocco: tra questi via Juvara, l&rsquo;unico di Milano attivo dal 1989. Il registro non dice perché. Quindi Juvara ha dati per 1990–2010 e 2021–2025, e niente in mezzo.',
+   '<b>Brera.</b> Il pluviometro «Milano v.Brera» esiste solo dal luglio 2016 (9 anni completi). Prima c&rsquo;erano via Confalonieri (2006–2012) e via Rosellini (dal 2012, 450 m più in là), nello stesso quartiere: li trattiamo come un solo punto, «Isola», con un trasloco.',
+   '<b>Valori inventati e la nostra regola.</b> Alcuni pluviometri hanno giorni impossibili: Segrate il 21–22 marzo 2000 (85 e 80 mm in un giorno, mentre via Juvara, Milano storica e Linate dicono 0), via Juvara il 21 ottobre 1999 (212 mm, gli altri da 67 a 85), Corsico il 16 maggio 2018 (80 mm contro 21 intorno). Regola: un giorno con almeno 40 mm viene tolto dalle statistiche se tutti gli altri riferimenti (pluviometri ARPA entro 15 km con almeno 20 ore di dati; per Milano anche ECA&amp;D e Linate) misurano meno di 0,4 volte il suo valore. Sono '+R.giorni_non_confermati+' giorni su '+f0(R.giorni_ge40)+'. La regola è nostra: un temporale vero e molto piccolo potrebbe essere stato tolto per errore (e uno falso passare), soprattutto quando i riferimenti sono pochi.',
+   '<b>Le ore.</b> La pioggia oraria è la somma delle sei letture da 10 minuti dell&rsquo;ora (se ne manca una, l&rsquo;ora non conta); fino al 2013 i dati ARPA sono già orari. Le ore sono «ora solare» (senza ora legale): il valore dice la pioggia caduta fino all&rsquo;ora scritta. I pluviometri misurano a gradini di 0,2 mm. Il valore -999 vuol dire «manca»: '+f0(R.righe_meno999)+' righe su '+f0(R.righe_scaricate)+' (0,9%, tutti i sensori scaricati), scartate.',
+   '<b>Serie storica ECA&amp;D.</b> Pluviometro di Milano, serie di Maurizio Maugeri (Università di Milano), 1858–2008. L&rsquo;intervallo di misura nei metadati cambia nel tempo e il giorno non coincide con il giorno solare ARPA: serve per le tendenze lunghe, non per confronti di un singolo giorno.',
+   '<b>Linate (NOAA GSOD).</b> Usato solo per controllare i giorni estremi. Il giorno è UTC (il 15 novembre 2014 ARPA misura 83–120 mm a Milano e Linate 5,6 mm: la pioggia è caduta in parte nel giorno prima). Teniamo solo i giorni con la pioggia delle 24 ore completa (flag D, F, G, H, I); le somme parziali di 6 o 12 ore sono scartate.',
+   '<b>Tendenze.</b> Per ogni pluviometro si prende lo scarto dalla sua media; poi la media tra i pluviometri attivi nell&rsquo;anno; poi pendenza di Theil–Sen con intervallo bootstrap al 95% (2.000 ricampionamenti). Otto misure provate, nessuna correzione per confronti multipli.',
+   '<b>Non fatto.</b> Nessuna mappa di dove piove di più dentro Milano (troppo pochi pluviometri); nessun collegamento con le alluvioni del Seveso (nessuna data nei dati).'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  fetch('data/giorni_non_confermati.csv',{cache:'no-cache'}).then(function(r){return r.text()}).then(function(t){
+    var ls=t.trim().split('\n').slice(1).map(function(l){var p=l.split(',');return p});
+    table('tab-nc',['Giorno','Stazione','mm in un giorno','Riferimento (mm)'],ls.map(function(c){return [DT(c[0]),esc(c[1]),nf(parseFloat(c[2]),1),c[3]===''?'–':nf(parseFloat(c[3]),1)]}));
+  }).catch(function(e){console.error(e)});
+}
+
+/* ---------- fonti ---------- */
+function fonti(){
+  var L=[
+   '<b>ARPA Lombardia</b>, pluviometri della rete idro-nivo-meteorologica, dataset «Precipitazioni fino al 2010» (<code>e7r2-7m84</code>), «dal 2011 al 2020» (<code>2kar-pnuk</code>), «dal 2021» (<code>pstb-pga6</code>) e «Dati sensori meteo» (<code>647i-nhxk</code>), anagrafica «Stazioni Idro Nivo Meteorologiche» (<code>nf78-nj6b</code>), da <a href="https://www.dati.lombardia.it/">dati.lombardia.it</a>, scaricati il 1 novembre 2026. Licenza <b>Creative Commons 1.0 Universal (CC0, pubblico dominio)</b>; attribuzione: ARPA Lombardia.',
+   '<b>ECA&amp;D</b> (European Climate Assessment &amp; Dataset), Milano, stazione 173, serie di Maugeri, 1858–2008, scaricata il 1 novembre 2026 da eca.knmi.nl (<code>ECA_blend_rr.zip</code>). Dati per ricerca e istruzione non commerciali, con citazione: Klein Tank, A.M.G. e altri (2002), «Daily dataset of 20th-century surface air temperature and precipitation series for the European Climate Assessment», Int. J. Climatol. 22, 1441–1453. Qui compaiono solo totali e conteggi annuali e, per i dieci giorni della tabella e due giorni citati, il valore dello stesso giorno. Il sito è non commerciale.',
+   '<b>NOAA GSOD</b> (Global Summary of the Day), Linate (16080099999), dominio pubblico (NOAA NCEI): solo il valore di pochi giorni, a controllo.',
+   'Per le temperature di Brera: <a href="../temperature/">Temperature di Brera dal 1763</a>; per il caldo di notte con la stessa fonte ARPA: <a href="../caldo/">Il quartiere più caldo</a>.'
+  ];
+  setH('fonti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

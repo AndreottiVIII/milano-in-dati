@@ -42,7 +42,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 28 | Biblioteche | Online |
 | 29 | Redditi dal 2000 | Online |
 | 30 | Scuole | Online |
-| — | In corso (fase 1) | Luoghi più cercati, costo della vita, pietre d'inciampo, metrò, turisti per nazionalità, ristoranti (solo se i dati sono aggiornati); pioggia e caldo in attesa di ok |
+| 31 | Pioggia e caldo | Online, due pagine |
+| — | In corso | Pagina del costo della vita; fase 1 di luoghi più cercati, pietre d'inciampo, metrò, turisti per nazionalità, ristoranti (solo se i dati sono aggiornati) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.
