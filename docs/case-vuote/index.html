@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Le case vuote</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.maps{display:grid;grid-template-columns:1fr 1fr;gap:12px} .maps .col{min-width:0}
+.map{height:56vh;min-height:320px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed} .lgd i.dot{width:11px;height:11px;border-radius:50%;vertical-align:-1px}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stk{display:flex;height:16px;background:#f1f1f1} .stk span{display:block;height:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2,.maps{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .map{height:50vh}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+#tab-tutti{min-width:560px} #tab-fonti{min-width:640px} #tab-mun{min-width:420px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Le case vuote di Milano, quartiere per quartiere</h1>
+<p>Quante abitazioni di Milano non hanno nessun residente dentro? Dove sono, e da quando? In questa pagina le guardiamo per quartiere (gli 88 NIL, Nuclei di Identità Locale) e nel tempo, dal censimento del 1991 a quello del 2023. <b>«Vuota» è una parola comoda ma inesatta</b>: le fonti dicono «non occupata da residenti», e dentro ci stanno case davvero vuote, seconde case, case di chi vive altrove e appartamenti per turisti (vedi <a href="#vuota">che cosa vuol dire «vuota»</a>).</p>
+
+<div class="warn" id="polimi"><span class="sub">Caricamento&hellip;</span></div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> I numeri del 2021 e del 2023 non si possono confrontare alla pari con quelli del 1991&ndash;2011: il censimento ha cambiato metodo. Non sono elenchi di case ma conteggi per sezione di censimento, sommati per quartiere: nessun indirizzo. Tutti i dettagli in <a href="#limiti">I limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa: prima e dopo</h2>
+<p>Quota di abitazioni <b>non occupate da residenti</b> su tutte le abitazioni del quartiere. A sinistra e a destra puoi scegliere l&rsquo;anno: all&rsquo;inizio sono il 2011 (ultimo censimento &laquo;porta a porta&raquo;) e il 2023 (ultimo dato). Le mappe si muovono insieme. Clic su un quartiere per la scheda.</p>
+<div class="ctl"><label class="sub" for="sel-a">Sinistra:</label><select id="sel-a" aria-label="Anno della mappa di sinistra"></select>
+<label class="sub" for="sel-b">Destra:</label><select id="sel-b" aria-label="Anno della mappa di destra"></select>
+<label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<div class="maps"><div class="col"><p class="sub" id="cap-a" style="margin:.2em 0"></p><div id="map-a" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per quota di abitazioni non occupate, anno di sinistra"></div></div>
+<div class="col"><p class="sub" id="cap-b" style="margin:.2em 0"></p><div id="map-b" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per quota di abitazioni non occupate, anno di destra"></div></div></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Quota = abitazioni non occupate da almeno un residente / abitazioni totali, per quartiere. In grigio i quartieri con meno di 1.000 abitazioni in quell&rsquo;anno (parchi e cascine): una percentuale su poche case non è affidabile. Passando dal 2011 al 2021 il metodo cambia (vedi i limiti): i colori delle due epoche non si confrontano come un prima e un dopo reali. Mappa &copy; OpenStreetMap contributors; dati ISTAT, confini Comune di Milano.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="centro">Centro e periferia</h2>
+<div id="centro-testo"></div>
+<div class="ch" id="ch-fasce" role="img" aria-label="Grafico: quota di abitazioni non occupate per fascia di distanza dal Duomo, dal 1991 al 2023"></div>
+<div class="lgd" id="lg-fasce"></div>
+<p class="src">Quartieri raggruppati per distanza in linea d&rsquo;aria tra il Duomo e il centro del quartiere. Le fasce hanno circa 114.000, 329.000, 256.000 e 129.000 abitazioni (2023). La linea verticale tratteggiata segna il cambio di metodo del censimento: il tratto punteggiato tra 2011 e 2021 non si legge come una crescita reale.</p>
+<h3>I nove municipi</h3>
+<div class="scroll"><table id="tab-mun"></table></div>
+<p class="src">Quota di abitazioni non occupate da residenti, per municipio (sezioni assegnate al municipio ufficiale). Fonte: ISTAT, sezioni di censimento.</p>
+<h3>Quartieri con la quota pi&ugrave; alta e pi&ugrave; bassa (2023)</h3>
+<div id="class-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Pi&ugrave; abitazioni senza residenti</b></p><div class="bars" id="b-top"></div></div>
+<div><p class="sub"><b>Meno abitazioni senza residenti</b></p><div class="bars" id="b-bot"></div></div></div>
+<p class="src">Solo i quartieri con almeno 2.000 abitazioni e 2.000 residenti (69 su 88). Quota del 2023.</p>
+<details><summary>Tutti i quartieri (tabella)</summary><div class="scroll tabmax"><table id="tab-tutti"></table></div></details>
+
+<h2 id="airbnb">E gli affitti brevi? E i prezzi?</h2>
+<div id="airbnb-testo"></div>
+<div class="grid2"><div><h3>Con gli annunci Airbnb</h3><div class="ch" id="ch-ab" role="img" aria-label="Grafico: quota di abitazioni non occupate e annunci Airbnb ogni 1.000 residenti, per quartiere"></div></div>
+<div><h3>Con i prezzi di vendita</h3><div class="ch" id="ch-pr" role="img" aria-label="Grafico: quota di abitazioni non occupate e prezzo di vendita per quartiere"></div></div></div>
+<div class="lgd" id="lg-sc"></div>
+<p class="src">Ogni punto &egrave; un quartiere con almeno 2.000 abitazioni e 2.000 residenti (69). Orizzontale: quota di abitazioni non occupate da residenti nel 2023 (ISTAT). Verticale a sinistra: annunci Airbnb ogni 1.000 residenti, snapshot del 19/9/2026 (Inside Airbnb); a destra: valore centrale delle quotazioni di vendita OMI in &euro;/m&sup2; (media delle zone OMI nel quartiere, ultimo semestre, euro 2025). Il colore &egrave; la distanza dal Duomo.</p>
+<div class="warn"><b>Un confronto, non una prova.</b> Quartieri con molte case senza residenti, molti annunci Airbnb e prezzi alti sono gli stessi, e sono quasi tutti vicini al Duomo. Questa pagina non dice che gli affitti brevi svuotano le case, n&eacute; il contrario: dice dove le tre cose si trovano insieme.</div>
+<div id="airbnb-testo2"></div>
+
+<h2 id="vuota">Che cosa vuol dire &laquo;vuota&raquo; in ogni fonte</h2>
+<p>Ogni fonte usa una parola diversa per una cosa diversa. Mettere i numeri nella stessa colonna senza leggerli sarebbe un errore.</p>
+<div class="scroll"><table id="tab-fonti"></table></div>
+<p class="src">Fonti: ISTAT, tracciati dei campi dei censimenti (A1&ndash;A8); ISTAT, comunicati e nota metodologica sul censimento permanente (1/8/2024 e 11/2/2026); MEF-Dipartimento delle Finanze e Agenzia delle Entrate-OMI, &laquo;Gli immobili in Italia&raquo;; Inside Airbnb. Il Comune di Milano non pubblica un elenco o una statistica delle case vuote: ho cercato sul portale (11 parole chiave, 1/11/2026) e ci sono solo i dati dei censimenti.</p>
+
+<h2 id="vere">Quante sono davvero seconde case o case di chi vive altrove?</h2>
+<div id="vere-testo"></div>
+<div id="vere-barre"></div>
+<div id="vere-testo2"></div>
+
+<h2 id="limiti">I limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil.csv">nil.csv</a> (una riga per quartiere: abitazioni, non occupate e quota in cinque anni, distanza dal Duomo, annunci Airbnb aggregati, prezzo), <a href="data/nil.geojson">nil.geojson</a> (confini semplificati con gli stessi valori), <a href="data/citta_anni.csv">citta_anni.csv</a> (tutta Milano, con il campo ISTAT usato per ogni anno), <a href="data/municipi_anni.csv">municipi_anni.csv</a>, <a href="data/fasce_distanza_anni.csv">fasce_distanza_anni.csv</a>, <a href="data/confronto_territori.csv">confronto_territori.csv</a> (Milano, altri comuni della citt&agrave; metropolitana, Lombardia, 2011 e 2021) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno). Sono valori aggregati: nessun annuncio singolo e nessun file del volume del Ministero &egrave; ripubblicato.</p>
+
+<h2 id="altre">Pagine collegate</h2>
+<p><a href="../affitti-brevi/">Affitti brevi</a> (gli annunci Airbnb per quartiere, i prezzi a notte, chi sono gli host) &middot; <a href="../case-popolari/">Case popolari vuote</a> (gli alloggi pubblici sfitti e perch&eacute;) &middot; <a href="../censimenti/">Censimenti</a> (tutti gli indicatori del 1991&ndash;2023 per quartiere) &middot; <a href="../prezzi-case/">Prezzi delle case</a> (quotazioni per zona OMI).</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Abitazioni per sezione di censimento 1991, 2001, 2011, 2021 e 2023: ISTAT, licenza CC BY 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>), scaricate dal filone &laquo;Censimenti&raquo; il 30/10/2026; file regionali Lombardia 2011 e 2021 (stesso sito, stessa data). Confini dei NIL: Comune di Milano (ds964, CC BY), <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Comunicati ISTAT del 1/8/2024 e dell&rsquo;11/2/2026 (<a href="https://www.istat.it/">istat.it</a>), scaricati l&rsquo;1/11/2026. &laquo;Gli immobili in Italia&raquo; edizioni 2019, 2023 e 2026 (MEF-Dipartimento delle Finanze e Agenzia delle Entrate-OMI, <a href="https://www1.finanze.gov.it/finanze/immobili/public/contenuti/immobili_2026.pdf">volume 2026</a>), scaricate l&rsquo;1/11/2026: il sito del Dipartimento dichiara i contenuti protetti dal diritto d&rsquo;autore e consente gli usi liberi previsti dalla legge, per questo qui compaiono solo pochi numeri, citati con la fonte. Annunci Airbnb: Inside Airbnb (insideairbnb.com), Milano, snapshot del 19/9/2026, CC BY 4.0, scaricati l&rsquo;1/11/2026; qui solo conteggi per quartiere. Quotazioni di vendita: Agenzia delle Entrate-OMI, CC BY 4.0 (dal filone &laquo;Prezzi delle case&raquo;). Comunicato stampa del Politecnico di Milano del 29/4/2026 (<a href="https://www.polimi.it/fileadmin/user_upload/comunicati_stampa/ComSt_260429_dashboard_Milano_def.pdf">pdf</a>), letto l&rsquo;1/11/2026; la dashboard in s&eacute; (su Tableau) non &egrave; stata consultata. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,NIL=[],RD=[];
+var YRS=[1991,2001,2011,2021,2023];
+var ACC='#00695c',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var BRK=[5,10,15,20,30];
+var FCOL=['#c26a1b','#136459','#62b0a4','#8a8a8a'],FLAB=['0-2 km','2-4 km','4-6 km','oltre 6 km'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function pc(x,d){return x==null?'':nf(x,d==null?1:d)+'%'}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function yi(y){return YRS.indexOf(y)}
+function A(y){return D.anni[String(y)]}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];NF=a[1];NIL=NF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  polimi();sorpresa();mappe();centro();airbnb();fonti();vere();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function nilByName(n){for(var k=0;k<NIL.length;k++)if(NIL[k].n===n)return NIL[k];return null}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+
+/* ---------- da dove nasce ---------- */
+function polimi(){
+  var P=D.polimi;
+  setH('polimi','<b>Da dove nasce questa pagina.</b> Il 29 aprile 2026 il Politecnico di Milano (laboratorio MAUD) ha presentato una dashboard su Milano; il <a href="'+esc(P.link_comunicato)+'">comunicato stampa</a> parla di oltre 109.000 abitazioni vuote o occupate da non residenti e le colloca nelle zone centrali. Qui guardiamo da dove viene un numero così, dove sono davvero e che cosa contiene. Del lavoro del Politecnico ho letto solo il comunicato, non la dashboard.');
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var V=D.variazioni,T=D.territori,M=T['Comune di Milano'],H=T["Altri comuni della città metropolitana"]||T["Altri comuni della citta' metropolitana"],L=T['Lombardia'],E=D.estremi_2023,AE=D.agenzia_entrate;
+  var mu=D.municipi,altri=[];for(var k=2;k<=9;k++)altri.push(mu[String(k)]['1991'].quota);
+  var h='<p><b>La cifra di cui si parla è vera, ma non è un&rsquo;esplosione.</b> Nel censimento del 2021 le abitazioni senza residenti a Milano sono <b>'+f0(A(2021).non_occupate)+'</b>, il numero citato anche dal Politecnico. Nel 2011 erano '+f0(A(2011).non_occupate)+': sembra una crescita di '+nf(V.non_occ_2011_2021_x,1)+' volte. Ma tra i due censimenti l&rsquo;ISTAT ha cambiato il modo di contare (dai questionari porta a porta ai registri di catasto e anagrafe) e lo stesso scatto si vede fuori da Milano: negli altri comuni della città metropolitana la quota passa da '+pc(H.q2011)+' a '+pc(H.q2021)+' ('+sg(V.quota_pp_altri_comuni_2011_2021,1)+' punti), in Lombardia da '+pc(L.q2011)+' a '+pc(L.q2021)+' ('+sg(V.quota_pp_lombardia_2011_2021,1)+'), a Milano da '+pc(M.q2011)+' a '+pc(M.q2021)+' ('+sg(V.quota_pp_milano_2011_2021,1)+').</p>';
+  h+='<p><b>Con lo stesso metodo il numero scende.</b> Dal 2021 al 2023 le abitazioni non occupate passano da '+f0(A(2021).non_occupate)+' a '+f0(A(2023).non_occupate)+' ('+sg(V.non_occ_2021_2023_pct,1)+'%). E le case che i proprietari dichiarano «a disposizione» (le vere seconde case) erano l&rsquo;'+nf(AE['2019'].a_disposizione_pct,1)+'% nel 2016, l&rsquo;'+nf(AE['2023'].a_disposizione_pct,1)+'% nel 2020 e l&rsquo;'+nf(AE['2026'].a_disposizione_pct,1)+'% nel 2023: quasi ferme.</p>';
+  h+='<p><b>Nel quartiere Duomo quasi 4 abitazioni su 10 non hanno residenti</b> ('+pc(nilByName('Duomo').q[4])+' nel 2023: '+f0(nilByName('Duomo').o[4])+' su '+f0(nilByName('Duomo').a[4])+'); a '+esc(E.min.nome)+' meno di 1 su 100 ('+pc(E.min.quota)+'). Ma «zone centrali» non vuol dire «quasi tutte lì»: nel Municipio 1 sta il '+pc(V.m1_quota_di_non_occ_2023_pct)+' delle abitazioni non occupate (con l&rsquo;'+pc(V.m1_quota_di_abit_2023_pct)+' di tutte le abitazioni). Entro 4 km dal Duomo ce n&rsquo;&egrave; il '+pc(V.entro4km_quota_di_non_occ_2023_pct,0)+', in una parte di città che ha il '+pc(V.entro4km_quota_di_abit_2023_pct,0)+' delle abitazioni: più concentrate, ma sparse su metà città.</p>';
+  h+='<p><b>Il centro era già il posto con più case senza residenti nel 1991</b> ('+pc(mu['1']['1991'].quota,0)+' nel Municipio 1 contro '+nf(Math.min.apply(null,altri),0)+'&ndash;'+nf(Math.max.apply(null,altri),0)+'% negli altri), quando in città erano il '+pc(A(1991).quota)+'; la quota è scesa fino al '+pc(A(2011).quota)+' nel 2011. Con il metodo nuovo nel Municipio 1 la quota triplica (da '+pc(mu['1']['2011'].quota)+' a '+pc(mu['1']['2021'].quota)+'), nel resto della città raddoppia (da '+pc(V.m1_quota_resto_2011)+' a '+pc(V.m1_quota_resto_2021)+'). Quanto di questo extra nel centro sia reale e quanto dipenda dal nuovo metodo, i dati non lo dicono (vedi <a href="#limiti">i limiti</a>).</p>';
+  h+='<p class="src">Fonti: ISTAT, censimenti 1991&ndash;2023 (somma delle sezioni di Milano, campi A1&ndash;A8: <a href="data/citta_anni.csv">citta_anni.csv</a>); ISTAT, file regionali Lombardia 2011 e 2021 (<a href="data/confronto_territori.csv">confronto_territori.csv</a>); MEF-Agenzia delle Entrate, «Gli immobili in Italia», Tabella 1.10 (abitazioni di proprietà di persone fisiche). Il numero della città metropolitana 2021 (214.674 su 1.727.347) coincide con quello pubblicato dall&rsquo;ISTAT.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappe ---------- */
+var MA=null,MB=null,LA=null,LB=null,SELY=[2011,2023],SEL=null,SYNC=false;
+function colore(q,few){if(q==null||few)return '#bdbdbd';var i=0;while(i<BRK.length&&q>=BRK[i])i++;return SEQ[i]}
+function sty(yidx,f){var p=f.properties,sel=SEL===p.i;return {fillColor:colore(p.q[yidx],p.a[yidx]<1000),fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:1}}
+function tip(yidx,p){var few=p.a[yidx]<1000;return '<b>'+esc(p.n)+'</b> ('+YRS[yidx]+')<br>'+(few?'meno di 1.000 abitazioni ('+f0(p.a[yidx])+'): percentuale non affidabile<br>':pc(p.q[yidx])+' non occupate<br>')+f0(p.o[yidx])+' su '+f0(p.a[yidx])+' abitazioni'}
+function mappe(){
+  var selA=el('sel-a'),selB=el('sel-b'),h='';
+  YRS.forEach(function(y){h+='<option value="'+y+'">'+y+(y>=2021?' (censimento permanente)':'')+'</option>'});
+  selA.innerHTML=h;selB.innerHTML=h;selA.value='2011';selB.value='2023';
+  function mk(id,yidx){
+    var m=L.map(id,{preferCanvas:true,scrollWheelZoom:false}).setView([45.4655,9.19],11);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(m);
+    var lay=L.geoJSON(NF,{style:function(f){return sty(yidx(),f)},onEachFeature:function(f,l){
+      l.bindTooltip(function(){return tip(yidx(),f.properties)},{sticky:true});
+      l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(m);
+    m.fitBounds(lay.getBounds());
+    return [m,lay];
+  }
+  var a=mk('map-a',function(){return yi(SELY[0])}),b=mk('map-b',function(){return yi(SELY[1])});
+  MA=a[0];LA=a[1];MB=b[0];LB=b[1];
+  function link(from,to){from.on('moveend',function(){if(SYNC)return;SYNC=true;to.setView(from.getCenter(),from.getZoom(),{animate:false});SYNC=false})}
+  link(MA,MB);link(MB,MA);
+  selA.addEventListener('change',function(){SELY[0]=parseInt(selA.value,10);ricolora()});
+  selB.addEventListener('change',function(){SELY[1]=parseInt(selB.value,10);ricolora()});
+  var sel=el('sel-nil'),o='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(x,y){return x.n.localeCompare(y.n,'it')}).forEach(function(p){o+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=o;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  var lg='';SEQ.forEach(function(c,i){var t=i===0?'meno del '+BRK[0]+'%':i===SEQ.length-1?BRK[i-1]+'% o più':'dal '+BRK[i-1]+' al '+BRK[i]+'%';lg+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+  lg+='<span><i style="background:#bdbdbd"></i>meno di 1.000 abitazioni</span>';setH('lg-map',lg);
+  ricolora();
+  setTimeout(function(){MA.invalidateSize();MB.invalidateSize();MA.fitBounds(LA.getBounds())},600);
+  window.addEventListener('resize',function(){MA.invalidateSize();MB.invalidateSize()});
+}
+function ricolora(){
+  LA.setStyle(function(f){return sty(yi(SELY[0]),f)});LB.setStyle(function(f){return sty(yi(SELY[1]),f)});
+  setH('cap-a','<b>'+SELY[0]+'</b>: '+pc(A(SELY[0]).quota)+' in tutta la città ('+f0(A(SELY[0]).non_occupate)+' abitazioni)');
+  setH('cap-b','<b>'+SELY[1]+'</b>: '+pc(A(SELY[1]).quota)+' in tutta la città ('+f0(A(SELY[1]).non_occupate)+' abitazioni)');
+  if(SEL)bring();
+}
+function bring(){[LA,LB].forEach(function(L0){L0.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})})}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);ricolora();
+  if(zoom){LA.eachLayer(function(l){if(l.feature.properties.i===i)MA.fitBounds(l.getBounds(),{maxZoom:14})})}
+  scheda(i)}
+function scheda(i){
+  var p=nilById(i);if(!p)return;
+  var h='<h3>'+esc(p.n)+'</h3><p class="sub">Municipio '+p.mu+' (prevalente) &middot; a '+nf(p.d,1)+' km dal Duomo</p><div class="scroll"><table><thead><tr><th>Anno</th><th class="r">Abitazioni</th><th class="r">Non occupate</th><th class="r">Quota</th></tr></thead><tbody>';
+  YRS.forEach(function(y,k){h+='<tr><td>'+y+(y>=2021?'<span class="sub"> (metodo nuovo)</span>':'')+'</td><td class="r">'+f0(p.a[k])+'</td><td class="r">'+f0(p.o[k])+'</td><td class="r"><b>'+(p.a[k]<1000?'<span class="sub">poche case</span> ':'')+pc(p.q[k])+'</b></td></tr>'});
+  h+='</tbody></table></div>';
+  h+='<p style="margin:.5em 0 0"><b>Airbnb</b> (19/9/2026): '+f0(p.an)+' annunci, di cui '+f0(p.ci)+' case intere'+(p.anr==null?'':' ('+f1(p.anr)+' annunci ogni 1.000 residenti)')+'.<br><b>Prezzo di vendita</b>: '+(p.p==null?'<span class="sub">le zone OMI non coprono il quartiere</span>':'circa '+f0(p.p)+' &euro;/m&sup2; (OMI, euro 2025)')+'.</p>';
+  h+='<p class="sub">Non occupate = non occupate da residenti. Dal 2021 il censimento conta con i registri: non confrontare 2011 e 2021 come un aumento reale. '+(p.a[3]<1000?'Quartiere con poche abitazioni: la percentuale cambia molto con poche case.':'')+'</p>';
+  setH('scheda',h);
+}
+
+/* ---------- grafico a linee ---------- */
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:40,r:14,t:16,b:30};
+  var y1=0;o.series.forEach(function(s){s.v.forEach(function(v){if(v>y1)y1=v})});
+  var sy=niceStep(y1/5);y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,n=o.x.length;
+  function X(i){return m.l+i/(n-1)*pw} function Y(v){return m.t+ph-v/y1*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'%</text>';
+  o.x.forEach(function(x,i){s+='<text class="mu" x="'+X(i)+'" y="'+(H-10)+'" text-anchor="middle">'+x+'</text>'});
+  if(o.cut!=null){var cx=(X(o.cut)+X(o.cut+1))/2;s+='<line x1="'+cx+'" x2="'+cx+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#8a4a10" stroke-dasharray="4 4"/><text x="'+(cx+4)+'" y="'+(m.t+10)+'" style="fill:#8a4a10;font-size:10px">metodo nuovo &rarr;</text>'}
+  o.series.forEach(function(se){
+    var seg=function(a,b){var d='';for(var i=a;i<=b;i++)d+=(i===a?'M':'L')+X(i).toFixed(1)+' '+Y(se.v[i]).toFixed(1);return d};
+    var cut=o.cut==null?n-1:o.cut;
+    s+='<path d="'+seg(0,cut)+'" fill="none" stroke="'+se.c+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
+    if(o.cut!=null){s+='<path d="'+seg(cut,cut+1)+'" fill="none" stroke="'+se.c+'" stroke-width="1.2" stroke-dasharray="1.5 4" opacity=".7"/><path d="'+seg(cut+1,n-1)+'" fill="none" stroke="'+se.c+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>'}
+    se.v.forEach(function(v,i){s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="3.4" fill="'+se.c+'"/>'});
+  });
+  s+='<rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tp=box.lastChild,rect=svg.querySelector('rect');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,i=Math.max(0,Math.min(n-1,Math.round((px-m.l)/pw*(n-1))));
+    var h='<b>'+o.x[i]+'</b>';o.series.forEach(function(se){h+='<br><span style="color:'+se.c+'">&#9679;</span> '+se.n+': '+pc(se.v[i])});
+    tp.innerHTML=h;tp.style.display='';var tw=tp.offsetWidth,left=X(i)/k+10;if(left+tw>r.width)left=X(i)/k-tw-10;if(left<0)left=0;tp.style.left=left+'px';tp.style.top='10px'}
+  function hide(){tp.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function centro(){
+  var F=D.fasce,V=D.variazioni;
+  setH('centro-testo','<p>Raggruppando i quartieri per distanza dal Duomo si vede che la quota di case senza residenti scende man mano che ci si allontana, in tutti gli anni. Nel 2023 è del <b>'+pc(F['0-2 km']['2023'].quota)+'</b> entro 2 km, del '+pc(F['2-4 km']['2023'].quota)+' tra 2 e 4 km, del '+pc(F['4-6 km']['2023'].quota)+' tra 4 e 6, del '+pc(F['oltre 6 km']['2023'].quota)+' oltre. Nel 2011 le stesse fasce erano '+pc(F['0-2 km']['2011'].quota)+', '+pc(F['2-4 km']['2011'].quota)+', '+pc(F['4-6 km']['2011'].quota)+' e '+pc(F['oltre 6 km']['2011'].quota)+'. Tra il 1991 e il 2011 la quota scende dappertutto (in città dal '+pc(A(1991).quota)+' al '+pc(A(2011).quota)+'); con il metodo nuovo sale dappertutto, e sale di più vicino al centro.</p>');
+  var cols=FCOL;
+  function draw(){
+    var S=FLAB.map(function(f,k){return {n:f,c:cols[k],v:YRS.map(function(y){return F[f][String(y)].quota})}});
+    S.push({n:'tutta Milano',c:'#111',dash:true,w:1.8,v:YRS.map(function(y){return A(y).quota})});
+    lineChart(el('ch-fasce'),{x:YRS,series:S,cut:2,h:300});
+  }
+  draw();RD.push(draw);
+  setH('lg-fasce',FLAB.map(function(f,k){return '<span><i class="ln" style="border-top-color:'+cols[k]+'"></i>'+f+'</span>'}).join('')+'<span><i class="ln d" style="border-top-color:#111"></i>tutta Milano</span>');
+  /* municipi */
+  var rows=[];for(var k=1;k<=9;k++){var q=D.municipi[String(k)];rows.push(['Municipio '+k].concat(YRS.map(function(y){return pc(q[String(y)].quota)})).concat([f0(q['2023'].non_occ)]))}
+  rows.push(['<b>Milano</b>'].concat(YRS.map(function(y){return '<b>'+pc(A(y).quota)+'</b>'})).concat(['<b>'+f0(A(2023).non_occupate)+'</b>']));
+  table('tab-mun',['','1991','2001','2011','2021','2023','Abitazioni 2023'],rows);
+  /* classifica */
+  var cl=NIL.filter(function(p){return p.cl===1}).sort(function(a,b){return b.q[4]-a.q[4]});
+  var top=cl.slice(0,8),bot=cl.slice(-8).reverse(),mx=top[0].q[4];
+  var abs=cl.slice().sort(function(a,b){return b.o[4]-a.o[4]}).slice(0,3);
+  setH('class-testo','<p>Su 69 quartieri con abbastanza abitazioni, la quota va dal '+pc(bot[0].q[4])+' ('+esc(bot[0].n)+') al '+pc(top[0].q[4])+' ('+esc(top[0].n)+'). In numero assoluto i quartieri con più abitazioni non occupate sono '+abs.map(function(p){return esc(p.n)+' ('+f0(p.o[4])+')'}).join(', ')+': quartieri grandi, non per forza quelli con la quota più alta.</p>');
+  function bars(id,rows,max,col){setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+  bars('b-top',top.map(function(p){return {nm:p.n,v:p.q[4],txt:pc(p.q[4])}}),mx);
+  bars('b-bot',bot.map(function(p){return {nm:p.n,v:p.q[4],txt:pc(p.q[4])}}),mx,'#8a4a10');
+  table('tab-tutti',['Quartiere','2011','2021','2023','Non occupate 2023','Abitazioni 2023'],NIL.slice().sort(function(a,b){return b.q[4]-a.q[4]}).map(function(p){return [esc(p.n)+(p.cl===1?'':' <span class="sub">(poche case)</span>'),pc(p.q[2]),pc(p.q[3]),pc(p.q[4]),f0(p.o[4]),f0(p.a[4])]}));
+}
+
+/* ---------- grafico a punti ---------- */
+function scatter(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:50,r:12,t:14,b:42};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=0,x1=Math.max.apply(null,xs),y0=0,y1=Math.max.apply(null,ys);
+  var sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);x1=Math.ceil(x1/sx)*sx;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yf(v)+'</text>';
+  var lastx=-99;
+  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);if(xx-lastx>34){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+f0(v)+'%</text>'}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-3)+'" text-anchor="start">'+o.yl+'</text>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.4" fill="'+p.c+'" fill-opacity=".8" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tp=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tp.style.display='none';ring.style.display='none';return}
+    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tp.innerHTML=p.t;tp.style.display='';var tw=tp.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tp.style.left=left+'px';tp.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  function hide(){tp.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function rho(c){return sg(c.rho,2)+' (da '+sg(c.ic95[0],2)+' a '+sg(c.ic95[1],2)+')'}
+function airbnb(){
+  var C=D.correlazioni,AB=D.airbnb,cl=NIL.filter(function(p){return p.cl===1});
+  var pa=cl.map(function(p){return {x:p.q[4],y:p.anr,c:FCOL[p.f],t:'<b>'+esc(p.n)+'</b><br>'+pc(p.q[4])+' non occupate<br>'+f1(p.anr)+' annunci ogni 1.000 residenti<br>a '+nf(p.d,1)+' km dal Duomo'}});
+  var pp=cl.filter(function(p){return p.p!=null}).map(function(p){return {x:p.q[4],y:p.p/1000,c:FCOL[p.f],t:'<b>'+esc(p.n)+'</b><br>'+pc(p.q[4])+' non occupate<br>circa '+f0(p.p)+' €/m²<br>a '+nf(p.d,1)+' km dal Duomo'}});
+  var fb=C.quota2023_vs_annunci_per_1000_residenti_a_parita_di_distanza_fasce;
+  setH('airbnb-testo','<p>Mettendo i '+D.n_quartieri_confronti+' quartieri in fila per quota di case senza residenti e per annunci Airbnb ogni 1.000 residenti, il legame è <b>forte e positivo</b>: correlazione di Spearman '+rho(C.quota2023_vs_annunci_per_1000_residenti)+'. Con i prezzi di vendita è ancora più forte: '+rho(C.quota2023_vs_prezzo)+'. Ma gli stessi quartieri sono anche quelli vicini al Duomo: la correlazione tra quota e distanza è '+rho(C.quota2023_vs_distanza_duomo)+', e quella tra annunci e prezzi '+rho(C.annunci_per_1000_residenti_vs_prezzo)+'. In parole semplici: sono tre modi di misurare il centro.</p>');
+  scatter(el('ch-ab'),{pts:pa,h:300,xl:'abitazioni non occupate (2023)',yl:'annunci Airbnb ogni 1.000 residenti',yf:function(v){return f0(v)}});
+  scatter(el('ch-pr'),{pts:pp,h:300,xl:'abitazioni non occupate (2023)',yl:'prezzo di vendita, migliaia di €/m²',yf:function(v){return nf(v,0)}});
+  RD.push(function(){scatter(el('ch-ab'),{pts:pa,h:300,xl:'abitazioni non occupate (2023)',yl:'annunci Airbnb ogni 1.000 residenti',yf:function(v){return f0(v)}});scatter(el('ch-pr'),{pts:pp,h:300,xl:'abitazioni non occupate (2023)',yl:'prezzo di vendita, migliaia di €/m²',yf:function(v){return nf(v,0)}})});
+  setH('lg-sc',FLAB.map(function(f,k){return '<span><i class="dot" style="background:'+FCOL[k]+'"></i>'+f+' dal Duomo</span>'}).join(''));
+  var h='<p><b>A parità di distanza il legame si indebolisce.</b> Dentro la fascia 4&ndash;6 km (21 quartieri) la correlazione tra quota e annunci è solo '+sg(fb['4-6 km'].rho,2)+', tra 2 e 4 km '+sg(fb['2-4 km'].rho,2)+' (25 quartieri); entro 2 km è alta ('+sg(fb['0-2 km'].rho,2)+') ma sono solo 8 quartieri. Non è una misura precisa: pochi quartieri per fascia.</p>';
+  h+='<p><b>La geografia è vecchia.</b> I quartieri che nel 2011, prima del boom degli affitti brevi, avevano più case senza residenti sono in parte gli stessi che oggi hanno più annunci (correlazione '+rho(C.quota2011_vs_annunci_per_1000_residenti)+'). Tra il 2021 e il 2023 (stesso metodo) le variazioni dei quartieri non seguono la crescita degli annunci con recensione dal 2019 al 2025: '+rho(C.variazione_non_occupate_2021_2023_pct_vs_crescita_airbnb)+', cioè nessun legame visibile in due anni.</p>';
+  h+='<p><b>Quanto pesa Airbnb?</b> Le case intere in affitto su Airbnb sono '+f0(AB.case_intere)+' (19/9/2026), il '+nf(AB.case_intere_su_non_occupate_2023_pct,0)+'% delle '+f0(A(2023).non_occupate)+' non occupate del 2023; quelle con almeno una recensione negli ultimi 12 mesi sono '+f0(AB.case_intere_con_recensione_12m)+' ('+nf(AB.case_intere_12m_su_non_occupate_2023_pct,0)+'%). Non sono lo stesso insieme: un annuncio può essere la stanza di una casa dove vive un residente, e due annunci possono stare nella stessa casa. Nel quartiere Duomo le case intere su Airbnb sono '+f0(nilByName('Duomo').ci)+' contro '+f0(nilByName('Duomo').o[4])+' non occupate. Sono date diverse (2026 contro 2023): un ordine di grandezza, non un conto.</p>';
+  setH('airbnb-testo2',h);
+}
+
+/* ---------- che cosa vuol dire vuota ---------- */
+function fonti(){
+  var AE=D.agenzia_entrate;
+  var R=[
+   ['<b>Censimento 1991</b> (ISTAT, porta a porta)','Abitazioni «non occupate» (campo A3).','Tutto ciò che non ha un nucleo residente. Nessuna distinzione tra case vuote e case di non residenti.','Il perché.'],
+   ['<b>Censimento 2001</b>','Due voci: «vuote» (A4) e «occupate solo da non residenti» (A3).','Vuota = nessuno la usa. Non residenti = la usano persone che hanno la residenza altrove.','Quanto spesso, e per quanto tempo.'],
+   ['<b>Censimento 2011</b>','Le stesse due voci (A6 «vuote», A7 «solo non residenti»).','Come nel 2001.','Il rapporto tra le due voci è molto diverso dal 2001 (vedi sotto): la rilevazione non è stabile.'],
+   ['<b>Censimento permanente 2021 e 2023</b>','Una sola voce: «vuote e occupate solo da non residenti» (A3).','Le abitazioni sono quelle del catasto dei fabbricati; «occupata» vuol dire che il collegamento tra indirizzi, catasto e archivi degli affitti ha trovato almeno una famiglia residente. Tutto il resto è «non occupata».','Non distingue più tra vuote e non residenti. Una casa abitata ma senza famiglia residente collegata finisce tra le non occupate. Sono stime, non conteggi porta a porta.'],
+   ['<b>Agenzia delle Entrate / Ministero dell&rsquo;Economia</b>, «Gli immobili in Italia»','Abitazioni di proprietà di persone fisiche, per uso dichiarato (dichiarazioni dei redditi): principale, a disposizione, locata, uso gratuito, altro.','«A disposizione» = tenuta dal proprietario a sua disposizione: seconda casa, o casa vuota. Milano 2023: '+f0(AE['2026'].a_disposizione)+' su '+f0(AE['2026'].totale_pf)+' ('+nf(AE['2026'].a_disposizione_pct,1)+'%).','Non vede le case di società ed enti; non è un conteggio di chi ci abita davvero.'],
+   ['<b>Inside Airbnb</b>','Annunci online (case intere, stanze private, stanze condivise).','Non misura case: misura annunci a una data. Una casa può avere più annunci, un annuncio può essere una stanza.','Altri portali (Booking, affitti diretti); posizione spostata fino a circa 150 m.'],
+   ['<b>Comune di Milano</b>','Nessun dataset sulle case vuote.','—','Il Comune pubblica solo i dati dei censimenti; per le case popolari vuote vedi <a href="../case-popolari/">la pagina dedicata</a>.']
+  ];
+  table('tab-fonti',['Fonte','Che cosa conta','Che cosa vuol dire «vuota»','Che cosa non vede'],R);
+  Array.prototype.forEach.call(document.querySelectorAll('#tab-fonti td'),function(td){td.classList.remove('r');td.style.whiteSpace='normal'});
+  Array.prototype.forEach.call(document.querySelectorAll('#tab-fonti th'),function(td){td.classList.remove('r')});
+}
+
+/* ---------- quante sono davvero ---------- */
+function vere(){
+  var S=D.split,AE=D.agenzia_entrate;
+  var p1=100*S['2001'].solo_non_residenti/S['2001'].totale,p2=100*S['2011'].solo_non_residenti/S['2011'].totale;
+  setH('vere-testo','<p><b>Nessuna fonte lo dice con precisione.</b> Il censimento del 2001 e quello del 2011 distinguevano le case vuote da quelle occupate solo da non residenti, ma i due risultati sono molto diversi, e quelli del 2021 e del 2023 non distinguono più.</p>');
+  function stk(lab,v,n){var w=100*v.solo_non_residenti/v.totale;return '<div class="row" style="display:grid;grid-template-columns:minmax(80px,16%) 1fr;gap:8px;align-items:center;margin:.3em 0"><span>'+lab+'</span><span><span class="stk"><span style="width:'+(100-w)+'%;background:#62b0a4"></span><span style="width:'+w+'%;background:#c26a1b"></span></span><span class="sub">vuote <b>'+f0(v.vuote)+'</b> ('+nf(100-w,1)+'%) &middot; occupate solo da non residenti <b>'+f0(v.solo_non_residenti)+'</b> ('+nf(w,1)+'%)</span></span></div>'}
+  setH('vere-barre',stk('2001',S['2001'])+stk('2011',S['2011'])+'<p class="src">Abitazioni non occupate da residenti a Milano, divise in due voci. Fonte: ISTAT, sezioni di censimento 2001 (A4, A3) e 2011 (A6, A7). Barra verde = vuote, barra arancione = occupate solo da non residenti.</p>');
+  var h='<p>Dal 29% al 4% in dieci anni non è una trasformazione credibile delle abitudini dei milanesi: è più probabile che cambiasse il modo in cui i rilevatori classificavano (non verificato). Per questo non diamo una percentuale di «vere seconde case». Quello che si può dire sono alcuni pezzi, <b>da non sommare</b> perché vengono da fonti, anni e universi diversi:</p><ul class="m">';
+  h+='<li><b>Case «a disposizione» dei proprietari:</b> '+f0(AE['2026'].a_disposizione)+' nel 2023 (Agenzia delle Entrate, solo abitazioni di persone fisiche), pari a poco più della metà delle '+f0(A(2023).non_occupate)+' non occupate del censimento. Erano '+f0(AE['2019'].a_disposizione)+' nel 2016 e '+f0(AE['2023'].a_disposizione)+' nel 2020. Sono più frequenti nel Centro storico (14,3% delle abitazioni delle persone fisiche, 2023) che nella Periferia Ovest (7,0%).</li>';
+  h+='<li><b>Case locate:</b> il '+nf(AE['2026'].locate_pct,1)+'% delle abitazioni di persone fisiche è dichiarato in affitto (2023). Chi le affitta non sempre le affitta a chi ci prende la residenza: è una delle strade per cui una casa è abitata ma conta come «non occupata da residenti».</li>';
+  h+='<li><b>Affitti brevi:</b> '+f0(D.airbnb.case_intere)+' case intere su Airbnb nel settembre 2026 (vedi sopra).</li>';
+  h+='<li><b>Case popolari vuote:</b> 8.420 su 58.506 a marzo 2023 (14,4%), per lo più in attesa di manutenzione: dati del Comune raccolti nella pagina <a href="../case-popolari/">Case popolari vuote</a>. Una parte di queste è nelle non occupate del censimento; non sappiamo quanta.</li>';
+  h+='<li><b>Quello che non si vede:</b> case davvero vuote (eredità, vendite, lavori), studi professionali o uffici accatastati come abitazioni, case abitate da persone non iscritte all&rsquo;anagrafe. Nessuna fonte aperta li separa.</li></ul><p class="src">Fonti: MEF-Agenzia delle Entrate, «Gli immobili in Italia» 2019, 2023 e 2026, Tabelle 1.10 e A1.14 (macroaree OMI: Centro storico e Periferia Ovest); Inside Airbnb, 19/9/2026; Comune di Milano, strategia abitativa 2023 e ALER, nel filone Case popolari (8.420 alloggi vuoti su 58.506 a marzo 2023: Comune/MM 4.752 su 26.489, ALER 3.668 su 32.017).</p>';
+  setH('vere-testo2',h);
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var V=D.variazioni,I=D.istat_citta_metropolitana_2021;
+  var L=[
+   '<b>Il censimento ha cambiato metodo nel 2021.</b> Fino al 2011 le abitazioni erano contate sul campo (questionari e rilevatori). Dal 2021 il censimento è «permanente»: il numero di abitazioni viene dal catasto dei fabbricati, e «occupata» vuol dire che un archivio ha collegato una famiglia residente a quell&rsquo;indirizzo. Per questo tra il 2011 e il 2021 le abitazioni totali di Milano passano da '+f0(A(2011).abitazioni)+' a '+f0(A(2021).abitazioni)+' ('+sg(V.abitazioni_2011_2021_pct,0)+'%) mentre le famiglie crescono del '+nf(V.famiglie_2011_2021_pct,0)+'%: <b>non va letto come «più case vuote»</b>. Il confronto affidabile è dentro lo stesso metodo: 1991&ndash;2011, oppure 2021&ndash;2023.',
+   '<b>Nel centro il cambio di metodo può pesare di più, ma non lo sappiamo.</b> Nel Municipio 1 le abitazioni totali passano da '+f0(D.municipi['1']['2011'].abit)+' a '+f0(D.municipi['1']['2021'].abit)+' ('+sg(V.m1_abit_2011_2021_pct,0)+'%). Una possibile spiegazione è che il catasto conti come abitazioni anche unità usate come studi o uffici; è un&rsquo;ipotesi, non verificata con i dati.',
+   '<b>2021 e 2023 sono stime, non conteggi.</b> Il censimento permanente usa registri e indagini a campione. Il totale per la città metropolitana (214.674 non occupate su 1.727.347, '+pc(I.quota)+') coincide con quello pubblicato dall&rsquo;ISTAT, ma per sezioni e quartieri non esiste un controllo indipendente. Il confronto 2021&ndash;2023 conta pochi punti: la differenza tra le due date è piccola.',
+   '<b>Quartieri.</b> Sommare le sezioni per NIL è esatto per il 2021 e il 2023. Per 1991, 2001 e 2011 ogni sezione è assegnata al NIL con cui ha più area in comune (il codice delle sezioni cambia a ogni censimento): il 5,8% degli abitanti del 1991 sta in sezioni con meno del 90% dell&rsquo;area dentro un solo quartiere (0,4% nel 2001, 0,1% nel 2011), quindi il 1991 è il meno preciso. Nei quartieri con meno di 1.000 abitazioni (parchi, cascine) le percentuali ballano e sono in grigio.',
+   '<b>Anni diversi, definizioni diverse.</b> Censimento al 31 dicembre; Airbnb a settembre 2026; Agenzia delle Entrate 2023 (dichiarazioni dei redditi); prezzi di vendita dell&rsquo;ultimo semestre. I confronti tra fonti sono ordini di grandezza.',
+   '<b>«Non occupata» non vuol dire «vuota».</b> Ci possono stare case in affitto a chi non è residente, case usate per lavoro, case in vendita o in ristrutturazione. E non vuol dire «disabitata da molto tempo»: il censimento non dice da quanto.',
+   '<b>Airbnb è solo una parte.</b> Mancano gli altri portali e gli affitti diretti; la posizione degli annunci è spostata di circa 150 m; un annuncio non è una casa. I dati per singolo annuncio non sono ripubblicati qui (le regole della comunità di Inside Airbnb lo chiedono): solo conteggi per quartiere.',
+   '<b>Agenzia delle Entrate.</b> Il volume copre le abitazioni di proprietà di persone fisiche (circa 678.000 a Milano nel 2023), non quelle di società ed enti; l&rsquo;uso viene dalle dichiarazioni dei redditi. Il volume non ha una licenza aperta: ne usiamo pochi numeri, con la fonte.',
+   '<b>Distanza dal Duomo.</b> È misurata in linea d&rsquo;aria dal centro di ogni quartiere, non è la «circonvallazione 90-91» del comunicato del Politecnico. Quartieri lunghi come Stazione Centrale o Navigli cadono in fasce diverse da quanto si aspetterebbe un milanese.',
+   '<b>Correlazioni.</b> Spearman tra posizioni in classifica, su 69 quartieri; gli intervalli sono al 95% con 5.000 ricampionamenti. Valgono per i quartieri, non per le singole case: non dicono cosa succede in un appartamento.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var L=[
+   '<b>Che cosa è un&rsquo;abitazione qui.</b> Quella dei file ISTAT di sezione: totale abitazioni (1991 e 2001: A1; 2011: A2+A3; 2021 e 2023: A8) meno occupate da almeno un residente (A2) = non occupate (nel 2011, 2021 e 2023 coincide con il campo A3).',
+   '<b>Quartieri.</b> I 88 NIL vigenti. 2021 e 2023: campo NIL del file ISTAT (COM_ASC2). 2001: codice NIL del Comune; 1991 (che non aveva i NIL) e 2011: sovrapposizione geometrica sezione per sezione (filone Censimenti, <a href="../censimenti/">pagina</a>). Le sezioni «senza fissa dimora» non hanno abitazioni e restano fuori. La somma dei 88 NIL è uguale al totale del comune in tutti e cinque gli anni.',
+   '<b>Municipi.</b> Dalle sezioni, con il municipio ufficiale di ogni sezione; non sono la somma dei quartieri, perché un quartiere può stare a cavallo di due municipi.',
+   '<b>Fasce di distanza.</b> Distanza in linea d&rsquo;aria (coordinate UTM 32N) tra il Duomo (9,19&deg; E, 45,4642&deg; N) e il centro di ogni quartiere; fasce 0&ndash;2, 2&ndash;4, 4&ndash;6, oltre 6 km. Il Municipio 1 e la fascia 0&ndash;2 km non coincidono.',
+   '<b>Altri territori.</b> Somma delle sezioni dei file regionali ISTAT della Lombardia, 2011 e 2021, per comune: Milano, gli altri comuni della città metropolitana (codice provincia 15), tutta la Lombardia. Il 2021 della città metropolitana torna esattamente con la tavola ISTAT (Prospetto 10 del comunicato del 1/8/2024).',
+   '<b>Airbnb e prezzi.</b> Conteggi per NIL dal filone Affitti brevi (<a href="../affitti-brevi/">pagina</a>). Prezzo: media delle zone OMI pesata per area dentro il NIL, solo se le zone coprono almeno il 70% del quartiere.',
+   '<b>Controlli del programma.</b> Il programma si ferma se: le abitazioni di sezione non tornano con gli indicatori del filone Censimenti; la somma dei quartieri non è il totale del comune; la città metropolitana non torna con l&rsquo;ISTAT; i numeri citati dal volume del Ministero non si trovano nel suo testo e la somma delle voci non è il totale.',
+   '<b>Pagina costruita da un programma</b> (<code>case-vuote/scripts/03_costruisci.py</code> e <code>pagina.py</code>) che legge le tabelle e scrive i file di <code>data/</code>. Ogni numero della pagina ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a> (campo <code>origine</code>).'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

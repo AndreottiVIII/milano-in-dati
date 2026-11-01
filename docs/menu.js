@@ -69,7 +69,8 @@
     { path: 'quartiere/', label: 'Il tuo quartiere' },
     { path: 'permettersi/', label: 'Chi può permettersi dove' },
     { path: 'viaggio-linea/', label: 'Un viaggio in tram' },
-    { path: 'speranza-vita/', label: 'Quanto si vive' }
+    { path: 'speranza-vita/', label: 'Quanto si vive' },
+    { path: 'case-vuote/', label: 'Le case vuote' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
