@@ -40,7 +40,8 @@
     { path: 'redditi/',          label: 'Redditi dal 2000' },
     { path: 'scuole/',           label: 'Scuole' },
     { path: 'pioggia/',          label: 'Quanto piove' },
-    { path: 'caldo/',            label: 'Il quartiere più caldo' }
+    { path: 'caldo/',            label: 'Il quartiere più caldo' },
+    { path: 'costo-vita/',       label: 'Quanto costa vivere' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

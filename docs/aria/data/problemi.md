@@ -1,4 +1,4 @@
-# Aria: trappole dei dati (per la rubrica "trappole dei dati")
+# Aria: limiti dei dati
 
 Elenco dei difetti trovati scaricando e pulendo i dati dell'aria di Milano. Ogni punto dice dove si vede.
 Quelli del download (fase 1) sono dettagliati in `aria\NOTE.md`, sezione 6; qui sono quelli che contano per leggere le serie, più quelli trovati nella pulizia (fase 2).

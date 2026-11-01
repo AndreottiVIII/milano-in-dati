@@ -375,7 +375,7 @@ FONTI = f"""<h3>Da dove vengono i numeri</h3>
 <li><b>Prossimi derby</b>: {pending} (Serie A 2026-27) e febbraio 2027 non sono ancora giocati.</li>
 <li><b>Numero di giornata</b> per il campionato e turno di Coppa Italia nelle prime edizioni: non disponibili.</li>
 </ul>
-<h3>Trappole da sapere</h3>
+<h3>Limiti dei dati</h3>
 <ul>
 <li>La squadra &ldquo;di casa&rdquo; &egrave; un&rsquo;etichetta del calendario, non sempre il campo (vedi la sezione sopra).</li>
 <li>Nomi di un tempo: l&rsquo;Inter fu Ambrosiana (1929-31) e Ambrosiana-Inter (1931-44), il Milan fu Milano (1939-44). Qui sono sempre Inter e Milan; i nomi storici sono nell&rsquo;elenco, accanto allo stadio.</li>

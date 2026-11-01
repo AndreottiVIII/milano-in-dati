@@ -2457,3 +2457,13 @@ python -I scripts\inventario.py <cartella censimenti>
 - Caldo (2017-2025): di giorno città e campagna pari (−0,1/−0,4 °C), di notte +2 °C (fino a +3 al centro); notti tropicali per estate Juvara 68, Lambrate 38; estate 2026 da record (79-80 notti su 92 al centro). Alberi entro 500 m: confronto su 6 punti, non prova.
 - Trappole: buco 2011-2020 in 16 pluviometri su 47 (tra cui Juvara); pluviometri che "inventano" (regola: giorno ≥40 mm non confermato dai vicini → tolto, 100 giorni); Brera pioggia solo da luglio 2016; salti dei termometri (Parco Nord, Lambrate, Zavattari 2019, Feltre); notti tropicali prima del 1996 sospette; campagna scelta da noi (±0,5 °C); ora = fine osservazione in ora solare.
 
+## 32. Quanto costa vivere a Milano
+
+- 2026-11-01 — Fase 1 e pagina (`costo-vita/`, `docs/costo-vita/`), volute da Davide. Il primo agente è stato fermato perché ripeteva il rapporto; la pagina l'ha fatta un agente nuovo. Dettagli in `costo-vita/NOTE.md`.
+- Fonti: indici NIC di Milano (ISTAT, via Comune CC BY e ISTAT SDMX CC BY 4.0) 2005-set 2026; MIMIT Osservatorio prezzi (prezzi in euro gen 2021-set 2026: licenza dei dati non dichiarata, in pagina solo le medie aggregate con citazione); MIMIT carburanti (IODL 2.0); ATM e stampa solo per le tariffe; affitti OMI (stime).
+- Numeri: Milano +58,0% dal 2000 contro Italia +63,3%; luce +160% dal 2005; biglietto ATM 1,00 → 2,20 € (1,51 se fosse salito come i prezzi; abbonamento fermo a 39 € dal 2019); espresso 1,02 → 1,26 €; benzina 2,108 €/l a settembre 2026, sopra il picco 2022. Sorpresa: un mese d'affitto di 60 m² (stima OMI) pesa il 31,9% del reddito mensile mediano nel 2006, il 27,8% nel 2021, il 34,5% nel 2024.
+- Biglietto: 1,50 € dal 2011 confermato da tre fonti; 1,00 € dal gennaio 2002 un solo riscontro (Il Giorno), scritto così in pagina.
+- Limiti dei dati: il Ministero dice che i prezzi in euro non vanno confrontati tra mesi (marche e confezioni cambiano); il bar esce dall'indice nel 2016; aprile 2024 manca nei file del Comune; mediana dei redditi interpolata dalle classi.
+
+- 2026-11-01 — **Davide: nelle pagine non si scrive più "trappole" ("sembriamo amatoriali")**, ma "limiti dei dati". Sostituito in 17 pagine, nei due `problemi.md` e nei modelli di beni culturali e derby. Nel JOURNAL e nelle NOTE la parola resta.
+

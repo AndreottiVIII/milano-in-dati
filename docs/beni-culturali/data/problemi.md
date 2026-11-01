@@ -1,4 +1,4 @@
-# Trappole dei dati: beni culturali di Milano (ICCD / ArCo 2.0)
+# Limiti dei dati: beni culturali di Milano (ICCD / ArCo 2.0)
 
 Fonte: Catalogo generale dei beni culturali (ICCD), tramite il dump ArCo 2.0 del CNR-ISTC del 2023-12-01; scaricato il 2026-10-29.
 File pulito: `beni_milano.csv` (30.721 righe, una per scheda, chiave `iri`). Programma: `scripts/06_pulisci.py`. I conteggi esatti sono in `problemi_conteggi.json`.
