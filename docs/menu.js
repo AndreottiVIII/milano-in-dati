@@ -27,7 +27,8 @@
     { path: 'cinema-spariti/',    label: 'Cinema spariti' },
     { path: 'acqua-del-sindaco/', label: 'Acqua del sindaco' },
     { path: 'censimenti/',       label: 'Censimenti' },
-    { path: 'prezzi-case/',      label: 'Prezzi delle case' }
+    { path: 'prezzi-case/',      label: 'Prezzi delle case' },
+    { path: 'bilancio-comune/',  label: 'Bilancio del Comune' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

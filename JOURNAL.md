@@ -2055,10 +2055,10 @@ Colonne comuni alle dieci edizioni: Tipo (ENTRATE/USCITE); PDC-Missione, PDC-Pro
 - `indice_prezzi_annuo_FOI_da_strand12.csv`: copia (non modificata) dal filone 12.
 
 **Entrate che interessano alla domanda (livello capitolo, in `bilancio_capitoli.csv`, rendiconto in milioni di euro):**
-- Area C (capitolo "PROVENTI DA ZTL AREA C"): 2016 64,6; 2019 65,7; 2023 57,6; 2025 33,7. Dal 2023 compare anche "PROVENTI DA ZTL - NUOVA TARIFFAZIONE ACCESSO AL CENTRO STORICO" (1,7; 1,0).
-- Sanzioni codice della strada: 2016 556,6; 2019 487,9; 2023 488,1 (+33,4 "esercizi precedenti"); 2025 260,8 (+33,6). Nel 2013 (ds285) "AMMENDE PER CONTRAVV." 410,5. Il nome del capitolo cambia quasi ogni anno: **per le serie storiche serve un elenco di capitoli equivalenti, da fare in fase 2**.
+- Area C (capitolo "PROVENTI DA ZTL AREA C"): 2016 32,3; 2019 32,9; 2023 28,8; 2025 33,7 (corretto il 1/11/2026: i primi valori sommavano due edizioni dello stesso anno; nel 2020 16,1). Dal 2023 compare anche "PROVENTI DA ZTL - NUOVA TARIFFAZIONE ACCESSO AL CENTRO STORICO" (1,7; 1,0).
+- Sanzioni codice della strada: 2016 278,3; 2019 243,9; 2023 244,1; 2024 320,2; 2025 260,8 (+33,6 "esercizi precedenti") (corretto il 1/11/2026: i primi valori sommavano due edizioni). Nel 2013 (ds285) "AMMENDE PER CONTRAVV." 410,5. Il nome del capitolo cambia quasi ogni anno: **per le serie storiche serve un elenco di capitoli equivalenti, da fare in fase 2**.
 - "Recupero spese postali notifica verbali" 2016 60,3; 2023 92,7; 2025 39,5 (e' un'entrata per rimborso spese, non una multa).
-- Imposta di soggiorno: 2016 82,8; 2019 118,2; 2023 125,3 + 2,7; 2025 114,0 + 0,1.
+- Imposta di soggiorno: 2016 41,4; 2019 59,1; 2023 62,7; 2025 114,0 (corretto il 1/11/2026: i primi valori sommavano due edizioni).
 - Tributi, trasferimenti, extratributarie: livello titolo/tipologia in `entrate.csv`.
 
 #### 5. Anni piu' vecchi: verdetto
@@ -2114,6 +2114,13 @@ Colonne comuni alle dieci edizioni: Tipo (ENTRATE/USCITE); PDC-Missione, PDC-Pro
 - Popolazione 2025.
 - Elenco dei capitoli equivalenti per le serie storiche di multe, Area C, sosta, imposta di soggiorno.
 
+
+### Fase 3 — pagina (2026-11-01)
+
+- Pagina `docs/bilancio-comune/` (programma `scripts/pagina.py`), voluta da Davide il 1/11/2026. Spese correnti per missione in euro 2025 per abitante, entrate per tipo, tributi, voci concrete (trasporto pubblico, multe, Area C, imposta di soggiorno, dividendi), metodo.
+- **Trappola nuova**: `bilancio_capitoli.csv` ha ogni anno 2016-2024 in due edizioni; sommarle raddoppia (Area C, multe e imposta di soggiorno della fase 1 erano doppie, corrette sopra). Regola: una sola edizione per (tipo, anno).
+- Sorprese: spesa corrente per abitante in euro 2025 da 2.520 (2015) a 2.350 (2025, −6,7%; 2025 con gli abitanti 2024, segnato come stima). I biglietti coprono il 52,6% del trasporto pubblico nel 2015 e il 37,9% nel 2025 (spesa 803,5 → 1.066,6 milioni). Nel 2020 le entrate correnti calano solo del 2,8%: −553,8 milioni di entrate proprie, +554,8 di trasferimenti. Dividendi da 56,6 a 203,2 milioni.
+- Possibili riclassificazioni tra missioni (1, 2, 3, 14: segnate con asterisco, scritte come "sembra"); sosta a pagamento non mostrata (capitoli piccoli e nomi cambiati nel 2020); multe, imposta di soggiorno e trasferimenti TPL sono somme di capitoli scelti per nome (`capitoli_usati.csv`), segnate come stima.
 
 ## 18. L'acqua del rubinetto, zona per zona
 

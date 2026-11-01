@@ -7,7 +7,6 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 ## Decisioni aperte per Davide
 
 1. **Grafica della home**: scegliere tra le quattro bozze tenute da parte (1 mosaico, 2 metro, 6 tabellone, 9 insegne al neon). Le bozze sono in `bozze-home/`.
-2. **Bilancio del Comune**: decidere se farne una pagina (la fase 1 è fatta: consuntivi 2015-2025).
 
 ## Filone per filone
 
@@ -29,7 +28,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 14 | Cinema spariti | Online |
 | 15 | Derby | Online |
 | 16 | Nomi delle fermate | Online |
-| 17 | Bilancio del Comune | Fase 1 fatta, pagina da decidere |
+| 17 | Bilancio del Comune | Online: spese ed entrate 2015-2025 |
 | 18 | Acqua del sindaco | Online, con i PFAS |
 | 19 | Censimenti | Online |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
