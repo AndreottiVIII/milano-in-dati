@@ -68,7 +68,8 @@
     { path: 'reati/', label: 'Reati denunciati' },
     { path: 'quartiere/', label: 'Il tuo quartiere' },
     { path: 'permettersi/', label: 'Chi può permettersi dove' },
-    { path: 'viaggio-linea/', label: 'Un viaggio in tram' }
+    { path: 'viaggio-linea/', label: 'Un viaggio in tram' },
+    { path: 'speranza-vita/', label: 'Quanto si vive' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

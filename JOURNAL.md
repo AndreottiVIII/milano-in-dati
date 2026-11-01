@@ -2647,3 +2647,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - 9 linee (M1-M5, tram 9 e 15, filobus 90 e 91) dal GTFS ATM/AMAT (orario 26/10-30/11/2026); per ogni fermata i valori del suo NIL o zona OMI (reddito, prezzo, età, stranieri, alberi, Airbnb, 15 minuti, scuole, voto 2021 centrosinistra/centrodestra), da docs/*/data.
 - Salti più grandi tra fermate vicine: Airbnb Famagosta → Romolo (M2); voto centrosinistra stessa coppia (50,0% → 68,4%); età Ca' Granda → Bicocca (M5). Il reddito cambia soprattutto tra capolinea: M1 da Pagano (92.141 €) a Turro (29.098 €).
 - Limiti dei dati: valori del quartiere, non della fermata; anni diversi; NIL sotto 5.000 residenti esclusi da testi e salti; diramazioni M1 Bisceglie e M2 Assago non incluse; 90/91 forse deviati per lavori.
+
+## 58. Quanto si vive
+
+- 2026-11-01 notte — Fase 1 e pagina (`speranza-vita/`, `docs/speranza-vita/`), pubblicata con l'autorizzazione notturna di Davide; idea dai progetti simili (Mapparoma, Londra). Dettagli in `speranza-vita/NOTE.md`.
+- Dati aperti: morti di residenti per NIL × sesso senza età (Comune ds137 2003-2020, ds1940 2021-2024, CC BY); età dei morti solo per la città (ISTAT, CC BY 4.0). Nessuna tavola di mortalità sotto il livello comunale (Comune, ISTAT, ATS). Quindi modello: standardizzazione indiretta (SMR con IC Poisson) e speranza di vita stimata con la tavola della città scalata per lo SMR. Controllo: speranza di vita della città 84,6 (2019) contro 84,2 ISTAT per la provincia.
+- Numeri: tra i NIL con almeno 10.000 residenti, 2012-2019, da 85,6 anni (Pagano) a 82,1 (Lambrate-Ortica); quinto più ricco contro quinto più povero 1,7 anni (uomini 2,2-2,4, donne 1,0-1,3); reddito e SMR Spearman −0,60. Sorpresa: il divario è soprattutto maschile, il reddito per CAP spiega circa un terzo delle differenze, la geografia è stabile nel tempo.
+- Limiti dei dati: valori per NIL da modello (stesso divario proporzionale a ogni età, probabilmente sottostima); Morivione con SMR 1,54 probabilmente per una residenza per anziani (ipotesi non verificata), escluso dalle classifiche; registro anagrafico sopra ISTAT; nessuna causa di morte per NIL.

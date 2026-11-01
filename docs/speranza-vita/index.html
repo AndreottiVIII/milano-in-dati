@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quanto si vive</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.iv{margin:.4em 0} .iv .row{display:grid;grid-template-columns:minmax(96px,34%) 1fr 92px;gap:6px;align-items:center;font-size:.88rem;padding:3px 0}
+.iv .nm{line-height:1.2;overflow-wrap:anywhere} .iv .nm i{display:block;font-size:.76rem;color:var(--mut);font-style:normal}
+.iv .tr{background:#f1f1f1;height:14px;position:relative} .iv .wh{position:absolute;top:6px;height:2px;background:#444} .iv .dot{position:absolute;top:1px;width:12px;height:12px;margin-left:-6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #444}
+.iv .ref{position:absolute;top:-3px;height:20px;border-left:2px dashed #c26a1b} .iv .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.iv .ax{display:grid;grid-template-columns:minmax(96px,34%) 1fr 92px;gap:6px;font-size:.75rem;color:var(--mut)} .iv .ax .sc{position:relative;height:16px}.iv .ax .sc span{position:absolute;transform:translateX(-50%)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .iv .row,.iv .ax{grid-template-columns:1fr 92px} .iv .nm{grid-column:1 / -1} .iv .ax .l0{display:none}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.tabmax{max-height:360px;overflow:auto} #tab-mun,#tab-tempo{min-width:520px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quanto si vive nei quartieri di Milano</h1>
+<p>Quanti anni, in media, può aspettarsi di vivere chi nasce in un quartiere di Milano? Il Comune non pubblica la speranza di vita per quartiere, ma pubblica <b>quante persone muoiono ogni anno in ciascuno degli 88 quartieri</b> (i NIL, Nuclei di Identità Locale) e <b>quante ne abitano, per età</b>. Mettendo insieme i due dati, e confrontando ogni quartiere con la media della città a parità di età, si può <b>stimare</b> la speranza di vita. È una stima, non una misura: leggi prima le <a href="#limiti">avvertenze</a>. Qui si confrontano due periodi: gli anni <b>2012–2019</b> (prima del Covid) e <b>2022–2024</b> (dopo).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Il Comune dà i decessi per quartiere <b>senza l&rsquo;età</b>. Per questo la speranza di vita di ogni quartiere è calcolata con un modello: si prende la città, si suppone che in quel quartiere il rischio di morire sia più alto o più basso <i>della stessa percentuale a ogni età</i>, e si ricalcola. Funziona bene per mettere i quartieri in ordine; i numeri assoluti sono meno sicuri. Le differenze vere tra quartieri sono probabilmente un po&rsquo; più grandi di quelle che vedi, perché in genere i divari tra ricchi e poveri sono più forti prima dei 75 anni. Dettagli in <a href="#limiti">limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Scegli che cosa mostrare, per chi e per quale periodo. Clic su un quartiere per la scheda con gli intervalli; oppure scegli dall&rsquo;elenco. I colori <b>pieni</b> dicono che la differenza dalla media della città è chiara; i colori <b>sbiaditi</b> che il quartiere, con i dati che abbiamo, non si distingue dalla media.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-k="mode" data-v="e0" class="on">Speranza di vita stimata</button><button type="button" data-k="mode" data-v="smr">Rischio di morire (città = 100)</button><button type="button" data-k="mode" data-v="red">Reddito medio</button></div>
+<div class="ctl"><span class="sub">Per:</span>
+<button type="button" data-k="sx" data-v="T" class="on">tutti</button><button type="button" data-k="sx" data-v="M">uomini</button><button type="button" data-k="sx" data-v="F">donne</button>
+<span class="sub">&nbsp;Anni:</span>
+<button type="button" data-k="per" data-v="2012-2019" class="on">2012–2019</button><button type="button" data-k="per" data-v="2022-2024">2022–2024</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per speranza di vita stimata"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa © OpenStreetMap contributors. Decessi, residenti e quartieri: Comune di Milano (CC BY); decessi per età della città: ISTAT (CC BY 4.0); reddito: Ministero dell&rsquo;Economia, per CAP. In grigio i quartieri con meno di 3.000 residenti (parchi, aree quasi senza abitanti): con così pochi decessi la stima non si regge.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="estremi">Chi vive di più e di meno</h2>
+<div id="estremi-testo"></div>
+<div class="ctl"><span class="sub">Per:</span><button type="button" data-k="sx2" data-v="T" class="on">tutti</button><button type="button" data-k="sx2" data-v="M">uomini</button><button type="button" data-k="sx2" data-v="F">donne</button>
+<span class="sub">&nbsp;Anni:</span><button type="button" data-k="per2" data-v="2012-2019" class="on">2012–2019</button><button type="button" data-k="per2" data-v="2022-2024">2022–2024</button></div>
+<div class="grid2"><div><h3>I 8 quartieri con la speranza di vita più alta</h3><div class="iv" id="iv-top"></div></div>
+<div><h3>I 8 con la più bassa</h3><div class="iv" id="iv-bot"></div></div></div>
+<p class="src">Solo quartieri con almeno 10.000 residenti. Il punto è la stima, la linea è l&rsquo;intervallo al 95% (qui l&rsquo;incertezza viene solo dal piccolo numero di decessi: non conta l&rsquo;errore del modello). La linea arancione tratteggiata è la media della città.</p>
+<details><summary>Tutti i quartieri, in tabella</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
+
+<h2 id="redditi">Zone ricche e zone povere</h2>
+<div id="red-testo"></div>
+<div class="ctl"><span class="sub">Per:</span><button type="button" data-k="sx3" data-v="T" class="on">tutti</button><button type="button" data-k="sx3" data-v="M">uomini</button><button type="button" data-k="sx3" data-v="F">donne</button>
+<span class="sub">&nbsp;Anni:</span><button type="button" data-k="per3" data-v="2012-2019" class="on">2012–2019</button><button type="button" data-k="per3" data-v="2022-2024">2022–2024</button></div>
+<div class="iv" id="iv-q"></div>
+<p class="src">Cinque gruppi di quartieri messi in fila per reddito medio dichiarato (anno d&rsquo;imposta 2024, per CAP) e divisi in modo che ogni gruppo abbia circa un quinto dei residenti. Sono considerati i 70 quartieri con almeno 3.000 residenti. Linea tratteggiata: media della città.</p>
+<div class="ch" id="ch-sc" role="img" aria-label="Grafico: reddito medio e rischio di morire per quartiere"></div>
+<p class="src">Ogni punto è un quartiere (70). Orizzontale: reddito medio per contribuente (CAP); verticale: rischio di morire rispetto alla media della città (100), anni 2012–2019. Un confronto, non una prova: il reddito è un indizio di molte altre cose (lavoro, istruzione, fumo, accesso alle cure) e qui è misurato per CAP, non per quartiere.</p>
+<div class="warn"><b>Un confronto, non una causa.</b> Dire che nei quartieri con redditi più bassi si muore prima non vuol dire che sia il reddito a far morire. Il reddito è solo uno degli indizi di condizioni di vita diverse. E il dato è sulle <i>zone</i>, non sulle persone: dentro ogni quartiere ci sono ricchi e poveri.</div>
+<div id="red-testo2"></div>
+
+<h2 id="tempo">Nel tempo</h2>
+<div id="tempo-testo"></div>
+<div class="ch" id="ch-tempo" role="img" aria-label="Grafico: speranza di vita alla nascita, Milano e Italia, per anno"></div>
+<div class="lgd" id="lg-tempo"></div>
+<p class="src">Linea piena: la città di Milano, calcolata da noi con i decessi per età (ISTAT) e i residenti del registro del Comune, tutti e due i sessi. Linee tratteggiate: ISTAT/Bes, provincia di Milano (la Città metropolitana, 133 comuni) e Italia. Le due serie non sono identiche perché sono due territori e due metodi; per Milano città il confronto con l&rsquo;ISTAT tiene entro mezzo anno.</p>
+<h3>Il divario tra il quinto più ricco e il più povero</h3>
+<div class="scroll"><table id="tab-tempo"></table></div>
+<p class="src">Differenza tra la speranza di vita stimata del gruppo di quartieri più ricco e quella del più povero (anni); in parentesi il rapporto tra i rischi di morire dei due gruppi e il suo intervallo al 95%.</p>
+
+<h2 id="municipi">I nove Municipi</h2>
+<div id="mun-testo"></div>
+<div class="scroll"><table id="tab-mun"></table></div>
+<p class="src">Stesso metodo, ma con i decessi ufficiali per Municipio (Comune di Milano, ds131 e ds1937) e i residenti per Municipio (ds29). I periodi sono 2013–2019 e 2022–2024. Dentro ogni Municipio ci sono quartieri molto diversi: per questo le differenze sono più piccole che tra i NIL.</p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come è fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil.csv">nil.csv</a> (una riga per quartiere: residenti, decessi osservati e attesi, rischio relativo e speranza di vita stimata con intervalli, per tutti/uomini/donne, nei due periodi; le ultime colonne con i periodi più corti e il 2020), <a href="data/nil.geojson">nil.geojson</a> (confini semplificati con gli stessi valori), <a href="data/nil_finestre.csv">nil_finestre.csv</a> (tutti i periodi, formato lungo), <a href="data/gruppi_reddito.csv">gruppi_reddito.csv</a> (i cinque gruppi per reddito), <a href="data/citta_anno.csv">citta_anno.csv</a> (la città anno per anno, con ISTAT/Bes), <a href="data/municipi.csv">municipi.csv</a>, <a href="data/decessi_nil_anno_sesso.csv">decessi_nil_anno_sesso.csv</a> (decessi per quartiere, anno e sesso: l&rsquo;unico dato di partenza del Comune che usiamo, aggregato), <a href="data/correlazione_reddito.csv">correlazione_reddito.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine). I CSV usano il punto e virgola come separatore e la virgola per i decimali.</p>
+<p>Sullo stesso sito: <a href="../morti/">morti giorno per giorno</a> (quanti ne muoiono, con le ondate di caldo e il Covid), <a href="../eta/">l&rsquo;età dei quartieri</a> (anziani e centenari), <a href="../redditi/">i redditi per CAP</a>, e <a href="../quartieri-che-cambiano/">i quartieri che cambiano</a>.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> <b>Decessi per quartiere:</b> Comune di Milano, &laquo;Popolazione: decessi dei residenti a Milano per quartiere&raquo; (ds137, 2003–2020, e ds1940, 2021–2024), per Municipio (ds131, ds1937), per genere ed età (ds1938), licenza Creative Commons Attribution (CC BY), scaricati da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026. <b>Residenti per quartiere, età e sesso al 31/12:</b> Comune di Milano, ds27 (1999–2025) e, per Municipio, ds29, CC BY, scaricati il 1 novembre 2026. <b>Decessi per età e sesso della città di Milano (residenti):</b> ISTAT, &laquo;Decessi e cause di morte: dati giornalieri comunali&raquo;, release del 25 agosto 2026, scaricati il 1 novembre 2026 (<a href="https://www.istat.it/it/archivio/240401">istat.it</a>), licenza CC BY 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>). <b>Speranza di vita della provincia e dell&rsquo;Italia:</b> ISTAT, &laquo;Il Bes dei territori&raquo; (indicatore 01SAL001, da Tavole di mortalità), edizione 2025, CC BY 4.0, scaricato il 1 novembre 2026. <b>Reddito per CAP:</b> Ministero dell&rsquo;Economia e delle Finanze, dichiarazioni dei redditi (anno d&rsquo;imposta 2024), attribuito ai quartieri dalla nostra sezione <a href="../quartieri-che-cambiano/">I quartieri che cambiano</a>. Elaborazioni nostre: i dati sono stati modificati (sommati, standardizzati per età, usati in un modello).</p>
+<p><b>Non usato:</b> i rapporti dell&rsquo;ATS Milano non hanno la speranza di vita per quartiere o distretto in formato aperto che abbiamo potuto trovare; un loro atlante del 2005 sulla mortalità a Milano (ASL Città di Milano, Russo e Bisanti) è consultabile e conferma, con altri metodi e dati, che il rischio di morire a Milano è più alto dove il reddito è più basso e che la differenza è più evidente tra gli uomini. Non ne riportiamo numeri.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,NIL=[];
+var ACC='#00695c',WARM='#c26a1b',GRY='#bdbdbd';
+var SEXN={T:'tutti',M:'uomini',F:'donne'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?1:d)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function PERN(w){return w.replace('-','–')}
+function W(p,per,sx){var a=p.w&&p.w[per];return a?a[sx]:null}
+function yrs(x){return nf(x,1)+' anni'}
+var RD=[];
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];NF=a[1];NIL=NF.features.map(function(f){return f.properties});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function caut(p){return p.fm!=null&&p.fm>1.25}
+function pool10(){return NIL.filter(function(p){return p.ab>=10000&&!caut(p)&&W(p,'2012-2019','T')})}
+function tutto(){
+  sorpresa();mappa();estremi();redditi();tempo();municipi();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var po=pool10().sort(function(a,b){return W(b,'2012-2019','T')[3]-W(a,'2012-2019','T')[3]});
+  var hi=po[0],lo=po[po.length-1],wh=W(hi,'2012-2019','T'),wl=W(lo,'2012-2019','T');
+  var Q=D.quintili['2012-2019'],QM=Q.M,QF=Q.F,QT=Q.T,Q2=D.quintili['2022-2024'];
+  var S=D.sensibilita,rho=D.correlazione_reddito_smr['2012-2019|T'];
+  var c=D.citta['2012-2019'].T;
+  var h='<p><b>Tra due quartieri grandi di Milano ci sono circa '+nf(wh[3]-wl[3],1)+' anni di speranza di vita.</b> Nel 2012–2019 la stima è di <b>'+nf(wh[3],1)+' anni</b> a '+esc(hi.n)+' (intervallo '+nf(wh[4],1)+'–'+nf(wh[5],1)+') e di <b>'+nf(wl[3],1)+'</b> a '+esc(lo.n)+' ('+nf(wl[4],1)+'–'+nf(wl[5],1)+'); la media della città è '+nf(c,1)+'. Il confronto è tra i quartieri con almeno 10.000 residenti.</p>';
+  h+='<p><b>La geografia non si muove.</b> I quartieri dove si muore di più sono più o meno gli stessi nel 2012–2015 e nel 2022–2024: la correlazione tra le due classifiche è '+nf(S.D_spearman_2012_2015_vs_2022_2024,2)+' (1 vorrebbe dire identiche), anche se in mezzo c&rsquo;è il Covid. La città intanto ha guadagnato '+nf(D.citta['2022-2024'].T-c,1)+' anni.</p>';
+  h+='<p><b>Il divario tra ricchi e poveri è soprattutto maschile.</b> Gli uomini dei quartieri più ricchi (un quinto dei residenti) hanno una speranza di vita stimata più alta di <b>'+nf(QM.gap_e0,1)+' anni</b> rispetto a quelli dei più poveri; per le donne la differenza è di <b>'+nf(QF.gap_e0,1)+'</b>. Nel 2022–2024: '+nf(Q2.M.gap_e0,1)+' per gli uomini, '+nf(Q2.F.gap_e0,1)+' per le donne. Per tutti insieme: '+nf(QT.gap_e0,1)+' anni, identici prima e dopo il Covid ('+nf(Q2.T.gap_e0,1)+').</p>';
+  h+='<p><b>Il reddito spiega solo una parte.</b> Mettendo i quartieri in fila per reddito e per rischio di morire il legame c&rsquo;è ma non è netto (correlazione di rango '+sg(rho.rho,2)+', intervallo '+sg(rho.lo,2)+' / '+sg(rho.hi,2)+'). A parità di reddito ci sono quartieri molto diversi: per esempio Muggiano (reddito basso, molti meno morti di quelli attesi) e Lambrate–Ortica (reddito medio, molti di più).</p>';
+  h+='<p class="src">Stime con un modello (vedi le avvertenze). Decessi per quartiere del Comune di Milano (CC BY), età dei decessi della città da ISTAT (CC BY 4.0). I numeri di questo riquadro sono calcolati dai dati della pagina.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,MODE='e0',SX='T',PER='2012-2019',SEL=null;
+var C_E0=['#a8540f','#e0a96d','#e9e9e9','#a6d3ca','#2b8a7d'];
+var C_SMR=['#2b8a7d','#a6d3ca','#e9e9e9','#e0a96d','#a8540f'];
+var C_RED=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459'];
+var RB=[28000,32000,40000,60000];
+function cityE0(){return D.citta[PER][SX]}
+function cls(v,b){var i=0;while(i<b.length&&v>=b[i])i++;return i}
+function fillOf(p){
+  if(p.cl!==1)return {c:GRY,o:.8};
+  if(MODE==='red')return {c:p.red==null?GRY:C_RED[cls(p.red,RB)],o:.85};
+  var w=W(p,PER,SX);if(!w)return {c:GRY,o:.8};
+  var sig=(w[1]>1||w[2]<1);
+  if(MODE==='e0'){var d=w[3]-cityE0();return {c:C_E0[cls(d,[-1.5,-.5,.5,1.5])],o:sig?.9:.4}}
+  return {c:C_SMR[cls(w[0]*100,[85,95,105,115])],o:sig?.9:.4};
+}
+function sty(f){var p=f.properties,s=fillOf(p),sel=SEL===p.i;return {fillColor:s.c,fillOpacity:s.o,color:sel?'#000':'#fff',weight:sel?3:1}}
+function tipNil(p){
+  var t='<b>'+esc(p.n)+'</b><br>'+f0(p.ab24)+' residenti';
+  if(p.cl!==1)return t+'<br>meno di 3.000 residenti: stima non affidabile';
+  if(MODE==='red')return t+'<br>reddito medio '+f0(p.red)+' €';
+  var w=W(p,PER,SX);if(!w)return t;
+  if(MODE==='e0')return t+'<br>speranza di vita stimata <b>'+nf(w[3],1)+'</b> anni ('+nf(w[4],1)+'–'+nf(w[5],1)+')';
+  return t+'<br>rischio di morire <b>'+f0(w[0]*100)+'</b> (intervallo '+f0(w[1]*100)+'–'+f0(w[2]*100)+')';
+}
+function legenda(){
+  var h='',t;
+  if(MODE==='e0'){var c=cityE0();t=['più di 1,5 anni sotto la città','da 0,5 a 1,5 sotto','vicino alla media ('+nf(c,1)+')','da 0,5 a 1,5 sopra','più di 1,5 sopra'];C_E0.forEach(function(k,i){h+='<span><i style="background:'+k+'"></i>'+t[i]+'</span>'})}
+  else if(MODE==='smr'){t=['meno di 85','85–95','95–105 (media = 100)','105–115','più di 115'];C_SMR.forEach(function(k,i){h+='<span><i style="background:'+k+'"></i>'+t[i]+'</span>'})}
+  else{t=['sotto 28.000 €','28.000–32.000','32.000–40.000','40.000–60.000','oltre 60.000 €'];C_RED.forEach(function(k,i){h+='<span><i style="background:'+k+'"></i>'+t[i]+'</span>'})}
+  h+='<span><i style="background:'+GRY+'"></i>meno di 3.000 residenti</span>';
+  if(MODE!=='red')h+='<span><i style="background:#e0a96d;opacity:.4"></i>colore sbiadito = non distinguibile dalla media</span>';
+  setH('lg-map',h);
+  var d={e0:'Speranza di vita alla nascita stimata per '+SEXN[SX]+', anni '+PERN(PER)+'. Più scuro (verde) = si vive di più; arancione = di meno, rispetto alla media della città ('+nf(cityE0(),1)+' anni).',
+         smr:'Rischio di morire a parità di età, per '+SEXN[SX]+', anni '+PERN(PER)+', con la media della città uguale a 100. 120 vuol dire il 20% di morti in più di quelli attesi per l&rsquo;età dei residenti.',
+         red:'Reddito imponibile medio per contribuente, anno d&rsquo;imposta 2024, assegnato al quartiere dal CAP (38 CAP): quartieri vicini nello stesso CAP hanno lo stesso valore.'}[MODE];
+  setH('map-desc',d);
+}
+function mappa(){
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-k="mode"],button[data-k="sx"],button[data-k="per"]'),function(b){b.addEventListener('click',function(){
+    var k=b.getAttribute('data-k'),v=b.getAttribute('data-v');if(k==='mode')MODE=v;if(k==='sx')SX=v;if(k==='per')PER=v;
+    Array.prototype.forEach.call(document.querySelectorAll('button[data-k="'+k+'"]'),function(x){x.classList.toggle('on',x===b)});
+    ricolora();if(SEL)scheda(SEL)})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function ricolora(){LAY.setStyle(sty);if(SEL)LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()});legenda()}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);
+  LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})}});scheda(i)}
+function ivtxt(w,k){return w?nf(w[k],1)+' <span class="sub">('+nf(w[k+1],1)+'–'+nf(w[k+2],1)+')</span>':'—'}
+function scheda(i){
+  var p=nilById(i);if(!p)return;
+  var h='<h3>'+esc(p.n)+'</h3>';
+  if(p.cl!==1)h+='<p class="warn">Meno di 3.000 residenti ('+f0(p.ab24)+'): troppo pochi decessi, la stima non è affidabile e non entra nei confronti.</p>';
+  var w0=W(p,'2012-2019','T');
+  if(caut(p))h+='<p class="warm">Da leggere con cautela: i decessi di donne sono molto più alti di quelli attesi (rischio 1,68 volte la media contro 1,30 per gli uomini). Può dipendere da una residenza per anziani o simile con residenza anagrafica nel quartiere: è un&rsquo;ipotesi, non l&rsquo;abbiamo verificata.</p>';
+  h+='<div class="scroll"><table><thead><tr><th>Speranza di vita stimata</th><th class="r">2012–2019</th><th class="r">2022–2024</th></tr></thead><tbody>';
+  ['T','M','F'].forEach(function(s){h+='<tr><td>'+(s==='T'?'Tutti':s==='M'?'Uomini':'Donne')+' <span class="sub">(città: '+nf(D.citta['2012-2019'][s],1)+' / '+nf(D.citta['2022-2024'][s],1)+')</span></td><td class="r">'+ivtxt(W(p,'2012-2019',s),3)+'</td><td class="r">'+ivtxt(W(p,'2022-2024',s),3)+'</td></tr>'});
+  h+='</tbody></table></div><div class="scroll"><table><tbody>';
+  var w=W(p,PER,SX);
+  if(w){h+='<tr><td>Rischio di morire, '+SEXN[SX]+', '+PERN(PER)+' (città = 100)</td><td class="r"><b>'+f0(w[0]*100)+'</b> <span class="sub">('+f0(w[1]*100)+'–'+f0(w[2]*100)+')</span></td></tr>';
+  h+='<tr><td>Decessi osservati / attesi per l&rsquo;età</td><td class="r">'+f0(w[6])+' / '+f0(w[7])+'</td></tr>'}
+  h+='<tr><td>Residenti al 31/12/2024</td><td class="r">'+f0(p.ab24)+'</td></tr>';
+  h+='<tr><td>Quota di over 85</td><td class="r">'+nf(p.q85,1)+'% '+(p.v85>=1.5?'<span class="pill">oltre 1,5 volte la media</span>':'')+'</td></tr>';
+  h+='<tr><td>Reddito medio (CAP), 2024</td><td class="r">'+(p.red!=null?f0(p.red)+' €':'—')+(p.q?' <span class="sub">(gruppo '+p.q+' su 5, 1 = più povero)</span>':'')+'</td></tr>';
+  h+='</tbody></table></div><p class="sub">Intervalli al 95%. Il rischio relativo è il rapporto tra i decessi osservati e quelli che ci sarebbero con i tassi per età della città. Stime con modello: vedi le avvertenze.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- grafico a intervalli ---------- */
+function ivPlot(id,rows,x0,x1,ref,step){
+  var ax='<div class="ax"><span class="l0"></span><span class="sc">';
+  for(var v=Math.ceil(x0/step)*step;v<=x1+1e-9;v+=step)ax+='<span style="left:'+((v-x0)/(x1-x0)*100)+'%">'+nf(v,0)+'</span>';
+  ax+='</span><span></span></div>';
+  function P(v){return Math.max(0,Math.min(100,(v-x0)/(x1-x0)*100))}
+  setH(id,rows.map(function(r){
+    return '<div class="row"><span class="nm">'+r.nm+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="ref" style="left:'+P(ref)+'%"></span><span class="wh" style="left:'+P(r.lo)+'%;width:'+(P(r.hi)-P(r.lo))+'%"></span><span class="dot" style="left:'+P(r.est)+'%;background:'+(r.col||ACC)+'"></span></span><span class="v">'+nf(r.est,1)+'</span></div>'}).join('')+ax);
+}
+var SX2='T',PER2='2012-2019',SX3='T',PER3='2012-2019';
+function estremi(){
+  function draw(){
+    var po=pool10().filter(function(p){return W(p,PER2,SX2)}).sort(function(a,b){return W(b,PER2,SX2)[3]-W(a,PER2,SX2)[3]});
+    var top=po.slice(0,8),bot=po.slice(-8).reverse(),c=D.citta[PER2][SX2];
+    function row(p,col){var w=W(p,PER2,SX2);return {nm:esc(p.n),sub:f0(p.ab)+' residenti',est:w[3],lo:w[4],hi:w[5],col:col}}
+    var all=top.concat(bot).map(function(p){return W(p,PER2,SX2)}),x0=Math.floor(Math.min.apply(null,all.map(function(w){return w[4]}))-.5),x1=Math.ceil(Math.max.apply(null,all.map(function(w){return w[5]}))+.5);
+    ivPlot('iv-top',top.map(function(p){return row(p,'#2b8a7d')}),x0,x1,c,2);
+    ivPlot('iv-bot',bot.map(function(p){return row(p,'#a8540f')}),x0,x1,c,2);
+    var hi=top[0],lo=bot[0],wh=W(hi,PER2,SX2),wl=W(lo,PER2,SX2);
+    setH('estremi-testo','<p>Tra i '+po.length+' quartieri con almeno 10.000 residenti ('+SEXN[SX2]+', '+PERN(PER2)+'), la speranza di vita stimata va da <b>'+nf(wl[3],1)+'</b> ('+esc(lo.n)+') a <b>'+nf(wh[3],1)+'</b> ('+esc(hi.n)+'), con una media di città di '+nf(c,1)+'. La differenza (<b>'+nf(wh[3]-wl[3],1)+' anni</b>) è molto più grande dell&rsquo;incertezza di ciascuna stima. In alto ci sono soprattutto quartieri centrali ('+top.slice(0,3).map(function(p){return esc(p.n)}).join(', ')+'); in basso quartieri più periferici ('+bot.slice(0,3).map(function(p){return esc(p.n)}).join(', ')+')'+((SX2==='T'&&PER2==='2012-2019')?', con eccezioni: tra i quartieri più piccoli, Trenno e Muggiano, ai margini della città, sono tra i più alti':'')+'.</p>');
+    var rows=NIL.filter(function(p){return p.cl===1&&W(p,PER2,SX2)}).sort(function(a,b){return W(b,PER2,SX2)[3]-W(a,PER2,SX2)[3]});
+    var h='<thead><tr><th>Quartiere</th><th class="r">Residenti</th><th class="r">Speranza di vita</th><th class="r">Intervallo</th><th class="r">Rischio (città=100)</th><th class="r">Reddito €</th></tr></thead><tbody>';
+    rows.forEach(function(p){var w=W(p,PER2,SX2);h+='<tr><td>'+esc(p.n)+(caut(p)?'<span class="pill">cautela</span>':'')+'</td><td class="r">'+f0(p.ab24)+'</td><td class="r"><b>'+nf(w[3],1)+'</b></td><td class="r">'+nf(w[4],1)+'–'+nf(w[5],1)+'</td><td class="r">'+f0(w[0]*100)+'</td><td class="r">'+f0(p.red)+'</td></tr>'});
+    setH('tab-nil',h+'</tbody>');
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-k="sx2"],button[data-k="per2"]'),function(b){b.addEventListener('click',function(){
+    var k=b.getAttribute('data-k'),v=b.getAttribute('data-v');if(k==='sx2')SX2=v;else PER2=v;
+    Array.prototype.forEach.call(document.querySelectorAll('button[data-k="'+k+'"]'),function(x){x.classList.toggle('on',x===b)});draw()})});
+  draw();
+}
+
+/* ---------- ricchi e poveri ---------- */
+function redditi(){
+  function draw(){
+    var Q=D.quintili[PER3][SX3],c=D.citta[PER3][SX3],rows=[];
+    for(var q=1;q<=5;q++){var g=Q[q];rows.push({nm:(q===1?'Più poveri':q===5?'Più ricchi':'Gruppo '+q),sub:'reddito '+f0(g.red_min)+'–'+f0(g.red_max)+' € · '+g.n_nil+' quartieri',est:g.e0,lo:g.e0_lo,hi:g.e0_hi,col:q<=2?'#a8540f':q>=4?'#2b8a7d':'#777'})}
+    var mn=Math.floor(Math.min.apply(null,rows.map(function(r){return r.lo}))-.3),mx=Math.ceil(Math.max.apply(null,rows.map(function(r){return r.hi}))+.3);
+    ivPlot('iv-q',rows,mn,mx,c,1);
+    setH('red-testo','<p>Mettiamo i 70 quartieri con almeno 3.000 residenti in cinque gruppi, dal reddito medio più basso al più alto, ciascuno con circa un quinto dei residenti. Per <b>'+SEXN[SX3]+'</b>, '+PERN(PER3)+': la speranza di vita stimata passa da <b>'+nf(Q[1].e0,1)+'</b> anni nel gruppo più povero a <b>'+nf(Q[5].e0,1)+'</b> nel più ricco, <b>'+nf(Q.gap_e0,1)+' anni</b> di differenza. Il rischio di morire, a parità di età, nel gruppo più povero è <b>'+nf(Q.rapporto_smr_1su5,2)+'</b> volte quello del più ricco (intervallo '+nf(Q.rapporto_lo,2)+'–'+nf(Q.rapporto_hi,2)+').</p>');
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-k="sx3"],button[data-k="per3"]'),function(b){b.addEventListener('click',function(){
+    var k=b.getAttribute('data-k'),v=b.getAttribute('data-v');if(k==='sx3')SX3=v;else PER3=v;
+    Array.prototype.forEach.call(document.querySelectorAll('button[data-k="'+k+'"]'),function(x){x.classList.toggle('on',x===b)});draw()})});
+  draw();
+  function sc(){
+    var pts=NIL.filter(function(p){return p.cl===1&&p.red!=null&&W(p,'2012-2019','T')}).map(function(p){var w=W(p,'2012-2019','T');return {x:p.red/1000,y:w[0]*100,t:'<b>'+esc(p.n)+'</b><br>reddito '+f0(p.red)+' €<br>rischio '+f0(w[0]*100)+' ('+f0(w[1]*100)+'–'+f0(w[2]*100)+')'}});
+    scatter(el('ch-sc'),{pts:pts,xl:'reddito medio (migliaia di €)',yl:'rischio di morire (città = 100)',xf:function(v){return nf(v,0)},hline:100,hl:'media città',h:320});
+  }
+  sc();RD.push(sc);
+  var S=D.sensibilita,rho=D.correlazione_reddito_smr['2012-2019|T'],q22=D.quintili['2022-2024'];
+  setH('red-testo2','<p>Il legame tra reddito e rischio di morire è negativo ma non stretto: correlazione di rango <b>'+sg(rho.rho,2)+'</b> (intervallo al 95%: '+sg(rho.lo,2)+' / '+sg(rho.hi,2)+', '+rho.n+' quartieri). Vuol dire che il reddito spiega circa un terzo delle differenze tra quartieri. Contando solo i residenti con cittadinanza italiana, i risultati sono praticamente gli stessi (correlazione tra le due versioni: '+nf(S.A_spearman_smr_tutti_vs_solo_italiani,2)+'), quindi il risultato non dipende dalla presenza di stranieri nei quartieri.</p>');
+}
+function scatter(box,o){
+  box.innerHTML='';
+  var Wd=box.clientWidth||320,H=o.h||300,m={l:48,r:12,t:14,b:42};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=Math.min.apply(null,ys.concat([o.hline||1e9])),y1=Math.max.apply(null,ys.concat([o.hline||0]));
+  y0=Math.floor(y0/10)*10-10;y1=Math.ceil(y1/10)*10+10;
+  var sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);x0=Math.floor(x0/sx)*sx;x1=Math.ceil(x1/sx)*sx;
+  var pw=Wd-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+Wd+' '+H+'" width="'+Wd+'" height="'+H+'" aria-hidden="true">';
+  for(var v=Math.ceil(y0/sy)*sy;v<=y1+1e-9;v+=sy)s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var lastx=-99;
+  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);if(xx-lastx>40){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(v)+'</text>'}}
+  s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.hline!=null)s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+Y(o.hline)+'" y2="'+Y(o.hline)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(Wd-m.r-2)+'" y="'+(Y(o.hline)-4)+'" text-anchor="end" style="fill:#8a4a10">'+o.hl+'</text>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-3)+'" text-anchor="start">'+o.yl+'</text>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.2" fill="'+ACC+'" fill-opacity=".72" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=Wd/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tip.style.display='none';ring.style.display='none';return}
+    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tip.innerHTML=p.t;tip.style.display='';var tw=tip.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  function hide(){tip.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- nel tempo ---------- */
+function line(box,series,o){
+  box.innerHTML='';
+  var Wd=box.clientWidth||320,H=o.h||300,m={l:40,r:12,t:14,b:30};
+  var all=[];series.forEach(function(s){s.pts.forEach(function(p){all.push(p)})});
+  var x0=Math.min.apply(null,all.map(function(p){return p[0]})),x1=Math.max.apply(null,all.map(function(p){return p[0]})),y0=Math.floor(Math.min.apply(null,all.map(function(p){return p[1]}))-.3),y1=Math.ceil(Math.max.apply(null,all.map(function(p){return p[1]}))+.3);
+  var pw=Wd-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+Wd+' '+H+'" width="'+Wd+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+1e-9;v+=1)s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+nf(v,0)+'</text>';
+  for(var a=Math.ceil(x0/4)*4;a<=x1;a+=4)s+='<text class="mu" x="'+X(a)+'" y="'+(H-10)+'" text-anchor="middle">'+a+'</text>';
+  series.forEach(function(se){s+='<polyline fill="none" stroke="'+se.col+'" stroke-width="'+(se.w||2)+'"'+(se.dash?' stroke-dasharray="5 4"':'')+' points="'+se.pts.map(function(p){return X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)}).join(' ')+'"/>'});
+  s+='<text class="mu" x="'+m.l+'" y="'+(m.t-3)+'">anni</text><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg><div class="tip" style="display:none"></div>';
+  box.innerHTML=s;
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('rect');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=Wd/r.width,px=(t.clientX-r.left)*k;var yr=Math.round(x0+(px-m.l)/pw*(x1-x0));if(yr<x0||yr>x1){tip.style.display='none';return}
+    var h='<b>'+yr+'</b>';series.forEach(function(se){se.pts.forEach(function(p){if(p[0]===yr)h+='<br><span style="color:'+se.col+'">&#9632;</span> '+se.nm+': '+nf(p[1],1)})});
+    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=X(yr)/k+10;if(left+tw>r.width)left=X(yr)/k-tw-10;tip.style.left=Math.max(0,left)+'px';tip.style.top='10px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function tempo(){
+  var an=D.annuale,bs=D.bes_serie;
+  function ch(){
+    line(el('ch-tempo'),[
+      {nm:'Milano città (nostro calcolo)',col:ACC,w:2.5,pts:an.filter(function(r){return r.e0_T!=null}).map(function(r){return [r.anno,r.e0_T]})},
+      {nm:'Provincia di Milano (ISTAT/Bes)',col:WARM,dash:1,pts:bs.filter(function(r){return r.bes_Milano_Totale!=null}).map(function(r){return [r.anno,r.bes_Milano_Totale]})},
+      {nm:'Italia (ISTAT/Bes)',col:'#555',dash:1,pts:bs.filter(function(r){return r.bes_Italia_Totale!=null}).map(function(r){return [r.anno,r.bes_Italia_Totale]})}],{h:300});
+  }
+  ch();RD.push(ch);
+  setH('lg-tempo','<span><i class="ln" style="border-top-color:'+ACC+'"></i>Milano città (2012–2024)</span><span><i class="ln d" style="border-top-color:'+WARM+'"></i>provincia di Milano (ISTAT/Bes)</span><span><i class="ln d" style="border-top-color:#555"></i>Italia (ISTAT/Bes)</span>');
+  var a=function(y){return an.filter(function(r){return r.anno===y})[0]},b=function(y){return bs.filter(function(r){return r.anno===y})[0]};
+  var q1=D.quintili['2016-2019'].T[1],it=[2016,2017,2018,2019].map(function(y){return b(y).bes_Italia_Totale}),itm=it.reduce(function(s,v){return s+v},0)/it.length;
+  setH('tempo-testo','<p>La speranza di vita alla nascita a Milano città, nostro calcolo, passa da <b>'+nf(a(2012).e0_T,1)+' anni nel 2012</b> a <b>'+nf(a(2019).e0_T,1)+'</b> nel 2019, poi cala a <b>'+nf(a(2020).e0_T,1)+' nel 2020</b> (il Covid), risale e arriva a <b>'+nf(a(2024).e0_T,1)+' nel 2024</b>. Nel 2024: uomini '+nf(a(2024).e0_M,1)+', donne '+nf(a(2024).e0_F,1)+'. Per la provincia di Milano l&rsquo;ISTAT dà '+nf(b(2024).bes_Milano_Totale,1)+' nel 2024 (Italia '+nf(b(2024).bes_Italia_Totale,1)+'); nel 2004 era '+nf(b(2004).bes_Milano_Totale,1)+' (Italia '+nf(b(2004).bes_Italia_Totale,1)+'): il vantaggio di Milano sull&rsquo;Italia è passato da '+nf(b(2004).bes_Milano_Totale-b(2004).bes_Italia_Totale,1)+' a '+nf(b(2024).bes_Milano_Totale-b(2024).bes_Italia_Totale,1)+' anni.</p>'+
+   '<p>Per confronto: il gruppo di quartieri più povero ha, nel 2016–2019, una speranza di vita stimata di '+nf(q1.e0,1)+' anni, circa come la media italiana negli stessi anni ('+nf(itm,1)+'). Sono due stime fatte in modo diverso: il confronto è di massima.</p>'+
+   '<p>In dodici anni il divario tra quartieri non si è chiuso: i quartieri ricchi e quelli poveri hanno guadagnato anni insieme, e la distanza tra loro è rimasta quasi uguale (tabella sotto). Tra gli uomini è un po&rsquo; salita, tra le donne è scesa, ma gli intervalli si sovrappongono: non possiamo dire che siano cambiate.</p>');
+  var Q=D.quintili,rows='';
+  [['2012-2015','2012–2015'],['2016-2019','2016–2019'],['2022-2024','2022–2024'],['2020','2020 (Covid)']].forEach(function(p){
+    var q=Q[p[0]];rows+='<tr><td>'+p[1]+'</td>'+['T','M','F'].map(function(s){var g=q[s];return '<td class="r"><b>'+nf(g.gap_e0,1)+'</b> anni <span class="sub">('+nf(g.rapporto_smr_1su5,2)+', '+nf(g.rapporto_lo,2)+'–'+nf(g.rapporto_hi,2)+')</span></td>'}).join('')+'</tr>'});
+  setH('tab-tempo','<thead><tr><th>Periodo</th><th class="r">Tutti</th><th class="r">Uomini</th><th class="r">Donne</th></tr></thead><tbody>'+rows+'</tbody>');
+}
+
+/* ---------- municipi ---------- */
+function municipi(){
+  var M=D.municipi,by={};
+  M.forEach(function(r){if(r.sesso==='T'){(by[r.municipio]=by[r.municipio]||{})[r.finestra]=r}});
+  var ks=Object.keys(by).map(Number).sort(function(a,b){return a-b}),h='<thead><tr><th>Municipio</th><th class="r">Residenti</th><th class="r">2013–2019 speranza di vita</th><th class="r">Rischio (città=100)</th><th class="r">2022–2024 speranza di vita</th><th class="r">Rischio</th></tr></thead><tbody>';
+  ks.forEach(function(k){var a=by[k]['2013-2019'],b=by[k]['2022-2024'];
+    h+='<tr><td>'+k+'</td><td class="r">'+f0(b.residenti_medi)+'</td><td class="r"><b>'+nf(a.e0,1)+'</b> <span class="sub">('+nf(a.e0_lo,1)+'–'+nf(a.e0_hi,1)+')</span></td><td class="r">'+f0(a.smr*100)+'</td><td class="r"><b>'+nf(b.e0,1)+'</b> <span class="sub">('+nf(b.e0_lo,1)+'–'+nf(b.e0_hi,1)+')</span></td><td class="r">'+f0(b.smr*100)+'</td></tr>'});
+  setH('tab-mun',h+'</tbody>');
+  var lo=ks.slice().sort(function(a,b){return by[a]['2013-2019'].e0-by[b]['2013-2019'].e0})[0],hi=ks.slice().sort(function(a,b){return by[b]['2013-2019'].e0-by[a]['2013-2019'].e0})[0];
+  setH('mun-testo','<p>A livello di Municipio le differenze sono più piccole, perché ogni Municipio mescola quartieri diversi. Il <b>Municipio '+hi+'</b> (il centro) ha la speranza di vita stimata più alta ('+nf(by[hi]['2013-2019'].e0,1)+' anni nel 2013–2019, '+nf(by[hi]['2022-2024'].e0,1)+' nel 2022–2024); il più basso è il <b>'+lo+'</b> ('+nf(by[lo]['2013-2019'].e0,1)+', poi '+nf(by[lo]['2022-2024'].e0,1)+'). Distanza: '+nf(by[hi]['2013-2019'].e0-by[lo]['2013-2019'].e0,1)+' anni, contro i '+nf(sorpDiff(),1)+' tra i quartieri.</p>');
+}
+function sorpDiff(){var po=pool10().sort(function(a,b){return W(b,'2012-2019','T')[3]-W(a,'2012-2019','T')[3]});return W(po[0],'2012-2019','T')[3]-W(po[po.length-1],'2012-2019','T')[3]}
+
+/* ---------- limiti e metodo ---------- */
+function limiti(){
+  var S=D.sensibilita,C=D.controlli;
+  var L=[
+   '<b>I decessi per quartiere non hanno l&rsquo;età.</b> Il Comune pubblica i morti per quartiere, sesso e cittadinanza, ma non per età. Per tenere conto dell&rsquo;età abbiamo usato i tassi per età di tutta la città (ISTAT) applicati ai residenti di ogni quartiere. Questo dice quanti morti ci si aspetterebbe; il rapporto tra morti veri e attesi è il &laquo;rischio relativo&raquo;. Da qui la speranza di vita è stimata supponendo che quel rapporto valga uguale a ogni età: nella realtà le differenze tra ricchi e poveri sono di solito più grandi tra i 40 e i 75 anni che dopo gli 85, quindi i divari veri sono probabilmente un po&rsquo; più grandi dei nostri. I numeri assoluti sono meno sicuri dell&rsquo;ordine dei quartieri.',
+   '<b>L&rsquo;intervallo è solo una parte dell&rsquo;incertezza.</b> Gli intervalli al 95% (metodo esatto di Poisson) vengono solo dal piccolo numero di decessi: non contano l&rsquo;errore del modello, né quello dei residenti. I quartieri piccoli (sotto 10.000 residenti) hanno intervalli larghi; sotto 3.000 residenti (18 quartieri su 88) non si dice niente. Parco Sempione non ha residenti.',
+   '<b>Residenti del registro, non del censimento.</b> I residenti vengono dal registro anagrafico del Comune (ds27). Dal 2020 conta più persone di ISTAT (+1,3% nel 2020, +2,7% nel 2025) e ha salti di serie (+24.600 persone tra 2011 e 2012). Se le persone partite non sono state cancellate, i tassi risultano più bassi. Per il confronto tra quartieri conta poco, perché vale per tutti; per il livello assoluto sì: con questi dati, nel 2019 la speranza di vita stimata della città è di 84,6 anni (uomini 82,3, donne 86,6) contro 84,2 dell&rsquo;ISTAT per la provincia (82,2 e 86,3).',
+   '<b>Residenze per anziani e altre convivenze.</b> Se una casa di riposo o un ospedale con letti di lungo degenza ha i suoi ospiti iscritti all&rsquo;anagrafe del quartiere, quel quartiere ha più decessi di quanti la sua età faccia pensare. Non abbiamo l&rsquo;elenco con i posti letto. Il caso più evidente è <b>Morivione</b>: 7.800 residenti, il 54% di decessi in più di quelli attesi (speranza di vita stimata 79,9 anni), con le donne molto più colpite degli uomini (rischio 1,68 contro 1,30) e una quota di over 85 appena sopra la media (1,1 volte). È un&rsquo;ipotesi, non verificata: nella tabella e nella scheda è segnato &laquo;cautela&raquo; e non entra nelle classifiche (resta nei gruppi di reddito, dove non cambia i due gruppi estremi). Altri quartieri hanno molti over 85 (il Gallaratese 1,8 volte la media della città; Cimiano, Taliedo, Gratosoglio, Bande Nere e Barona 1,4–1,5 volte), ma senza un eccesso di decessi paragonabile.',
+   '<b>Reddito per CAP, non per quartiere.</b> Il reddito viene da 38 CAP e arriva ai quartieri con una stima (fatta dalla sezione <a href="../quartieri-che-cambiano/">I quartieri che cambiano</a>). Quartieri nello stesso CAP hanno lo stesso valore. Non dice niente sulle persone, non è una causa, e dentro ogni quartiere ci sono ricchi e poveri.',
+   '<b>Residenza, non luogo del decesso.</b> I decessi sono quelli dei residenti, ovunque siano morti. I morti avvenuti a Milano ma di altri comuni non sono contati.',
+   '<b>Ci sono ritardi e differenze tra le fonti.</b> I decessi del Comune per il 2012–2019 sono più bassi di quelli ISTAT (in media del 6% nel 2012–2015, con un minimo del 10% nel 2014, e del 2% nel 2016–2019); abbiamo riportato i tassi ISTAT al livello del Comune. Dal 2021 le due fonti coincidono. Nel 2012 gli anni-persona sono contati con i soli residenti di fine anno, per via del salto del registro.',
+   '<b>Il Covid.</b> Nel 2020 i morti salgono da circa 14.000 a quasi 18.600. Per questo teniamo i periodi 2012–2019 e 2022–2024 e mostriamo il 2020 solo nella tabella del divario; il 2021 e il 2022 hanno ancora qualche morto in più del normale.',
+   '<b>Quartieri con pochi decessi.</b> Dei '+S.E_nil_analizzabili+' quartieri analizzabili (almeno 3.000 residenti), '+S.E_sotto_la_media_intervallo_esclude_1+' hanno nel 2012–2019 un rischio chiaramente sotto la media e '+S.E_sopra_la_media_intervallo_esclude_1+' chiaramente sopra; gli altri non si distinguono dalla media con i dati che abbiamo.',
+   '<b>Che cosa non c&rsquo;è.</b> Niente cause di morte per quartiere (i dati pubblici del Comune arrivano al 2013 e sono solo per tutta la città), niente istruzione o professione dei defunti, niente anni di vita in buona salute. Non usiamo gli anni 2003–2011: i NIL nascono nel 2012 e il Comune non dice come abbia assegnato ad essi i morti e i residenti precedenti.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var L=[
+   '<b>Rischio relativo (SMR, rapporto standardizzato di mortalità).</b> Per ogni quartiere e sesso: decessi veri del periodo diviso i decessi che ci sarebbero se ogni età avesse il tasso medio della città. Il tasso medio per età viene dai decessi ISTAT della città (22 classi di età, 0, 1–4, 5–9, &hellip;, 100 e più) divisi per gli anni-persona del registro. I decessi attesi sono poi ridotti o aumentati di una piccola percentuale uguale per tutti, perché il totale dei quartieri coincida con i decessi del Comune: così la città vale esattamente 1 (100).',
+   '<b>Anni-persona.</b> Per ogni anno, media dei residenti al 31 dicembre dell&rsquo;anno prima e dell&rsquo;anno stesso, per quartiere, età e sesso (per il 2012: solo fine 2012).',
+   '<b>Intervalli.</b> Intervallo al 95% esatto di Poisson sui decessi osservati (metodo di Garwood), con gli attesi presi come fissi. Per i gruppi e per il rapporto tra due gruppi, errore standard del logaritmo = radice di 1/osservati del primo + 1/osservati del secondo.',
+   '<b>Speranza di vita.</b> Tavola di mortalità abbreviata della città (stesse 22 classi di età, formule standard di Coale–Demeny per i primi anni e punto medio per le altre classi, ultima classe aperta) calcolata separatamente per uomini, donne e, con i tassi uniti, per tutti. Per un quartiere si moltiplicano i tassi della città per il suo rischio relativo e si ricalcola. Gli intervalli si ottengono applicando gli estremi del rischio relativo.',
+   '<b>Periodi.</b> 2012–2019 (8 anni), 2022–2024 (3 anni); come controlli 2012–2015, 2016–2019, 2020 e 2021. Prima del 2012 il registro ha salti (revisione dopo il censimento 2011) e i decessi per età di ISTAT cominciano nel 2011.',
+   '<b>Gruppi di reddito.</b> I quartieri con almeno 3.000 residenti sono messi in fila per reddito medio e divisi in cinque gruppi con circa un quinto dei residenti ciascuno; per ogni gruppo si sommano decessi osservati e attesi. La correlazione è di Spearman (sulle posizioni), con intervallo da 2.000 ricampionamenti.',
+   '<b>Controlli.</b> (1) I decessi per quartiere del Comune coincidono con quelli per età (ds1938) nel 2021–2024. (2) La speranza di vita della città così calcolata si avvicina a quella dell&rsquo;ISTAT per la provincia: 2019, 84,6 contro 84,2; 2024, 85,2 contro 84,7. (3) Solo con cittadini italiani i rischi sono quasi identici (correlazione '+nf(D.sensibilita.A_spearman_smr_tutti_vs_solo_italiani,3)+'). (4) Togliendo Morivione il legame con il reddito resta (correlazione '+sg(D.sensibilita.B_spearman_reddito_smr_senza_Morivione,2)+'). (5) I quartieri sono stabili nel tempo (correlazione tra 2012–2015 e 2016–2019: '+nf(D.sensibilita.D_spearman_2012_2015_vs_2016_2019,2)+').',
+   '<b>Pagina costruita da un programma</b> (<code>speranza-vita/scripts/pagina.py</code>) che legge le tabelle pulite e scrive i file di <code>data/</code>; ogni numero ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a> (campo <code>origine</code>).'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>
