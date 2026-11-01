@@ -2520,3 +2520,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Risultati: in testa Sarpi, Isola, Ghisolfa, Lambrate-Ortica, Farini; i 4 NIL del Municipio 1 tra il 59° e il 69° posto. Sorpresa: il cambiamento non è dove abitano i ricchi; Lambrate-Ortica 4° con affitti +114%.
 - Robustezza: Spearman 0,92-1,00 su 20 varianti; gli estremi tengono, il centro della classifica no (in pagina il posto ha sempre il suo intervallo). Gli indicatori concordano poco (alfa 0,31): l'indice mescola tre storie.
 - Limiti dei dati: OMI sono stime; reddito su 38 CAP e OMI su ~42 zone (NIL vicini condividono valori); CAP 20121/20122 esclusi; Airbnb una sola fotografia; censimenti 2011 e 2023 di tipo diverso; l'indice non misura espulsioni né cause. "Gentrificazione" solo definita, mai come etichetta.
+
+## 40. Pollini: la pianura attorno a Milano
+
+- 2026-11-01 notte — Fase 1 e pagina (`pollini/`, `docs/pollini/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `pollini/NOTE.md`.
+- **Per Milano città non esiste una serie aperta**: il monitoraggio lo fa ATS Città Metropolitana, che pubblica solo il bollettino a classi e il calendario; la Lombardia non ha stazioni POLLnet. Usate le 6 stazioni POLLnet più vicine (ISPRA/SNPA, CC BY 4.0; Novara a 45 km). Dal calendario ATS 2016-2025 (PDF, licenza non dichiarata) solo le classi per decade, ricavate dai colori; PDF non ripubblicato. Nessuna richiesta ad ATS.
+- Numeri: graminacee partono 8,2 giorni prima per decennio (IC da −17,2 a −0,3) e durano 16 giorni in più; urticacee e artemisia partono più tardi; platano, betulla e frassino partono 4-7 giorni prima per grado di febbraio-marzo a Brera (confronto). Sorpresa: ambrosia crollata nel 2013 in tutte le stazioni (Novara −86%); la Regione lo attribuisce al coleottero Ophraella communa, i dati non mostrano la causa.
+- Limiti dei dati: non è Milano; alcune stazioni registrano solo valori sopra zero; taxon e metodi cambiano; serie corte (11-20 anni); 55 test di tendenza.
