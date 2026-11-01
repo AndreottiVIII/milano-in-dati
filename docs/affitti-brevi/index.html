@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Affitti brevi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(90px,38%) 1fr 62px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .rg{position:absolute;top:4px;height:2px;background:#111} .bars .v{text-align:right;font-variant-numeric:tabular-nums}
+.bars .row.dim .fill{background:#b9b9b9} .bars .row.dim .nm,.bars .row.dim .v{color:#888}
+.bars.tall{max-height:440px;overflow:auto;padding-right:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.big{font-size:1.5rem;font-weight:700;color:var(--acc);line-height:1.2} .nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:.6em 0} .nums div{border:1px solid var(--line);padding:6px 10px}
+.tabmax{max-height:340px;overflow:auto}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Gli affitti brevi a Milano</h1>
+<p>Quante case di Milano si affittano ai turisti, dove sono, chi le gestisce e quanto fanno guadagnare rispetto a un affitto lungo. I numeri vengono da tre fonti che non coincidono: gli annunci di Airbnb (Inside Airbnb), le statistiche ufficiali sul turismo (ISTAT e Regione Lombardia) e i dati del Comune. <b>Sono confronti, non prove</b>: ogni sezione dice che cosa i dati non possono dire.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="lgd" id="lg-notti"></div>
+<div class="ch" id="ch-notti" role="img" aria-label="Notti dormite dai turisti a Milano dal 2019 al 2025, negli alberghi e fuori dagli alberghi, in milioni"></div>
+<p class="src">Fonte: PoliS-Lombardia / ISTAT, dataset vyxt-7jdx &laquo;Flussi turistici nei comuni lombardi&raquo;, campo <code>presenze</code>, comune di Milano. Una &laquo;presenza&raquo; &egrave; una notte dormita da un ospite. Passa il mouse o tocca il grafico.</p>
+<details><summary>Tabella dei valori</summary><div class="scroll"><table id="tab-notti"></table></div></details>
+
+<h2 id="mappa">Dove sono: la mappa dei quartieri</h2>
+<p>Ogni quartiere (NIL, nuclei di identit&agrave; locale del Comune) &egrave; colorato per <b>numero di annunci ogni 100 abitazioni</b>. Le abitazioni sono quelle del censimento permanente ISTAT <b>2023</b>. Clic su un quartiere per la scheda.</p>
+<div class="ctl"><span class="sub">Conta:</span>
+<button type="button" data-m="per100" class="on">Tutti gli annunci</button><button type="button" data-m="intere_per100">Solo case intere</button>
+<label class="sub" for="sel-nil">Scheda di:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<div class="warm"><b>Attenzione ai quartieri piccoli.</b> Dove il censimento conta poche abitazioni o pochi residenti il rapporto diventa assurdo (Parco Sempione: 1 abitazione e 29 annunci). I <span id="n-piccoli">19</span> quartieri con meno di 2.000 abitazioni o meno di 2.000 residenti sono in <b>grigio</b>: li vedi, ma non vanno in classifica. Inoltre in centro molte abitazioni non sono occupate da residenti (seconde case, uffici, case gi&agrave; in affitto breve): il rapporto va letto come ordine di grandezza.</div>
+<div id="map" class="map" role="img" aria-label="Mappa dei 88 quartieri di Milano colorati per annunci di affitto breve ogni 100 abitazioni"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Annunci di Inside Airbnb (Milano, 19 settembre 2026), contati per quartiere; abitazioni: censimento permanente ISTAT 2023, campo <code>abit_tot</code>; confini dei NIL: Comune di Milano. Mappa &copy; OpenStreetMap contributors. Dei singoli annunci non &egrave; mostrata la posizione.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<div id="nil-testo"></div>
+<div class="grid2"><div><p class="sub"><b>I quartieri con pi&ugrave; annunci ogni 100 abitazioni</b> (senza i piccoli)</p><div class="bars" id="nil-alti"></div></div>
+<div><p class="sub"><b>Quelli con meno</b> (con almeno un annuncio)</p><div class="bars" id="nil-bassi"></div></div></div>
+
+<h2 id="crescita">Quanto sono cresciuti (2014&ndash;2025)</h2>
+<div id="cres-testo"></div>
+<div class="lgd" id="lg-cres"></div>
+<div class="ch" id="ch-cres" role="img" aria-label="Strutture extra-alberghiere ISTAT, case vacanza e locazioni turistiche del Comune e annunci Airbnb con almeno una recensione nell'anno, a Milano dal 2014 al 2025"></div>
+<p class="src">Fonti: ISTAT/PoliS-Lombardia, dataset 2724-d4dt (strutture extra-alberghiere, dal 2019); Comune di Milano, dataset ds2955 (case vacanza + locazioni turistiche, dal 2014; le locazioni dal 2020); Inside Airbnb, 4 snapshot, annunci con almeno una recensione datata nell&rsquo;anno. Sono tre cose diverse, messe sullo stesso grafico solo per vedere se salgono insieme.</p>
+<h3>Le recensioni di Airbnb, anno per anno</h3>
+<div class="ch" id="ch-rec" role="img" aria-label="Recensioni di annunci di Milano su Airbnb per anno, dal 2012 al 2025"></div>
+<p class="src">Fonte: Inside Airbnb, file delle recensioni (campo <code>date</code>), unione dei 4 snapshot; 1.312.056 recensioni distinte. Il 2026 non &egrave; mostrato perch&eacute; l&rsquo;anno non &egrave; finito.</p>
+<div id="rec-testo"></div>
+<details><summary>Tabella dei valori del grafico</summary><div class="scroll tabmax"><table id="tab-cres"></table></div></details>
+<h3>Come abbiamo ricostruito il passato, e perch&eacute; si erode</h3>
+<div id="metodo-rec"></div>
+<div class="scroll"><table id="tab-ero"></table></div>
+<p class="src">Fonte: Inside Airbnb, file delle recensioni di dicembre 2025 e di settembre 2026, annunci con almeno una recensione nell&rsquo;anno.</p>
+
+<h2 id="chi">Chi affitta</h2>
+<div id="chi-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Quota degli host</b> per numero di annunci che hanno</p><div class="bars" id="host-h"></div></div>
+<div><p class="sub"><b>Quota degli annunci</b> in mano a quegli host</p><div class="bars" id="host-a"></div></div></div>
+<p class="src">Fonte: Inside Airbnb, 19 settembre 2026, 25.338 annunci; conteggio degli annunci per host (<code>host_id</code>, non pubblicato qui). Un &laquo;host&raquo; &egrave; un account di Airbnb.</p>
+<div class="warn"><b>Che cosa non dice.</b> Un host con molti annunci pu&ograve; essere un&rsquo;agenzia che gestisce case di altri, non il proprietario di tutte. E una stessa persona o societ&agrave; con pi&ugrave; account risulta come pi&ugrave; host. Non sappiamo da quanto tempo gli host siano su Airbnb: il campo con la data di iscrizione &egrave; vuoto in tutti gli snapshot. Gli annunci su altri portali non sono contati.</div>
+
+<h2 id="conto">Il conto del proprietario</h2>
+<div id="conto-testo"></div>
+<div class="nums" id="conto-num"></div>
+<div class="scroll"><table id="tab-sup"></table></div>
+<h3>Zona per zona (casa di 60 m&sup2;)</h3>
+<p class="sub">Notti al mese per eguagliare l&rsquo;affitto lungo. La barra &egrave; il valore con l&rsquo;affitto al centro dell&rsquo;intervallo OMI; il trattino nero va dall&rsquo;affitto minimo al massimo dell&rsquo;intervallo. In grigio le zone con meno di 30 case intere con prezzo.</p>
+<div class="ctl"><span class="sub">Fascia:</span><span id="fasce"></span></div>
+<div class="bars tall" id="zone-notti"></div>
+<p class="src"><b>I valori OMI sono stime dell&rsquo;Agenzia delle Entrate, non affitti realmente pagati.</b> Affitto = valore OMI (&euro; per m&sup2; al mese, abitazioni civili, 2026/1, centro dell&rsquo;intervallo) &times; 60 m&sup2; (ipotesi nostra: la superficie non &egrave; nei dati). Prezzo a notte = mediana delle quotazioni di Inside Airbnb del 19/09/2026 (case intere, 1&ndash;7 notti) nella zona.</p>
+<h3>Il controllo con la realt&agrave;</h3>
+<div id="occ-testo"></div>
+<div class="bars" id="occ-bars"></div>
+<p class="src">Fonte: Inside Airbnb, 19/09/2026, case intere, campi <code>estimated_occupancy_l365d</code> e <code>estimated_revenue_l365d</code>. Sono <b>stime di un modello</b> (dalle recensioni), non prenotazioni vere: il calendario di Airbnb non distingue una notte prenotata da una bloccata dal proprietario.</p>
+<div class="warn" id="occ-warn"></div>
+
+<h2 id="cin">Il codice CIN</h2>
+<div id="cin-testo"></div>
+<div class="bars" id="cin-bars"></div>
+<p class="src">Fonte: Inside Airbnb, 19/09/2026, campo <code>license</code> (scritto dall&rsquo;host). Il formato controllato &egrave; IT + 6 cifre (codice ISTAT del comune) + lettera + cifra + 8 caratteri.</p>
+
+<h2 id="metodo">Come &egrave; fatto, e le trappole</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina), <a href="data/nil.csv">nil.csv</a> e <a href="data/nil.geojson">nil.geojson</a> (una riga per quartiere), <a href="data/notti_alberghi_extra.csv">notti_alberghi_extra.csv</a>, <a href="data/crescita.csv">crescita.csv</a>, <a href="data/erosione_passato.csv">erosione_passato.csv</a>, <a href="data/host_fasce.csv">host_fasce.csv</a>, <a href="data/conto_per_superficie.csv">conto_per_superficie.csv</a>, <a href="data/conto_per_zona_omi.csv">conto_per_zona_omi.csv</a>, <a href="data/occupazione_stimata_istogramma.csv">occupazione_stimata_istogramma.csv</a>, <a href="data/prezzi_quotazioni.csv">prezzi_quotazioni.csv</a>, <a href="data/cin_per_snapshot.csv">cin_per_snapshot.csv</a>. Sono <b>tutti valori aggregati</b> (per quartiere, per zona, per anno, per fascia di host). Le righe dei singoli annunci non sono pubblicate.</p>
+
+<footer>
+<p><b>Fonti e licenze (dati scaricati l&rsquo;1 novembre 2026).</b> <b>Inside Airbnb</b> (<a href="https://insideairbnb.com/get-the-data/">insideairbnb.com</a>), Milano, snapshot del 26/12/2025, 27/03/2026, 25/06/2026 e 19/09/2026, licenza CC BY 4.0; le regole della comunit&agrave; chiedono di non ripubblicare i dati, quindi qui compaiono solo conteggi e mediane, mai i singoli annunci. <b>PoliS-Lombardia / ISTAT</b>: strutture turistiche e flussi turistici nei comuni lombardi (dati.lombardia.it, dataset 2724-d4dt e vyxt-7jdx; il portale non indica una licenza, quindi sono riportati solo numeri aggregati). <b>Comune di Milano</b> (dati.comune.milano.it): strutture attive e posti letto per tipologia (ds2955), strutture accreditate all&rsquo;imposta di soggiorno (ds477, ds500), licenza CC BY; confini dei quartieri (NIL), CC BY. <b>ISTAT</b>: censimento permanente della popolazione e delle abitazioni 2023 (CC BY 4.0). <b>Agenzia delle Entrate &ndash; OMI</b>: quotazioni degli affitti, licenza CC BY 4.0, scaricate il 30/10/2026. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a> (cartella <code>affitti-brevi</code>).</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NG=null,RD=[];
+var ACC='#00695c',GRY='#8a8a8a',WARM='#c26a1b',BLU='#2a5db0';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)} function f2(x){return nf(x,2)}
+function pc(x,d){return x==null?'':nf(x*100,d==null?0:d)+'%'}
+function ps(x,d){if(x==null)return '';var v=Math.round(Math.abs(x)*Math.pow(10,(d||0)+2))/Math.pow(10,(d||0)+2);return (x<0&&v>0?'−':'+')+nf(v*100,d||0)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function eur(x){return f0(x)+' €'}
+function mln(x,d){return nf(x/1e6,d==null?2:d)}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];NG=a[1];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mappa();crescita();chi();conto();cin();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- motore dei grafici a linee (come in prezzi-case, con etichette annuali) ---------- */
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||250,m={l:o.ml||46,r:12,t:o.mt||16,b:24},n=o.labels.length;
+  var all=[];o.series.forEach(function(s){s.vals.forEach(function(v){if(v!=null)all.push(v)})});
+  if(!all.length){box.innerHTML='<p class="sub">Dati non disponibili.</p>';return}
+  var lo=o.ymin!=null?o.ymin:Math.min.apply(null,all),hi=o.ymax!=null?o.ymax:Math.max.apply(null,all);
+  if(hi===lo){hi=lo+1}
+  var st=niceStep((hi-lo)/4);lo=Math.floor(lo/st+1e-9)*st;hi=Math.ceil(hi/st-1e-9)*st;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(i){return m.l+(n>1?i*pw/(n-1):pw/2)} function Y(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=lo;v<=hi+st/2;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>'}
+  var y0=parseInt(o.labels[0],10),step=W<480?2:1,last=-99;
+  o.labels.forEach(function(l,i){var y=parseInt(l,10);
+    if((y-y0)%step===0&&X(i)-last>30){last=X(i);s+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle">'+y+'</text>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  var placed=[];
+  (o.marks||[]).forEach(function(k){var x=X(k.i),right=x>W*0.6,w=k.text.length*5.6,x1=right?x-4-w:x+4,x2=right?x-4:x+4+w,row=0;
+    while(placed.some(function(q){return q.row===row&&x1<q.x2+4&&x2>q.x1-4}))row++;
+    placed.push({x1:x1,x2:x2,row:row});k.dy=row*12;
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+(m.t-2)+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="4 3"/><text x="'+(right?x-4:x+4)+'" y="'+(m.t+10+(k.dy||0))+'" text-anchor="'+(right?'end':'start')+'" style="fill:#8a4a10">'+esc(k.text)+'</text>'});
+  o.series.forEach(function(se){var d='',pen=false;
+    se.vals.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+' stroke-linejoin="round"/>'});
+  s+='<g id="hv" style="display:none"><line y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#444" stroke-width="1"/>';
+  o.series.forEach(function(se){s+='<circle r="4" fill="'+se.color+'" stroke="#fff" stroke-width="2"/>'});
+  s+='</g><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  if(!o.tip)return;
+  var svg=box.firstChild,g=svg.querySelector('#hv'),ln=g.firstChild,cs=g.querySelectorAll('circle'),tip=box.lastChild,rect=svg.querySelector('rect:last-of-type');
+  function show(ev){
+    var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width);
+    var i=Math.round((px-m.l)/pw*(n-1));i=Math.max(0,Math.min(n-1,i));
+    g.style.display='';ln.setAttribute('x1',X(i));ln.setAttribute('x2',X(i));
+    o.series.forEach(function(se,k){var v=se.vals[i];if(v==null){cs[k].style.display='none'}else{cs[k].style.display='';cs[k].setAttribute('cx',X(i));cs[k].setAttribute('cy',Y(v))}});
+    tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=X(i)*(r.width/W)+10;if(left+tw>r.width)left=X(i)*(r.width/W)-tw-10;if(left<0)left=0;
+    tip.style.left=left+'px';tip.style.top='4px';
+  }
+  function hide(){g.style.display='none';tip.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function brow(nm,pct,txt,o){o=o||{};return '<div class="row'+(o.dim?' dim':'')+'"><span class="nm" title="'+esc(o.title||nm)+'">'+nm+'</span><span class="tr"><span class="fill" style="width:'+Math.max(0,Math.min(100,pct))+'%'+(o.col?';background:'+o.col:'')+'"></span>'+(o.rg||'')+'</span><span class="v">'+txt+'</span></div>'}
+
+/* ---------- la cosa piu' sorprendente ---------- */
+function sorpresa(){
+  var S=D.sorpresa,F=D.flussi,h='';
+  h+='<p><b>Tutta la crescita dei turisti a Milano &egrave; passata fuori dagli alberghi.</b> Tra il '+S.anno0+' e il '+S.anno1+' le notti dormite dai turisti in citt&agrave; sono passate da '+mln(S.tot0,1)+' a '+mln(S.tot1,1)+' milioni (+'+mln(S.var_totale,1)+' milioni). Gli <b>alberghi ne hanno perse</b>: da '+mln(S.alb0)+' a '+mln(S.alb1)+' milioni (<b>'+ps(S.var_alberghi,1)+'</b>). Le strutture <b>fuori dagli alberghi</b> (B&amp;B, case vacanza, affitti brevi, ostelli, campeggi e simili) sono passate da '+mln(S.extra0)+' a '+mln(S.extra1)+' milioni: <b>&times;'+nf(S.moltiplicatore_extra,1)+'</b>.</p>';
+  h+='<p>La quota di notti fuori dagli alberghi era il <b>'+pc(S.quota0,1)+'</b> nel '+S.anno0+', il '+pc(S.quota2022,1)+' nel 2022 e <b>'+pc(S.quota1,1)+'</b> nel '+S.anno1+': quasi una notte su due.</p>';
+  h+='<p class="src">Fonte: PoliS-Lombardia/ISTAT, dataset vyxt-7jdx, campo <code>presenze</code> (notti dormite dagli ospiti), tipi &laquo;alberghieri&raquo; ed &laquo;extra-alberghieri&raquo;, comune di Milano. <b>Non dice</b> che gli affitti brevi abbiano tolto clienti agli alberghi: dice solo dove sono finite le notti in pi&ugrave;. &laquo;Fuori dagli alberghi&raquo; non vuol dire solo Airbnb, e conta tutti i canali di prenotazione.</p>';
+  h+='<p class="sub">Seconda sorpresa, pi&ugrave; sotto: <a href="#chi">'+f0(D.host_sintesi.host_20_o_piu)+' host (l&rsquo;'+pc(D.host_sintesi.quota_host_20_o_piu,1)+')</a> tengono il '+pc(D.host_sintesi.quota_annunci_host_20_o_piu,1)+' degli annunci di Airbnb.</p>';
+  setH('sorpresa',h);
+  setH('lg-notti',lgdLine([{color:GRY,t:'Alberghi'},{color:ACC,t:'Fuori dagli alberghi'}]));
+  function draw(){lineChart(el('ch-notti'),{labels:F.map(function(r){return r.anno+'/1'}),h:250,ymin:0,
+    series:[{color:GRY,w:2.4,vals:F.map(function(r){return r.alberghi/1e6})},{color:ACC,w:2.6,vals:F.map(function(r){return r.extra/1e6})}],
+    yf:function(v){return nf(v,0)+' mln'},
+    marks:[{i:F.findIndex(function(r){return r.anno===2020}),text:'2020'}],
+    tip:function(i){var r=F[i];return '<b>'+r.anno+'</b><br>alberghi: '+mln(r.alberghi)+' mln<br>fuori dagli alberghi: <b>'+mln(r.extra)+' mln</b><br>quota fuori: '+pc(r.quota_extra,1)}})}
+  draw();RD.push(draw);
+  table('tab-notti',['Anno','Alberghi','Fuori dagli alberghi','Totale','Quota fuori'],F.map(function(r){return [r.anno,f0(r.alberghi),f0(r.extra),f0(r.totale),pc(r.quota_extra,1)]}));
+}
+
+/* ---------- mappa dei NIL ---------- */
+var MAP=null,LAY=null,CUR='per100',SEL=null;
+var BR=[1,2,3.5,5,8];
+function colore(p){if(p.piccolo)return '#bdbdbd';var v=p[CUR];if(v==null)return '#bdbdbd';var i=0;while(i<BR.length&&v>=BR[i])i++;return SEQ[i]}
+function sty(f){var sel=SEL===f.properties.id;return {fillColor:colore(f.properties),fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:1}}
+function mappa(){
+  var P=NG.features.map(function(f){return f.properties});
+  el('n-piccoli').textContent=P.filter(function(p){return p.piccolo}).length;
+  MAP=L.map('map').setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NG,{style:sty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){var p=f.properties;return '<b>'+esc(p.nome)+'</b><br>'+(p.piccolo?'pochi abitanti/abitazioni: non confrontabile ('+f0(p.annunci)+' annunci)':f1(p[CUR])+' ogni 100 abitazioni ('+f0(p.annunci)+' annunci)')},{sticky:true});
+    l.on('click',function(){scegli(f.properties.id)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  P.slice().sort(function(a,b){return a.nome.localeCompare(b.nome,'it')}).forEach(function(p){h+='<option value="'+p.id+'">'+esc(p.nome)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10))});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  var C=D.citta,U=D.ultimo;
+  setH('nil-testo','<p>In tutta la citt&agrave; ci sono <b>'+f1(C.annunci_per_100).replace('.',',')+'</b> annunci ogni 100 abitazioni ('+f0(U.annunci)+' annunci su '+f0(C.abitazioni)+' abitazioni; '+f2(C.intere_per_100)+' contando solo le case intere). Nei '+C.nil_non_piccoli+' quartieri non piccoli la mediana &egrave; '+f2(C.mediana_nil_non_piccoli)+': '+C.nil_5_o_piu+' quartieri hanno 5 annunci o pi&ugrave; ogni 100 abitazioni, '+C.nil_10_o_piu+' ne hanno 10 o pi&ugrave;. I 10 quartieri pi&ugrave; &laquo;densi&raquo; contengono il '+pc(C.quota_annunci_10_nil_densi,1)+' di tutti gli annunci. Degli '+f0(U.annunci)+' annunci, '+f0(U.case_intere)+' ('+pc(U.quota_case_intere,1)+') sono case intere, '+f0(U.stanze_private)+' ('+pc(U.quota_stanze_private,1)+') stanze private.</p>');
+  var ok=P.filter(function(p){return !p.piccolo}).sort(function(a,b){return b.per100-a.per100});
+  var mx=ok[0].per100;
+  function bl(arr){return arr.map(function(p){return brow(esc(p.nome),p.per100/mx*100,f1(p.per100),{})}).join('')}
+  setH('nil-alti',bl(ok.slice(0,8)));
+  var bassi=ok.filter(function(p){return p.annunci>0}).slice(-6).reverse();
+  setH('nil-bassi',bl(bassi));
+}
+function ricolora(){
+  LAY.setStyle(sty);if(SEL)LAY.eachLayer(function(l){if(l.feature.properties.id===SEL)l.bringToFront()});
+  var h='';SEQ.forEach(function(c,i){var t;
+    if(i===0)t='meno di '+BR[0];else if(i===BR.length)t='oltre '+BR[i-1];else t=BR[i-1]+' – '+BR[i];
+    h+='<span><i style="background:'+c+'"></i>'+String(t).replace('.',',')+'</span>'});
+  h+='<span><i style="background:#bdbdbd"></i>grigio: troppo pochi abitanti o abitazioni</span><span class="sub">(annunci ogni 100 abitazioni)</span>';
+  setH('lg-map',h);
+}
+function scegli(id){SEL=id;el('sel-nil').value=id;LAY.setStyle(sty);LAY.eachLayer(function(l){if(l.feature.properties.id===id)l.bringToFront()});scheda(id)}
+function scheda(id){
+  var p=null;NG.features.forEach(function(f){if(f.properties.id===id)p=f.properties});if(!p)return;
+  var h='<h3>'+esc(p.nome)+'</h3><div class="scroll"><table><tbody>';
+  h+='<tr><td>Annunci (19/09/2026)</td><td class="r">'+f0(p.annunci)+' (case intere '+f0(p.intere)+', stanze private '+f0(p.stanze)+')</td></tr>';
+  if(p.annunci>0)h+='<tr><td>Quota di case intere</td><td class="r">'+pc(p.quota_intere,0)+'</td></tr>';
+  h+='<tr><td>Annunci ogni 100 abitazioni</td><td class="r">'+(p.piccolo?'<span class="sub">non calcolato: troppo piccolo ('+f0(p.abitazioni)+' abitazioni, '+f0(p.residenti)+' residenti nel 2023)</span>':'<b>'+f1(p.per100)+'</b> (case intere: '+f1(p.intere_per100)+')')+'</td></tr>';
+  h+='<tr><td>Abitazioni (censimento 2023)</td><td class="r">'+f0(p.abitazioni)+', di cui '+f0(p.non_occupate)+' ('+pc(p.abitazioni?p.non_occupate/p.abitazioni:null,0)+') non occupate da residenti</td></tr>';
+  h+='<tr><td>Prezzo mediano a notte, case intere</td><td class="r">'+(p.prezzo!=null?'<b>'+eur(p.prezzo)+'</b> <span class="sub">('+f0(p.n_prezzi)+' quotazioni)</span>':'<span class="sub">troppo pochi annunci con prezzo ('+f0(p.n_prezzi)+')</span>')+'</td></tr>';
+  if(p.annunci>0)h+='<tr><td>Annunci con un CIN di formato valido</td><td class="r">'+pc(p.cin,0)+'</td></tr>';
+  h+='</tbody></table></div><p class="sub">Il prezzo &egrave; una quotazione per date precise (check-in 21&ndash;28 settembre 2026), non un prezzo medio dell&rsquo;anno. Il CIN in formato valido non prova che la struttura sia registrata.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- crescita ---------- */
+function crescita(){
+  var C=D.crescita,N=D.crescita_note,E=D.erosione,Y=C.filter(function(r){return r.anno>=2014});
+  var h='<p>Due modi di contare le strutture. Le statistiche ufficiali ISTAT contano le strutture <b>extra-alberghiere</b> di Milano: erano <b>'+f0(N.istat2019)+'</b> nel 2019 e sono <b>'+f0(N.istat2025)+'</b> nel 2025 (<b>&times;'+f1(N.x_istat_2019_2025)+'</b>). Gli annunci di Airbnb con almeno una recensione nell&rsquo;anno passano da <b>'+f0(N.ann2019)+'</b> a <b>'+f0(N.ann2025)+'</b> (<b>&times;'+f1(N.x_airbnb_2019_2025)+'</b>). Le due serie salgono insieme, ma <b>non sono la stessa cosa</b>: l&rsquo;ISTAT conta anche B&amp;B, ostelli e campeggi e tutti i canali di prenotazione; Airbnb &egrave; solo una parte. Il Comune ha una terza serie (case vacanza e locazioni turistiche), che parte dal 2014.</p>';
+  setH('cres-testo',h);
+  setH('lg-cres',lgdLine([{color:ACC,t:'Airbnb: annunci con una recensione nell’anno'},{color:BLU,t:'ISTAT: strutture extra-alberghiere'},{color:GRY,dash:1,t:'Comune: case vacanza + locazioni turistiche'}]));
+  var labs=Y.map(function(r){return r.anno+'/1'}),i15=Y.findIndex(function(r){return r.anno===2015}),i20=Y.findIndex(function(r){return r.anno===2020});
+  function draw(){
+    lineChart(el('ch-cres'),{labels:labs,h:290,mt:20,ymin:0,
+      series:[{color:GRY,dash:1,w:2,vals:Y.map(function(r){return r.comune_cav_lt})},{color:BLU,w:2.4,vals:Y.map(function(r){return r.istat_extra_strutture})},{color:ACC,w:2.6,vals:Y.map(function(r){return r.airbnb_annunci_recensiti})}],
+      marks:[{i:i15,text:'Expo 2015'},{i:i20,text:'2020'}],
+      tip:function(i){var r=Y[i];return '<b>'+r.anno+'</b><br>Airbnb, annunci recensiti: <b>'+f0(r.airbnb_annunci_recensiti)+'</b><br>ISTAT extra-alberghiere: '+(r.istat_extra_strutture!=null?'<b>'+f0(r.istat_extra_strutture)+'</b>':'n.d.')+'<br>Comune, CAV + locazioni: '+(r.comune_cav_lt!=null?f0(r.comune_cav_lt):'n.d.')}});
+    var R=C.filter(function(r){return r.anno>=2012}),j15=R.findIndex(function(r){return r.anno===2015}),j20=R.findIndex(function(r){return r.anno===2020});
+    lineChart(el('ch-rec'),{labels:R.map(function(r){return r.anno+'/1'}),h:230,mt:20,ymin:0,
+      series:[{color:ACC,w:2.6,vals:R.map(function(r){return r.airbnb_recensioni})}],yf:function(v){return v>=1000?f0(v/1000)+' mila':f0(v)},
+      marks:[{i:j15,text:'Expo 2015'},{i:j20,text:'2020'}],
+      tip:function(i){var r=R[i];return '<b>'+r.anno+'</b><br>recensioni: <b>'+f0(r.airbnb_recensioni)+'</b>'}});
+  }
+  draw();RD.push(draw);
+  var t='';
+  t+='<p><b>Expo 2015.</b> Le recensioni di annunci di Milano passano da '+f0(N.rec2014)+' (2014) a '+f0(N.rec2015)+' (2015): &times;'+f1(N.x_2015_su_2014)+', un salto molto pi&ugrave; forte di quello dell&rsquo;anno dopo (&times;'+f2(N.x_2016_su_2015)+'). Pu&ograve; essere l&rsquo;effetto Expo, ma Airbnb partiva da pochissimo e cresceva comunque in tutta Europa: con questi dati non si pu&ograve; separare.</p>';
+  t+='<p><b>2020.</b> Le recensioni crollano da '+f0(N.rec2019)+' a '+f0(N.rec2020)+' (&times;'+f2(N.x_2020_su_2019)+'): i viaggi si sono fermati. Ma gli annunci con almeno una recensione scendono solo da '+f0(N.ann2019)+' a '+f0(N.ann2020)+', e le strutture ISTAT non scendono (anzi, da '+f0(C.filter(function(r){return r.anno===2019})[0].istat_extra_strutture)+' a '+f0(C.filter(function(r){return r.anno===2020})[0].istat_extra_strutture)+'): le case c&rsquo;erano ancora, mancavano i turisti. Le notti dormite fuori dagli alberghi passano da '+mln(D.flussi[0].extra)+' a '+mln(D.flussi[1].extra)+' milioni.</p>';
+  setH('rec-testo',t);
+  table('tab-cres',['Anno','Airbnb: annunci recensiti','Airbnb: recensioni','ISTAT extra-alb.','Comune CAV + loc. tur.','Comune: accreditate imposta di soggiorno (fine anno)'],C.map(function(r){return [r.anno,f0(r.airbnb_annunci_recensiti),f0(r.airbnb_recensioni),r.istat_extra_strutture!=null?f0(r.istat_extra_strutture):'',r.comune_cav_lt!=null?f0(r.comune_cav_lt):'',r.accreditate_imposta!=null?f0(r.accreditate_imposta):'']}));
+  var m='<p>Inside Airbnb non pubblica uno storico, ma ogni annuncio ha le sue recensioni con la data. Un annuncio conta nell&rsquo;anno X se ha almeno una recensione datata X. Per recuperare gli annunci spariti nel frattempo abbiamo messo insieme le recensioni dei <b>4 snapshot</b> (dicembre 2025, marzo, giugno e settembre 2026): '+f0(D.recensioni_totali.unione_4_snapshot)+' recensioni distinte, contro '+f0(D.recensioni_totali.ultimo_snapshot)+' nell&rsquo;ultimo file da solo.</p>';
+  m+='<div class="warm"><b>I limiti.</b> (1) <b>Il passato si erode</b>: quando un annuncio viene tolto dal sito, le sue recensioni spariscono dal file. Per il 2024 gli annunci recensiti sono '+f0(E[3].annunci_dic)+' nel file di dicembre 2025 e '+f0(E[3].annunci_set)+' in quello di settembre 2026 ('+ps(E[3].var_annunci,1)+'). Quindi pi&ugrave; si va indietro, pi&ugrave; la serie sottostima. (2) La recensione arriva dopo il soggiorno, e solo una parte degli ospiti recensisce. (3) La prima recensione non &egrave; la data di apertura dell&rsquo;annuncio. (4) Non si vedono gli annunci mai prenotati, n&eacute; gli altri portali.</div>';
+  setH('metodo-rec',m);
+  table('tab-ero',['Anno','Annunci recensiti, file dic. 2025','Annunci recensiti, file set. 2026','Variazione','Recensioni, variazione'],E.map(function(r){return [r.anno,f0(r.annunci_dic),f0(r.annunci_set),ps(r.var_annunci,1),ps(r.var_recensioni,1)]}));
+}
+
+/* ---------- chi affitta ---------- */
+function chi(){
+  var H=D.host,S=D.host_sintesi,lab={'1':'1 annuncio','2':'2 annunci','3-4':'3–4 annunci','5-9':'5–9 annunci','10-19':'10–19 annunci','20 o piu':'20 o più annunci'};
+  var h='<p>Su '+f0(S.host_totali)+' host, <b>'+pc(S.quota_host_con_1,1)+' ha un solo annuncio</b> ('+f0(S.host_con_1)+'). Sembra un mercato di piccoli proprietari. Ma i '+f0(S.host_con_2_o_piu)+' host con due o pi&ugrave; annunci ('+pc(S.quota_host_con_2_o_piu,1)+' degli host) <b>tengono il '+pc(S.quota_annunci_host_2_o_piu,1)+' degli annunci</b>. In cima, <b>'+f0(S.host_20_o_piu)+' host ('+pc(S.quota_host_20_o_piu,1)+')</b> con 20 annunci o pi&ugrave; ne hanno il <b>'+pc(S.quota_annunci_host_20_o_piu,1)+'</b>. Il pi&ugrave; grande ne ha '+f0(S.piu_grande)+'; i 10 pi&ugrave; grandi, insieme, '+f0(S.dieci_piu_grandi_annunci)+' ('+pc(S.dieci_piu_grandi_quota,1)+'). Gli host con 5 o pi&ugrave; annunci hanno il '+pc(S.quota_annunci_host_5_o_piu,1)+' degli annunci.</p>';
+  setH('chi-testo',h);
+  setH('host-h',H.map(function(r){return brow(lab[r.fascia]||r.fascia,r.quota_host*100,pc(r.quota_host,1),{col:GRY})}).join(''));
+  setH('host-a',H.map(function(r){return brow(lab[r.fascia]||r.fascia,r.quota_annunci*100,pc(r.quota_annunci,1))}).join(''));
+}
+
+/* ---------- il conto del proprietario ---------- */
+var FASCIA='tutte';
+function conto(){
+  var S=D.conto_superficie,s60=S.filter(function(r){return r.mq===60})[0],Z=D.conto_zone,ZS=D.conto_zone_sintesi,O=D.occupazione;
+  var h='<p>Una domanda semplice: se invece di affittare a lungo termine metto la stessa casa su Airbnb, <b>quante notti al mese devo riempire per incassare quanto un affitto normale?</b> Il conto: affitto del mese (stima OMI della zona &times; 60 m&sup2;) diviso il prezzo di una notte (mediana degli annunci di quella zona).</p>';
+  h+='<div class="warm"><b>I valori OMI sono stime, non affitti reali.</b> Sono gli intervalli che l&rsquo;Agenzia delle Entrate stima per ogni zona, abitazioni civili. Gli affitti degli annunci veri possono essere pi&ugrave; alti (non verificato qui). La superficie di 60 m&sup2; &egrave; un&rsquo;ipotesi nostra: nei dati di Airbnb non c&rsquo;&egrave;.</div>';
+  setH('conto-testo',h);
+  setH('conto-num','<div><div class="big">'+f1(s60.notti)+'</div><span class="sub">notti al mese bastano, per la casa mediana (quartili: '+f1(s60.p25)+'&ndash;'+f1(s60.p75)+')</span></div><div><div class="big">'+eur(s60.affitto)+'</div><span class="sub">affitto OMI mediano al mese per 60 m&sup2;</span></div><div><div class="big">'+pc(s60.meno_di_10,1)+'</div><span class="sub">degli annunci chiederebbero meno di 10 notti al mese</span></div>');
+  table('tab-sup',['Superficie ipotizzata','Affitto OMI mediano al mese','Notti al mese (mediana)','Quartili','Annunci con meno di 10 notti'],S.map(function(r){return [r.mq+' m²',eur(r.affitto),f1(r.notti),f1(r.p25)+' – '+f1(r.p75),pc(r.meno_di_10,1)]}));
+  var fas=['tutte'];Z.forEach(function(z){if(fas.indexOf(z.fascia)<0)fas.push(z.fascia)});
+  setH('fasce',fas.map(function(f){return '<button type="button" data-f="'+esc(f)+'"'+(f===FASCIA?' class="on"':'')+'>'+esc(f==='tutte'?'Tutte le zone':f)+'</button>'}).join(' '));
+  Array.prototype.forEach.call(document.querySelectorAll('#fasce button'),function(b){b.addEventListener('click',function(){FASCIA=b.getAttribute('data-f');Array.prototype.forEach.call(document.querySelectorAll('#fasce button'),function(x){x.classList.toggle('on',x===b)});zone()})});
+  zone();
+  var mo=O.mediana/12;
+  var t='<p>Il conto sopra dice quante notti servono. Quante ne riempie, davvero, una casa? Non lo sappiamo: Airbnb non pubblica le prenotazioni. Ma Inside Airbnb le <b>stima dalle recensioni</b>. Per la casa intera mediana la stima &egrave; di <b>'+f0(O.mediana)+' notti occupate in 12 mesi</b> (circa '+f1(mo)+' al mese, contro le '+f1(s60.notti)+' che servirebbero); il <b>'+pc(O.quota_zero,1)+'</b> delle case intere ha stima zero. La media &egrave; pi&ugrave; alta ('+f1(O.media)+' notti) perch&eacute; una parte delle case &egrave; molto occupata: '+pc(O.istogramma[4].quota,1)+' oltre 180 notti.</p>';
+  t+='<p>Nelle case intere con almeno una recensione negli ultimi 12 mesi ('+f0(O.n_ricavo)+' con prezzo e zona OMI) il ricavo lordo mensile stimato dal modello ha mediana <b>'+eur(O.ricavo_mensile_mediano)+'</b>, contro un affitto OMI di 60 m&sup2; di '+eur(O.affitto60_mediano)+': il <b>'+pc(O.quota_ricavo_sopra_affitto,1)+'</b> supera l&rsquo;affitto.</p>';
+  setH('occ-testo',t);
+  var mx=Math.max.apply(null,O.istogramma.map(function(r){return r.quota}));
+  setH('occ-bars','<p class="sub" style="margin:.2em 0">Case intere per notti occupate stimate in 12 mesi</p>'+O.istogramma.map(function(r){return brow(r.fascia,r.quota/mx*100,pc(r.quota,1),{title:f0(r.case_intere)+' case intere'})}).join(''));
+  setH('occ-warn','<b>Come leggerlo.</b> Il ricavo &egrave; <b>lordo</b>: prima di commissioni della piattaforma, pulizie, biancheria, utenze, tassa di soggiorno, imposte e giorni vuoti. Il prezzo a notte &egrave; una quotazione per date di fine settembre 2026 (forse una settimana di alta richiesta, non verificato), non la media dell&rsquo;anno. L&rsquo;occupazione &egrave; la stima di un modello (50% degli ospiti che recensiscono, soggiorno medio di 3 notti, tetto al 70%). Un affitto lungo, poi, ha costi e rischi diversi. Il conto non dice che cosa convenga: dice che cosa dovrebbe succedere perch&eacute; i due incassi si pareggino.');
+}
+function zone(){
+  var Z=D.conto_zone.filter(function(z){return FASCIA==='tutte'||z.fascia===FASCIA}).sort(function(a,b){return a.notti-b.notti});
+  var mx=Math.max.apply(null,D.conto_zone.map(function(z){return z.notti_max}))*1.02;
+  setH('zone-notti',Z.map(function(z){
+    var rg='<span class="rg" style="left:'+(z.notti_min/mx*100)+'%;width:'+((z.notti_max-z.notti_min)/mx*100)+'%"></span>';
+    return brow(esc(z.nome)+' <span class="sub">'+esc(z.zona)+'</span>',z.notti/mx*100,f1(z.notti),{dim:z.poco,rg:rg,title:z.nome+' ('+z.zona+', '+z.fascia.toLowerCase()+'): '+z.n+' case intere con prezzo, prezzo mediano '+f0(z.prezzo)+' €/notte, affitto OMI '+f1(z.loc_centro)+' €/m² al mese ('+f0(z.affitto60)+' € per 60 m²)'});
+  }).join('')+(Z.length?'':'<p class="sub">Nessuna zona.</p>'));
+}
+
+/* ---------- CIN ---------- */
+function cin(){
+  var C=D.cin;
+  var h='<p>Dal 1° gennaio 2025 ogni annuncio dovrebbe riportare un codice nazionale, il <b>CIN</b>. Nel campo <code>license</code> degli annunci di Airbnb a Milano il <b>'+pc(C.quota_valido,0)+'</b> ('+f0(C.valido)+' su '+f0(C.totale)+') ha un codice scritto nel formato giusto. Il '+pc(C.quota_assente,1)+' ('+f0(C.assente)+') non ha nulla; per '+f0(C.richiesto_non_ricevuto)+' l&rsquo;host scrive che l&rsquo;ha chiesto e non l&rsquo;ha ricevuto, '+f0(C.esente)+' si dichiarano esenti, '+f0(C.altro_testo)+' scrivono altro.</p>';
+  h+='<div class="warn"><b>Un formato giusto non prova che la struttura sia registrata.</b> Il registro nazionale dei CIN non &egrave; aperto (si consulta con SPID): non possiamo controllare che i codici esistano. Qualche indizio che il campo non basti: '+f0(C.valido_altri_comuni)+' codici portano il codice ISTAT di altri comuni e '+f0(C.codici_usati_piu_volte)+' codici compaiono in pi&ugrave; annunci (per un totale di '+f0(C.annunci_con_cin_condiviso)+' annunci, il '+pc(C.quota_condiviso,1)+' di quelli con un CIN; il massimo &egrave; '+C.massimo_annunci_stesso_cin+' annunci con lo stesso codice). Pu&ograve; essere legittimo (un palazzo con pi&ugrave; appartamenti) o un errore: non lo interpretiamo.</div>';
+  setH('cin-testo',h);
+  var rows=[['Formato valido',C.valido],['Nessun codice',C.assente],['Chiesto, non ricevuto',C.richiesto_non_ricevuto],['Altro testo',C.altro_testo],['Esente',C.esente]];
+  setH('cin-bars',rows.map(function(r){return brow(r[0],r[1]/C.totale*100,pc(r[1]/C.totale,1),{title:f0(r[1])+' annunci'})}).join(''));
+}
+
+/* ---------- metodo e trappole ---------- */
+function metodo(){
+  var Sn=D.snapshot,P=D.prezzi,T=D.tre_serie_2024;
+  var p9=P.filter(function(r){return r.snapshot==='2026-09-19'&&r.gruppo.indexOf('case intere, notti')===0})[0],p6=P.filter(function(r){return r.snapshot==='2026-06-25'&&r.gruppo.indexOf('case intere, notti')===0})[0];
+  var m3=Sn.filter(function(r){return r.snapshot==='2026-03-27'})[0],d12=Sn.filter(function(r){return r.snapshot==='2025-12-26'})[0];
+  var L=[
+   '<b>Quattro snapshot di Inside Airbnb</b> (annunci pubblici di Milano in quattro date): '+Sn.map(function(r){return r.snapshot.split('-').reverse().join('/')+' ('+f0(r.annunci)+')'}).join(', ')+'. I numeri della mappa, degli host e del CIN sono dell&rsquo;ultimo (19/09/2026).',
+   '<b>Lo snapshot di marzo 2026 &egrave; incompleto</b>: '+f0(m3.annunci)+' annunci contro '+f0(d12.annunci)+' di dicembre, scaricato in un solo giorno. Il calo non &egrave; reale (la maggior parte degli annunci &laquo;spariti&raquo; torna a giugno). Gli snapshot non sono scaricati tutti nello stesso giorno: dicembre copre 11 giorni (26/12&ndash;05/01).',
+   '<b>Il prezzo c&rsquo;&egrave; solo in giugno e settembre.</b> Nei file di dicembre e marzo il campo &egrave; vuoto. Ed &egrave; una <b>quotazione per date precise</b> (check-in del giorno dopo lo scarico, per lo pi&ugrave; 1&ndash;2 notti), non il prezzo medio dell&rsquo;anno: la mediana delle case intere &egrave; '+eur(p6.mediana)+' a giugno e '+eur(p9.mediana)+' a settembre, ma sono date diverse e non confrontabili. Per questo i confronti usano mediane, con i prezzi sopra 1.000 &euro; (errori o ville) tolti dal conto del proprietario.',
+   '<b>Il prezzo &egrave; in euro, anche se il campo scrive &laquo;$&raquo;.</b> Lo dice il campo <code>price_quote_raw</code> (valuta EUR): il simbolo &egrave; solo formattazione.',
+   '<b>Tre serie ufficiali, tre numeri diversi.</b> Per il 2024 le strutture sono '+f0(T.istat)+' (ISTAT, extra-alberghiere), '+f0(T.comune)+' (Comune, case vacanza + locazioni turistiche) e '+f0(T.imposta)+' (strutture accreditate all&rsquo;imposta di soggiorno). Le definizioni sono diverse e le schede non le spiegano.',
+   '<b>Cambio di definizione nel dataset ds2955 (2019).</b> I posti letto delle case vacanza passano da '+f0(D.cav_posti_letto['2018'])+' (2018) a '+f0(D.cav_posti_letto['2019'])+' (2019), mentre le strutture da '+f0(D.cav_strutture['2018'])+' a '+f0(D.cav_strutture['2019'])+': i posti letto per struttura da '+nf(D.cav_posti_letto['2018']/D.cav_strutture['2018'],1)+' a '+nf(D.cav_posti_letto['2019']/D.cav_strutture['2019'],1)+'. Probabilmente cambia la definizione: non usiamo quei posti letto a cavallo del 2019.',
+   '<b>Il registro dei CIN e quello regionale dei CIR non sono aperti.</b> Aperti ci sono solo conteggi: per questo non si pu&ograve; dire quanti annunci siano davvero in regola.',
+   '<b>Abitazioni del censimento.</b> Dal 2021 i totali sono ricavati da registri: il salto delle abitazioni a Milano non &egrave; edilizia. Le abitazioni non occupate da residenti sono molte nei quartieri centrali. Per questo il rapporto annunci/abitazioni &egrave; un ordine di grandezza. I quartieri con meno di 2.000 abitazioni o 2.000 residenti sono in grigio.',
+   '<b>I nomi dei quartieri di Inside Airbnb non sono quelli del Comune</b> (stessi confini, altri nomi: &laquo;Navigli&raquo; invece di &laquo;Porta Ticinese &ndash; Conchetta&raquo;). Qui gli annunci sono assegnati ai NIL con le coordinate e i nomi sono quelli del Comune. La posizione degli annunci, nei dati di Airbnb, &egrave; spostata fino a circa 150 m per proteggere la privacy.',
+   '<b>Il modello di occupazione</b> di Inside Airbnb (50% di recensioni, soggiorno di 3 notti, tetto 70%) &egrave; una convenzione: le notti vere possono essere molte di pi&ugrave; o di meno. Il calendario non distingue notti prenotate e notti bloccate.',
+   '<b>Airbnb non &egrave; tutto il mercato</b>: mancano Booking, altri portali e gli annunci diretti.',
+   '<b>Pagina costruita da un programma</b> (<code>affitti-brevi/scripts/08_pagina.py</code>) che legge le tabelle pulite e scrive solo i file aggregati di <code>data/</code>: si pu&ograve; rilanciare quando arrivano nuovi dati.'];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

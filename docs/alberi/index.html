@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Alberi della città</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars.wr .nm{} .bars.wr .nm i{display:block;font-size:.78rem;color:var(--mut)}
+.bars.dv .tr .fill{position:absolute;top:0} .bars.dv .tr:after{content:"";position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666}
+.rule{margin:.5em 0} .rule .row{display:grid;grid-template-columns:minmax(90px,26%) 1fr 150px;gap:6px;align-items:center;font-size:.88rem;padding:4px 0}
+.rule .tr{background:#f1f1f1;height:14px;position:relative} .rule .fill{position:absolute;left:0;top:0;height:14px;background:var(--acc)} .rule .mk{position:absolute;top:-4px;height:22px;border-left:3px solid #c26a1b}
+.rule .v{font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .rule .row{grid-template-columns:1fr} }
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+#tab-class,#tab-cambi{min-width:520px} #tab-mon{min-width:560px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Gli alberi di Milano, quartiere per quartiere</h1>
+<p>Ogni anno il Comune di Milano pubblica l&rsquo;elenco, albero per albero, delle piante che <b>gestisce lui</b>: strade, piazze, parchi pubblici, giardini e cimiteri. Nell&rsquo;ultima edizione (31 marzo 2025) sono <b id="n-tot">251.165</b>, circa un albero ogni <span id="n-uno">5,6</span> abitanti. Qui li guardiamo per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale) e per esagoni larghi circa 250 metri. <b>Non sono tutti gli alberi di Milano</b>: mancano i giardini privati e le aree di altri enti (vedi <a href="#limiti">i limiti</a>).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Questo non &egrave; il numero di alberi di Milano, ma di quelli che il Comune ha schedato. Le misure (altezza, tronco, chioma) sono in gran parte valori di riempimento, quindi qui non ci sono grafici su et&agrave; o grandezza degli alberi. Tutti i dettagli sono nella sezione <a href="#limiti">Che cosa non dice questo dato</a>.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Scegli che cosa mostrare. Clic su un quartiere (o su un esagono) per la scheda &laquo;il tuo quartiere in alberi&raquo;; oppure scegli il quartiere dall&rsquo;elenco. Dati del 31 marzo 2025.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="p1000" class="on">Alberi ogni 1.000 abitanti</button><button type="button" data-m="pkm2">Alberi per km&sup2;</button><button type="button" data-m="var">Cambiamento 2023&ndash;2025</button><button type="button" data-m="hex">Esagoni (densit&agrave;)</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select>
+<label class="ck"><input type="checkbox" id="ck-mon"> alberi monumentali</label></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per numero di alberi"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Alberi gestiti dal Comune, non tutti gli alberi della citt&agrave;. Mappa &copy; OpenStreetMap contributors; alberi, quartieri e residenti: Comune di Milano (CC BY). I valori dei quartieri con meno di 5.000 residenti (parchi e aree quasi senza abitanti) sono in grigio sulla mappa dei residenti: dividere per pochi abitanti non ha senso.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="specie">Quali alberi ci sono</h2>
+<div id="specie-testo"></div>
+<div class="grid2"><div><h3>Le 15 specie pi&ugrave; frequenti</h3><div class="bars wr" id="b-specie"></div></div>
+<div><h3>I 15 generi pi&ugrave; frequenti</h3><div class="bars wr" id="b-generi"></div></div></div>
+<p class="src">Quota sul totale degli alberi del 31/3/2025. Nomi comuni e famiglie sono scritti a mano da noi (il censimento non li ha): da far rivedere a un botanico. Le specie con &laquo;spp&raquo; (specie non indicata) non sono in classifica. Fonte: Comune di Milano, censimento alberi (ds2484, CC BY).</p>
+<p class="sub">Elenchi completi (tutte le specie e tutti i generi): <a href="data/specie_2025.csv">specie_2025.csv</a>, <a href="data/generi_2025.csv">generi_2025.csv</a>.</p>
+
+<h3 id="regola">La regola 10-20-30</h3>
+<div id="regola-testo"></div>
+<div class="rule" id="regola-citta"></div>
+<div id="regola-nil"></div>
+<p class="src">La regola &egrave; pensata per tutta la citt&agrave;, non per un quartiere. Quote calcolate su tutti gli alberi, specie non indicate comprese (al denominatore). Famiglie secondo la classificazione APG IV, scritte da noi.</p>
+
+<h2 id="classifica">Chi ha pi&ugrave; e meno alberi per abitante</h2>
+<div id="class-testo"></div>
+<div class="grid2"><div><h3>Pi&ugrave; alberi per abitante</h3><div class="bars" id="b-top"></div></div>
+<div><h3>Meno alberi per abitante</h3><div class="bars" id="b-bot"></div></div></div>
+<p class="src">Alberi gestiti dal Comune ogni 1.000 residenti (residenti ds205 del Comune, anno 2024). Solo i quartieri con almeno 5.000 residenti; gli altri sono parchi o aree quasi senza abitanti.</p>
+<details><summary>Tutti i quartieri in classifica</summary><div class="scroll tabmax"><table id="tab-class"></table></div></details>
+
+<h2 id="cambi">Dal 2023 al 2025</h2>
+<div id="cambi-testo"></div>
+<h3>Alberi in citt&agrave;, per edizione</h3>
+<div class="bars" id="b-ed"></div>
+<h3>Chi sono gli alberi spariti</h3>
+<div id="spariti-testo"></div>
+<div class="scroll"><table id="tab-spariti"></table></div>
+<h3>Per quartiere</h3>
+<div id="cambi-nil-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Quartieri che perdono di pi&ugrave;</b> (alberi in pi&ugrave; o in meno)</p><div class="bars dv" id="b-peggio"></div></div>
+<div><p class="sub"><b>Quartieri che guadagnano di pi&ugrave;</b></p><div class="bars dv" id="b-meglio"></div></div></div>
+<div class="warm"><b>Attenzione al perimetro.</b> Tra un&rsquo;edizione e l&rsquo;altra il Comune pu&ograve; aggiungere o togliere aree dalla sua gestione, o rifare le schede, senza dirlo. Se un albero &laquo;sparisce&raquo; da un quartiere, il dato non spiega se &egrave; stato tagliato, &egrave; morto, &egrave; stato sostituito o &egrave; uscito dall&rsquo;elenco. Se &laquo;compare&raquo;, non vuol dire che sia stato piantato in quegli anni: <span id="perim"></span></div>
+<details><summary>Tutti i quartieri: cambiamento 2023&ndash;2025</summary><div class="scroll tabmax"><table id="tab-cambi"></table></div></details>
+<h3>Per genere</h3>
+<div id="gen-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Generi che perdono di pi&ugrave;</b></p><div class="bars dv wr" id="b-gneg"></div></div>
+<div><p class="sub"><b>Generi che guadagnano di pi&ugrave;</b></p><div class="bars dv wr" id="b-gpos"></div></div></div>
+<p class="src">Saldo = alberi nuovi meno alberi spariti, per genere, tra il 31/3/2023 e il 31/3/2025 (confronto per numero identificativo di ogni albero). <a href="data/cambiamenti_per_genere_2023_2025.csv">Tutti i generi</a>. Fonte: Comune di Milano, ds2484, edizioni 2023 (copia d&rsquo;archivio) e 2025.</p>
+
+<h2 id="monumentali">I 13 alberi monumentali</h2>
+<div id="mon-testo"></div>
+<div class="scroll"><table id="tab-mon"></table></div>
+<p class="src">Fonte: Comune di Milano, &laquo;Gli alberi monumentali nel Comune di Milano&raquo; (ds2489, CC BY), dato del 3/11/2023. Le misure sono scritte come nel file (circonferenza del fusto): per i due alberi di Villa Litta il file riporta due valori, copiati senza interpretarli. Sulla mappa si vedono con la casella &laquo;alberi monumentali&raquo;.</p>
+
+<h2 id="reddito">Alberi e reddito</h2>
+<div id="red-testo"></div>
+<div class="ch" id="ch-cap" role="img" aria-label="Grafico: reddito imponibile medio per CAP e alberi ogni 1.000 abitanti"></div>
+<p class="src">Ogni punto &egrave; un CAP (38). Orizzontale: reddito imponibile medio per contribuente, anno d&rsquo;imposta 2024 (Comune di Milano, ds3009, CC BY). Verticale: alberi del censimento 2025 ogni 1.000 residenti stimati. Il CAP di ogni albero e i residenti per CAP sono stimati. Linea tratteggiata: media della citt&agrave;.</p>
+<div class="warn"><b>Un confronto, non una prova.</b> Dire che i CAP pi&ugrave; ricchi hanno meno alberi per abitante non vuol dire che &laquo;i ricchi hanno meno verde&raquo;: il censimento non comprende i giardini privati, e i CAP con redditi alti sono probabilmente pi&ugrave; centrali (&egrave; un&rsquo;ipotesi, non misurata). Quello che si vede bene, invece, &egrave; un legame forte con la densit&agrave; di abitanti:</div>
+<div class="ch" id="ch-dens" role="img" aria-label="Grafico: abitanti per km2 e alberi ogni 1.000 abitanti, per quartiere"></div>
+<p class="src">Ogni punto &egrave; un quartiere con almeno 5.000 residenti (64). Orizzontale: residenti per km&sup2;; verticale: alberi ogni 1.000 residenti. Linea tratteggiata: media della citt&agrave;.</p>
+<div id="red-testo2"></div>
+
+<h2 id="limiti">Che cosa non dice questo dato</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+<div id="forestami"></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil.csv">nil.csv</a> (alberi, residenti, cambiamenti e specie principali per quartiere), <a href="data/nil.geojson">nil.geojson</a> (i confini dei quartieri, semplificati, con gli stessi valori), <a href="data/esagoni.json">esagoni.json</a> (alberi per esagono di 250 m, con il genere pi&ugrave; frequente), <a href="data/specie_2025.csv">specie_2025.csv</a>, <a href="data/generi_2025.csv">generi_2025.csv</a>, <a href="data/cambiamenti_per_genere_2023_2025.csv">cambiamenti_per_genere_2023_2025.csv</a>, <a href="data/cap_alberi_reddito.csv">cap_alberi_reddito.csv</a>, <a href="data/monumentali.csv">monumentali.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno). Sono tutti valori aggregati: gli alberi uno per uno non sono ripubblicati qui (il file originale del Comune &egrave; sul suo portale).</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Alberi: Comune di Milano &ndash; Direzione Verde e Ambiente, &laquo;Territorio: localizzazione degli alberi&raquo; (ds2484), licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), edizioni del 31/3/2024 e 31/3/2025 scaricate dal portale <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026; edizione del 31/3/2023 da una copia della Wayback Machine (snapshot del 6/5/2024 del file del Comune), non pi&ugrave; sul portale. Alberi monumentali (ds2489, CC BY, scaricato il 1/11/2026). Confini dei NIL (ds964, CC BY). Residenti per quartiere (ds205, anno 2024, CC BY). Redditi per CAP (ds3009, anno d&rsquo;imposta 2024, CC BY). Forestami: solo i totali, con link a <a href="https://forestami.org/">forestami.org</a> (&laquo;tutti i diritti riservati&raquo;: nessun contenuto ripreso). Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,HX=null,NIL=[],RD=[];
+var ACC='#00695c',GRY='#8a8a8a',WARM='#c26a1b',NEG='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function sci(s){return '<i>'+esc(s)+'</i>'}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function DATA(d){var a=d.split('-');var m=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];return parseInt(a[2],10)+' '+m[parseInt(a[1],10)]+' '+a[0]}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/esagoni.json')]).then(function(a){
+  D=a[0];NF=a[1];HX=a[2];
+  NIL=NF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mappa();specie();regola();classifica();cambi();monumentali();reddito();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function nilByName(){var o={};NIL.forEach(function(p){o[p.n]=p});return o}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var C=D.cambi,c=D.citta;
+  el('n-tot').textContent=f0(c.alberi['2025']);el('n-uno').textContent=nf(c.abitanti_per_albero,1);
+  var h='<p><b>Gli alberi del Comune sono diminuiti.</b> Erano '+f0(c.alberi['2023'])+' a marzo 2023, sono '+f0(c.alberi['2025'])+' a marzo 2025: <b>'+sg(C.saldo)+' alberi ('+sgp(C.saldo_pct)+')</b>. Non &egrave; una discesa regolare: '+sg(C.saldo_2023_2024)+' ('+sgp(C.saldo_2023_2024_pct)+') nel primo anno, poi '+sg(C.saldo_2024_2025)+' ('+sgp(C.saldo_2024_2025_pct)+') nel secondo.</p>';
+  h+='<p>Sotto il saldo c&rsquo;&egrave; molto movimento: <b>'+f0(C.spariti)+'</b> alberi del 2023 non ci sono pi&ugrave; nel 2025 e '+f0(C.nuovi)+' sono nuovi. Tra quelli spariti il <b>'+nf(C.spariti_tronco_max12_pct,1)+'%</b> aveva un tronco di 12 cm o meno e il <b>'+Math.round(C.spariti_scheda_dal_2019_pct)+'%</b> una scheda del 2019 o pi&ugrave; recente: sono soprattutto alberi giovani. Tra tutti gli alberi del 2023 la scheda dal 2019 era il '+nf(C.confronto_2023_tutti_scheda_dal_2019_pct,1)+'%, il tronco fino a 12 cm il '+nf(C.confronto_2023_tutti_tronco_max12_pct,1)+'%.</p>';
+  h+='<p><b>Il dato non dice se siano morti, tagliati, sostituiti o usciti dalla gestione del Comune.</b> Per questo qui non si parla di &laquo;alberi abbattuti&raquo; (<a href="#cambi">vedi sotto</a>).</p>';
+  h+='<p class="src">Confronto per numero identificativo tra le edizioni del 31/3/2023 e del 31/3/2025 del censimento del Comune di Milano (ds2484, CC BY); la misura del tronco &egrave; poco affidabile (<a href="#limiti">limiti</a>).</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,OUT=null,HEXL=null,MONL=null,CUR='p1000',SEL=null,SELHEX=null,MET={};
+function qbreaks(vals,k,step){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]/step)*step);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
+function colore(v,m){if(v==null)return '#bdbdbd';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function mappa(){
+  var ok=NIL.filter(function(p){return p.cl===1});
+  var b1=qbreaks(ok.map(function(p){return p.p1000}),6,10),b2=qbreaks(NIL.map(function(p){return p.pkm2}),6,100);
+  var bh=HX.classi;
+  MET={
+   p1000:{k:'p1000',b:b1,c:pick(b1.length+1),f:function(v){return f0(v)},u:' alberi ogni 1.000 abitanti',grey:true,t:'Alberi del Comune ogni 1.000 residenti. La media della città è '+f1(D.citta.per_1000_abitanti)+'. In grigio i quartieri con meno di 5.000 residenti (parchi e aree quasi senza abitanti), dove il rapporto non è confrontabile: clicca per vedere gli alberi in valore assoluto.'},
+   pkm2:{k:'pkm2',b:b2,c:pick(b2.length+1),f:function(v){return f0(v)},u:' alberi per km²',t:'Alberi del Comune per km² di quartiere. La media della città è '+f0(D.citta.per_km2)+'. Per i parchi e le aree con pochi residenti il dato è valido: si divide per la superficie, non per i residenti.'},
+   'var':{k:'vp',b:[-4,-2,0,2],c:['#a8540f','#e0a96d','#f3dcc0','#a6d3ca','#2b8a7d'],f:function(v){return sgp(v,1)},u:'',sg:true,t:'Come è cambiato il numero di alberi tra marzo 2023 e marzo 2025, in percentuale. Attenzione: include alberi entrati o usciti dalla gestione del Comune (vedi “Dal 2023 al 2025”). I quartieri piccoli fanno percentuali grandi con pochi alberi.'},
+   hex:{b:bh,c:SEQ,t:'Alberi in ogni esagono largo circa 250 metri (circa '+nf(HX.area_ha,1)+' ettari). Il colore dice quanti alberi del Comune ci sono; più chiaro = meno. I fiumi, le ferrovie e le aree senza alberi gestiti dal Comune restano vuoti. Esagoni ai bordi della città contano meno terreno.'}
+  };
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});
+    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  OUT=L.geoJSON(NF,{style:function(){return {fill:false,color:'#555',weight:1,interactive:false}},interactive:false});
+  MAP.fitBounds(LAY.getBounds());
+  /* esagoni */
+  HEXL=L.layerGroup();
+  var R=HX.raggio_m;
+  HX.celle.forEach(function(c,ix){
+    var lat=c[1],lon=c[0],kx=111320*Math.cos(lat*Math.PI/180),ky=110950,pts=[];
+    for(var k=0;k<6;k++){var an=(60*k+30)*Math.PI/180;pts.push([lat+R*Math.sin(an)/ky,lon+R*Math.cos(an)/kx])}
+    var p=L.polygon(pts,{stroke:false,fillColor:colore(c[2],MET.hex),fillOpacity:.78,smoothFactor:0});
+    p.bindTooltip(function(){return tipHex(c)},{sticky:true});
+    p.on('click',function(){scegliHex(ix)});
+    HEXL.addLayer(p);
+  });
+  /* monumentali */
+  MAP.createPane('mon').style.zIndex=650;
+  var mr=L.svg({pane:'mon'});
+  MONL=L.layerGroup();
+  D.monumentali.forEach(function(m){
+    var mk=L.circleMarker([m.lat,m.lon],{pane:'mon',renderer:mr,radius:7,color:'#fff',weight:2,fillColor:'#111',fillOpacity:1});
+    mk.bindTooltip('<b>'+esc(m.nome)+'</b><br>'+esc(m.luogo),{sticky:true});
+    mk.on('click',function(){var a=document.getElementById('mon-'+m.id);if(a){a.scrollIntoView({behavior:'smooth',block:'center'});a.style.background='#fff3c4';setTimeout(function(){a.style.background=''},2500)}});
+    MONL.addLayer(mk);
+  });
+  el('ck-mon').addEventListener('change',function(){if(this.checked)MONL.addTo(MAP);else MAP.removeLayer(MONL)});
+  /* controlli */
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL&&CUR!=='hex')MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function tipNil(p){var m=MET[CUR],v=p[m.k];
+  if(CUR==='p1000'&&p.cl!==1)return '<b>'+esc(p.n)+'</b><br>'+f0(p.t25)+' alberi, '+f0(p.ab)+' residenti<br>meno di 5.000 residenti: non confrontabile';
+  return '<b>'+esc(p.n)+'</b><br>'+(m.sg?sgp(v,1)+' ('+sg(p.v)+' alberi)':f0(v)+m.u)}
+function tipHex(c){var g=c[3]>=0?HX.generi[c[3]]:null;var nm=c[5]>=0?nilById(c[5]).n:'fuori dai quartieri';
+  return '<b>'+f0(c[2])+' alberi</b><br>'+(g?'più frequente: '+esc(g[1]||g[0])+' ('+c[4]+'%)<br>':'')+esc(nm)}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+function sty(f){var p=f.properties,m=MET[CUR],sel=SEL===p.i,v=p[m.k];
+  if(CUR==='p1000'&&p.cl!==1)v=null;
+  return {fillColor:colore(v,m),fillOpacity:.82,color:sel?'#000':'#fff',weight:sel?3:1}}
+function ricolora(){
+  var m=MET[CUR];
+  if(CUR==='hex'){if(MAP.hasLayer(LAY))MAP.removeLayer(LAY);OUT.addTo(MAP);HEXL.addTo(MAP);OUT.bringToFront()}
+  else{if(MAP.hasLayer(HEXL))MAP.removeLayer(HEXL);if(MAP.hasLayer(OUT))MAP.removeLayer(OUT);if(!MAP.hasLayer(LAY))LAY.addTo(MAP);LAY.setStyle(sty);if(SEL)bringSel()}
+  var h='';
+  m.c.forEach(function(c,i){var t;
+    if(CUR==='var'){t=['meno di −4%','da −4% a −2%','da −2% a 0','da 0 a +2%','oltre +2%'][i]}
+    else if(CUR==='hex'){t=i===0?'meno di '+f0(m.b[0]):i===m.b.length?f0(m.b[i-1])+' o più':f0(m.b[i-1])+' – '+(m.b[i]-1)}
+    else{t=i===0?'meno di '+f0(m.b[0]):i===m.b.length?f0(m.b[i-1])+' o più':f0(m.b[i-1])+' – '+f0(m.b[i])}
+    h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+  if(m.grey)h+='<span><i style="background:#bdbdbd"></i>meno di 5.000 residenti</span>';
+  setH('lg-map',h);setH('map-desc',m.t);
+}
+function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
+function scegli(i,zoom){SEL=i;SELHEX=null;el('sel-nil').value=String(i);
+  if(CUR!=='hex'){LAY.setStyle(sty);bringSel()}
+  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}
+  scheda(i,null)}
+function scegliHex(ix){var c=HX.celle[ix];SELHEX=ix;SEL=c[5]>=0?c[5]:null;if(SEL)el('sel-nil').value=String(SEL);
+  if(c[5]>=0)scheda(c[5],c);else setH('scheda','<h3>Esagono fuori dai quartieri</h3><p>'+tipHex(c)+'</p>')}
+function regolaTag(v,thr){return v>=thr?'<span class="pill">sopra il '+thr+'%</span>':''}
+function scheda(i,hex){
+  var p=nilById(i);if(!p)return;
+  var C=D.citta,h='<h3>'+esc(p.n)+'</h3>';
+  if(hex){var g=hex[3]>=0?HX.generi[hex[3]]:null;h+='<p class="sub">Esagono scelto: <b>'+f0(hex[2])+' alberi</b>'+(g?', il più frequente è '+esc(g[1]||g[0])+' ('+hex[4]+'%)':'')+'. Qui sotto il quartiere intero.</p>'}
+  h+='<div class="scroll"><table><tbody>';
+  h+='<tr><td>Alberi nel 2025</td><td class="r"><b>'+f0(p.t25)+'</b> <span class="sub">(2023: '+f0(p.t23)+')</span></td></tr>';
+  h+='<tr><td>Residenti (2024)</td><td class="r">'+f0(p.ab)+'</td></tr>';
+  h+='<tr><td>Alberi ogni 1.000 residenti</td><td class="r">'+(p.cl===1?'<b>'+f1(p.p1000)+'</b> <span class="sub">(città: '+f1(C.per_1000_abitanti)+')</span>':'<span class="sub">non confrontabile: meno di 5.000 residenti'+(p.p1000!=null?' ('+f0(p.p1000)+')':'')+'</span>')+'</td></tr>';
+  h+='<tr><td>Alberi per km²</td><td class="r"><b>'+f0(p.pkm2)+'</b> <span class="sub">(città: '+f0(C.per_km2)+')</span></td></tr>';
+  var s=p.s.map(function(x){return esc(x[0]||x[1])+' <span class="sub">'+sci(x[1])+'</span>: '+f0(x[2])+' ('+nf(100*x[2]/p.t25,1)+'%)'}).join('<br>');
+  h+='<tr><td>Le 3 specie più frequenti</td><td>'+s+'</td></tr>';
+  h+='<tr><td>Genere più frequente</td><td class="r">'+esc(p.gi||p.g)+' <span class="sub">('+sci(p.g)+')</span>: <b>'+nf(p.gp,1)+'%</b>'+regolaTag(p.gp,20)+'</td></tr>';
+  h+='<tr><td>Specie più frequente (regola 10%)</td><td class="r">'+(p.sp!=null?nf(p.sp,1)+'%'+regolaTag(p.sp,10):'')+'</td></tr>';
+  h+='<tr><td>Cambiamento 2023–2025</td><td class="r"><b>'+sg(p.v)+'</b> alberi ('+(p.vp==null?'':sgp(p.vp,1))+') <span class="sub">spariti '+f0(p.rm)+', nuovi '+f0(p.ag)+'</span></td></tr>';
+  h+='</tbody></table></div><p class="sub">Alberi gestiti dal Comune (31/3/2025). Il cambiamento include alberi entrati o usciti dalla gestione. Specie non indicata: '+nf(p.nsp,1)+'% degli alberi del quartiere.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- specie e generi ---------- */
+function barsWr(id,rows,max){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.title||'')+'">'+r.nm+'<i>'+r.sub+'</i></span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+function specie(){
+  var S=D.top_specie,G=D.top_generi,F=D.top_famiglie,C=D.citta;
+  var h='<p>Nel 2025 il censimento conta '+f0(C.alberi['2025'])+' alberi, di '+D.generi_2025+' generi e '+D.famiglie_2025+' famiglie (circa '+D.specie_distinte_2025+' specie riconoscibili). Il <b>'+esc(S[0][0].toLowerCase())+'</b> ('+sci(S[0][1])+') &egrave; la specie pi&ugrave; frequente con '+f0(S[0][2])+' alberi, il '+nf(S[0][3],1)+'%; seguono '+esc(S[1][0].toLowerCase())+' ('+f0(S[1][2])+') e '+esc(S[2][0].toLowerCase())+' ('+f0(S[2][2])+'). Per genere il primo &egrave; l&rsquo;<b>acero</b> ('+sci('Acer')+'), con l&rsquo;'+nf(G[0][3],1)+'%, davanti a platano e tiglio. Per famiglia (secondo la classificazione APG IV) la prima &egrave; '+sci(F[0][0])+' con il '+nf(F[0][2],1)+'%.</p>';
+  h+='<p>Strade e piazze ospitano il '+nf(C.tipo_localita_pct['strada/piazza'],1)+'% degli alberi, parchi e giardini il '+nf(C.tipo_localita_pct['parco/giardino/area verde'],1)+'%, i cimiteri il '+nf(C.tipo_localita_pct['cimitero'],1)+'% (dalla prima parola del campo &laquo;localit&agrave;&raquo;).</p>';
+  setH('specie-testo',h);
+  var mx=S[0][3];
+  function draw(){
+    barsWr('b-specie',S.map(function(r){return {nm:esc(r[0]),sub:esc(r[1]),title:r[0]+' ('+r[1]+') '+f0(r[2])+' alberi',v:r[3],txt:nf(r[3],1)+'%'}}),mx);
+    barsWr('b-generi',G.map(function(r){return {nm:esc(r[1]||r[0]),sub:esc(r[0]),title:(r[1]||r[0])+' ('+r[0]+') '+f0(r[2])+' alberi',v:r[3],txt:nf(r[3],1)+'%'}}),G[0][3]);
+  }
+  draw();
+}
+
+/* ---------- 10-20-30 ---------- */
+function regola(){
+  var R=D.regola,e=R.edizioni[2],E=R.edizioni,N=R.nil_totale;
+  var h='<p>Chi si occupa di verde urbano consiglia una regola semplice, la <b>10-20-30</b>: non pi&ugrave; del 10% degli alberi della stessa specie, del 20% dello stesso genere e del 30% della stessa famiglia. Serve a non perdere gran parte degli alberi se arriva una malattia o un parassita che colpisce una sola specie. <b>Milano la rispetta, in tutte e tre le edizioni</b>: nel 2025 la specie pi&ugrave; frequente ('+esc(R.specie_top_nome.toLowerCase())+') &egrave; il '+nf(e.specie_pct,1)+'%, il genere pi&ugrave; frequente (acero) l&rsquo;'+nf(e.genere_pct,1)+'%, la famiglia pi&ugrave; frequente il '+nf(e.famiglia_pct,1)+'%.</p>';
+  h+='<p>Un dubbio: per '+f0(R.specie_non_indicata)+' alberi la specie non &egrave; indicata (&laquo;spp&raquo;). Nel caso peggiore, se tutti i platani senza specie fossero platano comune, la quota salirebbe all&rsquo;'+nf(R.caso_peggiore_specie_pct,1)+'%: ancora sotto il 10%. Con la classificazione botanica tradizionale delle famiglie le quote sarebbero pi&ugrave; basse.</p>';
+  setH('regola-testo',h);
+  var sc=35;
+  function row(nm,v,thr,txt){return '<div class="row"><span>'+nm+'</span><span class="tr"><span class="fill" style="width:'+(v/sc*100)+'%"></span><span class="mk" style="left:'+(thr/sc*100)+'%" title="limite '+thr+'%"></span></span><span class="v">'+txt+'</span></div>'}
+  setH('regola-citta','<p class="sub" style="margin-bottom:0"><b>La citt&agrave; intera, 2025.</b> Barra verde = quota del primo; segno arancione = limite della regola.</p>'+
+    row('Specie',e.specie_pct,10,'<b>'+nf(e.specie_pct,1)+'%</b> (limite 10%)')+row('Genere',e.genere_pct,20,'<b>'+nf(e.genere_pct,1)+'%</b> (limite 20%)')+row('Famiglia',e.famiglia_pct,30,'<b>'+nf(e.famiglia_pct,1)+'%</b> (limite 30%)'));
+  var ok=NIL.slice().filter(function(p){return p.sp!=null}).sort(function(a,b){return b.sp-a.sp}).filter(function(p){return p.t25>=1000}).slice(0,5);
+  var h2='<p><b>Quartiere per quartiere la regola non regge.</b> Su '+N+' quartieri, <b>'+R.nil_specie_oltre10+'</b> hanno una specie sopra il 10%, <b>'+R.nil_genere_oltre20+'</b> un genere sopra il 20% e '+R.nil_famiglia_oltre30+' una famiglia sopra il 30%. Non &egrave; un voto ai quartieri: la regola &egrave; pensata per la citt&agrave; intera, e in un quartiere piccolo basta qualche viale per superare la soglia.</p>';
+  h2+='<div class="rule">'+['Specie sopra il 10%','Genere sopra il 20%','Famiglia sopra il 30%'].map(function(t,i){var n=[R.nil_specie_oltre10,R.nil_genere_oltre20,R.nil_famiglia_oltre30][i];return '<div class="row"><span>'+t+'</span><span class="tr"><span class="fill" style="width:'+(n/N*100)+'%"></span></span><span class="v"><b>'+n+'</b> quartieri su '+N+'</span></div>'}).join('')+'</div>';
+  h2+='<p><b>Un caso: i cimiteri.</b> Il quartiere Maggiore-Musocco-Certosa ha il <b>'+nf(100*R.calocedri_nil_maggiore/R.alberi_nil_maggiore,1)+'%</b> di calocedri ('+sci('Calocedrus decurrens')+'): '+f0(R.calocedri_nil_maggiore)+' alberi su '+f0(R.alberi_nil_maggiore)+'. Quasi tutti sono dentro i cimiteri ('+f0(R.calocedri_nil_maggiore_cimiteri)+'), e in tutta la citt&agrave; l&rsquo;'+Math.round(100*R.calocedri_nei_cimiteri/R.calocedri_citta)+'% dei '+f0(R.calocedri_citta)+' calocedri &egrave; in un cimitero. Il quartiere &laquo;sfora&raquo; perch&eacute; ha i grandi cimiteri, non perch&eacute; le sue strade siano poco varie.</p>';
+  h2+='<p class="sub">Altri quartieri con una specie molto presente (almeno 1.000 alberi): '+ok.map(function(p){return esc(p.n)+' '+nf(p.sp,1)+'% '+esc(p.s[0][0].toLowerCase())}).join('; ')+'. Quartiere piccolo, quota enorme: Quintosole ha il '+nf(nilByName()['Quintosole'].gp,1)+'% di liquidambar, ma solo '+f0(nilByName()['Quintosole'].t25)+' alberi in tutto.</p>';
+  setH('regola-nil',h2);
+}
+
+/* ---------- classifica ---------- */
+function barsPlain(id,rows,max,col){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+function classifica(){
+  var C=D.citta,cl=NIL.filter(function(p){return p.cl===1}).sort(function(a,b){return b.p1000-a.p1000});
+  var top=cl.slice(0,8),bot=cl.slice(-8).reverse(),mx=top[0].p1000;
+  var h='<p>I quartieri con almeno 5.000 residenti sono '+cl.length+' su 88 (gli altri sono parchi o aree quasi senza abitanti: Parco Sempione ne ha zero, il Parco Nord un centinaio). La media della citt&agrave; &egrave; di '+f1(C.per_1000_abitanti)+' alberi ogni 1.000 residenti, la mediana dei quartieri &egrave; '+f1(C.mediana_nil_per_1000_abitanti)+'. Tra il primo e l&rsquo;ultimo c&rsquo;&egrave; un rapporto di <b>'+nf(C.rapporto_max_min_nil,1)+' volte</b>: '+esc(top[0].n)+' ('+f0(top[0].p1000)+') contro '+esc(bot[0].n)+' ('+f0(bot[0].p1000)+').</p>';
+  h+='<p>Questo non misura &laquo;quanto verde c&rsquo;&egrave;&raquo;, ma quanti alberi del Comune ci sono per ogni residente. Dove i residenti sono pochi il rapporto sale (per Maggiore-Musocco-Certosa ci sono i cimiteri), dove sono tanti e vicini scende (<a href="#reddito">vedi sotto</a>).</p>';
+  setH('class-testo',h);
+  barsPlain('b-top',top.map(function(p){return {nm:p.n,v:p.p1000,txt:f0(p.p1000)}}),mx);
+  barsPlain('b-bot',bot.map(function(p){return {nm:p.n,v:p.p1000,txt:f0(p.p1000)}}),mx,'#8a4a10');
+  table('tab-class',['Quartiere','Alberi 2025','Residenti 2024','Alberi ogni 1.000 residenti','Alberi per km²'],cl.map(function(p){return [esc(p.n),f0(p.t25),f0(p.ab),f1(p.p1000),f0(p.pkm2)]}));
+}
+
+/* ---------- cambiamenti ---------- */
+function divBars(id,rows,max,neg){
+  setH(id,rows.map(function(r){var w=Math.abs(r.v)/max*50,col=r.v<0?NEG:ACC;
+    return '<div class="row"><span class="nm" title="'+esc(r.title||r.nm)+'">'+(r.html||esc(r.nm))+'</span><span class="tr"><span class="fill" style="width:'+w+'%;'+(r.v<0?'right:50%':'left:50%')+';background:'+col+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+function cambi(){
+  var C=D.cambi,c=D.citta;
+  var h='<p>Il censimento esiste in tre edizioni, al 31 marzo di ogni anno (2023, 2024, 2025). Confrontando i numeri identificativi degli alberi si vede chi c&rsquo;&egrave; ancora, chi manca e chi &egrave; nuovo. In due anni gli alberi in comune sono '+f0(C.in_comune)+'; ne mancano '+f0(C.spariti)+' e ne sono comparsi '+f0(C.nuovi)+'. Il saldo &egrave; <b>'+sg(C.saldo)+' ('+sgp(C.saldo_pct,2)+')</b>. <b>'+C.nil_con_meno+' quartieri su 88</b> hanno meno alberi, '+C.nil_con_piu+' ne hanno di pi&ugrave;.</p>';
+  setH('cambi-testo',h);
+  var ed=[['31/3/2023',c.alberi['2023']],['31/3/2024',c.alberi['2024']],['31/3/2025',c.alberi['2025']]],lo=Math.min(c.alberi['2023'],c.alberi['2024'],c.alberi['2025']);
+  var mx=Math.max(c.alberi['2023'],c.alberi['2024'],c.alberi['2025']);
+  setH('b-ed',ed.map(function(r,i){return '<div class="row"><span class="nm">'+r[0]+'</span><span class="tr"><span class="fill" style="width:'+(r[1]/mx*100)+'%"></span></span><span class="v">'+f0(r[1])+'</span></div>'}).join(''));
+  el('b-ed').insertAdjacentHTML('afterend','<p class="src">Le barre partono da zero. Il calo del primo anno ('+sg(C.saldo_2023_2024)+') &egrave; pi&ugrave; grande di quello dei due anni insieme: poi il numero risale ('+sg(C.saldo_2024_2025)+'). Fonte: ds2484, righe di ogni edizione.</p>');
+  var s='<p>Gli alberi spariti sono diversi dagli altri? Un po&rsquo;: sono pi&ugrave; spesso giovani. Il <b>'+nf(C.spariti_tronco_max12_pct,1)+'%</b> dei '+f0(C.spariti)+' spariti aveva un tronco di 12 cm o meno, contro il '+nf(C.confronto_2023_tutti_tronco_max12_pct,1)+'% di tutti gli alberi del 2023 (la differenza &egrave; piccola, e la misura &egrave; poco affidabile). Pi&ugrave; netta la differenza sulla data della scheda: <b>'+f0(C.spariti_scheda_dal_2019)+' ('+Math.round(C.spariti_scheda_dal_2019_pct)+'%)</b> hanno una scheda del 2019 o pi&ugrave; recente, contro il '+nf(C.confronto_2023_tutti_scheda_dal_2019_pct,1)+'% di tutti gli alberi del 2023: circa il doppio. Gli alberi nuovi hanno per il '+nf(C.nuovi_scheda_nel_periodo_pct,0)+'% una scheda del 2023&ndash;2025 (piantagioni o schede nuove, il dato non distingue).</p>';
+  setH('spariti-testo',s);
+  table('tab-spariti',['','Spariti 2023&ndash;2025','Tutti gli alberi 2023','Quelli che restano'],[
+    ['Tronco di 12 cm o meno',nf(C.spariti_tronco_max12_pct,1)+'%',nf(C.confronto_2023_tutti_tronco_max12_pct,1)+'%',nf(C.confronto_2023_rimasti_tronco_max12_pct,1)+'%'],
+    ['Scheda del 2019 o pi&ugrave; recente',nf(C.spariti_scheda_dal_2019_pct,1)+'%',nf(C.confronto_2023_tutti_scheda_dal_2019_pct,1)+'%',nf(C.confronto_2023_rimasti_scheda_dal_2019_pct,1)+'%']]);
+  var sorted=NIL.slice().sort(function(a,b){return a.v-b.v}),pe=sorted.slice(0,8),me=sorted.slice(-8).reverse(),m2=Math.max(Math.abs(pe[0].v),me[0].v);
+  setH('cambi-nil-testo','<p>Il saldo per quartiere va da '+sg(pe[0].v)+' ('+esc(pe[0].n)+', '+sgp(pe[0].vp)+') a '+sg(me[0].v)+' ('+esc(me[0].n)+', '+sgp(me[0].vp)+'). In percentuale i quartieri piccoli ballano di pi&ugrave;: '+esc(nilByName()['Cantalupa'].n)+' &egrave; a '+sgp(nilByName()['Cantalupa'].vp)+', ma sono '+sg(nilByName()['Cantalupa'].v)+' alberi.</p>');
+  function rowsOf(a){return a.map(function(p){return {nm:p.n,v:p.v,txt:sg(p.v)+' <span class="sub">('+sgp(p.vp,1)+')</span>'}})}
+  divBars('b-peggio',rowsOf(pe),m2);divBars('b-meglio',rowsOf(me),m2);
+  var p1=C.nuovi_scheda_precedente_pct;
+  el('perim').textContent='l’'+nf(p1,1)+'% degli alberi nuovi del 2023–2025 ha una scheda con data precedente al 2023. Il saldo dice come cambia l’elenco del Comune, non quanti alberi sono stati piantati o tagliati.';
+  table('tab-cambi',['Quartiere','2023','2025','Saldo','%','Spariti','Nuovi'],NIL.slice().sort(function(a,b){return a.v-b.v}).map(function(p){return [esc(p.n),f0(p.t23),f0(p.t25),sg(p.v),p.vp==null?'':sgp(p.vp,1),f0(p.rm),f0(p.ag)]}));
+  /* generi */
+  var G=D.cambi_genere;
+  setH('gen-testo','<p>Per genere, tra 2023 e 2025 perdono di pi&ugrave; '+G.slice(0,3).map(function(r){return esc((r[1]||r[0]).toLowerCase())+' ('+sg(r[5])+')'}).join(', ')+'. I generi pi&ugrave; presenti tra i nuovi alberi sono '+G.slice().sort(function(a,b){return b[4]-a[4]}).slice(0,3).map(function(r){return esc((r[1]||r[0]).toLowerCase())+' ('+f0(r[4])+')'}).join(', ')+'. Il saldo per genere mescola alberi tolti e alberi rimpiazzati: dice come &egrave; cambiato l&rsquo;elenco, non una scelta di piantagione.</p>');
+  var neg=G.slice(0,8),pos=G.slice().sort(function(a,b){return b[5]-a[5]}).slice(0,8),mg=Math.max(Math.abs(neg[0][5]),pos[0][5]);
+  function rg(a){return a.map(function(r){return {nm:r[1]||r[0],html:esc(r[1]||r[0])+'<i>'+esc(r[0])+'</i>',v:r[5],txt:sg(r[5])}})}
+  divBars('b-gneg',rg(neg),mg);divBars('b-gpos',rg(pos),mg);
+}
+
+/* ---------- monumentali ---------- */
+function monumentali(){
+  var M=D.monumentali;
+  setH('mon-testo','<p>Oltre al censimento generale, il Comune pubblica a parte l&rsquo;elenco degli alberi monumentali: sono '+M.length+', tutti in citt&agrave;, con la scheda di ciascuno sul sito del Comune. Non sono alberi qualunque: grandi platani, bagolari, un cipresso calvo, una quercia rossa, un noce del Caucaso. Sono pochi, e per questo qui sono una lista, non un grafico. Con la casella &laquo;alberi monumentali&raquo; sulla mappa si vedono nei quartieri.</p>');
+  table('tab-mon',['Dove','Albero','Circonferenza del tronco (cm)','Altezza (m)','Quartiere','Scheda'],M.map(function(m){return ['<span id="mon-'+m.id+'">'+esc(m.luogo)+'</span>',esc(m.nome)+'<br><span class="sub">'+sci(m.specie)+'</span>',esc(m.circonferenza_cm),esc(m.altezza_m),esc(m.nil),'<a href="'+esc(m.scheda_del_comune)+'">scheda</a>']}));
+}
+
+/* ---------- grafico a punti ---------- */
+function scatter(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:48,r:12,t:12,b:42};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=o.x0!=null?o.x0:Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=0,y1=Math.max.apply(null,ys.concat([o.hline||0]));
+  var sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);x0=Math.floor(x0/sx)*sx;x1=Math.ceil(x1/sx)*sx;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var lastx=-99;
+  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);if(xx-lastx>40){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(v)+'</text>'}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.hline!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.hline)+'" y2="'+Y(o.hline)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(W-m.r-2)+'" y="'+(Y(o.hline)-4)+'" text-anchor="end" style="fill:#8a4a10">'+o.hl+'</text>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-1)+'" text-anchor="start">'+o.yl+'</text>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.2" fill="'+ACC+'" fill-opacity=".72" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tip.style.display='none';ring.style.display='none';return}
+    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tip.innerHTML=p.t;tip.style.display='';var tw=tip.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  function hide(){tip.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- reddito ---------- */
+function reddito(){
+  var X=D.confronti,pts=X.cap_punti,rho=X.cap_spearman;
+  var lo=pts.slice().sort(function(a,b){return a[3]-b[3]}).slice(0,3),hi=pts.slice().sort(function(a,b){return b[3]-a[3]}).slice(0,3);
+  var h='<p>Si pu&ograve; chiedere: dove i redditi sono pi&ugrave; alti ci sono pi&ugrave; o meno alberi? I redditi del Comune sono per CAP, non per quartiere, e i CAP sono 38. Mettendo i CAP in fila per reddito imponibile medio e per alberi ogni 1.000 residenti, il legame &egrave; <b>negativo</b>: la correlazione di Spearman &egrave; <b>'+sg(rho[0],2)+'</b> (intervallo di confidenza al 95%: da '+sg(rho[1][0],2)+' a '+sg(rho[1][1],2)+'). In parole semplici: in media, i CAP con reddito pi&ugrave; alto hanno meno alberi del Comune per abitante. Contando gli alberi in assoluto, e non per abitante, il legame &egrave; '+sg(X.cap_spearman_assoluti[0],2)+'.</p>';
+  h+='<p class="sub">Meno alberi per abitante: '+lo.map(function(p){return p[0]+' ('+esc(p[1])+', '+f0(p[3])+')'}).join('; ')+'. Pi&ugrave; alberi: '+hi.map(function(p){return p[0]+' ('+esc(p[1])+', '+f0(p[3])+')'}).join('; ')+'.</p>';
+  setH('red-testo',h);
+  var cp=pts.map(function(p){return {x:p[2]/1000,y:p[3],t:'<b>CAP '+p[0]+'</b> ('+esc(p[1])+')<br>reddito medio '+f0(p[2])+' €<br>'+f0(p[3])+' alberi ogni 1.000 residenti<br>'+f0(p[4])+' alberi'}});
+  var cl=NIL.filter(function(p){return p.cl===1}).map(function(p){return {x:p.abkm2,y:p.p1000,t:'<b>'+esc(p.n)+'</b><br>'+f0(p.abkm2)+' residenti per km²<br>'+f0(p.p1000)+' alberi ogni 1.000 residenti'}});
+  function draw(){
+    scatter(el('ch-cap'),{pts:cp,h:300,xl:'reddito imponibile medio (migliaia di €, 2024)',yl:'alberi ogni 1.000 residenti',xf:function(v){return f0(v)},hline:D.citta.per_1000_abitanti,hl:'città '+f1(D.citta.per_1000_abitanti)});
+    scatter(el('ch-dens'),{pts:cl,h:300,x0:0,xl:'residenti per km² del quartiere (2024)',yl:'alberi ogni 1.000 residenti',xf:function(v){return f0(v)},hline:D.citta.per_1000_abitanti,hl:'città '+f1(D.citta.per_1000_abitanti)});
+  }
+  draw();RD.push(draw);
+  var r2=X.nil_spearman_densita,rs=X.nil_spearman_verde_satellite;
+  setH('red-testo2','<p><b>La spiegazione pi&ugrave; semplice &egrave; la densit&agrave;.</b> Tra i '+cl.length+' quartieri con almeno 5.000 residenti, il legame tra alberi per abitante e abitanti per km&sup2; &egrave; ancora pi&ugrave; forte: Spearman <b>'+sg(r2[0],2)+'</b> (da '+sg(r2[1][0],2)+' a '+sg(r2[1][1],2)+'). Dove vivono molte persone in poco spazio, gli alberi del Comune per testa sono meno, quasi per definizione. I CAP con redditi alti sono probabilmente centrali e densi (&egrave; un&rsquo;ipotesi: i confini dei CAP non sono pubblici e la densit&agrave; per CAP non &egrave; stata misurata), e i loro giardini privati non sono nel censimento. Il reddito, da solo, non &egrave; dimostrato come causa di nulla.</p><p class="sub">Un altro confronto: gli alberi per km&sup2; di ogni quartiere contro l&rsquo;indice di verde urbano da satellite del Comune (luglio 2024, progetto SPOTTED) hanno una correlazione quasi nulla ('+sg(rs[0],2)+', da '+sg(rs[1][0],2)+' a '+sg(rs[1][1],2)+'): l&rsquo;indice misura tutto il verde visto dall&rsquo;alto, anche quello privato e agricolo, il censimento solo gli alberi del Comune.</p>');
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var M=D.misure,C=D.citta;
+  var L=[
+   '<b>Solo gli alberi gestiti dal Comune.</b> Il dataset elenca &laquo;tutte le piante gestite dal Comune di Milano&raquo;: strade, piazze, parchi, giardini e cimiteri comunali. Non ci sono i giardini privati, i cortili, i parchi di altri enti, le aree agricole. Il perimetro preciso della gestione comunale non &egrave; scritto, e cambia da un anno all&rsquo;altro.',
+   '<b>Le misure non sono affidabili.</b> Il '+nf(M.tripletta_pct,0)+'% degli alberi ('+f0(M.tripletta_n)+') ha esattamente tronco 8 cm, altezza 5 m e chioma 2 m: sono valori di riempimento. Il '+nf(M.tronco_8cm_pct,1)+'% ha il tronco di 8 cm, il '+nf(M.altezza_5m_pct,0)+'% l&rsquo;altezza di 5 m, il '+nf(M.chioma_2m_pct,0)+'% la chioma di 2 m. Per gli alberi che ci sono in due edizioni il tronco &egrave; lo stesso nel '+nf(M.tronco_invariato_pct,0)+'% dei casi: le misure non sono rifatte ogni anno. <b>Per questo qui non ci sono grafici su et&agrave;, altezza o grandezza degli alberi.</b>',
+   '<b>La data non &egrave; una data di impianto.</b> Il '+nf(M.data_21_ottobre_pct,0)+'% delle schede ha come data un &laquo;21 ottobre&raquo; di un anno qualsiasi: vale l&rsquo;anno, non il giorno, e non dice quanti anni ha l&rsquo;albero.',
+   '<b>L&rsquo;edizione 2023 viene da un archivio.</b> Non &egrave; pi&ugrave; sul portale del Comune: &egrave; una copia del file del Comune presa dalla Wayback Machine (6/5/2024). Ha la stessa struttura e il 91% dei suoi identificativi si ritrova nel 2025, ma non ho potuto controllarla con un codice di verifica del Comune.',
+   '<b>Famiglie e nomi comuni sono scritti a mano da noi.</b> Il censimento ha solo genere e specie. Abbiamo aggiunto famiglia (classificazione APG IV) e nome italiano, e unito alcuni sinonimi (per esempio <i>Platanus hybrida</i> con <i>Platanus x acerifolia</i>). Da far rivedere a un botanico prima di citarli. Per il '+nf(100*D.regola.specie_non_indicata/C.alberi['2025'],1)+'% degli alberi la specie non &egrave; indicata (&laquo;spp&raquo;).',
+   '<b>Quartieri e residenti.</b> Ogni albero &egrave; assegnato al quartiere (NIL) in cui cade; '+C.senza_nil_2025+' alberi cadono fuori da ogni quartiere e non sono nelle schede, ma sono nei totali. I residenti sono del 2024 (Comune, ds205), per tutte e tre le edizioni. Il CAP degli alberi, usato per il confronto con il reddito, &egrave; stimato.',
+   '<b>Gli alberi del Comune non sono &laquo;la copertura verde&raquo; di Milano.</b> Non misurano la chioma vista dall&rsquo;alto, n&eacute; l&rsquo;ombra, n&eacute; l&rsquo;aria pulita.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var F=D.forestami;
+  setH('forestami','<p><b>E Forestami?</b> Il progetto <a href="'+esc(F.link)+'">Forestami</a> pianta alberi e arbusti nell&rsquo;area metropolitana e pubblica sul suo sito il numero di piante di ogni piantagione, ma non dati aperti e il sito dichiara &laquo;tutti i diritti riservati&raquo;: perci&ograve; qui riportiamo solo i totali. Dalle sue pagine pubbliche risultano '+F.piantagioni+' piantagioni con '+f0(F.piante_totali)+' piante in tutto (alberi <b>e arbusti</b>), di cui '+F.siti_in_citta+' siti dentro Milano per '+f0(F.piante_in_citta)+' piante. Non sappiamo quanti di quegli alberi siano nel censimento del Comune: i due insiemi non si possono sommare n&eacute; confrontare.</p>');
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var C=D.citta,L=[
+   '<b>Che cosa &egrave; un albero qui.</b> Una riga del censimento del Comune di Milano (ds2484): una pianta gestita dal Comune alla data di riferimento, con genere, specie, posizione. Nessun albero &egrave; stato cancellato o corretto; sono stati solo segnalati i valori strani (per esempio tronchi oltre 3 metri di diametro o date prima del 1900).',
+   '<b>Tre edizioni.</b> 31/3/2023 ('+f0(C.alberi['2023'])+' alberi), 31/3/2024 ('+f0(C.alberi['2024'])+'), 31/3/2025 ('+f0(C.alberi['2025'])+'). Sul portale, CSV e JSON del dataset sono del 2025 e il GeoJSON &egrave; del 2024: stesso titolo, edizioni diverse. Il confronto tra edizioni usa il numero identificativo (<code>obj_id</code>) di ogni albero.',
+   '<b>Quartieri.</b> I 88 NIL vigenti (ds964); ogni albero va nel NIL in cui cade (punto in poligono). 331 punti cadono entro 100 m da un NIL senza starci dentro e sono assegnati al pi&ugrave; vicino; 87 punti oltre i 100 m (41 alberi nel 2025) restano fuori. I confini sulla mappa sono semplificati (circa 3 metri).',
+   '<b>Residenti e superfici.</b> Residenti per NIL: ds205 del Comune, anno 2024, totale '+f0(C.abitanti_2024)+'. Superfici: calcolate dai poligoni dei NIL (totale '+nf(C.area_km2,2)+' km&sup2;), non dal campo del ds205, che ha le superfici scambiate per tre quartieri (Porta Vigentina&ndash;Porta Lodovica, Gorla&ndash;Precotto, Villapizzone&ndash;Cagnola&ndash;Boldinasco). Alberi ogni 1.000 residenti = alberi 2025 / residenti 2024 &times; 1.000.',
+   '<b>Esagoni.</b> Griglia di esagoni larghi 250 m (circa '+nf(HX.area_ha,1)+' ettari ciascuno) calcolata in coordinate UTM 32N sugli alberi del 2025; ne escono '+f0(HX.celle.length)+' con almeno un albero. Per ognuno: numero di alberi e genere pi&ugrave; frequente. Gli esagoni sul bordo della citt&agrave; coprono meno terreno comunale.',
+   '<b>Regola 10-20-30.</b> Quota del primo (specie, genere, famiglia) sul totale degli alberi, con le specie non indicate al denominatore. Specie: nome scientifico dopo l&rsquo;unione dei sinonimi. Le specie &laquo;spp&raquo; non entrano nella classifica delle specie.',
+   '<b>Redditi.</b> Per CAP, reddito imponibile diviso numero di contribuenti, anno d&rsquo;imposta 2024 (ds3009). Il CAP di ogni albero &egrave; il CAP del civico pi&ugrave; vicino (se entro 250 m): una stima. Spearman: correlazione tra le posizioni in classifica, non tra i valori; intervalli di confidenza al 95% con 5.000 ricampionamenti.',
+   '<b>Non verificato.</b> Un confronto indipendente con gli alberi stradali da satellite (Copernicus Urban Atlas, Street Tree Layer 2021) non &egrave; stato fatto: il file richiede una registrazione.',
+   '<b>Pagina costruita da un programma</b> (<code>alberi/scripts/pagina.py</code>) che legge le tabelle pulite e scrive i file di <code>data/</code>; i controlli interni confrontano i numeri con quelli della fase di raccolta. Ogni numero di questa pagina ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a> (campo <code>origine</code>).'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

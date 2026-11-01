@@ -2372,3 +2372,42 @@ python -I scripts\inventario.py <cartella censimenti>
   - **Falda ARPA**: PFOS 42 ng/L nel 2024 contro una soglia ambientale di 30 (acqua grezza, non del rubinetto).
 - **Correzione del coordinatore**, dopo il controllo dei testi in Gazzetta Ufficiale: il limite "PFAS totale" di 0,50 µg/L è stato tolto dal D.Lgs. 102/2025, e l'elenco del 2023 conta 24 sostanze, non 20. Il rinvio per 4 PFAS riportato dalla stampa non è verificato ed è segnato come tale in pagina.
 
+## 20. Appalti pubblici (Focus Milano)
+
+- 2026-11-01 — La chat del progetto `appalti-anac` (analisi open data ANAC 2019-2025) gira il "Focus Milano" su richiesta di Davide. Pagina `docs/appalti/`, programma `appalti/scripts/pagina.py` che legge in sola lettura `appalti-anac/risultati/60_*.csv` e ricontrolla i numeri del testo. Dettagli in `appalti/NOTE.md`.
+- **Fonte**: open data ANAC (dati.anticorruzione.it), CC BY-SA 4.0; i file derivati in `docs/appalti/data/` sono CC BY-SA 4.0. "Milano" = enti con sede nel Comune: ANAC registra la sede dell'ente, non il luogo del lavoro. ARIA (centrale acquisti regionale) è il 61% del valore e compra per tutta la Lombardia.
+- **Regole**: un'anomalia non è una prova, sempre con la spiegazione innocua accanto; nomi solo di ARIA e Comune di Milano (e gruppi di enti), nessuna impresa e nessuna persona. Il paper nazionale non è linkato: Davide ha detto di pubblicare senza link, da aggiungere quando esce.
+- Numeri: soglia dell'affidamento diretto 21,8% contro 20,0% atteso (nella norma); un solo offerente a Milano città 54,5% contro 43,0% atteso, senza ARIA 38,2% contro 35,4%; lavori senza fine registrata 39,7% contro 39,9% atteso a parità di dimensione; PNRR 40,8% dei lavori 2023-2025, quasi tutto un solo operatore della fibra (senza, 7,6%).
+
+## 21. I servizi sotto casa fanno il prezzo? (incrocio filoni 9 e 12)
+
+- 2026-11-01 — Fase 1 e pagina (`case-servizi-reddito/`, `docs/case-servizi-reddito/`). Dettagli e numeri con la loro fonte in `case-servizi-reddito/NOTE.md`.
+- Metodo: 57.405 civici assegnati alle zone OMI 2026/1; 41 zone (tolte R2 agricola e D39 Cascina Merlata). Prezzo = centro di min-max, abitazioni civili, stato prevalente. **Le quotazioni OMI sono stime, non prezzi di vendita.**
+- Risultato: prezzo e servizi su 20 vanno insieme (Spearman 0,87), ma a parità di distanza dal Duomo e reddito del CAP resta +3,0% per servizio (IC 95% da −0,1% a +7,5%); circa +120 €/m², un tetto massimo e non un prezzo. Correlazione non vuol dire causa.
+- Sorpresa: Quarto Oggiaro ha più servizi essenziali (9,28 su 10) di CityLife, Porta Nuova e Sant'Ambrogio ed è la zona più economica (2.350 €/m²). Si pagano il metrò e i servizi extra, non quelli essenziali.
+- Trappole: anelli multipli dei poligoni GEOPOI (regola pari-dispari); zone OMI che si sovrappongono (58.681 m²); D39 con punteggio falsato da pochi civici; zone "OTTIMO" (nuove costruzioni) non confrontabili; reddito solo per CAP.
+
+## 22. Alberi della città
+
+- 2026-11-01 — Fase 1 e pagina (`alberi/`, `docs/alberi/`). Dettagli in `alberi/NOTE.md`.
+- Fonte: censimento degli alberi del Comune, ds2484 (CC BY), edizioni 31/3/2023 (dalla Wayback Machine: non più sul portale), 2024, 2025; scaricato il 1/11/2026. Solo alberi gestiti dal Comune, non giardini privati. Famiglie e nomi comuni aggiunti a mano (da far vedere a un botanico). Forestami: solo totali, il sito è "tutti i diritti riservati". Copernicus Street Tree Layer saltato: serve un login.
+- Numeri 2025: 251.165 alberi, 178,5 ogni 1.000 abitanti; regola 10-20-30 rispettata in città (specie 6,6%, genere 11,0%, famiglia 13,4%), non in 56 NIL su 88. Da 763 (Musocco, cimiteri) a 47 (Bovisa) per 1.000 abitanti.
+- Sorpresa: 2023→2025 −3.910 alberi (−1,5%); dei 21.815 spariti il 29% ha una scheda del 2019 o dopo (contro il 14,7% di tutti gli alberi): spariscono soprattutto alberi giovani. Il dato non dice perché.
+- Trappole: misure segnaposto (24% con 8 cm, 5 m, 2 m) e mai rimisurate; il 46% delle date è il 21 ottobre; il perimetro cambia tra edizioni; **ds205 (abitanti per NIL) ha le superfici scambiate fra Porta Vigentina, Gorla e Villapizzone**: da controllare nel filone 9, che cita ds205 per le superfici.
+
+## 23. Affitti brevi
+
+- 2026-11-01 — Fase 1 e pagina (`affitti-brevi/`, `docs/affitti-brevi/`). Dettagli in `affitti-brevi/NOTE.md`.
+- Fonti: Inside Airbnb Milano, 4 snapshot (26/12/2025-19/9/2026), CC BY 4.0 ma "Do not republish the data": nel repo e nella pagina solo programmi e tabelle aggregate (per NIL, zona OMI, anno, fascia). PoliS-Lombardia/ISTAT (strutture e flussi, 2019-2025), Comune (ds2955, imposta di soggiorno). Registri CIN e CIR non aperti. Davide ha scelto di non chiedere a Inside Airbnb lo storico d'archivio.
+- Numeri (settembre 2026): 25.338 annunci, 88% case intere; 3,06 ogni 100 abitazioni (Duomo 12,3); 1,2% dei proprietari (20 o più annunci) ha il 29,9% degli annunci; servono 5,8 notti al mese per eguagliare un affitto OMI di 60 m² (stima).
+- Sorpresa: 2019-2025 le notti dei turisti in albergo calano del 6,4%, quelle fuori dagli alberghi ×2,9; la quota fuori dagli alberghi passa dal 22,3% al 46,9%.
+- Trappole: snapshot di marzo incompleto; prezzi in euro anche se il campo dice "$"; le recensioni vecchie spariscono (−11,9% in 9 mesi per il 2024); tre serie ufficiali con tre numeri diversi; ds2955 cambia definizione dei posti letto nel 2019.
+
+## 24. Nomi dei bambini (in pausa)
+
+- 2026-11-01 — Fase 1 in `nomi-bambini/`. Il Comune di Milano non pubblica i nomi dei nati (cercati 2.611 dataset): ci sono solo classifiche parziali date alla stampa. ISTAT "Conta nomi" non ha un file scaricabile. Bergamo (dati.lombardia.it, CC0) ha tutti i nomi dal 1987, Rozzano 2007-2017. Davide ha deciso di lasciar stare il filone.
+
+## 25. Cani di Milano (fase 1)
+
+- 2026-11-01 — Fase 1 in `cani/`. Aperte solo le 423 aree cani (ds52, CC BY). Quanti cani, di che razza e dove: nessun dato aperto (anagrafe canina ATS non pubblicata); solo due totali dalla stampa (104.067 nel 2018, 118.292 "animali registrati" nel 2020). Trappola: `data_ini` di ds52 è la data della scheda, non dell'apertura.
+

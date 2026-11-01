@@ -1,4 +1,4 @@
-# Milano in dati: stato del progetto (30 ottobre 2026, sera)
+# Milano in dati: stato del progetto (1 novembre 2026)
 
 Sito: https://andreottiviii.github.io/milano-in-dati/ (Ctrl+F5 se una pagina sembra vecchia)
 
@@ -6,7 +6,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 
 ## Decisioni aperte per Davide
 
-1. **Grafica della home**: scegliere tra le quattro bozze tenute da parte (1 mosaico, 2 metro, 6 tabellone, 9 insegne al neon). Le bozze sono in `bozze-home/`.
+1. **Grafica della home**: 24 bozze in `bozze-home/`. Davide vuole una copertina di tutte le ricerche; "forse la 21 (tessere), ma per ora non scegliamo".
+2. **Cani di Milano**: decidere che fare (solo aree cani aperte, nessun dato sui cani).
 
 ## Filone per filone
 
@@ -31,6 +32,13 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 17 | Bilancio del Comune | Online: spese ed entrate 2015-2025 |
 | 18 | Acqua del sindaco | Online, con i PFAS |
 | 19 | Censimenti | Online |
+| 20 | Appalti pubblici | Online (Focus Milano dalla chat Appalti) |
+| 21 | Servizi e prezzi delle case | Online |
+| 22 | Alberi | Online |
+| 23 | Affitti brevi | Online |
+| 24 | Nomi dei bambini | In pausa: Milano non pubblica i nomi |
+| 25 | Cani | Fase 1 fatta: solo aree cani |
+| — | In corso (fase 1) | Biblioteche, scuole, matrimoni, morti giorno per giorno, luoghi più cercati, redditi dal 2000, pioggia e caldo, costo della vita |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.

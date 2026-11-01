@@ -28,7 +28,11 @@
     { path: 'acqua-del-sindaco/', label: 'Acqua del sindaco' },
     { path: 'censimenti/',       label: 'Censimenti' },
     { path: 'prezzi-case/',      label: 'Prezzi delle case' },
-    { path: 'bilancio-comune/',  label: 'Bilancio del Comune' }
+    { path: 'bilancio-comune/',  label: 'Bilancio del Comune' },
+    { path: 'appalti/',          label: 'Appalti pubblici' },
+    { path: 'affitti-brevi/',    label: 'Affitti brevi' },
+    { path: 'case-servizi-reddito/', label: 'Servizi e prezzi delle case' },
+    { path: 'alberi/',           label: 'Alberi della città' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

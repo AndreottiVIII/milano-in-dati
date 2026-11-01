@@ -70,3 +70,72 @@ Note sulle bozze 9-12: le curve della temperatura (bozze 9 e 11) sono medie mobi
 ## Scelte di Davide (30/10/2026)
 
 Tenute da parte: **1 mosaico, 2 metro, 6 tabellone, 9 insegne al neon**. Le altre restano come archivio.
+
+## Altre quattro bozze (13-16)
+
+Il programma che le disegna è `genera_bozze_4.py` (legge `docs/` senza toccarlo; fa anche le anteprime PNG). Solo grafica: immagini ferme, niente pulsanti né pagine che funzionano. Numeri solo quelli già usati nelle bozze precedenti (da `docs/`), più i titoli delle 19 storie.
+
+**13. Cantiere (`bozza_13_cantiere.svg`)**
+Idea: la home come un cartello di "lavori in corso". Strisce oblique nere e gialle in alto e in basso, "MILANO" enorme e "IN DATI" su targa nera. Le 19 storie sono 19 piastre numerate (01-19) a scacchiera nero/bianco, la ventesima è la mappa dei 88 quartieri.
+Colori: giallo cantiere, nero, bianco, un tocco di arancione del lampeggiante.
+
+**14. Manifesto modernista (`bozza_14_modernista.svg`)**
+Idea: un manifesto da design italiano anni Sessanta, tutto minuscolo e pesante. Fascia rossa a sinistra con "milano in dati" in verticale, la mappa piena in blu, un cerchio giallo con "88", un quadrato nero con "1763 → 2026", poi l'indice delle 19 storie come una lista numerata.
+Colori: rosso, blu cobalto, giallo, nero su bianco pieno.
+
+**15. Terminale (`bozza_15_terminale.svg`)**
+Idea: lo schermo di un terminale di borsa, fitto di dati. Barra di comando "STORIE <GO>", elenco delle 19 storie con sigla, il grafico vero delle temperature a Brera dal 1763, la mappa a calore degli stranieri nel 2023, le barre del derby, le "quotazioni" grandi e il nastro dei numeri in basso.
+Colori: nero con arancione ambra, verde e rosso per su e giù.
+
+**16. Risografia (`bozza_16_riso.svg`)**
+Idea: una stampa a due colori fatta a mano, con i colori che non combaciano bene e si sovrappongono. Titolo "MILANO" in blu con l'ombra rosa sfalsata, la mappa a puntini rosa (più punti, più stranieri) con il contorno blu spostato, l'elenco delle 19 storie come etichette, e sotto una barra per ogni anno di temperature.
+Colori: rosa fluo e blu, che sovrapposti diventano viola scuro; carta bianca con un po' di grana.
+
+## Bozze 17-20 (alla Noorda)
+
+Direzione di Davide: mappa di Milano, numeri e colori di Milano, semplice e pulita come la segnaletica del metrò di Bob Noorda (1964). Tutte con la mappa vera degli 88 quartieri al centro, pochi numeri veri, un solo carattere (Helvetica/Arial, due pesi), fondo bianco o grigio chiarissimo, colori piatti, niente ombre né grana. Il programma è `genera_bozze_5.py`; fa anche il foglio con tutte le bozze 1-20 (`anteprime/tutte_le_bozze.png`).
+
+**17. Fascia MM (`bozza_17_mm.svg`)**
+Idea: la fascia rossa con la scritta bianca dei cartelli del metrò, con il quadrato della "M". Sotto, la mappa grigia con Comasina in rosso e, a destra, quattro numeri (1763, 246, 4.635, 38%) separati da righe nere sottili.
+Colori: rosso MM, nero, bianco, grigio chiaro per la mappa.
+
+**18. Poster a griglia (`bozza_18_griglia.svg`)**
+Idea: un poster svizzero. Titolo piccolo in alto a sinistra, la mappa grande come unica immagine (bianca con contorni neri), quattro numeri giganti (1763, 246, 4.635, 88) in colonna con righe sottili.
+Colori: grigio chiarissimo, nero, un solo rosso per il titolo, il 1763 e Comasina.
+
+**19. Le cinque linee (`bozza_19_linee.svg`)**
+Idea: le 19 storie raggruppate come le linee del metrò: M1 clima e ambiente, M2 chi siamo, M3 muoversi, M4 cultura, M5 passioni e conflitti. Mappa grigia al centro con una fermata colorata per linea; sotto, cinque colonne con la linea, il nome del gruppo e le storie.
+Colori: bianco, grigio, e i colori delle linee: rosso, verde, giallo, blu, lilla.
+
+**20. Croce rossa (`bozza_20_croce.svg`)**
+Idea: la bandiera di Milano, la croce rossa su fondo bianco, a tutta pagina. La mappa bianca con i contorni rossi è appoggiata al centro della croce; quattro numeri rossi nei quattro angoli (1763, 246, 4.635, 88).
+Colori: solo rosso e bianco, un po' di nero per le scritte piccole.
+
+## Copertina di tutte le ricerche (21-24)
+
+Svolta di Davide: la home non deve avere due numeri "spot", ma essere la copertina di tutte le ricerche. Qui ogni storia è presente con un numero vero e, dove costa poco, una piccola figura fatta con i suoi dati (serie, barre, barra di percentuale, puntini). Sono 20 storie pubblicate più "Alberi" e "Affitti brevi" segnate "in arrivo": 22 in tutto. Linguaggio Noorda: bianco, colori piatti, Helvetica/Arial, righe sottili. Il colore è il tema (le linee del metrò: M1 clima e ambiente, M2 chi siamo, M3 muoversi, M4 cultura, M5 passioni e conflitti).
+
+**Formato: 1600 × 1600**, non 1080 (con 22 storie e numeri leggibili 1080 è stretto). Programma: `genera_bozze_6.py` (legge `docs/` senza toccarlo; da dove viene ogni numero è scritto nei commenti della funzione `dati()`). Foglio con le quattro: `anteprime/bozze_21_24.png`.
+
+**21. Tessere (`bozza_21_tessere.svg`)**
+Idea: una griglia 5 × 5 di tessere uguali, come i cartelli del metrò. Una tessera per storia (nome, numero, frase, figura), più la tessera del titolo, la mappa dei 88 quartieri e la legenda dei colori.
+Colori: bianco, nero, rosso per i numeri, fascia colorata (colori delle linee) in cima a ogni tessera.
+
+**22. Mappa con le storie (`bozza_22_mappa.svg`)**
+Idea: la mappa di Milano al centro e le schede in due colonne ai lati, ognuna unita con una linea a un punto della città (Scala alla Scala, derby a San Siro, aria in viale Marche, Cerchia per Area C, Palazzo Marino per elezioni e bilancio...). I punti sono indicativi: per alcune storie non c'è un luogo vero.
+Colori: mappa grigio chiaro, linee e bordi nei colori delle linee, numeri rossi.
+
+**23. Linea del tempo (`bozza_23_tempo.svg`)**
+Idea: una riga per storia; la barra parte dal primo anno dei dati e arriva al 2026, il numero è a destra. Si vede subito che le serie lunghe (beni culturali, temperature, Scala) e quelle recenti (bici, 15 minuti) non hanno la stessa età. Le storie "di oggi" (donne nelle vie, nomi delle fermate) hanno un puntino.
+Colori: barre nei colori delle linee, numeri rossi, righe grigie alternate.
+
+**24. Sommario (`bozza_24_sommario.svg`)**
+Idea: l'indice di un giornale o di un rapporto annuale: due colonne, storie raggruppate per linea (M1-M5), ognuna con nome, frase, numero grande e figurina. In alto la fascia rossa con la mappa piccola.
+Colori: rosso, bianco, nero, pallini e figure nei colori delle linee.
+
+Note sui numeri (tutti letti da `docs/`):
+- La Scala: 4.737 è il numero di titoli diversi (senza i concerti) calcolato dal file `scala/data/titoli.json`; non coincide con il "4.635" delle bozze 1-12 (che non sono riuscito a ricostruire dal file attuale). Da controllare con la pagina.
+- Area C: −15% è la media dei giorni feriali 2024 contro 2019 (`area-c/data/tabelle.json`), non il −16% delle bozze 1-12 (altro modo di calcolo).
+- Bici: 88% = media pesata alle 8 di `bici-auto-mezzi/data/quote.json`. Neve: 10,5 → 2 sono le medie degli anni Cinquanta e degli anni Venti (questi ultimi incompleti).
+- Temperature: "n. 1" = il 2026 è il più caldo su 264 anni nello stesso periodo (finora).
+- Nelle bozze 21-24 non ci sono i numeri più "tondi" di prima (1763, 246...) tranne dove sono la cifra vera della storia (derby 246, cinema 171, elezioni 167, violenza politica 84, beni culturali 27.459).
