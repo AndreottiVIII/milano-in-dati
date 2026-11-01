@@ -47,7 +47,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 33 | Il metrò | Online |
 | 34 | Cosa si mangia | Online |
 | 35 | Turisti | Online |
-| — | In corso | Pagina delle pietre d'inciampo; fase 1 di popolazione (arrivi, stranieri, età), case popolari, dove si costruisce, beni confiscati; luoghi più cercati in attesa di ok; pietre d'inciampo, metrò, turisti per nazionalità, ristoranti (solo se i dati sono aggiornati) |
+| 36 | Pietre d'inciampo | Online |
+| — | In corso | Pagina dei luoghi più cercati; fase 1 di statue, botteghe storiche, antenne, pollini, voto e reddito, quartieri che cambiano, scuole di domani, suolo, reati, benessere ISTAT, popolazione (arrivi, stranieri, età), case popolari, dove si costruisce, beni confiscati |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.

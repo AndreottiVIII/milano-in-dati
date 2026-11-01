@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Pietre d&rsquo;inciampo</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#37474f;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef1f3;--warm:#8a4a10;--warmbg:#fbf0e2;--raz:#2f6690;--pol:#b5532a;--imi:#6a5a8c;--alt:#8a8a8a}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:#1f5f7a} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:.5em 0}
+.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;max-width:100%}
+.ctl label.ck{font-size:.92rem;cursor:pointer;white-space:nowrap} .ctl label.ck i,.lgd i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px;border:1px solid #fff;box-shadow:0 0 0 1px #888}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i.sq{border-radius:0;width:16px;height:12px;border:1px solid #888;box-shadow:none}
+.scroll{overflow-x:auto} .tabmax{max-height:360px;overflow:auto}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(96px,32%) 1fr 54px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm.hl{font-weight:700} .bars .tr{background:#f1f1f1;height:14px;display:flex;overflow:hidden}
+.bars .seg{display:block;height:14px} .bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+details{margin:.4em 0} summary{cursor:pointer;color:#1f5f7a} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif} .leaflet-popup-content{font:14px/1.4 system-ui,Arial,sans-serif;margin:10px 12px} .leaflet-popup-content b{font-size:15px}
+.pop .m{color:#555}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Le pietre d&rsquo;inciampo di Milano</h1>
+<p>Le pietre d&rsquo;inciampo sono piccoli blocchi quadrati (10 &times; 10 cm) rivestiti di ottone, posati nel selciato davanti all&rsquo;ultima casa scelta da una persona deportata dai nazifascisti. Su ognuna sono scritti il nome, l&rsquo;anno di nascita, la data dell&rsquo;arresto, il luogo della deportazione e, se c&rsquo;&egrave;, la data della morte. L&rsquo;idea &egrave; dell&rsquo;artista tedesco Gunter Demnig. A Milano le prime sei sono state posate il 19 gennaio 2017; da allora il Comitato per le Pietre d&rsquo;inciampo le posa ogni anno, su richiesta di familiari, associazioni, scuole e Municipi.</p>
+<p>In questa pagina ci sono <b id="n-tot">265</b> pietre: <b id="n-sch">262</b> ricordano una persona deportata e <span id="n-pol">3</span> sono dedicate a poliziotti della Questura. Le guardiamo come luoghi, anni e categorie. Ogni pietra &egrave; una persona: qui non ci sono classifiche di persone.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Le pietre si posano <b>su richiesta</b> e per scelta di chi le chiede: non sono un censimento di tutte le vittime milanesi. Per esempio gli internati militari italiani sono soltanto <span id="n-imi">5</span> tra le pietre, mentre in Italia furono decine di migliaia. I numeri qui sotto descrivono le pietre, non tutte le persone deportate da Milano. Il quartiere &egrave; quello in cui la pietra si trova oggi. Tutti i dettagli sono in <a href="#limiti">Limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Ogni punto &egrave; una pietra. Clicca (o tocca) un punto: compaiono il nome, gli anni di nascita e di morte, la categoria, il campo o il luogo di morte, l&rsquo;anno di posa e un link alla scheda del Comitato, che racconta la storia della persona.</p>
+<div class="ctl" id="ctl-cat"><span class="sub">Categoria:</span></div>
+<div class="ctl"><label class="sub" for="sel-anno">Anno di posa:</label><select id="sel-anno" aria-label="Anno di posa"></select><span class="sub" id="n-vis"></span></div>
+<div id="map" class="map" role="img" aria-label="Mappa di Milano con le pietre d&rsquo;inciampo, colorate per categoria"></div>
+<p class="src">Posizioni: Comitato per le Pietre d&rsquo;inciampo &ndash; Milano (mappa del suo sito), controllate con i numeri civici del Comune di Milano; le 3 pietre dei poliziotti: Wikipedia. Mappa &copy; OpenStreetMap contributors.</p>
+<details><summary>Elenco delle pietre mostrate (tabella)</summary><div class="scroll tabmax"><table id="tab-elenco"></table></div></details>
+
+<h2 id="anni">Quante pietre ogni anno</h2>
+<div id="anni-testo"></div>
+<div class="lgd" id="lg-cat"></div>
+<div class="bars" id="b-anni"></div>
+<p class="src">Anno di posa. Fonte: schede del Comitato, date esatte e controlli da Wikipedia (CC BY-SA); verifiche con articoli di stampa del 2025 e del 2020 (vedi Limiti dei dati). Il 2026 arriva fino al 1&deg; novembre.</p>
+
+<h2 id="arresti">Quando sono stati arrestati</h2>
+<div id="arresti-testo"></div>
+<div class="bars" id="b-mesi"></div>
+<p class="src">Mese dell&rsquo;arresto, per le <span id="n-arr">249</span> persone con data nota (altre <span id="n-arr-no">13</span> non hanno la data). Fonte: schede del Comitato.</p>
+
+<h2 id="campi">Dove sono morte</h2>
+<div id="campi-testo"></div>
+<div class="bars" id="b-campi"></div>
+<p class="src">Campo o luogo di morte, dalla scheda del Comitato; se manca, l&rsquo;ultima tappa della deportazione. Sottocampi raggruppati con il campo principale (per esempio Gusen ed Ebensee con Mauthausen). Il Poligono di Cibeno (Fossoli, 12 luglio 1944) &egrave; il luogo di una fucilazione di prigionieri politici.</p>
+
+<h2 id="chi">Chi sono: et&agrave; e genere</h2>
+<div id="chi-testo"></div>
+<h3>Et&agrave; al momento dell&rsquo;arresto</h3>
+<div class="bars" id="b-eta"></div>
+<p class="src">Persone con data di nascita e di arresto complete (<span id="n-eta">241</span> su 262). Fasce di et&agrave;, nessun singolo caso.</p>
+<h3>Donne e uomini, per categoria</h3>
+<div class="scroll"><table id="tab-sesso"></table></div>
+<p class="src">Il genere &egrave; ricavato dalla scheda (&laquo;nato&raquo; o &laquo;nata&raquo;).</p>
+
+<h2 id="quartieri">Dove si trovano: i quartieri</h2>
+<div id="nil-testo"></div>
+<div class="warn"><b>Da tenere presente.</b> Le pietre sono richieste da familiari e associazioni: dove ce ne sono di pi&ugrave; o di meno non dipende solo da dove abitavano le persone. Il quartiere &egrave; quello in cui la pietra si trova oggi (88 NIL, Nuclei di Identit&agrave; Locale), non dove la persona fu arrestata. Il valore &laquo;ogni 10.000 abitanti&raquo; usa i residenti di oggi, non quelli del 1943.</div>
+<div class="lgd" id="lg-nil"></div>
+<div id="map-nil" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per numero di pietre ogni 10.000 abitanti"></div>
+<p class="src">Pietre con scheda del Comitato (262); le 3 dei poliziotti non sono nel conteggio per quartiere. Residenti per quartiere: Comune di Milano (ds205, anno 2024, CC BY); confini dei NIL: Comune di Milano (ds964, CC BY). Il valore ogni 10.000 abitanti non &egrave; calcolato per i quartieri con meno di 5.000 residenti (parchi e aree quasi senza abitanti).</p>
+<details><summary>I quartieri senza nessuna pietra (<span id="n-nil-senza">48</span>)</summary><p id="lista-senza"></p></details>
+<details><summary>Tutti i quartieri (tabella)</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="fonti">Fonti, licenze, file</h2>
+<ul class="m" id="fonti-lista"></ul>
+<p>File (solo fatti, nessuna biografia): <a href="data/pietre.csv">pietre.csv</a>, <a href="data/pietre.json">pietre.json</a>, <a href="data/nil.csv">nil.csv</a>, <a href="data/nil.geojson">nil.geojson</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Per la parte che viene da Wikipedia vale la licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it">CC BY-SA 4.0</a>: se li riusi, cita le fonti e mantieni la stessa licenza.</p>
+
+<footer>
+<p>Pietre d&rsquo;inciampo: <a href="https://www.pietredinciampomilano.it/">Comitato per le Pietre d&rsquo;inciampo &ndash; Milano</a>. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var P=[],R=null,NF=null;
+var CATS=[{k:'razziale',t:'persecuzione razziale',c:'#2f6690'},{k:'politica',t:'persecuzione politica',c:'#b5532a'},{k:'IMI',t:'internato militare italiano',c:'#6a5a8c'},{k:'altro',t:'poliziotti della Questura',c:'#8a8a8a'}];
+var CC={};CATS.forEach(function(c){CC[c.k]=c});
+var SEL={razziale:true,politica:true,IMI:true,altro:true},ANNO='';
+var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function $(i){return document.getElementById(i)}
+function setH(i,h){var e=$(i);if(e)e.innerHTML=h}
+function setT(i,t){var e=$(i);if(e)e.textContent=t}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([J('data/pietre.json'),J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){P=a[0];R=a[1];NF=a[2];init()}).catch(function(e){setH('sorpresa','<p>Non riesco a caricare i dati ('+esc(e.message)+'). Riprova pi&ugrave; tardi.</p>');if(window.console)console.error(e)});
+
+function legend(id){setH(id,CATS.filter(function(c){return c.k!=='altro'}).map(function(c){return '<span><i style="background:'+c.c+'"></i>'+c.t+'</span>'}).join(''))}
+function stacked(id,rows,hlKeys,withAlt){
+  var mx=0;rows.forEach(function(r){mx=Math.max(mx,r.t)});
+  setH(id,rows.map(function(r){
+    var segs=CATS.map(function(c){var v=r.p[c.k]||0;return v?'<span class="seg" style="width:'+(100*v/mx)+'%;background:'+c.c+'" title="'+esc(c.t+': '+v)+'"></span>':''}).join('');
+    return '<div class="row"><div class="nm'+(hlKeys&&hlKeys.indexOf(r.key)>=0?' hl':'')+'">'+esc(r.label)+'</div><div class="tr">'+segs+'</div><div class="v">'+r.t+'</div></div>';
+  }).join(''));
+}
+function tc(n){return String(n).toLowerCase().replace(/(^|[\s\-(])([a-z])/g,function(m,a,b){return a+b.toUpperCase()}).replace(/Xxii/g,'XXII').replace(/Qt /g,'QT ')}
+function mlabel(m){var p=m.split('-');return MESI[+p[1]-1]+' '+p[0]}
+
+function init(){
+  var tot=R.n_pietre,sch=R.n_schede;
+  setT('n-tot',tot);setT('n-sch',sch);setT('n-pol',R.n_solo_wikipedia);setT('n-imi',R.categorie.IMI);
+  setH('sorpresa','<p class="sub"><b>Che cosa colpisce</b></p>'+
+   '<p><b>'+Math.round(R.arresti_due_mesi_pct)+'%</b> delle pietre ('+R.arresti_due_mesi+' su '+R.arresti_noti+' con data d&rsquo;arresto nota) ricorda un arresto avvenuto in due soli mesi: <b>dicembre 1943</b> ('+R.arresti_dic43+', quasi tutti per persecuzione razziale: l&rsquo;ordine di polizia del 30 novembre dispose l&rsquo;arresto degli ebrei) e <b>marzo 1944</b> ('+R.arresti_mar44+', quasi tutti politici: dopo gli scioperi). Gli altri mesi della guerra, messi insieme, sono '+(R.arresti_noti-R.arresti_due_mesi)+'.</p>'+
+   '<p>E soltanto circa <b>un terzo</b> ('+R.nati_milano+' su '+R.nati_noti+' con luogo di nascita noto) &egrave; nato a Milano: gli altri sono nati in altre citt&agrave; e paesi italiani, e '+R.nati_estero+' all&rsquo;estero.</p>');
+  legend('lg-cat');
+  // controlli mappa
+  var ctl=$('ctl-cat');
+  CATS.forEach(function(c){var n=(c.k==='altro')?R.n_solo_wikipedia:R.categorie[c.k];
+    var l=document.createElement('label');l.className='ck';l.innerHTML='<input type="checkbox" checked data-k="'+c.k+'"> <i style="background:'+c.c+'"></i>'+c.t+' <span class="sub">('+n+')</span>';ctl.appendChild(l);
+    l.firstElementChild.addEventListener('change',function(e){SEL[c.k]=e.target.checked;draw()})});
+  var sa=$('sel-anno');sa.innerHTML='<option value="">Tutti gli anni</option>'+R.anni.map(function(a){return '<option value="'+a.anno+'">'+a.anno+'</option>'}).join('');
+  sa.addEventListener('change',function(){ANNO=sa.value;draw()});
+  mapStones();
+  textAndCharts();
+  mapNil();
+  textMetodo();
+}
+
+/* ---------- mappa delle pietre ---------- */
+var MAP,LAY,MK=[];
+function popup(p){
+  var vita='';
+  if(p.nato&&p.morto)vita='nato nel '+p.nato+' &middot; morto nel '+p.morto;else if(p.nato)vita='nato nel '+p.nato+' &middot; anno di morte non indicato';else if(p.morto)vita='morto nel '+p.morto+' &middot; anno di nascita non indicato';else vita='anni non indicati';
+  var h='<div class="pop"><b>'+esc(p.nome)+'</b><br>';
+  if(p.cat==='altro'){h+='<span class="m">Pietra per un poliziotto della Questura</span><br>'}
+  else{h+='<span class="m">'+vita+'</span><br>'+esc(CC[p.cat].t)+'<br>';if(p.campo)h+='Campo o luogo di morte: '+esc(p.campo)+'<br>'}
+  h+='Pietra posata nel '+p.anno+(p.stato==='da verificare'?' <span class="m">(anno da verificare)</span>':'')+'<br><span class="m">'+esc(p.via)+'</span>';
+  if(p.link)h+='<br><a href="'+esc(p.link)+'" target="_blank" rel="noopener">Scheda del Comitato &rarr;</a>';
+  return h+'</div>';
+}
+function mapStones(){
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.layerGroup().addTo(MAP);
+  P.forEach(function(p){
+    var m=L.circleMarker([p.lat,p.lon],{radius:6,color:'#fff',weight:1.2,fillColor:CC[p.cat].c,fillOpacity:.92});
+    m.bindPopup(popup(p),{maxWidth:280});m.bindTooltip(esc(p.nome),{direction:'top',offset:[0,-4]});m._p=p;MK.push(m)});
+  draw();
+}
+function vis(p){return SEL[p.cat]&&(!ANNO||String(p.anno)===ANNO)}
+function draw(){
+  LAY.clearLayers();var n=0;MK.forEach(function(m){if(vis(m._p)){LAY.addLayer(m);n++}});
+  setT('n-vis',n+' pietre mostrate');
+  var rows=P.filter(vis).map(function(p){return '<tr><td>'+esc(p.nome)+'</td><td>'+esc(p.nato||'')+(p.morto?'&ndash;'+esc(p.morto):'')+'</td><td>'+esc(p.cat==='altro'?'poliziotto':CC[p.cat].t)+'</td><td>'+esc(p.campo||'')+'</td><td class="r">'+p.anno+'</td><td>'+esc(p.via)+'</td><td>'+(p.link?'<a href="'+esc(p.link)+'" target="_blank" rel="noopener">scheda</a>':'')+'</td></tr>'});
+  setH('tab-elenco','<thead><tr><th>Nome</th><th>Nato&ndash;morto</th><th>Categoria</th><th>Campo o luogo di morte</th><th class="r">Posa</th><th>Indirizzo</th><th>Scheda</th></tr></thead><tbody>'+rows.join('')+'</tbody>');
+}
+
+/* ---------- testi e grafici ---------- */
+function textAndCharts(){
+  // anni
+  var rows=R.anni.map(function(a){var t=a.razziale+a.politica+a.IMI+a.altro;return {key:a.anno,label:a.anno+(a.anno===2026?' (fino al 1º novembre)':''),p:{razziale:a.razziale,politica:a.politica,IMI:a.IMI,altro:a.altro},t:t}});
+  stacked('b-anni',rows,[2024]);
+  var a24=R.anni.filter(function(a){return a.anno===2024})[0];
+  setH('anni-testo','<p>Dopo il primo anno (6 pietre) il Comitato ne posa ogni anno tra 23 e 31, di solito intorno al Giorno della Memoria (27 gennaio) e in una seconda data in marzo. Fa eccezione il <b>2024</b>: le pietre sono '+(a24.razziale+a24.politica+a24.IMI)+' perch&eacute; a quelle dell&rsquo;anno (26) si aggiungono le <b>'+R.cibeno_2024+' pietre del 14 e 15 novembre 2024</b>, dedicate a prigionieri politici milanesi fucilati al Poligono di Cibeno (Fossoli) il 12 luglio 1944. Furono posate per iniziativa della Fondazione Fossoli e dell&rsquo;ANED (fonte: pagina della Fondazione Fossoli, ripresa da Wikipedia). Le schede del Comitato per queste 17 persone scrivono invece &laquo;anno di posa 2026&raquo;: in questa pagina vale il 2024.</p>');
+  // mesi
+  var mm={};R.mesi.forEach(function(m){mm[m.mese]=m});
+  var first=R.mesi[0].mese,last=R.mesi[R.mesi.length-1].mese,ms=[],cur=first;
+  while(cur<=last){ms.push(cur);var p=cur.split('-'),y=+p[0],m=+p[1]+1;if(m>12){m=1;y++}cur=y+'-'+(m<10?'0':'')+m}
+  stacked('b-mesi',ms.map(function(k){var m=mm[k]||{razziale:0,politica:0,IMI:0};return {key:k,label:mlabel(k),p:m,t:m.razziale+m.politica+m.IMI}}),['1943-12','1944-03']);
+  setH('arresti-testo','<p>Le due barre in grassetto sono i mesi pi&ugrave; pieni. A <b>dicembre 1943</b>, dopo l&rsquo;ordine di polizia del 30 novembre che disponeva l&rsquo;arresto e l&rsquo;internamento degli ebrei, risultano '+R.arresti_dic43+' arresti, '+R.arresti_dic43_razziali+' per persecuzione razziale. A <b>marzo 1944</b>, dopo i grandi scioperi di inizio mese nelle fabbriche del Nord, risultano '+R.arresti_mar44+' arresti, '+R.arresti_mar44_politici+' per motivi politici. Che gli arresti di marzo siano legati agli scioperi &egrave; <b>una nostra ipotesi dalle date</b>: la scheda del Comitato non ha un campo apposito; in '+R.mar44_cita_sciopero+' delle '+R.mar44_sg+' schede (escluse le '+R.mar44_cibeno+' di Cibeno) il testo cita lo sciopero.</p>');
+  setT('n-arr',R.arresti_noti);setT('n-arr-no',R.arresti_ignoti);
+  // campi
+  stacked('b-campi',R.campi.map(function(c){return {key:c.campo,label:c.campo,p:c,t:c.razziale+c.politica+c.IMI}}),null);
+  var au=R.campi.filter(function(c){return c.campo==='Auschwitz'})[0],ma=R.campi.filter(function(c){return /^Mauthausen/.test(c.campo)})[0];
+  setH('campi-testo','<p>I due campi che pesano di pi&ugrave; sono quasi due mondi separati: ad <b>Auschwitz</b> sono morte '+(au.razziale+au.politica+au.IMI)+' persone, tutte deportate per persecuzione razziale; a <b>Mauthausen e nei suoi sottocampi</b> '+(ma.razziale+ma.politica+ma.IMI)+', quasi tutte per motivi politici ('+ma.politica+'), tra cui molti arrestati dopo gli scioperi.</p>');
+  // eta'
+  stacked('b-eta',R.eta.map(function(e){return {key:e.fascia,label:e.fascia,p:e,t:e.razziale+e.politica+e.IMI}}),null);
+  setT('n-eta',R.eta_note);
+  setH('chi-testo','<p>Alla data dell&rsquo;arresto l&rsquo;et&agrave; mediana &egrave; '+nf(R.eta_mediana,0)+' anni. I politici sono per lo pi&ugrave; adulti tra i 18 e i 59 anni; tra i perseguitati per la razza ci sono tutte le et&agrave;: '+R.eta_sotto18+' persone avevano meno di 18 anni quando furono arrestate, quasi tutte (16) per persecuzione razziale, e molte avevano pi&ugrave; di 60 anni. Le donne sono '+R.donne+' su '+R.n_schede+': sono quasi la met&agrave; (60 su 123) tra i perseguitati per la razza e pochissime (6 su 134) tra i politici; la differenza &egrave; netta.</p>');
+  var cs=['razziale','politica','IMI'];
+  setH('tab-sesso','<thead><tr><th>Categoria</th><th class="r">Donne</th><th class="r">Uomini</th><th class="r">Totale</th></tr></thead><tbody>'+cs.map(function(k){var s=R.sesso[k];return '<tr><td>'+esc(CC[k].t)+'</td><td class="r">'+s.donne+'</td><td class="r">'+s.uomini+'</td><td class="r">'+(s.donne+s.uomini)+'</td></tr>'}).join('')+'<tr><td><b>Tutte</b></td><td class="r"><b>'+R.donne+'</b></td><td class="r"><b>'+R.uomini+'</b></td><td class="r"><b>'+R.n_schede+'</b></td></tr></tbody>');
+}
+
+/* ---------- mappa dei quartieri ---------- */
+var NCOL=['#eef1f3','#cfd8dd','#9db1bb','#64808e','#37474f','#1a252a'],BR=[1,2,4,8];
+function nclass(p){if(p.pietre===0)return -1;if(p.per10mila==null)return -2;var v=p.per10mila,i=0;while(i<BR.length&&v>=BR[i])i++;return i}
+function mapNil(){
+  var feats=NF.features,T=feats.map(function(f){return f.properties});
+  var mg=T.filter(function(p){return p.nil===R.nil_top[0].nil})[0],MAG=mg?mg.razziale:'',MAGN=mg?mg.pietre:'';
+  var senza=T.filter(function(p){return p.pietre===0});
+  var senzaBig=senza.filter(function(p){return p.abitanti!=null&&p.abitanti>=5000});
+  setT('n-nil-senza',senza.length);
+  setH('lista-senza','<b>Con pi&ugrave; di 5.000 residenti:</b> '+senzaBig.map(function(p){return esc(tc(p.nil))}).sort().join('; ')+'.<br><b>Con meno di 5.000 residenti:</b> '+senza.filter(function(p){return !(p.abitanti!=null&&p.abitanti>=5000)}).map(function(p){return esc(tc(p.nil))}).sort().join('; ')+'.');
+  setH('nil-testo','<p>Su '+R.nil_totale+' quartieri, <b>'+R.nil_con+'</b> hanno almeno una pietra e <b>'+R.nil_senza+'</b> nessuna. Tra questi ultimi '+(senza.length-senzaBig.length)+' sono parchi o aree con meno di 5.000 residenti (Parco Nord, Parco Sempione, Chiaravalle&hellip;) e '+senzaBig.length+' sono quartieri abitati, con pi&ugrave; di 5.000 residenti (l&rsquo;elenco &egrave; qui sotto). In numero assoluto le pietre sono pi&ugrave; numerose in '+R.nil_assoluto_top.slice(0,3).map(function(x){return esc(tc(x.nil))+' ('+x.pietre+')'}).join(', ')+'. In rapporto ai residenti spicca <b>'+esc(tc(R.nil_top[0].nil))+'</b> ('+nf(R.nil_top[0].per10mila,1)+' ogni 10.000 abitanti; media della citt&agrave; '+nf(R.nil_per10mila_media_citta,1)+'); '+MAG+' delle sue '+MAGN+' pietre sono per persecuzione razziale.</p>');
+  setH('lg-nil','<span><i class="sq" style="background:#fff;border:1px dashed #999"></i>nessuna pietra</span><span><i class="sq" style="background:repeating-linear-gradient(45deg,#ddd,#ddd 3px,#fff 3px,#fff 6px)"></i>meno di 5.000 residenti (conteggio, non il rapporto)</span>'+
+   ['meno di 1','1-2','2-4','4-8','8 e oltre'].map(function(t,i){return '<span><i class="sq" style="background:'+NCOL[i+1]+'"></i>'+t+' ogni 10.000 ab.</span>'}).join(''));
+  var M=L.map('map-nil',{preferCanvas:false}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(M);
+  var g=L.geoJSON(NF,{style:function(f){var c=nclass(f.properties);
+    if(c===-1)return{fillColor:'#fff',fillOpacity:.3,color:'#666',weight:1.2,dashArray:'3 3'};
+    if(c===-2)return{fillColor:'#ccc',fillOpacity:.6,color:'#777',weight:1};
+    return{fillColor:NCOL[c+1],fillOpacity:.82,color:'#fff',weight:1}},
+    onEachFeature:function(f,l){var p=f.properties;l.bindTooltip('<b>'+esc(p.nil)+'</b><br>'+p.pietre+' pietre'+(p.pietre?(' ('+p.razziale+' razziali, '+p.politica+' politiche'+(p.IMI?', '+p.IMI+' IMI':'')+')'):'')+'<br>'+(p.abitanti!=null?f0(p.abitanti)+' residenti':'residenti non disponibili')+(p.per10mila!=null?'<br>'+nf(p.per10mila,1)+' ogni 10.000 abitanti':''),{sticky:true})}}).addTo(M);
+  M.fitBounds(g.getBounds());
+  // tabella
+  var tb=T.slice().sort(function(a,b){return b.pietre-a.pietre||a.nil.localeCompare(b.nil)});
+  setH('tab-nil','<thead><tr><th>Quartiere (NIL)</th><th class="r">Pietre</th><th class="r">razziali</th><th class="r">politiche</th><th class="r">IMI</th><th class="r">Residenti</th><th class="r">Ogni 10.000 ab.</th></tr></thead><tbody>'+tb.map(function(p){return '<tr><td>'+esc(p.nil)+'</td><td class="r">'+p.pietre+'</td><td class="r">'+p.razziale+'</td><td class="r">'+p.politica+'</td><td class="r">'+p.IMI+'</td><td class="r">'+(p.abitanti!=null?f0(p.abitanti):'')+'</td><td class="r">'+(p.per10mila!=null?nf(p.per10mila,1):'')+'</td></tr>'}).join('')+'</tbody>');
+}
+
+/* ---------- metodo, limiti, fonti ---------- */
+function textMetodo(){
+  var sen=R.senza;
+  setH('metodo-lista',[
+   '<b>Elenco e posizioni.</b> La mappa del sito del Comitato contiene '+R.n_schede+' punti con coordinate; ognuno rimanda a una scheda con i dati della persona. Le schede sono state scaricate il 1&deg; novembre 2026 con una richiesta al secondo al massimo, nel rispetto del file robots.txt del sito.',
+   '<b>Che cosa si usa.</b> Solo i fatti essenziali di ogni scheda: nome, anno di nascita e di morte, motivo dell&rsquo;arresto, date e luoghi di arresto e morte, anno di posa, indirizzo. I testi delle biografie e le fotografie <b>non sono ripresi</b>: si rimanda alla scheda del Comitato.',
+   '<b>Categorie.</b> Sono quelle del Comitato: persecuzione razziale, persecuzione politica, internato militare italiano (IMI).',
+   '<b>Date di posa.</b> Il Comitato scrive soltanto l&rsquo;anno. La data esatta e un secondo controllo vengono dalle due voci di Wikipedia sulle pietre di Milano (revisioni dell&rsquo;ottobre 2026); le due fonti si abbinano per nome (255 uguali o inclusi, 6 con ortografie diverse).',
+   '<b>Controllo delle posizioni.</b> Gli indirizzi sono confrontati con i numeri civici del Comune di Milano (ds634): per 246 pietre su 262 l&rsquo;indirizzo si ritrova nei civici e la distanza mediana dal punto della mappa &egrave; di 8 metri. Due punti della mappa erano lontani dal civico (2,2 km e 300 m) e sono stati corretti con il civico, dove anche Wikipedia lo confermava.',
+   '<b>Quartieri.</b> Ogni pietra &egrave; assegnata al NIL che contiene il suo punto (88 poligoni del Comune). Per 262 pietre su 262 il punto cade in un NIL.',
+   '<b>Et&agrave;.</b> Calcolata come differenza tra date complete di nascita e di arresto. Si pubblicano solo fasce, mai l&rsquo;et&agrave; di una persona.',
+   '<b>Controllo dei nomi con il CDEC.</b> Per le 123 pietre per persecuzione razziale abbiamo confrontato nome e anno di nascita con l&rsquo;archivio &laquo;I nomi della Shoah&raquo; del CDEC: 107 coincidono su nome e anno, 4 sul solo nome, 12 non si ritrovano (spesso nomi stranieri scritti in modo diverso). Nessun dato del CDEC &egrave; pubblicato qui.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join(''));
+  setH('limiti-lista',[
+   '<b>Le pietre non sono un censimento.</b> Sono posate su richiesta (familiari, associazioni, scuole, Municipi). Le categorie e i quartieri riflettono anche chi ha chiesto una pietra. Tutte le '+R.n_schede+' persone con scheda risultano morte: non ci sono pietre per chi &egrave; tornato.',
+   '<b>L&rsquo;anno di posa non sempre coincide tra le fonti.</b> Tra il Comitato e Wikipedia l&rsquo;anno &egrave; diverso per '+R.anni_diversi_comitato_wikipedia+' pietre. Per le <b>'+R.cibeno_2024+' di Cibeno</b> usiamo il novembre 2024 (Fondazione Fossoli e ANED, tramite Wikipedia), non il 2026 scritto nelle schede. Delle altre cinque abbiamo controllato quattro con articoli di stampa e con i totali cumulati delle pose: Ugo Milla e Gino Emanuele Neppi sono del <b>2019</b> (elenco 2019 del Comitato; 62 pietre fino al 2019 e 90 dopo le 28 del gennaio 2020, secondo la stampa); Adriano Pogliaghi &egrave; del <b>2025</b> (agenzia AGI e Mentelocale del 23 gennaio 2025; il Comitato scrive 2022); Ezio Bortolotti &egrave; del <b>2025</b> (la posa del 13 marzo 2025 era annunciata dalla stampa; il Comitato scrive 2026). Per una, <b>Lucia De Benedetti</b>, non abbiamo trovato una conferma: mostriamo il 2023 del Comitato con l&rsquo;indicazione &laquo;anno da verificare&raquo; (Wikipedia dice il 25 gennaio 2024).',
+   '<b>Campi mancanti nelle schede.</b> Mancano il luogo di nascita in '+sen.luogo_nascita+' schede, la data di morte in '+sen.data_morte+', il luogo di arresto in '+sen.luogo_arresto+' e la data di arresto in '+sen.data_arresto+'. In '+R.schede_con_testo_mancante+' schede il sito del Comitato ha perso alcune parole (&laquo;Arrestato a&hellip;&raquo;, &laquo;Morto a&hellip;&raquo;) e restano date senza luogo: le leggiamo come date di arresto e di morte e lasciamo vuoto il luogo.',
+   '<b>Etichette nostre.</b> &laquo;Cibeno&raquo; (morti al Poligono di Cibeno, '+R.campi.filter(function(c){return /Cibeno/.test(c.campo)})[0].politica+' persone) e &laquo;arrestati a marzo 1944, probabile sciopero&raquo; sono classificazioni <b>nostre</b>, ricavate da luogo di morte e date: non sono un campo del Comitato. Anche l&rsquo;accostamento di dicembre 1943 all&rsquo;ordine di polizia del 30 novembre e di marzo 1944 agli scioperi viene dalla storia del periodo, non dai dati.',
+   '<b>Wikipedia &egrave; indietro.</b> Il testo della voce parla di 264 pietre (dato del 2024). Le righe sono 264 ma comprendono le 3 pietre per i poliziotti (che il Comitato non ha tra le sue schede) e non c&rsquo;&egrave; una persona, Cesare Pistelli, che invece ha la scheda del Comitato.',
+   '<b>Indirizzo e quartiere.</b> La pietra sta davanti all&rsquo;ultima abitazione scelta, secondo chi l&rsquo;ha richiesta: a volte &egrave; un luogo di lavoro. Alcuni numeri civici sono cambiati dopo la guerra. Il quartiere (NIL) &egrave; quello di oggi.',
+   '<b>OpenStreetMap e Wikidata.</b> Sono troppo incompleti per questo uso: OpenStreetMap ha 26 punti, Wikidata nessuno.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join(''));
+  setH('fonti-lista',[
+   '<b>Comitato per le Pietre d&rsquo;inciampo &ndash; Milano</b>, <a href="https://www.pietredinciampomilano.it/">pietredinciampomilano.it</a>: mappa e schede delle persone (scaricate il 1&deg; novembre 2026). Le sue Note legali dicono che l&rsquo;editore &laquo;concede libero accesso e diritto di riproduzione dei contenuti&raquo;, esclusi quelli coperti da copyright di altri. Non &egrave; una licenza Creative Commons; per questo riprendiamo solo i fatti e rimandiamo alle schede. Mappa: <a href="https://www.pietredinciampomilano.it/la-mappa-delle-pietre/">la mappa delle pietre</a>.',
+   '<b>Wikipedia in italiano</b>, voci <a href="https://it.wikipedia.org/wiki/Pietre_d%27inciampo_a_Milano">Pietre d&rsquo;inciampo a Milano</a> e <a href="https://it.wikipedia.org/wiki/Pietre_d%27inciampo_nel_centro_storico_di_Milano">Pietre d&rsquo;inciampo nel centro storico di Milano</a>, licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it">CC BY-SA 4.0</a> (autori: le persone che hanno scritto le voci): date di posa, controllo di indirizzi e coordinate, le 3 pietre dei poliziotti. Scaricate il 1&deg; novembre 2026.',
+   '<b>Comune di Milano</b>, dati.comune.milano.it (licenza CC BY): numeri civici con coordinate (ds634, ottobre 2026), confini dei quartieri NIL (ds964), residenti per quartiere (ds205, anno 2024). Il Comune non pubblica le pietre d&rsquo;inciampo come dato aperto: nessun dataset trovato con dieci parole di ricerca.',
+   '<b>Stampa e Comune, per verificare gli anni di posa</b>: AGI (23 gennaio 2025), Mentelocale (23 gennaio 2025), Mosaico (gennaio 2020), Sky TG24 (novembre 2023), Fondazione Fossoli (novembre 2024).',
+   '<b>CDEC</b> (Centro di Documentazione Ebraica Contemporanea, &laquo;I nomi della Shoah&raquo;, dati collegati): usato solo per controllare i nomi, nessun dato ripubblicato.',
+   '<b>OpenStreetMap</b> (ODbL): mappa di sfondo; controllo (26 punti).'
+  ].map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

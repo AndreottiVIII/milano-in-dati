@@ -44,7 +44,8 @@
     { path: 'costo-vita/',       label: 'Quanto costa vivere' },
     { path: 'metro/',            label: 'Il metrò' },
     { path: 'ristoranti/',       label: 'Cosa si mangia' },
-    { path: 'turisti/',          label: 'Turisti' }
+    { path: 'turisti/',          label: 'Turisti' },
+    { path: 'pietre-inciampo/',  label: "Pietre d'inciampo" }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

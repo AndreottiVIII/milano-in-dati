@@ -2489,3 +2489,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: notti 5,04 milioni (2000), 12,95 (2019), 3,52 (2020), 17,75 (2025); stranieri 78% nel 2025; USA primi dal 2019 (×1,83), Cina al 94% del 2019; spesa dei turisti stranieri 3.858 → 5.532 milioni (2019-2025). Sorpresa: cala il turista italiano (−12,8% di notti, −34,2% negli alberghi).
 - Limiti dei dati: due serie con numeri diversi per lo stesso anno; punti delle migliaia in ds212 e ds219; refusi nei nomi dei paesi; salti dell'extra-albergo nel 2013, 2018 e 2025 (dal 2025 l'ISTAT conta anche le locazioni brevi non imprenditoriali); residenza, non nazionalità; Olimpiadi 2026 non ancora nei dati.
 
+## 36. Pietre d'inciampo
+
+- 2026-11-01 — Fase 1 e pagina (`pietre-inciampo/`, `docs/pietre-inciampo/`), volute da Davide; Davide ha scelto di mostrare il nome sulla mappa con il link alla scheda del Comitato. Dettagli in `pietre-inciampo/NOTE.md`.
+- Fonti: Comitato Pietre d'Inciampo Milano (pietredinciampomilano.it, "libero accesso e diritto di riproduzione": pubblicati solo i fatti, niente biografie né foto), Wikipedia (CC BY-SA) per le date di posa, OSM (ODbL) e CDEC solo per controllo. Il vecchio sito nomidellashoah.it ora mostra un sito di casinò: non usarlo.
+- Numeri: 265 pietre (262 persone e 3 agenti della Questura); 134 politici, 123 razziali, 5 internati militari; tutti morti; Auschwitz 104, Mauthausen 94. Sorpresa: il 43% degli arresti in due mesi (dicembre 1943 e marzo 1944).
+- Anni di posa controllati: Milla e Neppi 2019 (Wikipedia sbaglia), Pogliaghi 2025 (AGI), Bortolotti 2025 annunciato, De Benedetti 2023 da verificare; Cibeno 2024 (Fondazione Fossoli, ANED) mentre le schede del Comitato scrivono 2026.
+
