@@ -59,7 +59,8 @@
     { path: 'comunita/', label: 'Le comunità' },
     { path: 'eta/', label: 'Età e centenari' },
     { path: 'benessere/', label: 'Benessere ISTAT' },
-    { path: 'statue/', label: 'Statue e monumenti' }
+    { path: 'statue/', label: 'Statue e monumenti' },
+    { path: 'incroci/', label: 'Incroci e incidenti' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

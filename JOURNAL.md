@@ -2583,3 +2583,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-01 notte — Fase 1 e pagina (`statue/`, `docs/statue/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `statue/NOTE.md` (sezione 0 con i numeri finali).
 - Fonti: nessun registro ufficiale; Wikidata (CC0), OpenStreetMap (ODbL, file derivati share-alike), ICCD (CC BY-SA come beni culturali): 777 opere, soggetto noto per il 28%, anno per il 18%. Genere solo da P21 di Wikidata della persona ritratta, mai dai nomi. 8 soggetti dubbi tolti a mano; 31 persone aggiunte dalle iscrizioni delle lapidi (solo testo che lo dice).
 - Numeri: donne 9 su 194 persone (4,6%), "poche, nello stesso ordine di grandezza delle vie" (6,6%). Sorpresa: nessun monumento o statua datato a una donna reale prima del 2021 (Belgiojoso 2021, Hack 2022). Nessuno domina (massimo 4 opere, Manzoni).
+
+## 49. Incroci e incidenti
+
+- 2026-11-01 notte — Fase 1 e pagina (`incroci/`, `docs/incroci/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `incroci/NOTE.md`.
+- Fonti: microdati ISTAT/PoliS-Lombardia degli incidenti con lesioni 2010-2024 (CC BY 4.0; via in testo libero, solo mese), Comune ds175/ds177 (totali mensili 2001-2025), ds1438 zone a velocità limitata, Regione y7qm-hfqy (fasce orarie 2000-2011), OSM per gli incroci (ODbL). Nessuna fonte aperta con le coordinate dei singoli incidenti a Milano.
+- Numeri: 131.435 incidenti con lesioni, 676 morti in 15 anni; 46% agganciati a uno dei 5.382 incroci; il peggiore (viale Marche/viale Zara) ha lo 0,5% degli incidenti. Sorpresa: nessun incrocio "killer", ma i peggiori restano i peggiori (11 dei primi 20 del 2010-14 lo sono ancora nel 2020-24); pedoni 1 incidente su 7 ma circa 4 mortali su 10. Zone 30: nessun effetto chiaro (confronto).
+- Limiti dei dati: posizione ricostruita da indirizzi in testo; niente traffico (concentrazione, non rischio); solo mese dal 2012; data di avvio di Area C non confermata; in ds175 un campo vuoto dei morti vale 0 (corretto).
