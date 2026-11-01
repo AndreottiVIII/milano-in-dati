@@ -35,7 +35,8 @@
     { path: 'alberi/',           label: 'Alberi della città' },
     { path: 'cani/',             label: 'Cani di Milano' },
     { path: 'morti/',            label: 'Morti giorno per giorno' },
-    { path: 'matrimoni/',        label: 'Matrimoni e separazioni' }
+    { path: 'matrimoni/',        label: 'Matrimoni e separazioni' },
+    { path: 'biblioteche/',      label: 'Biblioteche' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

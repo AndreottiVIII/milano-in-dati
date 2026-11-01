@@ -2427,3 +2427,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: 12.398 matrimoni nel 1963, 2.492 nel 2024; civili oltre i religiosi nel 2002 a Milano, nel 2018 in Italia; civili 81% contro 61%. Sorpresa: i civili non sono mai cresciuti (3.308 nel 1972, 2.018 nel 2024); sono spariti i religiosi (10.525 nel 1961, 474 nel 2024); almeno il 61% dei matrimoni in chiesa dei milanesi si celebra fuori Milano.
 - Trappole: **refuso in ds1496** (civili 2024 = 2.218, le altre fonti 2.018: usato 2.018); **ds132/ds1949 descritti come "celebrati a Milano" ma sono nozze di residenti** (2019 e 2024 incompleti); ISTAT e Comune non coincidono nel 2010; Monza e Brianza dentro Milano nelle tavole ISTAT fino al 2009; divorzio breve 2014-2015 spezza la serie. Da segnalare al Comune.
 
+## 28. Biblioteche
+
+- 2026-11-01 — Fase 1 e pagina (`biblioteche/`, `docs/biblioteche/`), volute da Davide. Dettagli in `biblioteche/NOTE.md`.
+- Fonti: Comune di Milano (CC BY): ds2986 prestiti mensili per punto di prestito ed età, gen 2013-mag 2026; 138 file di dettaglio (un prestito per riga, 11,3 milioni, gen 2013-giu 2024, la serie si ferma lì); statistiche annuali per biblioteca; ds3012/ds1306 posizioni. ICCU (CC0) solo anagrafe. Prestiti digitali (MLOL) non aperti. Nella pagina solo dati aggregati.
+- Numeri: prestiti 1.301.765 (2013), 428.989 (2020), 986.954 (2025). Sorpresa: i libri non sono calati (861.254 nel 2013, 783.700 nel 2023; primo semestre 2024 +14,5% sul 2019), sono spariti DVD e CD (−75%, l'85% del calo). Sopra i 65 anni dal 19,2% al 26,6% dei prestiti.
+- Trappole: chiusure per lavori (Dergano 2018-2019 e altre) falsano i confronti per biblioteca; "interbibliotecario" registrato solo dal 2017; periodici contati solo dal 2018; nessun codice lettore (non si contano i lettori); le classifiche dei titoli dipendono anche dalle copie comprate; ds286 scrive il 2015 con il punto delle migliaia.
+

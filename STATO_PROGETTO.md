@@ -39,7 +39,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 25 | Cani | Online: aree cani (nessun dato aperto sui cani) |
 | 26 | Morti giorno per giorno | Online |
 | 27 | Matrimoni e separazioni | Online |
-| — | In corso | Pagine di scuole e biblioteche; fase 1 di luoghi più cercati, pioggia e caldo, costo della vita; redditi dal 2000 in attesa di ok |
+| 28 | Biblioteche | Online |
+| — | In corso | Pagine di scuole e redditi; fase 1 di luoghi più cercati, pioggia e caldo, costo della vita |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.

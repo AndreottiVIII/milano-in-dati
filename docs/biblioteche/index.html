@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Biblioteche</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:62vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed} .lgd i.rg{border-radius:50%;width:12px;height:12px;background:#fff;border:3px solid #c26a1b}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:360px;overflow:auto} #tab-anni{min-width:420px} #tab-ritiro{min-width:480px} #tab-bib{min-width:420px} #tab-tit{min-width:460px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Biblioteche: che cosa legge Milano</h1>
+<p>Le biblioteche del Comune di Milano (25 sedi, il bibliobus e alcuni punti di ritiro) pubblicano il numero di prestiti mese per mese dal 2013 e, fino a giugno 2024, anche <b>che cosa</b> si prende in prestito. In totale sono <b id="n-righe">11,3 milioni</b> di prestiti. Qui li guardiamo nel tempo, per biblioteca e per titolo. <b>Sono solo prestiti di materiale fisico</b>: i prestiti digitali (e-book, MLOL) non sono nei dati aperti.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b><ul>
+<li><b>Solo prestiti fisici.</b> I prestiti digitali non ci sono: una parte dei lettori pu&ograve; essere passata al digitale senza che qui si veda.</li>
+<li><b>Il dettaglio finisce a giugno 2024.</b> I totali mensili arrivano ad aprile 2026 (maggio 2026 &egrave; incompleto e non &egrave; mostrato). Libri, DVD, titoli, et&agrave; e sesso si fermano a giugno 2024.</li>
+<li><b>Non si contano i lettori.</b> I dati non hanno il numero del tesserato: un prestito non &egrave; una persona.</li>
+<li><b>Le classifiche dei titoli misurano anche le copie comprate:</b> un libro con molte copie e una lista d&rsquo;attesa fa pi&ugrave; prestiti.</li>
+<li><b>Le biblioteche chiudono per lavori:</b> una variazione di una biblioteca non &egrave; per forza meno (o pi&ugrave;) interesse dei lettori (<a href="#mappa">vedi la mappa</a>).</li></ul></div>
+
+<h2 id="mese">Mese per mese, dal 2013</h2>
+<div id="mese-testo"></div>
+<div class="lgd" id="lg-mese"></div>
+<div class="ch" id="ch-mese" role="img" aria-label="Grafico: prestiti al mese dal 2013, totale, libri e materiale non libro"></div>
+<p class="src">Totale: Comune di Milano, &laquo;Biblioteche: prestiti per mese&raquo; (ds2986, CC BY). Libri e non libri: file mensili di dettaglio del Comune (CC BY), sommati da noi; esclusi prestiti annullati e consultazioni in sede. Fascia grigia: chiusure per Covid (marzo&ndash;maggio e novembre 2020). Le due linee non sommano al totale (restano periodici, guide e altro).</p>
+<details><summary>Anno per anno: totale, libri, non libri</summary><div class="scroll tabmax"><table id="tab-anni"></table></div></details>
+
+<h2 id="titoli">Che cosa si legge</h2>
+<div id="titoli-testo"></div>
+<div class="scroll"><table id="tab-tit"></table></div>
+<p class="src">Titolo e autore pi&ugrave; prestato in ogni anno, solo libri a stampa. Il titolo somma le edizioni dello stesso libro; i volumi di una serie restano separati. 2024 = gennaio&ndash;giugno. Fonte: file mensili di dettaglio del Comune di Milano (CC BY).</p>
+
+<h3>Le classifiche, anno per anno</h3>
+<div class="ctl"><label class="sub" for="sel-anno">Anno:</label><select id="sel-anno" aria-label="Scegli l'anno"></select>
+<span class="sub">Chi prende in prestito:</span>
+<button type="button" data-f="tutti" class="on">Tutti</button><button type="button" data-f="Minori">Minori (0&ndash;17)</button><button type="button" data-f="Adulti">Adulti (18&ndash;64)</button><button type="button" data-f="Anziani">Anziani (65+)</button></div>
+<p class="sub" id="cl-nota"></p>
+<div class="grid2"><div><h3>I 10 titoli pi&ugrave; prestati</h3><div class="bars" id="b-tit"></div></div>
+<div><h3>I 10 autori pi&ugrave; prestati</h3><div class="bars" id="b-aut"></div></div></div>
+<p class="src">Gli autori sommano tutti i loro titoli, quindi in testa ci sono serie e guide (Geronimo Stilton per ragazzi, le guide del Touring Club, i fumetti Bonelli). La fascia di et&agrave; &egrave; quella di chi ha preso in prestito.</p>
+
+<h3>Il best seller conta sempre meno</h3>
+<div id="conc-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Prestiti del titolo pi&ugrave; prestato dell&rsquo;anno</b></p><div class="ch" id="ch-top1" role="img" aria-label="Grafico: prestiti del titolo pi&ugrave; prestato di ogni anno"></div></div>
+<div><p class="sub"><b>Titoli diversi presi in prestito in un anno</b></p><div class="ch" id="ch-dist" role="img" aria-label="Grafico: numero di titoli diversi presi in prestito ogni anno"></div></div></div>
+<p class="src">Solo libri a stampa e audiolibri, 2013&ndash;2023 (anni interi). Il 2020 &egrave; basso per le chiusure. Le liste complete per anno e fascia di et&agrave; sono nei file.</p>
+
+<h2 id="mappa">Biblioteca per biblioteca</h2>
+<div class="warm"><b>Non leggere le variazioni come domanda.</b> Molte biblioteche sono state chiuse o ridotte per lavori (Dergano da aprile 2018 a dicembre 2019, Calvairate dal 2020 a met&agrave; 2021, Fra Cristoforo da giugno a ottobre 2025...). L&rsquo;anello arancione sulla mappa segna le biblioteche con almeno 2 mesi in cui i prestiti sono sotto un quarto del loro livello normale. Lo stesso vale per il 2019, usato come anno di confronto: era un anno con diverse biblioteche a regime ridotto.</div>
+<div class="ctl"><label class="sub" for="sel-ym">Anno:</label><select id="sel-ym" aria-label="Scegli l'anno"></select>
+<label class="sub" for="sel-bib">Biblioteca:</label><select id="sel-bib" aria-label="Scegli una biblioteca"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa delle biblioteche di Milano, con cerchi proporzionali ai prestiti"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors; prestiti, biblioteche e quartieri: Comune di Milano (CC BY). Il cerchio &egrave; proporzionale ai prestiti fatti in quella biblioteca (anche di libri che arrivano da altre biblioteche). Il bibliobus (5 fermate) non &egrave; sulla mappa.</p>
+<div id="scheda" class="card"><span class="sub">Scegli una biblioteca sulla mappa o dall&rsquo;elenco.</span></div>
+<h3>Le biblioteche, in ordine di prestiti</h3>
+<div class="scroll tabmax"><table id="tab-bib"></table></div>
+<div id="bib-testo"></div>
+
+<h2 id="chi">Chi prende in prestito</h2>
+<div id="chi-testo"></div>
+<div class="lgd" id="lg-chi"></div>
+<div class="ch" id="ch-chi" role="img" aria-label="Grafico: quota di prestiti a persone di 65 anni e pi&ugrave;, a donne e a minori, per anno"></div>
+<p class="src">Quote sui prestiti totali per anno. Et&agrave; (ds2986, fino al 2025) e sesso (file di dettaglio, fino al 2024; &laquo;non indicato&raquo; escluso dal numeratore). Fonte: Comune di Milano (CC BY).</p>
+
+<h2 id="rete">Dentro la rete delle biblioteche</h2>
+<div id="rete-testo"></div>
+<div class="ch" id="ch-rete" role="img" aria-label="Grafico: quota di prestiti di libri di un&rsquo;altra biblioteca, per anno"></div>
+<p class="src">Quota di prestiti in cui la biblioteca che ha il libro &egrave; diversa da quella dove lo si ritira. Fino al 2016 il dato non distingue (non vuol dire zero). Fonte: file di dettaglio del Comune (CC BY).</p>
+<h3>Dove si ritira: bibliobus, smartlocker, edicole, librerie</h3>
+<div id="ritiro-testo"></div>
+<div class="scroll"><table id="tab-ritiro"></table></div>
+<p class="src">Prestiti per anno secondo il punto in cui sono fatti. Biblioteche = le 25 sedi. 2026 = gennaio&ndash;aprile (maggio incompleto), non mostrato. Fonte: ds2986 (CC BY).</p>
+
+<h2 id="limiti">Che cosa non dice questo dato</h2>
+<div class="warm"><ul>
+<li><b>Niente digitale.</b> I prestiti di e-book e audiolibri online (MLOL) non sono nei dati aperti del Comune. Ogni totale qui &egrave; solo materiale fisico.</li>
+<li><b>Niente lettori.</b> Nessun identificativo dell&rsquo;utente: non si sa quante persone diverse, n&eacute; quanti libri a testa. Il numero di tesserati nei file annuali del Comune (circa 100 mila nel 2013, 78 mila nel 2019, 72 mila nel 2023) &egrave; un dato diverso e non dice chi &egrave; attivo.</li>
+<li><b>Niente generi.</b> Il dettaglio non ha un campo genere e non l&rsquo;abbiamo dedotto. Chi guarda le liste vede molti gialli e romanzi italiani, ma &egrave; un&rsquo;impressione, non una misura.</li>
+<li><b>Il dettaglio si ferma a giugno 2024</b> (il Comune non ha pubblicato i mesi dopo); i totali arrivano ad aprile 2026.</li>
+<li><b>Residenza non nota:</b> non sappiamo dove abita chi prende in prestito, quindi niente &laquo;prestiti per abitante del quartiere&raquo;. La Sormani nel 2011 faceva il 28,4% dei prestiti di libri a chi abita fuori Milano (unico dato disponibile).</li>
+<li><b>Il confronto con il 2019</b> parte da un anno con biblioteche chiuse per lavori (vedi sopra).</li></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina), <a href="data/mensile.csv">mensile.csv</a> (prestiti per mese: totale, libri, non libri), <a href="data/biblioteche_anno.csv">biblioteche_anno.csv</a> (prestiti per biblioteca e anno, con i mesi quasi senza prestiti), <a href="data/biblioteche_posizione.csv">biblioteche_posizione.csv</a> (coordinate e quartiere), <a href="data/top_titoli_anno.csv">top_titoli_anno.csv</a> e <a href="data/top_autori_anno.csv">top_autori_anno.csv</a> (primi 10 per anno e fascia di et&agrave;), <a href="data/concentrazione_titoli_anno.csv">concentrazione_titoli_anno.csv</a>, <a href="data/utenti_anno.csv">utenti_anno.csv</a>, <a href="data/rete_anno.csv">rete_anno.csv</a>, <a href="data/punti_ritiro_anno.csv">punti_ritiro_anno.csv</a>. Sono valori aggregati: i prestiti uno per uno non sono ripubblicati (i file originali sono sul portale del Comune).</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Comune di Milano &ndash; Direzione Cultura, dataset &laquo;Biblioteche: prestiti per mese &ndash; serie storica&raquo; (ds2986) e i 138 dataset mensili &laquo;Biblioteche: prestiti&raquo; (gennaio 2013 &ndash; giugno 2024), &laquo;Punti di prestito del Sistema Bibliotecario Milanese&raquo; (ds3012), statistiche annuali delle biblioteche (ds336, ds928, ds1641, ds2166, ds2928, ds2929), residenti per quartiere (ds205), confini dei NIL (ds964): tutti licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,RD=[];
+var ACC='#00695c',WARM='#c26a1b',GRY='#555';
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+var MESI=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function ymLab(s){var a=s.split('-');return MESI[parseInt(a[1],10)]+' '+a[0]}
+function cut(s,n){s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s}
+
+J('data/riepilogo.json').then(function(d){
+  D=d;
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mese();titoli();mappa();chi();rete();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- grafico a linee ---------- */
+function lineChart(box,o){
+  var W=box.clientWidth||320,H=o.h||260,m={l:50,r:10,t:14,b:28},n=o.xs.length;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,all=[];
+  o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});
+  var y1=Math.max.apply(null,all),sy=niceStep(y1/5);y1=Math.ceil(y1/sy)*sy;
+  function X(i){return m.l+(n>1?i/(n-1)*pw:0)} function Y(v){return m.t+ph-v/y1*ph}
+  var st=n>1?pw/(n-1):pw,s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  (o.shade||[]).forEach(function(sh){var a=X(sh[0])-st/2,b=X(sh[1])+st/2;s+='<rect x="'+Math.max(m.l,a)+'" y="'+m.t+'" width="'+Math.max(2,b-a)+'" height="'+ph+'" fill="#e6e6e6"/>'});
+  for(var v=0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>';
+  var lastx=-99;
+  for(var i=0;i<n;i++){if(o.tick(i)){var xx=X(i);if(xx-lastx>(o.gap||34)){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xl(i)+'</text>'}}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  o.series.forEach(function(se){
+    var d='',pen=false;
+    se.v.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
+    if(n<=30)se.v.forEach(function(v,i){if(v!=null){var mk=se.mk&&se.mk[i];s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="'+(mk?5:3)+'" fill="'+(mk?'#fff':se.color)+'" stroke="'+(mk?WARM:se.color)+'" stroke-width="'+(mk?3:1)+'"/>'}});
+  });
+  s+='<line id="vl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,vl=svg.querySelector('#vl'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k;
+    var i=Math.round((px-m.l)/(pw/Math.max(1,n-1)));if(i<0)i=0;if(i>n-1)i=n-1;
+    vl.setAttribute('x1',X(i));vl.setAttribute('x2',X(i));vl.style.display='';
+    tip.innerHTML=o.tip(i);tip.style.display='';var tw=tip.offsetWidth,left=X(i)/k+10;if(left+tw>r.width)left=X(i)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){tip.style.display='none';vl.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var lb=D.libri_audiolibri_per_anno,nb=D.non_book_dvd_cd_per_anno,T=D.totali;
+  el('n-righe').textContent=nf(11.3,1)+' milioni';
+  var h='<p><b>I libri non se ne sono mai andati. Sono spariti i DVD e i CD.</b> I prestiti di libri e audiolibri erano <b>'+f0(lb['2013'])+'</b> nel 2013 e sono <b>'+f0(lb['2023'])+'</b> nel 2023 ('+sgp(D.libri_2023_su_2013_pct)+'): sono il '+nf(D.libri_2023_su_2019_pct,1)+'% sopra il 2019. Nel primo semestre 2024 sono <b>'+sgp(D.libri_gen_giu_2024_su_2019_pct)+'</b> sul primo semestre 2019 e solo '+sgp(D.libri_gen_giu_2024_su_2013_pct)+' sul 2013.</p>';
+  h+='<p>Il materiale che non &egrave; un libro (DVD, CD e simili) &egrave; passato da '+f0(nb['2013'])+' a '+f0(nb['2023'])+' prestiti (<b>'+sgp(D.non_book_2023_su_2013_pct)+'</b>). Vale l&rsquo;<b>'+f0(D.quota_non_book_perdita_pct)+'%</b> dei '+f0(D.calo_totale_2013_2023)+' prestiti persi tra il 2013 e il 2023.</p>';
+  h+='<p>Quindi &laquo;le biblioteche prestano un quarto in meno di prima&raquo; &egrave; vero (<b>'+f0(T['2025'])+'</b> prestiti nel 2025 contro '+f0(T['2013'])+' nel 2013, '+sgp(D.var_2025_su_2013_pct)+'), ma quasi tutta la perdita &egrave; la fine del noleggio di film e musica.</p>';
+  h+='<p class="src">Prestiti totali: ds2986; libri e non libri: file mensili di dettaglio, prestiti validi (senza annullati e consultazioni). Il 2024 nel dettaglio &egrave; solo gennaio&ndash;giugno: si confronta con lo stesso semestre degli altri anni. Fonte: Comune di Milano (CC BY).</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mese per mese ---------- */
+function mese(){
+  var M=D.mensile.filter(function(r){return r[0]!=='2026-05'}),T=D.totali;
+  var xs=M.map(function(r){return r[0]});
+  var ix20=function(y,m){return xs.indexOf(y+'-'+(m<10?'0':'')+m)};
+  var shade=[[ix20(2020,3),ix20(2020,5)],[ix20(2020,11),ix20(2020,11)]];
+  var C=D.mesi_piu_bassi_2020;
+  var h='<p>Fino al 2018 i prestiti calano di continuo: da '+f0(T['2013'])+' nel 2013 a '+f0(T['2018'])+' nel 2018 ('+sgp(D.calo_2013_2018_pct)+'). Il 2019 &egrave; il primo anno in cui risalgono ('+sgp(D.var_2019_su_2018_pct)+'), e gennaio 2020 &egrave; ancora sopra il gennaio 2019: <b>il Covid non ha cominciato il calo, l&rsquo;ha interrotto</b>.</p>';
+  h+='<p>Poi le chiusure: <b>'+f0(C['3'])+'</b> prestiti a marzo 2020, <b>'+f0(C['4'])+'</b> ad aprile, '+f0(C['5'])+' a maggio, '+f0(C['11'])+' a novembre. Il 2020 chiude a '+f0(T['2020'])+' ('+sgp(D.calo_2020_su_2019_pct)+' sul 2019). La ripresa &egrave; lenta: il 2021 &egrave; al '+f0(D.rapporto_2019['2021']*100)+'% del 2019, il 2022 al '+f0(D.rapporto_2019['2022']*100)+'%, il 2023 al '+f0(D.rapporto_2019['2023']*100)+'%, il 2024 e il 2025 al '+f0(D.rapporto_2019['2024']*100)+'&ndash;'+f0(D.rapporto_2019['2025']*100)+'%. Da gennaio ad aprile 2026 si &egrave; a '+f0(D.gen_apr_2026)+' prestiti, '+sgp(D.gen_apr_2026_su_2019_pct)+' sullo stesso periodo del 2019. Solo '+D.mesi_sopra_2019+' mesi su 60 (2021&ndash;2025) hanno superato lo stesso mese del 2019.</p>';
+  h+='<p>Per abitante: '+nf(D.per_abitante['2013'],2)+' prestiti all&rsquo;anno nel 2013, '+nf(D.per_abitante['2019'],2)+' nel 2019, '+nf(D.per_abitante['2025'],2)+' nel 2025 (residenti del Comune; prendono in prestito anche i non residenti, quindi &egrave; un indice).</p>';
+  setH('mese-testo',h);
+  setH('lg-mese',lgdLine([{color:GRY,dash:true,t:'tutti i prestiti'},{color:ACC,t:'libri e audiolibri'},{color:WARM,t:'DVD, CD e altro non libro'}]));
+  function draw(){
+    lineChart(el('ch-mese'),{xs:xs,h:290,
+      series:[{color:GRY,dash:true,v:M.map(function(r){return r[1]})},{color:ACC,v:M.map(function(r){return r[2]})},{color:WARM,v:M.map(function(r){return r[3]})}],
+      shade:shade,gap:46,tick:function(i){return xs[i].slice(5)==='01'},xl:function(i){return xs[i].slice(0,4)},
+      tip:function(i){var r=M[i];return '<b>'+ymLab(r[0])+'</b><br>tutti: '+f0(r[1])+(r[2]!=null?'<br>libri e audiolibri: '+f0(r[2])+'<br>non libri: '+f0(r[3]):'<br><span class="sub">libri e non libri: dato non disponibile</span>')}});
+  }
+  draw();RD.push(draw);
+  var an=[];
+  Object.keys(D.totali).filter(function(a){return a<='2025'}).forEach(function(a){
+    var lb=D.libri_audiolibri_per_anno[a],nb=D.non_book_dvd_cd_per_anno[a];
+    an.push([a,f0(D.totali[a]),lb!=null?f0(lb):'',nb!=null?f0(nb):'',D.quota_libri_pct[a]!=null?nf(D.quota_libri_pct[a],1)+'%':'']);
+  });
+  table('tab-anni',['Anno','Tutti i prestiti','Libri e audiolibri','Non libri','Quota libri'],an);
+}
+
+/* ---------- titoli ---------- */
+var FASCIA='tutti',ANNO='2023';
+function titoli(){
+  var yrs=Object.keys(D.titoli).sort(),C=D.concentrazione;
+  var h='<p>Ogni anno c&rsquo;&egrave; un libro che tutti prendono in prestito: <b>'+esc(D.titoli['2013'].tutti[0][0])+'</b> di '+esc(D.titoli['2013'].tutti[0][1].split(',').reverse().join(' ').trim())+' nel 2013 ('+f0(D.titoli['2013'].tutti[0][2])+' prestiti), i quattro volumi dell&rsquo;<i>Amica geniale</i> di Elena Ferrante tra il 2015 e il 2019, <b>'+esc(D.titoli['2023'].tutti[0][0])+'</b> nel 2023 ('+f0(D.titoli['2023'].tutti[0][2])+'). Tra gli autori, nel 2023 primeggia Geronimo Stilton (libri per ragazzi), seguito da Maurizio De Giovanni; per fascia di et&agrave; gli anziani prendono molto Sveva Casati Modignani e Gianrico Carofiglio, i minori <i>Diario di una schiappa</i> e <i>L&rsquo;amico ritrovato</i>.</p>';
+  setH('titoli-testo',h);
+  var rows=yrs.map(function(a){var t=D.titoli[a].tutti[0],au=D.autori[a].tutti[0];
+    return [a+(a==='2024'?' <span class="sub">(gen&ndash;giu)</span>':''),esc(cut(t[0],60))+'<br><span class="sub">'+esc(t[1])+' &middot; '+f0(t[2])+'</span>',esc(au[0])+'<br><span class="sub">'+f0(au[1])+' prestiti</span>']});
+  setH('tab-tit','<thead><tr><th>Anno</th><th>Titolo pi&ugrave; prestato</th><th>Autore pi&ugrave; prestato</th></tr></thead><tbody>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'}).join('')+'</tbody>');
+  var sel=el('sel-anno');sel.innerHTML=yrs.slice().reverse().map(function(a){return '<option value="'+a+'">'+a+(a==='2024'?' (gennaio–giugno)':'')+'</option>'}).join('');sel.value=ANNO;
+  sel.addEventListener('change',function(){ANNO=sel.value;lista()});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-f]'),function(b){b.addEventListener('click',function(){FASCIA=b.getAttribute('data-f');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-f]'),function(x){x.classList.toggle('on',x===b)});lista()})});
+  lista();
+  /* concentrazione */
+  var c13=C['2013'],c23=C['2023'];
+  h='<p>Il libro pi&ugrave; prestato dell&rsquo;anno passa da <b>'+f0(c13.primo)+'</b> prestiti (2013) a <b>'+f0(c23.primo)+'</b> (2023). I primi 100 titoli valgono il '+nf(c13.q100,1)+'% dei prestiti di libri nel 2013 e il '+nf(c23.q100,1)+'% nel 2023. I titoli diversi presi in prestito in un anno salgono da '+f0(c13.distinti)+' a '+f0(c23.distinti)+', mentre i prestiti di libri calano: i lettori si disperdono su pi&ugrave; titoli. Anche i libri tradotti pesano meno: dal '+nf(c13.tradotti,1)+'% al '+nf(c23.tradotti,1)+'% dei prestiti (conteggiamo solo i titoli che riportano &laquo;traduzione&raquo;, quindi &egrave; un minimo); tra i 100 titoli pi&ugrave; prestati i tradotti sono '+c13.trad100+' nel 2013 e '+c23.trad100+' nel 2023. L&rsquo;et&agrave; dei libri presi in prestito non cambia: circa un quinto &egrave; uscito nell&rsquo;anno o in quello prima.</p>';
+  setH('conc-testo',h);
+  var ys=[];for(var a=2013;a<=2023;a++)ys.push(String(a));
+  function draw(){
+    lineChart(el('ch-top1'),{xs:ys,h:220,tick:function(){return true},xl:function(i){return ys[i].slice(2)},gap:26,series:[{color:ACC,v:ys.map(function(a){return C[a].primo})}],tip:function(i){return '<b>'+ys[i]+'</b><br>'+f0(C[ys[i]].primo)+' prestiti'}});
+    lineChart(el('ch-dist'),{xs:ys,h:220,tick:function(){return true},xl:function(i){return ys[i].slice(2)},gap:26,series:[{color:WARM,v:ys.map(function(a){return C[a].distinti})}],tip:function(i){return '<b>'+ys[i]+'</b><br>'+f0(C[ys[i]].distinti)+' titoli diversi'}});
+  }
+  draw();RD.push(draw);
+}
+function lista(){
+  var T=(D.titoli[ANNO]||{})[FASCIA]||[],A=(D.autori[ANNO]||{})[FASCIA]||[];
+  var nome={tutti:'tutte le fasce di et&agrave;',Minori:'minori (0&ndash;17)',Adulti:'adulti (18&ndash;64)',Anziani:'anziani (65+)'}[FASCIA];
+  setH('cl-nota','Anno '+ANNO+(ANNO==='2024'?' (solo gennaio&ndash;giugno)':'')+', '+nome+'. Prestiti nell&rsquo;anno.');
+  function bars(id,arr,tf){var mx=arr.length?arr[0][arr[0].length-1]:1;
+    setH(id,arr.map(function(r,i){var v=r[r.length-1];return '<div class="row"><span class="nm" title="'+esc(r[0])+'">'+(i+1)+'. '+esc(cut(r[0],70))+(tf&&r[1]?'<i>'+esc(r[1])+'</i>':'')+'</span><span class="tr"><span class="fill" style="width:'+(v/mx*100)+'%"></span></span><span class="v">'+f0(v)+'</span></div>'}).join(''))}
+  bars('b-tit',T,true);bars('b-aut',A,false);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,MK=[],YR='2025',BIBSEL=null;
+function mappa(){
+  var yrs=[];for(var a=2025;a>=2013;a--)yrs.push(String(a));
+  el('sel-ym').innerHTML=yrs.map(function(a){return '<option value="'+a+'">'+a+'</option>'}).join('');el('sel-ym').value=YR;
+  var B=D.biblioteche.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')});
+  el('sel-bib').innerHTML='<option value="">— scegli —</option>'+B.map(function(b,i){return '<option value="'+i+'">'+esc(b.n)+'</option>'}).join('');
+  MAP=L.map('map',{preferCanvas:false}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  D.biblioteche.forEach(function(b,i){
+    var mk=L.circleMarker([b.lat,b.lon],{radius:6,color:ACC,weight:1,fillColor:ACC,fillOpacity:.6});
+    mk.bindTooltip(function(){return tipB(b)},{sticky:true});
+    mk.on('click',function(){sceltaB(i)});
+    mk.addTo(MAP);MK.push(mk);
+  });
+  var lat=D.biblioteche.map(function(b){return b.lat}),lon=D.biblioteche.map(function(b){return b.lon});
+  MAP.fitBounds([[Math.min.apply(null,lat),Math.min.apply(null,lon)],[Math.max.apply(null,lat),Math.max.apply(null,lon)]],{padding:[20,20]});
+  el('sel-ym').addEventListener('change',function(){YR=this.value;ricolora();tabB();if(BIBSEL!=null)scheda(BIBSEL)});
+  el('sel-bib').addEventListener('change',function(){if(this.value!=='')sceltaB(D.biblioteche.indexOf(B[parseInt(this.value,10)]))});
+  ricolora();tabB();
+  setTimeout(function(){MAP.invalidateSize()},600);window.addEventListener('resize',function(){MAP.invalidateSize()});
+  var tot=D.biblioteche_totale_anno;
+  setH('bib-testo','<p>'+D.nil_con_biblioteca+' quartieri (NIL) su '+D.nil_totale+' hanno almeno una biblioteca; gli altri '+(D.nil_totale-D.nil_con_biblioteca)+' no (la pi&ugrave; vicina pu&ograve; essere a pochi minuti: non abbiamo calcolato i tempi). Le prime tre biblioteche (Sormani, Lambrate, Sicilia) fanno circa un quarto dei prestiti delle 25 sedi. Nel 2025 le 25 sedi hanno fatto '+f0(tot['2025'])+' prestiti.</p>');
+}
+function val(b,y){var v=b.y[y];return v==null?null:v}
+function tipB(b){var v=val(b,YR),c=b.c[YR];return '<b>'+esc(b.n)+'</b><br>'+(v==null?'nessun dato':f0(v)+' prestiti nel '+YR)+(c>=1?'<br>'+c+' '+(c===1?'mese':'mesi')+' quasi senza prestiti':'')}
+function ricolora(){
+  var mx=0;D.biblioteche.forEach(function(b){var v=val(b,YR);if(v>mx)mx=v});
+  D.biblioteche.forEach(function(b,i){var v=val(b,YR),c=b.c[YR]||0,fl=c>=2;
+    MK[i].setRadius(v==null?3:3+Math.sqrt(v/mx)*20);
+    MK[i].setStyle({color:fl?WARM:ACC,weight:fl?4:1,fillColor:ACC,fillOpacity:.6})});
+  setH('lg-map','<span><i style="background:'+ACC+';opacity:.6;border-radius:50%"></i>prestiti nel '+YR+' (area proporzionale; il pi&ugrave; grande: '+f0(mx)+')</span><span><i class="rg"></i>almeno 2 mesi quasi senza prestiti</span>');
+  setH('map-desc','Prestiti fatti in ogni biblioteca nel '+YR+'. Clic su un cerchio per la scheda con tutti gli anni.');
+}
+function tabB(){
+  var rows=D.biblioteche.map(function(b,i){return {b:b,i:i,v:val(b,YR)}}).sort(function(a,b){return (b.v||0)-(a.v||0)});
+  table('tab-bib',['Biblioteca','Prestiti '+YR,'Mesi quasi senza prestiti'],rows.map(function(r){var c=r.b.c[YR]||0;return ['<a href="#scheda" data-i="'+r.i+'" class="bl">'+esc(r.b.n)+'</a>',r.v==null?'':f0(r.v),c?'<b style="color:#8a4a10">'+c+'</b>':'0']}));
+  Array.prototype.forEach.call(document.querySelectorAll('a.bl'),function(a){a.addEventListener('click',function(e){e.preventDefault();sceltaB(parseInt(a.getAttribute('data-i'),10));el('scheda').scrollIntoView({behavior:'smooth',block:'nearest'})})});
+}
+function sceltaB(i){BIBSEL=i;MK[i].openTooltip();MAP.panTo([D.biblioteche[i].lat,D.biblioteche[i].lon]);scheda(i)}
+function scheda(i){
+  var b=D.biblioteche[i],ys=Object.keys(b.y).sort();
+  var h='<h3>'+esc(b.n)+'</h3><p class="sub">'+esc(b.ind||'')+' &middot; quartiere '+esc(b.nil)+'</p><div class="lgd" id="lg-sch"></div><div class="ch" id="ch-sch" role="img" aria-label="Grafico: prestiti per anno della biblioteca"></div>';
+  var fl=ys.filter(function(a){return (b.c[a]||0)>=2});
+  h+='<p class="sub">Cerchi con anello arancione: anni con almeno 2 mesi quasi senza prestiti'+(fl.length?' ('+fl.map(function(a){return a+': '+b.c[a]}).join(', ')+' mesi)':' (nessuno per questa biblioteca)')+'. Il 2026 non &egrave; mostrato.</p>';
+  setH('scheda',h);
+  setH('lg-sch',lgdLine([{color:ACC,t:'prestiti all&rsquo;anno'}]));
+  function draw(){var bx=el('ch-sch');if(!bx)return;
+    lineChart(bx,{xs:ys,h:220,tick:function(){return true},xl:function(k){return ys[k].slice(2)},gap:26,
+      series:[{color:ACC,v:ys.map(function(a){return b.y[a]}),mk:ys.map(function(a){return (b.c[a]||0)>=2})}],
+      tip:function(k){var a=ys[k];return '<b>'+a+'</b><br>'+f0(b.y[a])+' prestiti'+((b.c[a]||0)>=1?'<br>'+b.c[a]+' mesi quasi senza prestiti':'')}})}
+  draw();RD.push(draw);
+}
+
+/* ---------- chi prende in prestito ---------- */
+function chi(){
+  var U=D.utenti,ys=Object.keys(U).filter(function(a){return a<='2025'}).sort();
+  var h='<p>Chi prende in prestito invecchia e, in maggioranza, &egrave; donna. Le persone di <b>65 anni e pi&ugrave;</b> erano il '+nf(U['2013'].p65,1)+'% dei prestiti nel 2013 e sono il '+nf(U['2025'].p65,1)+'% nel 2025. Le <b>donne</b> passano dal '+nf(U['2013'].f,1)+'% (2013) al '+nf(U['2024'].f,1)+'% (2024). I <b>minori</b> (0&ndash;17 anni) scendono dal '+nf(U['2013'].m,1)+'% del 2013 al minimo del '+nf(U['2021'].m,1)+'% nel 2021, poi tornano al '+nf(U['2025'].m,1)+'% nel 2025: nel 2025 la loro quota &egrave; tornata a quella del 2013, ma in numero sono meno (139.677 prestiti contro 182.461).</p>';
+  setH('chi-testo',h);
+  setH('lg-chi',lgdLine([{color:ACC,t:'65 anni e pi&ugrave;'},{color:WARM,t:'donne'},{color:GRY,dash:true,t:'minori (0&ndash;17)'}]));
+  function draw(){
+    lineChart(el('ch-chi'),{xs:ys,h:250,tick:function(){return true},xl:function(i){return ys[i].slice(2)},gap:26,yf:function(v){return f0(v)+'%'},
+      series:[{color:ACC,v:ys.map(function(a){return U[a].p65})},{color:WARM,v:ys.map(function(a){return U[a].f})},{color:GRY,dash:true,v:ys.map(function(a){return U[a].m})}],
+      tip:function(i){var u=U[ys[i]];return '<b>'+ys[i]+'</b><br>65+: '+nf(u.p65,1)+'%'+(u.f!=null?'<br>donne: '+nf(u.f,1)+'%':'')+'<br>minori: '+nf(u.m,1)+'%'}});
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- rete e punti di ritiro ---------- */
+function rete(){
+  var R=D.rete,ys=Object.keys(R).sort();
+  var h='<p>Un prestito su tre &egrave; un libro di <b>un&rsquo;altra biblioteca del sistema</b>, prenotato e ritirato dove si abita: il <b>'+nf(R['2024'],1)+'%</b> nel 2024, il '+nf(R['2019'],1)+'% nel 2019, il '+nf(R['2021'],1)+'% nel 2021. &Egrave; il segno del servizio in rete: la biblioteca sotto casa &egrave; la porta d&rsquo;ingresso di tutto il catalogo. Prima del 2017 il dato non distingue le due biblioteche (non vuol dire che il servizio non esistesse), quindi il grafico parte da l&igrave;.</p>';
+  setH('rete-testo',h);
+  var xs=ys.filter(function(a){return a>='2013'});
+  function draw(){lineChart(el('ch-rete'),{xs:xs,h:220,tick:function(){return true},xl:function(i){return xs[i].slice(2)},gap:26,yf:function(v){return f0(v)+'%'},
+    series:[{color:ACC,v:xs.map(function(a){return a>='2017'?R[a]:null})}],tip:function(i){return '<b>'+xs[i]+'</b><br>'+(xs[i]>='2017'?nf(R[xs[i]],1)+'% dei prestiti':'dato non disponibile')}})}
+  draw();RD.push(draw);
+  var P=D.ritiro,bt=D.biblioteche_totale_anno,yrs=Object.keys(bt).filter(function(a){return a<='2025'}).sort();
+  setH('ritiro-testo','<p>I punti di ritiro fuori dalle biblioteche sono piccoli ma cambiano: gli <b>smartlocker</b> (armadietti automatici: 3 dal 2023, 4 dal 2025) passano da '+f0(P['2023'].smartlocker)+' prestiti nel 2023 a '+f0(P['2025'].smartlocker)+' nel 2025; le <b>edicole</b> (punti di ritiro dal 2021) hanno fatto '+f0(P['2021'].edicola)+' prestiti nel 2021 e <b>nessuno nel 2025</b>; le <b>librerie</b> sono a '+f0(P['2025'].libreria)+'. Il <b>bibliobus</b> ha fatto '+f0(P['2013'].bibliobus)+' prestiti nel 2013 e '+f0(P['2025'].bibliobus)+' nel 2025.</p>');
+  table('tab-ritiro',['Anno','25 biblioteche','Bibliobus','Smartlocker','Edicole','Librerie','Altro'],yrs.map(function(a){var p=P[a]||{};return [a,f0(bt[a]),f0(p.bibliobus||0),f0(p.smartlocker||0),f0(p.edicola||0),f0(p.libreria||0),f0(p.altro||0)]}));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var L=[
+   '<b>Dati.</b> Totali mensili per punto di prestito e classe di et&agrave; (ds2986, da gennaio 2013 a aprile 2026) e 138 file mensili con un record per ogni prestito (gennaio 2013 &ndash; giugno 2024, 11.302.398 prestiti), tutti del Comune di Milano. Dei file di dettaglio teniamo solo i conteggi: nessun prestito &egrave; ripubblicato.',
+   '<b>Prestito valido.</b> Nel dettaglio escludiamo i prestiti annullati e le consultazioni in sede. Restano anche i prestiti ancora in corso al momento dell&rsquo;estrazione. Le due serie (totale e dettaglio) differiscono per meno dell&rsquo;1% (il dettaglio conta anche un deposito che il totale esclude).',
+   '<b>Libri e non libri.</b> &laquo;Libri e audiolibri&raquo; e &laquo;non libri&raquo; (DVD, CD, videogiochi) sono i due tipi di materiale del Comune. I periodici compaiono nei dati solo dal 2018: li lasciamo fuori dai confronti nel tempo.',
+   '<b>Titoli e autori.</b> Il titolo &egrave; quello prima della formula di responsabilit&agrave; (prima di &laquo; / &raquo;), senza numero di volume, senza accenti e maiuscole; le edizioni dello stesso libro si sommano. L&rsquo;autore &egrave; il primo, senza le date. Una piccola quota dei prestiti (0,5%) ha come titolo solo un numero ed &egrave; esclusa dalle classifiche. Titoli con caratteri non latini hanno a volte un &laquo;?&raquo; al posto delle lettere.',
+   '<b>Biblioteche.</b> Posizione e quartiere (NIL) dal punto di prestito del Comune (ds3012). &laquo;Mesi quasi senza prestiti&raquo; = mesi in cui una biblioteca ha meno di un quarto della sua mediana mensile 2024&ndash;2025: comprende lavori, chiusure per Covid e orari ridotti.',
+   '<b>Interbibliotecario.</b> Dal 2017 il Comune distingue i prestiti di libri di un&rsquo;altra biblioteca del sistema (consegna in rete); prima non li distingueva. Non sono prestiti tra sistemi diversi.',
+   '<b>Trappole.</b> Il confronto 2019&ndash;oggi parte da un anno con biblioteche chiuse; le classifiche misurano anche le copie comprate; niente lettori distinti; niente digitale; il 2024 nel dettaglio &egrave; solo gennaio&ndash;giugno; i file annuali del Comune sui tesserati hanno colonne sfalsate nel 2017&ndash;2018 e non sono usati qui.',
+   '<b>Programmi.</b> Un programma Python legge i file del Comune e scrive i dati aggregati di questa pagina; si pu&ograve; rilanciare. Il codice &egrave; nel repository indicato in fondo.'];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script></body></html>
