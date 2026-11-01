@@ -2612,3 +2612,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: ISPRA/SNPA, edizione 2026 (dati 27/10/2026): indicatori per comune 2006-2025 (CC BY 4.0), mappe a 10 m 2006-2025 (licenza citata alla lettera: "Attribuzione 3.0 Italia (CC BY 4.0 IT)", incoerente), strato logistica (solo centroidi). Raster non ripubblicati: in pagina solo tabelle e immagini PNG delle aree.
 - Numeri: Milano 10.679 ha consumati, 58,8% del comune (3ª tra le città sopra 100.000 abitanti), 78 m² per abitante; +3,0% dal 2006 con residenti +8,2%. Sorpresa: le grandi trasformazioni quasi non contano come nuovo consumo (scali, Portello) e CityLife e Porta Nuova hanno restituito suolo; entro 3 km dal Duomo il saldo è −8,4 ha; il nuovo consumo è in periferia e per il 36% è suolo di cantiere. La logistica pesa circa l'8% nella Città metropolitana.
 - Limiti dei dati: "consumato" = superficie artificiale, cantieri compresi; revisioni tra edizioni; mappe v6 e v8; classe 1 "non specificata nella legenda"; confronto con le costruzioni solo indicativo.
+
+## 53. Pendolari
+
+- 2026-11-01 notte — Fase 1 e pagina (`pendolari/`, `docs/pendolari/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `pendolari/NOTE.md`.
+- Fonti: ISTAT matrici del pendolarismo 1991, 2001, 2011 (CC BY 4.0, totali verificati) e stima 2021 da archivi amministrativi (modello, senza mezzo né durata); ISTAT distanze tra comuni; Regione Lombardia OD 2016 (CC0) solo per confronto sui mezzi (contraddice il censimento oltre 80 km: citate entrambe).
+- Numeri: entrano a Milano ogni giorno 470.331 (1991) → 489.785 (2021, stima) persone per lavoro o studio; un posto di lavoro su due è di un non residente (51,5%); distanza mediana 24 km; nel 2011 auto o moto 55%, treno/tram/metro 36%; un terzo oltre un'ora. Sorpresa: Assago è l'unico comune vicino che riceve da Milano più persone di quante ne manda (ipotesi Milanofiori e Forum, dichiarata come ipotesi).
+- Limiti dei dati: 2021 modellato, soglie diverse tra anni, correzione ISTAT 1991 sul treno a lunga distanza, salto sospetto degli studenti milanesi fuori Milano 2011-2021.

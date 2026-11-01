@@ -63,7 +63,8 @@
     { path: 'incroci/', label: 'Incroci e incidenti' },
     { path: 'amministratori/', label: 'Chi governa Milano' },
     { path: 'botteghe/', label: 'Botteghe storiche' },
-    { path: 'suolo/', label: 'Quanto suolo si consuma' }
+    { path: 'suolo/', label: 'Quanto suolo si consuma' },
+    { path: 'pendolari/', label: 'Pendolari' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

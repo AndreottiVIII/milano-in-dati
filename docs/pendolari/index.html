@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Pendolari</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative;display:flex} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.seg{margin:.3em 0} .seg .row{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;font-size:.86rem;padding:3px 0}
+.seg .bar{display:flex;height:24px;border:1px solid #888;background:#f1f1f1} .seg .bar span{display:block;height:100%;font-size:.72rem;line-height:22px;text-align:center;overflow:hidden;white-space:nowrap;color:#fff;font-variant-numeric:tabular-nums}
+.seg .bar span.lt{color:#111}
+.seg .nm b{display:block;font-weight:600;line-height:1.15} .seg .nm i{font-style:normal;font-size:.76rem;color:var(--mut)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 24px} .grid2>*{min-width:0} @media(max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)} th,td{padding:5px 4px;font-size:.88rem} .seg .row{grid-template-columns:1fr;gap:2px} .bars .row{grid-template-columns:minmax(90px,36%) 1fr 84px}}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto} .tab-min{min-width:480px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+tr.hl td{background:#fff3c4}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Chi entra a Milano ogni giorno</h1>
+<p>Ogni mattina quasi mezzo milione di persone raggiungono Milano per lavorare o studiare, e un centinaio di migliaia di milanesi fanno il contrario. Qui guardiamo <b>da dove vengono, quanto sono lontane, con che mezzo viaggiano e quanto ci mettono</b>, e come tutto questo è cambiato dal 1991 al 2021, con le &laquo;matrici del pendolarismo&raquo; dell&rsquo;ISTAT (i censimenti: dicono, comune per comune, quante persone vanno a lavorare o a studiare in quale altro comune).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> I numeri del 1991, 2001 e 2011 vengono da un conteggio (le risposte ai censimenti). Quelli del <b>2021 sono una stima fatta con un modello</b> dall&rsquo;ISTAT, e sono forniti <b>senza mezzo di trasporto n&eacute; durata del viaggio</b>. Per questo mezzi e tempi si fermano al 2011 e il confronto 2011&ndash;2021 va letto con prudenza. Tutti i dettagli sono in <a href="#limiti">Limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa: da dove vengono</h2>
+<p>Ogni comune della Lombardia &egrave; colorato in base a quante persone dal suo territorio vanno a Milano ogni giorno (per lavoro o studio) oppure a quale parte dei suoi pendolari va a Milano. Scegli l&rsquo;anno; clic su un comune per la scheda.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="e" class="on">Persone che vanno a Milano</button><button type="button" data-m="q">Quota dei pendolari del comune che va a Milano</button></div>
+<div class="ctl"><span class="sub">Anno:</span>
+<button type="button" data-y="0">1991</button><button type="button" data-y="1">2001</button><button type="button" data-y="2">2011</button><button type="button" data-y="3" class="on">2021 (stima)</button>
+<label class="ck"><input type="checkbox" id="ck-fl"> linee dai 30 comuni con pi&ugrave; pendolari</label></div>
+<div class="ctl"><label class="sub" for="sel-com">Il tuo comune:</label><select id="sel-com" aria-label="Scegli un comune"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei comuni lombardi colorati per numero di pendolari verso Milano"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Persone residenti nel comune che ogni giorno vanno a lavorare o a studiare a Milano (Milano esclusa). Confini dei comuni ISTAT al 1/1/2021 (CC BY 4.0); mappa &copy; OpenStreetMap contributors. I comuni che nel 2021 non risultano o non sono stati agganciati ai vecchi codici (0,2% dei flussi) restano in grigio.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un comune sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="quanti">Quanti sono</h2>
+<div id="quanti-testo"></div>
+<h3>Persone che entrano a Milano ogni giorno</h3>
+<div class="bars" id="b-entra"></div>
+<div class="lgd" id="lg-entra"></div>
+<h3>Quanti posti di lavoro a Milano sono di persone che abitano altrove</h3>
+<div class="bars" id="b-quota"></div>
+<h3>Su 100 milanesi che lavorano, quanti lavorano fuori Milano</h3>
+<div class="bars" id="b-esce"></div>
+<p class="src">Persone che vanno ogni giorno al luogo abituale di lavoro o di studio in un comune diverso da quello in cui abitano. 1991, 2001, 2011: censimenti ISTAT. 2021: stima ISTAT con modello (occupati e non occupati che studiano). Escluso chi va all&rsquo;estero.</p>
+
+<h2 id="origini">Da dove vengono</h2>
+<div id="orig-testo"></div>
+<div class="grid2"><div><h3>Per zona (2021)</h3><div class="bars" id="b-gruppi"></div></div>
+<div><h3>I 15 comuni con pi&ugrave; pendolari (2021)</h3><div class="bars" id="b-top"></div></div></div>
+<details><summary>I primi 40 comuni, con tutti gli anni</summary><div class="scroll tabmax"><table id="tab-top" class="tab-min"></table></div></details>
+<p class="src">Il comune &egrave; quello di residenza. &laquo;Resto della citt&agrave; metropolitana&raquo; = gli altri comuni della provincia di Milano (confini 2021). Lodi e Lecco sono province nate dopo il 1991 e Monza e Brianza dopo il 2001: qui tutto &egrave; riportato ai confini 2021.</p>
+
+<h2 id="distanza">Quanto lontano</h2>
+<div id="dist-testo"></div>
+<div class="seg" id="s-dist"></div>
+<div class="lgd" id="lg-dist"></div>
+<p class="src">Distanza stradale dal comune di residenza a Milano (ISTAT, matrice delle distanze 2021, grafo stradale 2020). Per i residenti fuori Lombardia la distanza non &egrave; calcolata. Percentuali sul totale di chi entra (lavoro + studio).</p>
+
+<h2 id="mezzi">Con che mezzo</h2>
+<div id="mezzi-testo"></div>
+<div class="ctl"><span class="sub">Motivo:</span><button type="button" data-mm="lavoro" class="on">Lavoro</button><button type="button" data-mm="studio">Studio</button>
+<span class="sub">Anno:</span><button type="button" data-my="1991">1991</button><button type="button" data-my="2001">2001</button><button type="button" data-my="2011" class="on">2011</button></div>
+<div class="seg" id="s-mezzi"></div>
+<div class="lgd" id="lg-mezzi"></div>
+<div class="warm" id="mezzi-avviso"></div>
+<p class="src">Mezzo dichiarato nel censimento, persone che entrano a Milano, per distanza dal comune di residenza (riga &laquo;Dentro Milano&raquo; = chi abita e lavora/studia a Milano). Il 2021 non ha il dato. &laquo;Auto&raquo; = conducente + passeggero. Fonte: ISTAT, matrici del pendolarismo 1991, 2001, 2011.</p>
+<h3 id="od">Un&rsquo;altra fonte dice altro: la matrice della Regione Lombardia (2016)</h3>
+<div id="od-testo"></div>
+
+<h2 id="tempo">Quanto tempo ci mettono</h2>
+<div id="tempo-testo"></div>
+<div class="ctl"><span class="sub">Motivo:</span><button type="button" data-tm="tutti" class="on">Lavoro e studio</button><button type="button" data-tm="lavoro">Lavoro</button><button type="button" data-tm="studio">Studio</button>
+<span class="sub">Anno:</span><button type="button" data-ty="1991">1991</button><button type="button" data-ty="2001">2001</button><button type="button" data-ty="2011" class="on">2011</button></div>
+<div class="seg" id="s-tempo"></div>
+<div class="lgd" id="lg-tempo"></div>
+<p class="src">Durata del viaggio di andata dichiarata nel censimento, in quattro classi. Fonte: ISTAT, matrici del pendolarismo 1991, 2001, 2011. Non c&rsquo;&egrave; il dato per il 2021.</p>
+<h3>A che ora si parte (chi va a lavorare)</h3>
+<div class="scroll"><table id="tab-orari" class="tab-min"></table></div>
+
+<h2 id="esce">Chi esce da Milano</h2>
+<div id="esce-testo"></div>
+<div class="grid2"><div><h3>Dove vanno i milanesi (2021)</h3><div class="bars" id="b-uscite"></div></div>
+<div><h3>Scambi con i comuni vicini (2021)</h3><div class="scroll tabmax"><table id="tab-scambi"></table></div></div></div>
+<p class="src">Persone residenti a Milano che lavorano o studiano in quel comune, 2021 (stima ISTAT). Nella tabella: i comuni con almeno 3.000 scambi in totale (le righe in giallo sono i comuni che ricevono da Milano pi&ugrave; persone di quante gliene mandino). &laquo;Vanno a Milano&raquo; = residenti nel comune che lavorano o studiano a Milano; &laquo;Vengono da Milano&raquo; = residenti a Milano che lavorano o studiano nel comune.</p>
+
+<h2 id="cambi">Cosa &egrave; cambiato dal 1991</h2>
+<div id="cambi-testo"></div>
+<div class="scroll"><table id="tab-cambi" class="tab-min"></table></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/comuni_lombardia.csv">comuni_lombardia.csv</a> (per ogni comune lombardo: persone verso Milano e quota dei pendolari, quattro anni), <a href="data/flussi_milano.csv">flussi_milano.csv</a> (tutti i comuni d&rsquo;Italia con Milano da un lato: entrate, uscite e interni per anno e motivo), <a href="data/serie_totali.csv">serie_totali.csv</a>, <a href="data/origini_gruppi.csv">origini_gruppi.csv</a>, <a href="data/top_comuni.csv">top_comuni.csv</a>, <a href="data/bande_distanza.csv">bande_distanza.csv</a>, <a href="data/modi_per_banda.csv">modi_per_banda.csv</a>, <a href="data/tempi_per_banda.csv">tempi_per_banda.csv</a>, <a href="data/orari_entrata.csv">orari_entrata.csv</a>, <a href="data/uscite_top.csv">uscite_top.csv</a>, <a href="data/scambi_vicini.csv">scambi_vicini.csv</a>, <a href="data/od2016_bande_modi.csv">od2016_bande_modi.csv</a>, <a href="data/comuni.geojson">comuni.geojson</a> (confini semplificati dei comuni lombardi con i valori) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Sono tutti valori aggregati per comune: nessun dato su singole persone.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Matrici del pendolarismo 1991, 2001, 2011 (istat.it/dati-della-ricerca/matrici-del-pendolarismo) e 2021 per lavoro (pubblicata il 2/10/2025) e per studio (nota del 22/9/2026): ISTAT, licenza Creative Commons Attribution 4.0 (CC BY 4.0), scaricate il 1 novembre 2026 da <a href="https://www.istat.it/dati-della-ricerca/matrici-del-pendolarismo/">istat.it</a> e <a href="https://esploradati.istat.it/">esploradati.istat.it</a>. ISTAT, matrici delle distanze tra i comuni (aggiornamento 2021) e confini amministrativi 1/1/2021 (CC BY 4.0), scaricati il 1 novembre 2026. Regione Lombardia, &laquo;Matrice OD2016 &ndash; Passeggeri&raquo; (dati.lombardia.it, dataset tezw-ewgk), licenza Creative Commons CC0 (dedica al pubblico dominio), scaricata il 1 novembre 2026; citata come fonte, i dati non sono modificati. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Elaborazione: Milano in dati (somme per comune, per fascia di distanza e per anno).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,GJ=null,ANNI=[1991,2001,2011,2021];
+var ACC='#00695c',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var BANDE=['0-10 km','10-20 km','20-30 km','30-50 km','50-80 km','oltre 80 km','fuori Lombardia'];
+var BCOL=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29','#9a9a9a'];
+var MODI=[['auto_cond','Auto, conducente','#c26a1b'],['auto_pass','Auto, passeggero','#e6b27a'],['moto','Moto e scooter','#7a4a1f'],['ferro','Treno, tram, metro','#00695c'],['bus','Autobus','#62b0a4'],['piedi_bici_altro','A piedi, bici, altro','#9a9a9a']];
+var TEMPI=[['1','fino a 15 min','#d7ece7'],['2','16–30 min','#a6d3ca'],['3','31–60 min','#2b8a7d'],['4','oltre 60 min','#052e29']];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function pc(x,d){return nf(100*x,d==null?0:d)+'%'}
+function sg(x){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+f0(v)}
+function sgp(x,d){var v=Math.abs(x)*100;return (x<0?'−':(x>0?'+':''))+nf(v,d==null?0:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows,cls){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr'+(r.cls?' class="'+r.cls+'"':'')+'>'+r.c.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function sum(rows,f){var s=0;rows.forEach(function(r){s+=f(r)});return s}
+function lgd(items){return items.map(function(it){return '<span><i style="background:'+it[1]+'"></i>'+it[0]+'</span>'}).join('')}
+/* barre semplici: rows [{nm,sub,v,txt,col}] */
+function bars(id,rows,max){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.title||r.nm)+'">'+esc(r.nm)+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr">'+(r.parts?r.parts.map(function(p){return '<span class="fill" style="width:'+(p.v/max*100)+'%;background:'+p.c+'"></span>'}).join(''):'<span class="fill" style="width:'+(r.v/max*100)+'%;'+(r.col?'background:'+r.col:'')+'"></span>')+'</span><span class="v">'+r.txt+'</span></div>'}).join(''))
+}
+/* barre segmentate: rows [{nm,sub,parts:[{v,c,t}]}] percentuali sul totale della riga */
+function segs(id,rows){
+  setH(id,rows.map(function(r){
+    var tot=sum(r.parts,function(p){return p.v}); if(!tot)return '<div class="row"><span class="nm"><b>'+esc(r.nm)+'</b>'+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="sub">nessun dato</span></div>';
+    return '<div class="row"><span class="nm"><b>'+esc(r.nm)+'</b>'+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="bar" role="img" aria-label="'+esc(r.nm+': '+r.parts.map(function(p){return p.t+' '+pc(p.v/tot)}).join(', '))+'">'+r.parts.map(function(p){var w=p.v/tot*100;return '<span class="'+(p.lt?'lt':'')+'" style="width:'+w+'%;background:'+p.c+'" title="'+esc(p.t+': '+pc(p.v/tot,1))+'">'+(w>=7?Math.round(w)+'%':'')+'</span>'}).join('')+'</span></div>'}).join(''))
+}
+function lightCol(c){return ['#d7ece7','#a6d3ca','#e6b27a','#9a9a9a','#62b0a4'].indexOf(c)>=0}
+
+Promise.all([J('data/riepilogo.json'),J('data/comuni.geojson')]).then(function(a){
+  D=a[0];GJ=a[1];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mappa();quanti();origini();distanza();mezzi();tempo();esce();cambi();limiti();metodo();
+}
+function over60(y){var t=0,o=0;D.tempi.forEach(function(r){if(r.anno===y&&r.direzione==='entra'){t+=r.n;if(r.tempo==='4')o+=r.n}});return o/t}
+function uno(x){return x>0.3&&x<0.37?'uno su tre':'il '+pc(x)}
+function T(y){return D.totali[y]}
+function TM(y,m){return D.totali_per_motivo[y+'_'+m]}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var t21=T(2021),t11=T(2011),q=D.quota_di_fuori_lavoro,d=D.distanze;
+  var ass=D.assago[0];
+  var h='<p><b>Ogni giorno entrano a Milano circa '+f0(Math.round(t21.entra/1000)*1000)+' persone</b> (lavoro e studio, stima 2021; erano '+f0(Math.round(t11.entra/1000)*1000)+' nel censimento 2011). Ne escono circa '+f0(Math.round(t21.esce/1000)*1000)+': <b>per ogni milanese che va a lavorare o a studiare fuori ne entrano '+nf(t21.rapporto_entra_esce,1)+'</b>.</p>';
+  h+='<p><b>Un posto di lavoro su due a Milano è di una persona che abita altrove</b>: '+pc(q['2021'],1)+' nel 2021, '+pc(q['2011'],1)+' nel 2011, '+pc(q['1991'],1)+' nel 1991.</p>';
+  h+='<p><b>La mappa è quasi uguale da trent&rsquo;anni.</b> Metà dei pendolari abita a meno di '+f0(d['2021'].mediana_km)+' km di strada da Milano (era '+f0(d['1991'].mediana_km)+' nel 1991) e circa uno su nove a oltre 50 km. Nel 2011 <b>'+uno(over60(2011))+' ha dichiarato di impiegare più di un&rsquo;ora</b> per arrivare.</p>';
+  h+='<p><b>Un comune fa eccezione: Assago.</b> Ci vanno ogni giorno '+f0(ass[1]['2021'][1])+' milanesi, mentre solo '+f0(ass[1]['2021'][0])+' assaghesi vengono a Milano: &egrave; l&rsquo;unico comune vicino che riceve da Milano pi&ugrave; persone di quante gliene mandi, e lo era gi&agrave; nel 1991, nel 2001 e nel 2011.</p>';
+  h+='<p class="src">ISTAT, matrici del pendolarismo (1991, 2001, 2011 censimenti; 2021 stima con modello); distanze stradali ISTAT. Il dato del 2021 &egrave; una stima: vedi <a href="#limiti">Limiti dei dati</a>.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,FLY=null,YI=3,MET='e',SELC=null,MILANO=[45.4642,9.19];
+var BRK={e:[10,50,200,1000,3000],q:[1,3,10,20,35]};
+function colore(v,m){if(v==null||v===0)return '#e4e4e4';var b=BRK[m],i=0;while(i<b.length&&v>=b[i])i++;return SEQ[i===0?0:i]}
+function valore(p){return MET==='e'?p.e[YI]:p.q[YI]}
+function sty(f){var p=f.properties;if(p.i===15146)return {fillColor:'#000',fillOpacity:.06,color:'#000',weight:2.2};
+  var v=valore(p);return {fillColor:colore(v,MET),fillOpacity:.85,color:SELC===p.i?'#000':'#fff',weight:SELC===p.i?3:.6}}
+function tip(p){
+  if(p.i===15146)return '<b>Milano</b><br>destinazione di tutti questi spostamenti';
+  var h='<b>'+esc(p.n)+'</b> ('+esc(p.u)+')<br>'+f0(p.e[YI])+' persone vanno a Milano ('+ANNI[YI]+')';
+  if(p.q[YI]!=null)h+='<br>'+nf(p.q[YI],1)+'% dei pendolari del comune';
+  return h;
+}
+function mappa(){
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4,9.35],9);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(GJ,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tip(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  FLY=L.layerGroup();
+  var sel=el('sel-com'),h='<option value="">— scegli —</option>';
+  GJ.features.map(function(f){return f.properties}).filter(function(p){return p.i!==15146}).sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('[data-m]'),function(b){b.addEventListener('click',function(){MET=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  Array.prototype.forEach.call(document.querySelectorAll('[data-y]'),function(b){b.addEventListener('click',function(){YI=parseInt(b.getAttribute('data-y'),10);Array.prototype.forEach.call(document.querySelectorAll('[data-y]'),function(x){x.classList.toggle('on',x===b)});ricolora();if(SELC)scheda(SELC)})});
+  el('ck-fl').addEventListener('change',function(){linee()});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize()},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function ricolora(){
+  LAY.setStyle(sty);
+  var b=BRK[MET],h='';
+  for(var i=0;i<=b.length;i++){
+    var t=MET==='e'?(i===0?'meno di '+f0(b[0]):i===b.length?f0(b[i-1])+' o più':f0(b[i-1])+' – '+f0(b[i]-1)):(i===0?'meno dell’1%':i===b.length?b[i-1]+'% o più':b[i-1]+'% – '+(b[i]-0.1).toFixed(1).replace('.',',')+'%');
+    h+='<span><i style="background:'+SEQ[i]+'"></i>'+t+'</span>'}
+  h+='<span><i style="background:#e4e4e4"></i>nessuno</span>';
+  setH('lg-map',h);
+  setH('map-desc',MET==='e'?'Persone residenti nel comune che nel '+ANNI[YI]+' vanno ogni giorno a Milano per lavoro o studio. Nel 2021 sono '+f0(T(2021).entra)+' in tutto, da altri comuni.':'Su 100 persone del comune che vanno ogni giorno a lavorare o a studiare (compreso chi lo fa nello stesso comune), quante vanno a Milano. Anno '+ANNI[YI]+'.');
+  linee();
+}
+function linee(){
+  FLY.clearLayers();
+  if(!el('ck-fl').checked){if(MAP.hasLayer(FLY))MAP.removeLayer(FLY);return}
+  FLY.addTo(MAP);
+  var ps=GJ.features.slice().filter(function(f){return f.properties.i!==15146}).sort(function(a,b){return b.properties.e[YI]-a.properties.e[YI]}).slice(0,30);
+  var cen={};LAY.eachLayer(function(l){cen[l.feature.properties.i]=l.getBounds().getCenter()});
+  ps.forEach(function(f){var p=f.properties,c=cen[p.i];if(!c)return;
+    L.polyline([c,MILANO],{color:'#b85a0a',weight:.6+Math.sqrt(p.e[YI])/20,opacity:.6,interactive:false}).addTo(FLY)});
+}
+function scegli(i,zoom){SELC=i;el('sel-com').value=String(i);LAY.setStyle(sty);
+  LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:12})}});scheda(i)}
+function scheda(i){
+  var p=null;GJ.features.forEach(function(f){if(f.properties.i===i)p=f.properties});if(!p)return;
+  var h='<h3>'+esc(p.n)+' <span class="sub">('+esc(p.u)+', '+f0(p.p)+' abitanti nel 2021)</span></h3>';
+  if(p.i===15146){setH('scheda',h+'<p>Milano è il punto di arrivo di tutti i flussi sulla mappa.</p>');return}
+  h+='<div class="scroll"><table class="tab-min"><thead><tr><th>Anno</th><th class="r">Vanno a Milano</th><th class="r">Quota dei pendolari del comune</th><th class="r">Pendolari del comune (tutti)</th></tr></thead><tbody>';
+  ANNI.forEach(function(y,k){h+='<tr'+(k===YI?' class="hl"':'')+'><td>'+y+(y===2021?' (stima)':'')+'</td><td class="r"><b>'+f0(p.e[k])+'</b></td><td class="r">'+(p.q[k]==null?'':nf(p.q[k],1)+'%')+'</td><td class="r">'+(p.t[k]==null?'':f0(p.t[k]))+'</td></tr>'});
+  h+='</tbody></table></div><p class="sub">'+(p.k!=null?'Distanza stradale da Milano: '+f1(p.k)+' km, circa '+f0(p.m)+' minuti in auto con traffico (ISTAT). ':'')+'&laquo;Pendolari del comune&raquo; = persone residenti che vanno a lavorare o a studiare in un altro comune o nel proprio.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- quanti ---------- */
+function quanti(){
+  var t=D.totali,mx=t['2021'].entra*1.05;
+  setH('quanti-testo','<p>Nel 2021 entrano a Milano circa <b>'+f0(t['2021'].entra)+'</b> persone da altri comuni: '+f0(TM(2021,'lavoro').entra)+' per lavoro e '+f0(TM(2021,'studio').entra)+' per studio. Escono '+f0(t['2021'].esce)+' milanesi, e <b>'+f0(t['2021'].interno)+'</b> lavorano o studiano senza lasciare la città. Di giorno, per lavoro e studio, la città ha quindi circa <b>'+f0(t['2021'].saldo)+' persone in più</b>, pari al '+Math.round(100*t['2021'].saldo/1349930)+'% dei suoi 1.349.930 residenti (censimento 2021).</p><p>Il totale è sceso nel 2001 e poi è risalito: <b>il lavoro cresce (da '+f0(TM(1991,'lavoro').entra)+' a '+f0(TM(2021,'lavoro').entra)+', '+sgp(TM(2021,'lavoro').entra/TM(1991,'lavoro').entra-1,0)+'), lo studio cala (da '+f0(TM(1991,'studio').entra)+' a '+f0(TM(2021,'studio').entra)+', '+sgp(TM(2021,'studio').entra/TM(1991,'studio').entra-1,0)+')</b>.</p>');
+  bars('b-entra',ANNI.map(function(y){return {nm:y+(y===2021?' (stima)':''),parts:[{v:TM(y,'lavoro').entra,c:ACC},{v:TM(y,'studio').entra,c:'#62b0a4'}],txt:'<b>'+f0(T(y).entra)+'</b>'}}),mx);
+  setH('lg-entra',lgd([['Lavoro',ACC],['Studio','#62b0a4']]));
+  var q=D.quota_di_fuori_lavoro;
+  bars('b-quota',ANNI.map(function(y){return {nm:y+(y===2021?' (stima)':''),v:q[y],txt:'<b>'+pc(q[y],1)+'</b>',col:WARM}}),0.6);
+  var qs=D.quota_milanesi_fuori_lavoro;
+  bars('b-esce',ANNI.map(function(y){return {nm:y+(y===2021?' (stima)':''),v:qs[y],txt:'<b>'+pc(qs[y],1)+'</b>',col:'#8a4a10'}}),0.6);
+}
+
+/* ---------- origini ---------- */
+function vicini(){var n=0,n21=0;GJ.features.forEach(function(f){var p=f.properties;if(p.i!==15146&&p.k!=null&&p.k<=20&&p.e[0]>300){n++;if(p.e[3]<p.e[0])n21++}});return {n:n,n21:n21}}
+function origini(){
+  var G={};D.gruppi.forEach(function(r){G[r.gruppo]=G[r.gruppo]||{};G[r.gruppo][r.anno]=(G[r.gruppo][r.anno]||0)+r.n});
+  var ks=Object.keys(G).filter(function(k){return k!=='Non agganciato'}).sort(function(a,b){return (G[b][2021]||0)-(G[a][2021]||0)});
+  var tot=T(2021).entra,mx=G[ks[0]][2021];
+  bars('b-gruppi',ks.map(function(k){var a=G[k][2021]||0,b=G[k][1991]||0;return {nm:k,sub:'1991: '+f0(b),v:a,txt:'<b>'+f0(a)+'</b> <span class="sub">'+pc(a/tot,1)+'</span>'}}),mx);
+  var top=D.top.slice(0,15);
+  bars('b-top',top.map(function(r){return {nm:r.nome,sub:esc(r.uts)+' · '+(r.km!=null?f0(r.km)+' km':'')+' · 2011: '+f0(r.n['2011']),v:r.n['2021'],txt:'<b>'+f0(r.n['2021'])+'</b>'}}),top[0].n['2021']);
+  var gm=G['Resto della città metropolitana di Milano'],mb=G['Monza e Brianza'],pv=G['Pavia'],br=G['Brescia'];
+  setH('orig-testo','<p>Più della metà di chi entra ('+pc(gm[2021]/tot)+') abita in un altro comune della <b>città metropolitana di Milano</b>; un altro '+pc(mb[2021]/tot)+' viene da <b>Monza e Brianza</b>. Poi Varese ('+f0(G['Varese'][2021])+'), Pavia ('+f0(pv[2021])+'), Bergamo ('+f0(G['Bergamo'][2021])+') e Como ('+f0(G['Como'][2021])+'). Da fuori Lombardia arrivano '+f0(G['Piemonte'][2021]+G['Emilia-Romagna'][2021]+G['Altre regioni'][2021])+' persone ('+pc((G['Piemonte'][2021]+G['Emilia-Romagna'][2021]+G['Altre regioni'][2021])/tot,1)+'), soprattutto dal Piemonte ('+f0(G['Piemonte'][2021])+').</p><p>Le zone che crescono di più dal 1991 sono Brescia (da '+f0(br[1991])+' a '+f0(br[2021])+'), Pavia ('+sgp(pv[2021]/pv[1991]-1,0)+') e Monza e Brianza ('+sgp(mb[2021]/mb[1991]-1,0)+'); Cremona cala ('+sgp(G['Cremona'][2021]/G['Cremona'][1991]-1,0)+'). Tra i singoli comuni <b>'+esc(D.top[0].nome)+'</b> è primo in tutti e quattro gli anni, ma manda meno persone di un tempo: da '+f0(D.top[0].n['1991'])+' nel 1991 a '+f0(D.top[0].n['2021'])+' nel 2021 ('+sgp(D.top[0].n['2021']/D.top[0].n['1991']-1,0)+'). Entro 20 km di strada, '+vicini().n21+' comuni su '+vicini().n+' (quelli con più di 300 pendolari verso Milano nel 1991) ne mandano oggi meno che nel 1991.</p>');
+  table('tab-top',['Comune','Prov.','km','1991','2001','2011','2021','di cui lavoro 2021'],D.top.map(function(r){return {c:[esc(r.nome),esc(r.uts),r.km!=null?f0(r.km):'',f0(r.n['1991']),f0(r.n['2001']),f0(r.n['2011']),'<b>'+f0(r.n['2021'])+'</b>',f0(r.lav21)]}}));
+}
+
+/* ---------- distanza ---------- */
+function distanza(){
+  var rows=ANNI.map(function(y){
+    var tot=0,p={};D.bande.forEach(function(r){if(r.anno===y){p[r.banda]=(p[r.banda]||0)+r.n;tot+=r.n}});
+    return {nm:y+(y===2021?' (stima)':''),sub:'mediana '+f0(D.distanze[y].mediana_km)+' km',parts:BANDE.map(function(b,i){return {v:p[b]||0,c:BCOL[i],t:b,lt:lightCol(BCOL[i])}})}});
+  segs('s-dist',rows);setH('lg-dist',lgd(BANDE.map(function(b,i){return [b,BCOL[i]]})));
+  var d=D.distanze;
+  setH('dist-testo','<p>Metà di chi entra a Milano abita a meno di <b>'+f0(d['2021'].mediana_km)+' km</b> di strada (circa '+f0(d['2021'].mediana_min_strada)+' minuti in auto, secondo i tempi ISTAT); nel 1991 erano '+f0(d['1991'].mediana_km)+' km. La quota di chi viene da oltre 30 km è salita dal '+pc(d['1991'].quota_oltre_30km)+' al '+pc(d['2021'].quota_oltre_30km)+'; quella da oltre 50 km è ferma all&rsquo;'+pc(d['2021'].quota_oltre_50km)+' (circa '+f0(D.totali['2021'].entra*d['2021'].quota_oltre_50km/1000)+'.000 persone). Chi lavora a Milano e abita a oltre 50 km di strada era '+f0(d['1991'].lavoratori_oltre_50km)+' nel 1991 ed &egrave; '+f0(d['2021'].lavoratori_oltre_50km)+' nel 2021.</p><p>Il grosso dei pendolari sta tra 10 e 20 km (circa un terzo) e tra 30 e 50 km (un quarto): la cintura dei comuni intorno alla citt&agrave;, poi le province vicine.</p>');
+}
+
+/* ---------- mezzi ---------- */
+var MM='lavoro',MY=2011;
+function mezzi(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-mm]'),function(b){b.addEventListener('click',function(){MM=b.getAttribute('data-mm');Array.prototype.forEach.call(document.querySelectorAll('[data-mm]'),function(x){x.classList.toggle('on',x===b)});mezziDisegna()})});
+  Array.prototype.forEach.call(document.querySelectorAll('[data-my]'),function(b){b.addEventListener('click',function(){MY=parseInt(b.getAttribute('data-my'),10);Array.prototype.forEach.call(document.querySelectorAll('[data-my]'),function(x){x.classList.toggle('on',x===b)});mezziDisegna()})});
+  setH('lg-mezzi',lgd(MODI.map(function(m){return [m[1],m[2]]})));
+  var w=function(y,m){var a={};D.modi.forEach(function(r){if(r.anno===y&&r.motivo===m&&r.direzione==='entra'){a[r.modo]=(a[r.modo]||0)+r.n}});var t=sum(Object.keys(a),function(k){return a[k]});return {a:a,t:t}};
+  var a11=w(2011,'lavoro'),a01=w(2001,'lavoro'),a91=w(1991,'lavoro');
+  var car=function(x){return (x.a.auto_cond+x.a.auto_pass+(x.a.moto||0))/x.t},fe=function(x){return x.a.ferro/x.t};
+  setH('mezzi-testo','<p>Nel 2011, tra chi viene a Milano <b>per lavoro</b>, il '+pc(car(a11))+' usa l&rsquo;auto o la moto (da soli o in due) e il '+pc(fe(a11))+' treno, tram o metropolitana (2001: '+pc(car(a01))+' e '+pc(fe(a01))+'). Per <b>studio</b> il mezzo principale &egrave; il treno (due su tre). Il treno supera l&rsquo;auto solo per chi abita a pi&ugrave; di 80 km; vicino a Milano, dove arriva la metropolitana, i due sono quasi alla pari; <b>tra 10 e 30 km, dove abita la maggior parte dei pendolari, l&rsquo;auto vale circa il doppio del treno</b> (gi&agrave; nel 2001).</p>');
+  mezziDisegna();
+  var o=D.od2016,q=o.quote;
+  setH('od-testo','<p>La Regione Lombardia pubblica una matrice di tutti gli spostamenti nel giorno feriale medio del 2016, stimata con un modello di trasporto (dati aperti, CC0). Per chi va a Milano <b>per lavoro</b> d&agrave; ('+f0(o.tot.entra_lavoro)+' spostamenti): auto '+pc(q.lavoro.auto,0)+', moto '+pc(q.lavoro.moto,0)+', treno e metro '+pc(q.lavoro.ferro,0)+', autobus '+pc(q.lavoro.bus,0)+'; per <b>studio</b> ('+f0(o.tot.entra_studio)+'): treno '+pc(q.studio.ferro,0)+', auto '+pc(q.studio.auto,0)+', autobus '+pc(q.studio.bus,0)+'.</p><div class="warm"><b>Le due fonti non coincidono.</b> Per chi abita a oltre 80 km il modello regionale stima l&rsquo;auto al '+pc(odq('oltre 80 km'),0)+' dei viaggi di lavoro, mentre i censimenti (2011) davano il 43% tra auto e moto e il 48% per il treno. Anche il numero di lavoratori in entrata &egrave; molto diverso (490.000 spostamenti contro 368.000 persone nel censimento 2011). Sono cose diverse (spostamenti stimati da un modello contro risposte delle persone) e non le ho riconciliate: la stessa Regione avverte che la matrice &laquo;si presta ad analisi su dimensione provinciale o sovralocale&raquo;, non a singoli comuni. Per questo la pagina usa i censimenti come fonte principale.</div>');
+}
+function odq(b){var a={},t=0;D.od2016.righe.forEach(function(r){if(r.motivo==='lavoro'&&r.banda===b){a[r.modo]=(a[r.modo]||0)+r.spostamenti;t+=r.spostamenti}});return ((a.cond||0)+(a.pax||0)+(a.moto||0))/t}
+function mezziDisegna(){
+  var ord=BANDE.slice(0,6).concat(['fuori Lombardia']);
+  var rows=[];
+  function riga(nm,sub,dir,banda){
+    var a={};D.modi.forEach(function(r){if(r.anno===MY&&r.motivo===MM&&r.direzione===dir&&r.banda===banda)a[r.modo]=(a[r.modo]||0)+r.n});
+    return {nm:nm,sub:sub,parts:MODI.map(function(m){return {v:a[m[0]]||0,c:m[2],t:m[1],lt:lightCol(m[2])}})}}
+  ord.forEach(function(b){rows.push(riga(b==='fuori Lombardia'?'Fuori Lombardia':'Da '+b,'',  'entra',b))});
+  rows.push(riga('Dentro Milano','abitano e lavorano/studiano a Milano','interno','Milano'));
+  segs('s-mezzi',rows);
+  setH('mezzi-avviso',MY===1991?'<b>Attenzione al 1991.</b> L&rsquo;ISTAT ha corretto i dati del 1991 accettando il rientro giornaliero dalle province lontane solo per chi usa il treno e impiega pi&ugrave; di un&rsquo;ora: il treno a grandi distanze &egrave; quindi gonfiato. Non va confrontato con 2001 e 2011. In pi&ugrave; &laquo;treno, tram, metro&raquo; e &laquo;autobus&raquo; qui sono raggruppati come nel 1991.':'Il 2001 si riferisce a chi si &egrave; spostato il mercoled&igrave; prima del censimento; il 2011 a chi dichiara di spostarsi ogni giorno. I mezzi sono quelli dichiarati dalle persone (campione per i comuni sopra i 20.000 abitanti nel 2011).');
+}
+
+/* ---------- tempo ---------- */
+var TMO='tutti',TY=2011;
+function tempo(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tm]'),function(b){b.addEventListener('click',function(){TMO=b.getAttribute('data-tm');Array.prototype.forEach.call(document.querySelectorAll('[data-tm]'),function(x){x.classList.toggle('on',x===b)});tempoDisegna()})});
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ty]'),function(b){b.addEventListener('click',function(){TY=parseInt(b.getAttribute('data-ty'),10);Array.prototype.forEach.call(document.querySelectorAll('[data-ty]'),function(x){x.classList.toggle('on',x===b)});tempoDisegna()})});
+  setH('lg-tempo',lgd(TEMPI.map(function(m){return [m[1],m[2]]})));
+  var s={};ANNI.slice(0,3).forEach(function(y){var a={},t=0;D.tempi.forEach(function(r){if(r.anno===y&&r.direzione==='entra'){a[r.tempo]=(a[r.tempo]||0)+r.n;t+=r.n}});s[y]={o:a['4']/t,e:(a['1']+a['2'])/t}});
+  setH('tempo-testo','<p>Nel 2011 il <b>'+pc(s[2011].o)+'</b> di chi entra a Milano ha dichiarato di impiegare <b>pi&ugrave; di un&rsquo;ora</b> per l&rsquo;andata (nel 2001 il '+pc(s[2001].o)+', nel 1991 il '+pc(s[1991].o)+'), e solo il '+pc(s[2011].e)+' meno di mezz&rsquo;ora. Chi abita e lavora a Milano impiega meno di mezz&rsquo;ora nel 75% dei casi. Il tempo cresce con la distanza: da 10 a 20 km il 13% supera l&rsquo;ora, da 30 a 50 km il 45%, a pi&ugrave; di 80 km il 90%.</p>');
+  tempoDisegna();
+  var oo={};D.orari.forEach(function(r){if(r.motivo==='lavoro'){oo[r.anno]=oo[r.anno]||{};oo[r.anno][r.orario]=(oo[r.anno][r.orario]||0)+r.n}});
+  var cl=[['1','prima delle 7:15'],['2','7:15 – 8:14'],['3','8:15 – 9:14'],['4','dopo le 9:15']];
+  table('tab-orari',['Anno'].concat(cl.map(function(c){return c[1]})),[1991,2001,2011].map(function(y){var t=sum(Object.keys(oo[y]),function(k){return oo[y][k]});return {c:[String(y)].concat(cl.map(function(c){return pc(oo[y][c[0]]/t)}))}}));
+}
+function tempoDisegna(){
+  var ord=BANDE.slice(0,6).concat(['fuori Lombardia']);
+  function riga(nm,sub,dir,banda){
+    var a={};D.tempi.forEach(function(r){if(r.anno===TY&&(TMO==='tutti'||r.motivo===TMO)&&r.direzione===dir&&r.banda===banda)a[r.tempo]=(a[r.tempo]||0)+r.n});
+    return {nm:nm,sub:sub,parts:TEMPI.map(function(m){return {v:a[m[0]]||0,c:m[2],t:m[1],lt:m[0]==='1'||m[0]==='2'}})}}
+  var rows=ord.map(function(b){return riga(b==='fuori Lombardia'?'Fuori Lombardia':'Da '+b,'','entra',b)});
+  rows.push(riga('Dentro Milano','abitano e lavorano/studiano a Milano','interno','Milano'));
+  segs('s-tempo',rows);
+}
+
+/* ---------- chi esce ---------- */
+function esce(){
+  var u=D.uscite.slice(0,10);
+  bars('b-uscite',u.map(function(r){return {nm:r.nome,sub:'2011: '+f0(r.n['2011']),v:r.n['2021'],txt:'<b>'+f0(r.n['2021'])+'</b>',col:'#8a4a10'}}),u[0].n['2021']);
+  table('tab-scambi',['Comune','Vanno a Milano','Vengono da Milano','Vengono meno vanno'],D.scambi.slice(0,30).map(function(r){var a=r.entra['2021'],b=r.esce['2021'];return {cls:b>a?'hl':'',c:[esc(r.nome),f0(a),f0(b),sg(b-a)]}}));
+  var ass=D.assago[0][1],t=D.totali,qs=D.quota_milanesi_fuori_lavoro;
+  setH('esce-testo','<p>Anche se il flusso verso Milano è molto più grande, <b>'+pc(qs['2021'],0)+' dei milanesi che lavorano lo fa fuori Milano</b> (era il '+pc(qs['1991'],0)+' nel 1991). Le mete sono i comuni intorno, con sedi di imprese e uffici: Sesto San Giovanni (da '+f0(D.uscite[0].n['2011'])+' a '+f0(D.uscite[0].n['2021'])+' persone tra 2011 e 2021), San Donato Milanese, Assago, Segrate, Rozzano.</p><p><b>Assago è il caso più netto</b> (riga evidenziata): ci vanno '+f0(ass['2021'][1])+' milanesi e solo '+f0(ass['2021'][0])+' assaghesi vengono a Milano. Nel 1991 erano '+f0(ass['1991'][1])+' contro '+f0(ass['1991'][0])+'. Assago ha circa 9.000 abitanti. <span class="sub">Una possibile spiegazione (non misurata qui): i centri direzionali e commerciali intorno al Forum e a Milanofiori.</span></p><p class="sub">Gli studenti che da Milano studiano fuori città sono 3.686 nel 2011 e 10.143 nel 2021: un salto che può dipendere dal diverso metodo del 2021 e che non va preso alla lettera.</p>');
+}
+
+/* ---------- cambiamenti ---------- */
+function cambi(){
+  var d=D.distanze,q=D.quota_di_fuori_lavoro,qs=D.quota_milanesi_fuori_lavoro;
+  function tm(y){var t=0,o=0;D.tempi.forEach(function(r){if(r.anno===y&&r.direzione==='entra'){t+=r.n;if(r.tempo==='4')o+=r.n}});return t?pc(o/t):'n.d.'}
+  var rows=[
+   ['Entrano a Milano per lavoro',function(y){return f0(TM(y,'lavoro').entra)}],
+   ['Entrano a Milano per studio',function(y){return f0(TM(y,'studio').entra)}],
+   ['<b>Entrano a Milano (totale)</b>',function(y){return '<b>'+f0(T(y).entra)+'</b>'}],
+   ['Escono da Milano',function(y){return f0(T(y).esce)}],
+   ['Lavorano e studiano a Milano (stesso comune)',function(y){return f0(T(y).interno)}],
+   ['Posti di lavoro a Milano di non residenti',function(y){return pc(q[y],1)}],
+   ['Milanesi che lavorano fuori Milano',function(y){return pc(qs[y],1)}],
+   ['Distanza mediana di chi entra (km di strada)',function(y){return f0(d[y].mediana_km)}],
+   ['Chi entra da oltre 30 km',function(y){return pc(d[y].quota_oltre_30km)}],
+   ['Chi entra da oltre 50 km',function(y){return pc(d[y].quota_oltre_50km)}],
+   ['Chi impiega più di un’ora (dichiarato)',function(y){return y===2021?'n.d.':tm(y)}]
+  ];
+  setH('tab-cambi','<thead><tr><th></th>'+ANNI.map(function(y){return '<th class="r">'+y+(y===2021?' (stima)':'')+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td>'+ANNI.map(function(y){return '<td class="r">'+r[1](y)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>');
+  setH('cambi-testo','<p>In trent&rsquo;anni il quadro &egrave; rimasto sorprendentemente stabile: sempre intorno a 450&ndash;500.000 persone che entrano e 90&ndash;110.000 che escono, la stessa distanza mediana, le stesse zone di partenza. Cambia la composizione (pi&ugrave; lavoro, meno studio) e cresce la quota dei posti di lavoro occupati da non residenti.</p><p class="sub">Il passaggio 2011&ndash;2021 cambia anche il metodo di misura: vedi i limiti qui sotto prima di dire che &laquo;dal 2011 &egrave; cambiato qualcosa&raquo;.</p>');
+}
+
+/* ---------- limiti e metodo ---------- */
+function limiti(){
+  var c=D.controlli;
+  var L=[
+   '<b>Il 2021 non è un conteggio ma una stima.</b> L&rsquo;ISTAT la costruisce con un modello che unisce l&rsquo;indagine del censimento permanente, gli archivi INPS e fiscali e le distanze tra comuni; i flussi tra province sono stimati con un modello statistico e poi distribuiti tra i comuni. Per le coppie di comuni con pochi pendolari i numeri sono ricostruiti, non osservati. I totali di Milano sono plausibili; i singoli comuni piccoli meno.',
+   '<b>Il luogo di lavoro 2021 viene dagli archivi</b>, cio&egrave; &egrave; quello registrato dal datore di lavoro: lo smart working e chi lavora in una sede diversa da quella registrata non si vedono. Nei censimenti 1991&ndash;2011 &egrave; quello dichiarato dalla persona.',
+   '<b>Definizioni diverse.</b> Nel 2021 contano le persone che si spostano <i>almeno tre giorni a settimana</i>; nei censimenti chi dichiara di spostarsi <i>ogni giorno</i> (nel 2001: chi lo ha fatto il mercoled&igrave; precedente). Nel 2021 gli studenti escludono chi lavora; nei censimenti ognuno conta per il motivo dichiarato.',
+   '<b>Mezzi, orario e durata ci sono solo per 1991, 2001, 2011</b>, e sono dichiarati dalle persone. Il 2011 per i comuni sopra i 20.000 abitanti &egrave; una stima da campione.',
+   '<b>Il 1991 ha una correzione</b> dell&rsquo;ISTAT sul rientro giornaliero dalle province lontane (solo treno e pi&ugrave; di un&rsquo;ora): i mezzi e le distanze lunghe del 1991 non sono confrontabili.',
+   '<b>Persone, non spostamenti.</b> Ogni persona conta una volta (l&rsquo;andata). Chi usa pi&ugrave; mezzi conta per quello dichiarato come principale. Studenti fuori sede e domiciliati non risultano pendolari se risiedono altrove; turisti e chi viene a Milano per altri motivi non ci sono.',
+   '<b>Comuni al 2021.</b> I codici dei comuni dei censimenti precedenti sono stati portati ai confini 2021: lo 0,2% dei flussi in entrata (comuni fusi dopo il censimento) non &egrave; stato agganciato e non compare sulla mappa, ma &egrave; nei totali.',
+   '<b>Distanze e tempi stradali sono dell&rsquo;ISTAT</b> (grafo stradale 2020, con traffico): non sono le durate dichiarate n&eacute; i tempi in treno. Per chi abita fuori Lombardia la distanza non &egrave; calcolata.',
+   '<b>La matrice regionale 2016 &egrave; un modello</b> e d&agrave; risposte diverse dai censimenti (vedi la sezione sui mezzi). Una matrice regionale &laquo;2020&raquo; non esiste come dato misurato: c&rsquo;&egrave; solo uno scenario.',
+   '<b>Non ci sono dati dopo il 2021</b> n&eacute; sul lavoro agile post-Covid.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var M=[
+   'Le matrici ISTAT 1991, 2001, 2011 sono file di milioni di righe (comune di residenza, comune di destinazione, motivo, mezzo, orario, durata). Un programma le legge, tiene solo le righe con Milano da un lato (come origine o come destinazione) e somma. I totali nazionali dei file coincidono con quelli dichiarati dall&rsquo;ISTAT (1991: '+f0(27540213)+' persone; 2001: '+f0(c0('2001_tutti'))+'; 2011: '+f0(c0('2011_tot'))+'; 2021: 19.565.808 lavoro + 9.279.329 studio).',
+   '1991: &laquo;studio&raquo; = condizione &laquo;studente o altro&raquo; (non esiste la distinzione); 2001 e 2011: motivo dichiarato. Nel 2001 i totali includono anche chi quel mercoled&igrave; non si &egrave; spostato (il 3,9%); per mezzo e durata solo chi si &egrave; spostato.',
+   'Le fasce di distanza usano i km stradali ISTAT dal comune di residenza a Milano (1.506 comuni lombardi). Le mediane sono calcolate sul numero di persone di ogni comune.',
+   'I mezzi sono raggruppati in 6 classi uguali nei tre censimenti: auto conducente, auto passeggero, moto, treno-tram-metro, autobus (anche aziendale e scolastico), a piedi-bici-altro. Le quote escludono chi non ha indicato il mezzo (3% nel 1991).',
+   'La mappa usa i confini ISTAT generalizzati dei 1.506 comuni lombardi al 1/1/2021, semplificati. La &laquo;quota del comune&raquo; = persone che vanno a Milano divise per tutti i pendolari residenti nel comune (compresi quelli che restano nel comune).',
+   'La matrice regionale OD 2016 (Regione Lombardia) &egrave; stata filtrata sulle righe con le 16 zone di Milano da un lato; i viaggi sono sommati su tutte le ore. Le zone grandi (citt&agrave; divise in settori) sono ricondotte al comune.',
+   'Programmi e passaggi: cartella <code>pendolari/</code> del progetto (<code>scripts/</code>, <code>NOTE.md</code>, <code>STATO.md</code>); questa pagina &egrave; prodotta da <code>pendolari/scripts/pagina.py</code>.'
+  ];
+  function c0(k){return D.controlli[k]}
+  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>
