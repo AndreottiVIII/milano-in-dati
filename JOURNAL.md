@@ -2669,3 +2669,8 @@ python -I scripts\inventario.py <cartella censimenti>
 - Perimetro "nucleo" scelto a mano (regole nel programma): 47 progetti, 240,7 milioni finanziati, 61% pagati; Lorenteggio-Giambellino 98,5 milioni, Gratosoglio 54,4; Quarto Oggiaro nessun progetto nel nucleo. Sorpresa: del PINQuA a Milano (223,7 milioni) solo il 57% va a edifici di case popolari; il progetto più grande (via dei Giaggioli, MM) ha fine prevista dopo il 30/6/2026.
 - Correzione del coordinatore: alla frase sul registro dei CUP (139 progetti, 2,0 miliardi di costo dichiarato, solo 11 nei dati di pagamento) aggiunto che il registro non dice come sono finanziati e che il costo non è un finanziamento.
 - Limiti dei dati: importi di natura diversa tra fonti; pagato non vuol dire finito; quartiere ricavato dal testo (34 milioni non localizzati); niente dati dopo il 13/6/2026.
+
+## 61. Il mio quartiere ideale
+
+- 2026-11-01 notte — Pagina `docs/quartiere-ideale/` (programma `quartiere-ideale/scripts/pagina.py`), voluta da Davide; idea da Opportunity Atlas e Amsterdam. Legge solo `docs/quartiere/data/schede.json`.
+- 9 criteri a scelta (parchi, alberi, poco cemento, case a prezzo basso — stima OMI —, servizi a 15 minuti, metrò, tranquillità o vita in strada, residenti giovani), percentili tra 70 NIL ammessi (esclusi parchi e NIL sotto 3.000 residenti), punteggio medio pesato. La cittadinanza non è un criterio, per scelta. Un gioco con dati veri, non un consiglio: scritto in pagina.

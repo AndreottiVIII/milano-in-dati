@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Il mio quartiere ideale</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2;--b:#c26a1b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:1100px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em;color:var(--acc);text-transform:uppercase;letter-spacing:.03em}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp ul{margin:.3em 0;padding-left:1.2em} .surp li{margin:.35em 0}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.25em 0}
+.map{height:56vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 12px;border-radius:14px;max-width:100%;cursor:pointer}
+.ctl button:hover{border-color:var(--acc)}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.num-ic{background:#111;color:#fff;border:2px solid #fff;border-radius:50%;width:22px;height:22px;line-height:18px;text-align:center;font:700 12px system-ui,Arial,sans-serif}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}
+.grid>*{min-width:0}
+.right{position:sticky;top:8px}
+.sl{border-top:1px solid var(--line);padding:8px 0}
+.sl .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sl label{font-weight:600;font-size:.98rem}
+.sl .val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--acc);white-space:nowrap}
+.sl input[type=range]{width:100%;margin:2px 0;accent-color:var(--acc);height:28px}
+.sl .sp{font-size:.8rem;color:var(--mut);line-height:1.3}
+.pill{display:inline-block;font-size:.74rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin:0 4px 2px 0;white-space:nowrap}
+.pill.g{border-color:#7a9a95;color:#37574f;background:var(--soft)}
+.live2{display:none;position:sticky;top:0;z-index:5;margin:.4em 0}
+.live{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.top10{list-style:none;margin:0;padding:0}
+.card{border:1px solid var(--line);padding:10px 12px;margin:.6em 0;background:#fff}
+.card .hd{display:flex;gap:10px;align-items:flex-start}
+.card .rk{flex:none;width:28px;height:28px;border-radius:50%;background:#111;color:#fff;font-weight:700;text-align:center;line-height:28px;font-size:.9rem}
+.card .nm{font-weight:700;font-size:1.1rem;line-height:1.25;min-width:0;overflow-wrap:anywhere}
+.card .nm .sub{display:block;font-weight:400}
+.card .sc{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.card .sc b{font-size:1.3rem;color:var(--acc)} .card .sc span{font-size:.75rem;color:var(--mut);display:block}
+.bar{position:relative;height:8px;background:#ececec;margin:6px 0} .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
+.why{margin:.3em 0;padding-left:1.1em;font-size:.92rem} .why li{margin:.25em 0}
+.why .sm{display:block;font-size:.8rem;color:var(--mut)}
+.mis{font-size:.82rem;color:var(--warm);margin:.3em 0}
+.lk{font-size:.85rem;margin-top:4px}
+details{margin:.3em 0} summary{cursor:pointer;color:var(--acc);font-size:.85rem}
+details table{border-collapse:collapse;font-size:.82rem;margin:.4em 0;width:100%} details td,details th{border-top:1px solid var(--line);padding:3px 6px 3px 0;text-align:left;vertical-align:top} details th{font-weight:600;color:var(--mut)}
+td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:900px){.live2{display:block}.grid{grid-template-columns:minmax(0,1fr)}.right{position:static}}
+@media(max-width:620px){.card .nm{font-size:1rem}.card .sc b{font-size:1.15rem}}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Il mio quartiere ideale</h1>
+<p>Che cosa conta per te in un quartiere? Il verde, il prezzo delle case, la metropolitana, la vita in strada? Muovi i cursori da 0 (non conta) a 5 (conta moltissimo): la pagina mette in fila i quartieri di Milano in base a quanto somigliano a quello che hai chiesto, sulla mappa e in una classifica dei primi 10. &Egrave; un gioco con dati veri, non un consiglio per scegliere casa.</p>
+
+<div class="grid">
+<div class="left">
+<h2 id="criteri-h" style="margin-top:.6em">Che cosa conta per te</h2>
+<div class="live live2" id="live2" aria-live="off"></div>
+<div class="ctl"><button type="button" id="b-base">Valori di partenza</button><button type="button" id="b-zero">Azzera tutto</button></div>
+<div id="sliders"></div>
+<p class="sub">Scala: 0 non conta · 1 poco · 3 abbastanza · 5 moltissimo. I due cursori su bar e locali si escludono: se ne alzi uno, l&rsquo;altro torna a zero. Le scelte restano nell&rsquo;indirizzo della pagina: puoi copiarlo e mandarlo a qualcuno.</p>
+</div>
+<div class="right">
+<h2 id="mappa-h" style="margin-top:.6em">I quartieri che ti somigliano</h2>
+<div class="live" id="live" aria-live="off">Caricamento&hellip;</div>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorata in base alla somiglianza con il profilo scelto; l'elenco dei primi dieci è sotto la mappa"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors; confini dei quartieri: Comune di Milano (ds964, CC BY). Clic su un quartiere per vederne il dettaglio.</p>
+</div>
+</div>
+
+<div id="sel"></div>
+
+<h2 id="top-h">I primi 10</h2>
+<ol class="top10" id="top10"><li class="sub">Caricamento&hellip;</li></ol>
+<details id="tutti"><summary>Tutta la classifica</summary><div id="tutti-c"></div></details>
+
+<h2 id="come">Come funziona</h2>
+<div class="surp"><ul id="come-lista"></ul></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<footer>
+<p><b>Da dove vengono i numeri.</b> Tutti i valori vengono dalla pagina <a href="../quartiere/">Il tuo quartiere</a>, che li prende a sua volta dalle altre pagine del sito, ognuna con la sua fonte e la sua licenza. Il file che alimenta questa pagina &egrave; <a href="data/criteri.json">data/criteri.json</a>: per ogni criterio e ogni quartiere il valore e il suo posto (percentile) tra i quartieri ammessi; per ogni criterio il file e il campo di origine.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,MAP=null,LAY={},MARK=null,NIL={},CR={},W={},SEL=null,RES=null;
+var BASE={parchi:3,prezzo:3,servizi:3,metro:2};
+var RAMP=['#00504a','#2a8a7b','#6fb8ac','#b4dad3','#e3f1ee'];
+var SCALA=['non conta','poco','così così','abbastanza','molto','moltissimo'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function fmt(c,v){
+  if(v==null)return '';
+  if(c.fmt==='int')return f0(v);
+  if(c.fmt==='eur')return '€ '+f0(v);
+  if(c.fmt==='pct')return nf(v,c.dec)+'%';
+  return nf(v,c.dec);
+}
+function unitOf(c){if(c.fmt==='eur')return /m²/.test(c.unita)?'al m²':'';return c.fmt==='pct'?'':c.unita}
+function valTxt(c,v){var u=unitOf(c);return fmt(c,v)+(u?' '+u:'')}
+function good(c,p){return c.verso>0?p:1-p}
+
+/* ---------- pesi e indirizzo ---------- */
+function leggiHash(){
+  var h=location.hash.replace(/^#/,'');if(!h)return null;
+  var o={},any=false;
+  h.split('&').forEach(function(p){var kv=p.split('=');if(CR[kv[0]]){var v=parseInt(kv[1],10);if(v>=0&&v<=5){o[kv[0]]=v;any=true}}});
+  return any?o:null;
+}
+function scriviHash(){
+  var p=[];D.criteri.forEach(function(c){if(W[c.id]>0)p.push(c.id+'='+W[c.id])});
+  try{history.replaceState(null,'',location.pathname+location.search+(p.length?'#'+p.join('&'):''))}catch(e){}
+}
+function impostaPesi(o){D.criteri.forEach(function(c){W[c.id]=o[c.id]||0})}
+
+/* ---------- calcolo ---------- */
+function calcola(){
+  var tot=0;D.criteri.forEach(function(c){tot+=W[c.id]});
+  var rows=[];
+  D.nil.forEach(function(n){
+    if(!n.ok){return}
+    var num=0,wav=0,mis=[],g={};
+    D.criteri.forEach(function(c){
+      var w=W[c.id];if(!w)return;
+      var d=n.d[c.id];
+      if(!d){mis.push(c);return}
+      var gg=good(c,d[1]);g[c.id]=gg;num+=w*gg;wav+=w;
+    });
+    var cov=tot?wav/tot:0;
+    rows.push({n:n,score:wav?100*num/wav:null,cov:cov,mis:mis,g:g,ranked:wav>0&&cov>=.5});
+  });
+  var ranked=rows.filter(function(r){return r.ranked}).sort(function(a,b){return b.score-a.score||a.n.nome.localeCompare(b.n.nome,'it')});
+  ranked.forEach(function(r,i){r.rank=i+1});
+  var by={};rows.forEach(function(r){by[r.n.id]=r});
+  return {tot:tot,rows:rows,ranked:ranked,by:by};
+}
+function perche(r){
+  var L=[];
+  D.criteri.forEach(function(c){
+    if(!W[c.id]||r.g[c.id]==null)return;
+    L.push({c:c,s:W[c.id]*r.g[c.id],g:r.g[c.id]});
+  });
+  L.sort(function(a,b){return b.s-a.s||b.g-a.g});
+  return L.slice(0,3);
+}
+
+/* ---------- schede ---------- */
+function rigaPerche(x,n){
+  var c=x.c,d=n.d[c.id],h='<li><b>'+esc(c.et)+'</b>: '+esc(valTxt(c,d[0]));
+  var sm=[];
+  if(c.citta!=null)sm.push('Milano: '+valTxt(c,c.citta));
+  sm.push('meglio di '+Math.round(100*x.g)+' quartieri su 100');
+  if(c.stima==='omi')sm.push('stima');
+  return h+'<span class="sm">'+esc(sm.join(' · '))+'</span></li>';
+}
+function dettaglio(r){
+  var h='<details><summary>Tutti i criteri scelti</summary><table><tr><th>Criterio</th><th class="r">Peso</th><th class="r">Valore</th><th class="r">Meglio di (quartieri su 100)</th></tr>';
+  D.criteri.forEach(function(c){
+    if(!W[c.id])return;
+    var d=r.n.d[c.id];
+    h+='<tr><td>'+esc(c.et)+'</td><td class="r">'+W[c.id]+'</td>'+(d?'<td class="r">'+esc(valTxt(c,d[0]))+'</td><td class="r">'+Math.round(100*good(c,d[1]))+' su 100</td>':'<td class="r" colspan="2"><i>dato mancante</i></td>')+'</tr>';
+  });
+  return h+'</table></details>';
+}
+function scheda(r,mostraMotivo){
+  var n=r.n,h='<div class="card"><div class="hd">';
+  if(r.rank&&r.rank<=10)h+='<div class="rk">'+r.rank+'</div>';
+  h+='<div class="nm">'+esc(n.nome)+'<span class="sub">Municipio '+n.municipio+' · '+f0(n.residenti)+' residenti (2025)'+(r.rank?' · '+r.rank+'° su '+RES.ranked.length:'')+'</span></div>';
+  if(r.score!=null)h+='<div class="sc"><b>'+Math.round(r.score)+'</b><span>su 100</span></div>';
+  h+='</div>';
+  if(r.score!=null)h+='<div class="bar" aria-hidden="true"><i style="width:'+r.score.toFixed(1)+'%"></i></div>';
+  if(!r.ranked){
+    h+='<div class="mis">'+(r.score==null?'Nessun criterio con peso da calcolare.':'Fuori classifica: per questo profilo mancano i dati di '+r.mis.map(function(c){return esc(c.et.toLowerCase())}).join(', ')+', cioè più della metà del peso scelto.')+'</div>';
+  }
+  var p=perche(r);
+  if(p.length)h+='<div class="sub" style="margin-top:6px">Perché somiglia al tuo profilo:</div><ul class="why">'+p.map(function(x){return rigaPerche(x,n)}).join('')+'</ul>';
+  if(r.mis.length){
+    var tot=D.criteri.filter(function(c){return W[c.id]>0}).length;
+    h+='<div class="mis"><b>Dato mancante:</b> '+r.mis.map(function(c){return esc(c.et)}).join(', ')+'. Il punteggio è calcolato sugli altri '+(tot-r.mis.length)+' criteri su '+tot+'.</div>';
+  }
+  h+=dettaglio(r);
+  h+='<div class="lk"><a href="../quartiere/#nil='+n.id+'">Scheda completa del quartiere</a></div></div>';
+  return h;
+}
+function schedaEsclusa(n){
+  return '<div class="card"><div class="hd"><div class="nm">'+esc(n.nome)+'<span class="sub">Municipio '+n.municipio+' · '+(n.residenti?f0(n.residenti)+' residenti (2025)':'quasi nessun residente')+'</span></div></div><div class="mis">Non è in classifica: '+esc(n.motivo)+'. I rapporti per abitante non sono affidabili.</div><div class="lk"><a href="../quartiere/#nil='+n.id+'">Scheda completa del quartiere</a></div></div>';
+}
+
+/* ---------- disegno ---------- */
+function classe(r){return Math.min(4,Math.floor(5*(r.rank-1)/RES.ranked.length))}
+function stile(f){
+  var i=f.properties.i,n=NIL[i],st={color:'#555',weight:1,fillOpacity:.8};
+  if(!n.ok){st.fillColor='#d6d6d6';st.fillOpacity=.5;return st}
+  var r=RES&&RES.by[i];
+  if(!r||!r.ranked){st.fillColor='#ececec';st.fillOpacity=.6;st.dashArray='3 3';}
+  else st.fillColor=RAMP[classe(r)];
+  if(r&&r.rank&&r.rank<=10){st.color='#000';st.weight=2.5}
+  if(SEL===i){st.color='#c26a1b';st.weight=4}
+  return st;
+}
+function disegna(){
+  RES=calcola();
+  var rk=RES.ranked;
+  if(LAY.nil){LAY.nil.setStyle(stile);LAY.nil.eachLayer(function(l){var i=l.feature.properties.i;if(SEL===i)l.bringToFront()})}
+  if(MARK){MARK.clearLayers();
+    LAY.nil.eachLayer(function(l){
+      var r=RES.by[l.feature.properties.i];
+      if(r&&r.rank&&r.rank<=10)L.marker(l.getBounds().getCenter(),{interactive:false,keyboard:false,icon:L.divIcon({className:'',html:'<div class="num-ic">'+r.rank+'</div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(MARK);
+    });
+  }
+  var live=el('live'),top10=el('top10');var l2=el('live2');
+  if(!RES.tot){
+    live.innerHTML='Metti almeno un cursore sopra lo zero per vedere la classifica.';
+    top10.innerHTML='<li class="sub">Nessun criterio scelto.</li>';el('tutti-c').innerHTML='';
+  }else{
+    live.innerHTML='Primi tre adesso: <b>'+rk.slice(0,3).map(function(r){return esc(r.n.nome)}).join('</b>, <b>')+'</b>.';
+    top10.innerHTML=rk.slice(0,10).map(function(r){return '<li>'+scheda(r)+'</li>'}).join('');
+    el('tutti-c').innerHTML='<table><tr><th>#</th><th>Quartiere</th><th class="r">Punteggio</th></tr>'+rk.map(function(r){return '<tr><td>'+r.rank+'</td><td>'+esc(r.n.nome)+(r.mis.length?' <span class="pill">dato mancante</span>':'')+'</td><td class="r">'+Math.round(r.score)+'</td></tr>'}).join('')+'</table>'+
+      (RES.rows.length>rk.length?'<p class="sub">Fuori classifica per dati mancanti: '+RES.rows.filter(function(r){return !r.ranked}).map(function(r){return esc(r.n.nome)}).join(', ')+'.</p>':'');
+  }
+  l2.innerHTML=live.innerHTML+' <a href="#top-h">Vai ai primi 10</a>';
+  mostraSel();
+  legenda();
+  scriviHash();
+}
+function mostraSel(){
+  var b=el('sel');
+  if(SEL==null){b.innerHTML='';return}
+  var n=NIL[SEL];
+  b.innerHTML='<h2>Il quartiere scelto sulla mappa</h2>'+(n.ok?(RES.by[SEL]?scheda(RES.by[SEL]):''):schedaEsclusa(n));
+}
+function legenda(){
+  var K=RES.ranked.length,h='';
+  if(RES.tot&&K){
+    h+='<span>Somiglia di più</span>'+RAMP.map(function(c){return '<span><i style="background:'+c+'"></i></span>'}).join('')+'<span>di meno</span>';
+    h+='<span><i style="background:#ececec;border-style:dashed"></i>fuori classifica (dati mancanti)</span>';
+  }
+  h+='<span><i style="background:#d6d6d6"></i>non ammesso (meno di 3.000 residenti, parchi)</span><span><i style="background:#fff;border:2px solid #000"></i>primi 10</span>';
+  el('lg-map').innerHTML=h;
+}
+
+/* ---------- slider ---------- */
+function slider(c){
+  var h='<div class="sl"><div class="top"><label for="s-'+c.id+'">'+esc(c.et)+'</label><span class="val" id="v-'+c.id+'"></span></div>';
+  h+='<input type="range" min="0" max="5" step="1" id="s-'+c.id+'" value="'+(W[c.id]||0)+'">';
+  var tags='';
+  if(c.stima==='omi')tags+='<span class="pill g">stima dalle quotazioni OMI</span>';
+  h+='<div class="sp">'+esc(c.spieg)+' <span class="sub">('+esc(String(c.anno))+')</span>'+(tags?'<br>'+tags:'')+'</div></div>';
+  return h;
+}
+function aggVal(c){
+  var v=W[c.id];
+  el('v-'+c.id).textContent=v+' · '+SCALA[v];
+  var s=el('s-'+c.id);s.value=String(v);s.setAttribute('aria-valuetext',v+' su 5, '+SCALA[v]);
+}
+function costruisciSlider(){
+  el('sliders').innerHTML=D.criteri.map(slider).join('');
+  D.criteri.forEach(function(c){
+    el('s-'+c.id).addEventListener('input',function(){
+      W[c.id]=parseInt(this.value,10);
+      if(c.gruppo&&W[c.id]>0)D.criteri.forEach(function(o){if(o.id!==c.id&&o.gruppo===c.gruppo){W[o.id]=0;aggVal(o)}});
+      aggVal(c);disegna();
+    });
+    aggVal(c);
+  });
+}
+function tuttiVal(){D.criteri.forEach(aggVal)}
+
+/* ---------- testi ---------- */
+function testi(){
+  var nrk=D.n_ammessi,al=D.criteri.filter(function(c){return c.id==='alberi'})[0];
+  el('come-lista').innerHTML=[
+   '<b>I criteri.</b> Sono '+D.criteri.length+', scelti tra gli indicatori più solidi di <a href="../quartiere/">Il tuo quartiere</a>. Ognuno ha un peso da 0 a 5 che decidi tu.',
+   '<b>Il posto, non il valore.</b> Per ogni criterio ogni quartiere riceve un posto da 0 a 100 tra i '+nrk+' quartieri ammessi (100 = il migliore per quel criterio). Si usa il posto e non il numero, così un criterio con numeri enormi (euro, alberi) non pesa più di uno con numeri piccoli.',
+   '<b>Il punteggio.</b> È la media dei posti, pesata con i tuoi cursori. 100 vorrebbe dire il primo quartiere in tutti i criteri che hai scelto: nessuno ci arriva, perché i criteri spesso si contraddicono (le case costano meno dove c&rsquo;è meno metropolitana).',
+   '<b>Dati mancanti.</b> Se per un quartiere manca un dato che hai scelto (per esempio gli alberi, che il Comune conta solo nei quartieri con almeno 5.000 abitanti), il punteggio è calcolato sugli altri criteri e la scheda lo dice. Se mancano dati per più della metà del peso, il quartiere resta fuori classifica e sulla mappa è tratteggiato.',
+   '<b>Chi è escluso.</b> I quartieri con meno di 3.000 residenti e i parchi e le aree verdi quasi senza abitanti non entrano: con così poche persone i rapporti per abitante oscillano troppo. Sulla mappa sono in grigio.',
+   '<b>Che cosa non c&rsquo;è.</b> La cittadinanza o l&rsquo;origine dei residenti non è un criterio e non lo sarà: i quartieri non si mettono in classifica per chi ci abita.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join('');
+  el('limiti-lista').innerHTML=[
+   '<b>È un gioco, non un consiglio.</b> Il punteggio dice quanto un quartiere somiglia a quello che hai chiesto, secondo pochi numeri. Non dice se ci si vive bene.',
+   '<b>Anni e fonti diversi.</b> I dati sono del 2025 e del 2026 e vengono dal Comune, dall&rsquo;Agenzia delle Entrate, da OpenStreetMap e da altri: non fotografano lo stesso momento e contano le cose in modi diversi.',
+   '<b>I prezzi delle case sono stime.</b> Vengono dalle quotazioni OMI dell&rsquo;Agenzia delle Entrate, che sono per zona e non per quartiere: sono portate al quartiere con i civici. Non sono prezzi di annunci. Il costo dell&rsquo;affitto qui non c&rsquo;è: la scheda ha solo come è cambiato negli anni, che non serve a questo scopo.',
+   '<b>La media del quartiere nasconde le differenze.</b> Dentro un quartiere possono esserci strade tranquille e strade piene di locali, case care e case economiche. I numeri sono medie.',
+   '<b>I locali sono uno solo.</b> «Tranquillità» e «Vita in strada» usano lo stesso numero (bar, ristoranti e locali per abitante), letto in due versi: pochi locali o tanti. Non misurano il rumore.',
+   '<b>Verde.</b> Gli alberi sono solo quelli gestiti dal Comune: mancano giardini e cortili privati. Il verde ha tre criteri diversi (parchi vicini, alberi, poco cemento) che si sovrappongono un po&rsquo;.',
+   '<b>Scuole e giovani.</b> Le scuole non hanno un criterio a sé, perché i dati disponibili dicono quanti alunni ci sono e non quanto sono buone o vicine; contano però dentro i «servizi a 15 minuti». «Residenti più giovani» usa l&rsquo;età media di tutti i residenti.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+
+/* ---------- avvio ---------- */
+function init(){
+  D.nil.forEach(function(n){NIL[n.id]=n});
+  D.criteri.forEach(function(c){CR[c.id]=c});
+  var h=leggiHash();impostaPesi(h||BASE);
+  testi();costruisciSlider();
+  el('b-base').addEventListener('click',function(){impostaPesi(BASE);tuttiVal();disegna()});
+  el('b-zero').addEventListener('click',function(){impostaPesi({});tuttiVal();disegna()});
+  window.addEventListener('hashchange',function(){var o=leggiHash();if(o){impostaPesi(o);tuttiVal();disegna()}});
+  MAP=L.map('map',{preferCanvas:false}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY.nil=L.geoJSON(NF,{style:stile,onEachFeature:function(f,l){
+    l.bindTooltip(function(){
+      var i=f.properties.i,n=NIL[i],r=RES&&RES.by[i];
+      if(!n.ok)return esc(n.nome)+'<br>non in classifica: '+esc(n.motivo);
+      if(!r||r.score==null)return esc(n.nome);
+      return esc(n.nome)+'<br>'+(r.ranked?r.rank+'° su '+RES.ranked.length+' · punteggio '+Math.round(r.score):'fuori classifica: troppi dati mancanti');
+    },{sticky:true});
+    l.on('click',function(){SEL=f.properties.i;disegna();var s=el('sel');if(window.innerWidth<=900&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'start'})});
+  }}).addTo(MAP);
+  MARK=L.layerGroup().addTo(MAP);
+  MAP.fitBounds(LAY.nil.getBounds());
+  disegna();
+}
+
+Promise.all([J('data/criteri.json'),J('../quartiere/data/nil.geojson')]).then(function(a){
+  D=a[0];NF=a[1];
+  try{init()}catch(e){console.error(e);el('live').innerHTML='<b>Errore nella pagina.</b> '+esc(e.message)}
+}).catch(function(e){el('live').innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+})();
+</script></body></html>

@@ -72,6 +72,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 58 | Quanto si vive | Online (stima da modello) |
 | 59 | Case vuote | Online |
 | 60 | Soldi per i quartieri popolari | Online |
+| 61 | Il mio quartiere ideale | Online |
 | — | In corso | Pagine di scuole di domani, popolazione (3 pagine), quartieri che cambiano, pollini; fase 1 di pendolari, chi governa Milano, parcheggi, incroci pericolosi, statue, botteghe storiche, antenne, pollini, voto e reddito, quartieri che cambiano, scuole di domani, suolo, reati, benessere ISTAT, popolazione (arrivi, stranieri, età), case popolari, dove si costruisce, beni confiscati |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
