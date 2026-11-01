@@ -2512,3 +2512,11 @@ python -I scripts\inventario.py <cartella censimenti>
 - Metodo: coorti dei residenti per età singola e NIL (ds27) che invecchiano; iscritti 2024 × variazione dei bambini dell'area (metà città, metà NIL e confinanti, scelto col test sul passato); tre scenari di nascite. Prova sul passato: errore di città 0-2% a 5 anni; per singola scuola 12-17%, quindi in pagina solo infanzia e primaria scuola per scuola, la secondaria di I grado solo per città e NIL.
 - Numeri (2034 su 2024, scenario centrale): infanzia −8,8%, primaria −19,2%, secondaria di I grado −20,8% (già scritto: quei bambini sono nati). "A rischio di scendere sotto il 70% del 2015": 74 infanzie su 284, 92 primarie su 210. Sorpresa: il quartiere dove vivono i bambini dice poco delle sue scuole (correlazione 0,23-0,42).
 - Limiti dei dati: niente matrice residenza→scuola; iscritti fermi al 2024/25; fusioni e cambi di codice; migrazione e case nuove non nel modello. È uno scenario, non una previsione; nessuna "chiusura" annunciata.
+
+## 39. I quartieri che cambiano
+
+- 2026-11-01 notte — Analisi e pagina (`quartieri-che-cambiano/`, `docs/quartieri-che-cambiano/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `quartieri-che-cambiano/NOTE.md`.
+- Indice di cambiamento per 73 NIL (almeno 2.000 residenti): sette indicatori a pesi uguali (reddito per CAP 2011→2024, prezzo e affitto OMI 2014/2→2026/1 in euro reali, Airbnb ogni 100 abitazioni, saldo di bar e ristoranti 2019→2026, quota 25-34 anni 2014→2025, laureati 2011→2023), collegati ai NIL tramite i civici. Botteghe storiche e costruzioni non ancora incluse ("in arrivo").
+- Risultati: in testa Sarpi, Isola, Ghisolfa, Lambrate-Ortica, Farini; i 4 NIL del Municipio 1 tra il 59° e il 69° posto. Sorpresa: il cambiamento non è dove abitano i ricchi; Lambrate-Ortica 4° con affitti +114%.
+- Robustezza: Spearman 0,92-1,00 su 20 varianti; gli estremi tengono, il centro della classifica no (in pagina il posto ha sempre il suo intervallo). Gli indicatori concordano poco (alfa 0,31): l'indice mescola tre storie.
+- Limiti dei dati: OMI sono stime; reddito su 38 CAP e OMI su ~42 zone (NIL vicini condividono valori); CAP 20121/20122 esclusi; Airbnb una sola fotografia; censimenti 2011 e 2023 di tipo diverso; l'indice non misura espulsioni né cause. "Gentrificazione" solo definita, mai come etichetta.
