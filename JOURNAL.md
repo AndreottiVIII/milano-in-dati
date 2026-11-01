@@ -2621,3 +2621,9 @@ python -I scripts\inventario.py <cartella censimenti>
 - Limiti dei dati: 2021 modellato, soglie diverse tra anni, correzione ISTAT 1991 sul treno a lunga distanza, salto sospetto degli studenti milanesi fuori Milano 2011-2021.
 - 2026-11-01 notte — **Quartieri che cambiano aggiornato a 9 segnali**: aggiunti botteghe storiche cessate 2017→2024 (solo 23 NIL con almeno 5 botteghe) e abitazioni nuove 2014-2024 ogni 1.000 residenti; indice con almeno 6 segnali su 9. Nuovi primi: Lambrate-Ortica, Porta Ticinese-Conchetta, Maggiore-Musocco-Certosa, Ghisolfa, Bovisa; Sarpi da 1° a 6°. Spearman 0,95 con la versione a 7 segnali (conservata in `out/prima_sette_indicatori/`). Il Municipio 1 resta in fondo.
 
+## 54. Reati denunciati
+
+- 2026-11-01 notte — Fase 1 e pagina (`reati/`, `docs/reati/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `reati/NOTE.md`.
+- Fonti: ISTAT DCCV_DELITTIPS 2006-2024 (CC BY 4.0) per Italia, province e 12 grandi comuni; Comune ds564 2004-2023 (CC BY, uguale a ISTAT dal 2006, corretti un anno sbagliato e celle vuote); pendolari 2011 e turisti per la popolazione presente (solo Milano). Cittadinanza degli autori volutamente non scaricata né usata.
+- Numeri: denunce nel comune 140.974 nel 2024 come nel 2004 (141.636), 19% sotto il picco 2007, con circa 120.000 residenti in più; il divario con l'Italia è quasi tutto furti (66%) e danneggiamenti (13%); omicidi 6 nel 2024. Il primato provinciale dipende dai confini: con Monza unita Milano è 1ª solo nel 2011 e 2023, 3ª nel 2024 (l'agente aveva prima omesso questo per un errore di calcolo, poi corretto). Per persona presente (turisti e pendolari) il tasso scende da 10.343 a 7.863.
+- Limiti dei dati: denunciato non è commesso; provincia non è città; salto Milano/Monza 2011; denominatori censuari; luogo del reato; nessuna affermazione causale.

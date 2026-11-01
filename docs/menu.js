@@ -64,7 +64,8 @@
     { path: 'amministratori/', label: 'Chi governa Milano' },
     { path: 'botteghe/', label: 'Botteghe storiche' },
     { path: 'suolo/', label: 'Quanto suolo si consuma' },
-    { path: 'pendolari/', label: 'Pendolari' }
+    { path: 'pendolari/', label: 'Pendolari' },
+    { path: 'reati/', label: 'Reati denunciati' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
