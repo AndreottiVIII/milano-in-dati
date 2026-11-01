@@ -33,7 +33,9 @@
     { path: 'affitti-brevi/',    label: 'Affitti brevi' },
     { path: 'case-servizi-reddito/', label: 'Servizi e prezzi delle case' },
     { path: 'alberi/',           label: 'Alberi della città' },
-    { path: 'cani/',             label: 'Cani di Milano' }
+    { path: 'cani/',             label: 'Cani di Milano' },
+    { path: 'morti/',            label: 'Morti giorno per giorno' },
+    { path: 'matrimoni/',        label: 'Matrimoni e separazioni' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

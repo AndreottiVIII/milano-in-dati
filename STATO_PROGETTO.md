@@ -37,7 +37,9 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 23 | Affitti brevi | Online |
 | 24 | Nomi dei bambini | In pausa: Milano non pubblica i nomi |
 | 25 | Cani | Online: aree cani (nessun dato aperto sui cani) |
-| — | In corso (fase 1) | Biblioteche, scuole, matrimoni, morti giorno per giorno, luoghi più cercati, redditi dal 2000, pioggia e caldo, costo della vita |
+| 26 | Morti giorno per giorno | Online |
+| 27 | Matrimoni e separazioni | Online |
+| — | In corso | Pagine di scuole e biblioteche; fase 1 di luoghi più cercati, pioggia e caldo, costo della vita; redditi dal 2000 in attesa di ok |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.

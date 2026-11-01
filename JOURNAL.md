@@ -2411,3 +2411,19 @@ python -I scripts\inventario.py <cartella censimenti>
 
 - 2026-11-01 — Fase 1 in `cani/`. Aperte solo le 423 aree cani (ds52, CC BY). Quanti cani, di che razza e dove: nessun dato aperto (anagrafe canina ATS non pubblicata); solo due totali dalla stampa (104.067 nel 2018, 118.292 "animali registrati" nel 2020). Trappola: `data_ini` di ds52 è la data della scheda, non dell'apertura.
 - 2026-11-01 — Pagina `docs/cani/` (programma `cani/scripts/pagina.py`), voluta da Davide: mappa delle 423 aree, aree per 100.000 abitanti per NIL (da 4,6 De Angeli-Monte Rosa a 79,2 Lorenteggio; i sei più poveri sono centrali o vicini al centro), crescita per anno di scheda con l'avvertenza, riquadro "quello che non sappiamo" con i totali di stampa dichiarati come tali.
+
+## 26. Morti giorno per giorno
+
+- 2026-11-01 — Fase 1 e pagina (`morti/`, `docs/morti/`), volute da Davide. Dettagli in `morti/NOTE.md`.
+- Fonte: ISTAT "Decessi e cause di morte: dati giornalieri comunali", release 25/8/2026 (1/1/2011-30/6/2026), CC BY 4.0, scaricata il 1/11/2026; nella pagina solo tabelle aggregate.
+- Scelta del coordinatore: il "normale" è la media dello stesso giorno nei 5 anni precedenti senza 2020-2021, lisciata a 15 giorni (B); soglie di caldo (≥3 giorni con massima ≥33 °C a Brera) e di freddo sono nostre e dichiarate.
+- Numeri: 2020 18.487 morti (+28,7%); 3/4/2020 137 morti contro 38,9 normali; primavera 2020 Milano +83% contro Lombardia senza Milano +117%; luglio 2022 +260. 2025 13.639, il minimo dal 2011. Sorpresa: estati con gli stessi giorni oltre 33 °C (2015, 2022, 2024) danno +10%, +15%, −4%.
+- Trappole: residenza, non luogo del decesso; righe a zero assenti; dati provvisori (giugno 2025 sottocontato del 3,5% nella release di agosto 2025); il normale non segue l'invecchiamento; Brera 2008-2016 +0,65 °C.
+
+## 27. Matrimoni e separazioni
+
+- 2026-11-01 — Fase 1 e pagina (`matrimoni/`, `docs/matrimoni/`), volute da Davide. Dettagli in `matrimoni/NOTE.md`.
+- Fonti: Comune di Milano (ds1496 rito 1948-2024, ds138/ds1947 cittadinanza, ds132/ds1949, ds1950/ds1952 età, ds398 unioni civili; CC BY), ISTAT demo.istat.it (CC BY 4.0) per Italia, provincia, età, separazioni e divorzi 2007-2024 per provincia del tribunale.
+- Numeri: 12.398 matrimoni nel 1963, 2.492 nel 2024; civili oltre i religiosi nel 2002 a Milano, nel 2018 in Italia; civili 81% contro 61%. Sorpresa: i civili non sono mai cresciuti (3.308 nel 1972, 2.018 nel 2024); sono spariti i religiosi (10.525 nel 1961, 474 nel 2024); almeno il 61% dei matrimoni in chiesa dei milanesi si celebra fuori Milano.
+- Trappole: **refuso in ds1496** (civili 2024 = 2.218, le altre fonti 2.018: usato 2.018); **ds132/ds1949 descritti come "celebrati a Milano" ma sono nozze di residenti** (2019 e 2024 incompleti); ISTAT e Comune non coincidono nel 2010; Monza e Brianza dentro Milano nelle tavole ISTAT fino al 2009; divorzio breve 2014-2015 spezza la serie. Da segnalare al Comune.
+

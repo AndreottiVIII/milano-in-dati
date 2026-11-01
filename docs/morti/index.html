@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Morti giorno per giorno</title>
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0} .card h3{margin:.1em 0 .1em}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars.dv .tr .fill{position:absolute;top:0} .bars.dv .tr:after{content:"";position:absolute;left:var(--c,50%);top:-2px;height:14px;border-left:1px solid #666}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.tabmax{max-height:340px;overflow:auto} #tab-ond,#tab-est,#tab-ann,#tab-fin{min-width:520px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Morti giorno per giorno, a Milano</h1>
+<p>Quanti milanesi muoiono ogni giorno? In media circa 39. Qui li guardiamo giorno per giorno dal 2011 al giugno 2026, e li confrontiamo con quanti ne erano &laquo;normali&raquo; per quel giorno: per capire che cosa sono stati la primavera del 2020, le estati calde e gli inverni freddi. I dati sono dell&rsquo;ISTAT e contano i morti <b>residenti a Milano</b>, dovunque siano morti. Sono confronti: la pagina non dice mai <i>perch&eacute;</i> una persona &egrave; morta.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Che cosa vuol dire &laquo;normale&raquo;.</b> Per ogni giorno, la media dello stesso giorno nei <b>5 anni precedenti, senza il 2020 e il 2021</b>, resa un po&rsquo; pi&ugrave; liscia (media su 15 giorni). Per il 2022 sono 2015&ndash;2019, per il 2024 sono 2017, 2018, 2019, 2022 e 2023. &Egrave; una scelta nostra, non un valore ufficiale: cambiando il metodo cambiano i numeri (vedi <a href="#metodo">metodo e trappole</a>). Non segue l&rsquo;invecchiamento della popolazione, che per Milano nel periodo &egrave; piccolo.</div>
+
+<h2 id="anni">Quanti morti ogni anno</h2>
+<div id="anni-testo"></div>
+<div class="ch" id="ch-anni" role="img" aria-label="Grafico a barre: morti a Milano per anno dal 2011 al 2025, con la linea del normale"></div>
+<div class="lgd" id="lg-anni"></div>
+<p class="src">Il grafico parte da 12.000, non da zero, per far vedere le differenze tra gli anni; la barra del 2020 &egrave; tagliata (18.487 morti). Fonte: ISTAT, decessi giornalieri per comune di residenza (CC BY 4.0), elaborazione Milano in dati.</p>
+
+<h2 id="primavera">La primavera del 2020, giorno per giorno</h2>
+<div id="prim-testo"></div>
+<div class="ch" id="ch-prim" role="img" aria-label="Grafico: morti al giorno a Milano da febbraio a giugno 2020, con la linea del normale"></div>
+<div class="lgd" id="lg-prim"></div>
+<h3>Milano, Lombardia, Italia: in percentuale del normale</h3>
+<p>Per confrontare territori di dimensioni diverse si guarda quanto i morti superano il normale: 100% &egrave; il normale, 200% il doppio. Scegli un territorio. Il grafico usa la media di 7 giorni (3 giorni prima, 3 dopo), per togliere il rumore.</p>
+<div class="ctl" id="sel-prim"><span class="sub">Evidenzia:</span><button type="button" data-k="Milano" class="on">Milano</button><button type="button" data-k="Lombardia">Lombardia</button><button type="button" data-k="Italia">Italia</button></div>
+<div class="ch" id="ch-pct" role="img" aria-label="Grafico: morti in percentuale del normale, Milano, Lombardia e Italia, da febbraio a giugno 2020"></div>
+<div class="lgd" id="lg-pct"></div>
+<div id="card-prim" class="card"></div>
+<p class="src">Normale: media dei 5 anni precedenti senza 2020-2021 (qui 2015&ndash;2019). Il giorno singolo pi&ugrave; alto (non la media di 7 giorni) &egrave; nella scheda. Fonte: ISTAT, decessi per comune di residenza, elaborazione Milano in dati.</p>
+
+<h2 id="ondate">Le altre ondate del Covid</h2>
+<div id="ond-testo"></div>
+<div class="ch" id="ch-sett" role="img" aria-label="Grafico: morti a Milano per settimana dal 2020 al 2022, con la linea del normale"></div>
+<div class="lgd" id="lg-sett"></div>
+<div class="scroll"><table id="tab-fin"></table></div>
+<p class="src">Differenza rispetto al normale, in percentuale: finestre di calendario scelte da noi (non &laquo;le ondate&raquo; ufficiali). Dove la Lombardia o l&rsquo;Italia hanno eccessi piccoli ma positivi anche negli anni tranquilli, conta il fatto che il normale non segue l&rsquo;invecchiamento (vedi metodo). Fonte: ISTAT, elaborazione Milano in dati.</p>
+
+<h2 id="caldo">Il caldo</h2>
+<div id="caldo-testo"></div>
+<p>Scegli un&rsquo;estate: in alto la temperatura massima di ogni giorno a Brera (<a href="../temperature/">pagina delle temperature</a>), in basso i morti di Milano. Le fasce colorate sono le ondate di caldo come le definiamo noi: almeno 3 giorni di fila con massima di 33 &deg;C o pi&ugrave;, pi&ugrave; 3 giorni dopo.</p>
+<div class="ctl" id="sel-estate"></div>
+<div class="ch" id="ch-tx" role="img" aria-label="Grafico: temperatura massima giornaliera a Brera in estate"></div>
+<div class="ch" id="ch-mx" role="img" aria-label="Grafico: morti al giorno a Milano in estate, con la linea del normale"></div>
+<div class="lgd" id="lg-estate"></div>
+<div id="card-estate" class="card"></div>
+<h3>Le ondate di caldo, una per una</h3>
+<div id="ond-caldo-testo"></div>
+<div class="scroll"><table id="tab-ond"></table></div>
+<details><summary>Tutte le ondate (2014&ndash;2025)</summary><div class="scroll tabmax"><table id="tab-ond-all"></table></div></details>
+<h3>Le estati a confronto</h3>
+<div id="est-testo"></div>
+<div class="ch" id="ch-est" role="img" aria-label="Grafico a barre: differenza dei morti dal normale in giugno-agosto, per anno"></div>
+<div class="scroll"><table id="tab-est"></table></div>
+<h3>Giorno per giorno: caldo e morti</h3>
+<div id="bin-testo"></div>
+<div class="bars dv" id="b-bin" style="--c:50%"></div>
+<p class="src">Temperatura: Milano Brera, serie giornaliera del filone <a href="../temperature/">temperature</a> (nel 2008&ndash;2016 il sensore di Brera &egrave; pi&ugrave; caldo di circa 0,65 &deg;C: vedi metodo). Morti: ISTAT, residenti. Le soglie e le finestre sono nostre. Solo confronti.</p>
+
+<h2 id="freddo">Freddo e inverni</h2>
+<div id="fre-testo"></div>
+<div class="scroll"><table id="tab-inv"></table></div>
+<p class="src">Inverno = 1 dicembre &ndash; 31 marzo. &laquo;Giorni a 0&nbsp;&deg;C o meno&raquo; = giorni con temperatura media di 0 &deg;C o meno a Brera. * L&rsquo;inverno 2019/20 contiene febbraio&ndash;marzo 2020 (Covid): non confrontabile.</p>
+
+<h2 id="chi">Chi muore: et&agrave; e sesso</h2>
+<div id="chi-testo"></div>
+<div class="ch" id="ch-85" role="img" aria-label="Grafico a barre: quota di morti con 85 anni o pi&ugrave;, per anno"></div>
+<p class="src">Quota dei morti dell&rsquo;anno che avevano 85 anni o pi&ugrave;. Fonte: ISTAT, residenti a Milano.</p>
+<div class="grid2"><div><h3>Primavera 2020, per et&agrave;</h3><div class="bars" id="b-eta"></div></div>
+<div><h3>Primavera 2020, uomini e donne</h3><div class="scroll"><table id="tab-sesso"></table></div></div></div>
+<p class="src">Morti in pi&ugrave; del normale, 1 marzo &ndash; 31 maggio 2020, per fascia d&rsquo;et&agrave; (barre: percentuale; accanto il numero). Uomini e donne: percentuale in pi&ugrave; per fascia; in numeri assoluti le donne sono di pi&ugrave; perch&eacute; tra gli anziani sono pi&ugrave; numerose.</p>
+<details><summary>Quanti morti ogni 100.000 abitanti, per fascia d&rsquo;et&agrave; e sesso (2019 e 2025)</summary><div id="tassi-c"></div></details>
+
+<h2 id="metodo">Metodo e trappole</h2>
+<ul class="m" id="metodo-lista"></ul>
+<h3>Quanto il metodo conta: tre modi di calcolare il normale</h3>
+<div id="ann-testo"></div>
+<div class="scroll"><table id="tab-ann"></table></div>
+<h3>I dati &laquo;provvisori&raquo; cambiano?</h3>
+<div id="rev-testo"></div>
+<div class="scroll"><table id="tab-rev"></table></div>
+
+<h2 id="download">File</h2>
+<p id="file-lista"></p>
+
+<footer>
+<p><b>Fonte e licenza.</b> ISTAT, &laquo;Decessi e cause di morte: dati giornalieri comunali&raquo; (decessi comunali giornalieri provvisori), release del 25 agosto 2026, dati dal 1 gennaio 2011 al 30 giugno 2026, scaricati da <a href="https://www.istat.it/it/archivio/240401">istat.it</a> il 1 novembre 2026. Licenza Creative Commons Attribuzione 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>). Qui sono pubblicati solo totali per Milano, Lombardia e Italia (per giorno o per settimana), calcolati da noi: le tabelle comunali di ISTAT non sono ripubblicate. Abbiamo anche rielaborato i dati (normale, differenze, ondate): sono &laquo;elaborazione Milano in dati&raquo;, non cifre ufficiali ISTAT. Temperature: Milano Brera (vedi la pagina <a href="../temperature/">temperature</a>). Popolazione per et&agrave;: ISTAT, demo.istat.it (POSAS al 1 gennaio, 2019&ndash;2026).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var ACC='#00695c',GRY='#9a9a9a',WARM='#c26a1b',INK='#111';
+var RD=[],S={};
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){if(!(r>0))return 1;var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function T0(s){var a=s.split('-');return Date.UTC(+a[0],+a[1]-1,+a[2])}
+function dstr(ms){var d=new Date(ms);return d.getUTCDate()+' '+MESI[d.getUTCMonth()]+' '+d.getUTCFullYear()}
+function dIso(s){return dstr(T0(s))}
+function lgdLine(items){return items.map(function(it){return it.box?'<span><i style="background:'+it.color+'"></i>'+it.t+'</span>':'<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function rowsOf(a,f){return a.filter(f)}
+function dvRows(items,max){ /* items: {nm,v,label} v in % rispetto a 0 */
+  return items.map(function(it){var w=Math.min(50,Math.abs(it.v)/max*50),left=it.v<0?50-w:50;
+    return '<div class="row"><span class="nm">'+it.nm+'</span><span class="tr"><span class="fill" style="left:'+left+'%;width:'+w+'%;background:'+(it.v<0?ACC:WARM)+'"></span></span><span class="v">'+it.label+'</span></div>'}).join('')}
+
+/* ---------- grafico a serie ---------- */
+function ts(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||260,m={l:o.ml||48,r:10,t:o.t==null?14:o.t,b:o.b==null?24:o.b};
+  var n=o.n,pw=W-m.l-m.r,ph=H-m.t-m.b,all=[];
+  (o.bars||[]).forEach(function(v){if(v!=null)all.push(v)});(o.lines||[]).forEach(function(L){L.v.forEach(function(v){if(v!=null)all.push(v)})});
+  var y0=o.y0!=null?o.y0:Math.min(0,Math.min.apply(null,all)),y1=o.y1!=null?o.y1:Math.max.apply(null,all);
+  var st=o.step||niceStep((y1-y0)/(o.ticks||4));
+  if(o.y0==null)y0=Math.floor(y0/st)*st;if(o.y1==null)y1=Math.ceil(y1/st)*st;
+  var base=o.base!=null?o.base:Math.max(y0,Math.min(0,y1));
+  function X(i){return m.l+(i+.5)/n*pw}
+  function Y(v){return m.t+ph-(Math.min(Math.max(v,y0),y1)-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  (o.shade||[]).forEach(function(z){var xa=m.l+z.a/n*pw,xb=m.l+(z.b+1)/n*pw;s+='<rect x="'+xa+'" y="'+m.t+'" width="'+(xb-xa)+'" height="'+ph+'" fill="'+(z.color||'#f3dcc0')+'" fill-opacity="'+(z.op||.55)+'"/>'});
+  for(var v=y0;v<=y1+1e-6;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>'}
+  (o.bars||[]).forEach(function(b,i){if(b==null)return;var bw=Math.max(1,pw/n-(n<=60?3:(n<=200?1:.4))),yb=Y(base),yv=Y(b),col=o.bc?o.bc(i):GRY;
+    s+='<rect x="'+(X(i)-bw/2).toFixed(1)+'" y="'+Math.min(yb,yv).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(.5,Math.abs(yb-yv)).toFixed(1)+'" fill="'+col+'"/>';
+    if(b>y1){var yy=m.t+6;s+='<path d="M'+(X(i)-bw/2-1)+' '+(yy+4)+' L'+(X(i)+bw/2+1)+' '+(yy-2)+'" stroke="#fff" stroke-width="3"/><text x="'+X(i)+'" y="'+(m.t-3)+'" text-anchor="middle" style="font-weight:700">'+(o.yf?o.yf(b):f0(b))+'</text>'}});
+  (o.hl||[]).forEach(function(h){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(h.v)+'" y2="'+Y(h.v)+'" stroke="'+(h.color||WARM)+'" stroke-dasharray="'+(h.dash===false?'':'5 4')+'"/>'+(h.label?'<text x="'+(m.l+3)+'" y="'+(Y(h.v)-4)+'" style="fill:'+(h.color||'#8a4a10')+'">'+h.label+'</text>':'')});
+  (o.lines||[]).forEach(function(L){var d='',pen=false;L.v.forEach(function(val,i){if(val==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(val).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+L.color+'" stroke-width="'+(L.w||2)+'" stroke-opacity="'+(L.op||1)+'"'+(L.dash?' stroke-dasharray="5 4"':'')+' stroke-linejoin="round"/>'});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(base)+'" y2="'+Y(base)+'" stroke="#888"/>';
+  var lastx=-99;(o.xt||[]).forEach(function(t){var x=X(t.i)-(t.edge?0:0);if(x-lastx<(o.minx||34))return;lastx=x;var an=x<m.l+14?'start':(x>W-m.r-16?'end':'middle');
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+x+'" y="'+(m.t+ph+16)+'" text-anchor="'+an+'">'+t.l+'</text>'});
+  (o.marks||[]).forEach(function(k){var x=X(k.i),y=Y(k.v);s+='<circle cx="'+x+'" cy="'+y+'" r="4" fill="#fff" stroke="'+(k.color||INK)+'" stroke-width="2"/>';
+    if(k.label){var an=x>W-m.r-110?'end':(x<m.l+110?'start':'middle');s+='<text x="'+(an==='end'?x-7:(an==='start'?x+7:x))+'" y="'+(an==='middle'?y-9:y+4)+'" text-anchor="'+an+'" style="font-weight:700">'+k.label+'</text>'}});
+  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-opacity=".5" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,i=Math.floor((px-m.l)/pw*n);if(i<0||i>=n){hide();return}
+    cur.setAttribute('x1',X(i));cur.setAttribute('x2',X(i));cur.style.display='';tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=X(i)/k+12;if(left+tw>r.width)left=X(i)/k-tw-12;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){tip.style.display='none';cur.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function draw(id,fn){fn(el(id));RD.push(function(){fn(el(id))})}
+
+/* ---------- indici ---------- */
+function gi(dateStr){return Math.round((T0(dateStr)-T0(S.MG.inizio))/864e5)}
+function monthTicks(ms0,n,every){var t=[];for(var i=0;i<n;i++){var d=new Date(ms0+i*864e5);if(d.getUTCDate()===1&&(d.getUTCMonth()%every===0))t.push({i:i,l:MESI[d.getUTCMonth()].slice(0,3)+(d.getUTCMonth()===0?' '+d.getUTCFullYear():'')})}return t}
+function milanoRow(a){var r=null;S.A.milano.forEach(function(x){if(x.anno===a)r=x});return r}
+function fin(scope,nome){var r=null;S.F.forEach(function(x){if(x.scope===scope&&x.finestra===nome)r=x});return r}
+function estate(a){var r=null;S.C.estati.forEach(function(x){if(x.anno===a)r=x});return r}
+function area(a,k){var r=null;S.C.estati_per_area.forEach(function(x){if(x.anno===a)r=x[k]});return r}
+
+Promise.all([J('data/milano_giorno.json'),J('data/settimane.json'),J('data/covid2020.json'),J('data/annuale.json'),J('data/finestre.json'),J('data/eta_sesso.json'),J('data/caldo.json'),J('data/freddo.json'),J('data/revisioni.json'),J('data/riepilogo.json'),J('data/mensile.json')]).then(function(a){
+  S.MG=a[0];S.W=a[1];S.V=a[2];S.A=a[3];S.F=a[4];S.E=a[5];S.C=a[6];S.FR=a[7];S.RV=a[8];S.R=a[9];S.M=a[10];
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();anni();primavera();ondate();caldo();freddo();chi();metodo();file();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var e15=estate(2015),e22=estate(2022),e24=estate(2024),m25=milanoRow(2025),comp=S.E.composizione,c11=comp[0],c25=comp[comp.length-1];
+  var p19=0,p25=0;S.E.tassi.forEach(function(t){if(t.fascia==='85+'){if(t.anno===2019)p19+=t.popolazione_media;if(t.anno===2025)p25+=t.popolazione_media}});
+  var h='<p><b>Stesse estati calde, risultati opposti.</b> Nell&rsquo;estate (giugno&ndash;agosto) 2015, 2022 e 2024 Brera ha avuto '+e15.giorni_tx_ge33+', '+e22.giorni_tx_ge33+' e '+e24.giorni_tx_ge33+' giorni con almeno 33 &deg;C. I morti, rispetto al normale: <b>'+sgp(e15.pct_B,0)+' nel 2015, '+sgp(e22.pct_B,0)+' nel 2022, '+sgp(e24.pct_B,0)+' nel 2024</b>. &Egrave; un confronto: i dati non spiegano la differenza.</p>';
+  h+='<p><b>Il 2025 &egrave; l&rsquo;anno con meno morti dal 2011:</b> '+f0(m25.morti)+', anche se i milanesi di 85 anni o pi&ugrave; sono pi&ugrave; di prima (circa '+Math.round((p25/p19-1)*100)+'% in pi&ugrave; che nel 2019) e sono una quota crescente dei morti: '+nf(c11.quota_85p,1)+'% nel 2011, '+nf(c25.quota_85p,1)+'% nel 2025.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- anni ---------- */
+function anni(){
+  var M=S.E.composizione,yrs=M.map(function(r){return r.anno}),mor=M.map(function(r){return r.morti});
+  var nor=yrs.map(function(y){var r=milanoRow(y);return r&&y>=2014?r.attesi_B:null});
+  var m20=milanoRow(2020),m26=milanoRow(2026);
+  var vals=mor.filter(function(v,i){return yrs[i]!==2020&&yrs[i]!==2022});
+  setH('anni-testo','<p>Dal 2011 al 2025 a Milano muoiono tra <b>'+f0(Math.min.apply(null,vals))+'</b> e <b>'+f0(Math.max.apply(null,vals))+'</b> residenti l&rsquo;anno (il 2022 ne ha '+f0(milanoRow(2022).morti)+'). L&rsquo;eccezione grande &egrave; il <b>2020, con '+f0(m20.morti)+'</b> morti: '+f0(m20.eccesso_B)+' in pi&ugrave; del normale ('+sgp(m20.pct_B,1)+'). Dal 2023 i numeri sono tornati sotto il normale; il 2024 ('+f0(milanoRow(2024).morti)+') e il 2025 ('+f0(milanoRow(2025).morti)+') sono i pi&ugrave; bassi della serie. I primi sei mesi del 2026 sono '+f0(m26.morti)+' ('+sgp(m26.pct_B,1)+' sul normale), ma gli ultimi mesi di questa serie potrebbero essere ancora incompleti (vedi <a href="#metodo">metodo</a>), per questo non sono nel grafico.</p>');
+  draw('ch-anni',function(box){ts(box,{n:yrs.length,bars:mor,lines:[{v:nor,color:ACC,w:2.5}],y0:12000,y1:16000,step:1000,h:270,t:16,
+    bc:function(i){return yrs[i]===2020?WARM:GRY},xt:yrs.map(function(y,i){return {i:i,l:String(y)}}),minx:30,
+    tip:function(i){var y=yrs[i],r=milanoRow(y);return '<b>'+y+'</b>: '+f0(mor[i])+' morti'+(r&&y>=2014?'<br>normale '+f0(r.attesi_B)+' ('+sgp(r.pct_B,1)+')':'<br>normale: non calcolabile (servono i 5 anni prima)')}})});
+  setH('lg-anni',lgdLine([{color:GRY,t:'morti dell&rsquo;anno',box:true},{color:WARM,t:'2020',box:true},{color:ACC,t:'normale (dal 2014)'}]));
+}
+
+/* ---------- primavera 2020 ---------- */
+var COL={Milano:'#111',Lombardia:WARM,Italia:ACC};
+function primavera(){
+  var V=S.V,t0=T0(V.inizio),n=V.Milano.morti.length,pk={};V.picco.forEach(function(p){pk[p.scope]=p});
+  var wmax=null;S.W.Milano.forEach(function(w){if(w[0]>='2020-02-01'&&w[0]<='2020-06-30'&&(!wmax||w[1]-w[2]>wmax[1]-wmax[2]))wmax=w});
+  var wk='La settimana pi&ugrave; alta &egrave; quella dal '+dIso(wmax[0])+': '+wmax[1]+' morti contro '+f0(wmax[2])+' normali ('+nf(wmax[1]/wmax[2],1)+' volte).';
+  var pm=pk.Milano,pl=pk.Lombardia,pi=pk.Italia,fm=fin('Milano','primavera 2020'),fl=fin('Lombardia','primavera 2020'),fi=fin('Italia','primavera 2020');
+  setH('prim-testo','<p>Il giorno con pi&ugrave; morti di tutta la serie &egrave; il <b>'+dIso(pm.giorno_max)+'</b>: <b>'+pm.morti_max+' morti a Milano contro '+nf(pm.attesi_B_quel_giorno,1)+' normali</b>, cio&egrave; '+nf(pm.volte_normale_giorno,1)+' volte il normale. Tra il 1&deg; marzo e il 31 maggio 2020 i morti sono '+f0(fm.morti)+', contro '+f0(fm.attesi_B)+' del normale: <b>'+f0(fm.eccesso_B)+' in pi&ugrave; ('+sgp(fm.pct_B,0)+')</b>. '+wk+'</p>');
+  var mm=V.Milano;
+  draw('ch-prim',function(box){ts(box,{n:n,bars:mm.morti,lines:[{v:mm.attesi,color:ACC,w:2.5}],y0:0,h:250,t:16,
+    bc:function(i){return mm.morti[i]>mm.attesi[i]*1.25?WARM:GRY},xt:monthTicks(t0,n,1),minx:46,
+    marks:[{i:Math.round((T0(pm.giorno_max)-t0)/864e5),v:pm.morti_max,label:pm.morti_max+' morti, '+dstr(T0(pm.giorno_max)).replace(' 2020','')}],
+    tip:function(i){return '<b>'+dstr(t0+i*864e5)+'</b><br>'+mm.morti[i]+' morti, normale '+nf(mm.attesi[i],1)+'<br>'+nf(mm.morti[i]/mm.attesi[i],1)+' volte il normale'}})});
+  setH('lg-prim',lgdLine([{color:GRY,t:'morti del giorno',box:true},{color:WARM,t:'oltre 1,25 volte il normale',box:true},{color:ACC,t:'normale'}]));
+  /* percentuali */
+  var ratio={};['Milano','Lombardia','Italia'].forEach(function(k){var d=V[k],r=[];for(var i=0;i<n;i++){if(i<3||i>n-4){r.push(null);continue}var a=0,b=0;for(var j=i-3;j<=i+3;j++){a+=d.morti[j];b+=d.attesi[j]}r.push(a/b*100)}ratio[k]=r});
+  var cur='Milano';
+  function dpct(){draw('ch-pct',function(box){
+    var lines=['Milano','Lombardia','Italia'].map(function(k){return {v:ratio[k],color:COL[k],w:k===cur?3.2:1.4,op:k===cur?1:.45}});
+    var mk=[];var im=0;ratio[cur].forEach(function(v,i){if(v!=null&&v>ratio[cur][im]||ratio[cur][im]==null)im=i});
+    mk.push({i:im,v:ratio[cur][im],color:COL[cur],label:cur+': picco '+Math.round(ratio[cur][im])+'% il '+dstr(t0+im*864e5).replace(' 2020','')});
+    ts(box,{n:n,lines:lines,y0:0,y1:500,step:100,h:260,t:14,yf:function(v){return f0(v)+'%'},hl:[{v:100,color:'#888',dash:false,label:'normale'}],xt:monthTicks(t0,n,1),minx:46,marks:mk,
+      tip:function(i){if(ratio.Milano[i]==null)return '<b>'+dstr(t0+i*864e5)+'</b>';return '<b>'+dstr(t0+i*864e5)+'</b> (media di 7 giorni)<br>Milano '+Math.round(ratio.Milano[i])+'%<br>Lombardia '+Math.round(ratio.Lombardia[i])+'%<br>Italia '+Math.round(ratio.Italia[i])+'%'}})})}
+  function card(){var p=pk[cur],f=fin(cur,'primavera 2020');
+    setH('card-prim','<h3>'+cur+'</h3><p style="margin:.2em 0">Giorno pi&ugrave; alto: <b>'+dIso(p.giorno_max)+'</b>, '+f0(p.morti_max)+' morti contro '+nf(p.attesi_B_quel_giorno,0)+' normali (<b>'+nf(p.volte_normale_giorno,1)+' volte</b>). Marzo&ndash;maggio 2020: '+f0(f.morti)+' morti, '+f0(f.eccesso_B)+' in pi&ugrave; del normale (<b>'+sgp(f.pct_B,0)+'</b>).</p>')}
+  dpct();RD.push(dpct);card();
+  Array.prototype.forEach.call(document.querySelectorAll('#sel-prim button'),function(b){b.addEventListener('click',function(){cur=b.getAttribute('data-k');Array.prototype.forEach.call(document.querySelectorAll('#sel-prim button'),function(x){x.classList.toggle('on',x===b)});dpct();card()})});
+  setH('lg-pct',lgdLine(['Milano','Lombardia','Italia'].map(function(k){return {color:COL[k],t:k}})));
+  var mar=function(k){var r=null;S.M.forEach(function(x){if(x.scope===k&&x.anno===2020&&x.mese===3)r=x});return r},apr=function(k){var r=null;S.M.forEach(function(x){if(x.scope===k&&x.anno===2020&&x.mese===4)r=x});return r};
+  var ex=document.createElement('div');ex.innerHTML='<p><b>Milano arriva al picco dopo la Lombardia.</b> Il giorno pi&ugrave; alto della Lombardia &egrave; il '+dIso(pl.giorno_max)+' ('+nf(pl.volte_normale_giorno,1)+' volte il normale), quello dell&rsquo;Italia il '+dIso(pi.giorno_max)+' ('+nf(pi.volte_normale_giorno,1)+' volte), quello di Milano il '+dIso(pm.giorno_max)+'. In marzo i morti sono '+sgp(mar('Milano').pct_B,0)+' sul normale a Milano contro '+sgp(mar('Lombardia').pct_B,0)+' in Lombardia e '+sgp(mar('Italia').pct_B,0)+' in Italia; in aprile '+sgp(apr('Milano').pct_B,0)+', '+sgp(apr('Lombardia').pct_B,0)+' e '+sgp(apr('Italia').pct_B,0)+'. Su tutto marzo&ndash;maggio la Lombardia fuori Milano sale del '+nf(fin('Lombardia_senza_Milano','primavera 2020').pct_B,0)+'%, Milano dell&rsquo;'+nf(fm.pct_B,0)+'%. Sono confronti tra territori: non dicono perch&eacute;.</p>';
+  el('card-prim').parentNode.insertBefore(ex,el('card-prim').nextSibling);
+}
+
+/* ---------- altre ondate ---------- */
+function ondate(){
+  var W=S.W.Milano.filter(function(w){return w[0]>='2020-01-06'&&w[0]<='2022-12-26'});
+  var n=W.length,t0=T0(W[0][0]),tick=[];
+  W.forEach(function(w,i){var d=new Date(T0(w[0]));if(d.getUTCMonth()%3===0&&d.getUTCDate()<=7)tick.push({i:i,l:MESI[d.getUTCMonth()].slice(0,3)+(d.getUTCMonth()===0?' '+d.getUTCFullYear():'')})});
+  var a=fin('Milano','autunno 2020'),p21=fin('Milano','primavera 2021'),iv=fin('Milano','inverno 2021-22');
+  setH('ond-testo','<p>Dopo la primavera del 2020, il grafico per settimana mostra altre salite. Nell&rsquo;autunno 2020 (ottobre&ndash;dicembre) i morti di Milano sono '+f0(a.eccesso_B)+' in pi&ugrave; del normale ('+sgp(a.pct_B,0)+'), con novembre da solo oltre l&rsquo;80% sopra. Poi le salite diventano piccole: marzo&ndash;aprile 2021 '+sgp(p21.pct_B,0)+', dicembre 2021 &ndash; marzo 2022 '+sgp(iv.pct_B,1)+'. L&rsquo;estate 2022 &egrave; un&rsquo;altra salita, ma &egrave; descritta nella sezione sul <a href="#caldo">caldo</a>.</p>');
+  draw('ch-sett',function(box){ts(box,{n:n,bars:W.map(function(w){return w[1]}),lines:[{v:W.map(function(w){return w[2]}),color:ACC,w:2.5}],y0:0,h:250,t:12,
+    bc:function(i){return W[i][1]>W[i][2]*1.25?WARM:GRY},xt:tick,minx:46,
+    tip:function(i){var w=W[i];return '<b>settimana dal '+dIso(w[0])+'</b><br>'+w[1]+' morti, normale '+nf(w[2],0)+'<br>'+nf(w[1]/w[2],2)+' volte'}})});
+  setH('lg-sett',lgdLine([{color:GRY,t:'morti della settimana',box:true},{color:WARM,t:'oltre 1,25 volte il normale',box:true},{color:ACC,t:'normale'}]));
+  var names=[['primavera 2020','Primavera 2020 (marzo&ndash;maggio)'],['autunno 2020','Autunno 2020 (ottobre&ndash;dicembre)'],['primavera 2021','Primavera 2021 (marzo&ndash;aprile)'],['inverno 2021-22','Inverno 2021&ndash;22 (dicembre&ndash;marzo)'],['anno 2020','Anno 2020'],['anno 2021','Anno 2021']];
+  table('tab-fin',['Periodo','Milano morti','Milano in pi&ugrave; del normale','Milano %','Lombardia %','Italia %'],names.map(function(nm){var m=fin('Milano',nm[0]),l=fin('Lombardia',nm[0]),i=fin('Italia',nm[0]);
+    return [nm[1],f0(m.morti),sg(m.eccesso_B),sgp(m.pct_B,0),sgp(l.pct_B,0),sgp(i.pct_B,0)]}));
+}
+
+/* ---------- caldo ---------- */
+function caldo(){
+  var C=S.C,e=C.estati,e15=estate(2015),e22=estate(2022),e23=estate(2023),e24=estate(2024),e25=estate(2025);
+  setH('caldo-testo','<p>Il caldo si misura con la temperatura massima di ogni giorno a Brera. Il periodo dei morti parte dal 2011 e il normale dal 2014, quindi le estati qui sono 2014&ndash;2025. (L&rsquo;estate 2026 non c&rsquo;&egrave;: i morti arrivano solo al 30 giugno. L&rsquo;agosto 2003 &egrave; prima dell&rsquo;inizio dei dati.)</p>');
+  var sel=el('sel-estate'),h='<span class="sub">Estate:</span>';for(var y=2014;y<=2025;y++)h+='<button type="button" data-y="'+y+'"'+(y===2022?' class="on"':'')+'>'+y+'</button>';sel.innerHTML=h;
+  var cy=2022;
+  function est(){
+    var MG=S.MG,i0=gi(cy+'-06-01'),n=92,tx=MG.tx.slice(i0,i0+n),mo=MG.morti.slice(i0,i0+n),at=MG.attesi.slice(i0,i0+n),t0=T0(cy+'-06-01');
+    var shade=[];C.ondate.forEach(function(o){if(o.inizio.slice(0,4)==String(cy)){var a=gi(o.inizio)-i0,b=gi(o.fine)-i0+3;if(b>=0&&a<n)shade.push({a:Math.max(0,a),b:Math.min(n-1,b)})}});
+    var xt=[];for(var k=0;k<n;k++){var d=new Date(t0+k*864e5);if(d.getUTCDate()===1||d.getUTCDate()===15)xt.push({i:k,l:d.getUTCDate()+' '+MESI[d.getUTCMonth()].slice(0,3)})}
+    function tip(i){return '<b>'+dstr(t0+i*864e5)+'</b><br>massima a Brera '+(tx[i]==null?'n.d.':nf(tx[i],1)+' °C')+'<br>'+mo[i]+' morti, normale '+nf(at[i],1)}
+    draw('ch-tx',function(box){ts(box,{n:n,lines:[{v:tx,color:WARM,w:2}],y0:15,y1:40,step:5,h:150,t:8,b:6,ml:48,shade:shade,hl:[{v:33,color:'#8a4a10',label:'33 °C'}],yf:function(v){return v+'°'},xt:[],tip:tip})});
+    draw('ch-mx',function(box){ts(box,{n:n,bars:mo,lines:[{v:at,color:ACC,w:2.5}],y0:0,h:190,t:8,b:24,ml:48,shade:shade,bc:function(i){return mo[i]>at[i]*1.25?WARM:GRY},xt:xt,minx:44,tip:tip})});
+    var s=estate(cy);
+    setH('card-estate','<h3>Estate '+cy+'</h3><p style="margin:.2em 0">Giugno&ndash;agosto: <b>'+s.giorni_tx_ge33+'</b> giorni con almeno 33 &deg;C (<b>'+s.giorni_tx_ge35+'</b> con almeno 35 &deg;C), massima media '+nf(s.tx_media,1)+' &deg;C. Morti '+f0(s.morti)+', normale '+f0(s.attesi_B)+': <b>'+sg(s.eccesso_B)+' ('+sgp(s.pct_B,1)+')</b>. Fasce colorate: '+shade.length+' ondate di caldo.</p>');
+  }
+  est();RD.push(est);
+  setH('lg-estate',lgdLine([{color:WARM,t:'temperatura massima (alto)'},{color:GRY,t:'morti del giorno',box:true},{color:ACC,t:'normale'},{color:'#f3dcc0',t:'ondata di caldo + 3 giorni dopo',box:true}]));
+  Array.prototype.forEach.call(sel.querySelectorAll('button'),function(b){b.addEventListener('click',function(){cy=+b.getAttribute('data-y');Array.prototype.forEach.call(sel.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});est()})});
+  /* ondate una per una */
+  var on=C.ondate.slice().sort(function(a,b){return b.eccesso_B-a.eccesso_B}),pos=C.ondate.filter(function(o){return o.eccesso_B>0}).length;
+  var head=['Ondata','Giorni','Massima più alta','Morti in più del normale','%','di cui 85 anni+'];
+  function rowOf(o){return [(o.inizio.slice(0,4)===o.fine.slice(0,4)?dIso(o.inizio).replace(/ \d{4}$/,''):dIso(o.inizio))+' &ndash; '+dIso(o.fine),o.giorni,nf(o.tx_max,1)+' °C',sg(o.eccesso_B,0),sgp(o.pct_B,0),sg(o['eccesso_85+'],0)]}
+  setH('ond-caldo-testo','<p>Le '+C.ondate.length+' ondate di caldo del 2014&ndash;2025 (almeno 3 giorni di fila con massima di 33 &deg;C o pi&ugrave;): '+pos+' hanno più morti del normale, '+(C.ondate.length-pos)+' no. Le più alte, nella tabella: luglio 2022 (<b>'+sg(on[0].eccesso_B,0)+'</b> morti, di cui '+f0(on[0]['eccesso_85+'])+' tra gli 85 anni e più) e luglio 2015. Il conteggio comprende i 3 giorni dopo la fine dell&rsquo;ondata.</p>');
+  table('tab-ond',head,on.slice(0,8).map(rowOf));
+  table('tab-ond-all',head,C.ondate.map(rowOf));
+  /* estati */
+  setH('est-testo','<p>Tutte le estati (giugno&ndash;agosto), rispetto al normale. I giorni caldi sono simili in molte estati (tra 24 e 35 giorni con almeno 33 &deg;C in sette delle dodici: 2015, 2017, 2019 e 2022&ndash;2025), eppure la differenza va da '+sgp(e23.pct_B,0)+' ('+e23.anno+') a '+sgp(e22.pct_B,0)+' ('+e22.anno+'). Nelle stesse estati la Lombardia fuori Milano ha fatto '+sgp(area(2022,'Lombardia_senza_Milano'),1)+' nel 2022 e '+sgp(area(2023,'Lombardia_senza_Milano'),1)+' nel 2023, l&rsquo;Italia '+sgp(area(2022,'Italia'),1)+' e '+sgp(area(2023,'Italia'),1)+'. Il confronto dice che il rapporto tra caldo e morti non &egrave; lo stesso ogni anno; non dice perch&eacute;.</p>');
+  draw('ch-est',function(box){ts(box,{n:e.length,bars:e.map(function(r){return r.pct_B}),y0:-10,y1:20,step:5,h:230,t:12,yf:function(v){return sg(v)+'%'},bc:function(i){return e[i].pct_B>0?WARM:GRY},xt:e.map(function(r,i){return {i:i,l:String(r.anno)}}),minx:30,
+    tip:function(i){var r=e[i];return '<b>Estate '+r.anno+'</b><br>'+sgp(r.pct_B,1)+' ('+sg(r.eccesso_B)+' morti)<br>'+r.giorni_tx_ge33+' giorni con 33 °C o più'}})});
+  table('tab-est',['Estate','Giorni ≥ 33 °C','Giorni ≥ 35 °C','Massima media °C','Morti','Normale','Differenza','%'],e.map(function(r){return [String(r.anno),r.giorni_tx_ge33,r.giorni_tx_ge35,nf(r.tx_media,1),f0(r.morti),f0(r.attesi_B),sg(r.eccesso_B),sgp(r.pct_B,1)]}));
+  /* classi di tmax */
+  var lab=['sotto 27 °C','27–30 °C','30–32 °C','32–34 °C','34–36 °C','sopra 36 °C'];
+  var items=C.classi_tmax3.map(function(r,i){return {nm:lab[i]+' <span class="sub">('+r.giorni+' giorni)</span>',v:(r.rapporto_B-1)*100,label:sgp((r.rapporto_B-1)*100,0)+' ('+nf(r.rapporto_B,2)+')'}});
+  setH('bin-testo','<p>Tutti i giorni di giugno, luglio e agosto 2014&ndash;2025, divisi per la massima media dei 3 giorni (quel giorno e i 2 prima). Per ogni gruppo: morti reali divisi per morti normali. Con la massima media sotto 30 &deg;C i morti sono un po&rsquo; sotto il normale; oltre 34 &deg;C sopra. &Egrave; un andamento medio: dentro ogni gruppo ci sono giorni molto diversi (vedi 2023, 2024, 2025 contro 2022).</p>');
+  setH('b-bin',dvRows(items,30));
+}
+
+/* ---------- freddo ---------- */
+function freddo(){
+  var I=S.FR.inverni,oc=S.FR.ondate;
+  var h17=null;oc.forEach(function(o){if(o.inizio==='2017-01-06')h17=o});
+  setH('fre-testo','<p>A Milano il freddo vero &egrave; raro nei dati recenti: dal 2014 c&rsquo;&egrave; una sola sequenza di almeno 3 giorni con temperatura media a 0 &deg;C o meno (26 febbraio &ndash; 1 marzo 2018) e in quei giorni i morti sono vicini al normale. Con una soglia pi&ugrave; larga (media di 3 &deg;C o meno) l&rsquo;episodio pi&ugrave; alto &egrave; <b>6&ndash;13 gennaio 2017</b>: '+(h17?sg(h17.eccesso_B,0)+' morti in pi&ugrave; del normale ('+sgp(h17.pct_B,0)+'), di cui '+f0(h17['eccesso_85+'])+' tra gli 85 anni e pi&ugrave;':'')+'. Gli altri episodi freddi sono dentro il rumore, anche in negativo. Per gli inverni interi, la differenza rispetto al normale cambia da un anno all&rsquo;altro (tabella); nei dati non si pu&ograve; separare l&rsquo;influenza dal resto.</p>');
+  table('tab-inv',['Inverno (dic&ndash;mar)','Temperatura media °C','Giorni a 0 °C o meno','Morti','Normale','Differenza','%'],I.map(function(r){return [r.inverno+(r.inverno==='2019/20'?' *':''),nf(r.tg_media,1),r.giorni_tg_le0,f0(r.morti),f0(r.attesi_B),sg(r.eccesso_B),sgp(r.pct_B,1)]}));
+}
+
+/* ---------- chi muore ---------- */
+function chi(){
+  var comp=S.E.composizione,c11=comp[0],c19=comp[8],c25=comp[comp.length-1],T=S.E.tassi;
+  setH('chi-testo','<p>Nel 2025 il '+nf(c25.quota_85p,1)+'% dei morti di Milano aveva <b>85 anni o pi&ugrave;</b>; nel 2011 era il '+nf(c11.quota_85p,1)+'%, nel 2019 il '+nf(c19.quota_85p,1)+'%. Sotto i 65 anni muore il '+nf(c25.quota_under65,1)+'% (nel 2011 il '+nf(c11.quota_under65,1)+'%). Nel 2025 le donne sono '+f0(c25.femmine)+' e gli uomini '+f0(c25.maschi)+' (le donne vivono pi&ugrave; a lungo e tra gli anziani sono di pi&ugrave;).</p>');
+  draw('ch-85',function(box){ts(box,{n:comp.length,bars:comp.map(function(r){return r.quota_85p}),y0:0,y1:60,step:10,h:200,t:14,yf:function(v){return v+'%'},xt:comp.map(function(r,i){return {i:i,l:String(r.anno)}}),minx:30,bc:function(){return ACC},
+    tip:function(i){var r=comp[i];return '<b>'+r.anno+'</b><br>'+nf(r.quota_85p,1)+'% dei morti aveva 85 anni o più<br>'+f0(r.morti)+' morti in tutto'}})});
+  var E=S.E.finestre.filter(function(r){return r.finestra==='primavera 2020'});
+  function g(f,s){var r=null;E.forEach(function(x){if(x.fascia===f&&x.sesso===s)r=x});return r}
+  var fasce=['0-64','65-74','75-84','85+'];
+  setH('b-eta',dvRows(fasce.map(function(f){var r=g(f,'T');return {nm:f.replace('-','–')+' anni'+(f==='85+'?'':''),v:r.pct_B,label:sgp(r.pct_B,0)+' ('+sg(r.eccesso_B,0)+')'}}),120));
+  table('tab-sesso',['Fascia','Uomini','Donne'],fasce.map(function(f){return [f.replace('-','–')+' anni',sgp(g(f,'M').pct_B,0),sgp(g(f,'F').pct_B,0)]}).concat([['Tutte le età',sgp(g('tutte','M').pct_B,0),sgp(g('tutte','F').pct_B,0)]]));
+  var h='<div class="scroll"><table><thead><tr><th>Fascia</th><th class="r">Uomini 2019</th><th class="r">Uomini 2025</th><th class="r">Donne 2019</th><th class="r">Donne 2025</th></tr></thead><tbody>';
+  fasce.forEach(function(f){function v(a,s){var r=null;T.forEach(function(x){if(x.anno===a&&x.fascia===f&&x.sesso===s)r=x});return r}
+    h+='<tr><td>'+f.replace('-','–')+' anni</td><td class="r">'+f0(v(2019,'M').per100mila)+'</td><td class="r">'+f0(v(2025,'M').per100mila)+'</td><td class="r">'+f0(v(2019,'F').per100mila)+'</td><td class="r">'+f0(v(2025,'F').per100mila)+'</td></tr>'});
+  setH('tassi-c','<p class="sub">Morti dell&rsquo;anno ogni 100.000 residenti della stessa fascia (popolazione media tra il 1&deg; gennaio dell&rsquo;anno e il successivo, ISTAT). I residenti per et&agrave; sono quelli dell&rsquo;anagrafe e nel 2020&ndash;2021 sono stati corretti: confronto indicativo.</p>'+h+'</tbody></table></div>');
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var m23=milanoRow(2023);
+  var L=[
+   '<b>Residenza, non luogo del decesso.</b> I dati contano i morti <i>residenti</i> a Milano, anche se sono morti altrove, e non contano chi muore negli ospedali di Milano ma risiede fuori. Non sono &laquo;i morti avvenuti a Milano&raquo;.',
+   '<b>Che cosa &egrave; il &laquo;normale&raquo;.</b> Media dello stesso giorno nei 5 anni precedenti senza 2020 e 2021, lisciata su 15 giorni. Prima del 2014 non si pu&ograve; calcolare. Un&rsquo;altra scelta &egrave; la media semplice degli ultimi 5 anni, ma dal 2021 contiene il 2020: per Milano nel 2023 darebbe '+sgp(m23.pct_A,1)+' invece di '+sgp(m23.pct_B,1)+' (tabella qui sotto). Questa pagina usa sempre la prima.',
+   '<b>Il normale non segue l&rsquo;invecchiamento.</b> Per Milano il numero di morti degli anni 2011&ndash;2019 &egrave; piatto (14.000&ndash;14.600) e il metodo regge. Per la Lombardia e per l&rsquo;Italia gli anni 2015&ndash;2019 hanno gi&agrave; un piccolo eccesso &laquo;normale&raquo; (la popolazione invecchia): i confronti in percentuale dopo il 2020 sono approssimativi.',
+   '<b>Dati provvisori.</b> ISTAT li chiama provvisori, ma i totali degli anni 2011&ndash;2024 sono identici nelle tre release che abbiamo confrontato (agosto 2025, marzo 2026, agosto 2026) e il 2025 completo &egrave; identico tra marzo e agosto 2026. Il rischio &egrave; negli ultimi mesi: a cinque settimane dalla fine del semestre, la release di agosto 2025 aveva contato il 3,5% di morti in meno a Milano per giugno 2025 (tabella). Per questo il 2026 (fino al 30 giugno) non &egrave; nei grafici e maggio&ndash;giugno 2026 vanno letti con prudenza.',
+   '<b>La temperatura di Brera 2008&ndash;2016.</b> Nel periodo la serie di Brera &egrave; pi&ugrave; calda di circa 0,65 &deg;C rispetto alle stazioni vicine (e non &egrave; stata corretta, vedi la pagina <a href="../temperature/">temperature</a>). Le ondate di caldo del 2014, 2015 e 2016 possono essere un po&rsquo; sovrastimate. Nel 2026 mancano 30 giorni di temperatura (marzo&ndash;maggio).',
+   '<b>Le soglie sono nostre.</b> Ondata di caldo = almeno 3 giorni di fila con massima di 33 &deg;C o pi&ugrave; a Brera, pi&ugrave; 3 giorni dopo; episodio di freddo = almeno 3 giorni con temperatura media a 0 &deg;C (o 3 &deg;C) o meno, pi&ugrave; 7 giorni dopo. Con altre soglie gli elenchi cambiano. Le finestre del Covid (marzo&ndash;maggio 2020, ecc.) sono scelte di calendario nostre.',
+   '<b>Il rumore.</b> In un giorno normale a Milano muoiono circa 39 persone, con uno scarto tipico di circa 6: differenze di 10&ndash;15 morti in un giorno non dicono niente. Per questo si guardano settimane, ondate e stagioni.',
+   '<b>L&rsquo;et&agrave; cambia poco il quadro.</b> Con un calcolo che tiene conto dell&rsquo;et&agrave; dei residenti (tassi del 2019 applicati alla popolazione di ogni anno, disponibile solo dal 2019; nel 2020&ndash;2021 la popolazione registrata di Milano &egrave; stata ridotta di oltre 50.000 persone con un &laquo;aggiustamento statistico&raquo; del bilancio demografico) le conclusioni restano: 2020 molto sopra, 2022 sopra, 2024 e 2025 sotto o vicini al normale.',
+   '<b>Comparazione, non cause.</b> Questa pagina non dice di che cosa si &egrave; morti, n&eacute; se il caldo, il freddo o un virus abbiano causato qualcosa. Mette in fila numeri accanto al normale.'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var A=S.A.milano.filter(function(r){return r.anno>=2019&&r.anno<=2025});
+  setH('ann-testo','<p>Per Milano, tre normali diversi per ogni anno: (B) il metodo di questa pagina; (A) media degli ultimi 5 anni, 2020 compreso; (et&agrave;) tassi per et&agrave; del 2019 applicati alla popolazione dell&rsquo;anno (indicativo).</p>');
+  table('tab-ann',['Anno','Morti','Normale B','Differenza B','Normale A','Differenza A','Normale per età','Differenza per età'],A.map(function(r){return [String(r.anno),f0(r.morti),f0(r.attesi_B),sgp(r.pct_B,1),f0(r.attesi_A),sgp(r.pct_A,1),f0(r.attesi_eta),sgp(r.pct_eta,1)]}));
+  var R=S.RV.filter(function(r){return r.scope==='Milano'});
+  setH('rev-testo','<p>I morti di gennaio&ndash;giugno 2025 a Milano, come erano nella release di agosto 2025 (cinque settimane dopo giugno) e come sono oggi. Dalla release di marzo 2026 in poi i numeri non cambiano pi&ugrave;.</p>');
+  var NM=['','gennaio','febbraio','marzo','aprile','maggio','giugno'];
+  table('tab-rev',['Mese 2025','Release agosto 2025','Release marzo 2026','Release agosto 2026','Mancavano'],R.map(function(r){return [NM[+r.periodo.slice(5)],f0(r['2025-08-05']),f0(r['2026-03-31']),f0(r['2026-08-25']),f0(r['2026-08-25']-r['2025-08-05'])+' ('+nf(100*(1-r['2025-08-05']/r['2026-08-25']),1)+'%)']}));
+}
+
+function file(){
+  var F=[['milano_giorno.csv','Milano, morti al giorno, normale, massima di Brera (2014&ndash;2026)'],['milano_settimana.csv','Milano, per settimana'],['lombardia_settimana.csv','Lombardia, per settimana'],['italia_settimana.csv','Italia, per settimana'],['annuale.csv','anni, tre modi di calcolare il normale'],['finestre_covid.csv','periodi Covid, Milano, Lombardia, Italia'],['ondate_caldo.csv','ondate di caldo'],['estati_confronto.csv','estati'],['ondate_freddo.csv','episodi di freddo'],['inverni_confronto.csv','inverni'],['milano_eta_sesso_finestre.csv','et&agrave; e sesso nei periodi'],['milano_composizione_per_anno.csv','et&agrave; dei morti per anno'],['milano_tassi_eta_sesso.csv','morti ogni 100.000 per et&agrave; e sesso']];
+  setH('file-lista',F.map(function(f){return '<a href="data/'+f[0]+'">'+f[0]+'</a> ('+f[1]+')'}).join('; ')+'. Tutti i file sono totali per Milano, Lombardia e Italia, calcolati da noi; i dati ISTAT per comune non sono qui. Altri file (per la pagina): <a href="data/riepilogo.json">riepilogo.json</a>, <a href="data/milano_giorno.json">milano_giorno.json</a>.');
+}
+})();
+</script>
+</body></html>
