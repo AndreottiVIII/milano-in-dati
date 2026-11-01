@@ -51,7 +51,8 @@
     { path: 'quartieri-che-cambiano/', label: 'Quartieri che cambiano' },
     { path: 'pollini/', label: 'Pollini' },
     { path: 'case-popolari/', label: 'Case popolari vuote' },
-    { path: 'beni-confiscati/', label: 'Beni confiscati' }
+    { path: 'beni-confiscati/', label: 'Beni confiscati' },
+    { path: 'voto-reddito/', label: 'Voto e reddito' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

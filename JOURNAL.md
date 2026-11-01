@@ -2542,3 +2542,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Nessun nome di persone, aziende o assegnatari: solo il tipo di assegnatario ("Impresa/privato" unito ad "Altro").
 - Numeri: 665 beni a Milano (477 immobili, 188 aziende), primo comune del Nord ma 49 ogni 100.000 abitanti (Roma 78, Palermo 645); immobili ancora in gestione 33% (Roma 79%). Sorpresa: le aziende confiscate non sopravvivono (95% liquidate in Italia, 68 su 73 a Milano), le case sì (193 unità su 274 del Comune in uso); il blocco più grande sono i 18 box di un solo palazzo, 18 anni dopo il decreto.
 - Limiti dei dati: niente data di confisca; beni in gestione senza indirizzo; si contano unità, non edifici; ANBSC e Comune non coincidono; "in attesa" non vuol dire "mai usato"; ANBSC avverte di una possibile sottostima.
+
+## 43. Come votano le zone ricche e povere
+
+- 2026-11-01 notte — Analisi e pagina (`voto-reddito/`, `docs/voto-reddito/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `voto-reddito/NOTE.md`.
+- Metodo: sezione → CAP dallo stradario ds939 (CAP ufficiale per civico); reddito medio per contribuente del CAP 2019-22 in euro 2025; decili di sezione pesati per elettori; 25 elezioni 2016-2026 (Senato e municipali fuori dal selettore, CSM 2022 scartato perché identico ai Consigli giudiziari nel file del Comune); intervalli col bootstrap sui 38 CAP; controlli per NIL con stranieri e over 65 dal filone popolazione.
+- Numeri: centrosinistra D10-D1 da +9,5 a +14,7 punti nel 2016-2021, circa zero dal 2022 ("non ha più la forte salita del 2016-2021": senza i 3 CAP instabili resta un legame debole); il Centro sale da 13% a 37% fra i decili nelle Politiche 2022; M5S sempre più forte nelle zone povere (Spearman −0,90/−0,94). Affluenza: sale col reddito alle Politiche, piatta alle amministrative.
+- Limiti dei dati: confronto fra zone (nessun voto individuale noto); reddito dei contribuenti, non degli elettori; D10 = 4 CAP; famiglie di partiti non sono coalizioni; Politiche 2018/2022 e Regionali 2023 dati ufficiosi; ipotesi del registro elettorale gonfiato nelle zone ricche non provata.
