@@ -2496,3 +2496,13 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: 265 pietre (262 persone e 3 agenti della Questura); 134 politici, 123 razziali, 5 internati militari; tutti morti; Auschwitz 104, Mauthausen 94. Sorpresa: il 43% degli arresti in due mesi (dicembre 1943 e marzo 1944).
 - Anni di posa controllati: Milla e Neppi 2019 (Wikipedia sbaglia), Pogliaghi 2025 (AGI), Bortolotti 2025 annunciato, De Benedetti 2023 da verificare; Cibeno 2024 (Fondazione Fossoli, ANED) mentre le schede del Comitato scrivono 2026.
 
+## 37. I luoghi di Milano più cercati
+
+- 2026-11-01 — Fase 1 e pagina (`luoghi-cercati/`, `docs/luoghi-cercati/`), volute da Davide. Dettagli in `luoghi-cercati/NOTE.md`.
+- Fonti: Wikidata (CC0) per 1.802 elementi con coordinate a Milano; Wikimedia Pageviews API (dataset Analytics CC0), mensile lug 2015-ott 2026, 201 lingue, 4 richieste al secondo (a 10 risponde 429).
+- Scelte del coordinatore: istituzioni (università, ospedali), opere (Ultima Cena), marchi e la voce "Milano" fuori classifica in un riquadro a parte; Santa Maria delle Grazie unita alla voce Unesco; ogni evento annotato verificato su Wikipedia, gli altri picchi "non spiegati".
+- Numeri: San Siro 16,7 milioni di letture contro Duomo 15,8 (84% dall'estero); Bosco Verticale settimo; l'Ultima Cena 33,2 milioni (fuori classifica). Le letture in italiano calano come tutta Wikipedia in italiano (per milione stabili), in inglese crescono.
+- Limiti dei dati: letture non visite, lingua non nazionalità, redirect non contati (Torre UniCredit, Unipol Dome, Monumentale sottostimati), NIL deciso dalla coordinata.
+
+- 2026-11-01 sera — **Davide autorizza il lavoro notturno**: quando una fase 1 è pronta e i dati reggono, si fa la pagina e si pubblica, con i limiti scritti; riepilogo il mattino dopo.
+
