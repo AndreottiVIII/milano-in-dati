@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Cosa si mangia a Milano</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:0 16px 16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.8em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+/* barra freschezza */
+#fresco{position:sticky;top:0;z-index:2000;background:var(--warmbg);border-bottom:2px solid #c26a1b;margin:0 -16px;padding:6px 16px;font-size:.85rem;line-height:1.35}
+#fresco .fh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap} #fresco .fh b{white-space:nowrap}
+#fresco .fk{color:var(--warm)} #fresco button{font:inherit;font-size:.8rem;border:1px solid #c26a1b;background:#fff;color:var(--warm);border-radius:12px;padding:0 10px;cursor:pointer;margin-left:auto}
+#fresco .fb{display:grid;grid-template-columns:repeat(3,1fr);gap:0 16px;margin-top:4px} #fresco .fb p{margin:.2em 0}
+@media(max-width:760px){#fresco .fb{grid-template-columns:1fr} #fresco:not(.open) .fb{display:none} #fresco .fh .fk{flex:1 1 100%;order:3}}
+@media(min-width:761px){#fresco button{display:none}}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:12px;height:12px;border-radius:6px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars .row.g .nm,.bars .row.g .v{color:#999} .bars .row.g .fill{background:#bdbdbd}
+.bars.dv .tr .fill{position:absolute;top:0} .bars.dv .tr:after{content:"";position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666}
+.bars .tr .fill.c2{background:#bdbdbd;height:5px} .bars .tr.two{height:12px} .bars .tr.two .fill{height:5px} .bars .tr.two .fill.c2{position:absolute;top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.tabmax{max-height:360px;overflow:auto} #tab-mix{min-width:780px} #tab-nil{min-width:520px}
+#tab-mix td.h{text-align:right;font-variant-numeric:tabular-nums} #tab-nil tr.g td{color:#999}
+.leaflet-popup-content{font:13px/1.4 system-ui,Arial,sans-serif;margin:8px 10px}
+</style><script src="../menu.js" defer></script></head><body><main>
+
+<div id="fresco" role="region" aria-label="Quanto sono freschi questi dati">
+<div class="fh"><b>Quanto sono freschi questi dati</b><span class="fk" id="fk"></span><button type="button" id="fbtn" aria-expanded="false">dettagli</button></div>
+<div class="fb" id="fb"></div>
+</div>
+
+<h1>Cosa si mangia a Milano</h1>
+<p>Ristoranti, trattorie, pizzerie, kebab, sushi, bar: dove sono e che cucina fanno, quartiere per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale). Usiamo due fonti che si controllano a vicenda: <b>OpenStreetMap</b> (la mappa fatta da volontari, <b id="n-osm">6.637</b> locali di cibo e bevande, di cui sappiamo spesso che cucina fanno) e il <b>registro del Comune</b> (<b id="n-reg">9.166</b> pubblici esercizi &laquo;in piano&raquo;, cio&egrave; dove servire cibo o bevande &egrave; l&rsquo;attivit&agrave; principale; ma senza la cucina). Nessuna delle due &egrave; completa: leggi la barra gialla in alto e <a href="#limiti">i limiti dei dati</a>.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Ogni puntino &egrave; un locale di OpenStreetMap. Scegli il tipo e la cucina. Clic su un puntino per il nome. Se non vedi un locale, pu&ograve; mancare nella mappa: OpenStreetMap ne ha il 72% rispetto al registro.</p>
+<div class="ctl"><label class="sub" for="f-tipo">Tipo:</label><select id="f-tipo" aria-label="Tipo di locale"></select>
+<label class="sub" for="f-cuc">Cucina:</label><select id="f-cuc" aria-label="Cucina"></select>
+<label class="ck"><input type="checkbox" id="ck-reg"> mostra anche le pratiche del registro (puntini grigi)</label></div>
+<p class="sub" id="map-n"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei locali di cibo e bevande di Milano"></div>
+<div class="lgd"><span><i style="background:#00695c"></i>locale con la cucina indicata</span><span><i style="background:#c9c9c9"></i>cucina non indicata</span><span><i style="background:#555;width:6px;height:6px;border-radius:3px"></i>pratica del registro (se attivata)</span></div>
+<p class="src">Locali: &copy; OpenStreetMap contributors (ODbL), dati del 1 novembre 2026; la cucina &egrave; raggruppata da noi a partire dal tag <code>cuisine</code>. Pratiche del registro: Comune di Milano (CC BY), ds58, solo posizione e tipo. Sfondo: &copy; OpenStreetMap contributors.</p>
+
+<h2 id="classifica">Quanti locali ogni 1.000 residenti</h2>
+<div id="class-testo"></div>
+<div class="warm"><b>Attenzione al centro.</b> Nei quartieri del centro i locali servono soprattutto chi ci lavora, ci studia o passa, non chi ci abita: &laquo;41 locali ogni 1.000 residenti&raquo; non vuol dire che ogni residente ne abbia 41 a disposizione. In grigio i quartieri con meno di 3.000 residenti (parchi, aree industriali): dividere per pochi abitanti non ha senso.</div>
+<div class="grid2"><div><h3>Pi&ugrave; locali per residente</h3><div class="bars" id="b-top"></div></div>
+<div><h3>Meno locali per residente</h3><div class="bars" id="b-bot"></div></div></div>
+<p class="src">Pubblici esercizi &laquo;in piano&raquo; del registro del Comune (ds58) ogni 1.000 residenti (ds205, anno 2024, CC BY). Qui solo i quartieri con almeno 3.000 residenti. Il conto con OpenStreetMap d&agrave; la stessa graduatoria (correlazione 0,985 tra quartieri) ma numeri pi&ugrave; bassi.</p>
+<details><summary>Tutti gli 88 quartieri</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
+
+<h2 id="cucine">Che cucina fanno</h2>
+<div id="cuc-testo"></div>
+<div class="bars" id="b-cuc"></div>
+<p class="src">Ristoranti e fast food di OpenStreetMap con la cucina indicata (<span id="n-cuc"></span>); un locale pu&ograve; avere pi&ugrave; cucine, quindi le quote non sommano a 100. Il registro del Comune dice solo il tipo di licenza (ristorante, pizzeria, bar&hellip;), non la cucina.</p>
+<h3>La cucina del tuo quartiere</h3>
+<div class="ctl"><label class="sub" for="sel-nil">Quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<div class="bars" id="b-nilcuc"></div>
+<p class="src">Barra verde: quota nel quartiere. Barra grigia: quota in tutta la citt&agrave;. Solo i quartieri con almeno 20 locali con cucina indicata (<span id="n-nilok"></span> su 88): in quelli con meno locali le percentuali ballano troppo.</p>
+<details><summary>Tutti i quartieri, in una tabella</summary><div class="scroll tabmax"><table id="tab-mix"></table></div></details>
+
+<h2 id="dove">Dove si raggruppano le cucine</h2>
+<div id="lq-testo"></div>
+<div id="lq"></div>
+
+<h2 id="cambi">Dal 2019 al 2026 nel registro</h2>
+<div id="cambi-testo"></div>
+<div class="warm" id="cambi-warn"></div>
+<div class="grid2"><div><h3>Crescono di pi&ugrave;</h3><div class="bars dv" id="b-su"></div></div>
+<div><h3>Calano di pi&ugrave;</h3><div class="bars dv" id="b-giu"></div></div></div>
+<p class="src">Pratiche &laquo;in piano&raquo; del registro: copia del 19 luglio 2019 (Wayback Machine, file del Comune) contro il file scaricato il 1 novembre 2026. Solo quartieri con almeno 40 pratiche nel 2019. Quartiere assegnato dalle coordinate sui confini attuali. <a href="data/pratiche_2019_2026_nil.csv">Tutti i quartieri</a>.</p>
+
+<h2 id="milanese">La cucina milanese non si pu&ograve; contare</h2>
+<div class="warm" id="mil-box"></div>
+<details><summary id="mil-sum"></summary><div class="scroll"><table id="tab-mil"></table></div></details>
+
+<h2 id="limiti">Come &egrave; fatto, e i limiti dei dati</h2>
+<h3>Come &egrave; fatto</h3>
+<ul class="m" id="metodo"></ul>
+<h3>I limiti dei dati</h3>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="download">File</h2>
+<p id="files"></p>
+<div class="warn" id="odbl"></div>
+
+<footer>
+<p><b>Fonti, licenze e date di scaricamento.</b> <span id="fonti"></span></p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,LO=null,PR=null,ACC='#00695c';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function tc(s){var t=String(s).toLowerCase().replace(/(^|[\s\-'’.(])([a-zà-ù])/g,function(m,a,b){return a+b.toUpperCase()});return t.replace(/\bXxii\b/,'XXII').replace(/\bQt\b/,'QT').replace(/\bQ\.Re\b/g,'Q.re').replace(/\bPta\b/,"P.ta")}
+function bars(id,rows,max){
+  setH(id,rows.map(function(r){return '<div class="row'+(r.grey?' g':'')+'"><span class="nm" title="'+esc(r.title||'')+'">'+r.nm+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="fill" style="width:'+Math.max(0,Math.min(100,r.v/max*100))+'%"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+function dbars(id,rows,max){
+  setH(id,rows.map(function(r){var w=Math.min(50,Math.abs(r.v)/max*50),l=r.v>=0?50:50-w;
+    return '<div class="row"><span class="nm">'+r.nm+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="fill" style="left:'+l+'%;width:'+w+'%;background:'+(r.v>=0?ACC:'#c26a1b')+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+function table(id,head,rows,cls){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr'+(r.g?' class="g"':'')+'>'+r.c.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+
+Promise.all([J('data/riepilogo.json'),J('data/locali_osm.json'),J('data/pratiche_ds58.json')]).then(function(a){
+  D=a[0];LO=a[1];PR=a[2];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){fresco();sorpresa();mappa();classifica();cucine();dove();cambi();milanese();metodo();file();}
+
+/* ---------- barra freschezza ---------- */
+function fresco(){
+  var F=D.fresh;
+  setH('fk','Registro: agosto 2026, senza data dentro i file &middot; OpenStreetMap: '+f0(F.osm_3a)+'% rivisto negli ultimi 3 anni, ma &egrave; il '+f0(F.osm_su_registro_pct)+'% del registro');
+  setH('fb','<p><b>Registro del Comune.</b> I file sono stati ricaricati sul portale ad agosto 2026 (dichiarati annuali) e sono cambiati davvero rispetto al 2019. Ma <b>nessuna colonna dice a che data sono fotografati</b>, e tiene per mesi i locali chiusi.</p>'+
+   '<p><b>OpenStreetMap.</b> Il '+f0(F.osm_3a)+'% dei locali &egrave; stato modificato negli ultimi 3 anni (il '+f0(F.osm_1a)+'% nell&rsquo;ultimo anno). Ma ne conta il '+f0(F.osm_su_registro_pct)+'% del registro, e meno in periferia.</p>'+
+   '<p><b>Chi lo tiene aggiornato.</b> Il '+f0(F.mod_top5)+'% delle modifiche del 2025-26 &egrave; di 5 sole persone. <a href="#limiti">Tutti i dettagli</a>.</p>');
+  var b=el('fbtn'),fr=el('fresco');
+  b.addEventListener('click',function(){var o=fr.classList.toggle('open');b.setAttribute('aria-expanded',o?'true':'false');b.textContent=o?'chiudi':'dettagli'});
+  el('n-osm').textContent=f0(F.osm_n);el('n-reg').textContent=f0(D.citta.in_piano);
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var S=D.sorpresa,N=S.nolo,R=S.sarpi,C=D.cucine;
+  var d=Object.keys(N.dett).map(function(k){return k.toLowerCase()+' '+N.dett[k]});
+  var dd=Object.keys(N.dett).sort(function(a,b){return N.dett[b]-N.dett[a]}).map(function(k){return k.toLowerCase()+' '+N.dett[k]});
+  setH('sorpresa','<p><b>NoLo &egrave; vario quanto Sarpi, ma in un altro modo.</b> Tra i locali con la cucina indicata, quelli che non sono italiani n&eacute; pizza sono il <b>'+nf(N.etn_pct,1)+'%</b> a NoLo ('+N.etn+' su '+N.n+') e il <b>'+nf(R.etn_pct,1)+'%</b> a Sarpi ('+R.etn+' su '+R.n+'): la differenza &egrave; nel rumore. In tutta la citt&agrave; sono il '+nf(C.etniche_pct,1)+'%.</p>'+
+   '<p>Ma a <b>Sarpi '+S.sarpi_asia_orientale+' locali su '+R.n+' ('+Math.round(100*S.sarpi_asia_orientale/R.n)+'%) sono cinesi, giapponesi o di altra cucina asiatica</b>; a <b>NoLo solo '+S.nolo_asia_orientale+' su '+N.n+' ('+Math.round(100*S.nolo_asia_orientale/N.n)+'%)</b>, e ci sono <b>cinque cucine con almeno 3 locali ciascuna</b>: '+dd.join(', ')+'.</p>'+
+   '<p class="src">OpenStreetMap, ristoranti e fast food con la cucina indicata, 1 novembre 2026. Sono pochi locali per quartiere (81 e 132): leggi le percentuali come ordini di grandezza.</p>');
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAYER=null,REGL=null,COL_N='#00695c',COL_X='#c9c9c9';
+function mappa(){
+  var st=el('f-tipo'),sc=el('f-cuc');
+  st.innerHTML='<option value="-1">Tutti i tipi</option>'+LO.tipi.map(function(t,i){return '<option value="'+i+'">'+esc(t)+'</option>'}).join('');
+  sc.innerHTML='<option value="-1">Tutte le cucine</option><option value="-2">Cucina non indicata</option>'+LO.gruppi.map(function(t,i){return '<option value="'+i+'">'+esc(t)+'</option>'}).join('');
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  MAP.setView([45.4655,9.19],12);
+  var cv=L.canvas({padding:.3});
+  LAYER=L.layerGroup().addTo(MAP);
+  REGL=L.layerGroup();
+  var rc=L.canvas({padding:.3});
+  PR.p.forEach(function(p){L.circleMarker([p[1],p[0]],{renderer:rc,radius:2.2,stroke:false,fillColor:'#555',fillOpacity:.55,interactive:false}).addTo(REGL)});
+  function draw(){
+    var t=+st.value,c=+sc.value,n=0;
+    LAYER.clearLayers();
+    LO.p.forEach(function(p){
+      if(t>=0&&p[2]!==t)return;
+      var has=p[3].length>0;
+      if(c>=0&&p[3].indexOf(c)<0)return;
+      if(c===-2&&has)return;
+      n++;
+      var m=L.circleMarker([p[1],p[0]],{renderer:cv,radius:4,weight:.8,color:'#fff',fillColor:has?COL_N:COL_X,fillOpacity:has?.85:.9});
+      m.bindPopup(function(){return '<b>'+esc(p[4]||'(senza nome)')+'</b><br>'+esc(LO.tipi[p[2]])+(p[5]?'<br>cucina (OSM): '+esc(p[5]):'<br>cucina non indicata')});
+      m.addTo(LAYER);
+    });
+    el('map-n').textContent='Mostrati '+f0(n)+' locali su '+f0(LO.p.length)+'.';
+  }
+  st.addEventListener('change',draw);sc.addEventListener('change',draw);
+  el('ck-reg').addEventListener('change',function(e){if(e.target.checked){REGL.addTo(MAP);LAYER.eachLayer(function(l){l.bringToFront&&l.bringToFront()})}else MAP.removeLayer(REGL)});
+  draw();
+}
+
+/* ---------- classifica ---------- */
+function classifica(){
+  var C=D.citta,rows=D.nil,big=rows.filter(function(r){return !r[7]&&r[4]!=null}).sort(function(a,b){return b[4]-a[4]});
+  setH('class-testo','<p>Il Comune tiene un registro dei pubblici esercizi &laquo;in piano&raquo;: bar, ristoranti, pizzerie, pub, dove somministrare cibo e bevande &egrave; l&rsquo;attivit&agrave; principale. Sono '+f0(C.in_piano)+' in citt&agrave;, <b>'+nf(C.in_piano_per_1000,1)+' ogni 1.000 residenti</b> ('+nf(C.piano_e_fuori_per_1000,1)+' se si aggiungono i &laquo;fuori piano&raquo;: circoli, mense, stadi, stazioni). Con i locali di OpenStreetMap sono '+nf(C.osm_per_1000,1)+'.</p>');
+  function R(r){return {nm:esc(tc(r[1])),sub:f0(r[2])+' residenti &middot; '+f0(r[3])+' locali',v:r[4],txt:nf(r[4],1)}}
+  var mx=big[0][4];
+  bars('b-top',big.slice(0,12).map(R),mx);
+  bars('b-bot',big.slice(-12).reverse().map(R),mx);
+  var all=rows.slice().sort(function(a,b){return (b[4]==null?-1:b[4])-(a[4]==null?-1:a[4])});
+  table('tab-nil',['Quartiere','Residenti','Pratiche in piano','Ogni 1.000 res.','Locali OSM','OSM ogni 1.000'],all.map(function(r){return {g:!!r[7],c:[esc(tc(r[1]))+(r[7]?' <span class="sub">(pochi residenti)</span>':''),f0(r[2]),f0(r[3]),r[4]==null?'&ndash;':nf(r[4],1),f0(r[5]),r[6]==null?'&ndash;':nf(r[6],1)]}}));
+}
+
+/* ---------- cucine ---------- */
+function cucine(){
+  var C=D.cucine,m=C.mix.slice().sort(function(a,b){return b[2]-a[2]});
+  var piz=m[0],s=function(n){return m.filter(function(x){return x[0]===n})[0]};
+  setH('cuc-testo','<p>Su '+f0(C.n)+' ristoranti e fast food di OpenStreetMap con la cucina indicata, <b>'+nf(s('Pizza')[2],1)+'%</b> fanno pizza e <b>'+nf(s('Italiana')[2],1)+'%</b> cucina italiana. Poi giapponese e sushi ('+nf(s('Giapponese e sushi')[2],1)+'%, pi&ugrave; dei cinesi: '+nf(s('Cinese')[2],1)+'%), hamburger e panini ('+nf(s('Hamburger e panini')[2],1)+'%), kebab e Medio Oriente ('+nf(s('Kebab e Medio Oriente')[2],1)+'%). Le cucine non italiane e non pizza (giapponese, cinese, altre asiatiche, indiana, mediorientale, latinoamericana, africana) sono il <b>'+nf(C.etniche_pct,1)+'%</b>.</p>');
+  bars('b-cuc',m.map(function(x){return {nm:esc(x[0]),sub:f0(x[1])+' locali',v:x[2],txt:nf(x[2],1)+'%'}}),m[0][2]);
+  el('n-cuc').textContent=f0(C.n)+' su '+f0(C.n_rist_fast);el('n-nilok').textContent=C.nil_ammessi;
+  var sel=el('sel-nil'),mix=D.mix_nil;
+  sel.innerHTML=mix.map(function(x,i){return '<option value="'+i+'">'+esc(tc(x.nil))+' ('+x.n+' locali)</option>'}).join('');
+  var gi=C.mix.map(function(_,i){return i});
+  function draw(){
+    var x=mix[+sel.value];
+    var rows=gi.map(function(i){return {i:i,q:100*x.g[i]/x.n,c:C.mix[i][2],k:x.g[i],nm:C.mix[i][0]}}).sort(function(a,b){return b.c-a.c}).slice(0,12);
+    var mxv=Math.max.apply(null,rows.map(function(r){return Math.max(r.q,r.c)}));
+    setH('b-nilcuc','<p class="sub"><b>'+esc(tc(x.nil))+'</b>: '+x.n+' locali con cucina indicata su '+x.n_rf+' ristoranti e fast food; cucine non italiane e non pizza: '+nf(x.etn,1)+'%.</p>'+rows.map(function(r){return '<div class="row"><span class="nm">'+esc(r.nm)+'</span><span class="tr two"><span class="fill" style="width:'+(r.q/mxv*100)+'%"></span><span class="fill c2" style="width:'+(r.c/mxv*100)+'%"></span></span><span class="v">'+nf(r.q,0)+'% &middot; '+nf(r.c,0)+'%</span></div>'}).join(''));
+  }
+  sel.addEventListener('change',draw);
+  var ix=0;mix.forEach(function(x,i){if(/LORETO/.test(x.nil))ix=i});sel.value=String(ix);draw();
+  var cols=[['Pizza',0],['Italiana',1],['Giapp.',2],['Cinese',3],['Altra asiat.',4],['Indiana',5],['Kebab/M.O.',6],['Latino',7],['Hamb.',9],['Pesce',10]];
+  var mxc=60;
+  table('tab-mix',['Quartiere','Locali'].concat(cols.map(function(c){return c[0]})).concat(['Non ital.']),mix.map(function(x){
+    return {c:[esc(tc(x.nil)),x.n].concat(cols.map(function(c){var q=100*x.g[c[1]]/x.n;return '<span style="display:block;margin:-6px -8px;padding:6px 8px;background:rgba(0,105,92,'+Math.min(.55,q/mxc*.55).toFixed(2)+')">'+nf(q,0)+'</span>'})).concat([nf(x.etn,0)])};
+  }));
+}
+
+/* ---------- dove si raggruppano ---------- */
+function dove(){
+  var Q=D.lq,cin=Q.filter(function(q){return q.g==='Cinese'})[0],t=cin.top[0];
+  setH('lq-testo','<p><b>Come si legge.</b> L&rsquo;<i>indice di localizzazione</i> dice quante volte una cucina &egrave; pi&ugrave; frequente in un quartiere che nella citt&agrave; intera. Esempio: i locali cinesi sono l&rsquo;'+nf(cin.quota,1)+'% di quelli con cucina indicata in tutta Milano, ma a '+esc(tc(t.nil))+' sono il '+nf(100*t.k/t.n,0)+'% ('+t.k+' su '+t.n+'): indice '+nf(t.lq,1)+', cio&egrave; '+nf(t.lq,1)+' volte la media. 1 vuol dire &ldquo;nella media&rdquo;. Contano solo i quartieri con almeno 15 locali con cucina indicata e almeno 3 della cucina in questione, per non farsi ingannare da due o tre locali.</p>');
+  setH('lq',Q.map(function(q){
+    var mx=q.top[0].lq;
+    return '<div class="card"><h3>'+esc(q.g)+'</h3><p class="sub">'+f0(q.n)+' locali in citt&agrave; ('+nf(q.quota,1)+'%). I 5 quartieri che ne hanno di pi&ugrave; ne contengono il '+nf(q.quota_primi5,0)+'%.</p><div class="bars" id="lq-'+q.g.length+q.n+'">'+q.top.map(function(r){return '<div class="row"><span class="nm">'+esc(tc(r.nil))+'<i>'+r.k+' su '+r.n+'</i></span><span class="tr"><span class="fill" style="width:'+(r.lq/mx*100)+'%"></span></span><span class="v">indice '+nf(r.lq,1)+'</span></div>'}).join('')+'</div></div>';
+  }).join(''));
+}
+
+/* ---------- cambi ---------- */
+function cambi(){
+  var C=D.cambi,F=D.fresh,r=C.rows;
+  setH('cambi-testo','<p>Nel registro dei pubblici esercizi &laquo;in piano&raquo; le pratiche sono passate da <b>'+f0(C.n_2019)+'</b> (luglio 2019) a <b>'+f0(C.n_2026)+'</b> (file ricaricato ad agosto 2026): <b>'+sg(100*(C.n_2026/C.n_2019-1),1)+'%</b>. Il saldo &egrave; piccolo, ma sotto c&rsquo;&egrave; molto ricambio: '+f0(F.reg_codici_spariti)+' codici del 2019 non ci sono pi&ugrave; e '+f0(F.reg_codici_nuovi)+' sono nuovi.</p>');
+  setH('cambi-warn','<b>Per lo pi&ugrave; sono cambi di gestione, non locali che aprono e chiudono.</b> Il '+f0(F.reg_nuovi_stesso_indirizzo_pct)+'% dei codici nuovi sta a un indirizzo che c&rsquo;era gi&agrave; nel 2019, e il '+f0(F.reg_spariti_stesso_indirizzo_pct)+'% dei codici spariti sta a un indirizzo dove c&rsquo;&egrave; ancora una pratica: quando subentra un nuovo gestore, il codice cambia. Contando gli indirizzi, ne sono spariti '+f0(F.reg_indirizzi_spariti)+' e comparsi '+f0(F.reg_indirizzi_nuovi)+'. Il registro non ha date di apertura o chiusura: non si sa quando.');
+  var mx=Math.max.apply(null,r.map(function(x){return Math.abs(x[4])}));
+  function R(x){return {nm:esc(tc(x[1])),sub:f0(x[2])+' &rarr; '+f0(x[3])+' pratiche',v:x[4],txt:sg(x[4],1)+'%'}}
+  dbars('b-su',r.slice(0,8).map(R),mx);dbars('b-giu',r.slice(-8).reverse().map(R),mx);
+}
+
+/* ---------- milanese ---------- */
+function milanese(){
+  var M=D.milanesi;
+  setH('mil-box','<p><b>Non c&rsquo;&egrave; un dato per dire quali locali fanno cucina milanese.</b> Il registro del Comune non indica la cucina. In OpenStreetMap solo <b>'+M.con_tag+'</b> locali hanno scritto &laquo;milanese&raquo; o &laquo;risotto&raquo; come cucina; il tag pi&ugrave; usato, <i>regional</i> ('+M.regional_n+' locali), non dice di quale regione. Altri '+(M.tot-M.con_tag)+' locali hanno nel nome o nella descrizione parole come milanese, lombardo, risotto, cotoletta, cassoeula: in tutto '+M.tot+'. Sarebbe un elenco casuale, non una classifica. Per sapere dove si mangia la cotoletta servirebbe una lista curata a mano o una guida. Non facciamo neanche una mappa delle &laquo;trattorie&raquo;: nel nome ne hanno la parola '+M.trattoria_osteria_nel_nome+' ristoranti di OpenStreetMap, e &laquo;trattoria&raquo; spesso &egrave; solo un nome.</p>');
+  setH('mil-sum','I '+M.tot+' locali trovati');
+  table('tab-mil',['Locale','Tipo','Cucina (OSM)','Quartiere'],M.rows.map(function(x){return {c:[esc(x[0]||'(senza nome)'),esc(x[1]),esc(x[2]||'&ndash;'),esc(tc(x[3]))]}}));
+}
+
+/* ---------- metodo e limiti ---------- */
+function metodo(){
+  var F=D.fresh;
+  setH('metodo',
+   '<li><b>Locali di OpenStreetMap</b>: tutti i punti con <code>amenity</code> = ristorante, fast food, caff&egrave;, bar, pub, gelateria dentro il confine del Comune, scaricati dal servizio Overpass il 1 novembre 2026 ('+f0(F.osm_n)+'). Un controllo con l&rsquo;estratto di Geofabrik del 31 ottobre ha dato gli stessi numeri (6.646 contro 6.647 elementi). Quartiere assegnato dalle coordinate.</li>'+
+   '<li><b>Registro del Comune</b>: ds58 (pubblici esercizi in piano, '+f0(F.reg_ds58_file)+' righe, '+f0(D.citta.in_piano)+' con coordinate), ds59 (fuori piano, '+f0(F.reg_ds59_file)+') e ds250 (artigianato alimentare: pizza e kebab da asporto, gelaterie, gastronomie; '+f0(F.reg_ds250_file)+'). Per i conti per quartiere usiamo solo ds58. Per il tipo si leggono le lettere a&ndash;i scritte nel campo di testo; per il 4,6% non c&rsquo;&egrave;.</li>'+
+   '<li><b>Residenti</b>: ds205 del Comune, anno 2024, per NIL.</li>'+
+   '<li><b>Cucine</b>: il tag <code>cuisine</code> di OpenStreetMap (oltre 170 valori diversi) &egrave; stato raggruppato da noi in 16 famiglie (per esempio <i>sushi</i>, <i>ramen</i> e <i>japanese</i> sono &laquo;giapponese e sushi&raquo;). I gruppi sono una scelta nostra e andrebbero rivisti; un locale pu&ograve; stare in pi&ugrave; gruppi.</li>'+
+   '<li><b>Indice di localizzazione</b> e <b>quote per quartiere</b>: solo sui locali con cucina indicata, con le soglie scritte sopra.</li>'+
+   '<li><b>Controllo tra le due fonti</b>: per i '+f0(F.indirizzo_n)+' locali di OpenStreetMap con via e civico, il '+nf(F.indirizzo_ritrovato_pct,1)+'% ha via e civico uguali nel registro. Su 100 ristoranti scelti a caso, '+F.campione_100+' hanno una pratica del registro a meno di 50 metri ('+F.campione_100_25m+' a meno di 25). Il solo criterio &laquo;a meno di 50 metri&raquo; &egrave; debole: spostando a caso gli stessi punti di 150&ndash;400 metri si ottiene comunque il '+f0(F.nullo_50m_pct)+'%, perch&eacute; Milano &egrave; fitta. Per questo conta l&rsquo;indirizzo.</li>');
+  setH('limiti-lista',
+   '<li><b>Il registro non ha date interne.</b> Sappiamo che i file sono stati ricaricati ad agosto 2026 e che sono cambiati rispetto al 2019 (la copia del 2019 era rimasta uguale fino al 2024), ma non a che giorno sono fotografati. Il Comune li dichiara annuali.</li>'+
+   '<li><b>Il registro conta pratiche, non locali aperti oggi.</b> Dei '+F.chiusi_n+' locali che OpenStreetMap segna come chiusi dal 2022 (senza un altro locale subentrato), '+F.chiusi_nel_registro+' sono ancora nel registro. &Egrave; un campione piccolo, ma dice che i locali chiusi restano a lungo. Sulle aperture il registro tiene il passo: dei '+F.nuovi_2026_n+' locali creati in OpenStreetMap nel 2026, solo '+F.nuovi_2026_senza+' non hanno una pratica vicina.</li>'+
+   '<li><b>OpenStreetMap ne conta meno</b>: '+f0(D.citta.osm_6tipi)+' contro '+f0(D.citta.in_piano)+' del registro ('+nf(F.osm_su_registro_pct,0)+'%). Solo '+F.nil_20+' quartieri su '+F.nil_tot+' sono entro il 20% di differenza, '+F.nil_30+' entro il 30%. La differenza non &egrave; uguale dappertutto: in centro e a Citt&agrave; Studi i due conteggi sono vicini, in periferia (Quarto Cagnino, San Siro, Quarto Oggiaro) OpenStreetMap ne ha circa un terzo o meno. Le graduatorie sono simili (correlazione '+nf(F.nil_correlazione,3)+'), i numeri assoluti no.</li>'+
+   '<li><b>La freschezza di OpenStreetMap dipende da poche persone</b>: '+f0(F.mod_2526_n)+' locali sono stati modificati nel 2025&ndash;26 da '+F.mod_2526_utenti+' utenti, ma il '+nf(F.mod_top1,0)+'% da uno solo e il '+nf(F.mod_top5,0)+'% da cinque. Senza di loro la quota di locali modificati negli ultimi 3 anni scenderebbe dal '+f0(F.osm_3a)+'% al '+f0(F.osm_3a_senza_top5)+'%. &laquo;Modificato&raquo; non vuol dire &laquo;verificato&raquo;: solo il '+nf(F.osm_cd_pct,0)+'% ha una data di verifica scritta ('+f0(F.osm_cd_12m_n)+' negli ultimi 12 mesi).</li>'+
+   '<li><b>La cucina c&rsquo;&egrave; solo per il '+nf(F.rist_fast_cucina_pct,0)+'% di ristoranti e fast food</b> di OpenStreetMap, e si scrive pi&ugrave; spesso dove ci sono pi&ugrave; mappatori: le quote per quartiere sono &laquo;tra i locali con cucina nota&raquo;. Gli orari ci sono per il '+nf(F.osm_orari_pct,0)+'% dei locali: non li usiamo.</li>'+
+   '<li><b>I residenti non sono i clienti</b>: in centro i locali servono chi lavora, studia o visita. I NIL piccoli o senza abitanti (parchi, aree industriali) sono in grigio.</li>'+
+   '<li><b>Il registro non dice la cucina</b> e per tre locali su quattro non ha l&rsquo;insegna. Il tipo (ristorante, pizzeria, bar&hellip;) &egrave; quello della licenza: un locale pu&ograve; averne pi&ugrave; d&rsquo;uno.</li>'+
+   '<li><b>Lo stesso locale compare nelle due fonti</b>: i file riuniscono le righe di OpenStreetMap e del registro senza abbinarle una a una. Per contare, guarda una fonte alla volta (come in questa pagina).</li>'+
+   '<li><b>Fuori da questa pagina</b>: panetterie, pasticcerie e gastronomie che sono negozi, ambulanti, mense e locali &laquo;fuori piano&raquo; (circoli, stadi, stazioni) non sono nelle mappe e nelle classifiche; i fuori piano sono contati solo nel totale citt&agrave;. Le aperture e chiusure non si possono datare. Il Comune non &egrave; stato contattato.</li>');
+}
+
+/* ---------- file e fonti ---------- */
+function file(){
+  setH('files','<a href="data/locali_osm.csv">locali_osm.csv</a> (i '+f0(D.fresh.osm_n)+' locali di OpenStreetMap: id, nome, tipo, cucina, coordinate, quartiere, ultima modifica), <a href="data/locali_osm.json">locali_osm.json</a> (gli stessi, per la mappa), <a href="data/pratiche_ds58.json">pratiche_ds58.json</a> (posizione e tipo di ogni pratica del registro, senza insegne n&eacute; indirizzi), <a href="data/nil.csv">nil.csv</a> (residenti, pratiche e locali per quartiere), <a href="data/nil_cucine.csv">nil_cucine.csv</a> (quote di cucina per quartiere), <a href="data/pratiche_2019_2026_nil.csv">pratiche_2019_2026_nil.csv</a>, <a href="data/locali_milanesi.csv">locali_milanesi.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine).');
+  setH('odbl','<b>Licenze dei file.</b> I file che contengono locali o conteggi di OpenStreetMap (<code>locali_osm.csv</code>, <code>locali_osm.json</code>, <code>locali_milanesi.csv</code>, <code>nil.csv</code>, <code>nil_cucine.csv</code>, <code>riepilogo.json</code>) sono un database derivato da OpenStreetMap: &copy; OpenStreetMap contributors, licenza <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>. Se li riusi devi citare OpenStreetMap e, se pubblichi un database derivato, condividerlo con la stessa licenza (<i>share-alike</i>). I dati del Comune di Milano (<code>pratiche_ds58.json</code>, <code>pratiche_2019_2026_nil.csv</code>) sono CC BY: cita &laquo;Comune di Milano &ndash; dati.comune.milano.it&raquo;.');
+  setH('fonti','<b>OpenStreetMap</b>: locali con <code>amenity</code> = restaurant, fast_food, cafe, bar, pub, ice_cream, scaricati dal servizio Overpass il 1 novembre 2026 (stato del database: 1 novembre 2026, 19:27 UTC); controllo con l&rsquo;estratto Geofabrik &laquo;nord-ovest&raquo; del 31 ottobre 2026. &copy; OpenStreetMap contributors, licenza ODbL 1.0. '+
+   '<b>Comune di Milano</b> (<a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, CC BY, versione non indicata dal portale; scaricati il 1 novembre 2026): &laquo;Attivit&agrave; commerciali: pubblici esercizi in piano&raquo; (ds58), &laquo;pubblici esercizi fuori piano&raquo; (ds59), &laquo;Attivit&agrave; artigianali: settore alimentare&raquo; (ds250); confini dei NIL (ds964); residenti per NIL (ds205, anno 2024). La copia di ds58 del 19 luglio 2019 viene dalla Wayback Machine (<a href="https://web.archive.org/">web.archive.org</a>) ed &egrave; un file del Comune. Nessun dato da Google, TripAdvisor o TheFork.');
+}
+})();
+</script></body></html>

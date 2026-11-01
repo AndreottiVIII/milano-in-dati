@@ -2475,3 +2475,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: rete 96,8 → 111,3 km (+15%), passeggeri 384,9 → 352,4 milioni (−8,4%), per km −20% (2019 → 2025); 2020 −56,6%; nel 2025 M4 +21,1 milioni, M1+M2+M3 −9,7 (confronto, non prova). Stazioni del treno a novembre 2025 all'81% del 2019; la teoria "uffici e università" non regge (correlazione −0,10).
 - Limiti dei dati: passeggeri = ingressi ai tornelli; l'anno della Carta ATM è quello dei dati dell'anno prima; lo stesso anno ha totali diversi secondo la definizione; 134 stazioni-linea ma 125 stazioni; GTFS solo l'orario di oggi.
 
+## 34. Cosa si mangia a Milano
+
+- 2026-11-01 — Fase 1 e pagina (`ristoranti/`, `docs/ristoranti/`). Condizione di Davide: "solo se ben aggiornato". Verdetto: aggiornato con riserve, scritto in una barra sempre visibile in cima alla pagina. Dettagli in `ristoranti/NOTE.md`.
+- Fonti: registro dei pubblici esercizi del Comune (ds58 in piano, ds59 fuori piano, ds250 artigianato; CC BY), ricaricato ad agosto 2026 ma senza data di riferimento nei file; OpenStreetMap (ODbL, file derivati share-alike): 70% dei locali modificati negli ultimi 3 anni, conta il 72% del registro (meno in periferia), 62% delle modifiche 2025-26 di 5 utenti. Nessun Google, TripAdvisor o TheFork. Insegne del registro non pubblicate (possibili nomi di persona).
+- Numeri: 6,5 pratiche ogni 1.000 residenti (Duomo 41,7, Gallaratese 1,0); cucine: pizza 30,6%, italiana 28,0%, giapponese 11,1%; cinesi a Sarpi (indice 4,6), indiani a Porta Venezia, latinoamericani a NoLo. Sorpresa: NoLo ha tante cucine straniere quante Sarpi (66,7% contro 65,2%) ma molto più varie. La cucina milanese non si può contare (24 locali in tutto).
+- Limiti dei dati: il registro conta pratiche, non locali aperti; nessuna cucina nel registro; tag cucina solo nel 69% dei locali OSM; pratiche 2019-2026 soprattutto cambi di gestione; ds2954 cambia definizione tra 2023 e 2024.
+

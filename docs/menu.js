@@ -42,7 +42,8 @@
     { path: 'pioggia/',          label: 'Quanto piove' },
     { path: 'caldo/',            label: 'Il quartiere più caldo' },
     { path: 'costo-vita/',       label: 'Quanto costa vivere' },
-    { path: 'metro/',            label: 'Il metrò' }
+    { path: 'metro/',            label: 'Il metrò' },
+    { path: 'ristoranti/',       label: 'Cosa si mangia' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
