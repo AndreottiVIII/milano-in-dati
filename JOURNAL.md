@@ -2570,3 +2570,16 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Comune di Milano (CC BY): ds27 residenti per NIL, età singola, genere e cittadinanza 1999-2025; flussi per NIL ds1596/1600/1954/1956; ds1957-1960 per età e destinazione 2020-2024; ISTAT demo (CC BY 4.0). Matrice ISTAT origine/destinazione non ottenuta (servizio non risponde).
 - Sorprese: dal 2020 Milano perde ogni anno abitanti verso la sua provincia (−39.473 in 5 anni) e li compensa con estero e Sud; a Comasina il 23,6% dei residenti ha cittadinanza cinese (38 persone nel 1999), il NIL con più cinesi è Villapizzone; i centenari passano da 249 a 835 ma la quota di over 65 è sotto il picco del 2008.
 - Limiti dei dati: anagrafe, non conteggio vero (dal 2020 il registro supera ISTAT, stranieri +10,4%); salti per revisioni (2002-03, 2011-12); tre contabilità dei trasferimenti; cittadinanza non è origine (naturalizzazioni); niente età per NIL nei flussi; ds205 sbagliato in 3 punti.
+
+## 47. Il benessere della Città metropolitana (BES ISTAT)
+
+- 2026-11-01 notte — Fase 1 e pagina (`benessere/`, `docs/benessere/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `benessere/NOTE.md`.
+- Fonte: ISTAT "Il Bes dei territori", edizione 2025 (CC BY 4.0), 67 indicatori, 107 province. "Milano" = Città metropolitana.
+- Polarità: 48 dalla nota metodologica ISTAT, 10 dal testo del Report ISTAT città metropolitane 2024 (pagine citate in `alias_polarita.csv`), 5 derivate e fuori dalla media, 3 solo valori; tasso di default bancario escluso (ISTAT scrive "+", quasi certamente un refuso).
+- Numeri: 3ª su 14 città metropolitane per media dei percentili (nostra media, non un indice ISTAT); prima di 107 su reddito, stipendi, pensioni, posti-km del trasporto pubblico, perdite della rete idrica. Sorpresa: bambini di 4-5 anni a scuola 91,8%, 102ª di 107, in calo dal 2013. Ultima su suolo sigillato e rinnovabili quasi.
+
+## 48. Statue e monumenti
+
+- 2026-11-01 notte — Fase 1 e pagina (`statue/`, `docs/statue/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `statue/NOTE.md` (sezione 0 con i numeri finali).
+- Fonti: nessun registro ufficiale; Wikidata (CC0), OpenStreetMap (ODbL, file derivati share-alike), ICCD (CC BY-SA come beni culturali): 777 opere, soggetto noto per il 28%, anno per il 18%. Genere solo da P21 di Wikidata della persona ritratta, mai dai nomi. 8 soggetti dubbi tolti a mano; 31 persone aggiunte dalle iscrizioni delle lapidi (solo testo che lo dice).
+- Numeri: donne 9 su 194 persone (4,6%), "poche, nello stesso ordine di grandezza delle vie" (6,6%). Sorpresa: nessun monumento o statua datato a una donna reale prima del 2021 (Belgiojoso 2021, Hack 2022). Nessuno domina (massimo 4 opere, Manzoni).

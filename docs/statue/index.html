@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Statue e monumenti</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#a1402a;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#f8eeea;--warm:#8a4a10;--warmbg:#fbf0e2;--pink:#c2185b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:8px 12px;margin:.8em 0;font-size:.95rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.25em 0}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:.5em 0}
+.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 8px;border-radius:14px;max-width:100%}
+.ctl label.ck{font-size:.9rem;cursor:pointer;max-width:100%} .ctl label.ck i{display:inline-block;width:11px;height:11px;border-radius:50%;margin:0 4px 0 2px;vertical-align:-1px;border:1px solid #666}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px;border:1px solid #666}
+.scroll{overflow-x:auto}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 70px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative}
+.bars .fill{display:block;height:10px;background:var(--acc)} .bars .fill.w{background:var(--pink)} .bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rule{margin:.5em 0} .rule .row{display:grid;grid-template-columns:minmax(110px,28%) 1fr 170px;gap:6px;align-items:center;font-size:.88rem;padding:5px 0}
+.rule .tr{background:#f1f1f1;height:16px;position:relative} .rule .iv{position:absolute;top:6px;height:4px;background:var(--acc);opacity:.55} .rule .dot{position:absolute;top:2px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--acc);border:2px solid #fff}
+.rule .mk{position:absolute;top:-4px;height:24px;border-left:3px dashed var(--pink)} .rule .row.vie .iv,.rule .row.vie .dot{background:var(--pink)}
+.rule .v{font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .rule .row{grid-template-columns:1fr}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;height:auto;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif} .big{font-size:2rem;font-weight:700;color:var(--acc);line-height:1.1}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:.8em 0} .kpi div{border:1px solid var(--line);padding:6px 10px} .kpi .big{font-size:1.6rem} .kpi span.sub{display:block}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.fl li{margin:.25em 0}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Statue, monumenti e lapidi di Milano: chi ricordiamo?</h1>
+<p>Per le strade c&rsquo;&egrave; un elenco ufficiale; per le <b>statue, i monumenti, le lapidi e le opere d&rsquo;arte in strada no</b>. Il Comune di Milano non pubblica un elenco aperto. Abbiamo quindi messo insieme quello che si trova in tre fonti libere (Wikidata, OpenStreetMap e il catalogo dei beni culturali ICCD): <b id="n-tot"></b> opere. Qui guardiamo chi raffigurano, quando sono state messe, dove stanno, e quante sono dedicate a donne (per le vie il confronto &egrave; con la <a href="../vie/">pagina sulle vie intitolate a donne</a>).</p>
+
+<div class="warm" id="limiti-alto"><b>Prima di leggere: i limiti dei dati.</b><ul>
+<li><b>Non esiste un registro ufficiale.</b> Questo non &egrave; &laquo;l&rsquo;elenco delle statue di Milano&raquo;, ma ci&ograve; che Wikidata, OpenStreetMap e ICCD riescono a vedere. Ne mancano molte, soprattutto lapidi.</li>
+<li><b>Chi &egrave; raffigurato lo sappiamo solo per il <span id="l-pers"></span></b> delle opere. Per tutte le altre non si sa (titolo come &laquo;Colonna&raquo; o &laquo;La Danza&raquo;, o nessun nome).</li>
+<li><b>L&rsquo;anno di posa lo sappiamo solo per il <span id="l-anno"></span></b> delle opere, e pi&ugrave; spesso per quelle recenti.</li>
+<li>Per le donne i numeri sono piccoli: le differenze piccole <b>non</b> contano. Dettagli in <a href="#limiti">metodo e limiti dei dati</a>.</li></ul></div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="kpi" id="kpi"></div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Ogni punto &egrave; un&rsquo;opera con una posizione (<span id="m-n"></span> su <span id="m-tot"></span>). Le opere <b>raffigurano o ricordano una donna</b> hanno il bordo rosa. Passa sopra un punto (o toccalo) per leggere il nome.</p>
+<div class="ctl" id="ctl-tipo"></div>
+<div class="ctl">
+<label class="sub" for="f-sogg">Soggetto:</label><select id="f-sogg"><option value="">tutte le opere</option><option value="p">solo con una persona riconosciuta</option><option value="d">solo donne</option></select>
+<label class="sub" for="f-epoca">Anno di posa:</label><select id="f-epoca"><option value="">qualsiasi (anche senza anno)</option><option value="0">prima del 1861</option><option value="1">1861&ndash;1921</option><option value="2">1922&ndash;1943</option><option value="3">1944&ndash;1969</option><option value="4">1970&ndash;1999</option><option value="5">dal 2000</option></select>
+<label class="ck"><input type="checkbox" id="f-aperto"> nascondi le opere che sembrano dentro chiese, musei o cimiteri</label></div>
+<p class="sub" id="m-conta"></p>
+<div id="map" class="map" role="img" aria-label="Mappa delle statue, dei monumenti e delle lapidi di Milano"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors. Posizioni da OpenStreetMap, Wikidata e ICCD; <span id="m-senza"></span> opere (quasi tutte da Wikidata) non hanno una posizione e non si vedono. Il centro (Duomo e Brera) ha molti pi&ugrave; punti anche perch&eacute; Wikidata e OpenStreetMap lo descrivono meglio: <a href="#limiti">limiti dei dati</a>.</p>
+<div id="nil-top"></div>
+
+<h2 id="chi">Chi viene celebrato</h2>
+<p id="chi-testo"></p>
+<div class="grid2"><div><h3>Le persone pi&ugrave; rappresentate <span class="sub">(numero di opere)</span></h3><div class="bars" id="b-top"></div></div>
+<div><h3>Mestiere delle persone nelle statue e nei monumenti</h3><div class="bars" id="b-prof"></div><p class="sub">Il gruppo di mestiere &egrave; scelto con una regola semplice dalla prima professione scritta in Wikidata; pu&ograve; sbagliare (Garibaldi finisce tra i &laquo;politici&raquo;).</p></div></div>
+<p class="src">Persone riconosciute: <span id="chi-n"></span>. Le persone con il bordo rosa nelle barre sono donne.</p>
+
+<h2 id="donne">Le donne</h2>
+<p id="donne-testo"></p>
+<div class="rule" id="rule"></div>
+<p class="sub">Il pallino &egrave; la quota di donne tra le persone di sesso noto; la linea &egrave; l&rsquo;intervallo di incertezza al 95% (Wilson): con poche persone &egrave; molto largo. La linea rosa tratteggiata &egrave; la quota delle vie (<span id="q-vie"></span>%). Il sesso viene dal campo &laquo;sesso o genere&raquo; di Wikidata per la persona raffigurata, mai dal nome.</p>
+<div class="warn" id="donne-lettura"></div>
+<h3>Le donne nell&rsquo;elenco, una per una</h3>
+<div class="scroll"><table id="tab-donne"></table></div>
+<p id="donne-madonna"></p>
+
+<h2 id="tempo">Nel tempo</h2>
+<p id="tempo-testo"></p>
+<div class="ch" id="ch-dec" role="img" aria-label="Opere datate per decennio"></div>
+<div class="lgd" id="lg-dec"></div>
+<p class="warm" id="tempo-warm"></p>
+<div class="scroll"><table id="tab-ep"></table></div>
+
+<h3 id="gap">Quanto tempo dopo la morte?</h3>
+<p id="gap-testo"></p>
+<div class="bars" id="b-gap"></div>
+
+<h2 id="lapidi">Le lapidi: il buco dei dati aperti</h2>
+<p id="lap-testo"></p>
+<div class="warn"><b>Un invito.</b> Se conosci una lapide o una statua che non c&rsquo;&egrave;, puoi aggiungerla su <a href="https://www.openstreetmap.org/">OpenStreetMap</a> (con i tag <code>historic=memorial</code>, <code>memorial=plaque</code> e il testo in <code>inscription</code>) o su <a href="https://www.wikidata.org/">Wikidata</a>. I dati di questa pagina cambieranno man mano: &egrave; il modo pi&ugrave; semplice per avere un elenco migliore, aperto a tutti.</div>
+
+<h2 id="limiti">Metodo e limiti dei dati</h2>
+<div id="limiti-testo"></div>
+
+<h2 id="file">I file</h2>
+<p>Tutti i file sono qui, scaricabili. Le colonne e le regole sono spiegate nella nota del progetto (<code>statue/NOTE.md</code>).</p>
+<ul class="fl" id="lista-file"></ul>
+
+<footer>
+<p><b>Fonti e licenze (dati scaricati il 1 novembre 2026).</b></p>
+<ul class="m" id="fonti"></ul>
+<p>Pagine collegate: <a href="../vie/">le vie intitolate a donne</a> &middot; <a href="../beni-culturali/">i beni culturali di Milano (ICCD)</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,MP=null;
+var ACC='#a1402a',PINK='#c2185b';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function pc(x,d){return nf(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function lc(s){return s.charAt(0).toLowerCase()+s.slice(1)}
+function bars(id,rows,max,cls){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm">'+r.nm+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="fill'+(r.w?' w':'')+'" style="width:'+Math.max(0.5,r.v/max*100)+'%"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+var TG=[ // gruppi per la mappa
+ {k:'a',t:'Statue, busti, monumenti',c:'#a1402a',tipi:['statua','busto','monumento']},
+ {k:'b',t:'Sculture, installazioni, fontane',c:'#1f5f8b',tipi:['scultura o installazione','fontana']},
+ {k:'c',t:'Monumenti ai caduti',c:'#4d4d4d',tipi:['monumento ai caduti']},
+ {k:'d',t:'Lapidi e targhe',c:'#e0a526',tipi:['lapide o targa']},
+ {k:'e',t:'Altro (cippi, murali, tombe, memoriali)',c:'#9e9e9e',tipi:['cippo, stele o pietra','murale o opera decorativa','monumento funebre o tomba','altro memoriale']}];
+function grp(t){for(var i=0;i<TG.length;i++)if(TG[i].tipi.indexOf(t)>=0)return TG[i];return TG[4]}
+var EPOCHE=[[0,1860],[1861,1921],[1922,1943],[1944,1969],[1970,1999],[2000,3000]];
+
+Promise.all([J('data/pagina.json'),J('data/opere_mappa.json')]).then(function(a){
+  D=a[0];MP=a[1];
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){intro();sorpresa();mappa();chi();donne();tempo();lapidi();limiti();file();fonti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){tempo(true)},200)})}
+
+function intro(){
+  var c=D.copertura;
+  el('n-tot').textContent=f0(D.n);
+  el('l-pers').textContent=pc(c.persona[1],0)+' ('+f0(c.persona[0])+' su '+f0(D.n)+')';
+  el('l-anno').textContent=pc(c.anno[1],0)+' ('+f0(c.anno[0])+' su '+f0(D.n)+')';
+  var h='';
+  h+='<div><span class="big">'+f0(D.n)+'</span><span class="sub">opere trovate in 3 fonti libere</span></div>';
+  h+='<div><span class="big">'+f0(D.mon)+'</span><span class="sub">statue, monumenti, sculture (di cui '+f0(D.mon_aperto)+' non sembrano in chiese o musei)</span></div>';
+  h+='<div><span class="big">'+f0(D.lapidi)+'</span><span class="sub">lapidi e targhe</span></div>';
+  h+='<div><span class="big">'+pc(c.persona[1],0)+'</span><span class="sub">con la persona riconosciuta</span></div>';
+  h+='<div><span class="big">'+pc(c.anno[1],0)+'</span><span class="sub">con l&rsquo;anno di posa</span></div>';
+  setH('kpi',h);
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var S=D.sorpresa,dw=S.donne_datate,h='';
+  if(S.donne_prima_2021===0&&dw.length){
+    var p0=dw[0];
+    h+='<p><b>Tra le statue e i monumenti con un anno di posa, nessuno &egrave; dedicato a una donna reale prima del '+p0[2]+'.</b> Fino al 2020 sono '+f0(S.persone_datate_prima_2021)+' persone celebrate (tutti uomini); poi ne arrivano '+(dw.length===1?'una':'due')+': '+dw.map(function(x){return esc(x[0])+' ('+x[2]+')'}).join(' e ')+'.</p>';
+  }else{
+    h+='<p><b>Le donne sono pochissime tra le persone celebrate dai monumenti con un anno di posa:</b> '+f0(S.donne_prima_2021)+' su '+f0(S.persone_datate_prima_2021)+' fino al 2020.</p>';
+  }
+  h+='<p>La donna pi&ugrave; rappresentata nella scultura pubblica milanese &egrave; invece <b>la Madonna: '+f0(D.maria_n)+' opere</b>, '+(D.maria_n>=D.donne_elenco.length?'almeno quante le':'poco meno delle')+' '+f0(D.donne_elenco.length)+' donne reali di tutto l&rsquo;elenco messe insieme (monumenti, lapidi e tombe).</p>';
+  h+='<p class="sub"><b>Attenzione, il campione &egrave; piccolo.</b> Le persone celebrate da monumenti con anno di posa sono solo '+f0(S.persone_datate)+'. &Egrave; vero per i dati che abbiamo, non necessariamente per tutti i monumenti di Milano.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP,LY=[],STATE={tipi:{a:1,b:1,c:1,d:1,e:1}};
+function mappa(){
+  var C=MP.colonne,ix={};C.forEach(function(c,i){ix[c]=i});
+  el('m-tot').textContent=f0(D.n);el('m-n').textContent=f0(MP.punti.length);el('m-senza').textContent=f0(D.n-MP.punti.length);
+  setH('ctl-tipo',TG.map(function(g){return '<label class="ck"><input type="checkbox" data-k="'+g.k+'" checked><i style="background:'+g.c+'"></i>'+g.t+'</label>'}).join(''));
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  var rd=L.canvas({padding:.5});
+  MP.punti.forEach(function(p){
+    var w=(p[ix.genere]||'').indexOf('donna')>=0,g=grp(p[ix.tipo]);
+    var m=L.circleMarker([p[ix.lat],p[ix.lon]],{renderer:rd,radius:w?8:5,color:w?PINK:'#fff',weight:w?3:1,fillColor:g.c,fillOpacity:.9});
+    var t='<b>'+esc(p[ix.nome]||'(senza nome)')+'</b><br>'+esc(p[ix.tipo])+(p[ix.anno]?', '+p[ix.anno]:', anno non noto')+'<br>'+(p[ix.soggetto]?esc(p[ix.soggetto]):'<i>soggetto non noto</i>')+'<br><span class="sub">'+esc(p[ix.NIL])+' &middot; fonte: '+esc(p[ix.fonte])+(p[ix.coll]?' &middot; forse in: '+esc(p[ix.coll]):'')+'</span>';
+    m.bindTooltip(t,{sticky:true});
+    m._d={k:g.k,pers:p[ix.stipo].indexOf('persona')>=0||p[ix.stipo].indexOf('persone')>=0,don:w,anno:p[ix.anno],coll:p[ix.coll]};
+    LY.push(m);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#ctl-tipo input'),function(b){b.addEventListener('change',function(){STATE.tipi[b.getAttribute('data-k')]=b.checked?1:0;filtra()})});
+  ['f-sogg','f-epoca'].forEach(function(i){el(i).addEventListener('change',filtra)});el('f-aperto').addEventListener('change',filtra);
+  filtra();
+  setTimeout(function(){MAP.invalidateSize()},500);
+}
+function filtra(){
+  var fs=el('f-sogg').value,fe=el('f-epoca').value,fa=el('f-aperto').checked,n=0;
+  LY.forEach(function(m){
+    var d=m._d,ok=!!STATE.tipi[d.k];
+    if(ok&&fs==='p'&&!d.pers)ok=false;if(ok&&fs==='d'&&!d.don)ok=false;
+    if(ok&&fe!==''){var r=EPOCHE[+fe];if(d.anno==null||d.anno<r[0]||d.anno>r[1])ok=false}
+    if(ok&&fa&&d.coll)ok=false;
+    if(ok){if(!MAP.hasLayer(m))m.addTo(MAP);n++}else if(MAP.hasLayer(m))MAP.removeLayer(m);
+  });
+  el('m-conta').textContent='Mostrate '+f0(n)+' opere su '+f0(LY.length)+' con una posizione.';
+  nilTop();
+}
+function nilTop(){
+  var t=D.nil_top;
+  if(!t||el('nil-top').innerHTML)return;
+  var mx=t[0][1];
+  setH('nil-top','<h3>Dove sono: i quartieri (NIL) con pi&ugrave; opere</h3><div class="bars">'+t.map(function(r){return '<div class="row"><span class="nm">'+esc(r[0])+'</span><span class="tr"><span class="fill" style="width:'+(r[1]/mx*100)+'%"></span></span><span class="v">'+f0(r[1])+'</span></div>'}).join('')+'</div><p class="sub">Duomo e Brera da soli hanno il '+pc(100*D.nil_duomo_brera/D.nil_opere_tot,0)+' delle opere con posizione; '+f0(D.nil_senza)+' quartieri su '+D.nil_tot+' non ne hanno nessuna nei nostri dati. Non vuol dire che non esistano: vedi i limiti.</p>');
+}
+
+/* ---------- chi ---------- */
+function chi(){
+  var T=D.top,mx=T[0][1];
+  var nom=D.top_con_max.map(esc).join(', ');
+  var h='<b>Nessuno domina.</b> Il massimo &egrave; <b>'+D.top_max+' opere</b> a testa ('+nom+'). ';
+  h+='Vittorio Emanuele II compare in '+D.ve2[0]+' '+(D.ve2[0]===1?'opera':'opere')+' ('+D.ve2[2].map(esc).join('; ')+'); Giuseppe Garibaldi in '+D.garibaldi[0]+' ('+D.garibaldi[1].join(', ')+'). Con numeri cos&igrave; piccoli una differenza di una sola opera non dice niente.';
+  setH('chi-testo',h);
+  bars('b-top',T.filter(function(r,i){return r[1]>=2||i<10}).map(function(r){return {nm:esc(r[0]),sub:esc(r[2]),v:r[1],txt:r[1]+(r[1]===1?' opera':' opere'),w:r[3]==='donna'}}),mx);
+  var P=D.prof_mon,pm=P[0][1];
+  bars('b-prof',P.filter(function(r){return r[0]!=='non indicata'&&r[0]!=='altro o non indicata'}).map(function(r){return {nm:esc(r[0]),sub:r[2]?r[2]+(r[2]===1?' donna':' donne'):'',v:r[1],txt:f0(r[1])}}),pm);
+  el('chi-n').textContent=f0(D.persone_uniche)+' persone diverse in '+f0(D.opere_persona)+' opere ('+f0(D.coppie_opera_persona)+' coppie opera-persona)';
+}
+
+/* ---------- donne ---------- */
+function donne(){
+  var G=D.genere,vie=G[G.length-1],mon=G[1],lap=G[3];
+  el('q-vie').textContent=nf(D.quota_vie,1);
+  setH('donne-testo','Tra le persone raffigurate o ricordate dalle statue, dai monumenti e dalle sculture, le donne sono <b>'+mon.donne+' su '+mon.persone+'</b> ('+pc(mon.quota)+'). Nelle lapidi sono <b>'+lap.donne+' su '+lap.persone+'</b> ('+pc(lap.quota)+'). Per le vie intitolate a persone sono '+vie.donne+' su '+f0(vie.persone)+' ('+pc(vie.quota)+').');
+  var mx=22;
+  setH('rule',G.map(function(g,i){
+    var vi=i===G.length-1;
+    return '<div class="row'+(vi?' vie':'')+'"><span>'+esc(g.nome)+'</span><span class="tr"><span class="iv" style="left:'+g.lo/mx*100+'%;width:'+(g.hi-g.lo)/mx*100+'%"></span><span class="dot" style="left:'+g.quota/mx*100+'%"></span><span class="mk" style="left:'+D.quota_vie/mx*100+'%"></span></span><span class="v">'+pc(g.quota)+' ('+nf(g.lo,1)+'&ndash;'+nf(g.hi,1)+'%)<br><span class="sub">'+g.donne+' su '+f0(g.persone)+' persone</span></span></div>'}).join('')+'<div class="sub">La scala va da 0% a 22%.</div>');
+  setH('donne-lettura','<b>Come leggerlo.</b> Le donne sono <b>poche, nello stesso ordine di grandezza delle vie</b> ('+pc(D.quota_vie,1)+'). Le linee di statue/monumenti e delle vie si sovrappongono: con questi numeri non possiamo dire che i monumenti siano meno o pi&ugrave; &laquo;maschili&raquo; delle strade. Nelle lapidi le donne sembrano ancora meno, ma i casi sono troppo pochi ('+lap.donne+' su '+lap.persone+') per una conclusione.');
+  var rows=D.donne_elenco.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1]||'(senza nome)')+'</td><td>'+esc(r[2])+'</td><td class="r">'+(r[3]||'<span class="sub">n.d.</span>')+'</td><td>'+esc(r[4])+'</td></tr>'}).join('');
+  setH('tab-donne','<thead><tr><th>Donna</th><th>Opera</th><th>Tipo</th><th class="r">Anno</th><th>Mestiere</th></tr></thead><tbody>'+rows+'</tbody>');
+  var f=D.figure_top;
+  setH('donne-madonna','Per confronto, la figura femminile pi&ugrave; presente &egrave; la <b>Madonna</b>: '+D.maria_n+' opere (le figure religiose, mitologiche o di fantasia sono in tutto '+D.figure_n+' opere e non entrano nei conti delle donne). Le persone reali sono quelle che Wikidata segna come tali: i santi storici, come Sant&rsquo;Ambrogio, ci sono.');
+}
+
+/* ---------- tempo ---------- */
+function tempo(rd){
+  var dec=D.decenni.filter(function(r){return r[0]>=1800}),pre=D.decenni.filter(function(r){return r[0]<1800}).reduce(function(a,r){return a+r[1]},0);
+  if(!rd){
+    var c=D.copertura.anno;
+    setH('tempo-testo','Le opere con un anno di posa sono solo <b>'+f0(c[0])+' su '+f0(D.n)+' ('+pc(c[1],0)+')</b>: il grafico mostra <b>quelle</b>, non tutte le opere di Milano. Ogni colonna &egrave; un decennio dal 1800 ('+f0(pre)+' opere datate sono pi&ugrave; vecchie).');
+    setH('tempo-warm','<b>Limite dei dati:</b> le opere recenti sono pi&ugrave; spesso datate (Wikidata e OpenStreetMap registrano meglio il nuovo), quindi le colonne degli ultimi anni sono gonfiate rispetto al passato. Leggi il grafico come un ordine di grandezza: dopo l&rsquo;Unit&agrave; e intorno alla Grande Guerra &egrave; stata messa molta scultura celebrativa; sotto il fascismo e nel dopoguerra meno (tra le opere datate); negli ultimi quindici anni di nuovo molta.');
+    var ep=D.epoche;
+    setH('tab-ep','<thead><tr><th>Periodo</th><th class="r">Opere datate</th><th class="r">di cui statue, monumenti, sculture</th></tr></thead><tbody>'+ep.map(function(r){return '<tr><td>'+r[0]+'</td><td class="r">'+f0(r[1])+'</td><td class="r">'+f0(r[2])+'</td></tr>'}).join('')+'</tbody>');
+    setH('lg-dec','<span><i style="background:'+ACC+'"></i>statue, monumenti, sculture</span><span><i style="background:#e0a526"></i>lapidi e targhe</span><span><i style="background:#bbb"></i>altro</span>');
+    var g=D.lag,tot=g.bins.reduce(function(a,b){return a+b[1]},0);
+    setH('gap-testo','Per le '+f0(g.n)+' persone di cui conosciamo sia l&rsquo;anno di morte sia l&rsquo;anno del monumento, la <b>mediana &egrave; di '+nf(g.mediana,0)+' anni</b> dalla morte alla posa. Pi&ugrave; di met&agrave; (grafico) arriva entro 30 anni; i pi&ugrave; vecchi (santi, personaggi antichi) hanno monumenti secoli dopo. '+(g.esempi_in_vita.length?'In vita ancora: '+g.esempi_in_vita.map(function(x){return esc(x[0])+' ('+x[2]+')'}).join(', ')+'.':''));
+    bars('b-gap',g.bins.map(function(b){return {nm:b[0],v:b[1],txt:f0(b[1])+' ('+pc(100*b[1]/tot,0)+')'}}),Math.max.apply(null,g.bins.map(function(b){return b[1]})));
+  }
+  var W=Math.max(300,Math.min(940,el('ch-dec').clientWidth||700)),H=240,m={l:30,r:6,t:8,b:24},n=dec.length,bw=(W-m.l-m.r)/n;
+  var my=Math.max.apply(null,dec.map(function(r){return r[1]})),top=Math.ceil(my/5)*5;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet">';
+  for(var t=0;t<=top;t+=5){var y=H-m.b-(H-m.t-m.b)*t/top;s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="#e5e5e5"/><text class="mu" x="'+(m.l-4)+'" y="'+(y+3)+'" text-anchor="end">'+t+'</text>'}
+  dec.forEach(function(r,i){
+    var x=m.l+i*bw,hh=function(v){return (H-m.t-m.b)*v/top},y0=H-m.b;
+    var a=r[2],b=r[3],o=r[1]-a-b;
+    s+='<g><title>'+r[0]+'-'+(r[0]+9)+': '+r[1]+' opere datate ('+a+' statue/monumenti/sculture, '+b+' lapidi)</title>';
+    s+='<rect x="'+(x+1)+'" y="'+(y0-hh(a))+'" width="'+Math.max(1,bw-2)+'" height="'+hh(a)+'" fill="'+ACC+'"/>';
+    s+='<rect x="'+(x+1)+'" y="'+(y0-hh(a)-hh(b))+'" width="'+Math.max(1,bw-2)+'" height="'+hh(b)+'" fill="#e0a526"/>';
+    s+='<rect x="'+(x+1)+'" y="'+(y0-hh(a)-hh(b)-hh(o))+'" width="'+Math.max(1,bw-2)+'" height="'+hh(o)+'" fill="#bbb"/></g>';
+    if(r[0]%50===0)s+='<text class="mu" x="'+(x+bw/2)+'" y="'+(H-8)+'" text-anchor="middle">'+r[0]+'</text>';
+  });
+  s+='</svg>';
+  setH('ch-dec',s);
+}
+
+/* ---------- lapidi ---------- */
+function lapidi(){
+  var L_=D.lapidi_info,o=L_.stima;
+  setH('lap-testo','Le lapidi e le targhe sono <b>'+f0(L_.n)+'</b> nei nostri dati: '+f0(L_.solo_osm)+' solo in OpenStreetMap, '+f0(L_.solo_wd)+' solo in Wikidata, <b>'+L_.entrambe+' in tutte e due</b>. Quando due fonti indipendenti quasi non si sovrappongono, significa che ciascuna vede una parte piccola del totale. Una stima grezza (che presuppone fonti indipendenti, quindi solo un indizio) d&agrave; circa <b>'+f0(Math.round(o.stima_grezza_totale/100)*100)+'</b> lapidi e targhe a Milano, contro le '+f0(o.trovate)+' che vediamo. Per le statue e i monumenti la sovrapposizione &egrave; molto migliore ('+f0(D.overlap.statue_busti_monumenti.in_entrambe)+' su '+f0(D.overlap.statue_busti_monumenti.trovate)+' in entrambe le fonti): le opere pi&ugrave; grandi sono coperte, le piccole no. Solo '+f0(L_.con_persona)+' lapidi su '+f0(L_.n)+' hanno una persona riconosciuta.');
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var c=D.conteggi_pulizia,cv=D.copertura;
+  var h='<details open><summary>I limiti dei dati, in breve</summary><ul class="m">';
+  h+='<li><b>Nessun registro ufficiale.</b> Il Comune di Milano non pubblica un elenco di statue, monumenti, lapidi e arte pubblica (abbiamo cercato nel suo portale con 24 parole chiave). I numeri sono quelli visibili in Wikidata, OpenStreetMap e ICCD, non quelli di Milano.</li>';
+  h+='<li><b>Chi &egrave; raffigurato si conosce per il '+pc(cv.persona[1],0)+' delle opere.</b> Per l&rsquo;altro '+pc(100-cv.persona[1],0)+' manca il nome, o il titolo non lo dice. Tutti i risultati su donne, mestieri ed epoche si basano su queste opere.</li>';
+  h+='<li><b>L&rsquo;anno di posa si conosce per il '+pc(cv.anno[1],0)+'</b>, soprattutto delle opere recenti. L&rsquo;anno di Wikidata &egrave; di solito quello dell&rsquo;inaugurazione, non sempre.</li>';
+  h+='<li><b>Poche donne, intervalli larghi.</b> Con poche donne basta una in pi&ugrave; o in meno per cambiare la percentuale.</li>';
+  h+='<li><b>Il centro &egrave; sovra-rappresentato</b> e le lapidi sono la parte meno completa.</li>';
+  h+='<li><b>&laquo;Dentro chiese, musei, cimiteri&raquo; &egrave; solo un&rsquo;ipotesi</b>, ricavata dai luoghi scritti in Wikidata; sbaglia in alcuni casi (il monumento a Costantino, davanti a San Lorenzo, risulta &laquo;in chiesa&raquo;). Per le opere di OpenStreetMap e ICCD non c&rsquo;&egrave; l&rsquo;informazione.</li>';
+  h+='<li><b>Il mestiere</b> (politico, artista&hellip;) &egrave; una regola semplice sulla prima professione di Wikidata; pu&ograve; sbagliare.</li></ul></details>';
+  h+='<details><summary>Come sono stati messi insieme i dati</summary><ul class="m">';
+  h+='<li><b>Wikidata:</b> '+f0(c.wd_trovati)+' elementi che sono statua, monumento, memoriale, scultura, targa o arte pubblica a Milano; '+f0(c.wd_tenuti)+' tenuti (tolti edifici, porte cittadine, cose fuori dal confine del Comune).</li>';
+  h+='<li><b>OpenStreetMap</b> (dati del '+esc(D.osm_timestamp.slice(0,10))+'): '+f0(c.osm_elementi)+' oggetti (<code>historic=memorial|monument</code>, <code>memorial=*</code>, <code>tourism=artwork</code>); '+f0(c.osm_tenuti)+' tenuti (tolte 21 pietre d&rsquo;inciampo, che hanno <a href="../pietre-inciampo/">una pagina a parte</a>, e 6 biciclette bianche).</li>';
+  h+='<li><b>ICCD</b> (catalogo dei beni culturali, schede di Milano gi&agrave; scaricate per la <a href="../beni-culturali/">pagina dei beni culturali</a>): '+f0(c.iccd_schede)+' schede, '+f0(c.iccd_tipi)+' dei tipi giusti (statue, lapidi, busti, monumenti ai caduti&hellip;), ma solo '+c.iccd_tenute+' con una posizione propria e fuori da musei e chiese. Quasi niente di arte pubblica.</li>';
+  h+='<li><b>Unione:</b> lo stesso oggetto in due fonti &egrave; unito se ha lo stesso identificatore Wikidata, o se sta a meno di 60 metri e ha una parola importante del nome in comune. Pu&ograve; restare qualche doppione o unirne male qualcuno.</li>';
+  h+='<li><b>Il quartiere (NIL)</b> si ricava dalla posizione.</li>';
+  h+='<li><b>Chi &egrave; raffigurato</b> viene, in ordine: dal collegamento esplicito in Wikidata o OpenStreetMap; da un titolo del tipo &laquo;Monumento a X&raquo; cercato su Wikidata; dal nome scritto per esteso nel testo della lapide. In questi ultimi due casi si accetta solo una corrispondenza esatta del nome con <b>una</b> persona di Wikidata. <b>Il sesso viene sempre dal campo &laquo;sesso o genere&raquo; di Wikidata, mai dal nome</b>. Le persone senza voce su Wikidata (per esempio molti partigiani citati nelle lapidi) restano senza sesso e non entrano nelle percentuali.</li>';
+  h+='<li><b>Controllo a mano:</b> le coppie trovate cercando il nome sono '+f0(D.controlli.soggetti_per_nome)+'; ne abbiamo riviste a mano e <b>tolte '+D.controlli.esclusi+'</b> per omonimi dubbi (elenco e motivi nel file &laquo;soggetti_esclusi_a_mano.csv&raquo;). Non &egrave; un controllo completo: altri omonimi possono esserci.</li>';
+  h+='<li>Le iscrizioni tutte in maiuscolo non si leggono con un programma; le lapidi con pi&ugrave; persone nominate non ricevono un soggetto.</li></ul></details>';
+  setH('limiti-testo',h);
+}
+
+/* ---------- file e fonti ---------- */
+function file(){
+  var F=[['opere.csv','tutte le opere (una riga ciascuna): nome, tipo, soggetto, genere, mestiere, anno, autore, posizione, quartiere, fonte e altre colonne'],
+   ['soggetti.csv','una riga per ogni coppia opera-persona (la tabella dei conteggi sulle persone)'],
+   ['per_nil.csv','opere, lapidi, persone e donne per quartiere (NIL)'],
+   ['piu_rappresentati_tutte.csv','le persone con pi&ugrave; opere'],
+   ['per_decennio.csv','opere datate per decennio'],
+   ['controllo_soggetti_per_titolo.csv','ogni persona cercata a partire dal titolo, con l&rsquo;esito'],
+   ['controllo_soggetti_da_iscrizione.csv','ogni persona cercata a partire dal testo della lapide, con l&rsquo;esito'],
+   ['soggetti_esclusi_a_mano.csv','coppie tolte dopo il controllo a mano, con il motivo'],
+   ['inventario_fonti.csv','le fonti: contenuto, righe, licenza, data, cosa manca'],
+   ['opere_mappa.json','le posizioni usate dalla mappa'],['pagina.json','tutti i numeri di questa pagina'],['LICENZE.txt','le licenze dei file']];
+  setH('lista-file',F.map(function(f){return '<li><a href="data/'+f[0]+'">'+f[0]+'</a> &ndash; '+f[1]+'</li>'}).join(''));
+}
+function fonti(){
+  var h='';
+  h+='<li><b>Wikidata</b>, licenza CC0 (pubblico dominio): <a href="https://www.wikidata.org/">wikidata.org</a>, interrogato il 1 novembre 2026.</li>';
+  h+='<li><b>OpenStreetMap</b>, &copy; OpenStreetMap contributors, licenza ODbL, dati del '+esc(D.osm_timestamp.slice(0,10))+' (scaricati il 1 novembre 2026): <a href="https://www.openstreetmap.org/copyright">openstreetmap.org/copyright</a>. <b>I file derivati da OpenStreetMap di questa pagina sono ripubblicati con la stessa licenza ODbL (share-alike): chi li riusa deve citare la fonte e usare la stessa licenza.</b> Mappa di sfondo: stesso copyright.</li>';
+  h+='<li><b>ICCD &ndash; Catalogo generale dei beni culturali</b> (dump ArCo 2.0 del 1 dicembre 2023, gi&agrave; scaricato per la pagina dei beni culturali il 29 ottobre 2026): i dati derivati sono ripubblicati con licenza <b>CC BY-SA 4.0</b>, come nella <a href="../beni-culturali/">pagina dei beni culturali</a>.</li>';
+  h+='<li><b>Comune di Milano</b> (dati.comune.milano.it): confini dei quartieri NIL (ds964, CC BY); ricerca di dataset su statue e monumenti, senza esito utile (il pi&ugrave; vicino, ds599, CC0, contiene solo capolavori dei musei ed &egrave; stato escluso).</li>';
+  h+='<li>Confronto con le vie: <a href="../vie/">le vie intitolate a donne</a> (quota '+nf(D.quota_vie,1)+'%).</li>';
+  setH('fonti',h);
+}
+})();
+</script>
+</body></html>

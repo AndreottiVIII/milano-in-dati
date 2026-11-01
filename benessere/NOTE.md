@@ -1,0 +1,122 @@
+# Il benessere di Milano (Bes dei territori) - FASE 1 (raccolta, pulizia, riepiloghi)
+
+Scaricato il 1 novembre 2026. Niente pagina web. Ogni numero dice file, codice indicatore e anno. Programmi in `scripts/` (si lanciano con `python -I -X utf8 scripts/<nome>.py <percorso assoluto di benessere>`, vedi STATO.md). File ISTAT grezzi in `raw/` (non fidati, mai eseguiti), tabelle pulite in `pulito/`.
+
+**"Milano" in tutto questo = provincia / Città metropolitana di Milano (133 comuni), non il comune.** ISTAT non dà il Bes del solo comune di Milano (salvo poche tavole nel Report città metropolitane 2024, non scaricabili in serie).
+
+## 1. In breve
+
+1. **Fonte: Istat, "Il Bes dei territori" (BesT), licenza CC BY 4.0.** Edizione più recente: **2025** (diffusa 1 luglio 2025; la pagina ISTAT segna solo un aggiornamento dei grafici interattivi il 4/12/2025, i dati non cambiano). Non esiste ancora un'edizione 2026 (l'indirizzo `notizia/bes-dei-territori-edizione-2026/` risponde 404). Edizioni scaricate: 2018, 2019 (file `tavole-bes-2018.zip`), 2020, 2021, 2022, 2023, 2024, 2025.
+2. **67 indicatori in 11 domini, 107 province, serie annuali 2004-2024** (la maggior parte parte dal 2004 ma molti hanno solo 5-10 anni utili), distinti per sesso quando ha senso. Il dominio **Benessere soggettivo non c'è** (ISTAT: manca una fonte sub-regionale adeguata; nel Bes nazionale sono 12 domini e 152 indicatori, quelli territoriali sono 67 su 152: `raw/ed2025/Quadro-di-corrispondenza-Bes_BesT_2025.pdf`).
+3. **La polarità (più alto = meglio o peggio) NON è nei metadati ISTAT delle edizioni 2020-2025.** I file Excel dei metadati non hanno la colonna. ISTAT la pubblica una volta sola, nella Tavola 1 della Nota metodologica 2018/2019 (55 indicatori, in parte cambiati). Regola (decisa dal coordinatore, 1/11): polarità solo se scritta da ISTAT. Esito su 67 indicatori (`livello_polarita` in `pulito/indicatori.csv`): **48 `istat`** (Tavola 1, anche ribattezzati), **10 `istat_testo`** (nessuna tabella, ma il testo ISTAT del Report città metropolitane 2024 dice chiaramente quale direzione è favorevole; pagina citata in `scripts/alias_polarita.csv`), **5 `derivata`** (complemento o componente di un indicatore con polarità ISTAT: competenze non adeguate, furti, borseggi, rapine; tenuti fuori dalla media delle 14 città e segnati), **3 senza** (altri delitti mortali, frane, alluvioni: solo valori) e **1 `dubbia`** (tasso di ingresso in sofferenza dei prestiti: ISTAT scrive + ma è quasi certamente un refuso; esclusa, con spiegazione). Dettaglio al punto 4.
+4. **La Città metropolitana di Milano è terza tra le 14** per posizione media (percentile medio sulle 107 province, 57 indicatori con polarità scritta da ISTAT, ultimo anno): Firenze 73,4, Bologna 71,7, **Milano 67,2**, Torino 63,6 ... Reggio di Calabria 25,0 (`pulito/cm14_graduatoria_sintetica.csv`). **È una nostra media semplice, senza pesi, non un indice ISTAT**: sulla pagina è etichettata così.
+5. **Dove è prima in Italia (1 su 107, ultimo anno)**: reddito disponibile pro capite (34.885 euro, 2023, `04BEC001P`), retribuzione media dei dipendenti (34.343 euro, 2023, `04BEC002P`), importo medio delle pensioni (26.349 euro, 2023, `04BEC005P`), posti-km del trasporto pubblico (16.310 per abitante contro 4.623 in Italia, 2023, `12SER008`), dispersione della rete idrica (17,4% contro 42,4%, 2022, `10AMB003`).
+6. **Dove è tra le ultime**: suolo impermeabilizzato 31,9% (105ª su 107, `10AMB018P` 2023), energia elettrica da rinnovabili 6,5% dei consumi (104ª, `10AMB016` 2023), aree protette 5,4% (102ª, ultima tra le 14, `10AMB014` 2022; polarità dal testo ISTAT), **bambini di 4-5 anni a scuola 91,8% (102ª su 107, 13ª su 14 città metropolitane, `02IST001` 2023)**; con gli indicatori "derivati" anche borseggi (905 per 100.000, ultima in Italia su 106, `07SIC005P` 2023) e rapine (129 per 100.000, 105ª, `07SIC006P`).
+7. **La cosa più sorprendente**: nel dominio Istruzione, che per il resto è fortissimo (laureati 25-39 anni 3ª in Italia, diplomati 5ª, formazione continua 2ª), la **frequenza dei bambini di 4-5 anni è tra le più basse d'Italia** (91,8% contro 94,7%): nel 2023 Milano è 102ª su 107 province e 13ª su 14 città metropolitane (solo Roma è sotto). Il calo non è nuovo (95,3% nel 2013, 92,3% nel 2019) e riguarda tutta la Lombardia (93,1% nel 2023), quindi non è solo un fatto milanese. Seconda sorpresa minore: le **organizzazioni non profit** sono 53,9 ogni 10.000 abitanti contro 61,0 in Italia (85ª su 107, `05REL008`, 2022); Bologna 64,1, Torino 63,4.
+8. **Verifica**: l'edizione 2025 coincide al 93,1% (96.236 su 103.413 celle confrontate) con la 2024; per Milano 725 su 776. Le differenze sono revisioni ISTAT, non errori miei (es. serie dei brevetti 2004-2011 rivista fino a 49 per milione, PM10 2022 di 6 µg/m3). Confronto indipendente con l'Appendice del Report ISTAT sulle città metropolitane 2024: 454 celle su 491 uguali entro l'arrotondamento (`pulito/controlli_confronto.json`); le altre sono dati rivisti nell'edizione 2025.
+
+## 2. Fonti, una per una (anche in `raw/download_log.csv`, con byte e sha256)
+
+Licenza: sul sito ISTAT, pagina "Note legali" (https://www.istat.it/note-legali/): "Salvo diversa indicazione, tutti i contenuti pubblicati su questo sito sono soggetti alla licenza **Creative Commons - Attribuzione - versione 4.0**". Citare: "Istat, Il Bes dei territori (BesT), edizione 2025" con link alla licenza e indicare le modifiche (qui: formato lungo, ranghi e medie calcolati da me). Esclusi dalla licenza loghi e immagini di terzi. Pagina madre: https://www.istat.it/statistiche-per-temi/focus/benessere-e-sostenibilita/la-misurazione-del-benessere-bes/il-bes-dei-territori/
+
+| Cartella raw | Cosa | Come l'ho avuta |
+|---|---|---|
+| `ed2025/` | `Bes_dei_territori_edizione_2025.zip` (1,5 MB: `Indicatori_per_provincia_sesso_ed.2025.xlsx`, `Metadati_IT_ed.2025.xlsx`) + Quadro di corrispondenza Bes/BesT 2025 | link "Tavole" della notizia https://www.istat.it/notizia/bes-dei-territori-edizione-2025/ |
+| `ed2024/` | zip 11 MB (stessi due file; 2024, versione "EC 18/12/2024" con tavole sostituite dopo errore di intestazioni, 5/3/2025) | notizia edizione 2024 |
+| `ed2023/`, `ed2022/`, `ed2021/`, `ed2020/` | zip con indicatori + metadati (l'edizione 2022 non ha la colonna `CODICE`: vedi limiti) | pagine archivio ISTAT (it/archivio/285730, 275368) e zip 2021 e 2020 linkati dalla pagina Bes dei territori |
+| `ed2019/` (= "edizione 2018" diffusa nel 2019), `ed2018/` | tavole **per dominio e per regione** (circa 100 Excel per zip, formato diverso), glossari, Note metodologiche | archivio ISTAT 230627 e 217099 |
+| `report_cm2024/` | Report "Il benessere equo e sostenibile dei territori - Le città metropolitane 2024" (PDF), Appendice statistica (xlsx), nota stampa | https://www.istat.it/comunicato-stampa/il-benessere-equo-e-sostenibile-dei-territori-report-citta-metropolitane-2024/ |
+| `extra/` | presentazione ISTAT BesT marzo 2026 (Ballabio), nessun dato usato | ricerca |
+| `probe/` | pagine HTML ISTAT e struttura SDMX di IstatData (DF_BES_TERRIT, 13 MB) usate per trovare i link; **nessuna polarità lì** (esiste il concetto `NOTE_INDIC_POLAR` nello schema, ma non negli attributi del flusso BesT) | consultazione |
+
+IstatData (esploradati.istat.it, flusso `DF_BES_TERRIT`) dà gli stessi dati in SDMX: non scaricato perché l'Excel è completo e il servizio è limitato a poche chiamate al minuto. Il Bes dei territori sul grafico interattivo (Tableau Public) non è stato toccato.
+
+## 3. Pulizia (`scripts/build.py`, risultati in `pulito/controlli_build.json`)
+
+- **Letta solo l'edizione 2025**: ogni edizione contiene già tutta la serie 2004-ultimo anno, quindi la 2025 sostituisce le precedenti per gli indicatori ancora vivi. Le edizioni 2020-2024 servono solo per il catalogo (`pulito/indicatori_per_edizione.csv`: 83 indicatori diversi per nome in almeno un'edizione, 16 non più presenti nel 2025; es. patrimonio familiare, conferimento in discarica, biossido di azoto, delitti diffusi, altri delitti violenti) e per il controllo sulle revisioni (`milano_per_edizione.csv`, `controllo_revisioni_milano_ed24_ed25.csv`). Le edizioni 2018 e 2019 hanno tavole in un altro formato e non sono state lette.
+- **Tabella lunga `pulito/bes_lungo.csv`** (50 MB, 173.542 righe): `dominio, codice, indicatore, unita, polarita, livello_polarita, tipo_indicatore (Bes/Proxy/Locale), sesso, territorio, codice_territorio, tipo_territorio (italia/ripartizione/regione/provincia/provincia_storica), citta_metropolitana, anno, valore, flag_valore, valore_grezzo, nota_edizione, fonte_dato, edizione`. Una riga per territorio, indicatore, sesso, anno.
+- I numeri nei file ISTAT sono testo con virgola decimale: convertiti. Segni ISTAT: `-` (fenomeno assente o casi non verificati) e `..` (sotto la metà dell'ultima cifra) sono stati messi a 0 con `flag_valore` = `assente_zero_casi` (1.830 celle: mortalità infantile, omicidi, raccolta differenziata dove il servizio non esiste...) o `quasi_zero` (18); `....` (dato non conosciuto, circa 125.000 celle) scartati.
+- **Territori**: 1 Italia, 7 ripartizioni (Nord, Nord-ovest, Nord-est, Centro, Mezzogiorno, Sud, Isole), 20 regioni, **107 province** (incluse Aosta, Bolzano, Trento e Sud Sardegna) e 4 province sarde storiche (Olbia-Tempio, Ogliastra, Medio Campidano, Carbonia-Iglesias: solo dati fino al 2005, non usate). 14 città metropolitane: Torino, Genova, Milano, Venezia, Bologna, Firenze, Roma, Napoli, Bari, Reggio di Calabria, Palermo, Messina, Catania, Cagliari (stesso elenco del Report CM 2024).
+- Metadati (definizione, unità, fonte, tipo) agganciati per codice: tutti i 67 codici dei dati sono nei metadati e viceversa.
+- Domini nei dati 2025: Salute, Istruzione e formazione, Lavoro e conciliazione, Benessere economico, Relazioni sociali, Politica e istituzioni, Sicurezza, Paesaggio e patrimonio culturale, Ambiente, Innovazione ricerca e creatività, Qualità dei servizi (11).
+
+## 4. Polarità: come l'ho presa (`scripts/polarita_istat.py`, `scripts/alias_polarita.csv`, `pulito/polarita_istat_nota2019.csv`)
+
+- **Unica fonte ISTAT**: Tavola 1 "Misure del Benessere dei territori: indicatori provinciali, polarità, corrispondenza con il Bes" nella Nota metodologica ISTAT (`raw/ed2019/Nota-metodologica.pdf`, pag. 4-5), 55 indicatori. La Nota 2018 (`raw/ed2018/`) aggiunge solo la propensione alla brevettazione (+), letta a mano (`pulito/polarita_istat_aggiunte.csv`). Il Report CM 2024 spiega la regola ("polarità positiva se al crescere del valore cresce il benessere", `raw/report_cm2024/BesT_CM_2024_VSP.pdf` pag. 4 e 56) ma non pubblica l'elenco; ISTAT non calcola le differenze standardizzate per PM10, PM2,5 e mobilità dei laureati.
+- **Aggancio ai codici 2025 (`alias_polarita.csv`, una riga per indicatore con motivo)**: livello `istat` = stesso indicatore anche se ribattezzato (es. "Reddito disponibile pro capite" -> "Reddito medio disponibile pro capite"); livello `derivata` = 5 indicatori: competenza numerica e alfabetica **non** adeguata (ISTAT dà + alla competenza, qui è il complemento, quindi -) e furto in abitazione, borseggio, rapina (componenti dei "delitti diffusi denunciati", polarità -); livello `dubbia` = tasso di ingresso in sofferenza dei prestiti (ISTAT scrive **+** nella Nota 2018 e 2019, che per un tasso di sofferenza è quasi certamente un refuso: escluso dalle graduatorie; da chiedere a best@istat.it).
+- **Polarità dal testo ISTAT (10, livello `istat_testo`)**, tutte dal Report città metropolitane 2024 (`raw/report_cm2024/BesT_CM_2024_VSP.pdf`, numeri di pagina del PDF): mortalità evitabile (pag. 6: più alta = posizione sfavorevole, -), PM2,5 (pag. 29: concentrazioni molto sopra il limite per la salute = aria molto inquinata, -), aree protette (pag. 27: maggiore incidenza = "eccezione positiva", +), rifiuti urbani prodotti (pag. 28-29: valori pro-capite più bassi = "più sostenibili", la discesa è un "lieve miglioramento", -), comuni con servizi online (pag. 34: chi cresce meno "arretra", +), rete ultraveloce (pag. 35: tra i "vantaggi", +), servizio di raccolta differenziata (pag. 36: quota bassa = "criticità", +), posti letto ad alta assistenza (pag. 36: più posti = "più favorite", +), medici specialisti (pag. 35: maggiore dotazione = vantaggio, +), posti letto ospedalieri (pag. 5: ampia disponibilità = "situazione favorevole", +). **Restano senza polarità (3)**: altri delitti mortali denunciati, popolazione esposta a frane, a alluvioni: nessun testo ISTAT trovato. Il PM2,5 ha polarità ma ISTAT stesso non lo standardizza nei suoi rapporti.
+- Se Davide o ISTAT chiariscono le 3 mancanti e il segno del tasso di sofferenza, si aggiunge una riga in `alias_polarita.csv` (livello `istat_testo` con `polarita_esplicita` e `fonte_testo`) e si rilancia `build.py`, `analisi.py`, `pagina.py`.
+
+## 5. Risultati (anno di riferimento = ultimo anno con Milano e almeno 80 province; `scripts/analisi.py`)
+
+File: `milano_posizione_ultimo_anno.csv` (una riga per indicatore: valore Milano e Italia, differenza, scarto standardizzato, ranghi su 107 e su 14, primi e ultimi), `cm14_ultimo_anno.csv` (tutte le città metropolitane), `milano_migliori_peggiori.csv`, `milano_profilo_domini.csv`, `milano_cambiamenti.csv`, `milano_sotto_la_meta.csv`, `milano_serie.csv` (serie di Milano, Italia, Nord-ovest, Lombardia). Anni di riferimento: 2024 per 18 indicatori, 2023 per 27, 2022 per 19, 2020 per 2 (frane e alluvioni).
+
+**5.1 Posizione di Milano, 57 indicatori con polarità scritta da ISTAT (livelli `istat` e `istat_testo`)** - prima su 107 in 5, tra le prime 3 in 9, tra le prime 10 in 17; prima tra le 14 città metropolitane in 10, tra le prime 3 in 27; tra le ultime 3 (su 14) in 6; mai ultima. Meglio dell'Italia (scarto standardizzato > 0) in 44 indicatori su 55 confrontabili. Percentile mediano 71,7. Aggiungendo i 5 derivati: ultima su 14 in 1 (borseggi).
+
+**5.2 Migliori 10 / peggiori 10** (solo polarità ISTAT, ordinati per percentile; rango su 107; `milano_migliori_peggiori.csv`):
+
+Migliori: Posti-km Tpl (1), Reddito medio disponibile pro capite (1), Retribuzione media annua dipendenti (1), Importo medio annuo pensioni (1), Dispersione rete idrica (1), Addetti nelle imprese culturali (2; 3,1% contro 1,6%), Formazione continua (2; 17,9% contro 10,4%), Mobilità dei laureati 25-39 anni (2; +33,4 per 1.000 contro -6,2 in Italia), Laureati 25-39 anni (3; 45,5% contro 30,9%), Patrimonio museale (4; 13,25 per 100 km2 contro 1,46).
+
+Peggiori (con le polarità dal testo ISTAT): Impermeabilizzazione del suolo (105), Energia elettrica da fonti rinnovabili (104), Aree protette (102; 5,4% contro 21,7%; ultima tra le 14), Bambini 4-5 anni a scuola (102), PM2,5 (82 su 90; 21 µg/m3), PM10 (81 su 95; 32 µg/m3; 2023), Capacità di riscossione delle amministrazioni provinciali (87 su 103; 68,6% contro 86,4%), Organizzazioni non profit (85), Servizio di raccolta differenziata dei rifiuti (81; 49,2% contro 62,9%), Disponibilità di verde urbano (76; 18,8 m2 per abitante contro 33,3).
+
+Con i derivati le peggiori diventano: borseggi (106 su 106), rapine (105 su 106), poi impermeabilizzazione, rinnovabili, aree protette, scuola 4-5 anni, PM2,5, PM10, riscossione, non profit. Sono denunce per 100.000 **residenti**: Milano ha un'enorme popolazione non residente (pendolari, turisti) che fa salire il numeratore e non il denominatore (vedi limiti).
+
+**5.3 Quadro per dominio** (percentile medio di Milano sulle 107 province, solo indicatori con polarità scritta da ISTAT e dato valido; `pagina.py` -> riepilogo.json; i file `milano_profilo_domini.csv` includono anche i derivati):
+
+| Dominio | n | percentile medio su 107 | posizione del dominio tra le 14 CM |
+|---|---|---|---|
+| Benessere economico | 4 (su 5) | 96,5 | 2ª |
+| Innovazione, ricerca e creatività | 4 | 96,0 | 2ª |
+| Lavoro e conciliazione | 6 | 79,6 | 2ª |
+| Qualità dei servizi | 8 | 78,9 | 3ª |
+| Istruzione e formazione | 7 (su 9; 2 derivati esclusi) | 73,2 | 4ª |
+| Salute | 6 | 72,0 | 2ª |
+| Paesaggio e patrimonio culturale | 3 | 71,7 | 5ª |
+| Sicurezza | 2 (su 6) | 71,0 (35,1 con i 3 derivati) | 2ª |
+| Politica e istituzioni | 6 (su 7) | 51,5 | 7ª |
+| Relazioni sociali | 2 | 34,4 | 8ª |
+| Ambiente | 9 (su 11) | 30,4 | 13ª |
+
+Il dominio più debole è **Ambiente** (6 indicatori su 9 nell'ultimo terzo; 13ª tra le 14). Attenzione al numero di indicatori: Sicurezza ha solo 2 indicatori con polarità ISTAT e Relazioni sociali solo 2: il dominio dice poco. Posizioni per dominio tra le 14 in `cm14_graduatoria_per_dominio.csv`.
+
+**5.4 Come è cambiata la posizione** (`milano_cambiamenti.csv`; due orizzonti: rispetto al 2019, anno scelto anche da ISTAT nel Report CM 2024, e "serie lunga" = primo anno con almeno 80 province, almeno 5 anni prima; variazione standardizzata = (valore ultimo - valore base) x polarità / deviazione standard delle province nell'anno base, come fa ISTAT; "relativa all'Italia" = variazione di Milano meno variazione dell'Italia).
+- Rispetto al 2019 (48 indicatori con polarità scritta da ISTAT e totale Italia confrontabile): Milano migliora in 30; fa meglio dell'Italia in 21; sale in classifica su 107 in 14, scende in 24 (uguale in 10).
+- Migliorati di più rispetto all'Italia dal 2019: formazione continua (11,8% -> 17,9%, dal 7º al 2º posto), retribuzione media (30.408 -> 34.343 euro, sempre 1ª), capacità di riscossione dei comuni (dal 52º al 28º posto), medici specialisti, speranza di vita (84,2 -> 84,7 anni, dall'11º al 4º), amministratori under 40 (dall'82º al 63º), mortalità per tumore, omicidi.
+- Peggiorati di più rispetto all'Italia dal 2019: mobilità dei laureati (49,0 -> 33,4 per 1.000), mortalità stradale 15-34 anni (0,4 -> 0,5, dal 18º al 40º posto), NEET (13,5% -> 10,6%, ma l'Italia migliora di più: dal 20º al 37º), infortuni sul lavoro, brevetti (172 -> 136 per milione), passaggio all'università (dall'11º al 31º), mancata partecipazione al lavoro giovanile (dal 24º al 38º), amministratori donne (dal 7º al 16º), affollamento carceri (dal 47º al 70º posto).
+- Serie lunga: crescono molto speranza di vita (81,1 anni nel 2004 -> 84,7 nel 2024, dal 30º al 4º posto), mortalità per tumore 20-64 anni (12,0 -> 7,0 per 10.000, dall'84º al 32º), agriturismi, posti-km del trasporto pubblico. Peggiorano di più rispetto all'Italia: brevetti (251 -> 136), capacità di riscossione dei comuni (dal 1º al 28º), **raccolta differenziata (42,2% -> 68,7%, ma l'Italia sale più in fretta: dal 13º al 56º posto)**, mortalità stradale extraurbana, irregolarità del servizio elettrico (dal 3º al 37º), servizio di raccolta differenziata (7,9% -> 49,2%, dal 36º all'81º), affollamento delle carceri.
+- Cautele: le serie lunghe passano per cambi di definizione e revisioni (`nota_edizione`: "Nuova serie storica (base 2021)", "Serie storica revisionata"); i ranghi di indicatori con molti pari merito (omicidi, mortalità infantile, a 0 in molte province) saltano facilmente.
+
+**5.5 Milano contro l'Italia** (scarto standardizzato = differenza / deviazione standard delle 107 province, col segno della polarità; `gap_standardizzato`). Più grande: Tpl +5,4, addetti culturali +3,9, reddito +3,2, retribuzione +2,7, formazione continua +2,5, patrimonio museale +2,4, laureati +2,2. Più negativo: impermeabilizzazione del suolo -4,1 (31,9% contro 7,2%), amministrazioni provinciali -1,5, scuola 4-5 anni -1,3, energia rinnovabile -0,4. PM10 e PM2,5: il valore "Italia" nel file (70) e quelli regionali (0-10) sono fuori dall intervallo dei valori provinciali (15-55), quindi hanno un significato diverso da una media: non confrontabile, lasciato vuoto.
+
+## 6. Limiti dei dati (da riportare sulla pagina)
+
+1. **Polarità**: ISTAT non la pubblica per gli indicatori nati dopo il 2018 (punto 4): 10 le abbiamo prese dal testo del suo Report 2024, 3 restano senza polarità, 1 dubbia, 5 derivate. Il quadro per dominio con pochi indicatori (Sicurezza, Relazioni sociali) è fragile.
+2. **"Milano" = 133 comuni**, non la città: il capoluogo ha valori molto diversi (ISTAT lo mostra solo nel Report CM 2024 per pochi indicatori).
+3. **Anni diversi tra indicatori** (2020-2024) e **serie molto corte** per molti (reddito disponibile: solo 2021-2023 nella serie attuale; verde storico 2021-2022; aree protette 2021-2022; frane e alluvioni 2017 e 2020; scuole accessibili solo 2024). Sette indicatori hanno al massimo 3 anni di serie per Milano (reddito, scuole accessibili, verde storico, frane, alluvioni, aree protette, comuni con servizi online): per questi non ha senso parlare di andamento.
+4. **Revisioni**: ISTAT rivede i dati precedenti a ogni edizione (7% delle celle cambia tra 2024 e 2025). Citare sempre l'edizione.
+5. **Denunce per 100.000 residenti** (borseggio, rapina, furto): il denominatore sono i residenti, non le persone presenti; per una città con turisti e pendolari le denunce risultano gonfiate. Sono comunque denunce, non reati.
+6. **PM10 e PM2,5**: la fonte è l'indagine ISTAT Dati ambientali nelle città (capoluoghi di provincia): solo 95 e 90 province su 107 hanno il dato; i totali (Italia, regioni) hanno un altro significato (valori da 0 a 70: sembrano conteggi, non medie in µg/m3; non verificato) e non si confrontano. ISTAT stesso non li usa nelle differenze standardizzate.
+7. **Scuola 4-5 anni**: indicatore del Ministero dell'Istruzione e del Merito (frequenza della scuola dell'infanzia o del primo anno di primaria sul totale dei bambini di 4-5 anni residenti). Non so perché Milano e la Lombardia siano sotto la media: possibili cause (iscrizioni non registrate, residenti stranieri, scuole non incluse) **non verificate**.
+8. **Province sarde**: Sardegna ha cambiato assetto (Sud Sardegna presente, quattro province soppresse fino al 2005). Cagliari è città metropolitana; il confronto sulle 107 usa l'assetto Nuts 2021 di ISTAT, come ISTAT.
+9. **Valori '..' e '-'** trattati come 0 (punto 3). Il tasso di omicidi e di mortalità infantile vale 0 in molte province piccole: i ranghi hanno molti pari merito (usato il rango "min").
+10. **Edizione 2022**: il file Excel non ha la colonna `CODICE` (le altre edizioni sì): letto per nome. Nelle edizioni 2023/2024 il nome del file xlsx è doppio (`.xlsx.xlsx`).
+11. **Dato regionale a elezioni**: "Partecipazione elettorale (elezioni regionali)" ha dati solo per le regioni al voto nell'anno: non confrontabile tra le 107 (escluso dalle graduatorie).
+12. Milano è "prima" in alcune misure perché grande e densa (Tpl, musei, reddito): un indicatore per abitante o per km2 non è un giudizio di qualità.
+13. **Benessere soggettivo non presente**. Nota: su IstatData ci sono flussi separati "province e grandi comuni" dall'indagine Aspetti della vita quotidiana (soddisfazione per la vita, parenti/amici/vicini su cui contare, percezione del rischio di criminalità: `DF_DCSS_BEST_PPC_1_GC` ... `_6_GC`) che includono Milano; non scaricati in questa fase.
+
+## 7. Pagina (costruita il 1/11/2026)
+
+`docs/benessere/index.html` + `docs/benessere/data/` (scritti da `scripts/pagina.py`, rieseguibile). Sezioni: prima di leggere, cosa sorprende (scuola 4-5 anni), nel complesso (3ª su 14, etichettata come nostra media e non indice ISTAT), prima/ultime, 11 grafici a pallini (uno per dominio, Milano evidenziata tra le 14 città), dal 2019, Milano e Italia, limiti dei dati, metodo, file, fonti. Il link a `../reati/` compare solo se `docs/reati/index.html` esiste al momento in cui si lancia `pagina.py`.
+
+## 7b. Cosa si potrebbe aggiungere
+
+- Una scheda per dominio con il rango di Milano tra le 14 città metropolitane (un solo grafico a punti, Milano evidenziata), usando solo gli indicatori con polarità ISTAT e dicendo quanti sono.
+- "Dove Milano è prima, dove è tra le ultime": le 5 prime posizioni assolute (reddito, retribuzione, pensioni, Tpl, rete idrica) accanto a suolo impermeabilizzato, rinnovabili, scuola a 4-5 anni.
+- La storia dell'istruzione: laureati, diplomati e formazione continua tra i primi d'Italia, scuola a 4-5 anni tra gli ultimi (serie 2013-2023 con Italia e Lombardia).
+- Quanto è cambiato dal 2019 (migliora 27 indicatori su 43, ma ne sale in classifica solo 13).
+- Il paragrafo "limiti dei dati" con la polarità mancante e il significato di "Milano".
+- Dati pronti per i grafici: `milano_serie.csv`, `cm14_ultimo_anno.csv`, `milano_posizione_ultimo_anno.csv`.
+
+## 8. Come ripetere tutto
+
+Vedi STATO.md (6 programmi, nessuno scarica più di una volta se i file ci sono).

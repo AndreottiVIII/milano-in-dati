@@ -57,7 +57,9 @@
     { path: 'costruzioni/', label: 'Dove si costruisce' },
     { path: 'arrivi-partenze/', label: 'Chi arriva e chi lascia' },
     { path: 'comunita/', label: 'Le comunità' },
-    { path: 'eta/', label: 'Età e centenari' }
+    { path: 'eta/', label: 'Età e centenari' },
+    { path: 'benessere/', label: 'Benessere ISTAT' },
+    { path: 'statue/', label: 'Statue e monumenti' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
