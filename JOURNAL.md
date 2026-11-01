@@ -2633,3 +2633,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-01 notte — Pagina `docs/quartiere/` (programmi in `quartiere/scripts/`), voluta da Davide: una scheda per ognuno degli 88 NIL con 42 indicatori presi dalle altre pagine (file e campo citati per ogni riga), confronto con la città e con un secondo quartiere (#nil=11&vs=27), link alla pagina e ai dati di origine. Idea presa dai progetti simili (Mapparoma "Scopri la tua Roma", NYU Furman), vedi `_idee/progetti_simili.md`.
 - Regole: mai valori stimati al posto dei mancanti ("non disponibile" con il motivo); valori poco affidabili segnati e fuori dalle classifiche; stime da CAP, zone OMI, sezioni o proiezioni con etichetta grigia; "cose che saltano all'occhio" solo per valori affidabili nel primo o ultimo 5%.
 - Escluse: donne nelle vie e beni culturali (senza NIL), voto-reddito, redditi e prezzi (già dentro tramite quartieri-che-cambiano), parcheggi (stime), luoghi cercati, incroci, aria, pollini.
+
+## 56. Chi può permettersi di vivere dove
+
+- 2026-11-01 notte — Analisi e pagina (`permettersi/`, `docs/permettersi/`), pubblicata con l'autorizzazione notturna di Davide; idea dai progetti simili (Mietenwatch Berlino, NYU Furman). Dettagli in `permettersi/NOTE.md`.
+- Metodo: affitto OMI (stima) per civico e semestre 2011-2024, mediato per NIL; percentili del reddito di città stimati dalle classi MEF e reddito di quartiere da miscela dei CAP; quota = affitto × 12 / reddito lordo; case di 40/60/80 m² scelte da noi. Stipendi ufficiali ARAN con pagina (infermiere CCNL Sanità 2022-24 p. 106; docenti CCNL Istruzione e Ricerca 2022-24 p. 49); autista non incluso (contratto privato senza tabella aperta).
+- Numeri: con il reddito mediano e 60 m², NIL entro il 30% 42 (2011) → 52 (2019) → 18 (2024); usciti dal 2015 28, entrati 0. Sorpresa: fino al 2022 non era peggiorato; il crollo è 2022-24, in gran parte il salto delle quotazioni OMI (stime). Il quarto più basso dei redditi non sta nel 30% con 60 m² in nessun quartiere e anno.
+- Limiti dei dati: OMI stime; zone ridisegnate (confronti dal 2015); contribuenti ≠ famiglie; reddito lordo; stipendi di base senza indennità.

@@ -66,7 +66,8 @@
     { path: 'suolo/', label: 'Quanto suolo si consuma' },
     { path: 'pendolari/', label: 'Pendolari' },
     { path: 'reati/', label: 'Reati denunciati' },
-    { path: 'quartiere/', label: 'Il tuo quartiere' }
+    { path: 'quartiere/', label: 'Il tuo quartiere' },
+    { path: 'permettersi/', label: 'Chi può permettersi dove' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
