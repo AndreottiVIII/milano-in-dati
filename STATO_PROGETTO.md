@@ -46,7 +46,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 32 | Costo della vita | Online |
 | 33 | Il metrò | Online |
 | 34 | Cosa si mangia | Online |
-| — | In corso | Pagine di turisti e pietre d'inciampo; fase 1 di luoghi più cercati, pietre d'inciampo, metrò, turisti per nazionalità, ristoranti (solo se i dati sono aggiornati) |
+| 35 | Turisti | Online |
+| — | In corso | Pagina delle pietre d'inciampo; fase 1 di popolazione (arrivi, stranieri, età), case popolari, dove si costruisce, beni confiscati; luoghi più cercati in attesa di ok; pietre d'inciampo, metrò, turisti per nazionalità, ristoranti (solo se i dati sono aggiornati) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.

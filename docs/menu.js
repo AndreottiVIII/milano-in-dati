@@ -43,7 +43,8 @@
     { path: 'caldo/',            label: 'Il quartiere più caldo' },
     { path: 'costo-vita/',       label: 'Quanto costa vivere' },
     { path: 'metro/',            label: 'Il metrò' },
-    { path: 'ristoranti/',       label: 'Cosa si mangia' }
+    { path: 'ristoranti/',       label: 'Cosa si mangia' },
+    { path: 'turisti/',          label: 'Turisti' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

@@ -2482,3 +2482,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: 6,5 pratiche ogni 1.000 residenti (Duomo 41,7, Gallaratese 1,0); cucine: pizza 30,6%, italiana 28,0%, giapponese 11,1%; cinesi a Sarpi (indice 4,6), indiani a Porta Venezia, latinoamericani a NoLo. Sorpresa: NoLo ha tante cucine straniere quante Sarpi (66,7% contro 65,2%) ma molto più varie. La cucina milanese non si può contare (24 locali in tutto).
 - Limiti dei dati: il registro conta pratiche, non locali aperti; nessuna cucina nel registro; tag cucina solo nel 69% dei locali OSM; pratiche 2019-2026 soprattutto cambi di gestione; ds2954 cambia definizione tra 2023 e 2024.
 
+## 35. Turisti per nazionalità
+
+- 2026-11-01 — Fase 1 e pagina (`turisti/`, `docs/turisti/`), volute da Davide. Dettagli in `turisti/NOTE.md`.
+- Fonti: Comune di Milano (CC BY, dati ISTAT/PoliS per il comune): annuale per paese 2005-2025 (ds211/ds213) e 2000-2004 dalla serie vecchia (ds210/ds212), mensile 2015-2025, albergo/extra-albergo per paese 2008-2025; Banca d'Italia, indagine sul turismo internazionale (microdati 1997-2025, solo il totale di spesa del comune, con avvertenze). ISTAT esploradati non ha Milano per paese. Scelte: solo il comune, niente provincia; voce "Altri Paesi del Medio Oriente" (mai "Golfo").
+- Numeri: notti 5,04 milioni (2000), 12,95 (2019), 3,52 (2020), 17,75 (2025); stranieri 78% nel 2025; USA primi dal 2019 (×1,83), Cina al 94% del 2019; spesa dei turisti stranieri 3.858 → 5.532 milioni (2019-2025). Sorpresa: cala il turista italiano (−12,8% di notti, −34,2% negli alberghi).
+- Limiti dei dati: due serie con numeri diversi per lo stesso anno; punti delle migliaia in ds212 e ds219; refusi nei nomi dei paesi; salti dell'extra-albergo nel 2013, 2018 e 2025 (dal 2025 l'ISTAT conta anche le locazioni brevi non imprenditoriali); residenza, non nazionalità; Olimpiadi 2026 non ancora nei dati.
+
