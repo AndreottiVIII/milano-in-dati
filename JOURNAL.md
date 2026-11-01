@@ -2605,3 +2605,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Albo Botteghe Storiche del Comune (ds290 2017, ds2858 2024 con stato attiva/cessata; CC BY), elenco regionale Negozi e Locali Storici (ds612 e dati.lombardia.it, CC0) con 10 edizioni ricostruite dalla Wayback Machine, OSM (solo sì/no in pagina), registri commerciali 2026. 760 attività uniche; solo insegne, mai ragioni sociali.
 - Controllo a campione su 40 schede: 24 su 25 con stato deciso coerenti; 35% "probabili" non verificabili (scritto in pagina). 18 unioni incerte (fonti a oltre 1 km) escluse da mappa e schede.
 - Numeri: 120 cessate su 625 nell'Albo 2024 ("cessata secondo l'Albo del Comune, data non indicata"); Duomo ha il 28% delle botteghe. Sorpresa: bar storici 1 chiuso su 45, panifici e pasticcerie 12 su 34; chiudono di più le nate nel dopoguerra.
+
+## 52. Quanto suolo si consuma
+
+- 2026-11-01 notte — Fase 1 e pagina (`suolo/`, `docs/suolo/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `suolo/NOTE.md`.
+- Fonti: ISPRA/SNPA, edizione 2026 (dati 27/10/2026): indicatori per comune 2006-2025 (CC BY 4.0), mappe a 10 m 2006-2025 (licenza citata alla lettera: "Attribuzione 3.0 Italia (CC BY 4.0 IT)", incoerente), strato logistica (solo centroidi). Raster non ripubblicati: in pagina solo tabelle e immagini PNG delle aree.
+- Numeri: Milano 10.679 ha consumati, 58,8% del comune (3ª tra le città sopra 100.000 abitanti), 78 m² per abitante; +3,0% dal 2006 con residenti +8,2%. Sorpresa: le grandi trasformazioni quasi non contano come nuovo consumo (scali, Portello) e CityLife e Porta Nuova hanno restituito suolo; entro 3 km dal Duomo il saldo è −8,4 ha; il nuovo consumo è in periferia e per il 36% è suolo di cantiere. La logistica pesa circa l'8% nella Città metropolitana.
+- Limiti dei dati: "consumato" = superficie artificiale, cantieri compresi; revisioni tra edizioni; mappe v6 e v8; classe 1 "non specificata nella legenda"; confronto con le costruzioni solo indicativo.

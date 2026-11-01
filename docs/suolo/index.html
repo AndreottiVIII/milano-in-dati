@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quanto suolo si consuma</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select,.ctl input[type=search]{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl input[type=search]{cursor:text;min-width:0;width:220px}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(90px,36%) 1fr minmax(96px,128px);gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums}
+.pair .row{grid-template-columns:70px 1fr 120px} .pair .tr{height:16px;background:none} .pair .fill{position:absolute;left:0;height:7px;top:0} .pair .fill.b2{top:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .pair .row{grid-template-columns:56px 1fr 96px}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:520px;overflow:auto}
+#tab-metro{min-width:760px} #tab-metro th{cursor:pointer;position:sticky;top:0;background:#fff} #tab-metro th.on{color:var(--acc)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:.6em 0} .big div{border:1px solid var(--line);padding:6px 10px} .big b{display:block;font-size:1.35rem;line-height:1.2} .big span{font-size:.8rem;color:var(--mut)}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quanto suolo si consuma a Milano</h1>
+<p>Ogni anno l&rsquo;ISPRA (l&rsquo;istituto nazionale per l&rsquo;ambiente) misura dal satellite quanta parte di ogni comune italiano &egrave; coperta da superfici artificiali. La chiama <b>suolo consumato</b>. A Milano nel 2025 sono <b id="n-ha">10.679</b> ettari, il <b id="n-pct">58,8%</b> del comune. Qui vediamo come &egrave; cambiato dal 2006, dove, e come si confronta con le altre grandi citt&agrave; e con i comuni intorno.</p>
+<div class="warm"><b>Che cosa vuol dire &laquo;consumato&raquo;.</b> Non vuol dire &laquo;costruito&raquo;. &Egrave; la superficie resa artificiale: edifici, ma anche strade, piazzali, parcheggi, ferrovie, <b>cantieri e terra battuta</b>, cave. Un parco, un giardino, un campo no. Un cantiere s&igrave;, anche se l&rsquo;edificio non c&rsquo;&egrave; ancora. Un ettaro &egrave; un quadrato di 100 metri per 100.</div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="tempo">Dal 2006 al 2025</h2>
+<div id="tempo-testo"></div>
+<div class="big" id="big"></div>
+<div class="ch" id="ch-tempo" role="img" aria-label="Grafico: suolo consumato e popolazione di Milano dal 2006 al 2025, 2006 = 100"></div>
+<div class="lgd" id="lg-tempo"></div>
+<p class="src">Indice, 2006 = 100. Suolo consumato: ISPRA, edizione 2026. Popolazione: residenti ISTAT usati da ISPRA (nel 2021 il dato ha un salto perch&eacute; l&rsquo;ISTAT ha ricalcolato i residenti col censimento). I punti sono gli anni disponibili: 2006, 2012 e poi ogni anno dal 2015.</p>
+<div id="incr-testo"></div>
+<div class="scroll"><table id="tab-incr"></table></div>
+<p class="src">Ettari di suolo consumato in pi&ugrave; (o in meno) in ogni periodo. Netto = nuovo consumo meno superfici tornate libere (&laquo;ripristino&raquo;). Fonte: ISPRA/SNPA, edizione 2026.</p>
+
+<h2 id="citta">Milano e le altre grandi citt&agrave;</h2>
+<div id="citta-testo"></div>
+<div class="grid2"><div><h3>Quanta parte del comune &egrave; consumata (2025)</h3><div class="bars" id="b-pct"></div></div>
+<div><h3>Metri quadri consumati per abitante (2025)</h3><div class="bars" id="b-m2"></div></div></div>
+<div class="scroll"><table id="tab-citta"></table></div>
+<p class="src">ISPRA/SNPA edizione 2026, comuni. Metri quadri per residente = suolo consumato diviso residenti ISTAT: non conta chi viene in citt&agrave; ogni giorno. Crescita 2012&ndash;2025 calcolata sulla differenza fra i due anni.</p>
+
+<h2 id="dove">Dove, dentro Milano</h2>
+<div id="dove-testo"></div>
+<p>Scegli il periodo. I colori dei quartieri (i 88 NIL) dicono quanti ettari di terreno libero sono diventati superficie artificiale; i puntini scuri sono i punti esatti (celle di 10 metri). Clic su un quartiere per i dettagli.</p>
+<div class="ctl"><span class="sub">Periodo:</span>
+<button type="button" data-m="1225" class="on">2012&ndash;2025</button><button type="button" data-m="0612">2006&ndash;2012</button><button type="button" data-m="1215">2012&ndash;2015</button><button type="button" data-m="1518">2015&ndash;2018</button><button type="button" data-m="1825">2018&ndash;2025</button><button type="button" data-m="r1225">Terra restituita 2012&ndash;2025</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select>
+<label class="ck"><input type="checkbox" id="ck-px" checked> mostra i punti esatti</label></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per suolo nuovo consumato"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">&laquo;Nuovo&raquo; = cella non consumata nella prima carta e consumata nella seconda. &laquo;Restituita&raquo; = il contrario. Carte ISPRA a 10 metri (2006, 2012, 2015, 2018: versione 6; 2025: versione 8; vedi <a href="#limiti">limiti dei dati</a>). Il 2018&ndash;2025 passa da una versione all&rsquo;altra della carta. Mappa &copy; OpenStreetMap contributors; quartieri: Comune di Milano (CC BY).</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<h3>I quartieri con pi&ugrave; terreno nuovo, 2012&ndash;2025</h3>
+<div class="bars" id="b-nil"></div>
+<div id="nil-testo"></div>
+
+<h3>Distanza dal Duomo</h3>
+<div id="anelli-testo"></div>
+<div class="bars pair" id="b-anelli"></div>
+<div class="lgd"><span><i style="background:#c26a1b"></i>terreno libero diventato consumato</span><span><i style="background:#00695c"></i>tornato libero</span></div>
+<p class="src">Ettari 2012&ndash;2025 per anello di 1 km attorno al Duomo (45,4642 N, 9,1900 E), dentro i confini dei NIL. Carte ISPRA a 10 m.</p>
+
+<h3>Da che cosa &egrave; fatto il terreno nuovo</h3>
+<div id="classi-testo"></div>
+<div class="bars" id="b-classi"></div>
+<p class="src">Classe della cella nel 2025, per le celle che erano libere nel 2012. Fonte: carta ISPRA 2025, legenda ISPRA (classi 111&ndash;126). &laquo;Superficie consumata non specificata nella legenda&raquo; = classe 1 della carta.</p>
+
+<h2 id="restituita">Terra restituita</h2>
+<div class="surp" id="restituita"></div>
+<div class="bars" id="b-rest"></div>
+<p class="src">Ettari 2012&ndash;2025 che erano consumati nel 2012 e non lo sono pi&ugrave; nel 2025, per quartiere. Carte ISPRA a 10 metri.</p>
+
+<h2 id="metro">La citt&agrave; metropolitana</h2>
+<div id="metro-testo"></div>
+<div class="ctl"><label class="sub" for="q-metro">Cerca un comune:</label><input type="search" id="q-metro" placeholder="per esempio Segrate"> <span class="sub" id="metro-n"></span></div>
+<div class="scroll tabmax"><table id="tab-metro"></table></div>
+<p class="src">133 comuni della Citt&agrave; metropolitana di Milano. Clic sull&rsquo;intestazione per ordinare. &laquo;Lordo&raquo; e &laquo;netto&raquo; 2012&ndash;2025: ISPRA/SNPA edizione 2026. Le colonne &laquo;edifici&raquo;, &laquo;cantieri&raquo;, &laquo;cave&raquo; sono nostri calcoli sulle carte 2012 e 2025 (quanto del terreno diventato consumato risulta oggi di quel tipo; il resto sono strade, piazzali e altro). &laquo;Logistica&raquo;: aree classificate da ISPRA come logistica dal 2012 al 2023 (centroidi; vedi limiti).</p>
+<div class="warm" id="metro-log"></div>
+
+<h2 id="verde">Quanto verde potrebbe tornare</h2>
+<div id="verde-testo"></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<div id="download-testo"></div>
+
+<p>Sullo stesso sito: <a href="../costruzioni/">Costruzioni</a> (nuovi edifici, abitazioni e volumi per quartiere) e <a href="../alberi/">Alberi della citt&agrave;</a>.</p>
+
+<footer id="fonti"></footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,NIL=[],RD=[];
+var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?0:d)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows,rcols){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function bars(id,rows,max,col){setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(Math.max(0,r.v)/max*100)+'%;background:'+(r.col||col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];NF=a[1];NIL=NF.features.map(function(f){return f.properties});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();tempo();citta();dove();restituita();metro();verde();limiti();metodo();download();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function zona(n){var z=D.raster.zone;for(var i=0;i<z.length;i++)if(z[i].nil===n)return z[i];return {nuovo:0,restituito:0}}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var R=D.raster,M=D.milano;
+  el('n-ha').textContent=f0(M.ha25);el('n-pct').textContent=nf(M.pct25,1)+'%';
+  var sr=zona('Scalo Romana'),fa=zona('Farini'),po=zona('Portello'),tt=zona('Tre Torri'),pn=zona('Porta Garibaldi - Porta Nuova');
+  var h='<p><b>Le grandi trasformazioni di Milano quasi non contano come &laquo;nuovo suolo consumato&raquo;.</b> Dal 2012 al 2025, nei quartieri di Scalo Romana sono diventati superficie artificiale '+nf(sr.nuovo,1)+' ettari di terreno libero, a Farini '+nf(fa.nuovo,1)+', al Portello '+nf(po.nuovo,1)+'. Perch&eacute; erano gi&agrave; &laquo;consumati&raquo;: scali ferroviari, ex fiera, aree industriali, cantieri. Nei quartieri Tre Torri (dove c&rsquo;&egrave; CityLife) e Porta Garibaldi&ndash;Porta Nuova la superficie consumata &egrave; anzi <b>scesa</b>, di '+nf(tt.restituito,1)+' e '+nf(pn.restituito,1)+' ettari.</p>';
+  h+='<p><b>Nel centro il saldo &egrave; negativo.</b> Entro 3 km dal Duomo, dal 2012 al 2025: '+nf(R.entro3km.nuovo,1)+' ettari nuovi, '+nf(R.entro3km.rip,1)+' tornati liberi, saldo <b>'+sg(R.entro3km.nuovo-R.entro3km.rip,1)+' ettari</b>.</p>';
+  h+='<p><b>Il terreno davvero nuovo &egrave; in periferia</b>: '+f0(100*R.tra4e9km.nuovo/R.nuovo_1225)+'% fra 4 e 9 km dal Duomo ('+f0(R.nuovo_1225)+' ettari in tutto). E il <b>'+f0(R.quota_cantieri)+'%</b> di quel terreno, oggi, &egrave; terra battuta di cantiere: non ci sono ancora edifici.</p>';
+  h+='<p>Otto quartieri ('+R.top8.slice(0,3).map(esc).join(', ')+' e altri cinque) prendono il <b>'+nf(R.quota_top8_suolo,1)+'%</b> del terreno nuovo, ma solo il <b>'+f0(R.quota_top8_abitazioni)+'%</b> delle nuove abitazioni di Milano (permessi 2014&ndash;2024, dal filone <a href="../costruzioni/">Costruzioni</a>). Le nuove case nascono soprattutto dove il suolo era gi&agrave; consumato.</p>';
+  h+='<p class="src">Confronto fra le carte ISPRA del consumo di suolo 2012 e 2025 (10 m), ritagliate sui 88 NIL. Il saldo netto di Milano (+'+nf(R.netto_1225,1)+' ettari) coincide con la cifra pubblicata da ISPRA.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- serie nel tempo ---------- */
+function linechart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||280,m={l:42,r:36,t:14,b:30};
+  var all=[];o.series.forEach(function(s){s.pts.forEach(function(p){all.push(p.y)})});
+  var y0=Math.floor(Math.min.apply(null,all)/5)*5-0,y1=Math.ceil(Math.max.apply(null,all)/5)*5;
+  var x0=o.x0,x1=o.x1,pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  var sy=niceStep((y1-y0)/5);
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var lastx=-99;
+  o.xt.forEach(function(v){var xx=X(v);if(xx-lastx>34){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+v+'</text>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  o.series.forEach(function(se){
+    s+='<polyline fill="none" stroke="'+se.col+'" stroke-width="2.4" points="'+se.pts.map(function(p){return X(p.x).toFixed(1)+','+Y(p.y).toFixed(1)}).join(' ')+'"/>';
+    se.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3" fill="'+se.col+'" stroke="#fff" stroke-width="1"/>'});
+    var l=se.pts[se.pts.length-1];s+='<text x="'+(X(l.x)+6)+'" y="'+(Y(l.y)+4)+'" style="fill:'+se.col+';font-weight:700">'+se.end+'</text>';
+  });
+  s+='<rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('rect');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bi=0,bd=1e9;
+    o.series[0].pts.forEach(function(p,i){var d=Math.abs(X(p.x)-px);if(d<bd){bd=d;bi=i}});
+    tip.innerHTML=o.tip(bi);tip.style.display='';var tw=tip.offsetWidth,left=X(o.series[0].pts[bi].x)/k+10;if(left+tw>r.width)left=X(o.series[0].pts[bi].x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
+  function hide(){tip.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function tempo(){
+  var M=D.milano,I=M.indice,S=M.serie;
+  var h='<p>Milano aveva <b>'+f0(M.ha06)+'</b> ettari di suolo consumato nel 2006 e ne ha <b>'+f0(M.ha25)+'</b> nel 2025: <b>+'+f0(M.ha25-M.ha06)+' ettari ('+sg(100*(M.ha25/M.ha06-1),1)+'%)</b>. Nello stesso periodo i residenti sono passati da '+f0(M.pop06)+' a '+f0(M.pop25)+' ('+sg(100*(M.pop25/M.pop06-1),1)+'%). Il suolo cresce molto pi&ugrave; lentamente delle persone: i metri quadri consumati per abitante scendono da '+f0(M.m2ab06)+' a '+f0(M.m2ab25)+'.</p>';
+  setH('tempo-testo',h);
+  setH('big','<div><b>'+nf(M.pct25,1)+'%</b><span>del comune &egrave; consumato (2025)</span></div><div><b>'+f0(M.m2ab25)+' m&sup2;</b><span>consumati per abitante</span></div><div><b>'+nf(M.ultimo.netto_ha,1)+' ha</b><span>in pi&ugrave; nell&rsquo;ultimo anno (2024&ndash;2025)</span></div><div><b>'+M.rango_grandi+'&ordf; su '+M.n_grandi+'</b><span>fra i comuni con oltre 100.000 abitanti</span></div><div><b>'+nf(M.italia_pct,1)+'%</b><span>la media italiana</span></div>');
+  function draw(){
+    linechart(el('ch-tempo'),{x0:2006,x1:2025,xt:[2006,2010,2012,2015,2018,2020,2022,2025],h:280,
+      series:[{col:ACC,end:nf(I[I.length-1].suolo,0),pts:I.map(function(r){return {x:r.anno,y:r.suolo}})},{col:WARM,end:nf(I[I.length-1].pop,0),pts:I.map(function(r){return {x:r.anno,y:r.pop}})}],
+      tip:function(i){var r=S[i];return '<b>'+r.anno+'</b><br>suolo consumato: '+f0(r.consumato_ha)+' ha ('+nf(r.consumato_pct,1)+'%)<br>residenti: '+f0(r.popolazione)+'<br>'+f0(r.m2_per_ab)+' m&sup2; per abitante'}});
+  }
+  draw();RD.push(draw);
+  setH('lg-tempo','<span><i class="ln" style="border-top-color:'+ACC+'"></i>suolo consumato</span><span><i class="ln" style="border-top-color:'+WARM+'"></i>residenti</span>');
+  var inc=M.incrementi;
+  setH('incr-testo','<p>Dal 2006 al 2012 la crescita netta &egrave; stata in media di '+nf(M.netto_06_12/6,1)+' ettari all&rsquo;anno; dal 2012 al 2025 di '+nf(M.netto_12_25/13,1)+'. Nell&rsquo;ultimo anno, 2024&ndash;2025, il consumo &egrave; stato di '+nf(M.ultimo.lordo_ha,1)+' ettari, '+nf(M.ultimo.ripristino_ha,1)+' sono tornati liberi: <b>+'+nf(M.ultimo.netto_ha,1)+' netti</b>. In due periodi il saldo &egrave; negativo (2018&ndash;2019 e 2023&ndash;2024): in quell&rsquo;ultimo caso sono tornati liberi 20,9 ettari contro 13,1 di nuovo consumo.</p>');
+  table('tab-incr',['Periodo','Nuovo consumo (ha)','Tornato libero (ha)','Netto (ha)','Netto per anno (ha)'],inc.map(function(r){return [r.periodo.replace('-','&ndash;'),nf(r.lordo_ha,1),nf(r.ripristino_ha,1),sg(r.netto_ha,1),sg(r.netto_ha/r.anni,1)]}));
+}
+
+/* ---------- citta ---------- */
+function citta(){
+  var C=D.citta.slice(),M=D.milano;
+  var a=C.slice().sort(function(x,y){return y.pct-x.pct}),b=C.slice().sort(function(x,y){return y.m2ab25-x.m2ab25});
+  var h='<p>Milano &egrave; la <b>terza grande citt&agrave; italiana per quota di comune consumata</b> (fra i '+M.n_grandi+' comuni con oltre 100.000 abitanti), dopo Torino e Napoli; su tutti i '+f0(M.n_comuni_italia)+' comuni italiani &egrave; al '+M.rango_italia+'&ordm; posto. Ma per abitante &egrave; fra le pi&ugrave; compatte: '+f0(M.m2ab25)+' m&sup2; a testa, contro '+f0(b[0].m2ab25)+' di '+esc(b[0].comune)+' e '+f0(b[1].m2ab25)+' di '+esc(b[1].comune)+'. Solo Napoli ci si avvicina.</p>';
+  h+='<p>Una quota alta con pochi metri a testa vuol dire: molte persone sullo stesso suolo. Non dice nulla sulla qualit&agrave; dell&rsquo;abitare.</p>';
+  setH('citta-testo',h);
+  bars('b-pct',a.map(function(r){return {nm:r.comune,v:r.pct,txt:nf(r.pct,1)+'%',col:r.comune==='Milano'?WARM:ACC}}),70);
+  bars('b-m2',b.map(function(r){return {nm:r.comune,v:r.m2ab25,txt:f0(r.m2ab25)+' m&sup2;',col:r.comune==='Milano'?WARM:ACC}}),135);
+  table('tab-citta',['Citt&agrave;','Consumato 2025 (ha)','m&sup2; per ab. 2006','m&sup2; per ab. 2025','Suolo 2006&ndash;2025','Suolo 2012&ndash;2025','Residenti 2006&ndash;2025'],C.map(function(r){return [esc(r.comune),f0(r.ha),f0(r.m2ab06),f0(r.m2ab25),sg(r.suolo_06_25_pct,1)+'%',sg(r.suolo_12_25_pct,1)+'%',sg(r.pop_06_25_pct,1)+'%']}));
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,PXL=null,CUR='1225',SEL=null;
+var WSEQ=['#f6e9dc','#f0c9a0','#e19d5e','#c26a1b','#8a4a10','#4a2306'],TSEQ=['#dff0ec','#b0d9d1','#6fb7aa','#2f8f80','#00695c','#023a33'];
+var BRK={'1225':[0.5,2,5,10,20],'0612':[0.5,2,5,10,20],'1215':[0.5,1.5,3,6,12],'1518':[0.5,1.5,3,6,12],'1825':[0.5,2,5,10,15],'r1225':[0.2,0.6,1.5,3,4]};
+var DESC={'1225':'Terreno libero nel 2012 che nel 2025 &egrave; superficie artificiale (ettari per quartiere). Totale Milano: ','0612':'Come sopra, fra il 2006 e il 2012. Totale: ','1215':'Fra il 2012 e il 2015. Sono gli anni dell&rsquo;Expo. Totale: ','1518':'Fra il 2015 e il 2018. Totale: ','1825':'Fra il 2018 e il 2025 (cambia la versione della carta ISPRA: vedi limiti dei dati). Totale: ','r1225':'Superficie che nel 2012 era consumata e nel 2025 non lo &egrave; pi&ugrave;, ettari per quartiere. Totale: '};
+function key(m){return m.charAt(0)==='r'?'r'+m.slice(1):'n'+m}
+function colore(v,m){var s=m.charAt(0)==='r'?TSEQ:WSEQ,b=BRK[m],i=0;while(i<b.length&&v>=b[i])i++;return s[i]}
+function dove(){
+  var R=D.raster,P=R.periodi;
+  var h='<p>Il confronto fra le carte ISPRA permette di vedere <i>dove</i> il suolo &egrave; cambiato. Dal 2012 al 2025 <b>'+f0(R.nuovo_1225)+' ettari</b> di terreno libero sono diventati superficie artificiale (circa '+f1(100*R.nuovo_1225/D.milano.superficie_ha)+'% del comune) e <b>'+f0(R.rip_1225)+' ettari</b> hanno fatto il percorso inverso: il saldo, '+nf(R.netto_1225,1)+' ettari, &egrave; lo stesso che pubblica ISPRA. Su 88 quartieri, '+R.n_nil_oltre05+' hanno pi&ugrave; di mezzo ettaro di terreno nuovo e '+R.n_nil_sotto01+' meno di un decimo.</p>';
+  setH('dove-testo',h);
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tip(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  MAP.createPane('px').style.zIndex=450;MAP.getPane('px').style.pointerEvents='none';
+  PXL={};['1225','0612','1215','1518','1825','r1225'].forEach(function(k){
+    PXL[k]=L.imageOverlay('data/png/'+(k.charAt(0)==='r'?'restituito_1225':'nuovo_'+k)+'.png',R.pixel_png.bounds,{pane:'px',opacity:.95,interactive:false})});
+  var sel=el('sel-nil'),o='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){o+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=o;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  el('ck-px').addEventListener('change',ricolora);
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+  /* quartieri */
+  var top=NIL.slice().sort(function(a,b){return b.n1225-a.n1225}).slice(0,12),mx=top[0].n1225;
+  bars('b-nil',top.map(function(p){return {nm:p.n,v:p.n1225,txt:nf(p.n1225,1)+' ha'+(p.r1225>=1?' <span class="sub">(&minus;'+nf(p.r1225,1)+')</span>':''),col:WARM}}),mx);
+  var cm=NIL.filter(function(p){return p.n==='Cascina Merlata'})[0];
+  setH('nil-testo','<p>Fra parentesi, gli ettari tornati liberi nello stesso quartiere. <b>Cascina Merlata</b> (il quartiere accanto all&rsquo;ex area Expo) &egrave; prima: '+nf(cm.n1225,1)+' ettari, <b>'+nf(cm.n1215,1)+' fra il 2012 e il 2015</b> e nulla dopo. Gli altri quartieri hanno tempi diversi: Maggiore&ndash;Musocco&ndash;Certosa soprattutto nel 2012&ndash;2015, Lorenteggio nel 2015&ndash;2018 e di nuovo dopo il 2018, Stadio&ndash;Ippodromi nel 2018&ndash;2025 (cambia il periodo con i pulsanti della mappa). I primi otto quartieri hanno il <b>'+nf(R.quota_top8_suolo,1)+'%</b> di tutto il terreno nuovo.</p>');
+  /* anelli */
+  var A=R.anelli,am=0;A.forEach(function(r){am=Math.max(am,r.nuovo_2012_2025_ha,r.ripristino_2012_2025_ha)});
+  setH('anelli-testo','<p>Il centro non cresce: nei primi tre chilometri il suolo consumato era gi&agrave; l&rsquo;85&ndash;93% e, anzi, si restituisce pi&ugrave; di quanto si consuma. Il terreno nuovo &egrave; in una fascia fra 4 e 9 km dal Duomo ('+f0(R.tra4e9km.nuovo)+' ettari su '+f0(R.nuovo_1225)+'), dove la quota consumata &egrave; fra il 45% e il 66%. Oltre i 10 km resta poco da consumare.</p>');
+  setH('b-anelli',A.map(function(r){return '<div class="row"><span class="nm">'+r.anello_km_dal_duomo.replace('-','&ndash;')+' km</span><span class="tr"><span class="fill" style="width:'+(r.nuovo_2012_2025_ha/am*100)+'%;background:'+WARM+'"></span><span class="fill b2" style="width:'+(r.ripristino_2012_2025_ha/am*100)+'%;background:'+ACC+'"></span></span><span class="v">+'+nf(r.nuovo_2012_2025_ha,1)+' / &minus;'+nf(r.ripristino_2012_2025_ha,1)+'</span></div>'}).join(''));
+  /* classi */
+  var cl=R.classi_milano.filter(function(c){return c.ha>=0.5});
+  var nome={122:'Cantieri e terra battuta',111:'Edifici',1:'Superficie consumata non specificata nella legenda',116:'Piazzali e parcheggi pavimentati',112:'Strade pavimentate',113:'Ferrovia'};
+  setH('classi-testo','<p>I '+f0(R.nuovo_1225)+' ettari nuovi (con i confini ISTAT del comune sono '+f0(R.nuovo_comune_istat)+') sono oggi per il <b>'+f0(R.quota_cantieri)+'% cantieri e terra battuta</b> e solo per il '+f0(R.quota_edifici)+'% edifici. Il resto sono piazzali, strade e ferrovia. Il cantiere &egrave; la prima voce: quel terreno &egrave; &laquo;consumato&raquo; prima che gli edifici ci siano. Succede anche il contrario: dal 2012 al 2025, '+nf(R.cantiere_a_libero,1)+' ettari di cantiere sono tornati terreno libero e '+nf(R.cantiere_a_costruito,1)+' sono diventati edifici, strade o piazzali; '+nf(R.cantiere_resta,1)+' ettari su '+nf(R.stock122_2012,0)+' sono ancora cantiere. In tutto i cantieri passano da '+f0(R.stock122_2012)+' ettari (2012) a '+f0(R.stock122_2025)+' (2025).</p>');
+  bars('b-classi',cl.map(function(c){return {nm:nome[c.classe_2025]||c.descrizione,v:c['quota_%'],txt:nf(c['quota_%'],0)+'% ('+nf(c.ha,0)+' ha)',col:c.classe_2025===122?WARM:ACC}}),40);
+}
+function tip(p){var m=CUR,k=key(m),s='<b>'+esc(p.n)+'</b><br>';
+  if(m==='r1225')return s+nf(p.r1225,1)+' ha tornati liberi (2012&ndash;2025)';
+  return s+nf(p[k],1)+' ha di terreno nuovo'+(m==='1225'?'<br>consumato: '+nf(p.p25,0)+'% nel 2025':'')}
+function sty(f){var p=f.properties,m=CUR,v=p[key(m)];
+  return {fillColor:colore(v,m),fillOpacity:.72,color:SEL===p.i?'#000':'#fff',weight:SEL===p.i?3:1}}
+function ricolora(){
+  var m=CUR,R=D.raster;
+  LAY.setStyle(sty);if(SEL)LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()});
+  Object.keys(PXL).forEach(function(k){if(MAP.hasLayer(PXL[k]))MAP.removeLayer(PXL[k])});
+  if(el('ck-px').checked)PXL[m].addTo(MAP);
+  var b=BRK[m],sq=m.charAt(0)==='r'?TSEQ:WSEQ,h='';
+  sq.forEach(function(c,i){var t=i===0?'meno di '+nf(b[0],1):i===b.length?nf(b[i-1],1)+' o pi&ugrave;':nf(b[i-1],1)+' &ndash; '+nf(b[i],1);h+='<span><i style="background:'+c+'"></i>'+t+' ha</span>'});
+  h+='<span><i style="background:'+(m.charAt(0)==='r'?'#00695c':'#8f2d0a')+'"></i>punti esatti (10 m)</span>';
+  setH('lg-map',h);
+  var tot=m==='r1225'?R.periodi['1225'].rip:R.periodi[m].nuovo;
+  setH('map-desc',DESC[m]+'<b>'+nf(tot,1)+' ettari</b>'+(m==='r1225'?'':' (tornati liberi nello stesso periodo: '+nf(R.periodi[m].rip,1)+')')+'.');
+}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);
+  LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})}});scheda(i)}
+function scheda(i){
+  var p=NIL.filter(function(x){return x.i===i})[0];if(!p)return;
+  var h='<h3>'+esc(p.n)+'</h3><div class="scroll"><table><tbody>';
+  h+='<tr><td>Superficie</td><td class="r">'+f0(p.ha)+' ettari</td></tr>';
+  h+='<tr><td>Suolo consumato</td><td class="r">2006: '+nf(p.p06,0)+'% &middot; 2012: '+nf(p.p12,0)+'% &middot; <b>2025: '+nf(p.p25,0)+'%</b></td></tr>';
+  h+='<tr><td>Terreno nuovo, 2012&ndash;2025</td><td class="r"><b>'+nf(p.n1225,1)+' ha</b> <span class="sub">(2012&ndash;15: '+nf(p.n1215,1)+' &middot; 2015&ndash;18: '+nf(p.n1518,1)+' &middot; 2018&ndash;25: '+nf(p.n1825,1)+')</span></td></tr>';
+  h+='<tr><td>Tornato libero, 2012&ndash;2025</td><td class="r">'+nf(p.r1225,1)+' ha</td></tr>';
+  h+='<tr><td>Saldo netto 2012&ndash;2025</td><td class="r"><b>'+sg(p.n1225-p.r1225,1)+' ha</b></td></tr>';
+  h+='<tr><td>Cantieri e terra battuta oggi</td><td class="r">'+nf(p.c122,1)+' ha</td></tr>';
+  if(p.abit_nuove!=null)h+='<tr><td>Nuove abitazioni (permessi 2014&ndash;2024)</td><td class="r">'+f0(p.abit_nuove)+' <span class="sub"><a href="../costruzioni/">Costruzioni</a></span></td></tr>';
+  h+='</tbody></table></div><p class="sub">Calcolo sulle carte ISPRA a 10 metri ritagliate sul quartiere.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- terra restituita ---------- */
+function restituita(){
+  var R=D.raster,T=R.restituiti_top,tt=zona('Tre Torri'),pn=zona('Porta Garibaldi - Porta Nuova'),is=zona('Isola');
+  var h='<p><b>Dal 2012 al 2025, '+nf(R.rip_1225,1)+' ettari che erano consumati a Milano non lo sono pi&ugrave;.</b> I quartieri dove succede di pi&ugrave; sono quelli delle grandi trasformazioni: Tre Torri ('+nf(tt.restituito,1)+' ettari), Rogoredo&ndash;Santa Giulia ('+nf(zona('Rogoredo - Santa Giulia').restituito,1)+'), Porta Garibaldi&ndash;Porta Nuova ('+nf(pn.restituito,1)+'), Lambrate&ndash;Ortica, Isola ('+nf(is.restituito,1)+'). Una parte &egrave; probabilmente il verde dei nuovi quartieri, ma il dato non lo dice: ISPRA chiama &laquo;ripristino&raquo; ogni superficie prima consumata e ora no, e non distingue un parco da un cantiere chiuso.</p>';
+  setH('restituita',h);
+  bars('b-rest',T.map(function(r){return {nm:r.nil,v:r.rip,txt:nf(r.rip,1)+' ha'+' <span class="sub">(nuovo '+nf(r.nuovo,1)+')</span>'}}),T[0].rip);
+}
+
+/* ---------- metropoli ---------- */
+var MT=[],MS={k:6,d:-1};
+function metro(){
+  var M=D.metro,R=D.raster;
+  MT=M.tab;
+  var h='<p>I 133 comuni della Citt&agrave; metropolitana di Milano hanno <b>'+f0(M.ha25)+' ettari</b> di suolo consumato, il <b>'+nf(M.pct25,1)+'%</b> della superficie. Senza Milano la quota &egrave; del '+nf(M.resto_pct,1)+'%, ma con molto pi&ugrave; suolo a testa: '+f0(M.resto_m2ab)+' m&sup2; per residente (a Milano '+f0(D.milano.m2ab25)+'). Dal 2012 al 2025 la citt&agrave; metropolitana ha consumato in pi&ugrave;, al netto dei ripristini, <b>'+f0(M.netto_12_25)+' ettari</b> (ISPRA): Milano ne ha '+f0(D.milano.netto_12_25)+', cio&egrave; il '+f0(100*D.milano.netto_12_25/M.netto_12_25)+'%.</p>';
+  h+='<p>Milano &egrave; solo '+M.milano_rango_pct+'&ordf; fra i 133 comuni per quota consumata: pi&ugrave; in alto '+M.top_pct.slice(0,5).map(function(r){return esc(r.comune)+' '+nf(r.consumato_2025_pct,1)+'%'}).join(', ')+'. Ma <b>&egrave; il comune che ha consumato di pi&ugrave; in assoluto</b> dal 2012 ('+f0(D.milano.lordo_12_25)+' ettari lordi su '+f0(M.lordo_12_25)+'), davanti a Pozzuolo Martesana, Segrate, Gessate, Pioltello e Bollate.</p>';
+  setH('metro-testo',h);
+  var lg=M.logistica_periodi;
+  var cl=M.nuovo_raster_resto_classi;function q(c){var r=cl.filter(function(x){return x.classe_2025===c})[0];return r?r['quota_%']:0}
+  setH('metro-log','<b>La logistica non &egrave; la causa principale.</b> Le aree che ISPRA classifica come logistica (grande distribuzione, magazzini produttivi, e-commerce) nel territorio della Citt&agrave; metropolitana sono '+f0(M.logistica_ha_dal_2012)+' ettari dal 2012 al 2023: circa l&rsquo;<b>'+f0(M.logistica_quota_pct)+'%</b> del terreno nuovo dell&rsquo;area ('+f0(M.nuovo_raster_tot)+' ettari dalle carte). Nei comuni intorno a Milano il nuovo consumo &egrave; fatto soprattutto di cantieri e terra battuta ('+f0(M.resto_cantieri_pct)+'%), edifici ('+f0(q(111))+'%) e strade ('+f0(q(112))+'%); le <b>cave</b> sono il '+f0(M.resto_cave_pct)+'%. Le tre pi&ugrave; grandi macchie di nuovo consumo dell&rsquo;intera area sono cave: Pozzuolo Martesana (cava in falda), Vizzolo Predabissi, Cassano d&rsquo;Adda. Per comune la logistica pesa di pi&ugrave; a '+M.logistica_top.slice(0,5).map(function(r){return esc(r.comune)+' ('+f0(r.ha_dal_2012)+' ha dal 2012)'}).join(', ')+'. Il livello ISPRA contiene solo le aree che ha classificato: pu&ograve; sottostimare (<a href="#limiti">limiti dei dati</a>).');
+  var heads=['Comune','Residenti','% consumato 2025','m&sup2; per abitante','Nuovo lordo 2012&ndash;25 (ha)','Netto 2012&ndash;25 (ha)','Di cui, da carte: edifici','cantieri','cave','Logistica dal 2012 (ha)'];
+  var idx=[1,3,4,5,6,7,9,10,11,12];
+  function draw(){
+    var qq=el('q-metro').value.trim().toLowerCase();
+    var rows=MT.filter(function(r){return !qq||r[1].toLowerCase().indexOf(qq)>=0});
+    var k=idx[MS.k];rows.sort(function(a,b){var x=a[k],y=b[k];if(typeof x==='string')return MS.d*x.localeCompare(y,'it');return MS.d*((x||0)-(y||0))});
+    el('metro-n').textContent=rows.length+' comuni';
+    setH('tab-metro','<thead><tr>'+heads.map(function(t,i){return '<th'+(i?' class="r':' class="')+(i===MS.k?' on':'')+'" data-k="'+i+'">'+t+(i===MS.k?(MS.d<0?' ↓':' ↑'):'')+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){
+      return '<tr><td>'+esc(r[1])+(r[1]==='Milano'?' <span class="pill">citt&agrave;</span>':'')+'</td><td class="r">'+f0(r[3])+'</td><td class="r">'+nf(r[4],1)+'</td><td class="r">'+f0(r[5])+'</td><td class="r">'+nf(r[6],1)+'</td><td class="r">'+sg(r[7],1)+'</td><td class="r">'+nf(r[9],1)+'</td><td class="r">'+nf(r[10],1)+'</td><td class="r">'+nf(r[11],1)+'</td><td class="r">'+nf(r[12],1)+'</td></tr>'}).join('')+'</tbody>');
+    Array.prototype.forEach.call(document.querySelectorAll('#tab-metro th'),function(th){th.addEventListener('click',function(){var i=parseInt(th.getAttribute('data-k'),10);if(i===MS.k)MS.d=-MS.d;else{MS.k=i;MS.d=i===0?1:-1}draw()})});
+  }
+  MS={k:4,d:-1};
+  el('q-metro').addEventListener('input',draw);draw();
+}
+
+/* ---------- verde ---------- */
+function verde(){
+  var P=D.potenziale;
+  setH('verde-testo','<p>Oltre a misurare, l&rsquo;ISPRA ha stimato dove potrebbe tornare il verde dentro l&rsquo;area gi&agrave; urbanizzata: superfici oggi artificiali, o spazi non verdi, che per forma e posizione potrebbero diventare spazi verdi o alberate. Per Milano la stima &egrave; di <b>'+f0(P.spazi_verdi)+' ettari</b> di spazi verdi potenziali ('+f0(P.pubblico)+' ettari prevalentemente pubblici, '+f0(P.privato)+' privati, '+f0(P.altre)+' in altre aree interne al perimetro urbano) e di <b>'+f0(P.alberi)+' ettari</b> di copertura arborea potenziale. Sono circa il '+f0(100*P.spazi_verdi/D.milano.superficie_ha)+'% e il '+f0(100*P.alberi/D.milano.superficie_ha)+'% della superficie del comune. Per confronto, i tetti potenzialmente disponibili per il fotovoltaico sono '+f0(P.tetti_min)+'&ndash;'+f0(P.tetti_max)+' ettari.</p><div class="warm"><b>Sono stime, non progetti.</b> Dicono dove sarebbe possibile, non dove si far&agrave; n&eacute; se il proprietario &egrave; d&rsquo;accordo; non le abbiamo controllate. Fonte: ISPRA/SNPA, &laquo;potenziale di recupero&raquo;, edizione 2026. Per gli alberi gi&agrave; esistenti vedi <a href="../alberi/">Alberi della citt&agrave;</a>. L&rsquo;isola di calore stimata da ISPRA per Milano nel 2025 &egrave; di '+nf(D.milano.isola_calore,1)+' gradi: differenza fra la temperatura al suolo media estiva (2020&ndash;2025, di giorno) delle aree urbane e di quelle rurali.</div>');
+}
+
+/* ---------- limiti, metodo, file, fonti ---------- */
+function limiti(){
+  var R=D.raster,E=D.edizioni.filter(function(e){return e.periodo==='2012-2015'})[0];
+  var c=R.controllo.map(function(r){return r.anno+': '+f0(r.raster_ha)+' contro '+f0(r.ispra_ha)}).join('; ');
+  var L=[
+   '<b>Consumato non vuol dire costruito.</b> &Egrave; la superficie artificiale; comprende strade, piazzali, ferrovie, cantieri, cave. I giardini e i parchi dentro la citt&agrave; non sono consumati, i parcheggi s&igrave;. I cantieri e la terra battuta (classe 122: '+f0(R.stock122_2025)+' ettari a Milano nel 2025) contano come consumato.',
+   '<b>I numeri si rivedono a ogni edizione.</b> Per Milano il consumo 2012&ndash;2015 era di '+nf(E.netto_ed2025_ha,1)+' ettari nell&rsquo;edizione 2025 e di '+nf(E.netto_ed2026_ha,1)+' nella 2026. Nel file 2026 gli anni 2023 e 2024 hanno due versioni (originale e rivista); per la serie qui usiamo la rivista. Gli incrementi pubblicati e le differenze fra gli stock non coincidono del tutto (2012&ndash;2025: 203,0 contro 200,5 ettari). Citare sempre l&rsquo;edizione.',
+   '<b>Carte di versioni diverse.</b> Le carte 2006&ndash;2018 sono la versione 6, quelle 2024&ndash;2025 la versione 8. Il confronto 2018&ndash;2025 (mappa) passa da una all&rsquo;altra e ha '+nf(R.periodi['1825'].nuovo,0)+' ettari di terreno nuovo contro circa 144 che dice ISPRA nello stesso periodo. I totali di ogni carta su Milano coincidono con ISPRA entro lo 0,04% ('+c+').',
+   '<b>Pochi punti nel tempo.</b> Le carte disponibili sono 2006, 2012, 2015 e poi annuali; qui ne usiamo 2006, 2012, 2015, 2018 e 2025. Il 2006&ndash;2012 &egrave; una media su sei anni.',
+   '<b>La classe 1 non &egrave; spiegata.</b> Nella carta &egrave; &laquo;consumo di suolo&raquo; senza dettaglio: a Milano sono '+f0(R.classe1_ha_2025)+' ettari nel 2025. La contiamo come consumata e la chiamiamo &laquo;non specificata nella legenda&raquo;.',
+   '<b>&laquo;Ripristino&raquo; non vuol dire parco.</b> ISPRA lo definisce come ripristino di superfici prima consumate; a Milano '+nf(R.cantiere_a_libero,1)+' ettari di cantiere del 2012 sono oggi terreno libero. Possono essere cantieri chiusi.',
+   '<b>Il confronto con le nuove abitazioni &egrave; solo indicativo.</b> I permessi edilizi 2014&ndash;2024 e le carte di consumo di suolo hanno periodi diversi; a Cascina Merlata i permessi non registrano abitazioni nuove, mentre il database topografico mostra molti edifici nuovi (vedi <a href="../costruzioni/">Costruzioni</a>).',
+   '<b>I residenti</b> sono quelli ISTAT, con un salto nel 2021 (censimento). I metri quadri per abitante sono &laquo;per residente&raquo;: non contano pendolari e city users.',
+   '<b>Risoluzione di 10 metri.</b> Giardini interni, alberate e piccoli edifici si perdono nella classificazione.',
+   '<b>Logistica.</b> Il livello ISPRA contiene solo i centroidi delle aree di cambiamento classificate come logistica (2006&ndash;2023), non i poligoni n&eacute; i magazzini gi&agrave; esistenti nel 2006. I punti sono stati assegnati ai comuni da noi con i confini ISTAT. Pu&ograve; sottostimare.',
+   '<b>Confini diversi.</b> Per Milano usiamo i 88 NIL ('+nf(R.nuovo_1225,1)+' ettari di nuovo consumo 2012&ndash;2025) o i confini ISTAT del comune ('+nf(R.nuovo_comune_istat,1)+'): 6 ettari di differenza al bordo. Per i 133 comuni usiamo le sezioni di censimento ISTAT 2021 unite; in quel caso la somma delle carte (1.771 ettari lordi 2012&ndash;2025) &egrave; l&rsquo;8% sotto il dato ISPRA (1.934): per la classifica dei comuni vale il dato ISPRA, le carte servono a dire dove e di che tipo.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var M=[
+   'Dati ufficiali: ISPRA/SNPA, rapporto &laquo;Consumo di suolo, ecosistemi urbani e stato del territorio&raquo;, edizione 2026 (dati del 27 ottobre 2026). Per ogni comune: suolo consumato, incrementi, popolazione, superficie.',
+   'Carte raster a 10 metri dell&rsquo;ISPRA (2006, 2012, 2015, 2018, 2025), ritagliate sui 88 NIL vigenti di Milano. Consumato = classi 1, 11, 12 e 111&ndash;126 della legenda ISPRA; non consumato = classe 2 e 201&ndash;206. Una cella &egrave; &laquo;nuova&raquo; se nella carta pi&ugrave; vecchia non &egrave; consumata e in quella pi&ugrave; recente s&igrave;; &laquo;restituita&raquo; se accade il contrario.',
+   'Distanza dal Duomo: anelli di 1 km dal punto 45,4642 N, 9,1900 E. Gli ettari sono celle di 10 m &times; 10 m (0,01 ettari).',
+   'I punti sulla mappa sono ridisegnati da noi in un&rsquo;immagine PNG con solo le celle &laquo;nuove&raquo; o &laquo;restituite&raquo;: le carte ISPRA non sono ripubblicate.',
+   'Confronti con altre citt&agrave;: dati ISPRA per comune (Roma, Torino, Napoli, Bologna, Firenze, Genova). Citt&agrave; metropolitana: i 133 comuni della provincia di Milano; tipo di terreno nuovo: carte ISPRA 2012 e 2025 sui confini ISTAT.',
+   'Il confronto con le nuove abitazioni usa i permessi edilizi 2014&ndash;2024 e il database topografico 2012/2020 del filone <a href="../costruzioni/">Costruzioni</a>: sono altri dati, con altri periodi.',
+   'Programmi in Python 3, rilanciabili: scaricano i file, li puliscono e scrivono questi numeri. Il punto di partenza &egrave; sempre la fonte; ogni numero di questa pagina viene da un file in <code>data/</code>.'
+  ];
+  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function download(){
+  setH('download-testo','<p>Tutti valori aggregati (nessun dato personale). <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina), <a href="data/nil.geojson">nil.geojson</a> (88 quartieri, semplificati, con consumo per periodo), <a href="data/nil_suolo.csv">nil_suolo.csv</a>, <a href="data/nil_suolo_serie.csv">nil_suolo_serie.csv</a> (suolo consumato per quartiere a 6 anni), <a href="data/anelli_duomo.csv">anelli_duomo.csv</a>, <a href="data/serie_citta.csv">serie_citta.csv</a> e <a href="data/confronto_citta_2025.csv">confronto_citta_2025.csv</a>, <a href="data/incrementi_milano_periodi.csv">incrementi_milano_periodi.csv</a>, <a href="data/metro_comuni.csv">metro_comuni.csv</a> (133 comuni), <a href="data/metro_raster_comuni.csv">metro_raster_comuni.csv</a>, <a href="data/metro_nuovo_per_comune_e_classe.csv">metro_nuovo_per_comune_e_classe.csv</a>, <a href="data/logistica_metro_comuni.csv">logistica_metro_comuni.csv</a>, <a href="data/confronto_costruzioni_nil.csv">confronto_costruzioni_nil.csv</a>, <a href="data/confronto_edizioni_2025_2026.csv">confronto_edizioni_2025_2026.csv</a>, <a href="data/inventario_fonti.csv">inventario_fonti.csv</a> (le fonti, con licenza, dimensione e impronta dei file scaricati). Le immagini dei punti sono in <code>data/png/</code>.</p>');
+  setH('fonti','<p><b>Fonti e licenze.</b> Indicatori per comune, incrementi, potenziale di recupero: ISPRA/SNPA, Munaf&ograve; M. (a cura di), 2026, <i>Consumo di suolo, ecosistemi urbani e stato del territorio. Edizione 2026</i>, Report ambientali SNPA, 50/2026; licenza Creative Commons Attribution 4.0 (<a href="https://creativecommons.org/licenses/by/4.0/">creativecommons.org/licenses/by/4.0</a>), scaricati dal repository ISPRA (groupware.sinanet.isprambiente.it) e da <a href="https://www.snpambiente.it/">snpambiente.it</a> il 1 novembre 2026. Carte nazionali del consumo di suolo a 10 m: ISPRA; il file di licenza dice &laquo;Licenza Attribuzione 3.0 Italia (CC BY 4.0 IT)&raquo; con link a creativecommons.org/licenses/by/4.0/it/legalcode; scaricate il 1 novembre 2026, non ripubblicate (qui solo immagini elaborate da noi). Logistica in Italia: stessa licenza, da citare come &laquo;SNPA, Consumo di suolo, dinamiche territoriali e servizi ecosistemici. Edizione 2024, Report ambientali SNPA, 43/2024&raquo;. Confronto fra edizioni: edizione 2025 (SNPA 46/2025). NIL: Comune di Milano (ds964, CC BY). Confini dei comuni della Citt&agrave; metropolitana: ISTAT, basi territoriali 2021 (sezioni di censimento). Nuove abitazioni e volumi: filone Costruzioni (Comune di Milano e Regione Lombardia). Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Elaborazioni: Milano in dati.</p><p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>');
+}
+})();
+</script></body></html>

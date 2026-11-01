@@ -62,7 +62,8 @@
     { path: 'statue/', label: 'Statue e monumenti' },
     { path: 'incroci/', label: 'Incroci e incidenti' },
     { path: 'amministratori/', label: 'Chi governa Milano' },
-    { path: 'botteghe/', label: 'Botteghe storiche' }
+    { path: 'botteghe/', label: 'Botteghe storiche' },
+    { path: 'suolo/', label: 'Quanto suolo si consuma' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
