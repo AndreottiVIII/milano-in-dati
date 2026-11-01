@@ -2640,3 +2640,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Metodo: affitto OMI (stima) per civico e semestre 2011-2024, mediato per NIL; percentili del reddito di città stimati dalle classi MEF e reddito di quartiere da miscela dei CAP; quota = affitto × 12 / reddito lordo; case di 40/60/80 m² scelte da noi. Stipendi ufficiali ARAN con pagina (infermiere CCNL Sanità 2022-24 p. 106; docenti CCNL Istruzione e Ricerca 2022-24 p. 49); autista non incluso (contratto privato senza tabella aperta).
 - Numeri: con il reddito mediano e 60 m², NIL entro il 30% 42 (2011) → 52 (2019) → 18 (2024); usciti dal 2015 28, entrati 0. Sorpresa: fino al 2022 non era peggiorato; il crollo è 2022-24, in gran parte il salto delle quotazioni OMI (stime). Il quarto più basso dei redditi non sta nel 30% con 60 m² in nessun quartiere e anno.
 - Limiti dei dati: OMI stime; zone ridisegnate (confronti dal 2015); contribuenti ≠ famiglie; reddito lordo; stipendi di base senza indennità.
+
+## 57. Un viaggio in tram (e in metrò)
+
+- 2026-11-01 notte — Pagina `docs/viaggio-linea/` (programmi in `viaggio-linea/scripts/`), pubblicata con l'autorizzazione notturna di Davide; idea dalla storia della linea M29 del Berliner Morgenpost. Dettagli in `viaggio-linea/NOTE.md`.
+- 9 linee (M1-M5, tram 9 e 15, filobus 90 e 91) dal GTFS ATM/AMAT (orario 26/10-30/11/2026); per ogni fermata i valori del suo NIL o zona OMI (reddito, prezzo, età, stranieri, alberi, Airbnb, 15 minuti, scuole, voto 2021 centrosinistra/centrodestra), da docs/*/data.
+- Salti più grandi tra fermate vicine: Airbnb Famagosta → Romolo (M2); voto centrosinistra stessa coppia (50,0% → 68,4%); età Ca' Granda → Bicocca (M5). Il reddito cambia soprattutto tra capolinea: M1 da Pagano (92.141 €) a Turro (29.098 €).
+- Limiti dei dati: valori del quartiere, non della fermata; anni diversi; NIL sotto 5.000 residenti esclusi da testi e salti; diramazioni M1 Bisceglie e M2 Assago non incluse; 90/91 forse deviati per lavori.
