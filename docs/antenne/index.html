@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Le antenne dei cellulari</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.5em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.25em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer;white-space:nowrap} .ctl label.ck i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin:0 3px 0 2px;border:1px solid #fff;box-shadow:0 0 0 1px #888}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.dot{width:12px;height:12px;border-radius:50%}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 92px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pair{margin:.5em 0} .pair .grp{margin:.7em 0 .2em;font-size:.9rem;font-weight:600} .pair .row{display:grid;grid-template-columns:minmax(80px,28%) 1fr 62px;gap:6px;align-items:center;font-size:.86rem;padding:2px 0}
+.pair .tr{background:#f1f1f1;height:12px;position:relative} .pair .fill{display:block;height:12px}
+.pair .v{text-align:right;font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} }
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto} #tab-nil{min-width:560px} #tab-serie{min-width:480px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Le antenne dei cellulari a Milano</h1>
+<p>In Lombardia c&rsquo;&egrave; un catasto pubblico degli impianti di telecomunicazione e di radio e televisione, tenuto da ARPA Lombardia (si chiama CASTEL). Il Comune di Milano ne pubblica l&rsquo;elenco per la citt&agrave;: <b id="n-imp">2.580</b> impianti, di cui <b id="n-acc">2.480</b> accesi e <b id="n-prev">100</b> &laquo;previsti&raquo;, cio&egrave; autorizzati ma non ancora accesi. Qui vediamo <b>dove sono</b>, <b>di chi sono</b> e <b>come &egrave; cambiato il catasto</b> negli ultimi anni, quartiere per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale). Un&rsquo;avvertenza: <b>un &laquo;impianto&raquo; del catasto non &egrave; una singola antenna</b> (pu&ograve; averne molte, o essere una microcella da pochi watt), e il catasto <b>non dice che tecnologia usa</b> (4G, 5G&hellip;): vedi <a href="#nonsi">che cosa non si sa</a>.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Ogni cerchio &egrave; un sito (un punto con una o pi&ugrave; impianti accesi); pi&ugrave; &egrave; grande, pi&ugrave; impianti ci sono. Scegli quali categorie vedere e, se vuoi, colora i quartieri.</p>
+<div class="ctl"><span class="sub">Categorie:</span>
+<label class="ck"><input type="checkbox" data-c="0" checked><i style="background:#00695c"></i>Operatori mobili</label>
+<label class="ck"><input type="checkbox" data-c="1" checked><i style="background:#c26a1b"></i>Società di infrastrutture</label>
+<label class="ck"><input type="checkbox" data-c="2" checked><i style="background:#6a4c93"></i>Radio e TV</label>
+<label class="ck"><input type="checkbox" data-c="3" checked><i style="background:#777"></i>Altro</label></div>
+<div class="ctl"><label class="sub" for="sel-tipo">Tipo di impianto:</label><select id="sel-tipo" aria-label="Tipo di impianto">
+<option value="-1">Tutti i tipi</option><option value="0">Telefonia (celle grandi)</option><option value="1">Microcelle</option><option value="2">Ponti radio</option><option value="3">Radio e TV (radiofonia, televisione)</option></select>
+<span class="sub">Quartieri:</span>
+<button type="button" data-m="none" class="on">Nessun colore</button><button type="button" data-m="km2">Impianti per km&sup2;</button><button type="button" data-m="ab">Per 1.000 residenti</button></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei siti con antenne a Milano, colorati per categoria"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Solo gli impianti accesi con coordinate (<span id="n-siti">1.703</span> siti, <span id="n-impc">2.469</span> impianti): non compaiono i 100 &laquo;previsti&raquo; e 11 impianti senza coordinate. Gli impianti di operatori diversi sullo stesso traliccio possono avere coordinate un po&rsquo; diverse, quindi i siti sono un massimo. Mappa &copy; OpenStreetMap contributors; impianti, quartieri e residenti: Comune di Milano (CC BY), dati ARPA Lombardia (CASTEL).</p>
+
+<h2 id="densita">Quartiere per quartiere</h2>
+<div id="dens-testo"></div>
+<div class="grid2"><div><h3>Pi&ugrave; impianti per km&sup2;</h3><div class="bars" id="b-km-top"></div></div>
+<div><h3>Meno impianti per km&sup2;</h3><div class="bars" id="b-km-bot"></div></div></div>
+<div class="grid2"><div><h3>Pi&ugrave; impianti ogni 1.000 residenti</h3><div class="bars" id="b-ab-top"></div></div>
+<div><h3>Meno impianti ogni 1.000 residenti</h3><div class="bars" id="b-ab-bot"></div></div></div>
+<div class="warm"><b>Attenzione ai residenti.</b> &laquo;Per 1.000 residenti&raquo; conta solo chi abita nel quartiere. Il centro e i quartieri degli uffici sono frequentati da molte pi&ugrave; persone di quelle che ci vivono, e la rete serve anche loro: perci&ograve; il rapporto del Duomo (<span id="duomo-ab">12,4</span>) misura la <b>capacit&agrave; della rete</b>, non l&rsquo;esposizione di chi ci abita. Sono esclusi dalle classifiche per abitante i 12 quartieri con meno di 1.000 residenti (parchi e aree quasi senza abitanti).</div>
+<details><summary>Tutti i quartieri</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
+<p class="src">Impianti di telefonia mobile = impianti accesi di operatori mobili o di societ&agrave; di infrastrutture, di tipo &laquo;Telefonia&raquo; o &laquo;Microcella&raquo; (stima nostra: il catasto non dice la tecnologia). Residenti: Comune di Milano, ds205, anno 2024. Superfici: dai confini dei NIL. Fonte impianti: ds718, CC BY.</p>
+
+<h2 id="gestori">Di chi sono: operatori e societ&agrave; di infrastrutture</h2>
+<div id="gest-testo"></div>
+<div class="lgd"><span><i class="dot" style="background:#00695c"></i>operatori mobili</span><span><i class="dot" style="background:#c26a1b"></i>societ&agrave; di infrastrutture</span><span><i class="dot" style="background:#6a4c93"></i>radio e TV</span><span><i class="dot" style="background:#777"></i>altro (enti, ferrovie, trasporti&hellip;)</span></div>
+<div class="bars" id="b-gest"></div>
+<p class="src">Impianti accesi per gestore (file dell&rsquo;8/6/2025). &laquo;Gestore&raquo; &egrave; chi risulta titolare dell&rsquo;impianto nel catasto. WindTre = Wind Tre S.p.A. e Wind Telecomunicazioni S.p.A.; i nomi delle altre societ&agrave; sono abbreviati. Le societ&agrave; di infrastrutture costruiscono e affittano impianti: il catasto non dice quali operatori li usino.</p>
+
+<h2 id="tempo">Come &egrave; cambiato il catasto</h2>
+<div id="tempo-testo"></div>
+<div class="ch" id="ch-serie" role="img" aria-label="Grafico: impianti di telefonia mobile accesi per gestore, dal 2021 al 2025"></div>
+<div class="lgd" id="lg-serie"></div>
+<div class="warm"><b>Il tratto tratteggiato non si pu&ograve; leggere come crescita.</b> Le copie del catasto del 2021 non hanno il codice di ogni impianto e il file del 2023 porta nel nome la sigla &laquo;no filter&raquo;: il salto tra il 2021 e il 2023 pu&ograve; dipendere in parte da come il file &egrave; stato estratto. Per questo il confronto affidabile parte dal gennaio 2023.</div>
+<div class="scroll"><table id="tab-serie"></table></div>
+<p class="src">Impianti di telefonia mobile accesi (stima come sopra) in cinque versioni del file del Comune (ds718): la versione attuale e quattro copie della Wayback Machine (archive.org), che ha le versioni vecchie non pi&ugrave; sul portale. La data di ogni punto &egrave; quella della copia (per gennaio 2023, la data scritta nel nome del file); non &egrave; la data di accensione degli impianti, che il catasto aperto non ha.</p>
+
+<h2 id="scuole">Le scuole e le antenne</h2>
+<div id="scuole-testo"></div>
+<div class="pair" id="p-scuole"></div>
+<div class="lgd"><span><i style="background:#00695c"></i>scuole</span><span><i style="background:#9a9a9a"></i>indirizzi residenziali</span></div>
+<h3>Per ordine di scuola</h3>
+<div class="scroll"><table id="tab-ord"></table></div>
+<div class="warn"><b>Vicinanza non &egrave; esposizione: contano i limiti di legge.</b> La distanza in linea d&rsquo;aria da un impianto non dice quanto campo arriva in un luogo: dipendono dalla potenza, dall&rsquo;altezza, dalla direzione in cui l&rsquo;antenna trasmette e dagli edifici in mezzo. Quello che la legge controlla, con misure e calcoli di ARPA, &egrave; il rispetto dei limiti (vedi <a href="#legge">la sezione sui limiti</a>). Questo confronto dice soltanto dove sono le antenne rispetto alle scuole.</div>
+<p class="src">Scuole: infanzia, primaria e secondaria di I grado del Comune (anagrafe 2024/25, tutte le gestioni) e secondarie di II grado statali e paritarie del Ministero dell&rsquo;Istruzione, con coordinate (835; 46 superiori senza coordinate sono escluse). Indirizzi: 46.896 numeri civici residenziali del Comune. Distanze in linea d&rsquo;aria da impianti di telefonia mobile accesi.</p>
+
+<h2 id="legge">I limiti di legge</h2>
+<div id="legge-testo"></div>
+
+<h2 id="nonsi">Che cosa non si sa</h2>
+<div class="warm"><ul id="nonsi-lista"></ul></div>
+
+<h2 id="limiti">Come &egrave; fatto e limiti dei dati</h2>
+<ol class="m" id="limiti-lista"></ol>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/siti.csv">siti.csv</a> (i siti con impianti accesi: posizione, quartiere, numero di impianti per categoria, gestori), <a href="data/siti.json">siti.json</a> (gli stessi, per la mappa), <a href="data/nil.csv">nil.csv</a> e <a href="data/nil.geojson">nil.geojson</a> (impianti, residenti e densit&agrave; per quartiere; confini semplificati), <a href="data/gestori.csv">gestori.csv</a>, <a href="data/serie_snapshot.csv">serie_snapshot.csv</a> e <a href="data/serie_gestori_mobile.csv">serie_gestori_mobile.csv</a> (le cinque versioni del catasto), <a href="data/scuole_per_ordine.csv">scuole_per_ordine.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Le posizioni delle singole scuole non sono ripubblicate; l&rsquo;elenco degli impianti uno per uno &egrave; sul portale del Comune.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Impianti: Comune di Milano, &laquo;CASTEL: Catasto localizzazione Impianti di Telecomunicazione e Radiotelevisione nel Comune di Milano&raquo; (ds718, dati ARPA Lombardia), licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), file caricato l&rsquo;8/6/2025 e scaricato da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026; le versioni precedenti (2021, gennaio 2023, maggio e giugno 2024) da copie della Wayback Machine dello stesso file, scaricate il 1/11/2026. Confini dei NIL (ds964, CC BY). Residenti per quartiere (ds205, anno 2024, CC BY). Scuole: Comune di Milano, anagrafe scolastica (CC BY); Ministero dell&rsquo;Istruzione e del Merito, anagrafe delle scuole (IODL 2.0). Indirizzi: Comune di Milano, numeri civici. Valori di legge: <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2023-12-30;214~art10">legge 30 dicembre 2023 n. 214, art. 10 (Normattiva)</a>; MIMIT, <i>La Comunicazione</i> n. 71/2026 e decreto MIMIT-MASE sul limite emissivo assentibile; manuale d&rsquo;uso del catasto CASTEL (ARPA Lombardia, 2017). Misure regionali 2018 e rapporto sullo stato dell&rsquo;ambiente: ARPA Lombardia (&laquo;tutti i diritti riservati&raquo;: si citano soltanto alcuni numeri). Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,ST=null,NF=null,NIL=[],RD=[];
+var ACC='#00695c',WARM='#c26a1b';
+var CATC=['#00695c','#c26a1b','#6a4c93','#777777'];
+var CATN=['operatori mobili','società di infrastrutture','radio e TV','altro'];
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+var MESI=['','gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function DTX(d){var a=d.split('-');return MESI[parseInt(a[1],10)]+' '+a[0]}
+function gn(s){var m={'RAI WAY S.p.A.':'RAI Way','A.T.M. - AZIENDA TRASPORTI MUNICIPALI S.p.A.':'ATM (trasporti)','RFI - Rete Ferroviaria Italiana S.p.A.':'RFI (ferrovie)','MULTIMEDIA SAN PAOLO S.r.l.':'Multimedia San Paolo','RADIO REPORTER S.r.l. Unipersonale':'Radio Reporter','NUOVA RADIO S.p.A.':'Nuova Radio'};
+  if(m[s])return m[s];var t=s.replace(/\s+(S\.p\.A\.?|S\.r\.l\.?.*|S\.c\.a\.r\.l\.?)$/i,'');
+  if(t===t.toUpperCase()&&t.length>3)t=t.toLowerCase().replace(/(^|\s)\S/g,function(c){return c.toUpperCase()});return t}
+
+Promise.all([J('data/riepilogo.json'),J('data/siti.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];ST=a[1];NF=a[2];
+  NIL=NF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  intro();sorpresa();mappa();densita();gestori();tempo();scuole();legge();nonsi();limiti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+function intro(){var C=D.citta;
+  el('n-imp').textContent=f0(C.impianti);el('n-acc').textContent=f0(C.accesi);el('n-prev').textContent=f0(C.previsti);
+  el('n-siti').textContent=f0(C.siti_accesi);el('n-impc').textContent=f0(C.accesi-C.senza_coordinate);
+  var du=NIL.filter(function(p){return p.n==='Duomo'})[0];if(du)el('duomo-ab').textContent=nf(du.m1,1)}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var G={};D.gestori.forEach(function(g){G[g.n]=g});var cc=D.commscon,S=D.sempione,Sc=D.scuole;
+  var bassa=(cc.potenza['<= 7']||0)+(cc.potenza['> 7 e <= 20']||0),conp=bassa+(cc.potenza['> 20 e <= 300']||0);
+  var h='<p><b>Il terzo &laquo;operatore&raquo; di Milano non &egrave; una compagnia telefonica.</b> Per numero di impianti accesi, dopo TIM ('+f0(G.TIM.imp)+') e Vodafone ('+f0(G.Vodafone.imp)+') c&rsquo;&egrave; <b>CommsCon Italia, con '+f0(cc.impianti_accesi)+'</b>: pi&ugrave; di WindTre ('+f0(G.WindTre.imp)+') e di Iliad ('+f0(G.Iliad.imp)+'). Di questi, '+f0(cc.micro)+' sono microcelle, piccole antenne di poca potenza (per '+f0(bassa)+' dei '+f0(conp)+' con la classe indicata, 20 watt o meno), messe soprattutto nel centro: '+f0(cc.nil_top.DUOMO)+' nel quartiere Duomo. Il catasto non dice quali operatori le usino.</p>';
+  h+='<p><b>Il sito pi&ugrave; affollato &egrave; per radio e televisione, non per i cellulari.</b> In '+esc(S.indirizzo)+' (quartiere '+esc(S.nil)+') il catasto conta <b>'+f0(S.impianti)+' impianti</b>, di cui '+f0(S.radio_tv)+' di radio e TV (80 di RAI Way). Il secondo sito ne ha 21.</p>';
+  h+='<p><b>Le scuole stanno un po&rsquo; meno vicine alle antenne di un indirizzo qualunque.</b> Il <b>'+f1(Sc.scuole.entro_100m_pct)+'%</b> delle '+f0(Sc.n)+' scuole ha un impianto di telefonia mobile entro 100 metri, contro il <b>'+f1(Sc.civici.entro_100m_pct)+'%</b> dei '+f0(Sc.civici.n)+' indirizzi residenziali. Vicinanza non &egrave; esposizione: contano i limiti di legge (<a href="#legge">vedi sotto</a>).</p>';
+  h+='<p class="src">Impianti accesi nel catasto CASTEL (ARPA Lombardia), file del Comune di Milano ds718 dell&rsquo;8/6/2025 (CC BY). Scuole e indirizzi: Comune di Milano e Ministero dell&rsquo;Istruzione (<a href="#scuole">dettagli</a>).</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,NL=null,SL=null,SR=null,CUR='none',CATON=[true,true,true,true],TIPO=-1;
+function bandaCol(v,b){var i=0;while(i<b.length&&v>=b[i])i++;return SEQ[i]}
+var MB={km2:[5,10,20,40],ab:[0.7,1.2,2,5]};
+function nilSty(f){var p=f.properties;
+  if(CUR==='none')return {fill:false,color:'#777',weight:1,opacity:.7};
+  var v=CUR==='km2'?p.mk:p.m1;
+  return {fill:true,fillColor:v==null?'#bdbdbd':bandaCol(v,MB[CUR]),fillOpacity:.72,color:'#fff',weight:1,opacity:1}}
+function siteCount(s){var tot=0,by=[0,0,0,0];
+  for(var i=0;i<s.k.length;i+=3){var c=s.k[i],t=s.k[i+1],n=s.k[i+2];
+    if(!CATON[c])continue;
+    if(TIPO===0&&t!==0)continue;if(TIPO===1&&t!==1)continue;if(TIPO===2&&t!==2)continue;if(TIPO===3&&t!==3&&t!==4)continue;
+    by[c]+=n;tot+=n}
+  return {tot:tot,by:by}}
+function siteTip(s,c){var nm=s.n!=null?nilById(s.n):null,parts=[];
+  c.by.forEach(function(n,i){if(n)parts.push(n+' '+CATN[i])});
+  return '<b>'+esc(s.a)+'</b><br>'+(nm?esc(nm.n)+'<br>':'')+f0(c.tot)+' impianti accesi ('+esc(parts.join(', '))+')<br><span class="sub">'+esc(s.g)+'</span>'}
+function mappa(){
+  MAP=L.map('map',{preferCanvas:true,zoomSnap:.25}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  NL=L.geoJSON(NF,{style:nilSty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){var p=f.properties;return '<b>'+esc(p.n)+'</b><br>'+f0(p.m)+' impianti di telefonia mobile<br>'+nf(p.mk,1)+' per km²'+(p.m1==null?'<br>meno di 1.000 residenti: rapporto non confrontabile':'<br>'+nf(p.m1,2)+' ogni 1.000 residenti')},{sticky:true})}}).addTo(MAP);
+  MAP.fitBounds(NL.getBounds());
+  MAP.createPane('siti').style.zIndex=450;
+  SL=L.layerGroup().addTo(MAP);SR=L.canvas({pane:'siti',padding:.5});
+  ridisegna();
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl input[data-c]'),function(b){b.addEventListener('change',function(){CATON[parseInt(b.getAttribute('data-c'),10)]=b.checked;ridisegna()})});
+  el('sel-tipo').addEventListener('change',function(){TIPO=parseInt(this.value,10);ridisegna()});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});NL.setStyle(nilSty);legenda()})});
+  legenda();
+  setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(NL.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function ridisegna(){
+  SL.clearLayers();var n=0,imp=0,r=SR;
+  ST.siti.forEach(function(s){var c=siteCount(s);if(!c.tot)return;
+    var dom=0;c.by.forEach(function(v,i){if(v>c.by[dom])dom=i});
+    var rad=Math.min(14,2.6+Math.sqrt(c.tot)*1.5);
+    var m=L.circleMarker([s.y,s.x],{pane:'siti',renderer:r,radius:rad,color:'#fff',weight:.8,fillColor:CATC[dom],fillOpacity:.78});
+    m.bindTooltip(function(){return siteTip(s,siteCount(s))},{sticky:false});SL.addLayer(m);n++;imp+=c.tot});
+  el('map-desc').innerHTML='Si vedono <b>'+f0(n)+'</b> siti con <b>'+f0(imp)+'</b> impianti accesi'+(CUR==='none'?'':'; i quartieri sono colorati per '+(CUR==='km2'?'impianti di telefonia mobile per km²':'impianti di telefonia mobile ogni 1.000 residenti'))+'. Il colore di ogni cerchio è la categoria più numerosa tra quelle scelte.';
+}
+function legenda(){var h='';
+  if(CUR!=='none'){var b=MB[CUR];
+    SEQ.forEach(function(c,i){var t=i===0?'meno di '+nf(b[0],b[0]<1?1:0):i===b.length?nf(b[i-1],b[i-1]<1?1:0)+' o più':nf(b[i-1],b[i-1]<1?1:0)+' – '+nf(b[i],b[i]<1?1:0);h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+    if(CUR==='ab')h+='<span><i style="background:#bdbdbd"></i>meno di 1.000 residenti</span>'}
+  setH('lg-map',h);ridisegna()}
+
+/* ---------- barre ---------- */
+function bars(id,rows,max,col){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm">'+esc(r.nm)+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(r.col||col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+
+/* ---------- quartieri ---------- */
+function densita(){
+  var C=D.citta;
+  var h='<p>In tutta la citt&agrave; gli impianti di telefonia mobile accesi sono <b>'+f0(C.mobile)+'</b> (<b>'+f0(C.macro)+'</b> celle di tipo &laquo;Telefonia&raquo; e '+f0(C.micro)+' microcelle), in circa <b>'+f0(C.mobile_siti)+'</b> punti distinti: <b>'+nf(C.per_km2,1)+' per km&sup2;</b> e <b>'+nf(C.per_1000,2)+' ogni 1.000 residenti</b> ('+f0(C.abitanti)+' residenti nel 2024, '+nf(C.area_km2,1)+' km&sup2;). Il numero dipende da come si conta: le sole celle di tipo &laquo;Telefonia&raquo; sono '+f0(C.macro)+' impianti in '+f0(C.macro_siti)+' siti; nel 2019 ARPA Lombardia parlava di &laquo;1200 circa&raquo; stazioni radiobase a Milano.</p>';
+  h+='<p>Il quartiere mediano ha '+nf(C.mediana_km2,1)+' impianti per km&sup2; e '+nf(C.mediana_1000,2)+' ogni 1.000 residenti. <b>I quartieri non sono tutti uguali</b>: il Duomo ne ha '+nf(D.top_km2[0].v,0)+' per km&sup2;, circa otto volte la mediana; per abitante, tra il quartiere pi&ugrave; ricco di impianti e il pi&ugrave; povero (senza contare chi ne ha zero) c&rsquo;&egrave; un rapporto di circa <b>'+Math.round(C.rapporto_1000)+' a 1</b>. Gli impianti seguono grosso modo la densit&agrave; di abitanti (correlazione di Spearman '+nf(C.corr_spearman_densita,2)+' tra i quartieri) ma anche dove la gente lavora e passa. In '+C.nil_senza.length+' quartieri non c&rsquo;&egrave; nessun impianto acceso: '+C.nil_senza.map(esc).join(', ')+'.</p>';
+  setH('dens-testo',h);
+  function B(id,rows,col,dec){var mx=Math.max.apply(null,rows.map(function(r){return r.v}));bars(id,rows.map(function(r){return {nm:r.n,v:r.v,txt:nf(r.v,dec)}}),mx,col)}
+  B('b-km-top',D.top_km2,ACC,1);B('b-km-bot',D.bot_km2,WARM,1);B('b-ab-top',D.top_1000,ACC,2);B('b-ab-bot',D.bot_1000,WARM,2);
+  table('tab-nil',['Quartiere','Residenti 2024','Impianti di telefonia mobile','di cui microcelle','Per km²','Per 1.000 residenti'],NIL.slice().sort(function(a,b){return b.mk-a.mk}).map(function(p){return [esc(p.n),f0(p.ab),f0(p.m),f0(p.mc),nf(p.mk,1),p.m1==null?'<span class="sub">&lt;1.000 res.</span>':nf(p.m1,2)]}));
+}
+
+/* ---------- gestori ---------- */
+function gestori(){
+  var G=D.gestori,C=D.citta,cc=D.commscon;
+  var h='<p>Nel catasto compaiono 90 nomi di gestori. Ma non sono tutti operatori di telefonia mobile. I quattro operatori mobili (TIM, Vodafone, WindTre, Iliad) hanno <b>'+f0(G.filter(function(g){return g.c===0&&['TIM','Vodafone','WindTre','Iliad'].indexOf(g.n)>=0}).reduce(function(s,g){return s+g.imp},0))+'</b> impianti accesi; le <b>societ&agrave; di infrastrutture</b> (CommsCon, Cellnex, e poche altre) ne hanno <b>'+f0(C.categorie_accesi['societa infrastrutture'])+'</b>; le radio e le TV <b>'+f0(C.categorie_accesi['radio e TV'])+'</b>. Le societ&agrave; di infrastrutture costruiscono e gestiscono impianti che poi ospitano pi&ugrave; operatori, e il catasto non dice chi li usa: <b>le quote per operatore qui sono quindi sottostimate</b>.</p>';
+  h+='<p>Le microcelle sono '+f0(C.tipi_accesi.Microcella)+' impianti accesi e il '+nf(C.microcelle_infra_pct,0)+'% di quelle di telefonia mobile &egrave; di societ&agrave; di infrastrutture, in gran parte di CommsCon. CommsCon non ha impianti &laquo;previsti&raquo; n&eacute; con la procedura &laquo;SCIA&raquo; (una procedura autorizzativa: il catasto non spiega la differenza).</p>';
+  setH('gest-testo',h);
+  var mx=G[0].imp;
+  bars('b-gest',G.map(function(g){return {nm:gn(g.n),v:g.imp,txt:f0(g.imp),col:CATC[g.c],sub:g.micro?f0(g.micro)+' microcelle':''}}),mx);
+}
+
+/* ---------- serie ---------- */
+var LC={TIM:'#00695c',Vodafone:'#2d6cdf',WindTre:'#7b4fa3',Iliad:'#111111',CommsCon:'#c26a1b'};
+function tempo(){
+  var S=D.serie,T=D.tra_2023_2025,SG=D.serie_gestori;
+  var h='<p>Il catasto cambia nel tempo, e abbiamo trovato cinque versioni dello stesso file. <b>Da gennaio 2023 a giugno 2025</b> (versioni comparabili, con il codice di ogni impianto) gli impianti di telefonia mobile accesi passano da <b>'+f0(T.mob_2023)+' a '+f0(T.mob_2025)+'</b> ('+sgp(100*(T.mob_2025/T.mob_2023-1),1)+'): '+f0(T.macro_2025-T.macro_2023)+' in pi&ugrave; di tipo &laquo;Telefonia&raquo; ('+sgp(100*(T.macro_2025/T.macro_2023-1),1)+') e '+f0(T.micro_2025-T.micro_2023)+' microcelle ('+sgp(100*(T.micro_2025/T.micro_2023-1),1)+'). In percentuale cresce di pi&ugrave; Iliad ('+f0(SG.Iliad['2023-01'])+' &rarr; '+f0(SG.Iliad['2025-06'])+'), mentre CommsCon resta ferma a '+f0(SG.CommsCon['2025-06'])+'.</p>';
+  h+='<p>Sotto il totale il catasto si muove molto: dei '+f0(T.codici_2023)+' codici del gennaio 2023, <b>'+f0(T.codici_spariti)+' non ci sono pi&ugrave;</b> nel 2025, e ce ne sono <b>'+f0(T.codici_nuovi)+' nuovi</b>. Tra giugno 2024 e giugno 2025 '+f0(T.cambi_stato_giu24_giu25)+' impianti hanno cambiato stato (per esempio da &laquo;previsto&raquo; ad &laquo;acceso&raquo;). Non sappiamo se un codice sparito sia un impianto spento, smontato o solo rinumerato.</p>';
+  setH('tempo-testo',h);
+  var ds=['2020-21','2023-01','2024-05','2024-06','2025-06'],dd={'2020-21':'2021-01-22','2023-01':'2023-01-24','2024-05':'2024-05-15','2024-06':'2024-06-15','2025-06':'2025-06-08'};
+  function tm(d){var a=d.split('-');return Date.UTC(+a[0],+a[1]-1,+a[2])/86400000}
+  var names=['TIM','Vodafone','CommsCon','WindTre','Iliad'];
+  function draw(){
+    var box=el('ch-serie');box.innerHTML='';
+    var W=box.clientWidth||320,H=300,m={l:40,r:W<480?88:96,t:14,b:44},pw=W-m.l-m.r,ph=H-m.t-m.b;
+    var x0=tm('2020-10-01'),x1=tm('2025-09-01'),y1=700;
+    function X(d){return m.l+(tm(d)-x0)/(x1-x0)*pw}function Y(v){return m.t+ph-v/y1*ph}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+    for(var v=0;v<=y1;v+=100)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>';
+    [2021,2022,2023,2024,2025].forEach(function(y){var xx=X(y+'-01-01');s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+y+'</text>'});
+    s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+    s+='<text class="mu" x="'+m.l+'" y="'+(m.t-3)+'" text-anchor="start">impianti di telefonia mobile accesi</text>';
+    s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">data della versione del catasto</text>';
+    var lastY=[];
+    names.forEach(function(n){var col=LC[n],pts=ds.map(function(k){return [X(dd[k]),Y(SG[n][k])]});
+      s+='<polyline points="'+pts.slice(0,2).map(function(p){return p.join(',')}).join(' ')+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-dasharray="3 4" opacity=".6"/>';
+      s+='<polyline points="'+pts.slice(1).map(function(p){return p.join(',')}).join(' ')+'" fill="none" stroke="'+col+'" stroke-width="2.2"/>';
+      pts.forEach(function(p,i){s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(i===0?3.4:3.6)+'" fill="'+(i===0?'#fff':col)+'" stroke="'+col+'" stroke-width="1.6"/>'});
+      var ly=pts[4][1]+4;lastY.push([ly,n,col]);
+    });
+    lastY.sort(function(a,b){return a[0]-b[0]});for(var i=1;i<lastY.length;i++)if(lastY[i][0]-lastY[i-1][0]<12)lastY[i][0]=lastY[i-1][0]+12;
+    lastY.forEach(function(l){s+='<text x="'+(W-m.r+6)+'" y="'+l[0]+'" style="fill:'+l[2]+';font-weight:600">'+l[1]+' '+f0(SG[l[1]]['2025-06'])+'</text>'});
+    s+='</svg>';box.innerHTML=s;
+  }
+  draw();RD.push(draw);
+  setH('lg-serie','<span><i class="ln" style="border-top-color:#555;border-top-style:dotted"></i>2021&ndash;2023: non confrontabile</span><span><i class="ln" style="border-top-color:#555"></i>2023&ndash;2025: comparabile</span><span>cerchio vuoto = copia del 2021</span>');
+  var rows=names.concat(['totale']).map(function(n){var o=[n==='totale'?'<b>Tutti (anche INWIT, OpNet, TowerCo)</b>':esc(n)];
+    ds.forEach(function(k){o.push(n==='totale'?'<b>'+f0(S[ds.indexOf(k)].mob)+'</b>':f0(SG[n][k]))});
+    var a=n==='totale'?S[1].mob:SG[n]['2023-01'],b=n==='totale'?S[4].mob:SG[n]['2025-06'];o.push(sgp(100*(b/a-1),1));return o});
+  table('tab-serie',['Gestore'].concat(ds.map(function(k){return DTX(dd[k])})).concat(['2023→2025']),rows);
+}
+
+/* ---------- scuole ---------- */
+function scuole(){
+  var Sc=D.scuole,a=Sc.scuole,b=Sc.civici,am=Sc.scuole_macro,bm=Sc.civici_macro,cs=Sc.casuali_100m;
+  var h='<p>Una domanda frequente &egrave;: ci sono antenne vicino alle scuole? Abbiamo misurato, in linea d&rsquo;aria, la distanza di <b>'+f0(Sc.n)+' scuole</b> (infanzia, primaria, secondaria) dall&rsquo;impianto di telefonia mobile acceso pi&ugrave; vicino, e fatto lo stesso per <b>'+f0(b.n)+' indirizzi residenziali</b>, per avere un termine di paragone. Risultato: <b>'+f1(a.entro_100m_pct)+'%</b> delle scuole ha un impianto entro 100 metri ('+f0(Sc.entro_100m_n)+' scuole; '+f0(Sc.entro_50m_n)+' entro 50 metri), contro il <b>'+f1(b.entro_100m_pct)+'%</b> degli indirizzi residenziali. La distanza mediana &egrave; '+f0(a.mediana_dist_m)+' metri per le scuole e '+f0(b.mediana_dist_m)+' per gli indirizzi. Se si estraggono a caso gruppi di '+f0(Sc.n)+' indirizzi, la quota entro 100 metri va dal '+f1(cs['p2.5'])+'% al '+f1(cs['p97.5'])+'% (intervallo al 95%): le scuole, con il '+f1(a.entro_100m_pct)+'%, stanno fuori da questo intervallo, <b>un po&rsquo; meno vicine alle antenne di un indirizzo qualunque</b>. Contando solo le celle di tipo &laquo;Telefonia&raquo; la quota &egrave; del '+f1(am.entro_100m_pct)+'% contro il '+f1(bm.entro_100m_pct)+'%.</p>';
+  setH('scuole-testo',h);
+  var P=[['entro 50 m',a.entro_50m_pct,b.entro_50m_pct],['entro 100 m',a.entro_100m_pct,b.entro_100m_pct],['entro 200 m',a.entro_200m_pct,b.entro_200m_pct]];
+  function draw(){setH('p-scuole',P.map(function(p){return '<div class="grp">Con un impianto di telefonia mobile '+p[0]+'</div>'+
+    '<div class="row"><span>Scuole</span><span class="tr"><span class="fill" style="width:'+p[1]+'%;background:'+ACC+'"></span></span><span class="v"><b>'+f1(p[1])+'%</b></span></div>'+
+    '<div class="row"><span>Indirizzi</span><span class="tr"><span class="fill" style="width:'+p[2]+'%;background:#9a9a9a"></span></span><span class="v">'+f1(p[2])+'%</span></div>'}).join(''))}
+  draw();
+  table('tab-ord',['Ordine di scuola','Scuole','Impianto entro 50 m','entro 100 m','entro 200 m'],Sc.per_ordine.map(function(o){return [esc(o.o),f0(o.n),f1(o.e50)+'%',f1(o.e100)+'%',f1(o.e200)+'%']}));
+}
+
+/* ---------- limiti di legge ---------- */
+function legge(){
+  var L=D.legge,A=D.arpa_regionale_2018;
+  var h='<p>Per i campi a radiofrequenza (antenne dei cellulari, radio e TV) la legge fissa tre soglie per il campo elettrico, in volt al metro (V/m): un <b>limite di esposizione</b>, un <b>valore di attenzione</b> e un <b>obiettivo di qualit&agrave;</b>. Il valore di attenzione si applica agli edifici dove si sta almeno quattro ore al giorno (per esempio le abitazioni) ed &egrave; pi&ugrave; basso del limite di esposizione. Le misure e i controlli sono compito di ARPA.</p>';
+  h+='<ul class="m"><li><b>Limite di esposizione</b>: '+L.esposizione_3MHz_3GHz+' V/m per le frequenze tra 3 MHz e 3 GHz (quelle dei cellulari e delle trasmissioni radio e TV), invariato (DPCM 8 luglio 2003; confermato nel decreto MIMIT-MASE sul limite emissivo e in MIMIT, <i>La Comunicazione</i> n. 71/2026).</li>';
+  h+='<li><b>Valore di attenzione e obiettivo di qualit&agrave;</b>: erano <b>'+L.attenzione_prima+' V/m</b> dal 2003. La <a href="https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2023-12-30;214~art10">legge 30 dicembre 2023, n. 214, art. 10, comma 2</a>, li ha fissati &laquo;in via provvisoria e cautelativa&raquo; a <b>'+L.attenzione_dal_2024+' V/m</b> (nello stesso modo per il campo magnetico, 0,039 A/m, e per la densit&agrave; di potenza, 0,59 W/m&sup2;) in attesa dell&rsquo;adeguamento definitivo previsto dalla legge. Il Ministero delle Imprese (MIMIT) indica il valore come in vigore da aprile 2024.</li></ul>';
+  h+='<p>I confronti con le misure che si leggono altrove sono quindi da guardare con attenzione: le misure di ARPA Lombardia del 2018, per esempio, sono riferite al vecchio valore di 6 V/m. In quell&rsquo;anno, su '+f0(A.misure)+' misure vicino a stazioni radio base in tutta la Lombardia, il '+A.sotto3+'% era sotto 3 V/m, il '+A.da3a6+'% tra 3 e 6 V/m e l&rsquo;'+A.da6a20+'% tra 6 e 20 V/m. Sono numeri regionali: non dicono niente su un singolo quartiere o una singola scuola.</p>';
+  h+='<div class="warn"><b>Misure per Milano.</b> ARPA Lombardia inserisce nel catasto CASTEL anche le sue misure di campo elettrico (brevi misure con strumento portatile e centraline in continuo). Per Milano, per&ograve;, <b>non sono pubblicate come dati aperti</b>: si vedono una alla volta in una mappa del catasto. Per questo in questa pagina non c&rsquo;&egrave; nessun confronto con i limiti.</div>';
+  setH('legge-testo',h);
+}
+
+/* ---------- che cosa non si sa ---------- */
+function nonsi(){
+  var St=D.stati;
+  var L=[
+   '<b>Che tecnologia usa ogni impianto.</b> Il catasto aperto non indica 2G, 3G, 4G o 5G (nemmeno la scheda del catasto sul sito di ARPA le prevede, secondo il suo manuale). Quindi <b>non si pu&ograve; dire quante antenne 5G ci siano a Milano</b>, n&eacute; quanto sia cresciuto il 5G.',
+   '<b>Quando un impianto &egrave; stato acceso o autorizzato.</b> Non c&rsquo;&egrave; una data per impianto. Abbiamo solo cinque &laquo;fotografie&raquo; del catasto, e la pi&ugrave; vecchia (2021) non &egrave; del tutto confrontabile con le altre.',
+   '<b>Quanto campo elettrico c&rsquo;&egrave; in un punto.</b> Le misure di ARPA su Milano esistono nel catasto ma non sono aperte (vedi <a href="#legge">sopra</a>). Un altro file del Comune sulle scuole statali (ds1864) ha una casella &laquo;sorgenti di radiazioni elettromagnetiche nelle vicinanze&raquo;, ma &egrave; un s&igrave;/no dichiarato nella scheda dell&rsquo;edificio (anno scolastico 2020/21; 8 s&igrave; su 560), non una misura: non l&rsquo;abbiamo usata.',
+   '<b>Quante antenne e quanta potenza.</b> Un impianto del catasto pu&ograve; avere molte antenne o una sola; la potenza &egrave; data solo in classi (per esempio &laquo;da 300 a 1.000 W&raquo;), e il significato esatto non &egrave; spiegato.',
+   '<b>Che cosa significano alcune etichette di stato.</b> '+f0(St.incoerenza_grave)+' impianti hanno lo stato &laquo;incoerenza grave&raquo;, uno &laquo;ultimo parere: non rispetto limiti&raquo; (una televisione) e uno &laquo;ultimo parere negativo&raquo;: sono etichette del catasto, non misure, e non sappiamo cosa vogliano dire in concreto.'];
+  setH('nonsi-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo e limiti dei dati ---------- */
+function limiti(){
+  var C=D.citta,Sc=D.scuole,A=D.approx_2020_2023;
+  var L=[
+   '<b>Nessuna tecnologia.</b> Non si pu&ograve; dire quante antenne siano 5G; &laquo;Telefonia&raquo; e &laquo;Microcella&raquo; sono tipi di impianto, non generazioni.',
+   '<b>Nessuna data per impianto.</b> Solo cinque versioni del file, e la prima (2021) non ha il codice di ogni impianto.',
+   '<b>Un impianto non &egrave; un&rsquo;antenna n&eacute; una potenza.</b> Contare impianti non vuol dire contare antenne o watt: un centro con tante microcelle ha molti impianti ma poca potenza per ciascuno.',
+   '<b>Gestore non vuol dire operatore.</b> '+f0(C.categorie_accesi['societa infrastrutture'])+' impianti accesi sono di societ&agrave; di infrastrutture che ospitano pi&ugrave; operatori; le quote degli operatori mobili sono sottostimate.',
+   '<b>Telefonia, radio e TV nello stesso elenco.</b> Sono cose diverse per potenza e uso: qui sono separate per categoria. Il sito di radio e TV di corso Sempione pesa molto in un conteggio per quartiere, anche se non &egrave; un&rsquo;antenna per i cellulari.',
+   '<b>&laquo;Acceso&raquo; &egrave; lo stato scritto nel catasto</b>, aggiornato da gestori e ARPA, non un controllo sul posto. Il catasto di ARPA oggi mostra per Milano 2.535 record, il file del Comune ne ha 2.580.',
+   '<b>Le coordinate sono quelle del catasto</b>: non le abbiamo verificate sul posto. 11 impianti non hanno coordinate e compaiono nei totali ma non sulla mappa e nei quartieri.',
+   '<b>Residenti, non frequentatori.</b> I rapporti per abitante contano chi vive nel quartiere, non chi ci lavora o passa.',
+   '<b>Nessuna misura di campo per Milano</b> tra i dati aperti. I numeri regionali di ARPA non descrivono un quartiere.',
+   '<b>Il numero di impianti cambia con la definizione.</b> '+f0(C.macro_siti)+' siti con celle di tipo &laquo;Telefonia&raquo;, '+f0(C.macro)+' impianti di quel tipo, '+f0(C.mobile)+' con le microcelle, in '+f0(C.mobile_siti)+' punti distinti; ARPA nel 2019 scriveva &laquo;1200 circa&raquo; stazioni radiobase.'];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var M=[
+   'Categorie: ricostruite da noi dal nome del gestore (operatori mobili: TIM, Vodafone, WindTre, Iliad; societ&agrave; di infrastrutture: CommsCon, Cellnex, INWIT, OpNet, Hightel, TowerCo; radio e TV; altro). Le regole e l&rsquo;elenco dei gestori di ogni categoria sono nel programma <code>common.py</code>.',
+   'Quartieri: ogni impianto ha il NIL scritto nel file; il calcolo con i confini ufficiali d&agrave; lo stesso NIL nel 100% dei casi. Superficie dai confini dei NIL (somma '+nf(C.area_km2,2)+' km&sup2;).',
+   'Scuole e indirizzi: distanza in linea d&rsquo;aria, in metri, dall&rsquo;impianto di telefonia mobile acceso pi&ugrave; vicino. Intervallo dell&rsquo;estrazione casuale: 1.000 gruppi di '+f0(Sc.n)+' indirizzi residenziali.',
+   'Tra il 2021 e il 2023 un confronto approssimato (stesso gestore, tipo e posizione a circa 10 metri) trova '+f0(A.corrispondenti)+' impianti in comune, '+f0(A.nuove_in_2023)+' nuovi e '+f0(A.sparite_dal_2020)+' spariti: non si pu&ograve; distinguere una crescita vera da un file estratto in modo diverso.',
+   'Nessun valore &egrave; stato cancellato o corretto nei dati originali; i programmi per ripetere tutto sono nella cartella del progetto (<code>antenne/scripts</code>).'];
+  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

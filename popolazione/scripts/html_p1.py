@@ -1,0 +1,164 @@
+TITOLO = "Chi arriva e chi lascia Milano"
+CSS = ""
+BODY = """
+<h1>Chi arriva e chi lascia Milano</h1>
+@@NAV@@
+<p>Ogni volta che qualcuno cambia residenza, l’anagrafe del Comune scrive una <b>iscrizione</b> (chi arriva) o una <b>cancellazione</b> (chi parte). Qui guardiamo il <b>saldo</b>, cioè iscrizioni meno cancellazioni, dal 2002 al 2025: con gli altri comuni italiani e con l’estero. Sono cambi di residenza registrati, non le persone che «ci sono davvero» (vedi <a href="#limiti">i limiti dei dati</a>). I dati dicono <i>quanti</i> e <i>da dove</i>, non <i>perché</i>.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Esistono tre conteggi dello stesso fenomeno (ISTAT, il bilancio storico del Comune, il Comune per data dell’evento) e non coincidono; qui si usa ISTAT per la serie lunga e il Comune per i dettagli. L’età dei migranti c’è solo per la città intera e solo dal 2020; per i quartieri non esiste. Dettagli in <a href="#limiti">limiti dei dati</a>.</div>
+
+<h2 id="anni">Anno per anno, dal 2002</h2>
+<div class="ctl"><span class="sub">Fonte:</span>
+<button type="button" data-f="istat" class="on">ISTAT, 2002–2025</button><button type="button" data-f="ev">Comune, per data dell’evento, 2004–2024</button></div>
+<div class="lgd" id="lg-anni"></div>
+<div class="ch" id="ch-anni" role="img" aria-label="Saldo di residenti con il resto d'Italia e con l'estero, anno per anno"></div>
+<p class="sub" id="anni-desc"></p>
+<div id="anni-testo"></div>
+<div class="scroll"><table id="tab-fasi"></table></div>
+<p class="src">Saldo = iscrizioni meno cancellazioni. «Italia» = da/per altri comuni italiani. Fonti: ISTAT, bilancio demografico (RBD 2001-2018, mensile 2019-2024, 2025; CC BY 4.0) per la serie ISTAT; Comune di Milano, iscrizioni e cancellazioni per data dell’evento (ds1596/1600/1954/1956, CC BY) per l’altra. Scaricati il 30 ottobre e il 1° novembre 2026. Nel 2001 ISTAT conta solo il 22/10–31/12 e non è mostrato.</p>
+
+<h2 id="dove">Da dove arrivano e dove vanno (2020-2024)</h2>
+<div id="dove-testo"></div>
+<p class="sub">Saldo di residenti per zona, somma dei cinque anni 2020-2024 (iscrizioni meno cancellazioni):</p>
+<div class="bars dv" id="b-zone"></div>
+<div class="ctl"><span class="sub">Anno:</span><select id="sel-dove" aria-label="Scegli l'anno"></select></div>
+<div class="scroll"><table id="tab-zone"></table></div>
+<details><summary>Saldo regione per regione (2020-2024)</summary><div class="scroll tabmax"><table id="tab-reg"></table></div></details>
+<p class="src">Fonte: Comune di Milano, iscrizioni per luogo di provenienza e cancellazioni per luogo di destinazione (ds1959 e ds1960, CC BY), per anno dell’evento, scaricati il 1° novembre 2026. «Provincia di Milano» = voce «Prov. MI», «Resto della Lombardia» = «Altre prov. Lombardia»; le altre zone sono somme di regioni fatte da noi (Sud e isole = Abruzzo, Molise, Campania, Puglia, Basilicata, Calabria, Sicilia, Sardegna). «Luogo non indicato» = «n.d.» nel file. I dati non dicono il comune: la provincia di Milano è un blocco unico.</p>
+
+<h2 id="eta">Chi arriva e chi parte, per età</h2>
+<div id="eta-testo"></div>
+<div class="ctl"><span class="sub">Anno:</span><select id="sel-eta" aria-label="Scegli l'anno"></select></div>
+<p class="sub">Saldo per classe di età: a destra si guadagna, a sinistra si perde.</p>
+<div class="bars dv" id="b-eta"></div>
+<div class="scroll"><table id="tab-eta"></table></div>
+<p class="src">Fonte: Comune di Milano, iscrizioni e cancellazioni per classi di età (ds1957 e ds1958, CC BY), per anno dell’evento, scaricati il 1° novembre 2026. L’età non è incrociata con il luogo: non si può dire quanti bambini vanno in provincia, solo che i bambini escono più di quanti entrino e che la provincia è la destinazione più frequente di chi lascia Milano. Il dato per età esiste solo per la città intera.</p>
+
+<h2 id="mappa">Quartiere per quartiere</h2>
+<p>Saldo medio all’anno ogni 1.000 residenti: iscrizioni meno cancellazioni da/per altri comuni e estero, voce «altro» esclusa. Clic su un quartiere per la scheda.</p>
+<div class="ctl"><span class="sub">Periodo:</span><button type="button" data-p="a">2012–2019</button><button type="button" data-p="b" class="on">2020–2024</button></div>
+<div class="ctl"><span class="sub">Saldo:</span><button type="button" data-c="2" class="on">Totale</button><button type="button" data-c="0">Con il resto d’Italia</button><button type="button" data-c="1">Con l’estero</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per saldo di residenti"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa © OpenStreetMap contributors. Dati: Comune di Milano, iscrizioni e cancellazioni per quartiere (ds1596/1600 per il 2012-2019, ds1954/1956 per il 2020-2024, CC BY). In grigio i quartieri con meno di 3.000 residenti (parchi e aree quasi senza abitanti): pochi abitanti fanno percentuali instabili. I residenti usati sono la media del periodo (ds27, CC BY).</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall’elenco.</span></div>
+<div id="nil-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Saldo totale più basso</b> (per 1.000 residenti all’anno)</p><div class="bars dv" id="b-peggio"></div></div>
+<div><p class="sub"><b>Saldo totale più alto</b></p><div class="bars dv" id="b-meglio"></div></div></div>
+
+<h2 id="covid">Il Covid</h2>
+<div id="covid-testo"></div>
+<div class="lgd" id="lg-covid"></div>
+<div class="ch" id="ch-covid" role="img" aria-label="Iscrizioni e cancellazioni mensili 2019-2022"></div>
+<p class="src">Fonte: ISTAT, bilancio demografico mensile (D7B, riga «Totale», comune di Milano), 2019-2022, CC BY 4.0, scaricato il 30 ottobre 2026. Dati mensili per data di registrazione. Linea tratteggiata: marzo 2020 (primo lockdown).</p>
+
+<h2 id="limiti">I limiti dei dati</h2>
+<div class="warm"><ul>
+<li><b>Sono registrazioni, non persone.</b> Il saldo conta cambi di residenza scritti in anagrafe. Chi lascia Milano senza avvisare non compare come partenza finché il Comune non lo cancella (la voce «altro»); chi arriva può registrarsi mesi dopo. Il registro del Comune ha dal 2020 più residenti di quanti ne conti ISTAT (+2,7% a fine 2025; per gli stranieri +10,4%).</li>
+<li><b>Tre contabilità diverse.</b> Per il 2018: immigrati totali 52.879 (ISTAT), 47.559 (bilancio storico del Comune), 49.794 (Comune per data dell’evento). ISTAT conta più iscritti da altri comuni (+5-10 mila l’anno nel 2012-2019). Il segno dei saldi è lo stesso, la dimensione no: nel 2012-2019 il saldo con il resto d’Italia è +64.579 per ISTAT e circa +24.700 per il Comune.</li>
+<li><b>Anni strani.</b> Nel 2004 ISTAT ha un saldo estero di +34.062 e nel bilancio storico del Comune gli immigrati sono 92.263 nel 2003 e 109.249 nel 2013: sono probabilmente registrazioni accumulate, non arrivi di quell’anno (causa non verificata). Le cancellazioni «altro» sono 23.663 nel 2013 e 25.118 nel 2014 contro 0,8-6,4 mila negli altri anni (forse una pulizia del registro dopo il censimento 2011: ipotesi non verificata).</li>
+<li><b>Il 2024 è incompleto per le uscite all’estero</b> nei dati per evento (2.990 contro 6.479 di ISTAT): le cancellazioni per l’estero arrivano in ritardo. Gli stranieri che se ne vanno dall’Italia sono pochi nel registro (342-1.243 l’anno): chi parte senza dirlo finisce in «altro».</li>
+<li><b>Niente comune di origine o destinazione, niente età per quartiere.</b> La matrice ISTAT dei trasferimenti tra comuni è sul sito IstatData, che non ha risposto quando l’abbiamo provato (nessun tentativo di aggirarlo). «Luogo non indicato» pesa da 1.842 a 6.422 cancellazioni l’anno.</li>
+<li><b>Quartieri fuori scala.</b> Maggiore-Musocco-Certosa e Monluè-Ponte Lambro hanno saldi molto alti: forse residenze collettive o nuove costruzioni (ipotesi, non verificata). Nei quartieri con meno di 3.000 residenti il saldo ogni 1.000 abitanti è instabile e non è mostrato.</li>
+<li><b>Il saldo non dice il perché.</b> Un saldo negativo verso la provincia non dice se chi parte lo fa per il prezzo delle case, per i figli o per altro. La lettura «famiglie con bambini verso l’hinterland» è plausibile ma non misurata, perché l’età e la destinazione non sono incrociate.</li>
+</ul></div>
+
+<h2 id="file">Fonti e file</h2>
+<p><b>Fonti e licenze.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: ds27 (residenti per quartiere), ds71 (movimento storico), ds1596, ds1600, ds1954, ds1956 (iscrizioni e cancellazioni per quartiere), ds1957, ds1958 (per età), ds1959, ds1960 (per provenienza/destinazione), tutti licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1° novembre 2026. ISTAT, <a href="https://demo.istat.it/">demo.istat.it</a>: ricostruzione del bilancio demografico 2001-2018 e bilancio 2025 (scaricati il 1° novembre 2026), bilancio mensile 2019-2024 (30 ottobre 2026), CC BY 4.0. Confini dei quartieri (NIL): ds964, Comune di Milano, CC BY. Mappa: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL.</p>
+<p>File: <a href="data/saldi_anno.csv">saldi_anno.csv</a>, <a href="data/destinazioni_2020_2024.csv">destinazioni_2020_2024.csv</a>, <a href="data/eta_saldi_2020_2024.csv">eta_saldi_2020_2024.csv</a>, <a href="data/nil_saldi.csv">nil_saldi.csv</a>, <a href="data/nil.geojson">nil.geojson</a>, <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina, con l’origine). Sono valori aggregati.</p>
+<footer><p>Altre pagine: <a href="../comunita/">Le comunità quartiere per quartiere</a> · <a href="../eta/">Età e centenari</a> · <a href="../censimenti/">I censimenti di Milano</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p></footer>
+"""
+JS = r"""
+var D=null,NF=null,FONTE='istat',PER='b',COMP=2,SEL=null,LAY=null,MAP=null;
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){D=a[0];NF=a[1];
+  try{sorpresa();anni();dove();eta();mappa();covid()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+function sal(d,k){return d['isc_'+k]-d['canc_'+k]}
+function sorpresa(){var Z=D.destinazioni.zone_tot,pm=Z['Provincia di Milano (hinterland)'],es=Z['Estero'],su=Z['Sud e isole (+Abruzzo, Molise)'];
+  var z=D.destinazioni.zone['Provincia di Milano (hinterland)'];var e=D.eta.gruppi;
+  var h='<p><b>Dal 2020 Milano perde ogni anno residenti verso la sua stessa provincia: '+sg(pm.saldo)+' in cinque anni (2020-2024), '+sg(z['2020'].saldo)+' nel 2020 e '+sg(z['2024'].saldo)+' nel 2024.</b> Li compensa con l’estero ('+sg(es.saldo)+') e con il Sud e le isole ('+sg(su.saldo)+').</p>';
+  h+='<p>È il contrario del 2012-2019, quando il saldo con il resto d’Italia era positivo ogni anno (+64.579 in otto anni secondo ISTAT). Per età, nei dati 2020-2024 guadagnano i 20-34 anni ('+sg(e['20-34'].saldo)+'); perdono i bambini fino a 14 anni ('+sg(e['0-14'].saldo)+') e chi ha più di 50 anni ('+sg(e['50-64'].saldo+e['65+'].saldo)+').</p>';
+  h+='<p class="src">Saldi = iscrizioni meno cancellazioni di residenza. Fonti: Comune di Milano ds1959/ds1960 (luogo), ds1957/ds1958 (età), ISTAT bilancio demografico (2012-2019). Sono registrazioni all’anagrafe (<a href="#limiti">limiti dei dati</a>).</p>';
+  setH('sorpresa',h)}
+/* ---- anni ---- */
+function serieF(){return D.serie.filter(function(d){return FONTE==='istat'?true:d.ev_isc_i!=null})}
+function anni(){
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-f]'),function(b){b.addEventListener('click',function(){FONTE=b.getAttribute('data-f');Array.prototype.forEach.call(document.querySelectorAll('button[data-f]'),function(x){x.classList.toggle('on',x===b)});disegnaAnni()})});
+  disegnaAnni()}
+function disegnaAnni(){var s=serieF(),ist=FONTE==='istat';
+  var vi=s.map(function(d){return ist?sal(d,'i'):d.ev_isc_i-d.ev_canc_i}),ve=s.map(function(d){return ist?sal(d,'e'):d.ev_isc_e-d.ev_canc_e});
+  var bands=ist?[{i0:0,i1:8,t:'2002-2010'},{i0:9,i1:17,t:'2011-2019'},{i0:18,i1:23,t:'2020-2025'}]:[{i0:0,i1:6,t:'2004-2010'},{i0:7,i1:15,t:'2011-2019'},{i0:16,i1:20,t:'2020-2024'}];
+  setH('lg-anni',lgdBox([{c:WARM,t:'Con il resto d’Italia'},{c:ACC,t:'Con l’estero'}]));
+  colChart('ch-anni',{cats:s.map(function(d){return d.a}),series:[{n:'Resto d’Italia',c:WARM,v:vi},{n:'Estero',c:ACC,v:ve}],bands:bands,h:320,yf:function(v){return sg(v)},extra:function(i){return '<br>Totale: '+sg(vi[i]+ve[i])}});
+  setH('anni-desc',ist?'ISTAT, per data di registrazione. Saldo = iscritti meno cancellati.':'Comune di Milano, per data dell’evento (esclusa la voce «altro»). Il 2024 ha le cancellazioni per l’estero incomplete.');
+  var ph=ist?[[2002,2010],[2011,2019],[2020,2025]]:[[2004,2010],[2011,2019],[2020,2024]];
+  table('tab-fasi',['Fase','Resto d’Italia','Estero','Totale'],ph.map(function(p){var a=0,b=0;s.forEach(function(d,i){if(d.a>=p[0]&&d.a<=p[1]){a+=vi[i];b+=ve[i]}});return [p[0]+'–'+p[1],sg(a),sg(b),'<b>'+sg(a+b)+'</b>']}).concat([['Tutto il periodo',sg(sum(vi)),sg(sum(ve)),'<b>'+sg(sum(vi)+sum(ve))+'</b>']]));
+  var t='<p>';
+  if(ist){t+='<b>Tre fasi.</b> Nel <b>2002-2010</b> Milano perdeva residenti verso il resto d’Italia (−105.273 in nove anni, fino a −18.131 nel 2006) e ne guadagnava dall’estero (+124.099). Nel <b>2011-2019</b> il saldo con il resto d’Italia diventa positivo ogni anno (+65.850; +12.357 nel 2013, +10.624 nel 2017) e quello con l’estero resta forte (+101.662). Dal <b>2020</b> torna negativo (−34.195 fino al 2025, −10.222 nel 2024, −11.484 nel 2025) mentre l’estero porta +74.726.</p><p>Nel 2002-2025 il saldo totale è +226.869: −73.618 con il resto d’Italia, +300.487 con l’estero. Nello stesso periodo il saldo naturale (nati meno morti) è negativo, quindi la crescita della popolazione viene dalle migrazioni.</p>'}
+  else{t+='Con il conteggio per data dell’evento il segno è lo stesso ma l’ampiezza cambia: il saldo con il resto d’Italia passa da −11.675 (2004) a +307 (2011), +4.408 (2016), −3.825 (2020) e −11.326 (2024); l’estero da +20.133 (2004) a +5.872 (2020), +20.973 (2023) e +16.765 (2024, incompleto).</p>'}
+  setH('anni-testo',t)}
+/* ---- dove ---- */
+function dove(){var Z=D.destinazioni;var ord=['Provincia di Milano (hinterland)','Resto della Lombardia','Nord (fuori Lombardia)','Centro (Lazio, Toscana, Umbria, Marche)','Sud e isole (+Abruzzo, Molise)','Estero','Luogo non indicato'];
+  var nm={'Provincia di Milano (hinterland)':'Provincia di Milano','Resto della Lombardia':'Resto della Lombardia','Nord (fuori Lombardia)':'Nord, fuori Lombardia','Centro (Lazio, Toscana, Umbria, Marche)':'Centro','Sud e isole (+Abruzzo, Molise)':'Sud e isole','Estero':'Estero','Luogo non indicato':'Luogo non indicato'};
+  var q=Z.quota_cancellazioni_italia,h='<p>Delle cancellazioni verso altri comuni italiani nel 2020-2024, il <b>'+nf(100*q['Prov. MI'],1)+'%</b> va nella provincia di Milano e il <b>'+nf(100*q['Altre prov. Lombardia'],1)+'%</b> nel resto della Lombardia: due su tre restano in Lombardia (le altre destinazioni valgono poco: Piemonte '+nf(100*q['Piemonte'],1)+'%, Emilia-Romagna '+nf(100*q['Emilia Romagna'],1)+'%, Lazio '+nf(100*q['Lazio'],1)+'%). Dall’altra parte, <b>dal Sud e dalle isole arrivano '+f0(Z.zone_tot['Sud e isole (+Abruzzo, Molise)'].isc)+' persone e ne partono '+f0(Z.zone_tot['Sud e isole (+Abruzzo, Molise)'].canc)+'</b> (+24.788). Il saldo con il Nord fuori Lombardia è praticamente zero ('+sg(Z.zone_tot['Nord (fuori Lombardia)'].saldo)+').</p>';
+  setH('dove-testo',h);
+  var rows=ord.map(function(k){var v=Z.zone_tot[k].saldo;return {nm:nm[k],v:v,txt:sg(v),c:v<0?WARM:ACC}});
+  hbars('b-zone',rows,{dv:1});
+  var sel=el('sel-dove');sel.innerHTML='<option value="tot">tutti, 2020-2024</option>'+[2020,2021,2022,2023,2024].map(function(y){return '<option value="'+y+'">'+y+'</option>'}).join('');
+  function tab(){var y=sel.value;table('tab-zone',['Zona','Arrivano','Partono','Saldo'],ord.map(function(k){var v=y==='tot'?Z.zone_tot[k]:Z.zone[k][y];return [nm[k],f0(v.isc),f0(v.canc),'<b>'+sg(v.saldo)+'</b>']}))}
+  sel.addEventListener('change',tab);tab();
+  var rg=Z.regioni_saldo,keys=Object.keys(rg).sort(function(a,b){return rg[a]-rg[b]});table('tab-reg',['Regione / zona','Saldo 2020-2024'],keys.map(function(k){return [esc(k==='Prov. MI'?'Provincia di Milano':k==='Altre prov. Lombardia'?'Resto della Lombardia':k==='n.d.'?'Luogo non indicato':k),sg(rg[k])]}))}
+/* ---- eta ---- */
+function eta(){var E=D.eta,g=E.gruppi;
+  var h='<p>Nei cinque anni 2020-2024 sono arrivate 247.271 persone e ne sono partite 216.730 (saldo +30.541). La differenza è tutta tra i giovani adulti: <b>i 20-34 anni sono '+f0(g['20-34'].isc)+' in arrivo contro '+f0(g['20-34'].canc)+' in partenza ('+sg(g['20-34'].saldo)+')</b>; la classe più forte è 25-29 anni (+26.989 in cinque anni). I bambini fino a 14 anni hanno saldo negativo ogni anno ('+sg(g['0-14'].saldo)+'), i 50-64enni '+sg(g['50-64'].saldo)+', gli over 65 '+sg(g['65+'].saldo)+'. I 35-49enni sono in equilibrio ('+sg(g['35-49'].saldo)+'): positivi solo nel 2022 e 2023 (+910 e +1.770).</p><p>Messi insieme, i dati sono compatibili con l’idea di giovani che arrivano per studio e lavoro e di famiglie con figli che si spostano fuori città, ma <b>l’età e la destinazione non sono incrociate</b>: è una lettura, non una misura.</p>';
+  setH('eta-testo',h);
+  var sel=el('sel-eta');sel.innerHTML='<option value="tot">tutti, 2020-2024</option>'+E.anni.map(function(y){return '<option value="'+y+'">'+y+'</option>'}).join('');
+  function draw(){var y=sel.value,v=E.classi.map(function(c,i){return y==='tot'?E.anni.reduce(function(s,a){return s+E.saldo[a][i]},0):E.saldo[y][i]});
+    var mx=Math.max.apply(null,v.map(Math.abs));hbars('b-eta',E.classi.map(function(c,i){return {nm:c.replace(' anni',''),v:v[i],txt:sg(v[i]),c:v[i]<0?WARM:ACC}}),{dv:1,max:mx});
+    var gr=[['0-14',0,3],['15-19',3,4],['20-34',4,7],['35-49',7,10],['50-64',10,13],['65 e più',13,18]];
+    table('tab-eta',['Età','Arrivano','Partono','Saldo'],gr.map(function(r){var a=0,b=0;for(var i=r[1];i<r[2];i++){a+=y==='tot'?E.anni.reduce(function(s,k){return s+E.isc[k][i]},0):E.isc[y][i];b+=y==='tot'?E.anni.reduce(function(s,k){return s+E.canc[k][i]},0):E.canc[y][i]}return [r[0],f0(a),f0(b),'<b>'+sg(a-b)+'</b>']}))}
+  sel.addEventListener('change',draw);draw()}
+/* ---- mappa ---- */
+var BR=[-4,-1.5,1.5,5,10,15];
+function val(p){var a=p[PER];return a&&a[COMP]!=null&&p.cl===1&&(PER==='b'?p.b[3]>=3000:true)?a[COMP]:null}
+function stile(f){var p=f.properties,v=val(p),sel=SEL===p.i;return {fillColor:v==null?'#bdbdbd':DIVC[cls(v,BR)],fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:1}}
+function mappa(){
+  MAP=baseMap('map');
+  LAY=L.geoJSON(NF,{style:stile,onEachFeature:function(f,l){l.bindTooltip(function(){var p=f.properties,v=val(p);return '<b>'+esc(p.n)+'</b><br>'+(v==null?'meno di 3.000 residenti: non confrontabile':sg(v,1)+' ogni 1.000 residenti all’anno')},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(LAY.getBounds())},500);
+  var sel=el('sel-nil');sel.innerHTML='<option value="">— scegli —</option>'+NF.features.map(function(f){return f.properties}).sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(p){return '<option value="'+p.i+'">'+esc(p.n)+'</option>'}).join('');
+  sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(b){b.addEventListener('click',function(){PER=b.getAttribute('data-p');Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(x){x.classList.toggle('on',x===b)});ric()})});
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-c]'),function(b){b.addEventListener('click',function(){COMP=parseInt(b.getAttribute('data-c'),10);Array.prototype.forEach.call(document.querySelectorAll('button[data-c]'),function(x){x.classList.toggle('on',x===b)});ric()})});
+  ric()}
+function props(){return NF.features.map(function(f){return f.properties})}
+function ric(){LAY.setStyle(stile);
+  var T=['meno di −4','da −4 a −1,5','da −1,5 a +1,5','da +1,5 a +5','da +5 a +10','da +10 a +15','oltre +15'];
+  setH('lg-map',DIVC.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+T[i]+'</span>'}).join('')+'<span><i style="background:#bdbdbd"></i>meno di 3.000 residenti</span>');
+  var nome=['con il resto d’Italia','con l’estero','totale'][COMP],per=PER==='a'?'2012-2019':'2020-2024';
+  setH('map-desc','Saldo '+nome+', '+per+', per 1.000 residenti all’anno. Verde = più iscrizioni che cancellazioni; arancione = più cancellazioni.');
+  var ok=props().filter(function(p){return val(p)!=null}).sort(function(a,b){return val(a)-val(b)});
+  hbars('b-peggio',ok.slice(0,8).map(function(p){return {nm:p.n,v:val(p),txt:sg(val(p),1),c:val(p)<0?WARM:ACC}}),{dv:1,max:Math.max(30,Math.abs(val(ok[0])))});
+  hbars('b-meglio',ok.slice(-8).reverse().map(function(p){return {nm:p.n,v:val(p),txt:sg(val(p),1),c:val(p)<0?WARM:ACC}}),{dv:1,max:Math.max(30,Math.abs(val(ok[0])))});
+  var C=D.nil_conteggi;
+  setH('nil-testo','<p>'+(PER==='b'?'<b>Nel 2020-2024 tutti i '+C.periodo_2020_2024.nil_70+' quartieri con almeno 3.000 residenti hanno un saldo positivo con l’estero e '+C.periodo_2020_2024.saldo_italia_negativo+' su '+C.periodo_2020_2024.nil_70+' un saldo negativo con il resto d’Italia.</b> Perdono di più i quartieri periferici e di case degli anni ’60 (Muggiano, Bruzzano, Barona, Quinto Romano, Gratosoglio); guadagnano di più Maggiore-Musocco-Certosa e Monluè-Ponte Lambro (due valori fuori scala, vedi i limiti), Porta Garibaldi-Porta Nuova, Porta Ticinese e Brera.':'Nel 2012-2019 solo '+C.periodo_2012_2019.saldo_tot_negativo+' quartieri su '+C.periodo_2012_2019.nil_70+' (con almeno 3.000 residenti) avevano un saldo totale negativo. Guadagnavano di più Stazione Centrale-Ponte Seveso (+24,4), Porta Garibaldi, Scalo Romana, Bicocca; perdevano Quarto Oggiaro-Vialba-Musocco, Barona, Quinto Romano, Gratosoglio.')+'</p>');
+  if(SEL)scheda(SEL)}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(stile);LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})}});scheda(i)}
+function scheda(i){var p=props().filter(function(q){return q.i===i})[0];
+  function r(k){var a=p[k];return a[2]==null?'<span class="sub">n.d.</span>':'<b>'+sg(a[2],1)+'</b> <span class="sub">(Italia '+sg(a[0],1)+', estero '+sg(a[1],1)+')</span>'}
+  setH('scheda','<h3>'+esc(p.n)+'</h3><div class="scroll"><table><tbody><tr><td>Residenti medi 2020-2024</td><td class="r">'+f0(p.b[3])+'</td></tr><tr><td>Saldo 2012-2019, per 1.000 residenti all’anno</td><td class="r">'+r('a')+'</td></tr><tr><td>Saldo 2020-2024, per 1.000 residenti all’anno</td><td class="r">'+r('b')+'</td></tr><tr><td>Persone in più/meno 2020-2024 (somma)</td><td class="r">Italia '+sg(p.b[4])+', estero '+sg(p.b[5])+'</td></tr></tbody></table></div>'+(p.cl!==1?'<p class="sub">Meno di 3.000 residenti: il dato per 1.000 abitanti è instabile.</p>':''))}
+/* ---- covid ---- */
+function covid(){var C=D.covid;
+  var x=function(d){return d.a+(d.m-1)/12};
+  var ser=[{n:'Arrivi da altri comuni',c:ACC,pts:C.map(function(d){return [Math.round(x(d)*12),d.isc_i]})},{n:'Partenze per altri comuni',c:WARM,pts:C.map(function(d){return [Math.round(x(d)*12),d.canc_i]})},{n:'Arrivi dall’estero',c:'#0b4f45',dash:1,pts:C.map(function(d){return [Math.round(x(d)*12),d.isc_e]})}];
+  setH('lg-covid',lgd(ser.map(function(s){return {c:s.c,t:s.n,dash:s.dash}})));
+  var mesi=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+  lineChart('ch-covid',{series:ser,xmin:2019*12,xmax:2022*12+11,ymin:0,ymax:5000,xt:[2019*12,2020*12,2021*12,2022*12],xf:function(v){return Math.round(v/12)},xtip:function(v){return mesi[v%12]+' '+Math.floor(v/12)},h:300,xstep:1,marks:[{x:2020*12+2,t:'marzo 2020'}]});
+  var y=function(a,k){return sum(C.filter(function(d){return d.a===a}).map(function(d){return d[k]}))};
+  var p=function(k){return Math.round(100*(y(2020,k)/y(2019,k)-1))};
+  setH('covid-testo','<p><b>Nel 2020 Milano non si è svuotata: sono mancati soprattutto gli arrivi.</b> Rispetto al 2019 gli arrivi dall’estero sono scesi del '+Math.abs(p('isc_e'))+'% ('+f0(y(2020,'isc_e'))+' contro '+f0(y(2019,'isc_e'))+'), gli arrivi da altri comuni del '+Math.abs(p('isc_i'))+'% ('+f0(y(2020,'isc_i'))+' contro '+f0(y(2019,'isc_i'))+'), le partenze per altri comuni solo del '+Math.abs(p('canc_i'))+'% ('+f0(y(2020,'canc_i'))+' contro '+f0(y(2019,'canc_i'))+'). Ad aprile 2020 gli arrivi dall’estero sono 384 (580 a marzo, 1.276 a gennaio). Il saldo totale (Italia più estero) è +3.794 nel 2020 contro +14.261 nel 2019.</p><p>Nello stesso anno i morti sono 18.520 contro 13.835 del 2019, e la popolazione «calcolata» del Comune cala di 31.660 persone (1.406.242 → 1.374.582); <b>20.728 di questo calo è un «aggiustamento statistico»</b> (campo «saldo censuario» del bilancio storico, ds71), cioè una correzione di conteggio e non persone partite. Nel 2022-2023 gli arrivi dall’estero tornano sopra i livelli pre-Covid (+14.262 e +19.887 di saldo).</p>')}
+"""

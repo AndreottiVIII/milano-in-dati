@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Età e centenari</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:62vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl input[type=range]{flex:1 1 200px;min-width:140px;max-width:100%}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 92px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars.dv .tr .fill{position:absolute;top:0} .bars.dv .tr:after{content:"";position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} }
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+@media(max-width:760px){.bars .row{grid-template-columns:minmax(80px,32%) 1fr auto} .bars .v{white-space:normal;max-width:150px}} .bars .row>*{min-width:0}
+.nav3{font-size:.9rem;margin:.2em 0 .8em} .nav3 a{margin-right:12px}
+#yr{font-weight:700;min-width:3.2em;display:inline-block} .pyr text{font:11px system-ui,Arial,sans-serif} .pyr .mu{fill:#666}
+</style><script src="../menu.js" defer></script></head><body><main>
+
+<h1>Età e centenari, quartiere per quartiere</h1>
+<p class="nav3"><b>Le tre pagine sulla popolazione:</b> <a href="../arrivi-partenze/">Chi arriva e chi lascia</a> &middot; <a href="../comunita/">Le comunità quartiere per quartiere</a> &middot; <b>Età e centenari</b> &middot; <a href="../censimenti/">I censimenti di Milano</a></p>
+<p>Quanti anni hanno i residenti di Milano, e come cambia da un quartiere all’altro (gli 88 NIL, Nuclei di Identità Locale)? Qui guardiamo l’<b>età</b> dei residenti iscritti in anagrafe al 31 dicembre di ogni anno, dal 1999 al 2025, e i <b>centenari</b>, cioè chi ha 100 anni o più. L’età è in anni compiuti.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> I numeri sono del registro del Comune, che dal 2020 ha più residenti di ISTAT (+2,7% a fine 2025) e più centenari (835 contro 789, +5,8%). Alcuni quartieri hanno residenze collettive che spostano l’età (case di riposo, centri di accoglienza): è un’ipotesi, non verificata. Vedi <a href="#limiti">i limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa, anno per anno</h2>
+<div class="ctl"><span class="sub">Mostra:</span><button type="button" data-m="em" class="on">Età media</button><button type="button" data-m="q65">Quota 65 anni e più</button><button type="button" data-m="q80">Quota 80 anni e più</button><button type="button" data-m="q14">Quota 0-14 anni</button></div>
+<div class="ctl"><span class="sub">Anno:</span><input type="range" id="rng" min="1999" max="2025" step="1" value="2025" aria-label="Anno"><span id="yr">2025</span><button type="button" id="play" aria-label="Avvia la sequenza degli anni">▶ anni</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per età dei residenti"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Residenti al 31 dicembre per età: Comune di Milano, «Popolazione: residenti per cittadinanza e quartiere (1999-2025)» (ds27, CC BY, scaricato il 1° novembre 2026); età media = media delle età compiute (l’età media esatta è circa mezzo anno più alta: per i confronti non cambia). Mappa © OpenStreetMap contributors. I colori sono gli stessi per tutti gli anni. In grigio i quartieri con meno di 3.000 residenti in quell’anno (parchi e aree quasi senza abitanti).</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall’elenco.</span></div>
+<div id="est-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Più anziani</b> (età media, anno scelto)</p><div class="bars" id="b-old"></div></div>
+<div><p class="sub"><b>Più giovani</b></p><div class="bars" id="b-young"></div></div></div>
+<p class="src">Solo quartieri con almeno 3.000 residenti nell’anno scelto con il cursore. Le barre partono da 30 anni.</p>
+
+<h2 id="citta">La città in 26 anni</h2>
+<div id="citta-testo"></div>
+<div class="lgd" id="lg-citta"></div>
+<div class="ch" id="ch-citta" role="img" aria-label="Quote di residenti 0-14, 65+, 80+ anni, 1999-2025"></div>
+<p class="src">Quota di residenti per fascia di età sul totale della città (ds27, CC BY). Linea tratteggiata: 2008, massimo della quota 65+.</p>
+
+<h2 id="piramidi">Due quartieri a confronto</h2>
+<div id="pir-testo"></div>
+<div class="ctl"><label class="sub" for="sel-a">Quartiere A:</label><select id="sel-a"></select><label class="sub" for="sel-b">Quartiere B:</label><select id="sel-b"></select>
+<span class="sub">Anno:</span><button type="button" data-p="1999">1999</button><button type="button" data-p="2011">2011</button><button type="button" data-p="2025" class="on">2025</button></div>
+<div class="grid2"><div id="pir-a"></div><div id="pir-b"></div></div>
+<p class="src">Ogni barra è la quota dei residenti del quartiere in una classe di 5 anni (l’ultima è «100 e più»), sulla stessa scala per i due quartieri. A sinistra gli uomini, a destra le donne. Dati ds27 (CC BY). Monluè-Ponte Lambro e Maggiore-Musocco-Certosa possono avere residenze collettive (ipotesi non verificata): leggere con cautela.</p>
+
+<h2 id="centenari">I centenari</h2>
+<div id="cen-testo"></div>
+<div class="lgd" id="lg-cen"></div>
+<div class="ch" id="ch-cen" role="img" aria-label="Residenti di 100 anni e più, 1999-2025, donne e uomini"></div>
+<p class="src">Residenti di 100 anni e più al 31 dicembre (ds27, CC BY). I punti ISTAT sono la popolazione di 100 anni e più al 1° gennaio dell’anno dopo (POSAS, ISTAT, CC BY 4.0, scaricati il 30 ottobre 2026), messi sullo stesso anno del registro.</p>
+
+<h3>Centenari per quartiere</h3>
+<div id="cenq-testo"></div>
+<div class="grid2"><div><p class="sub"><b>Numero di centenari, 2025</b></p><div class="bars" id="b-cn"></div></div>
+<div><p class="sub"><b>Ogni 10.000 residenti, 2025</b> (quartieri con 3.000 residenti o più)</p><div class="bars" id="b-cp"></div></div></div>
+<details><summary>Tutti i quartieri</summary><div class="scroll tabmax"><table id="tab-cen"></table></div></details>
+<p class="src">Residenti di 100 anni e più per quartiere (ds27, CC BY). I numeri sono piccoli: un quartiere con 6 centenari ogni 4.000 residenti può cambiare molto con una persona.</p>
+<div class="warn"><b>Una cautela.</b> I centenari sono più numerosi dove ci sono residenze per anziani (ipotesi non verificata: i dati dicono dove le persone sono iscritte in anagrafe, non dove vivevano da giovani né se vivono in una casa di riposo). Un quartiere con molti centenari non è per questo «più sano».</div>
+
+<h2 id="limiti">I limiti dei dati</h2>
+<div class="warm"><ul>
+<li><b>Anagrafe, non conteggio vero.</b> Il registro del Comune supera ISTAT dal 2020: +1,3% (2020), +3,4% (2023), +2,7% (2025) sul totale; i centenari sono il 4-10% in più (835 contro 789 a fine 2025; 512 contro 491 a fine 2018). Fino al 2019 i totali coincidevano entro lo 0,2%.</li>
+<li><b>Il 2003 non è un dato demografico.</b> Tra il 2002 e il 2003 il totale dei residenti cala di 53.857 persone (da 1.324.821 a 1.270.964) e gli uomini centenari passano da 85 a 23: è con ogni probabilità una revisione del registro dopo il censimento 2001 (ipotesi non verificata). Lo stesso tipo di salto c’è tra il 2011 e il 2012 (+24.579 residenti). Le serie per quartiere hanno gli stessi salti.</li>
+<li><b>Quartieri piccoli.</b> 18 quartieri su 88 hanno meno di 3.000 residenti: età media e quote oscillano e non sono in classifica. Trenno (4.008 residenti) è il più anziano ma è piccolo.</li>
+<li><b>Residenze collettive e nuove costruzioni.</b> Maggiore-Musocco-Certosa passa da 4.900 a 10.508 residenti tra il 2011 e il 2025 e da 45,3 a 39,9 anni di età media; Monluè-Ponte Lambro ha la quota di stranieri al 50% e l’età media più bassa. Non sappiamo perché (ipotesi non verificata: residenze collettive, nuovi edifici).</li>
+<li><b>NIL prima del 2012.</b> I residenti del 1999-2011 sono assegnati ai quartieri di oggi; il dataset non dice come.</li>
+<li><b>Età media approssimata.</b> È la media delle età compiute; «100 e più» conta 100. Per i confronti tra quartieri e anni non cambia nulla. Prima del 1999 non c’è anagrafe per quartiere; per il 1991 e il 2001 ci sono i censimenti (classi di 5 anni): vedi <a href="../censimenti/">I censimenti di Milano</a>.</li>
+</ul></div>
+
+<h2 id="file">Fonti e file</h2>
+<p><b>Fonti e licenze.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: ds27 (residenti per cittadinanza, età e quartiere 1999-2025), confini dei NIL ds964; Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1° novembre 2026. ISTAT, <a href="https://demo.istat.it/">demo.istat.it</a>: popolazione per età al 1° gennaio (POSAS) 2019-2026, CC BY 4.0, scaricata il 30 ottobre 2026. Mappa: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL.</p>
+<p>File: <a href="data/citta_eta_centenari.csv">citta_eta_centenari.csv</a>, <a href="data/nil_eta_centenari.csv">nil_eta_centenari.csv</a>, <a href="data/eta.json">eta.json</a> (età, quote e centenari per quartiere e anno), <a href="data/piramidi.json">piramidi.json</a>, <a href="data/nil.geojson">nil.geojson</a>, <a href="data/riepilogo.json">riepilogo.json</a>. Sono valori aggregati.</p>
+<footer><p>Altre pagine: <a href="../arrivi-partenze/">Chi arriva e chi lascia Milano</a> · <a href="../comunita/">Le comunità quartiere per quartiere</a> · <a href="../censimenti/">I censimenti di Milano</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p></footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var DIVC=['#a8540f','#d98a43','#eeeeee','#bfe0d8','#7dbdb0','#2b8a7d','#0b4f45'];
+var RD=[];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){if(x==null)return '';var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i]||0;return s}
+function lgd(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
+function lgdBox(items){return items.map(function(it){return '<span><i style="background:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
+/* barre orizzontali (anche divergenti) */
+function hbars(id,rows,o){o=o||{};var mx=o.max||Math.max.apply(null,rows.map(function(r){return Math.abs(r.v)}))||1;
+  setH(id,rows.map(function(r){var col=r.c||(o.dv&&r.v<0?WARM:ACC);var w=Math.abs(r.v)/mx*(o.dv?50:100);
+    return '<div class="row"><span class="nm" title="'+esc(r.t||r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+w+'%;background:'+col+(o.dv?(';'+(r.v<0?'right:50%':'left:50%')):'')+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+/* grafico SVG: tooltip e guida */
+function mkSvg(box,W,H){box.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img"></svg><div class="tip" style="display:none"></div>';return box.firstChild}
+function S(tag,at,txt){var e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(var k in at)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;return e}
+function yTicks(lo,hi,n){var st=niceStep((hi-lo)/(n||5)),t=[],v=Math.ceil(lo/st)*st;for(;v<=hi+1e-9;v+=st)t.push(Math.round(v*1e6)/1e6);return t}
+/* grafico a linee. o: series[{n,c,dash,pts:[[x,y]],w}], xmin,xmax,ymin,ymax,yf,xf,h,marks[{x,t}],xt */
+function lineChart(boxId,o){var box=el(boxId);var W=Math.max(300,box.clientWidth),H=o.h||300,m={l:o.ml||50,r:12,t:12,b:26};
+  var ymin=o.ymin,ymax=o.ymax;if(ymin==null||ymax==null){var a=[];o.series.forEach(function(s){s.pts.forEach(function(p){if(p[1]!=null)a.push(p[1])})});ymin=ymin==null?Math.min(0,Math.min.apply(null,a)):ymin;ymax=ymax==null?Math.max.apply(null,a):ymax;ymax+= (ymax-ymin)*.04}
+  var yt=yTicks(ymin,ymax,5);var xs=function(x){return m.l+(x-o.xmin)/(o.xmax-o.xmin)*(W-m.l-m.r)},ys=function(y){return H-m.b-(y-ymin)/(ymax-ymin)*(H-m.t-m.b)};
+  var svg=mkSvg(box,W,H);
+  yt.forEach(function(v){svg.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:ys(v),y2:ys(v),stroke:v===0?'#666':'#e4e4e4'}));svg.appendChild(S('text',{x:m.l-6,y:ys(v)+4,'text-anchor':'end',class:'mu'},(o.yf||f0)(v)))});
+  (o.xt||[]).forEach(function(v){svg.appendChild(S('text',{x:xs(v),y:H-8,'text-anchor':'middle',class:'mu'},(o.xf||String)(v)))});
+  (o.marks||[]).forEach(function(mk){var x=xs(mk.x);svg.appendChild(S('line',{x1:x,x2:x,y1:m.t,y2:H-m.b,stroke:'#c26a1b','stroke-dasharray':'3 3'}));svg.appendChild(S('text',{x:x+3,y:m.t+9,class:'mu'},mk.t))});
+  o.series.forEach(function(s){var d='',pen=false;s.pts.forEach(function(p){if(p[1]==null){pen=false;return}d+=(pen?'L':'M')+xs(p[0]).toFixed(1)+' '+ys(p[1]).toFixed(1);pen=true});
+    svg.appendChild(S('path',{d:d,fill:'none',stroke:s.c,'stroke-width':s.w||2,'stroke-dasharray':s.dash?'5 4':'none','stroke-linejoin':'round'}))});
+  var gl=S('line',{y1:m.t,y2:H-m.b,stroke:'#555',display:'none'});svg.appendChild(gl);var rect=S('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'});svg.appendChild(rect);var tip=box.lastChild;
+  function show(ev){var r=svg.getBoundingClientRect(),k=W/r.width,t=ev.touches?ev.touches[0]:ev,mx=(t.clientX-r.left)*k;var x=Math.round(o.xmin+(mx-m.l)/(W-m.l-m.r)*(o.xmax-o.xmin));if(o.xstep)x=Math.round(x/o.xstep)*o.xstep;x=Math.max(o.xmin,Math.min(o.xmax,x));
+    var h='<b>'+(o.xtip?o.xtip(x):x)+'</b>';o.series.forEach(function(s){var p=null;for(var i=0;i<s.pts.length;i++)if(s.pts[i][0]===x)p=s.pts[i];if(p&&p[1]!=null)h+='<br><span style="color:'+s.c+'">■</span> '+esc(s.n)+': '+(o.tf||o.yf||f0)(p[1])});
+    gl.setAttribute('x1',xs(x));gl.setAttribute('x2',xs(x));gl.removeAttribute('display');tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=xs(x)/k+10;if(left+tw>r.width)left=xs(x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
+  function hide(){tip.style.display='none';gl.setAttribute('display','none')}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+  box._f=function(){lineChart(boxId,o)};if(RD.indexOf(box)<0)RD.push(box);
+}
+/* istogramma a colonne raggruppate con valori negativi. o: cats[], series[{n,c,v[]}], yf,h,bands[{i0,i1,t}], tf */
+function colChart(boxId,o){var box=el(boxId);var W=Math.max(300,box.clientWidth),H=o.h||300,m={l:o.ml||50,r:10,t:o.bands?26:12,b:26};
+  var all=[];o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});var lo=Math.min(0,Math.min.apply(null,all)),hi=Math.max(0,Math.max.apply(null,all));hi+=(hi-lo)*.04;lo-= (hi-lo)*.02;
+  var n=o.cats.length,pw=(W-m.l-m.r)/n,ys=function(y){return H-m.b-(y-lo)/(hi-lo)*(H-m.t-m.b)};var svg=mkSvg(box,W,H);
+  (o.bands||[]).forEach(function(b,k){svg.appendChild(S('rect',{x:m.l+b.i0*pw,y:m.t,width:(b.i1-b.i0+1)*pw,height:H-m.t-m.b,fill:k%2?'#f6f6f6':'#fff'}));svg.appendChild(S('text',{x:m.l+b.i0*pw+3,y:m.t-8,class:'mu'},b.t))});
+  yTicks(lo,hi,5).forEach(function(v){svg.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:ys(v),y2:ys(v),stroke:v===0?'#333':'#e4e4e4'}));svg.appendChild(S('text',{x:m.l-6,y:ys(v)+4,'text-anchor':'end',class:'mu'},(o.yf||f0)(v)))});
+  var ns=o.series.length,bw=Math.max(1.5,pw*.8/ns);
+  o.cats.forEach(function(c,i){o.series.forEach(function(s,k){var v=s.v[i];if(v==null)return;var x=m.l+i*pw+pw*.1+k*bw,y0=ys(0),y1=ys(v);svg.appendChild(S('rect',{x:x,y:Math.min(y0,y1),width:bw-.5,height:Math.max(.5,Math.abs(y1-y0)),fill:s.c}))});
+    if(i%(o.step||(pw<16?3:1))===0)svg.appendChild(S('text',{x:m.l+i*pw+pw/2,y:H-8,'text-anchor':'middle',class:'mu'},String(c).length>4?String(c):(pw<16?String(c).slice(2):c)))});
+  var rect=S('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'});svg.appendChild(rect);var tip=box.lastChild;
+  function show(ev){var r=svg.getBoundingClientRect(),k=W/r.width,t=ev.touches?ev.touches[0]:ev,i=Math.floor(((t.clientX-r.left)*k-m.l)/pw);if(i<0||i>=n){tip.style.display='none';return}
+    var h='<b>'+o.cats[i]+'</b>';o.series.forEach(function(s){if(s.v[i]!=null)h+='<br><span style="color:'+s.c+'">■</span> '+esc(s.n)+': '+(o.tf||o.yf||f0)(s.v[i])});if(o.extra)h+=o.extra(i);
+    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=(m.l+i*pw+pw/2)/k+10;if(left+tw>r.width)left=(m.l+i*pw+pw/2)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+  box._f=function(){colChart(boxId,o)};if(RD.indexOf(box)<0)RD.push(box);
+}
+window.addEventListener('resize',(function(){var t;return function(){clearTimeout(t);t=setTimeout(function(){RD.forEach(function(b){b._f()})},200)}})());
+/* mappa a quartieri */
+function baseMap(id){var M=L.map(id,{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(M);
+  window.addEventListener('resize',function(){M.invalidateSize()});return M}
+function cls(v,br){var i=0;while(i<br.length&&v>=br[i])i++;return i}
+function qbreaks(vals,k){var s=vals.filter(function(v){return v!=null&&isFinite(v)}).sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(s[Math.floor(i*s.length/k)]);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function nearestInt(v){return Math.round(v)}
+
+var E=null,PI=null,NF=null,ANNI=[],IDX={},MET='em',YI=26,SEL=null,MAP=null,LAY=null,BR={},TIMER=null,PY='2025';
+var NM={em:'Età media',q65:'Quota 65 anni e più',q80:'Quota 80 anni e più',q14:'Quota 0-14 anni'};
+Promise.all([J('data/eta.json'),J('data/piramidi.json'),J('data/nil.geojson')]).then(function(a){E=a[0];PI=a[1];NF=a[2];ANNI=E.anni;ANNI.forEach(function(y,i){IDX[y]=i});
+  try{sorpresa();mappa();citta();piramidi();centenari()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+function fm(v){return MET==='em'?nf(v,1)+' anni':nf(v,1)+'%'}
+function sorpresa(){var C=E.citta,c0=C.cF[0]+C.cM[0],c1=C.cF[26]+C.cM[26];
+  var h='<p><b>I centenari sono passati da '+c0+' (1999) a '+c1+' (2025)</b>, più che triplicati; gli over 80 da '+nf(C.q80[0],1)+'% a '+nf(C.q80[26],1)+'% dei residenti. Eppure <b>la quota di over 65 è scesa dal massimo del 2008 ('+nf(C.q65[9],1)+'%) al '+nf(C.q65[24],1)+'% del 2023</b> (oggi '+nf(C.q65[26],1)+'%) e <b>l’età media è salita di un solo anno in 26 anni</b>: da '+nf(C.em[0],1)+' a '+nf(C.em[26],1)+'.</p>';
+  h+='<p>Nei dati, a frenare l’invecchiamento sono stati l’arrivo di giovani adulti e di residenti stranieri (vedi <a href="../arrivi-partenze/">Chi arriva e chi lascia Milano</a> e <a href="../comunita/">Le comunità quartiere per quartiere</a>). Tra i quartieri la distanza resta grande: dal più giovane (Monluè-Ponte Lambro, 38,4 anni di età media) al più anziano (Trenno, 50,5) ci sono 12 anni.</p>';
+  h+='<p class="src">Residenti al 31 dicembre per età (ds27, Comune di Milano, CC BY). Il registro conta più persone di ISTAT (<a href="#limiti">limiti dei dati</a>).</p>';
+  setH('sorpresa',h)}
+/* ---- mappa ---- */
+function mis(p,yi){var v=E.nil[p.i||p][MET][yi];return v}
+function ok(i,yi){return E.nil[i].r[yi]>=3000}
+function soglie(){BR[MET]=[];var all=[];Object.keys(E.nil).forEach(function(i){for(var y=0;y<ANNI.length;y++){var v=E.nil[i][MET][y];if(v!=null&&ok(i,y))all.push(v)}});
+  var b=qbreaks(all,6).map(function(v){return Math.round(v*10)/10});BR[MET]=b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function stile(f){var p=f.properties,v=E.nil[p.i][MET][YI],g=!ok(p.i,YI)||v==null;return {fillColor:g?'#bdbdbd':SEQ[cls(v,BR[MET])+(6-BR[MET].length-1)],fillOpacity:.85,color:SEL===p.i?'#000':'#fff',weight:SEL===p.i?3:1}}
+function mappa(){Object.keys(NM).forEach(function(k){MET=k;soglie()});MET='em';
+  MAP=baseMap('map');
+  LAY=L.geoJSON(NF,{style:stile,onEachFeature:function(f,l){l.bindTooltip(function(){var p=f.properties,n=E.nil[p.i],v=n[MET][YI];return '<b>'+esc(p.n)+'</b><br>'+ANNI[YI]+': '+(v==null||!ok(p.i,YI)?'meno di 3.000 residenti':fm(v))+'<br>'+f0(n.r[YI])+' residenti, '+n.c[YI]+' centenari'},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(LAY.getBounds())},500);
+  var s2=el('sel-nil');s2.innerHTML='<option value="">— scegli —</option>'+NF.features.map(function(f){return f.properties}).sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(p){return '<option value="'+p.i+'">'+esc(p.n)+'</option>'}).join('');
+  s2.addEventListener('change',function(){if(s2.value)scegli(parseInt(s2.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-m]'),function(b){b.addEventListener('click',function(){MET=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('button[data-m]'),function(x){x.classList.toggle('on',x===b)});ric()})});
+  var r=el('rng');r.addEventListener('input',function(){YI=IDX[parseInt(r.value,10)];ric()});
+  el('play').addEventListener('click',function(){if(TIMER){clearInterval(TIMER);TIMER=null;this.textContent='▶ anni';return}var b=this;b.textContent='■ ferma';if(YI>=26)YI=0;TIMER=setInterval(function(){YI++;if(YI>=26){clearInterval(TIMER);TIMER=null;b.textContent='▶ anni'}r.value=ANNI[YI];ric()},550)});
+  ric()}
+function ric(){LAY.setStyle(stile);el('yr').textContent=ANNI[YI];var b=BR[MET],pal=SEQ.slice(6-b.length-1),t=[];
+  for(var i=0;i<=b.length;i++){var u=MET==='em'?'':'%';t.push(i===0?'meno di '+nf(b[0],1)+u:i===b.length?nf(b[i-1],1)+u+' o più':nf(b[i-1],1)+u+' – '+nf(b[i],1)+u)}
+  setH('lg-map',pal.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+t[i]+'</span>'}).join('')+'<span><i style="background:#bdbdbd"></i>meno di 3.000 residenti</span>');
+  var C=E.citta,cv={em:C.em,q65:C.q65,q80:C.q80,q14:C.q14}[MET][YI];
+  setH('map-desc',NM[MET]+' nel '+ANNI[YI]+'. Tutta la città: '+fm(cv)+'. Colore più scuro = più anziani (o, per la quota 0-14, più bambini).');
+  var L2=Object.keys(E.nil).map(function(i){return {i:i,n:E.nil[i].n,v:E.nil[i][MET][YI],r:E.nil[i].r[YI]}}).filter(function(x){return x.r>=3000&&x.v!=null}).sort(function(a,b){return b.v-a.v});
+  var mx=L2[0].v,mn=MET==='em'?30:0;
+  function rows(a,c){return a.map(function(x){return {nm:x.n,v:x.v-mn,txt:fm(x.v),c:c}})}
+  hbars('b-old',rows(L2.slice(0,8),WARM),{max:mx-mn});hbars('b-young',rows(L2.slice(-8).reverse(),ACC),{max:mx-mn});
+  setH('est-testo','<p>'+(MET==='em'?'Nel 2025 i più anziani sono Trenno (50,5 anni), Gallaratese-San Leonardo-Lampugnano (49,1), Barona (48,7); i più giovani Monluè-Ponte Lambro (38,4) e Maggiore-Musocco-Certosa (39,9). Monluè è il più giovane in tutte le fotografie (1999, 2005, 2011, 2019, 2025). Nel 1999 i più anziani erano QT8 e Taliedo-Morsenchio-Forlanini (48,4); Gallaratese lo è nel 2011 (49,8) e nel 2019 (50,1), e la sua quota di over 80 passa dal 3,4% (1999) al 14,4% (2019): i residenti arrivati negli anni ’60 invecchiano sul posto.':'Scegli «Età media» per il commento sui quartieri più anziani e più giovani.')+'</p>'+(MET==='em'?'<p>Tra il 1999 e il 2025 invecchia di più <b>Trenno (+10,2 anni</b>, da 40,3 a 50,5), poi Quinto Romano (+7,3), Quarto Cagnino (+5,7), Barona (+5,3). Si ringiovanisce di più <b>Maggiore-Musocco-Certosa (−5,3</b>, da 45,2 a 39,9, con i residenti da 4.488 a 10.508), poi Ortomercato (−3,4), Lorenteggio (−2,9), Comasina (−2,6), Rogoredo-Santa Giulia (−2,2). Cambio mediano tra i quartieri: +1,1 anni.</p>':''));
+  if(SEL)scheda(SEL)}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(stile);LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})}});scheda(i)}
+function scheda(i){var n=E.nil[i],C=E.citta,pts=[],pc=[];
+  for(var y=0;y<ANNI.length;y++){pts.push([ANNI[y],n.r[y]>=3000?n[MET][y]:null]);pc.push([ANNI[y],{em:C.em,q65:C.q65,q80:C.q80,q14:C.q14}[MET][y]])}
+  setH('scheda','<h3>'+esc(n.n)+'</h3><p>Nel '+ANNI[YI]+': <b>'+f0(n.r[YI])+'</b> residenti; età media <b>'+(n.em[YI]==null?'n.d.':nf(n.em[YI],1))+'</b>, mediana '+(n.md[YI]==null?'n.d.':nf(n.md[YI],1))+'; 0-14 anni '+(n.q14[YI]==null?'n.d.':nf(n.q14[YI],1)+'%')+', 65 e più '+(n.q65[YI]==null?'n.d.':nf(n.q65[YI],1)+'%')+', 80 e più '+(n.q80[YI]==null?'n.d.':nf(n.q80[YI],1)+'%')+'; centenari: <b>'+n.c[YI]+'</b>.</p><div class="ch" id="ch-sch"></div><p class="sub">'+NM[MET]+': quartiere (linea continua) e città (tratteggio). Mancano gli anni con meno di 3.000 residenti.</p>');
+  lineChart('ch-sch',{series:[{n:n.n,c:ACC,pts:pts},{n:'Tutta la città',c:GRY,dash:1,pts:pc}],xmin:1999,xmax:2025,xt:[2000,2005,2010,2015,2020,2025],h:200,yf:function(v){return nf(v,MET==='em'?0:1)},tf:fm})}
+/* ---- citta ---- */
+function citta(){var C=E.citta,P=function(a){return a.map(function(v,j){return [ANNI[j],v]})};
+  setH('citta-testo','<p>L’<b>età media</b> è '+nf(C.em[0],1)+' anni nel 1999, '+nf(C.em[12],1)+' nel 2011, '+nf(C.em[26],1)+' nel 2025 (età mediana: '+nf(C.md[0],1)+' → '+nf(C.md[26],1)+'). I <b>bambini fino a 14 anni</b> sono il '+nf(C.q14[0],1)+'% nel 1999, il '+nf(C.q14[12],1)+'% nel 2011 (massimo) e l’'+nf(C.q14[26],1)+'% nel 2025. Gli <b>over 65</b> sono il '+nf(C.q65[0],1)+'% nel 1999, salgono al massimo del <b>'+nf(C.q65[9],1)+'% nel 2008</b>, scendono al minimo del <b>'+nf(C.q65[24],1)+'% nel 2023</b> e risalgono al '+nf(C.q65[26],1)+'% nel 2025. Gli <b>over 80</b> crescono quasi sempre: dal '+nf(C.q80[0],1)+'% all’'+nf(C.q80[26],1)+'% (e gli over 90 dallo 0,9% all’1,8%).</p><p>La discesa degli over 65 dopo il 2008 coincide con gli anni in cui la città ha guadagnato residenti giovani e stranieri; dal 2023 la quota risale. I dati non permettono di dire quanto pesi ciascuna causa.</p>');
+  setH('lg-citta',lgd([{c:ACC,t:'0-14 anni'},{c:WARM,t:'65 anni e più'},{c:'#7a5230',t:'80 anni e più',dash:1}]));
+  lineChart('ch-citta',{series:[{n:'0-14 anni',c:ACC,pts:P(C.q14)},{n:'65 anni e più',c:WARM,pts:P(C.q65)},{n:'80 anni e più',c:'#7a5230',dash:1,pts:P(C.q80)}],xmin:1999,xmax:2025,xt:[2000,2005,2010,2015,2020,2025],ymin:0,ymax:26,h:300,yf:function(v){return nf(v,0)+'%'},tf:function(v){return nf(v,1)+'%'},marks:[{x:2008,t:'2008'}]})}
+/* ---- piramidi ---- */
+var CL=['0-4','5-9','10-14','15-19','20-24','25-29','30-34','35-39','40-44','45-49','50-54','55-59','60-64','65-69','70-74','75-79','80-84','85-89','90-94','95-99','100+'];
+function piramidi(){var ids=Object.keys(E.nil).sort(function(a,b){return E.nil[a].n.localeCompare(E.nil[b].n,'it')});
+  var opt=ids.map(function(i){return '<option value="'+i+'">'+esc(E.nil[i].n)+'</option>'}).join('');
+  var a=el('sel-a'),b=el('sel-b');a.innerHTML=opt;b.innerHTML=opt;a.value='64';b.value='31';
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(x){x.addEventListener('click',function(){PY=x.getAttribute('data-p');Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(y){y.classList.toggle('on',y===x)});draw()})});
+  a.addEventListener('change',draw);b.addEventListener('change',draw);
+  setH('pir-testo','<p>La forma per età di un quartiere. Di default: <b>Trenno</b>, il più anziano nel 2025 (età media 50,5, 33,8% di over 65), e <b>Monluè-Ponte Lambro</b>, il più giovane (38,4; 14,4% di bambini fino a 14 anni). Scegli altri quartieri o altri anni. Monluè ha anche la quota di stranieri più alta (50,4%) e può avere residenze collettive (ipotesi non verificata), quindi non va letto come «un quartiere di famiglie giovani».</p>');
+  window.addEventListener('resize',function(){draw()});draw()}
+function draw1(id,i,mx){var d=PI[PY][i],n=E.nil[i],tot=sum(d.F)+sum(d.M),W=Math.max(280,el(id).clientWidth),H=21*15+34,c=W/2,sc=(c-34)/mx;
+  var svg='<svg class="pyr" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Piramide delle età di '+esc(n.n)+'">';
+  svg+='<text x="'+(c-6)+'" y="11" text-anchor="end" class="mu">uomini</text><text x="'+(c+6)+'" y="11" text-anchor="start" class="mu">donne</text>';
+  for(var k=0;k<21;k++){var y=18+(20-k)*15,mw=d.M[k]/tot*100*sc,fw=d.F[k]/tot*100*sc;
+    svg+='<rect x="'+(c-mw)+'" y="'+y+'" width="'+mw+'" height="12" fill="'+WARM+'"><title>'+CL[k]+' anni, uomini: '+d.M[k]+'</title></rect><rect x="'+c+'" y="'+y+'" width="'+fw+'" height="12" fill="'+ACC+'"><title>'+CL[k]+' anni, donne: '+d.F[k]+'</title></rect>';
+    }
+  for(var k2=0;k2<21;k2+=4){var yy=18+(20-k2)*15+10;svg+='<text x="2" y="'+yy+'" class="mu">'+CL[k2]+'</text>'}
+  svg+='</svg>';
+  var m65=sum(d.F.slice(13))+sum(d.M.slice(13)),m14=sum(d.F.slice(0,3))+sum(d.M.slice(0,3));
+  setH(id,'<h3>'+esc(n.n)+' · '+PY+'</h3>'+svg+'<p class="sub">'+f0(tot)+' residenti; 0-14 anni '+nf(100*m14/tot,1)+'%; 65 e più '+nf(100*m65/tot,1)+'%; donne '+nf(100*sum(d.F)/tot,1)+'%. Barra più lunga: '+nf(mx,1)+'% dei residenti.</p>')}
+function draw(){var A=el('sel-a').value,B=el('sel-b').value,m=0;[A,B].forEach(function(i){var d=PI[PY][i],tot=sum(d.F)+sum(d.M);for(var k=0;k<21;k++)m=Math.max(m,d.F[k]/tot*100,d.M[k]/tot*100)});m=Math.ceil(m*10)/10;draw1('pir-a',A,m);draw1('pir-b',B,m)}
+/* ---- centenari ---- */
+function centenari(){var C=E.citta,P=function(a){return a.map(function(v,j){return [ANNI[j],v]})},tot=C.cF.map(function(v,i){return v+C.cM[i]});
+  setH('cen-testo','<p>Residenti di 100 anni e più: <b>'+tot[0]+'</b> nel 1999, '+tot[12]+' nel 2011, '+tot[20]+' nel 2019, '+tot[24]+' nel 2023, <b>'+tot[26]+' nel 2025</b>: da 18,6 a 59,7 ogni 100.000 abitanti. Nel 2025 sono '+C.cF[26]+' donne e '+C.cM[26]+' uomini, cioè '+nf(C.cF[26]/C.cM[26],1)+' donne per ogni uomo (3,5 nel 1999, 7,3 nel 2011).</p><p><b>Il salto del 2003.</b> Nel 2003 i centenari sono 215 contro 343 del 2002, e gli uomini passano da 85 a 23: non è una strage ma, con tutta probabilità, una revisione del registro dopo il censimento del 2001 (ipotesi non verificata): lo stesso anno il totale dei residenti cala di 53.857 persone. I punti ISTAT mostrano un’altra differenza: dal 2018 il registro conta il 4-10% di centenari in più di ISTAT.</p>');
+  var ist=[],ys=Object.keys(C.istat100).map(Number).sort();ys.forEach(function(y){ist.push([y,C.istat100[y]])});
+  setH('lg-cen',lgd([{c:ACC,t:'Donne'},{c:WARM,t:'Uomini'},{c:'#111',t:'Totale'},{c:'#3a6ea5',t:'Totale secondo ISTAT',dash:1}]));
+  lineChart('ch-cen',{series:[{n:'Donne',c:ACC,pts:P(C.cF)},{n:'Uomini',c:WARM,pts:P(C.cM)},{n:'Totale',c:'#111',pts:P(tot)},{n:'Totale secondo ISTAT',c:'#3a6ea5',dash:1,pts:ist}],xmin:1999,xmax:2025,xt:[2000,2005,2010,2015,2020,2025],ymin:0,h:320,yf:f0,marks:[{x:2003,t:'2003: revisione del registro'}]});
+  var L2=Object.keys(E.nil).map(function(i){var n=E.nil[i];return {n:n.n,c:n.c[26],c11:n.c[12],r:n.r[26]}});
+  var a=L2.slice().sort(function(x,y){return y.c-x.c}).slice(0,10),mx=a[0].c;
+  hbars('b-cn',a.map(function(x){return {nm:x.n,v:x.c,txt:x.c+' <span class="sub">('+f0(x.r)+' ab.)</span>'}}),{max:mx});
+  var b=L2.filter(function(x){return x.r>=3000}).map(function(x){return {n:x.n,p:1e4*x.c/x.r,c:x.c,r:x.r}}).sort(function(x,y){return y.p-x.p}).slice(0,10);
+  hbars('b-cp',b.map(function(x){return {nm:x.n,v:x.p,txt:nf(x.p,1)+' <span class="sub">('+x.c+')</span>',c:WARM}}),{max:b[0].p});
+  setH('cenq-testo','<p>Nel 2025 i quartieri con più centenari sono <b>Bande Nere (58)</b>, Buenos Aires-Porta Venezia-Porta Monforte (51), Porta Magenta (29), Città Studi (26), Maciachini-Maggiolina (25). In rapporto ai residenti: QT8 (15,1 ogni 10.000: 6 persone), Bande Nere (13,2), Porta Magenta (10,9), Cimiano-Rottole-Feltre (10,8), Tibaldi (10,5). 18 quartieri su 88 non hanno nessun centenario (21 nel 2011, parchi compresi).</p>');
+  var rows=L2.slice().sort(function(x,y){return y.c-x.c}).map(function(x){return [esc(x.n),f0(x.r),String(x.c),String(x.c11),x.r>=3000?nf(1e4*x.c/x.r,1):'<span class="sub">n.d.</span>']});
+  table('tab-cen',['Quartiere','Residenti 2025','Centenari 2025','Centenari 2011','Ogni 10.000 residenti'],rows)}
+
+})();
+</script>
+</body></html>

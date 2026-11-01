@@ -52,7 +52,12 @@
     { path: 'pollini/', label: 'Pollini' },
     { path: 'case-popolari/', label: 'Case popolari vuote' },
     { path: 'beni-confiscati/', label: 'Beni confiscati' },
-    { path: 'voto-reddito/', label: 'Voto e reddito' }
+    { path: 'voto-reddito/', label: 'Voto e reddito' },
+    { path: 'antenne/', label: 'Antenne dei cellulari' },
+    { path: 'costruzioni/', label: 'Dove si costruisce' },
+    { path: 'arrivi-partenze/', label: 'Chi arriva e chi lascia' },
+    { path: 'comunita/', label: 'Le comunità' },
+    { path: 'eta/', label: 'Età e centenari' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

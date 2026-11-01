@@ -2549,3 +2549,24 @@ python -I scripts\inventario.py <cartella censimenti>
 - Metodo: sezione → CAP dallo stradario ds939 (CAP ufficiale per civico); reddito medio per contribuente del CAP 2019-22 in euro 2025; decili di sezione pesati per elettori; 25 elezioni 2016-2026 (Senato e municipali fuori dal selettore, CSM 2022 scartato perché identico ai Consigli giudiziari nel file del Comune); intervalli col bootstrap sui 38 CAP; controlli per NIL con stranieri e over 65 dal filone popolazione.
 - Numeri: centrosinistra D10-D1 da +9,5 a +14,7 punti nel 2016-2021, circa zero dal 2022 ("non ha più la forte salita del 2016-2021": senza i 3 CAP instabili resta un legame debole); il Centro sale da 13% a 37% fra i decili nelle Politiche 2022; M5S sempre più forte nelle zone povere (Spearman −0,90/−0,94). Affluenza: sale col reddito alle Politiche, piatta alle amministrative.
 - Limiti dei dati: confronto fra zone (nessun voto individuale noto); reddito dei contribuenti, non degli elettori; D10 = 4 CAP; famiglie di partiti non sono coalizioni; Politiche 2018/2022 e Regionali 2023 dati ufficiosi; ipotesi del registro elettorale gonfiato nelle zone ricche non provata.
+
+## 44. Le antenne dei cellulari
+
+- 2026-11-01 notte — Fase 1 e pagina (`antenne/`, `docs/antenne/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `antenne/NOTE.md`.
+- Fonte: catasto CASTEL di ARPA ripubblicato dal Comune (ds718, CC BY, giugno 2025) e 5 versioni storiche dalla Wayback Machine; niente tecnologia 2G-5G, niente date, misure di campo elettrico di Milano non aperte (viewer CASTEL non toccato). ds1864 (scuole) solo sì/no di scheda, non usato.
+- Limite di legge verificato su Normattiva: L. 214/2023 art. 10 porta il valore di attenzione a 15 V/m "in via provvisoria e cautelativa" (prima 6 V/m); in pagina con la citazione.
+- Numeri: 2.097 impianti di telefonia mobile accesi (11,5 per km²); sorpresa: il terzo gestore è una società di infrastrutture (CommsCon, 373 microcelle); il sito più affollato è la torre radio-TV di corso Sempione (84 impianti); le scuole sono un po' meno vicine alle antenne di un indirizzo qualunque (26,9% contro 33,7% entro 100 m). "Vicinanza non è esposizione."
+
+## 45. Dove si costruisce
+
+- 2026-11-01 notte — Fase 1 e pagina (`costruzioni/`, `docs/costruzioni/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `costruzioni/NOTE.md`.
+- Fonti: Comune, 5 dataset "Edilizia" (nuovi fabbricati e ampliamenti 2014-2024, CC BY); database topografico 2012 (di fatto 2006) e 2020 (CC BY); ISTAT permessi solo per la Città metropolitana. Niente SCIA/CILA, ristrutturazioni, demolizioni separate o cantieri: non misurabili. Nessuna richiesta al Comune.
+- Numeri: 725 nuovi edifici residenziali e 26.174 abitazioni in 11 anni (46 ogni 100 residenti in più, lordo); picco 2022, minimo 2024 (forse incompleto). Sorpresa: dal 2022 metà dei nuovi edifici residenziali sostituisce un edificio demolito (92 su 185), due terzi con SCIA alternativa.
+- Indirizzi di privati (310) mai pubblicati; nei grandi interventi solo imprese, cooperative ed enti; nessun nome di progetto dedotto; cronologia 2024-25 solo con tre voci verificate.
+
+## 46. Popolazione: arrivi e partenze, comunità, età (tre pagine)
+
+- 2026-11-01 notte — Fase 1 in `popolazione/` e tre pagine `docs/arrivi-partenze/`, `docs/comunita/`, `docs/eta/`, pubblicate con l'autorizzazione notturna di Davide. Dettagli in `popolazione/NOTE.md`.
+- Fonti: Comune di Milano (CC BY): ds27 residenti per NIL, età singola, genere e cittadinanza 1999-2025; flussi per NIL ds1596/1600/1954/1956; ds1957-1960 per età e destinazione 2020-2024; ISTAT demo (CC BY 4.0). Matrice ISTAT origine/destinazione non ottenuta (servizio non risponde).
+- Sorprese: dal 2020 Milano perde ogni anno abitanti verso la sua provincia (−39.473 in 5 anni) e li compensa con estero e Sud; a Comasina il 23,6% dei residenti ha cittadinanza cinese (38 persone nel 1999), il NIL con più cinesi è Villapizzone; i centenari passano da 249 a 835 ma la quota di over 65 è sotto il picco del 2008.
+- Limiti dei dati: anagrafe, non conteggio vero (dal 2020 il registro supera ISTAT, stranieri +10,4%); salti per revisioni (2002-03, 2011-12); tre contabilità dei trasferimenti; cittadinanza non è origine (naturalizzazioni); niente età per NIL nei flussi; ds205 sbagliato in 3 punti.
