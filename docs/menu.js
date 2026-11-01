@@ -65,7 +65,8 @@
     { path: 'botteghe/', label: 'Botteghe storiche' },
     { path: 'suolo/', label: 'Quanto suolo si consuma' },
     { path: 'pendolari/', label: 'Pendolari' },
-    { path: 'reati/', label: 'Reati denunciati' }
+    { path: 'reati/', label: 'Reati denunciati' },
+    { path: 'quartiere/', label: 'Il tuo quartiere' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

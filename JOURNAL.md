@@ -2627,3 +2627,9 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: ISTAT DCCV_DELITTIPS 2006-2024 (CC BY 4.0) per Italia, province e 12 grandi comuni; Comune ds564 2004-2023 (CC BY, uguale a ISTAT dal 2006, corretti un anno sbagliato e celle vuote); pendolari 2011 e turisti per la popolazione presente (solo Milano). Cittadinanza degli autori volutamente non scaricata né usata.
 - Numeri: denunce nel comune 140.974 nel 2024 come nel 2004 (141.636), 19% sotto il picco 2007, con circa 120.000 residenti in più; il divario con l'Italia è quasi tutto furti (66%) e danneggiamenti (13%); omicidi 6 nel 2024. Il primato provinciale dipende dai confini: con Monza unita Milano è 1ª solo nel 2011 e 2023, 3ª nel 2024 (l'agente aveva prima omesso questo per un errore di calcolo, poi corretto). Per persona presente (turisti e pendolari) il tasso scende da 10.343 a 7.863.
 - Limiti dei dati: denunciato non è commesso; provincia non è città; salto Milano/Monza 2011; denominatori censuari; luogo del reato; nessuna affermazione causale.
+
+## 55. Il tuo quartiere
+
+- 2026-11-01 notte — Pagina `docs/quartiere/` (programmi in `quartiere/scripts/`), voluta da Davide: una scheda per ognuno degli 88 NIL con 42 indicatori presi dalle altre pagine (file e campo citati per ogni riga), confronto con la città e con un secondo quartiere (#nil=11&vs=27), link alla pagina e ai dati di origine. Idea presa dai progetti simili (Mapparoma "Scopri la tua Roma", NYU Furman), vedi `_idee/progetti_simili.md`.
+- Regole: mai valori stimati al posto dei mancanti ("non disponibile" con il motivo); valori poco affidabili segnati e fuori dalle classifiche; stime da CAP, zone OMI, sezioni o proiezioni con etichetta grigia; "cose che saltano all'occhio" solo per valori affidabili nel primo o ultimo 5%.
+- Escluse: donne nelle vie e beni culturali (senza NIL), voto-reddito, redditi e prezzi (già dentro tramite quartieri-che-cambiano), parcheggi (stime), luoghi cercati, incroci, aria, pollini.
