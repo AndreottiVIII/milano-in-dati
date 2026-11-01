@@ -46,7 +46,8 @@
     { path: 'ristoranti/',       label: 'Cosa si mangia' },
     { path: 'turisti/',          label: 'Turisti' },
     { path: 'pietre-inciampo/',  label: "Pietre d'inciampo" },
-    { path: 'luoghi-cercati/',   label: 'Luoghi più cercati' }
+    { path: 'luoghi-cercati/',   label: 'Luoghi più cercati' },
+    { path: 'scuole-domani/', label: 'Scuole di domani' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

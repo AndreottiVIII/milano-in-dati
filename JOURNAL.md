@@ -2506,3 +2506,9 @@ python -I scripts\inventario.py <cartella censimenti>
 
 - 2026-11-01 sera — **Davide autorizza il lavoro notturno**: quando una fase 1 è pronta e i dati reggono, si fa la pagina e si pubblica, con i limiti scritti; riepilogo il mattino dopo.
 
+## 38. Quali scuole si svuoteranno
+
+- 2026-11-01 notte — Analisi e pagina (`scuole-domani/`, `docs/scuole-domani/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `scuole-domani/NOTE.md`.
+- Metodo: coorti dei residenti per età singola e NIL (ds27) che invecchiano; iscritti 2024 × variazione dei bambini dell'area (metà città, metà NIL e confinanti, scelto col test sul passato); tre scenari di nascite. Prova sul passato: errore di città 0-2% a 5 anni; per singola scuola 12-17%, quindi in pagina solo infanzia e primaria scuola per scuola, la secondaria di I grado solo per città e NIL.
+- Numeri (2034 su 2024, scenario centrale): infanzia −8,8%, primaria −19,2%, secondaria di I grado −20,8% (già scritto: quei bambini sono nati). "A rischio di scendere sotto il 70% del 2015": 74 infanzie su 284, 92 primarie su 210. Sorpresa: il quartiere dove vivono i bambini dice poco delle sue scuole (correlazione 0,23-0,42).
+- Limiti dei dati: niente matrice residenza→scuola; iscritti fermi al 2024/25; fusioni e cambi di codice; migrazione e case nuove non nel modello. È uno scenario, non una previsione; nessuna "chiusura" annunciata.

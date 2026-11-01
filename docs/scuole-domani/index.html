@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quali scuole si svuoteranno</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:46vh;min-height:300px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select,.ctl input[type=text]{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl input[type=text]{cursor:text;min-width:0;width:260px}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .ctl input[type=text]{width:100%}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin:0 4px 2px 0;white-space:nowrap}
+.pill.g{border-color:var(--acc);color:var(--acc);background:var(--soft)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px;border:1px solid #fff;box-shadow:0 0 0 1px #888}
+.res{list-style:none;margin:.4em 0;padding:0;max-height:260px;overflow:auto;border:1px solid var(--line)} .res li button{display:block;width:100%;text-align:left;font:inherit;font-size:.9rem;background:#fff;border:0;border-bottom:1px solid var(--line);padding:6px 8px;cursor:pointer} .res li button:hover,.res li button.on{background:var(--soft)} .res li button span{color:var(--mut);font-size:.8rem}
+.nilt button{font:inherit;background:none;border:0;color:var(--acc);text-decoration:underline;cursor:pointer;padding:0;text-align:left}
+#tab-nr,#tab-sr{min-width:420px} #tab-bt{min-width:520px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quali scuole si svuoteranno?</h1>
+<p>Quanti bambini ci saranno nelle scuole di Milano nei prossimi dieci anni? Questa pagina prende i bambini che abitano a Milano oggi (da 0 a 13 anni, per quartiere e per età), li fa crescere di un anno alla volta e conta quanti saranno in età di asilo, elementari e medie fino all&rsquo;anno scolastico 2034/35. Poi controlla il metodo sul passato: che cosa avrebbe detto nel 2014 o nel 2019, e che cosa è successo davvero. Quando scriviamo &laquo;2024&raquo; intendiamo l&rsquo;anno scolastico 2024/25, l&rsquo;ultimo di cui il Comune ha pubblicato gli iscritti.</p>
+
+<div class="warm"><b>È uno scenario, non una previsione.</b> Dice che cosa succede se i bambini che abitano a Milano oggi vanno a scuola come hanno fatto finora. Non sa nulla di famiglie che arrivano o partono, di nuove case, di scuole che chiudono, si fondono o aprono, né di come le famiglie sceglieranno. Per le singole scuole l&rsquo;errore è grande (vedi &laquo;La prova sul passato&raquo;): le cifre vanno lette come ordini di grandezza.</div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="citta">La città: quanti alunni, ordine per ordine</h2>
+<div class="ctl" id="b-citta"></div>
+<div id="ct-testo"></div>
+<div class="ch" id="ch-citta"></div>
+<div class="lgd" id="lg-citta"></div>
+<p class="src">Fonte: iscritti, Comune di Milano (ANASCO, ds224/225/226), somma delle scuole 2009–2024; bambini residenti, Comune di Milano ds27 (31 dicembre, età compiuta); elaborazione scuole-domani/scripts/03_proietta.py. La fascia per nascite vale solo per l&rsquo;infanzia e la primaria: la secondaria di I grado del 2034 è fatta di bambini già nati.</p>
+<div class="scroll"><table id="tab-citta"></table></div>
+
+<h2 id="quartieri">I quartieri: i bambini e le scuole non vanno insieme</h2>
+<p>A sinistra, come cambiano gli <b>alunni nelle scuole del quartiere</b> dal 2024 al 2034. A destra, come cambiano i <b>bambini che abitano nel quartiere</b> nella stessa fascia d&rsquo;età. Colori uguali sulle due carte. Passa o tocca un quartiere per i numeri. I quartieri con meno di 200 alunni o 200 bambini sono grigi.</p>
+<div class="ctl" id="b-nil"></div>
+<div class="lgd" id="lg-n"></div>
+<div class="grid2"><div><h3>Alunni nelle scuole del quartiere</h3><div class="map" id="map-a"></div></div><div><h3>Bambini che abitano nel quartiere</h3><div class="map" id="map-r"></div></div></div>
+<div class="card" id="scheda-nil"><span class="sub">Tocca un quartiere.</span></div>
+<p class="src">Fonte: iscritti per scuola (ANASCO), residenti per età e quartiere (ds27), confini dei NIL (ds964). Alunni: scenario centrale (vedi metodo); bambini del quartiere: solo coorti già nate, nascite future stabili, senza arrivi e partenze. Un quartiere con molte scuole accoglie anche bambini di altri quartieri: per questo le due carte non coincidono (il 54% degli alunni di primaria va a scuola fuori dal proprio quartiere, Comune ds1739, 2023/24).</p>
+
+<h2 id="cerca">Cerca la tua scuola (infanzia e primaria)</h2>
+<div class="warn">Per la <b>secondaria di I grado</b> non mostriamo le singole scuole: nella prova sul passato, a livello di scuola, il metodo non fa meglio di &laquo;tenere gli alunni fermi&raquo;. Restano la città e i quartieri qui sopra.</div>
+<div class="ctl"><span id="b-sc"></span><input type="text" id="q" placeholder="Nome o via della scuola" aria-label="Cerca scuola"><select id="sel-nil-sc" aria-label="Quartiere"></select></div>
+<ul class="res" id="res-sc"></ul>
+<div class="card" id="scheda-sc"><span class="sub">Scegli una scuola dall&rsquo;elenco.</span></div>
+
+<h2 id="rischio">Scuole a rischio di scendere sotto il 70% del 2015</h2>
+<div id="rs-testo"></div>
+<div class="ctl"><span id="b-rs"></span></div>
+<div class="scroll nilt"><table id="tab-nr"></table></div>
+<div class="ctl"><select id="sel-nil-rs" aria-label="Quartiere"></select></div>
+<div id="lista-rs"></div>
+<p class="src">Le scuole sono elencate in ordine alfabetico, dentro ogni quartiere: non è una classifica. &laquo;A rischio&raquo; vuol dire solo che nello scenario centrale gli iscritti del 2034 sono sotto il 70% di quelli del 2015/16; non vuol dire che la scuola chiuderà. Solo scuole presenti nel 2015 e nel 2024.</p>
+
+<h2 id="prova">La prova sul passato: il metodo avrebbe funzionato?</h2>
+<div id="pv-testo"></div>
+<div class="scroll"><table id="tab-bt"></table></div>
+
+<h2 id="metodo">Come è fatto, passo per passo</h2>
+<ul class="m" id="metodo-lista"></ul>
+<h2 id="limiti">Limiti dei dati</h2>
+<ul class="m" id="limiti-lista"></ul>
+
+<h2 id="file">File scaricabili</h2>
+<ul class="m" id="file-lista"></ul>
+
+<footer>
+<p><b>Fonti e licenze.</b> <b>Comune di Milano</b> &ndash; dati.comune.milano.it: iscritti per singola scuola (ANASCO, ds224, ds225, ds226), residenti per quartiere, età e cittadinanza (ds27), alunni residenti in un NIL diverso (ds1739&ndash;ds1741), confini dei NIL (ds964), nati (ds289, ds1945; solo come contesto). Licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1 novembre 2026. Il Ministero dell&rsquo;Istruzione non è usato in questa pagina.</p>
+<p>Da dove vengono i dati e come sono stati puliti: la pagina <a href="../scuole/">Le scuole di Milano</a>. Programmi: <code>scuole-domani/scripts/</code> (<code>lib.py</code>, <code>02_backtest.py</code>, <code>03_proietta.py</code>, <code>04_sorpresa.py</code>, <code>pagina.py</code>) nel repository <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var R=null,SC=[],NF=null,NILP={},NILN=[];
+var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
+var LIVN=['Infanzia','Primaria','Secondaria di I grado'],LIVK=['infanzia','primaria','sec1'];
+var LIVB=['3–5 anni','6–10 anni','11–13 anni'];
+var GN=['Statale','Comunale','Privata paritaria','Privata non paritaria'];
+var RD=[];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows,left){left=left==null?1:left;setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i>=left?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i>=left?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function buttons(id,names,cur,cb){
+  var box=el(id);box.innerHTML='';
+  names.forEach(function(n,i){var b=document.createElement('button');b.type='button';b.textContent=n;if(i===cur)b.className='on';
+    b.addEventListener('click',function(){Array.prototype.forEach.call(box.children,function(x){x.classList.toggle('on',x===b)});cb(i)});box.appendChild(b)});
+}
+function lgd(items){return items.map(function(it){return '<span><i class="'+(it.line?'ln'+(it.dash?' d':''):'')+'" style="'+(it.line?'border-top-color:'+it.color:'background:'+it.color)+'"></i>'+it.t+'</span>'}).join('')}
+function pc(x){return nf(100*x,0)+'%'}
+
+Promise.all([J('data/riepilogo.json'),J('data/scuole.json'),J('data/nil.geojson')]).then(function(a){
+  R=a[0];SC=a[1];NF=a[2];
+  NF.features.forEach(function(f){NILP[f.properties.i]=f.properties;NILN.push([f.properties.n,f.properties.i])});
+  NILN.sort(function(x,y){return x[0].localeCompare(y[0],'it')});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();citta();quartieri();cerca();rischio();prova();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function nilNome(i){return NILP[i]?NILP[i].n:''}
+function cs(o){return R.casi.filter(function(c){return c.ordine===o})}
+function caso(o,m,p,a){a=a||p+5;return R.casi.filter(function(c){return c.ordine===o&&c.metodo===m&&c.partenza===p&&c.arrivo===a})[0]}
+
+/* ---------- grafico a linee ---------- */
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:46,r:12,t:14,b:26};
+  var xs=o.xs,all=[];
+  o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});
+  var y0=o.y0!=null?o.y0:Math.min.apply(null,all),y1=Math.max.apply(null,all);
+  var sy=niceStep((y1-y0)/5);y0=Math.floor(y0/sy)*sy;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,xa=xs[0],xb=xs[xs.length-1];
+  function X(v){return m.l+(v-xa)/(xb-xa)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var lx=-99;xs.forEach(function(x){var xx=X(x);if(xx-lx>(o.tickw||44)){lx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+x+'</text>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.ref!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.ref)+'" y2="'+Y(o.ref)+'" stroke="#999" stroke-dasharray="2 3"/>';
+  if(o.cut!=null)s+='<line x1="'+X(o.cut)+'" x2="'+X(o.cut)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#bbb" stroke-dasharray="2 3"/><text class="mu" x="'+(X(o.cut)+4)+'" y="'+(m.t+10)+'">scenario →</text>';
+  o.series.forEach(function(se){
+    var d='',pen=false;
+    se.v.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(xs[i]).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+'/>';
+  });
+  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bi=0,bd=1e9;
+    xs.forEach(function(x,i){var d=Math.abs(X(x)-px);if(d<bd){bd=d;bi=i}});
+    var h='<b>'+xs[bi]+(xs[bi]<=2024?'':' (scenario)')+'</b>';
+    o.series.forEach(function(se){if(se.v[bi]!=null&&!se.nt)h+='<br><span class="dot" style="background:'+se.color+'"></span>'+se.name+': '+f0(se.v[bi])});
+    tip.innerHTML=h;tip.style.display='';cur.setAttribute('x1',X(xs[bi]));cur.setAttribute('x2',X(xs[bi]));cur.style.display='';
+    var tw=tip.offsetWidth,left=X(xs[bi])/k+10;if(left+tw>r.width)left=X(xs[bi])/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){tip.style.display='none';cur.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var q=function(o,a){return R.quartiere_vs_scuola.filter(function(x){return x.ordine===o&&x.area===a})[0]};
+  var gnn=function(o){return R.gia_nati.filter(function(x){return x.ordine===o})[0]};
+  var c=function(x){return nf(x,2)};
+  setH('sorpresa','<p><b>Il quartiere dove vivono i bambini dice poco sulle scuole di quel quartiere.</b> Dal 2015 al 2024, tra i quartieri, il legame tra come cambiano i bambini residenti e come cambiano gli alunni delle scuole del quartiere è debole: <b>'+c(q('infanzia','nil').corr_pearson)+'</b> per l&rsquo;infanzia, <b>'+c(q('primaria','nil').corr_pearson)+'</b> per la primaria, <b>'+c(q('sec1','nil').corr_pearson)+'</b> per la secondaria di I grado (0 = nessun legame, 1 = legame perfetto). Se si contano anche i quartieri confinanti, il legame è quasi zero: '+c(q('infanzia','anello1').corr_pearson)+', '+c(q('primaria','anello1').corr_pearson)+', '+c(q('sec1','anello1').corr_pearson)+'. In '+q('primaria','nil').nil_dove_calano_bambini_e_crescono_alunni+' quartieri su '+q('primaria','nil').n_nil+' i bambini di 6–10 anni sono diminuiti mentre gli alunni delle primarie del quartiere sono aumentati. Molte scuole accolgono bambini di altri quartieri, e nel passato usare i bambini del quartiere al posto della media cittadina non ha reso la previsione migliore.</p>'+
+  '<p><b>E gran parte del calo è già scritto, perché i bambini sono già nati.</b> I ragazzi che nel 2034 faranno le medie hanno oggi 2–4 anni e abitano a Milano: gli alunni della secondaria di I grado scendono del <b>'+nf(Math.abs(gnn('sec1').var_pct_2034),1)+'%</b> qualunque cosa succeda alle nascite. Alle elementari l&rsquo;<b>'+nf(Math.floor(gnn('primaria').quota_del_calo_2034_gia_scritta_pct),0)+'%</b> del calo 2024–2034 (<b>'+sgp(gnn('primaria').var_pct_2034,1)+'</b> in tutto) è già scritto nel 2031; all&rsquo;infanzia il calo dei prossimi anni (<b>'+sgp(gnn('infanzia').var_pct,1)+'</b> al 2028) è già deciso, e dopo dipende da quanti bambini nasceranno.</p>');
+}
+
+/* ---------- città ---------- */
+var CL=0;
+function citta(){
+  buttons('b-citta',LIVN,0,function(i){CL=i;drawCitta()});drawCitta();
+  RD.push(drawCitta);
+}
+function drawCitta(){
+  var o=LIVK[CL],c=R.citta[o],xs=R.anni_passati.concat(R.anni_futuri),np=R.anni_passati.length,nfu=R.anni_futuri.length;
+  var pad=function(n){var a=[];for(var i=0;i<n;i++)a.push(null);return a};
+  var last=c.passato[np-1];
+  var ser=[{name:'Iscritti (dato)',color:ACC,v:c.passato.concat(pad(nfu))},
+    {name:'Scenario centrale',color:ACC,dash:1,v:pad(np-1).concat([last],c.centrale)}];
+  var th=false;
+  if(o!=='sec1'){th=true;
+    ser.push({name:'Se le nascite calano',color:GRY,dash:1,w:1.4,v:pad(np-1).concat([last],c.nati_in_calo)});
+    ser.push({name:'Se le nascite risalgono',color:GRY,dash:1,w:1.4,v:pad(np-1).concat([last],c.nati_in_risalita)});}
+  var rv=c.residenti_passato.concat([c.residenti_2025],c.residenti_futuro);
+  ser.push({name:'Bambini residenti ('+LIVB[CL]+')',color:WARM,w:1.6,v:rv});
+  lineChart(el('ch-citta'),{xs:xs,series:ser,y0:0,h:300,cut:2024.5});
+  setH('lg-citta',lgd([{color:ACC,line:1,t:'Iscritti nelle scuole (dato)'},{color:ACC,line:1,dash:1,t:'Scenario centrale'}].concat(th?[{color:GRY,line:1,dash:1,t:'Scenario con nascite in calo / in risalita'}]:[]).concat([{color:WARM,line:1,t:'Bambini residenti '+LIVB[CL]+' (dato e conto)'}])));
+  var c34=c.centrale[9],c29=c.centrale[4],v=100*(c34/last-1);
+  var tx='<p><b>'+LIVN[CL]+'.</b> Iscritti nel 2024: <b>'+f0(last)+'</b>. Nello scenario centrale: <b>'+f0(c.centrale[0])+'</b> nel 2025, <b>'+f0(c29)+'</b> nel 2029, <b>'+f0(c34)+'</b> nel 2034 (<b>'+sgp(v,1)+'</b>). ';
+  if(o==='sec1')tx+='Per questo ordine il risultato non dipende dalle nascite: i bambini del 2034 sono già nati.';
+  else tx+='Con nascite che continuano a calare come negli ultimi cinque anni ('+sg(R.tasso_nati_pct,2)+'% l&rsquo;anno) il 2034 sarebbe <b>'+f0(c.nati_in_calo[9])+'</b> ('+sgp(100*(c.nati_in_calo[9]/last-1),1)+'); con nascite che risalgono allo stesso ritmo <b>'+f0(c.nati_in_risalita[9])+'</b> ('+sgp(100*(c.nati_in_risalita[9]/last-1),1)+').';
+  tx+=' A parità di alunni per classe del 2024 ('+nf(c.alunni_per_classe_2024,1)+') il 2034 corrisponde a circa '+f0(c.classi_eq_2034)+' classi: è solo un conto, non un piano.</p>';
+  setH('ct-testo',tx);
+  var rows=[];LIVK.forEach(function(k,i){var cc=R.citta[k],l=cc.passato[np-1];
+    rows.push([LIVN[i],f0(l),f0(cc.centrale[4]),f0(cc.centrale[9]),sgp(100*(cc.centrale[9]/l-1),1),i<2?f0(cc.nati_in_calo[9])+' – '+f0(cc.nati_in_risalita[9]):'uguale',f0(cc.con_migrazione[9])])});
+  table('tab-citta',['Ordine','2024','2029','2034','Variazione 2034','2034 con nascite in calo – in risalita','2034 con arrivi e partenze come negli ultimi 5 anni'],rows);
+}
+
+/* ---------- quartieri ---------- */
+var NL_=0,MA=null,MR=null,LA=null,LR=null,selN=null;
+var BRK=[-30,-20,-10,0,10],NCOL=['#a8540f','#d9904a','#efcfa4','#c5e3dd','#62b0a4','#136459'];
+function ncol(v){if(v==null)return '#bdbdbd';var i=0;while(i<BRK.length&&v>=BRK[i])i++;return NCOL[i]}
+function quartieri(){
+  buttons('b-nil',LIVN,0,function(i){NL_=i;LA.setStyle(sa);LR.setStyle(sr);lgn();schedaN(selN)});
+  function mk(id,fn){var m=L.map(id,{preferCanvas:true}).setView([45.4655,9.19],11);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(m);
+    var l=L.geoJSON(NF,{style:fn,onEachFeature:function(f,ly){ly.bindTooltip(function(){return tip(f.properties)},{sticky:true});ly.on('click',function(){selN=f.properties.i;LA.setStyle(sa);LR.setStyle(sr);schedaN(selN)})}}).addTo(m);
+    m.fitBounds(l.getBounds());return [m,l]}
+  var a=mk('map-a',sa),r=mk('map-r',sr);MA=a[0];LA=a[1];MR=r[0];LR=r[1];
+  lgn();
+  setTimeout(function(){MA.invalidateSize();MR.invalidateSize();MA.fitBounds(LA.getBounds());MR.fitBounds(LR.getBounds())},600);
+  window.addEventListener('resize',function(){MA.invalidateSize();MR.invalidateSize()});
+}
+function sty(v,p){return {fillColor:ncol(v),fillOpacity:.85,color:selN===p.i?'#000':'#fff',weight:selN===p.i?3:1}}
+function sa(f){return sty(f.properties['av_'+NL_],f.properties)}
+function sr(f){return sty(f.properties['rv_'+NL_],f.properties)}
+function tip(p){return '<b>'+esc(p.n)+'</b><br>'+ttxt(p)}
+function ttxt(p){var k=NL_,av=p['av_'+k],rv=p['rv_'+k];
+  return 'Alunni: '+(av==null?(p['a24_'+k]?f0(p['a24_'+k])+' nel 2024 (meno di 200: non calcolato)':'nessuna scuola'):sgp(av,1)+' ('+f0(p['a24_'+k])+' → '+f0(p['a34_'+k])+')')+
+  '<br>Bambini residenti: '+(rv==null?'meno di 200':sgp(rv,1)+' ('+f0(p['r24_'+k])+' → '+f0(p['r34_'+k])+')')}
+function lgn(){
+  var t=['oltre −30%','da −30% a −20%','da −20% a −10%','da −10% a 0','da 0 a +10%','oltre +10%'];
+  setH('lg-n',NCOL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+t[i]+'</span>'}).join('')+'<span><i style="background:#bdbdbd"></i>meno di 200</span>');
+}
+function schedaN(i){
+  if(i==null)return;var p=NILP[i],k=NL_;
+  setH('scheda-nil','<h3>'+esc(p.n)+' · '+LIVN[k]+'</h3><p>'+ttxt(p).replace('<br>','<br>')+'<br>Scuole di questo ordine nel quartiere: '+(p['ns_'+k]||0)+'. Bambini di '+LIVB[k]+'.</p>');
+}
+
+/* ---------- cerca la tua scuola ---------- */
+var SL=1,SEL=null;
+function scList(o){return SC.filter(function(s){return s.o===o})}
+function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+function nilSelect(id,cb){
+  var s=el(id);s.innerHTML='<option value="">Tutti i quartieri</option>'+NILN.map(function(x){return '<option value="'+x[1]+'">'+esc(x[0])+'</option>'}).join('');
+  s.addEventListener('change',cb);
+}
+function cerca(){
+  buttons('b-sc',['Infanzia','Primaria'],1,function(i){SL=i;SEL=null;setH('scheda-sc','<span class="sub">Scegli una scuola dall’elenco.</span>');elenco()});
+  nilSelect('sel-nil-sc',elenco);el('q').addEventListener('input',elenco);elenco();
+}
+function elenco(){
+  var q=norm(el('q').value.trim()),nl=el('sel-nil-sc').value,l=scList(SL).filter(function(s){return (!nl||String(s.nil)===nl)&&(!q||norm(s.n+' '+s.a).indexOf(q)>=0)});
+  l.sort(function(a,b){return a.n.localeCompare(b.n,'it')});
+  var tot=l.length;l=l.slice(0,60);
+  el('res-sc').innerHTML=l.length?l.map(function(s){return '<li><button type="button" data-id="'+esc(s.id)+'"'+(SEL===s.id?' class="on"':'')+'>'+esc(s.n)+' <span>'+esc(s.a)+' · '+esc(nilNome(s.nil))+'</span></button></li>'}).join('')+(tot>60?'<li><span class="sub" style="padding:6px 8px;display:block">Altre '+(tot-60)+' scuole: scrivi più lettere o scegli un quartiere.</span></li>':''):'<li><span class="sub" style="padding:6px 8px;display:block">Nessuna scuola trovata.</span></li>';
+  Array.prototype.forEach.call(el('res-sc').querySelectorAll('button'),function(b){b.addEventListener('click',function(){SEL=b.getAttribute('data-id');schedaS(SEL);Array.prototype.forEach.call(el('res-sc').querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)})})});
+}
+function nVar(s){if(!s.i15)return null;var n=((s.p[9]/s.i15)<.7?1:0);s.v.forEach(function(v){if(v/s.i15<.7)n++});return n}
+function schedaS(id){
+  var s=SC.filter(function(x){return x.id===id})[0];if(!s)return;
+  var k=LIVK[s.o],bn=R.bande[k],xs=R.anni_passati.concat(R.anni_futuri),np=R.anni_passati.length;
+  var pad=function(n){var a=[];for(var i=0;i<n;i++)a.push(null);return a};
+  var last=s.i[np-1],lo=[],hi=[];
+  for(var h=1;h<=10;h++){lo.push(s.p[h-1]*bn[h][0]);hi.push(s.p[h-1]*bn[h][1])}
+  var pill='<span class="pill g">'+GN[s.g]+'</span>';
+  if(s.gs)pill+='<span class="pill">già sotto il 70% del 2015</span>';
+  else if(s.s34)pill+='<span class="pill">a rischio di scendere sotto il 70% del 2015'+(s.ay?' (nello scenario centrale dal '+s.ay+')':'')+'</span>';
+  var nv=nVar(s),wa=[];
+  if(s.i15==null)wa.push('Manca il riferimento 2015 (scuola aperta dopo, o con un altro codice): non si può dire se sia sotto il 70%.');
+  else if(s.s34||s.gs)wa.push('Nelle 6 varianti del metodo la scuola è sotto il 70% del 2015 in '+nv+' su 6'+(nv===6?': il risultato regge.':'; il risultato dipende da come si ipotizzano nascite e spostamenti.'));
+  if(s.pc)wa.push('Meno di 50 iscritti nel 2024: pochi bambini in più o in meno cambiano molto la percentuale.');
+  if(s.cod)wa.push('Nella serie c’è un salto improvviso o un buco: può essere una fusione, un trasloco o un cambio di codice, non un calo vero.');
+  var ser=[{name:'Iscritti (dato)',color:ACC,v:s.i.concat(pad(10))},{name:'Scenario centrale',color:ACC,dash:1,v:pad(np-1).concat([last],s.p)},
+    {name:'Fascia di errore (bassa)',color:GRY,dash:1,w:1.2,v:pad(np-1).concat([last],lo)},{name:'Fascia di errore (alta)',color:GRY,dash:1,w:1.2,v:pad(np-1).concat([last],hi)}];
+  var mx=0;ser.forEach(function(x){x.v.forEach(function(v){if(v>mx)mx=v})});
+  var c=s.i15?s.i15*0.7:null;
+  var h5='<h3>'+esc(s.n)+'</h3><p class="sub">'+esc(s.a)+' · '+esc(nilNome(s.nil))+' · '+LIVN[s.o]+'</p><p>'+pill+'</p>';
+  h5+='<div class="ch" id="ch-sc"></div><div class="lgd"><span><i class="ln" style="border-top-color:'+ACC+'"></i>Iscritti (dato)</span><span><i class="ln d" style="border-top-color:'+ACC+'"></i>Scenario centrale</span><span><i class="ln d" style="border-top-color:'+GRY+'"></i>Fascia di errore'+(c?'</span><span><i class="ln d" style="border-top-color:#999"></i>70% del 2015':'')+'</span></div>';
+  h5+='<div class="scroll"><table id="tab-ss"><thead><tr><th></th><th class="r">2015</th><th class="r">2024</th><th class="r">2029</th><th class="r">2034</th></tr></thead><tbody><tr><td>Iscritti</td><td class="r">'+(s.i15==null?'–':f0(s.i15))+'</td><td class="r">'+f0(last)+'</td><td class="r">'+f0(s.p[4])+'</td><td class="r">'+f0(s.p[9])+'</td></tr><tr><td>Fascia di errore</td><td class="r"></td><td class="r"></td><td class="r">'+f0(lo[4])+' – '+f0(hi[4])+'</td><td class="r">'+f0(lo[9])+' – '+f0(hi[9])+'</td></tr><tr><td>Rispetto al 2024</td><td class="r"></td><td class="r"></td><td class="r">'+sgp(100*(s.p[4]/last-1),0)+'</td><td class="r">'+sgp(100*(s.p[9]/last-1),0)+'</td></tr></tbody></table></div>';
+  h5+='<p class="sub">La fascia contiene il numero vero in circa 8 casi su 10 nel passato (dal 10° al 90° percentile degli errori misurati sulla prova all’indietro, per '+LIVN[s.o].toLowerCase()+' e per numero di anni). Gli iscritti 2015 sono quelli dell’a.s. 2015/16.</p>';
+  if(wa.length)h5+='<div class="warm"><ul>'+wa.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>';
+  setH('scheda-sc',h5);
+  var draw=function(){lineChart(el('ch-sc'),{xs:xs,series:ser,y0:0,h:260,ref:c,cut:2024.5})};draw();RD.push(draw);
+}
+
+/* ---------- a rischio ---------- */
+var RL=1;
+function rischio(){
+  buttons('b-rs',['Infanzia','Primaria'],1,function(i){RL=i;drawRischio()});
+  nilSelect('sel-nil-rs',drawLista);drawRischio();
+}
+function drawRischio(){
+  var cn=R.conteggi[RL],sg7=R.soglie.filter(function(x){return x.ordine===LIVK[RL]});
+  setH('rs-testo','<p><b>'+LIVN[RL]+'.</b> Su '+cn.con_rif+' scuole presenti sia nel 2015 sia nel 2024, nello scenario centrale <b>'+cn.sotto34+'</b> hanno nel 2034 meno del 70% degli iscritti del 2015/16; <b>'+cn.gia+'</b> lo sono già nel 2024. <b>'+cn.robuste+'</b> restano sotto la soglia in tutte e 6 le varianti del metodo; per le altre dipende dalle ipotesi. Il 70% è vicino alla media: tra il 2015 e il 2034 gli iscritti della città calano del '+(RL===1?'26':'23')+'%. Con soglia 60% sono '+sg7.filter(function(x){return x.soglia===0.6})[0].sotto_nel_2034+' scuole, con 80% '+sg7.filter(function(x){return x.soglia===0.8})[0].sotto_nel_2034+'.</p><div class="warn">Nella prova sul passato, delle scuole segnalate a questo modo '+pc(R.soglia.filter(function(x){return x.ordine===LIVK[RL]&&x.metodo==='centrale'})[0].precisione)+' sono davvero finite sotto la soglia e ne sono state ritrovate '+pc(R.soglia.filter(function(x){return x.ordine===LIVK[RL]&&x.metodo==='centrale'})[0].richiamo)+' di quelle che ci sono finite: l’elenco indica scuole <b>a rischio</b>, non una lista chiusa.</div>');
+  var by={};
+  scList(RL).forEach(function(s){if(s.i15==null)return;var b=by[s.nil]||(by[s.nil]={n:0,r:0,g:0,t:0});b.n++;if(s.s34){b.r++;if(s.gs)b.g++;if(s.t===2)b.t++}});
+  var rows=NILN.filter(function(x){return by[x[1]]}).map(function(x){var b=by[x[1]];return ['<button type="button" data-n="'+x[1]+'">'+esc(x[0])+'</button>',b.n,b.r,b.g,b.t]});
+  table('tab-nr',['Quartiere (tocca per l’elenco)','Scuole con riferimento 2015','A rischio','di cui già sotto','di cui robuste'],rows);
+  Array.prototype.forEach.call(el('tab-nr').querySelectorAll('button'),function(b){b.addEventListener('click',function(){el('sel-nil-rs').value=b.getAttribute('data-n');drawLista();el('lista-rs').scrollIntoView({behavior:'smooth',block:'nearest'})})});
+  drawLista();
+}
+function drawLista(){
+  var nl=el('sel-nil-rs').value;
+  if(!nl){setH('lista-rs','<p class="sub">Scegli un quartiere qui sopra, o toccane uno nella tabella, per vedere le scuole.</p>');return}
+  var l=scList(RL).filter(function(s){return String(s.nil)===nl&&s.s34});
+  l.sort(function(a,b){return a.n.localeCompare(b.n,'it')});
+  if(!l.length){setH('lista-rs','<p>Nessuna scuola di questo ordine in '+esc(nilNome(+nl))+' scende sotto la soglia nello scenario centrale.</p>');return}
+  var k=LIVK[RL],bn=R.bande[k];
+  var rows=l.map(function(s){var st=(s.gs?'<span class="pill">già sotto</span>':'')+(s.t===2?'<span class="pill g">robusta</span>':'<span class="pill">dipende</span>')+(s.pc?'<span class="pill">piccola</span>':'')+(s.cod?'<span class="pill">salto nella serie</span>':'');
+    return ['<a href="#cerca" data-id="'+esc(s.id)+'">'+esc(s.n)+'</a><br><span class="sub">'+GN[s.g]+' · '+esc(s.a)+'</span>',f0(s.i15),f0(s.i[15]),f0(s.p[9])+'<br><span class="sub">'+f0(s.p[9]*bn[10][0])+' – '+f0(s.p[9]*bn[10][1])+'</span>',st]});
+  setH('lista-rs','<h3>'+esc(nilNome(+nl))+'</h3><div class="scroll"><table id="tab-sr"></table></div>');
+  table('tab-sr',['Scuola','2015','2024','2034 (e fascia)','Stato'],rows);
+  Array.prototype.forEach.call(el('tab-sr').querySelectorAll('a[data-id]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();SL=RL;var bs=el('b-sc').children;Array.prototype.forEach.call(bs,function(x,i){x.classList.toggle('on',i===SL)});el('sel-nil-sc').value=nl;el('q').value='';elenco();SEL=a.getAttribute('data-id');schedaS(SEL);el('cerca').scrollIntoView({behavior:'smooth'})})});
+}
+
+/* ---------- prova sul passato ---------- */
+function prova(){
+  var rows=[];
+  [2014,2019].forEach(function(p){LIVK.forEach(function(k,i){var a=caso(k,'centrale',p),f=caso(k,'fermo',p);
+    rows.push([(p)+' → '+(p+5)+' · '+LIVN[i],f0(a.alunni_partenza),f0(a.alunni_proiettati),f0(a.alunni_reali),sgp(a.errore_citta_pct,1),sgp(f.errore_citta_pct,1),nf(a.WAPE_nil_pct,0)+'%',nf(a.mediana_err_scuola_pct,0)+'%',nf(a.scuole_entro10_pct,0)+'%']) })});
+  table('tab-bt',['Dal → al · ordine','Alunni alla partenza','Scenario','Alunni veri','Errore sul totale','Errore tenendo tutto fermo','Errore per quartiere','Errore tipico per scuola','Scuole entro ±10%'],rows);
+  var p5=function(m,o){return R.pool5.filter(function(x){return x.metodo===m&&x.ordine===o})[0]};
+  var s0=R.soglia.filter(function(x){return x.metodo==='centrale'});
+  setH('pv-testo','<p>Per sapere se ci si può fidare, abbiamo fatto finta di essere nel 2014 e nel 2019: il metodo usa solo i dati disponibili fino a quell&rsquo;anno (alunni fino a quell&rsquo;anno, residenti fino all&rsquo;anno dopo, come oggi), proietta cinque anni avanti e si confronta con gli alunni veri. Il metodo è sempre lo stesso di questa pagina.</p>'+
+  '<p><b>Sul totale della città ha funzionato bene</b>: dal 2019 al 2024 ha sbagliato di '+sgp(caso('infanzia','centrale',2019).errore_citta_pct,1)+' per l&rsquo;infanzia, '+sgp(caso('primaria','centrale',2019).errore_citta_pct,1)+' per la primaria e '+sgp(caso('sec1','centrale',2019).errore_citta_pct,1)+' per la secondaria di I grado, mentre «tenere gli alunni fermi» avrebbe sbagliato di '+sgp(caso('infanzia','fermo',2019).errore_citta_pct,0)+', '+sgp(caso('primaria','fermo',2019).errore_citta_pct,0)+' e '+sgp(caso('sec1','fermo',2019).errore_citta_pct,0)+'. Per i quartieri l&rsquo;errore tipico è 5–11%.</p>'+
+  '<p><b>Per le singole scuole l&rsquo;errore è molto più grande</b>: con tutte le partenze dal 2010 al 2019, a cinque anni l&rsquo;errore medio (pesato sul numero di alunni) è '+nf(100*p5('centrale','infanzia').WAPE_scuola,0)+'% all&rsquo;infanzia, '+nf(100*p5('centrale','primaria').WAPE_scuola,0)+'% alla primaria e '+nf(100*p5('centrale','sec1').WAPE_scuola,0)+'% alla secondaria di I grado, contro '+nf(100*p5('fermo','infanzia').WAPE_scuola,0)+'%, '+nf(100*p5('fermo','primaria').WAPE_scuola,0)+'% e '+nf(100*p5('fermo','sec1').WAPE_scuola,0)+'% di «tenere ferme le scuole». Alle medie il metodo non fa meglio, per questo non mostriamo quelle scuole. Il metodo dice <b>quanto cala un ordine e un quartiere</b>, non <b>quale singola scuola</b> perde più bambini.</p>'+
+  '<p><b>Dieci anni sono troppi per l&rsquo;infanzia</b>: dal 2014 al 2024 il metodo avrebbe sbagliato di '+sgp(caso('infanzia','centrale',2014,2024).errore_citta_pct,0)+' (le nascite sono scese più di quanto ipotizzato); con le nascite vere l&rsquo;errore sarebbe stato −2%. Per primaria e medie, a dieci anni, l&rsquo;errore sul totale è stato '+sgp(caso('primaria','centrale',2014,2024).errore_citta_pct,1)+' e '+sgp(caso('sec1','centrale',2014,2024).errore_citta_pct,1)+'. Per questo l&rsquo;infanzia ha tre scenari sulle nascite.</p>'+
+  '<p><b>La soglia del 70%</b>: nelle stesse prove, delle scuole che il metodo metteva sotto il 70% del livello di cinque anni prima, '+pc(s0.filter(function(x){return x.ordine==='infanzia'})[0].precisione)+' (infanzia) e '+pc(s0.filter(function(x){return x.ordine==='primaria'})[0].precisione)+' (primaria) ci sono finite davvero; ne ha ritrovate circa '+pc(s0.filter(function(x){return x.ordine==='infanzia'})[0].richiamo)+' e '+pc(s0.filter(function(x){return x.ordine==='primaria'})[0].richiamo)+' di quelle che ci sono finite. Alle medie solo '+pc(s0.filter(function(x){return x.ordine==='sec1'})[0].precisione)+': per questo è esclusa.</p>');
+}
+
+/* ---------- metodo e limiti ---------- */
+function metodo(){
+  setH('metodo-lista',[
+   '<b>1. I bambini, anno per anno.</b> Si parte dai residenti per età e quartiere al 31 dicembre 2025 (Comune ds27). Ogni anno chi ha <i>a</i> anni passa ad <i>a</i>+1, senza arrivi né partenze (nella prova sul passato aggiungere arrivi e partenze osservati non migliora la previsione; resta come variante).',
+   '<b>2. I nati che non ci sono ancora.</b> Entrano con 0 anni secondo tre scenari: stabili (la media dei residenti di 0 anni 2023–2025, scenario centrale), in calo (continuano a calare come negli ultimi cinque anni, −1,76% l&rsquo;anno) e in risalita (stesso ritmo, al contrario). Contano solo dal 2029 per l&rsquo;infanzia e dal 2032 per la primaria; alle medie mai.',
+   '<b>3. Dai bambini agli iscritti.</b> Gli iscritti di una scuola nell&rsquo;anno N sono quelli del 2024 moltiplicati per la variazione dei bambini della zona di quella scuola nella fascia d&rsquo;età dell&rsquo;ordine (infanzia 3–5 anni, primaria 6–10, medie 11–13). La zona è metà la città intera e metà il quartiere con i quartieri confinanti: nella prova sul passato è la scelta che sbaglia meno o quanto la sola città, e lascia vedere differenze locali. Contare solo i bambini del quartiere sbaglia di più.',
+   '<b>4. Perché non si modellano gli spostamenti tra quartieri.</b> I dati aperti dicono solo quanti alunni abitano in un altro quartiere, non verso quale. Questo movimento resta nel rapporto tra iscritti e bambini del 2024, che è tenuto fisso.',
+   '<b>5. Varianti.</b> Per ogni scuola si calcolano 6 varianti (centrale, nascite in calo, nascite in risalita, solo città, solo quartiere, con arrivi e partenze). «Robusta» vuol dire sotto il 70% del 2015 in tutte e 6.',
+   '<b>6. Fascia di errore.</b> È la proiezione moltiplicata per il 10° e il 90° percentile del rapporto tra alunni veri e proiettati misurato sul passato, per ordine e per numero di anni.',
+   'Programmi: <code>scuole-domani/scripts/</code>; note complete in <code>scuole-domani/NOTE.md</code>.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join(''));
+  setH('limiti-lista',[
+   '<b>Gli iscritti si fermano al 2024/25.</b> Il 2025/26 è in corso e qui è già una proiezione, anche se i residenti 2025 sono noti.',
+   '<b>Niente flussi tra quartieri.</b> Non esiste, tra i dati aperti, la tabella «quartiere dove abita il bambino → scuola». Per questo i bambini del quartiere spiegano poco le scuole del quartiere.',
+   '<b>Fusioni, traslochi e cambi di codice</b> sembrano chiusure e aperture. Una scuola con un salto nella serie può non aver perso nessuno. Lo scenario non sa che cosa il Comune o lo Stato decideranno su chiusure, accorpamenti e nuove aperture.',
+   '<b>Arrivi, partenze e nuove case non sono modellati.</b> Nel quartiere Maggiore–Musocco–Certosa, per esempio, i bambini di 6–10 anni crescono del 48% al 2034 già solo con quelli che ci abitano oggi. Con arrivi e partenze come negli ultimi cinque anni il 2034 sarebbe più basso: primaria −23%, medie −25%.',
+   '<b>L&rsquo;infanzia è meno rigida delle altre</b>: la quota di bambini di 3–5 anni iscritti era 0,94 nel 2009, 0,83 nel 2020, 0,91 nel 2024. Lo scenario la tiene ferma al 2024.',
+   '<b>Il 70% del 2015 è una scelta.</b> È vicino alla media: cambiare soglia o anno cambia gli elenchi.',
+   '<b>Scuole piccole</b>: 53 scuole dell&rsquo;infanzia e 4 primarie hanno meno di 50 iscritti; per 9 infanzie e 6 primarie manca il riferimento 2015.',
+   '<b>Gli errori misurati sul passato non sono garanzie.</b> Il futuro può essere diverso dal passato recente (la pandemia, per esempio, ha lasciato un salto nell&rsquo;infanzia nel 2020/21).',
+   '<b>Esclusi</b>: scuole superiori, nidi, scuole fuori Milano. La proiezione tende a sovrastimare di circa 1–3%.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var fl=[['proiezione_scuole_infanzia_primaria.csv','Una riga per scuola (infanzia e primaria): iscritti 2015/2019/2024, proiezione 2025–2034, fasce di errore, soglia 70%, varianti.'],
+   ['proiezione_nil.csv','Per quartiere e ordine (sede delle scuole): iscritti e proiezione, scuole sotto soglia.'],
+   ['proiezione_residenti_nil.csv','Bambini residenti nel quartiere per fascia d’età, 2015–2034.'],
+   ['proiezione_citta.csv','Città: scenari e varianti per anno, con classi equivalenti.'],
+   ['backtest_casi.csv','La prova sul passato: 2014→2019, 2019→2024, 2014→2024.'],
+   ['sensibilita_scenari.csv','Totali 2034 e scuole sotto soglia per ognuna delle 6 varianti.'],
+   ['riepilogo.json','Numeri usati dalla pagina.'],['scuole.json','Dati per scuola usati dalla pagina.'],['nil.geojson','Quartieri con i numeri della mappa.']];
+  setH('file-lista',fl.map(function(f){return '<li><a href="data/'+f[0]+'">'+f[0]+'</a> &ndash; '+f[1]+'</li>'}).join(''));
+}
+})();
+</script></body></html>
