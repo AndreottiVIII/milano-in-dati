@@ -70,7 +70,8 @@
     { path: 'permettersi/', label: 'Chi può permettersi dove' },
     { path: 'viaggio-linea/', label: 'Un viaggio in tram' },
     { path: 'speranza-vita/', label: 'Quanto si vive' },
-    { path: 'case-vuote/', label: 'Le case vuote' }
+    { path: 'case-vuote/', label: 'Le case vuote' },
+    { path: 'fondi-quartieri/', label: 'Soldi per i quartieri popolari' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

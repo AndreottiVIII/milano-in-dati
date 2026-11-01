@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · I soldi per i quartieri popolari</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:62vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0;max-width:100%} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+@media(max-width:760px){.lgd span{white-space:normal}}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.big{display:flex;flex-wrap:wrap;gap:8px 26px;margin:.6em 0} .big div{min-width:130px} .big b{display:block;font-size:1.9rem;line-height:1.1;color:var(--acc)} .big span{font-size:.85rem;color:var(--mut)}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(90px,30%) 1fr minmax(90px,34%);gap:6px;align-items:center;font-size:.88rem;padding:3px 0}
+.bars .tr{background:#f1f1f1;height:14px;position:relative;display:flex;overflow:hidden} .bars .seg{display:block;height:14px}
+.bars .v{font-variant-numeric:tabular-nums;line-height:1.25}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .bars .row{grid-template-columns:1fr} }
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.tabmax{max-height:420px;overflow:auto}
+.pb{display:inline-block;width:70px;height:8px;background:#e6e6e6;vertical-align:middle;margin-right:6px;position:relative} .pb i{display:block;height:8px;background:var(--acc)}
+#tab-prog,#tab-big{min-width:620px} #tab-cup{min-width:520px}
+.links a{margin-right:14px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>I soldi per i quartieri popolari di Milano</h1>
+<p>Quanti soldi pubblici arrivano a Milano per le case popolari e per i quartieri dove ci sono pi&ugrave; case popolari e pi&ugrave; difficolt&agrave;? Da quali programmi (PNRR, fondi europei di coesione, programmi nazionali e della Regione), chi li spende (Comune, MM, ALER) e a che punto sono i lavori. Tutto viene da dati aperti sui singoli progetti, con il loro codice (CUP). Questa pagina guarda <b>solo i progetti con i dati aperti</b>: non &egrave; il bilancio completo di ALER, MM e Comune. Vedi anche <a href="../case-popolari/">le case popolari vuote</a> e <a href="../appalti/">gli appalti pubblici</a>.</p>
+
+<div class="warm"><b>Prima di leggere.</b>
+<ul>
+<li><b>Gli importi sono quelli scritti nelle fonti</b>, e le fonti non misurano tutte la stessa cosa: per il PNRR il &laquo;finanziamento totale&raquo; del progetto (anche quote non PNRR) e i pagamenti registrati; per i fondi di coesione il &laquo;costo ammesso&raquo; e i pagamenti; per il Piano complementare (PNC) solo gli importi aggiudicati nelle gare. <b>Soldi pagati non vuol dire lavori finiti</b>, e soldi non pagati non vuol dire lavori fermi.</li>
+<li><b>Perimetro scelto da me, dichiarato</b> (<a href="#metodo">come</a>): il &laquo;nucleo&raquo; sono case popolari, alloggi per l&rsquo;emergenza abitativa, e opere e servizi in quartieri popolari. Altre opere pagate con gli stessi programmi (per esempio il tram o la metropolitana) sono mostrate a parte.</li>
+<li>I dati dei progetti PNRR sono &laquo;fotografati&raquo; al <b>13 giugno 2026</b> (ultima versione pubblicata): non dicono cosa &egrave; successo dopo, n&eacute; se la scadenza del 30 giugno &egrave; stata rispettata. Vedi <a href="#limiti">limiti dei dati</a>.</li>
+</ul></div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="quanto">Quanto, da dove e chi lo spende</h2>
+<div id="quanto-testo"></div>
+<div class="big" id="big"></div>
+<h3>Per programma</h3>
+<div class="bars" id="b-prog"></div>
+<div class="lgd" id="lg-prog"></div>
+<p class="src">Barra scura = pagato; chiara = ancora da pagare. Nucleo, 47 progetti (esclusi i 3 del Piano complementare, vedi sotto). Fonti: OpenCoesione (dati al 30/6/2026, CC BY 4.0); Italia Domani / ReGiS (13/6/2026, CC-BY 4.0).</p>
+<div class="grid2"><div><h3>Per ente che lo realizza</h3><div class="bars" id="b-ente"></div><p class="src">L&rsquo;ente &egrave; quello scritto nella fonte (attuatore o beneficiario); per i lavori sulle case ALER e MM l&rsquo;ho letto anche dai testi delle gare. Nei fondi di coesione l&rsquo;ente &egrave; spesso solo il Comune che riceve il finanziamento.</p></div>
+<div><h3>Per tipo di intervento</h3><div class="bars" id="b-amb"></div><div class="lgd" id="lg-amb"></div></div></div>
+<h3>Il Piano complementare: &laquo;Sicuro, verde e sociale&raquo;</h3>
+<div id="pnc-testo"></div>
+
+<h2 id="dove">Dove: per quartiere</h2>
+<div id="dove-testo"></div>
+<div class="ctl"><label class="sub" for="sel-area">Scegli un quartiere:</label><select id="sel-area" aria-label="Scegli un quartiere"></select></div>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per soldi pubblici ricevuti dai progetti del nucleo"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors; confini dei quartieri (NIL): Comune di Milano (CC BY). Quartieri scritti in grigio: nessun progetto del nucleo localizzato l&igrave;. Come ho trovato il quartiere: <a href="#metodo">metodo</a>.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<div class="scroll"><table id="tab-aree"></table></div>
+<div id="dove-testo2"></div>
+
+<h2 id="avanzamento">A che punto siamo</h2>
+<div id="av-testo"></div>
+<div class="bars" id="b-av"></div>
+<div class="lgd" id="lg-av"></div>
+<p class="src">Ogni riga &egrave; un progetto del PNRR nel nucleo (PINQuA e Housing First): barra scura = pagato al 13/6/2026, chiara = finanziato non ancora pagato. Titolo come nella fonte (ReGiS).</p>
+<div class="warn" id="scad"></div>
+<h3>I progetti dei fondi di coesione</h3>
+<div id="oc-testo"></div>
+
+<h2 id="grandi">I progetti pi&ugrave; grandi</h2>
+<p class="sub">Solo enti pubblici (Comune, MM, ALER, Regione). Titoli come nelle fonti. Tutti gli altri nel file scaricabile.</p>
+<div class="scroll tabmax"><table id="tab-big"></table></div>
+
+<h2 id="registro">Quanto non si vede: il registro dei CUP</h2>
+<div id="reg-testo"></div>
+<div class="scroll"><table id="tab-cup"></table></div>
+<p class="src">Fonte: OpenCUP (registro nazionale dei codici unici di progetto, CC-BY, aggiornato al 1/10/2026), progetti localizzati a Milano con sottosettore &laquo;abitative&raquo;, titolari ALER, MM, Comune, Regione. Il costo &egrave; quello dichiarato alla registrazione del CUP.</p>
+
+<h2 id="bilancio">E il bilancio del Comune?</h2>
+<div id="bil-testo"></div>
+<div class="bars" id="b-bil"></div>
+<p class="src">Fonte: Comune di Milano, bilancio (rendiconto), missione 8 &laquo;Assetto del territorio ed edilizia abitativa&raquo;, programma 2 &laquo;Edilizia residenziale pubblica e locale e piani di edilizia economico-popolare&raquo;, titolo 2 (spese in conto capitale, impegni), dati aperti del Comune (CC-BY), vedi <a href="../bilancio-comune/">la pagina sul bilancio</a>.</p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p id="file-lista"></p>
+
+<h2 id="fonti">Fonti, licenze e data di scaricamento</h2>
+<ul class="m" id="fonti-lista"></ul>
+
+<footer>
+<p class="links">Vedi anche: <a href="../case-popolari/">Case popolari vuote</a> <a href="../appalti/">Appalti pubblici</a> <a href="../bilancio-comune/">Bilancio del Comune</a></p>
+<p>Dati scaricati il <b>1 novembre 2026</b>. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors. I dati di OpenCoesione, Italia Domani e OpenCUP sono ripubblicati qui in forma aggregata o come titoli di progetti pubblici, con la licenza dichiarata dalle fonti (CC BY 4.0 / CC-BY) e citando la fonte.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,PJ=[],map=null,layer=null,RD=[];
+var ACC='#00695c',WARM='#c26a1b',MID='#62b0a4',LT='#cfe5e0',GRY='#bdbdbd',DK='#052e29';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function M(x,d){return nf(x/1e6,d==null?1:d)+' M'}
+function pc(x){return nf(x,0)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function lgd(items){return items.map(function(it){return '<span><i style="background:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
+function DATA(d){var a=d.split('-');var m=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];return parseInt(a[2],10)+' '+m[parseInt(a[1],10)]+' '+a[0]}
+function dIT(iso){return iso?DATA(iso):'&mdash;'}
+function bar(label,fin,pag,max,vtxt,c1,c2){var w=fin/max*100,p=fin>0?pag/fin:0;return '<div class="row"><span class="nm">'+label+'</span><span class="tr"><span class="seg" style="width:'+(w*p)+'%;background:'+(c1||ACC)+'" title="pagato"></span><span class="seg" style="width:'+(w*(1-p))+'%;background:'+(c2||LT)+'" title="non ancora pagato"></span></span><span class="v">'+vtxt+'</span></div>'}
+function stat(p){return p.stato?esc(p.stato):''}
+
+Promise.all([J('data/riepilogo.json'),J('data/progetti.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];PJ=a[1];NF=a[2];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();quanto();dove();avanzamento();grandi();registro();bilancio();limiti();metodo();fonti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+function sorpresa(){
+  var T=D.totali,P=D.avanzamento_pnrr.PINQuA,S=D.pinqua_split,O=D.opencup;
+  var h='<p><b>Il programma nazionale per la &laquo;qualit&agrave; dell&rsquo;abitare&raquo; (PINQuA) porta a Milano '+M(P.finanziato,0)+' di euro, ma solo il '+pc(S.case_pct)+' ('+M(S.case_popolari_e_abitare,0)+') va a edifici di case popolari.</b> Il resto ('+M(S.altro,0)+') finanzia sistemazioni di strade sopra la metropolitana M4, una linea di tram, una biblioteca, una caserma e strade nei quartieri.</p>';
+  h+='<p>E il progetto pi&ugrave; grande, la demolizione e ricostruzione degli edifici di via dei Giaggioli ('+M(57576000,1)+', realizzato da MM), nei dati del 13 giugno 2026 ha come fine prevista il <b>31 dicembre 2026</b>: sei mesi dopo il 30 giugno 2026, la data entro cui i lavori del PINQuA dovevano essere conclusi. In tutto, '+M(P.fine_dopo_30_6_2026.finanziato,0)+' ('+P.fine_dopo_30_6_2026.progetti+' progetti su '+P.progetti+') hanno una fine prevista dopo quella data.</p>';
+  h+='<p class="sub">Un confronto tra date scritte nei dati, non un giudizio: le date possono essere cambiate dopo il 13 giugno e la proroga a fine anno pu&ograve; avere altri fondi dietro. Seconda sorpresa, nel <a href="#registro">registro dei CUP</a>: dei '+f0(O.attivi_dal_2020.cup)+' progetti &laquo;abitativi&raquo; di ALER, MM, Comune e Regione ancora attivi e decisi dal 2020 (costo dichiarato '+nf(O.attivi_dal_2020.costo/1e9,1)+' miliardi) solo '+O.attivi_dal_2020_in_oc_o_pnrr.cup+' compaiono nei dati di PNRR o fondi di coesione: per gli altri non c&rsquo;&egrave; nessun dato aperto sui pagamenti (il registro non dice come sono finanziati: possono essere fondi propri degli enti, progetti non ancora partiti o già chiusi; il costo dichiarato non è un finanziamento).</p>';
+  setH('sorpresa',h);
+}
+
+function quanto(){
+  var T=D.totali,P=D.avanzamento_pnrr;
+  setH('quanto-testo','<p>Nel nucleo ci sono <b>'+T.nucleo_progetti+' progetti per '+M(T.nucleo_finanziato,0)+' di euro</b>, di cui '+M(T.nucleo_pagato,0)+' ('+pc(T.nucleo_pagato_pct)+') risultano pagati. Aggiungendo le altre opere dei programmi (soprattutto i Piani urbani integrati del PNRR e le opere di mobilit&agrave; collegate al PINQuA) i progetti diventano '+T.largo_progetti+' per '+M(T.largo_finanziato,0)+'.</p>');
+  setH('big','<div><b>'+M(T.nucleo_finanziato,0)+'</b><span>finanziato (nucleo)</span></div><div><b>'+M(T.nucleo_pagato,0)+'</b><span>pagato ('+pc(T.nucleo_pagato_pct)+')</span></div><div><b>'+T.nucleo_progetti+'</b><span>progetti</span></div><div><b>'+M(P.PINQuA.quota_pnrr,0)+'</b><span>quota PNRR del PINQuA</span></div>');
+  var pr=D.per_programma.slice(),mx=pr[0].finanziato;
+  pr.sort(function(a,b){return b.finanziato-a.finanziato});mx=pr[0].finanziato;
+  setH('b-prog',pr.map(function(r){var n=r.programma.replace("PNRR - ","PNRR · ").replace("PON FESR FSE CITTA' METROPOLITANE","PON Metro 2014-20 (UE)").replace('POC LOMBARDIA','POC Lombardia (accordo Lorenteggio)').replace('PN FESR FSE+ METRO PLUS E CITTÀ MEDIE SUD','PN Metro Plus 2021-27 (UE)').replace('PSC CITTÀ METROPOLITANA DI MILANO','PSC Città metropolitana (periferie)').replace('POC METRO','POC Metro').replace('PR FSE+ LOMBARDIA','PR FSE+ Lombardia').replace("PON FESR FSE LEGALITA'",'PON Legalità').replace('POR FESR LOMBARDIA','POR FESR Lombardia').replace('PN FESR FSE+ SCUOLA E COMPETENZE','PN Scuola e competenze');
+    return bar(esc(n),r.finanziato,r.pagato,mx,M(r.finanziato)+' · '+pc(r.pagato_pct)+' pagato <span class="sub">('+r.progetti+' prog.)</span>')}).join(''));
+  setH('lg-prog',lgd([{c:ACC,t:'pagato'},{c:LT,t:'da pagare'}]));
+  var en=D.per_ente.slice().sort(function(a,b){return b.finanziato-a.finanziato});
+  setH('b-ente',en.map(function(r){return bar(esc(r.tipo_ente.replace('Altro/non indicato','Scuole e altri').replace('Citta metropolitana di Milano','Città metropolitana')),r.finanziato,r.pagato,en[0].finanziato,M(r.finanziato)+' · '+pc(r.pagato_pct)+' <span class="sub">('+r.progetti+')</span>')}).join(''));
+  var am=D.per_ambito.slice().sort(function(a,b){return b.finanziato-a.finanziato});
+  setH('b-amb',am.map(function(r){return bar(esc(r.ambito_txt.replace(/ \(.*\)/,'')),r.finanziato,r.pagato,am[0].finanziato,M(r.finanziato)+' · '+pc(r.pagato_pct)+' <span class="sub">('+r.progetti+')</span>')}).join(''));
+  setH('lg-amb',lgd([{c:ACC,t:'pagato'},{c:LT,t:'da pagare'}]));
+  var pnc=PJ.filter(function(p){return p.fonte.indexOf('PNC')===0});
+  var tt=pnc.reduce(function(a,p){return a+p.importo},0);
+  setH('pnc-testo','<p>Il Piano nazionale complementare ha un programma &laquo;Sicuro, verde e sociale&raquo; per riqualificare le case popolari. A Milano i dati aperti elencano <b>3 interventi</b> (ALER e MM): via Tofano 5 torre C (demolizione e ricostruzione, MM), San Siro via Gigante 2 e via Ricciarelli 16 (ALER), efficientamento energetico (ALER, lotto 3). I dati aperti del Piano complementare <b>non hanno il finanziamento per progetto</b>: ci sono solo gli importi aggiudicati nelle gare, in tutto <b>'+M(tt,1)+'</b> (dato al 7/3/2024, non aggiornato). Non li sommo agli altri totali.</p>');
+}
+
+function aggr(){var a={};D.aree.forEach(function(r){a[r.area]=r});return a}
+function dove(){
+  var A=D.aree,nl=D.non_localizzati,T=D.totali;
+  var loc=A.reduce(function(a,r){return a+r.finanziato},0);
+  setH('dove-testo','<p>Per sapere in quale quartiere (NIL) &egrave; un progetto ho usato, nell&rsquo;ordine: l&rsquo;indirizzo scritto nel titolo o nella sintesi (agganciato ai civici del Comune), il nome del quartiere scritto nel testo, e per il PINQuA l&rsquo;area della proposta. <b>'+M(loc,0)+' su '+M(T.nucleo_finanziato,0)+' ('+pc(100*loc/T.nucleo_finanziato)+') sono localizzati</b>; gli altri '+nl.progetti+' progetti ('+M(nl.finanziato,0)+') non hanno un luogo nel testo (servizi su tutta la citt&agrave; o senza indirizzo) e non sono sulla mappa.</p>');
+  var mx=Math.max.apply(null,A.map(function(r){return r.finanziato}));
+  function col(v){if(!v)return '#e4e4e4';var r=v/mx;return r>.5?SEQ[5]:r>.25?SEQ[4]:r>.1?SEQ[3]:r>.03?SEQ[2]:r>.005?SEQ[1]:SEQ[0]}
+  var sel=el('sel-area');sel.innerHTML='<option value="">&mdash;</option>'+A.map(function(r){return '<option value="'+esc(r.area)+'">'+esc(r.area)+'</option>'}).join('');
+  map=L.map('map',{scrollWheelZoom:false}).setView([45.4642,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  layer=L.geoJSON(NF,{style:function(f){var p=f.properties;return {color:'#fff',weight:1,fillColor:col(p.f),fillOpacity:p.f?0.8:0.25}},onEachFeature:function(f,l){var p=f.properties;
+    l.bindTooltip(esc(p.n)+(p.f?'<br><b>'+esc(p.a)+'</b>: '+M(p.f)+', '+p.np+' progetti':'<br>nessun progetto del nucleo localizzato'),{sticky:true});
+    l.on('click',function(){if(p.a)scheda(p.a);else setH('scheda','<b>'+esc(p.n)+'</b><br><span class="sub">Nessun progetto del nucleo localizzato in questo quartiere (non vuol dire che non ci siano altri fondi).</span>')})}}).addTo(map);
+  setH('lg-map',lgd([{c:SEQ[0],t:'meno di 0,5%'},{c:SEQ[1],t:'0,5-3%'},{c:SEQ[2],t:'3-10%'},{c:SEQ[3],t:'10-25%'},{c:SEQ[4],t:'25-50%'},{c:SEQ[5],t:'oltre 50%'},{c:'#e4e4e4',t:'nessun progetto'}])+'<span class="sub">quota del massimo ('+M(mx,0)+')</span>');
+  sel.addEventListener('change',function(){if(sel.value)scheda(sel.value)});
+  table('tab-aree',['Quartiere','Progetti','Finanziato','Pagato','% pagato'],A.map(function(r){return ['<a href="#scheda" data-a="'+esc(r.area)+'">'+esc(r.area)+'</a>',r.progetti,M(r.finanziato),M(r.pagato),'<span class="pb"><i style="width:'+r.pagato_pct+'%"></i></span>'+pc(r.pagato_pct)]}));
+  el('tab-aree').addEventListener('click',function(e){var a=e.target.closest('a[data-a]');if(a){e.preventDefault();scheda(a.getAttribute('data-a'));sel.value=a.getAttribute('data-a');el('scheda').scrollIntoView({block:'nearest'})}});
+  var lo=A.filter(function(r){return r.area==='Lorenteggio-Giambellino'})[0];
+  setH('dove-testo2','<p class="sub">Lorenteggio-Giambellino ('+M(lo.finanziato,0)+') pesa quasi met&agrave; dei soldi localizzati: dentro ci sono l&rsquo;accordo di programma regionale (edifici ALER), la ricostruzione di via dei Giaggioli e la biblioteca. Gratosoglio ('+M(A.filter(function(r){return r.area==="Gratosoglio"})[0].finanziato,0)+') &egrave; un unico grande progetto di efficientamento dei palazzi ALER. San Siro, Quarto Oggiaro e Corvetto, citati spesso come quartieri popolari, hanno nel nucleo pochi progetti o piccoli (Quarto Oggiaro nessuno).</p>');
+}
+function scheda(a){
+  var r=aggr()[a];if(!r)return;
+  if(map&&layer){var b=null;layer.eachLayer(function(l){if(l.feature.properties.a===a){b=b?b.extend(l.getBounds()):L.latLngBounds(l.getBounds())}});if(b)map.fitBounds(b,{maxZoom:14,padding:[30,30]})}
+  setH('scheda','<h3 style="margin-top:0">'+esc(a)+'</h3><p>'+r.progetti+(r.progetti===1?' progetto':' progetti')+', <b>'+M(r.finanziato)+'</b> finanziati, '+M(r.pagato)+' pagati ('+pc(r.pagato_pct)+').</p><table><tbody>'+r.lista.map(function(p){return '<tr><td>'+esc(p.titolo)+'</td><td class="r">'+M(p.importo,2)+'</td></tr>'}).join('')+'</tbody></table>');
+}
+
+function avanzamento(){
+  var P=D.avanzamento_pnrr,pin=PJ.filter(function(p){return p.programma.indexOf('PINQuA')>=0}),hf=PJ.filter(function(p){return p.programma.indexOf('Housing')>=0});
+  var nuc=pin.filter(function(p){return p.nucleo===1}).concat(hf);
+  nuc.sort(function(a,b){return b.importo-a.importo});
+  var mx=nuc[0].importo;
+  var pa=P.PINQuA,hfa=P['Housing First'];
+  setH('av-testo','<p>I progetti PNRR del nucleo sono <b>'+nuc.length+'</b>: '+pin.filter(function(p){return p.nucleo===1}).length+' del PINQuA e '+hf.length+' di Housing First (alloggi per persone senza casa). Al 13 giugno 2026 il PINQuA ha pagato <b>'+pc(pa.pagato_pct)+'</b> del suo finanziamento a Milano ('+M(pa.pagato,0)+' su '+M(pa.finanziato,0)+', tutti i 14 progetti) e Housing First '+pc(hfa.pagato_pct)+'. '+pa.in_collaudo+' progetti PINQuA su '+pa.progetti+' sono nella fase di &laquo;collaudo&raquo;, cio&egrave; con i lavori in sostanza fatti: i pagamenti finali arrivano dopo. I Piani urbani integrati (periferie, non nel nucleo) avevano pagato il '+pc(P['Piani urbani integrati'].pagato_pct)+'.</p>');
+  setH('b-av',nuc.map(function(p){var f=p.fase?p.fase.replace(/ \(.*\)/,''):'';return bar(esc(p.titolo.length>70?p.titolo.slice(0,68)+'…':p.titolo)+'<br><span class="sub">'+esc(p.quartiere||'')+' · '+esc(f.toLowerCase())+' · fine prevista '+dIT(p.fine_prevista_iso).replace('&mdash;','—')+'</span>',p.importo,p.pagato,mx,M(p.importo,2)+' · '+pc(p.pagato_pct)+' pagato')}).join(''));
+  setH('lg-av',lgd([{c:ACC,t:'pagato'},{c:LT,t:'da pagare'}]));
+  var d=pa.fine_dopo_30_6_2026,e=pa.fine_entro_30_6_2026;
+  setH('scad','<b>La scadenza del 2026.</b> Per le misure con termine europeo al primo trimestre 2026, come il PINQuA, il termine italiano per concludere gli interventi era il <b>30 giugno 2026</b>; l&rsquo;Unione europea valuta le attivit&agrave; svolte fino al <b>31 agosto 2026</b>, e le richieste di pagamento vanno inviate entro il 30 settembre 2026 (fonti: <a href="https://pagellapolitica.it/articoli/pnrr-scadenza-giugno-2026">Pagella Politica</a>, <a href="https://www.lavoripubblici.it/news/pnrr-scadenza-30-giugno-2026-allarme-ritardi-proroga-2027-38037">lavoripubblici.it</a>, nota ANCI del 18/3/2026: articoli e linee guida, non il testo del regolamento).<br>Nei dati del 13/6/2026, per il PINQuA di Milano: <b>'+e.progetti+' progetti ('+M(e.finanziato,0)+')</b> hanno fine prevista il 30 giugno 2026, con '+pc(100*e.pagato/e.finanziato)+' gi&agrave; pagato; <b>'+d.progetti+' progetti ('+M(d.finanziato,0)+')</b> hanno fine prevista il 31 dicembre 2026, con '+pc(100*d.pagato/d.finanziato)+' pagato. Non so cosa sia successo dopo: non ci sono dati pi&ugrave; recenti.');
+  var O=D.opencoesione;
+  setH('oc-testo','<p>I fondi di coesione e i programmi nazionali (OpenCoesione) hanno <b>'+O.progetti+' progetti nel nucleo</b>: '+O.conclusi+' conclusi ('+M(O.finanziato_conclusi,0)+') e '+(O.progetti-O.conclusi)+' in corso o non avviati ('+M(O.finanziato_in_corso,0)+', di cui pagati '+M(O.pagato_in_corso,1)+'). Per i '+O.conclusi_con_data_effettiva+' conclusi, la fine effettiva &egrave; arrivata in mediana <b>'+f0(O.ritardo_mediano_giorni)+' giorni</b> dopo la fine prevista (media '+f0(O.ritardo_medio_giorni)+'; '+O.conclusi_con_ritardo_oltre_180g+' progetti con pi&ugrave; di sei mesi). Tra quelli ancora aperti, '+O.in_corso_con_fine_prevista_passata+' ('+M(O.in_corso_con_fine_prevista_passata_importo,1)+') hanno una fine prevista gi&agrave; passata al 30/6/2026: tra questi l&rsquo;&laquo;hub per l&rsquo;ospitalit&agrave; temporanea&raquo; (2,1 M, previsto entro fine 2023, pagato l&rsquo;1%, in fase di aggiudicazione della gara) e la riqualificazione energetica delle case popolari di via San Romanello (15,5 M, fondi europei 2021-27, pagato il 6%, lavori in corso). <span class="sub">La data di fine &laquo;prevista&raquo; pu&ograve; essere stata aggiornata nel tempo: il ritardo misura quanto l&rsquo;ultima previsione scritta nei dati si discosta dalla fine effettiva.</span></p>');
+}
+
+function grandi(){
+  var g=PJ.filter(function(p){return p.nucleo===1&&p.fonte.indexOf('PNC')!==0}).sort(function(a,b){return b.importo-a.importo}).slice(0,14);
+  table('tab-big',['Progetto (titolo come nella fonte)','Programma','Ente','Quartiere','Finanziato','% pagato','Fine prevista'],g.map(function(p){
+    var pr=p.programma.replace('PNRR - PINQuA (qualita\' dell\'abitare)','PNRR · PINQuA').replace("PON FESR FSE CITTA' METROPOLITANE","PON Metro").replace('PN FESR FSE+ METRO PLUS E CITTÀ MEDIE SUD','PN Metro Plus').replace('PSC CITTÀ METROPOLITANA DI MILANO','PSC Città metr.');
+    return [esc(p.titolo.length>110?p.titolo.slice(0,108)+'…':p.titolo)+'<br><span class="sub">CUP '+esc(p.cup)+'</span>',esc(pr),esc(p.tipo_ente.replace('Citta metropolitana di Milano','Città metr.')),esc(p.quartiere||'—'),M(p.importo,1),p.pagato_pct==null?'—':pc(p.pagato_pct),dIT(p.fine_prevista_iso)]}));
+  for(var i=1;i<=7;i++){var c=el('tab-big').querySelectorAll('tbody tr td:nth-child('+i+')');for(var k=0;k<c.length;k++){if(i<5&&i>1)c[k].className='';if(i===1)c[k].className=''}}
+}
+
+function registro(){
+  var O=D.opencup;
+  var ent={};O.per_ente.forEach(function(r){ent[r.ente]=r});
+  setH('reg-testo','<p>Il registro nazionale dei CUP elenca per Milano <b>'+f0(O.cup_enti_pubblici)+' progetti &laquo;abitativi&raquo; di ALER, MM, Comune e Regione</b> con un costo dichiarato di <b>'+nf(O.costo_enti_pubblici/1e9,1)+' miliardi</b> (compresi progetti chiusi, anche di vent&rsquo;anni fa, e accordi quadro pluriennali). Quelli ancora attivi e decisi dal 2020 sono <b>'+O.attivi_dal_2020.cup+'</b>, per <b>'+nf(O.attivi_dal_2020.costo/1e9,2)+' miliardi</b>. Di questi soltanto '+O.attivi_dal_2020_in_oc_o_pnrr.cup+' sono anche nei dati di PNRR o fondi di coesione (costo dichiarato '+nf(O.attivi_dal_2020_in_oc_o_pnrr.costo/1e9,2)+' miliardi). Il resto &egrave; finanziato in altri modi che i dati non dicono (un CUP di ALER da 68,5 M cita i meccanismi fiscali della legge 77/2020, cio&egrave; il Superbonus; altri verranno dai bilanci di ALER, Comune e Regione) e <b>per questi i dati aperti non dicono quanto &egrave; stato pagato</b>. Il costo del CUP non &egrave; un finanziamento n&eacute; una spesa.</p>');
+  table('tab-cup',['Primi per costo dichiarato (titolo come nel registro)','Ente','Stato','Costo'],O.top.slice(0,8).map(function(t){var s=t.DESCRIZIONE_SINTETICA_CUP;var tt=s.split('*');var tx=(tt.length>2?tt[0]+' · '+tt[2]:s).replace(/^MM S\.P\.A\.\* ?/,'');return [esc(tx.length>130?tx.slice(0,128)+'…':tx),esc(t.ente),esc(t.STATO_PROGETTO.toLowerCase())+' ('+esc(t.ANNO_DECISIONE)+')',M(t.costo,0)]}));
+}
+
+function bilancio(){
+  var B=D.bilancio_m8_erp.filter(function(r){return r.anno>=2015}),mx=Math.max.apply(null,B.map(function(r){return r.titolo_2}));
+  var b25=B.filter(function(r){return r.anno===2025})[0];
+  setH('bil-testo','<p>Per confronto: la spesa del Comune di Milano in conto capitale per l&rsquo;edilizia residenziale pubblica &egrave; stata di <b>'+M(D.bilancio_m8_erp_capitale_2021_2025,0)+'</b> nel quinquennio 2021-2025 (impegni di rendiconto; '+M(b25.titolo_2,0)+' nel solo 2025), pi&ugrave; '+M(b25.titolo_1,0)+' di spesa corrente nel 2025. Non si possono confrontare direttamente con i fondi della pagina: il bilancio comprende anche contributi, trasferimenti e opere che nei dati dei progetti non compaiono, e parte dei fondi qui sopra (PNRR, UE) transita nel bilancio del Comune.</p>');
+  setH('b-bil',B.map(function(r){return '<div class="row"><span class="nm">'+r.anno+'</span><span class="tr"><span class="seg" style="width:'+(r.titolo_2/mx*100)+'%;background:'+ACC+'"></span></span><span class="v">'+M(r.titolo_2)+'</span></div>'}).join(''));
+}
+
+function limiti(){
+  var L=[
+   '<b>Non esiste un unico elenco.</b> Ho messo insieme tre fonti sui progetti (OpenCoesione, PNRR/ReGiS, Piano complementare) e il registro dei CUP; il Comune di Milano non pubblica un elenco delle sue opere pubbliche con finanziamenti (cercato con 30 parole chiave sul portale dei dati aperti: nulla), e nemmeno i programmi di ALER e MM.',
+   '<b>Importi non omogenei.</b> PNRR: finanziamento totale e pagamenti dei soggetti attuatori; coesione: costo ammesso e pagamenti di coesione; Piano complementare: solo aggiudicazioni; registro dei CUP: costo dichiarato. Per lo stesso progetto le cifre possono differire (esempio: Gratosoglio, 54,4 M nel PNRR e 52,3 M nel registro; accordo Lorenteggio, 30,5 M di coesione contro 45,0 M di costo nel registro). Sommo solo importi della stessa natura e dico quando non lo sono.',
+   '<b>Pagato non vuol dire finito.</b> I pagamenti arrivano dopo il collaudo; i progetti in fase di collaudo risultano pagati in parte. Il dato PNRR &egrave; del 13/6/2026, quello di OpenCoesione del 30/6/2026 (alcuni progetti fermi a date pi&ugrave; vecchie).',
+   '<b>Le date previste cambiano.</b> Le date di fine nei dati sono le ultime scritte, non quelle originali: un ritardo gi&agrave; assorbito in una proroga non si vede.',
+   '<b>Quartiere.</b> Solo '+pc(100*(1-D.non_localizzati.finanziato/D.totali.nucleo_finanziato))+' dei soldi del nucleo &egrave; localizzato, dal testo del titolo o della sintesi; i dati non hanno coordinate. Per i progetti del PINQuA la proposta (ID 94, 318, 363, 510) &egrave; un&rsquo;area, non un confine. Il quartiere &egrave; il NIL del Comune; le vie che attraversano pi&ugrave; NIL non sono assegnate.',
+   '<b>Perimetro scelto a mano.</b> Per i fondi di coesione ho letto titolo e sintesi di circa 120 progetti e scelto quali includere (elenco e motivo per ogni progetto nel file scaricabile). Altre scelte sarebbero possibili. Non sono contati: Superbonus e altri crediti d&rsquo;imposta, i fondi di ALER, MM e Comune non rendicontati nei dati aperti, i contratti di quartiere pi&ugrave; vecchi.',
+   '<b>Stesso progetto, due righe.</b> Alcuni progetti hanno pi&ugrave; righe nei dati (per esempio ristrutturazioni in pi&ugrave; lotti con lo stesso CUP): le sommo come righe distinte di OpenCoesione, dopo aver controllato che nessun CUP sia presente sia in OpenCoesione sia nel PNRR del nucleo.',
+   '<b>Un progetto escluso per dubbio.</b> Due righe di efficientamento ALER in via dei Larici (2,4 M) sono assegnate a Milano da OpenCoesione ma uno dei titoli parla di Rozzano: le ho lasciate fuori dalle somme.',
+   '<b>Chi realizza.</b> Nel PNRR il &laquo;soggetto attuatore&raquo; di Gratosoglio &egrave; la Regione e di via dei Giaggioli il Comune; ALER e MM compaiono nei testi delle gare. Ho assegnato ALER o MM solo quando il testo lo dice chiaramente.',
+   '<b>Fonte secondaria per le scadenze.</b> Le date del 30 giugno e 31 agosto 2026 vengono da articoli di stampa e da una nota ANCI, non dal regolamento europeo.'
+  ];
+  setH('limiti-lista',L.map(function(t){return '<li>'+t+'</li>'}).join(''));
+}
+
+function metodo(){
+  var M_=[
+   '<b>OpenCoesione</b> (progetti per regione, tutti i cicli 2007-2027, dati al 30/6/2026): ho tenuto i progetti localizzati nel Comune di Milano (codice ISTAT 015146; 128.501 righe, quasi tutte formazione) e scelto a mano quelli su case popolari, emergenza abitativa e quartieri popolari/fragili (programma, titolo e motivo nel file).',
+   '<b>PNRR</b> (Italia Domani, progetti + localizzazione + pagamenti + gare, estrazione del 13/6/2026): CUP localizzati a Milano agganciati per CUP e codice locale. Nel nucleo: sotto-misura PINQuA (I2.3.1) e Housing First (I1.3); i Piani urbani integrati (I2.2.3) restano nel perimetro largo. Dentro il PINQuA ho separato i progetti di mobilit&agrave; della proposta ID 94 (M4, tram 90-91, pista ciclabile via Olona), non localizzabili in un quartiere popolare.',
+   '<b>Piano complementare</b>: interventi C.13 &laquo;riqualificazione edilizia residenziale&raquo; localizzati a Milano; importi dalle gare.',
+   '<b>Registro dei CUP</b> (OpenCUP): CUP localizzati a Milano con sottosettore &laquo;abitative&raquo; (o titolare ALER/MM con parole come ERP, alloggi); esclusi gli incentivi alle imprese. Servono solo a mostrare quanto non si vede.',
+   '<b>Quartiere</b>: indirizzo trovato nel testo e agganciato ai civici del Comune (via e civico), oppure nome del quartiere nel testo, oppure area della proposta PINQuA. Lorenteggio e Giambellino sono contati insieme.',
+   '<b>Controlli</b>: ogni totale ricalcolato per programma, ente, tipo e quartiere (scarto zero); lo script della pagina si ferma se un numero chiave cambia.'
+  ];
+  setH('metodo-lista',M_.map(function(t){return '<li>'+t+'</li>'}).join(''));
+  setH('file-lista','Scaricabili: <a href="data/progetti_perimetro.csv">progetti_perimetro.csv</a> (un progetto per riga, con motivo di inclusione e metodo del quartiere), <a href="data/aree.csv">aree.csv</a>, <a href="data/bilancio_missione8_erp.csv">bilancio_missione8_erp.csv</a>, <a href="data/opencup_per_ente.csv">opencup_per_ente.csv</a>, <a href="data/riepilogo.json">riepilogo.json</a>, <a href="data/nil.geojson">nil.geojson</a>.');
+}
+
+function fonti(){
+  var F=[
+   'OpenCoesione, <a href="https://opencoesione.gov.it/it/opendata/">progetti per regione (Lombardia)</a>, dati al 30/6/2026, licenza CC BY 4.0 (<a href="https://opencoesione.gov.it/it/licenza/">licenza</a>). Scaricato il 1/11/2026.',
+   'Italia Domani / ReGiS, <a href="https://www.italiadomani.gov.it/content/sogei-ng/it/it/catalogo-open-data.html">Catalogo Open Data</a>: Progetti del PNRR (v13), Localizzazione (v13), Pagamenti (v5), Gare (v11), estrazione 13/6/2026, CC-BY-4.0. Scaricato il 1/11/2026.',
+   'Italia Domani, dati del Piano complementare (PNC): localizzazione geografica e gare, 7/3/2024, CC-BY-4.0. Scaricato il 1/11/2026.',
+   'OpenCUP (Dipartimento per la programmazione e il coordinamento della politica economica), <a href="https://www.opencup.gov.it/portale/web/opencup/accesso-agli-open-data">open data</a>: progetti, localizzazione, soggetti; aggiornamento 1/10/2026, CC-BY. Scaricato il 1/11/2026.',
+   'Comune di Milano, dati aperti (<a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>): bilancio, rendiconti 2015-2025 (CC-BY); confini dei NIL (CC BY).',
+   'Scadenza PNRR: <a href="https://pagellapolitica.it/articoli/pnrr-scadenza-giugno-2026">Pagella Politica</a>, <a href="https://www.lavoripubblici.it/news/pnrr-scadenza-30-giugno-2026-allarme-ritardi-proroga-2027-38037">lavoripubblici.it</a>, nota ANCI sulle linee guida del 18/3/2026 (fonti secondarie, lette il 1/11/2026).'
+  ];
+  setH('fonti-lista',F.map(function(t){return '<li>'+t+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

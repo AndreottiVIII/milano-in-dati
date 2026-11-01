@@ -2661,3 +2661,11 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: ISTAT abitazioni per sezione 1991-2023 (CC BY 4.0, dal filone censimenti), comunicati ISTAT 2024 e 2026; MEF/Agenzia Entrate "Gli immobili in Italia" 2019-2026 (nessuna licenza aperta: in pagina solo pochi numeri citati con tabella, nessuna tabella copiata); Inside Airbnb solo come conteggi per NIL. Il dato "oltre 109.000" del Politecnico coincide col censimento permanente 2021 (109.404 abitazioni non occupate da residenti, 13,5%).
 - Numeri: 10,0% (1991), 6,0% (2011), 13,5% (2021), 12,7% (2023); Duomo 39%. Sorpresa: il salto 2011→2021 c'è anche fuori Milano (Lombardia 15,2% → 21,2%): è soprattutto il passaggio ISTAT ai registri, non un'esplosione; dal 2021 al 2023 il numero cala del 3,7%; 4 case non occupate su 5 sono fuori dal Municipio 1.
 - Limiti dei dati: 2011-2021 non alla pari (abitazioni del Municipio 1 +49%, forse studi e uffici a catasto, ipotesi non verificata); 2021-23 stime che non distinguono vuote da non residenti; i pezzi (a disposizione, Airbnb, popolari vuote) non si sommano.
+
+## 60. I soldi per i quartieri popolari
+
+- 2026-11-01 notte — Fase 1 e pagina (`fondi-quartieri/`, `docs/fondi-quartieri/`), voluta da Davide e pubblicata con l'autorizzazione notturna. Dettagli in `fondi-quartieri/NOTE.md`.
+- Fonti: OpenCoesione (dati al 30/6/2026, CC BY 4.0), Italia Domani/ReGiS (estrazione 13/6/2026, CC BY 4.0), OpenCUP (registro, solo confronto), bilancio del Comune missione 8. ANAC senza CUP: nessun aggancio. Scadenze PNRR da fonti secondarie, dichiarate.
+- Perimetro "nucleo" scelto a mano (regole nel programma): 47 progetti, 240,7 milioni finanziati, 61% pagati; Lorenteggio-Giambellino 98,5 milioni, Gratosoglio 54,4; Quarto Oggiaro nessun progetto nel nucleo. Sorpresa: del PINQuA a Milano (223,7 milioni) solo il 57% va a edifici di case popolari; il progetto più grande (via dei Giaggioli, MM) ha fine prevista dopo il 30/6/2026.
+- Correzione del coordinatore: alla frase sul registro dei CUP (139 progetti, 2,0 miliardi di costo dichiarato, solo 11 nei dati di pagamento) aggiunto che il registro non dice come sono finanziati e che il costo non è un finanziamento.
+- Limiti dei dati: importi di natura diversa tra fonti; pagato non vuol dire finito; quartiere ricavato dal testo (34 milioni non localizzati); niente dati dopo il 13/6/2026.
