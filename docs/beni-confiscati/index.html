@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Beni confiscati alla mafia</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2;--or:#c26a1b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.1em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid var(--or);padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.dot{width:12px;height:12px;border-radius:50%}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:.8em 0} .tile{border:1px solid var(--line);padding:8px 12px} .tile b{display:block;font-size:1.9rem;line-height:1.15;color:var(--acc)} .tile span{font-size:.85rem;color:var(--mut)}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 92px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:12px;position:relative;display:flex} .bars .fill{display:block;height:12px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} .bars .row.mi .nm{font-weight:700} .bars .row.mi .fill{background:var(--or)}
+.bars .seg{height:12px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .tiles{grid-template-columns:1fr} .bars .row{grid-template-columns:minmax(90px,40%) 1fr 70px}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.pill{display:inline-block;font-size:.78rem;border:1px solid var(--or);color:var(--warm);background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;margin:.3em 0} .key i{display:inline-block;width:12px;height:10px;margin-right:4px;vertical-align:0}
+#tab-serie{min-width:480px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Beni confiscati alla mafia a Milano</h1>
+<p>Case, box, negozi, terreni e aziende tolti alla criminalit&agrave; organizzata. Dopo la confisca li amministra l&rsquo;Agenzia nazionale (ANBSC), che poi li <b>&laquo;destina&raquo;</b>: a un comune, allo Stato, oppure li vende. Qui guardiamo quelli che stanno nel comune di Milano, con i dati aperti dell&rsquo;Agenzia e del Comune, scaricati il 1&nbsp;novembre 2026.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Qui si contano <b>beni</b>, non persone: non c&rsquo;&egrave; nessun nome di chi ha subito la confisca, n&eacute; delle aziende, n&eacute; di chi usa oggi i beni. Un appartamento, la sua cantina e il suo box sono tre beni. I dati dicono quando un bene &egrave; passato a un ente, non quando &egrave; stato confiscato. L&rsquo;Agenzia avverte che le destinazioni pi&ugrave; recenti <b>potrebbero essere sottostimate</b> perch&eacute; sta rinnovando la sua piattaforma. Tutti i dettagli sono nei <a href="#limiti">limiti dei dati</a>.</div>
+
+<h2 id="numero">Il numero grande</h2>
+<div class="tiles" id="tiles"></div>
+<div id="numero-testo"></div>
+<h3>I comuni con pi&ugrave; beni confiscati d&rsquo;Italia</h3>
+<div class="bars" id="b-top"></div>
+<p class="src">Numero di beni (immobili e aziende, in gestione e destinati) per comune. Fonte: ANBSC, esportazione dei dati aperti del 1/11/2026 (Italian Open Data License v2.0).</p>
+
+<h2 id="mappa">Dove sono</h2>
+<p>Ogni cerchio &egrave; un palazzo: pi&ugrave; &egrave; grande, pi&ugrave; unit&agrave; ci sono dentro. I quartieri sono colorati per numero di unit&agrave;. Clic su un cerchio o su un quartiere per i dettagli.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="c" class="on">Elenco del Comune (274 unit&agrave;)</button><button type="button" data-m="a">Immobili destinati secondo ANBSC (319)</button>
+<label class="ck"><input type="checkbox" id="ck-ed" checked> palazzi</label></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano con i palazzi che contengono beni confiscati"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src" id="map-src">Mappa &copy; OpenStreetMap contributors. Posizioni: numeri civici del Comune di Milano (CC BY).</p>
+<div id="scheda" class="card"><span class="sub">Scegli un palazzo o un quartiere sulla mappa.</span></div>
+<h3>Pochi palazzi, molte unit&agrave;</h3>
+<div id="conc-testo"></div>
+<div class="bars" id="b-palazzi"></div>
+<h3>I quartieri con pi&ugrave; unit&agrave;</h3>
+<div class="bars" id="b-nil"></div>
+<p class="src">Unit&agrave; dell&rsquo;elenco del Comune di Milano (giugno 2026). Il quartiere &egrave; il NIL (nucleo di identit&agrave; locale) del numero civico. <a href="data/nil.geojson">nil.geojson</a> ha tutti gli 88 quartieri.</p>
+
+<h2 id="stato">Che fine hanno fatto</h2>
+<div id="stato-testo"></div>
+<h3>I 477 immobili secondo l&rsquo;Agenzia, per tipo</h3>
+<div class="key" id="k-anbsc"></div><div class="bars" id="b-anbsc"></div>
+<p class="src">ANBSC, immobili nel comune di Milano. &laquo;Destinato&raquo; = passato a un ente (soprattutto il Comune) o tenuto dallo Stato. Gli altri tipi (locali commerciali, altro) sono raggruppati sotto &laquo;altro&raquo;.</p>
+<h3>Le 274 unit&agrave; dell&rsquo;elenco del Comune, per tipo e per uso</h3>
+<div class="key" id="k-com"></div><div class="bars" id="b-com"></div>
+<div class="grid2"><div><h3>A chi sono affidate (le 193 in uso)</h3><div class="bars" id="b-enti"></div></div>
+<div><h3>A chi sono destinati i 319 immobili</h3><div class="bars" id="b-dest"></div></div></div>
+<p class="src">Elenco del Comune (ds147, giugno 2026, CC BY) e ANBSC. Dei nomi di chi ha in uso i beni qui si dice solo il tipo.</p>
+
+<h2 id="tempo">Da quando</h2>
+<div id="tempo-testo"></div>
+<div class="ch" id="ch-anni" role="img" aria-label="Grafico: immobili destinati per anno del decreto"></div>
+<div class="key" id="k-anni"></div>
+<p class="src">Anno del decreto con cui il bene &egrave; passato a un ente (ANBSC, 319 immobili). Non &egrave; l&rsquo;anno della confisca, che nei dati non c&rsquo;&egrave;.</p>
+<div id="attesa-testo"></div>
+<div class="ch" id="ch-attesa" role="img" aria-label="Grafico: anni dal decreto delle unit&agrave; non ancora in uso"></div>
+<p class="src">Le 57 unit&agrave; dell&rsquo;elenco del Comune non in uso e con anno di decreto noto (agganciate per indirizzo agli immobili destinati ANBSC). Anni = 2026 &minus; anno del decreto.</p>
+
+<h2 id="aziende">Le aziende</h2>
+<div id="az-testo"></div>
+<h3>Le 188 aziende nel comune di Milano, per settore</h3>
+<div class="key" id="k-az"></div><div class="bars" id="b-az"></div>
+<div class="grid2"><div><h3>Come finiscono le aziende destinate</h3><div class="bars" id="b-az-esito"></div></div>
+<div><h3>Le 153 aziende con sede a Milano (confisca definitiva)</h3><div class="bars" id="b-az-uc"></div></div></div>
+<p class="src">Settore secondo ANBSC (export 1/11/2026). A destra: Unioncamere e ANBSC, aziende in confisca definitiva (CC BY 4.0, dati al 1/10/2026); l&rsquo;attivit&agrave; &egrave; il codice Ateco dichiarato al registro delle imprese. Nessun nome di azienda.</p>
+<div id="az-testo2"></div>
+
+<h2 id="citta">Milano e le altre citt&agrave;</h2>
+<div id="citta-testo"></div>
+<div class="ctl"><span class="sub">Confronta:</span>
+<button type="button" data-c="tot">Beni in tutto</button><button type="button" data-c="p100k" class="on">Beni ogni 100.000 abitanti</button><button type="button" data-c="quota_gest">Immobili ancora in gestione all&rsquo;Agenzia (%)</button></div>
+<div class="bars" id="b-citta"></div>
+<p class="src" id="citta-src">ANBSC, 1/11/2026; abitanti al 1/1/2025 (ISTAT). &laquo;Beni&raquo; = immobili e aziende, contati uno per uno.</p>
+<div id="prov-testo"></div>
+
+<h2 id="cambia">Dal 2014 a oggi</h2>
+<div id="cambia-testo"></div>
+<div class="scroll"><table id="tab-serie"></table></div>
+<p class="src">2014 e 2024: copie dei file ANBSC pubblicate da Confiscati Bene (Libera e onData), oggi spento, recuperate dalla Wayback Machine. 2026: ANBSC, 1/11/2026.</p>
+<div class="warm"><b>Confronto indicativo.</b> I nomi degli stati e il modo di contare non sono identici in tutti gli anni. L&rsquo;aumento dei beni destinati pu&ograve; dipendere anche da registrazioni fatte in ritardo.</div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p id="files"></p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Agenzia nazionale per l&rsquo;amministrazione e la destinazione dei beni sequestrati e confiscati alla criminalit&agrave; organizzata (ANBSC), Infoweb / OpenRe.G.I.O., esportazioni nazionali di immobili e aziende, in gestione e destinati: Italian Open Data License v2.0, scaricate il 1/11/2026 &ndash; <a href="https://openregio.anbsc.it/statistiche">openregio.anbsc.it/statistiche</a>. &laquo;Aziende confiscate&raquo; (Unioncamere e ANBSC), dati JSON-LD al 1/10/2026: CC BY 4.0, scaricati il 1/11/2026 &ndash; <a href="https://aziendeconfiscate.camcom.gov.it/odacWeb/home">aziendeconfiscate.camcom.gov.it</a>. Comune di Milano, &laquo;Sociale: beni immobili confiscati alla criminalit&agrave; organizzata&raquo; (ds147, giugno 2026) e registro dei numeri civici con coordinate (ds634, 1/10/2026): Creative Commons Attribution (CC BY), scaricati il 1/11/2026 &ndash; dati.comune.milano.it. Copie 2014 e 2024 dei file ANBSC: Confiscati Bene (Libera, onData), dalla Wayback Machine, scaricate il 1/11/2026; i dati originali sono ANBSC. Popolazione: ISTAT, residenti al 1/1/2025, scaricata il 1/11/2026. Mappa: &copy; OpenStreetMap contributors.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,ED=[],RD=[];
+var ACC='#00695c',OR='#c26a1b',GR='#8a8a8a',DK='#444',LT='#d9b48a';
+var SEQ=['#eef6f4','#c3e0da','#8fc7bd','#4fa597','#1d7a6d','#064a41'];
+var TIPI={abitazione:'abitazioni',box_posto_auto:'box e posti auto',negozio_laboratorio:'negozi e laboratori',magazzino:'magazzini',terreno:'terreni',altro_pertinenza:'cantine, solai e simili',altro_commerciale_industriale:'altri locali commerciali',altro:'altro'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function bars(id,rows,o){/* rows: [nome, valore, etichetta?, evidenzia?] */
+  o=o||{};var mx=o.max||Math.max.apply(null,rows.map(function(r){return r[1]}))||1;
+  setH(id,rows.map(function(r){return '<div class="row'+(r[3]?' mi':'')+'"><div class="nm">'+esc(r[0])+'</div><div class="tr"><span class="fill" style="width:'+Math.max(0.5,100*r[1]/mx)+'%"></span></div><div class="v">'+(r[2]!=null?r[2]:f0(r[1]))+'</div></div>'}).join(''))}
+function stack(id,rows,cols,o){/* rows: [nome,v1,v2,..] ; stessa scala per tutte le righe */
+  o=o||{};var mx=Math.max.apply(null,rows.map(function(r){return r.slice(1).reduce(function(a,b){return a+b},0)}))||1;
+  setH(id,rows.map(function(r){var t=r.slice(1).reduce(function(a,b){return a+b},0);
+    return '<div class="row"><div class="nm">'+esc(r[0])+'</div><div class="tr">'+cols.map(function(c,k){var v=r[k+1];return v?'<span class="seg" title="'+esc(c[0])+': '+f0(v)+'" style="width:'+(100*v/mx)+'%;background:'+c[1]+'"></span>':''}).join('')+'</div><div class="v">'+r.slice(1).map(f0).join(' · ')+'</div></div>'}).join(''));
+  if(o.key)setH(o.key,cols.map(function(c){return '<span><i style="background:'+c[1]+'"></i>'+c[0]+'</span>'}).join(''))}
+function pct(a,b){return b?100*a/b:0}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/edifici.json')]).then(function(a){
+  D=a[0];NF=a[1];ED=a[2];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();numero();mappa();stato();tempo();aziende();citta();cambia();limiti();metodo();files();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var A=D.aziende,C=D.comune,I=A.italia_esiti;
+  var h='<p><b>Le aziende confiscate non sopravvivono.</b> In Italia, delle '+f0(A.italia_uscite)+' aziende destinate, '+f0(I.Liquidazione)+' (il '+f0(A.quota_liquidate_italia)+'%) sono state <b>liquidate</b>, '+I.Vendita+' vendute, '+I.Affitto+' affittate e '+I['Cessione gratuita']+' ceduta gratuitamente. A Milano: '+A.liquidate+' su '+A.uscite+' liquidate e '+A.vendute+' vendute.</p>';
+  h+='<p><b>Le case, invece, vengono riusate.</b> Delle '+C.unita+' unit&agrave; dell&rsquo;elenco del Comune, <b>'+C.uso+'</b> sono in uso: '+C.assegnate_terzi+' affidate a fondazioni, cooperative, associazioni e altri, '+C.in_gestione_diretta+' gestite direttamente dal Comune.</p>';
+  h+='<p><b>Il freno &egrave; un solo palazzo.</b> '+C.torre.unita+' delle '+C.attesa+' unit&agrave; in attesa di assegnazione sono i box di <b>Via Carlo Torre 24</b>: passati al Comune nel '+C.torre.decreto+' e ancora &laquo;in attesa di prossimo bando&raquo;, '+C.torre.anni+' anni dopo.</p>';
+  h+='<p class="src">ANBSC, esportazione del 1/11/2026; elenco del Comune di Milano, giugno 2026. &laquo;In attesa&raquo; non vuol dire &laquo;mai usati&raquo;: pu&ograve; essere un bene gi&agrave; assegnato in passato e ora in attesa di un nuovo bando (<a href="#limiti">limiti dei dati</a>).</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- numero grande ---------- */
+function numero(){
+  var M=D.milano,P=D.provincia;
+  setH('tiles','<div class="tile"><b>'+f0(M.totale)+'</b><span>beni confiscati nel comune di Milano: '+f0(M.immobili)+' immobili e '+f0(M.aziende)+' aziende</span></div>'+
+    '<div class="tile"><b>'+M.pos_italia+'&ordm;</b><span>comune d&rsquo;Italia per numero di beni, il primo del Nord (su '+f0(M.italia_totale)+' beni in tutta Italia: Milano ne ha l&rsquo;'+nf(M.quota_italia_pct,1)+'%)</span></div>'+
+    '<div class="tile"><b>'+f0(M.p100k)+'</b><span>beni ogni 100.000 abitanti, meno di Roma, Napoli e Palermo</span></div>');
+  var c={};D.citta.forEach(function(x){c[x.comune]=x});
+  setH('numero-testo','<p>Milano &egrave; il primo comune del Nord per numero di beni confiscati, ma in rapporto agli abitanti ne ha meno di Roma ('+f0(c.Roma.p100k)+' ogni 100.000), Napoli ('+f0(c.Napoli.p100k)+') e soprattutto Palermo ('+f0(c.Palermo.p100k)+'): Milano ne ha '+f0(M.p100k)+'. Ne ha di pi&ugrave; di Torino ('+f0(c.Torino.p100k)+') e Genova ('+f0(c.Genova.p100k)+'). In provincia (Citt&agrave; metropolitana) i beni sono '+f0(P.tot)+', in tutta la Lombardia '+f0(P.lombardia_tot)+'.</p>');
+  bars('b-top',D.top_assoluti.map(function(r){return [r[0],r[1],null,r[0]==='Milano']}));
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,NL=null,EL=null,MODE='c',SELN=null;
+function brk(m){return m==='c'?[1,5,10,20,30]:[1,5,10,20,30]}
+function colN(v,m){if(!v)return SEQ[0];var b=brk(m),i=0;while(i<b.length&&v>=b[i])i++;return SEQ[Math.min(i,5)]}
+function nStyle(f){var p=f.properties,v=MODE==='c'?p.cu:p.ad;return {fillColor:colN(v,MODE),fillOpacity:.78,color:SELN===p.i?'#000':'#fff',weight:SELN===p.i?3:1}}
+function tot(e){return MODE==='c'?e.cu:e.ad}
+function edCol(e){
+  if(MODE==='c'){if(e.att>0)return OR; if(e.uso===0)return GR; return ACC}
+  var d=e.dd,best=null,bv=-1;Object.keys(d).forEach(function(k){if(d[k]>bv){bv=d[k];best=k}});
+  if(best==='Comune')return ACC; if(best&&best.indexOf('Stato')===0)return DK; return LT}
+function mappa(){
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  NL=L.geoJSON(NF,{style:nStyle,onEachFeature:function(f,l){
+    l.bindTooltip(function(){var p=f.properties;return '<b>'+esc(p.n)+'</b><br>'+(MODE==='c'?f0(p.cu)+' unit&agrave; del Comune':f0(p.ad)+' immobili destinati')},{sticky:true});
+    l.on('click',function(){SELN=f.properties.i;NL.setStyle(nStyle);schedaN(f.properties)})}}).addTo(MAP);
+  MAP.fitBounds(NL.getBounds());
+  EL=L.layerGroup().addTo(MAP);
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    MODE=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ric()})});
+  el('ck-ed').addEventListener('change',function(){if(this.checked)EL.addTo(MAP);else MAP.removeLayer(EL)});
+  ric();
+  setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(NL.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+  /* concentrazione */
+  var C=D.comune;
+  setH('conc-testo','<p>I '+C.unita+' beni dell&rsquo;elenco del Comune stanno in '+C.indirizzi+' indirizzi. I primi tre palazzi ne contengono <b>'+C.tre_palazzi+'</b> ('+f0(pct(C.tre_palazzi,C.unita))+'%), i primi cinque '+C.cinque_palazzi+' ('+f0(pct(C.cinque_palazzi,C.unita))+'%). Sono quasi sempre stabili interi o grandi parti di un condominio, assegnati insieme.</p>');
+  bars('b-palazzi',C.top5_palazzi.map(function(r){return [r[0],r[1]]}));
+  bars('b-nil',C.quartieri_top.map(function(r){return [r[0],r[1]]}));
+}
+function ric(){
+  NL.setStyle(nStyle);EL.clearLayers();
+  var mx=0;ED.forEach(function(e){mx=Math.max(mx,tot(e))});
+  ED.filter(function(e){return tot(e)>0}).sort(function(a,b){return tot(b)-tot(a)}).forEach(function(e){
+    var m=L.circleMarker([e.lat,e.lon],{radius:4+2.3*Math.sqrt(tot(e)),color:'#fff',weight:1.5,fillColor:edCol(e),fillOpacity:.88});
+    m.bindTooltip('<b>'+esc(e.a)+'</b><br>'+f0(tot(e))+(MODE==='c'?' unit&agrave; del Comune':' immobili destinati'),{sticky:true});
+    m.on('click',function(){schedaE(e)});EL.addLayer(m)});
+  var h='';
+  ['nessuna','1–4','5–9','10–19','20–29','30 o più'].forEach(function(t,i){h+='<span><i style="background:'+SEQ[i]+'"></i>'+t+'</span>'});
+  if(MODE==='c'){h+='<span><i class="dot" style="background:'+ACC+'"></i>palazzo in uso</span><span><i class="dot" style="background:'+OR+'"></i>con unità in attesa</span><span><i class="dot" style="background:'+GR+'"></i>ferme o senza informazioni</span>';
+    setH('map-desc','Le 274 unit&agrave; dell&rsquo;elenco del Comune di Milano (giugno 2026). Quartieri colorati per numero di unit&agrave;; cerchi: i palazzi. '+D.posizione.comune.civico+' unit&agrave; su 274 sono su un numero civico esatto; 3 hanno una posizione approssimata e una &egrave; indicata solo per quartiere.')}
+  else{h+='<span><i class="dot" style="background:'+ACC+'"></i>al Comune</span><span><i class="dot" style="background:'+DK+'"></i>allo Stato (forze dell&rsquo;ordine, ministeri)</span><span><i class="dot" style="background:'+LT+'"></i>Provincia, altro</span>';
+    setH('map-desc','I 319 immobili destinati nel comune di Milano secondo ANBSC: dove si trovano e a chi sono andati. Gli immobili ancora in gestione all&rsquo;Agenzia (158) non hanno indirizzo nei dati e non sono sulla mappa.')}
+  setH('lg-map',h);
+}
+function nome(k){return TIPI[k]||k}
+function lst(o,fn){return Object.keys(o).sort(function(a,b){return o[b]-o[a]}).map(function(k){return (fn?fn(k):k)+' '+o[k]}).join(', ')}
+function schedaE(e){
+  var h='<h3>'+esc(e.a)+'</h3><p class="sub">'+esc(e.nil)+(e.q==='vicino'?' · <span class="pill">posizione approssimata</span>':'')+'</p>';
+  if(e.cu){h+='<p><b>Elenco del Comune: '+e.cu+' unit&agrave;</b> ('+esc(lst(e.tc,nome))+'). In uso: '+e.uso+'; in attesa di assegnazione: '+e.att+'; ferme o senza informazioni: '+e.alt+'.'+
+    (e.uso?' Affidate a: '+esc(lst(e.ente).replace(/\d+ nessun assegnatario,? ?/,''))+'.':'')+(e.yc?' Decreto di destinazione: '+(e.yc[0]===e.yc[1]?e.yc[0]:e.yc[0]+'–'+e.yc[1])+'.':'')+'</p>'}
+  if(e.ad){h+='<p><b>Immobili destinati (ANBSC): '+e.ad+'</b> ('+esc(lst(e.ta,nome))+'), a: '+esc(lst(e.dd))+'.'+(e.ya?' Decreto: '+(e.ya[0]===e.ya[1]?e.ya[0]:e.ya[0]+'–'+e.ya[1])+'.':'')+'</p>'}
+  setH('scheda',h);
+}
+function schedaN(p){
+  var h='<h3>'+esc(p.n)+'</h3><p><b>Elenco del Comune: '+p.cu+' unit&agrave;</b>'+(p.cu?' (in uso '+p.cuso+', in attesa '+p.catt+', ferme o senza informazioni '+p.calt+')':'')+'.<br><b>Immobili destinati (ANBSC): '+p.ad+'</b>'+(p.ad?', di cui '+p.adc+' al Comune':'')+'.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- che fine hanno fatto ---------- */
+function stato(){
+  var I=D.immobili_stato,C=D.comune,G=D.gestione_provvedimento;
+  setH('stato-testo','<p>Dei <b>'+(I.in_gestione+I.destinati+I.venduti)+' immobili</b> nel comune di Milano, l&rsquo;Agenzia ne amministra ancora <b>'+I.in_gestione+'</b> ('+G['Confisca def.']+' con confisca definitiva, gli altri in attesa dei gradi di giudizio). <b>'+I.destinati+'</b> sono stati destinati: '+I.destinati_enti+' a enti territoriali (215 al Comune di Milano, 18 alla Provincia o Citt&agrave; metropolitana) e '+I.destinati_stato+' tenuti dallo Stato per forze dell&rsquo;ordine e uffici. <b>'+I.venduti+'</b> sono stati venduti.</p><p>L&rsquo;elenco del Comune ha pi&ugrave; unit&agrave; ('+C.unita+') degli immobili destinati al Comune secondo l&rsquo;Agenzia (215): comprende anche acquisizioni pi&ugrave; recenti ('+C.nuove_2026+' del 2026) che i dati dell&rsquo;Agenzia non hanno ancora.</p>');
+  var cols=[['ancora in gestione',OR],['destinato',ACC],['venduto',GR]];
+  var rows=D.stato_tipo.filter(function(r){return r[1]+r[2]+r[3]>0});
+  /* raggruppa gli ultimi tre tipi sotto "altro" */
+  var main=rows.filter(function(r){return ['altri locali commerciali','altro','cantine, solai e simili'].indexOf(r[0])<0}),alt=[0,0,0];
+  rows.forEach(function(r){if(['altri locali commerciali','altro','cantine, solai e simili'].indexOf(r[0])>=0){alt[0]+=r[1];alt[1]+=r[2];alt[2]+=r[3]}});
+  main.push(['cantine, solai, altro',alt[0],alt[1],alt[2]]);
+  main.sort(function(a,b){return (b[1]+b[2]+b[3])-(a[1]+a[2]+a[3])});
+  stack('b-anbsc',main,cols,{key:'k-anbsc'});
+  var cc=[['in uso',ACC],['in attesa di assegnazione',OR],['ferme per lavori o senza informazioni',GR]];
+  var cr=D.uso_tipo.slice();var m2=cr.filter(function(r){return ['cantine, solai e simili','altro'].indexOf(r[0])<0}),a2=[0,0,0];
+  cr.forEach(function(r){if(['cantine, solai e simili','altro'].indexOf(r[0])>=0){a2[0]+=r[1];a2[1]+=r[2];a2[2]+=r[3]}});
+  m2.push(['cantine, solai, altro',a2[0],a2[1],a2[2]]);m2.sort(function(a,b){return (b[1]+b[2]+b[3])-(a[1]+a[2]+a[3])});
+  stack('b-com',m2,cc,{key:'k-com'});
+  var en=D.comune.enti;bars('b-enti',Object.keys(en).sort(function(a,b){return en[b]-en[a]}).map(function(k){return [k,en[k]]}));
+  var de=D.destinatari;bars('b-dest',Object.keys(de).sort(function(a,b){return de[b]-de[a]}).map(function(k){return [k,de[k]]}));
+}
+
+/* ---------- da quando ---------- */
+function tempo(){
+  var C=D.comune;
+  setH('tempo-testo','<p>I dati non dicono quando un bene &egrave; stato confiscato. Dicono l&rsquo;anno del <b>decreto di destinazione</b>, cio&egrave; quando passa a un ente. Per i beni destinati a Milano il procedimento giudiziario si era aperto, in mediana, nel '+D.anni_procedimento_mediana+' e il decreto &egrave; arrivato circa '+D.anni_procedimento_decreto_mediana+' anni dopo. <b>Il 2008 &egrave; l&rsquo;anno del picco</b>: '+D.decreto_2008_tot+' immobili destinati, '+D.decreto_2008_comune+' al Comune (soprattutto due decreti, del 30 giugno e del 13 ottobre 2008).</p>');
+  RD.push(chAnni);chAnni();
+  var a=C.anni_decreto_non_in_uso;
+  setH('attesa-testo','<p>Delle <b>'+C.attesa+'</b> unit&agrave; in attesa di assegnazione e delle altre non in uso, per '+C.n_non_in_uso_con_anno+' si conosce l&rsquo;anno del decreto: <b>'+C.oltre_10+'</b> hanno il decreto di oltre 10 anni fa, mediana '+C.mediana_anni+' anni ('+C.mediana_senza_torre+' se si toglie Via Carlo Torre 24). Ma <b>&laquo;in attesa&raquo; non vuol dire &laquo;mai usato&raquo;</b>: il Comune scrive &laquo;in attesa di prossimo bando&raquo; anche per beni gi&agrave; assegnati in passato. Il numero &egrave; il tempo trascorso dal decreto, non il tempo in cui il bene &egrave; rimasto vuoto.</p>');
+  RD.push(chAtt);chAtt();
+}
+function svgBars(box,data,o){/* data: [[label, [v1,v2..]]]; o: colors, h, labelEvery, mark */
+  var w=el(box).clientWidth||600,h=o.h||220,m={l:30,r:8,t:12,b:24},iw=w-m.l-m.r,ih=h-m.t-m.b;
+  var mx=0;data.forEach(function(d){mx=Math.max(mx,d[1].reduce(function(a,b){return a+b},0))});
+  var step=Math.ceil(mx/4/10)*10;if(mx<=12)step=Math.ceil(mx/4);var top=step*Math.ceil(mx/step);
+  var s='<svg viewBox="0 0 '+w+' '+h+'" height="'+h+'" preserveAspectRatio="none" role="img">';
+  for(var g=0;g<=top;g+=step){var y=m.t+ih-ih*g/top;s+='<line x1="'+m.l+'" x2="'+(w-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="#e5e5e5"/><text class="mu" x="'+(m.l-4)+'" y="'+(y+4)+'" text-anchor="end">'+g+'</text>'}
+  var bw=iw/data.length;
+  data.forEach(function(d,i){var x=m.l+i*bw,acc=0,t=d[1].reduce(function(a,b){return a+b},0);
+    d[1].forEach(function(v,k){if(v){var hh=ih*v/top,y=m.t+ih-ih*(acc+v)/top;s+='<rect x="'+(x+1)+'" y="'+y+'" width="'+Math.max(1,bw-2)+'" height="'+hh+'" fill="'+o.colors[k]+'"><title>'+esc(d[0])+' · '+esc(o.names[k])+': '+f0(v)+'</title></rect>';acc+=v}});
+    if(o.mark&&o.mark.indexOf(d[0])>=0&&t){s+='<text x="'+(x+bw/2)+'" y="'+(m.t+ih-ih*t/top-4)+'" text-anchor="middle" font-weight="700">'+t+'</text>'}
+    var near=o.mark&&data.some(function(q,j){return o.mark.indexOf(q[0])>=0&&j!==i&&Math.abs(j-i)<=1});
+    if(!near&&(i%o.every===0||(o.mark&&o.mark.indexOf(d[0])>=0))){s+='<text class="mu" x="'+(x+bw/2)+'" y="'+(h-8)+'" text-anchor="middle">'+esc(d[0])+'</text>'}});
+  el(box).innerHTML=s+'</svg>'}
+function chAnni(){
+  var data=D.decreti.map(function(r){return [String(r[0]),[r[1],r[2]]]});
+  svgBars('ch-anni',data,{colors:[ACC,GR],names:['al Comune','ad altri enti o allo Stato'],every:4,mark:['2008'],h:230});
+  setH('k-anni','<span><i style="background:'+ACC+'"></i>destinati al Comune</span><span><i style="background:'+GR+'"></i>ad altri (Stato, Provincia, altro)</span>')}
+function chAtt(){
+  var a=D.comune.anni_decreto_non_in_uso,keys=Object.keys(a).sort();
+  var data=keys.map(function(k){return [String(2026-parseInt(k,10))+' anni',[a[k]]]});
+  svgBars('ch-attesa',data,{colors:[OR],names:['unità non in uso'],every:1,mark:['18 anni'],h:190})}
+
+/* ---------- aziende ---------- */
+function aziende(){
+  var A=D.aziende,I=A.italia_esiti,U=A.uc;
+  setH('az-testo','<p>Nel comune di Milano ci sono <b>'+(A.gest+A.uscite)+' aziende</b> confiscate: '+A.gest+' ancora amministrate dall&rsquo;Agenzia e '+A.uscite+' gi&agrave; uscite. Sono quasi tutte societ&agrave; a responsabilit&agrave; limitata ('+A.forma[0][1]+'). I settori pi&ugrave; colpiti sono il mattone (immobiliare e costruzioni), il commercio e la ristorazione.</p>');
+  stack('b-az',A.settori.map(function(r){return [r[0],r[1],r[2]]}),[['in gestione',OR],['uscite (liquidate o vendute)',GR]],{key:'k-az'});
+  bars('b-az-esito',[['Milano: liquidate',A.liquidate],['Milano: vendute',A.vendute],['Italia: liquidate',I.Liquidazione],['Italia: vendute',I.Vendita],['Italia: affittate',I.Affitto],['Italia: cedute gratuitamente',I['Cessione gratuita']]]);
+  var at=U.stato_attivita;
+  bars('b-az-uc',[['ancora attive',at.ATTIVA],['cessate',at.CESSATA],['con procedure concorsuali',at['CON PROCEDURE CONCORSUALI']],['inattive',at.INATTIVA]]);
+  setH('az-testo2','<p>Delle <b>'+U.tot+'</b> aziende con sede a Milano in confisca definitiva, solo <b>'+at.ATTIVA+'</b> sono ancora attive al registro delle imprese. Per <b>'+U.compravendita_immobili+'</b> (una su cinque) l&rsquo;attivit&agrave; dichiarata &egrave; la &laquo;compravendita di beni immobili su beni propri&raquo;; seguono i settori '+U.ateco.slice(0,4).map(function(r){return esc(r[0].toLowerCase())+' ('+r[1]+')'}).join(', ')+'. Le due fonti non contano esattamente le stesse aziende (188 e 153): vedi i <a href="#limiti">limiti dei dati</a>.</p>');
+}
+
+/* ---------- citt&agrave; ---------- */
+var CM='p100k';
+function citta(){
+  var c={};D.citta.forEach(function(x){c[x.comune]=x});
+  setH('citta-testo','<p>Per numero, Milano &egrave; ottava in Italia e prima del Nord. Il numero dipende per&ograve; da quanti abitanti ha il comune. Milano tiene in gestione all&rsquo;Agenzia solo il '+f0(c.Milano.quota_gest)+'% degli immobili (Roma '+f0(c.Roma.quota_gest)+'%, Torino '+f0(c.Torino.quota_gest)+'%, Napoli '+f0(c.Napoli.quota_gest)+'%; in Italia il '+f0(100*D.quota_gestione.Italia[2])+'%): vuol dire che a Milano i beni vengono destinati pi&ugrave; in fretta che altrove, o che molti sono stati destinati prima.</p>');
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-c]'),function(b){b.addEventListener('click',function(){
+    CM=b.getAttribute('data-c');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-c]'),function(x){x.classList.toggle('on',x===b)});cb()})});
+  cb();
+  var P=D.provincia;
+  setH('prov-testo','<p><b>La provincia.</b> Nella Citt&agrave; metropolitana di Milano i beni sono <b>'+f0(P.tot)+'</b> (ottava provincia d&rsquo;Italia); Milano citt&agrave; ne ha il '+f0(100*P.quota_citta)+'%. Fuori dal capoluogo: '+P.comuni.slice(1,7).map(function(r){return esc(r[0])+' '+r[1]}).join(', ')+'. La Lombardia ha '+f0(P.lombardia_tot)+' beni: '+P.lombardia.slice(0,5).map(function(r){return esc(r[0])+' '+f0(r[1])}).join(', ')+'.</p>'+
+    '<p>Un altro modo in cui Milano &egrave; diversa: il '+f0(D.tipo_it_vs_mi.mi_abit_pct)+'% dei suoi immobili sono abitazioni (in Italia il '+f0(D.tipo_it_vs_mi.it_abit_pct)+'%) e solo il '+f0(D.tipo_it_vs_mi.mi_terreni_pct)+'% terreni (in Italia il '+f0(D.tipo_it_vs_mi.it_terreni_pct)+'%).</p>');
+}
+function cb(){
+  var rows=D.citta.slice().filter(function(r){return r[CM]!=null}).sort(function(a,b){return b[CM]-a[CM]});
+  bars('b-citta',rows.map(function(r){return [r.comune,r[CM],CM==='quota_gest'?f0(r[CM])+'%':CM==='p100k'?f0(r[CM]):f0(r[CM]),r.comune==='Milano']}));
+  setH('citta-src',CM==='tot'?'Beni in tutto (immobili e aziende, in gestione e destinati). ANBSC, 1/11/2026.':CM==='p100k'?'Beni ogni 100.000 abitanti. ANBSC, 1/11/2026; abitanti al 1/1/2025 (ISTAT). Palermo e altri comuni con pochi abitanti e molti beni hanno valori molto alti.':'Quota degli immobili del comune che l&rsquo;Agenzia amministra ancora (non ancora destinati). ANBSC, 1/11/2026. Per Bologna il valore &egrave; calcolato su soli 13 immobili.')
+}
+
+/* ---------- cambiamenti ---------- */
+function cambia(){
+  var S=D.serie,M=D.movimenti;
+  setH('cambia-testo','<p>Gli immobili destinati a Milano sono passati da '+S[0].imm_dest+' nel 2014 a '+S[1].imm_dest+' nell&rsquo;agosto 2024 e '+S[2].imm_dest+' oggi; quelli ancora in gestione da '+S[0].imm_gest+' a '+S[1].imm_gest+' a '+S[2].imm_gest+'. Dei '+M.gest_2024+' immobili in gestione ad agosto 2024, <b>'+M.ancora_gest+'</b> lo sono ancora oggi (stesso identificativo) e almeno '+M.ora_destinati+' sono stati destinati; ne sono entrati di nuovi in gestione. Tutti i '+M.destinati_2024+' destinati del 2024 ci sono ancora; i nuovi destinati sono '+M.nuovi_destinati+', in gran parte con decreto del 2021 (29) e del 2023 (14).</p>');
+  table('tab-serie',['Quando','Immobili in gestione','Immobili destinati','Aziende in gestione','Aziende uscite'],S.map(function(r){return [esc(r.data),r.imm_gest,r.imm_dest,r.az_gest,r.az_dest]}));
+}
+
+/* ---------- limiti, metodo, file ---------- */
+function limiti(){
+  var L=['<b>Nessuna data di confisca.</b> Gli anni nei dati sono due altri: l&rsquo;anno del decreto con cui il bene passa a un ente, e l&rsquo;anno in cui si &egrave; aperto il procedimento giudiziario. Non dicono da quanto tempo il bene &egrave; stato tolto, n&eacute; per quanto &egrave; rimasto vuoto.',
+   '<b>I beni ancora in gestione all&rsquo;Agenzia (158 immobili, 115 aziende) non hanno n&eacute; indirizzo n&eacute; data</b>: non si possono mettere sulla mappa n&eacute; datare. La mappa mostra solo i 319 immobili destinati e le 274 unit&agrave; del Comune.',
+   '<b>Si contano unit&agrave;, non edifici n&eacute; famiglie.</b> Un appartamento, la sua cantina e il suo box sono tre beni. Tre palazzi contengono da soli 59 delle 274 unit&agrave; del Comune.',
+   '<b>L&rsquo;elenco dell&rsquo;Agenzia e quello del Comune non coincidono</b>: 215 immobili destinati al Comune secondo l&rsquo;una, 274 unit&agrave; secondo l&rsquo;altro (comprese '+D.comune.nuove_2026+' acquisizioni del 2026). Non c&rsquo;&egrave; un codice comune per collegarli: l&rsquo;anno del decreto l&rsquo;abbiamo abbinato per indirizzo, e ci riusciamo per '+D.comune.agganciate_a_anbsc+' unit&agrave; su 274.',
+   '<b>L&rsquo;Agenzia avverte che i dati sulle destinazioni potrebbero essere sottostimati</b>, perch&eacute; sta rinnovando la piattaforma. L&rsquo;aumento dei destinati dal 2014 a oggi pu&ograve; dipendere anche da registrazioni in ritardo.',
+   '<b>&laquo;In attesa&raquo; non vuol dire &laquo;mai usato&raquo;</b>: la nota del Comune pu&ograve; riguardare un bene gi&agrave; assegnato in passato e in attesa di un nuovo bando. Il tempo dal decreto &egrave; un massimo, non un tempo di inutilizzo. Per lo stesso motivo non mostriamo il tempo tra decreto e inizio del contratto: il contratto in corso pu&ograve; essere un rinnovo.',
+   '<b>Il perimetro &egrave; il luogo del bene</b>, non il tribunale. Per le aziende i conteggi cambiano con la fonte: 188 secondo ANBSC (in gestione e uscite), 153 secondo Unioncamere (sede legale a Milano, solo confisca definitiva), e il settore &egrave; classificato in due modi diversi.',
+   '<b>Gli indirizzi sono scritti a mano</b> nei file originali (sigle, refusi). Li abbiamo abbinati ai numeri civici del Comune: '+D.posizione.anbsc.civico+' su 319 immobili ANBSC e '+D.posizione.comune.civico+' su 274 unit&agrave; del Comune su un numero civico esatto. Gli altri sono approssimati (stessa via, civico vicino o solo via): le posizioni vanno prese come indicative a livello di palazzo.',
+   '<b>Confronto tra comuni</b>: i beni sono attribuiti al comune dove si trovano; gli abitanti sono quelli del 1/1/2025. Un comune con molti box o terreni pesa pi&ugrave; di uno con pochi grandi immobili; nei comuni piccoli il rapporto per abitante &egrave; poco significativo.',
+   '<b>I dati del 2014 e del 2024</b> vengono da copie dei file dell&rsquo;Agenzia pubblicate da Confiscati Bene, un sito spento: le abbiamo recuperate dalla Wayback Machine e non si possono verificare sul sito originale.',
+   '<b>Persone e aziende</b>: nei file non ci sono i nomi di chi ha subito la confisca; delle aziende non c&rsquo;&egrave; il nome (solo settore e forma giuridica); di chi usa i beni diciamo solo il tipo di ente. Abbiamo scelto cos&igrave; anche dove i file originali dell&rsquo;elenco del Comune scrivono i nomi.'];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var L=['<b>Agenzia (ANBSC).</b> Abbiamo scaricato i quattro file nazionali (immobili e aziende, in gestione e destinati) e tenuto le righe del comune di Milano. Il file dei destinati ha un campo di testo con virgolette rotte, che spezza il formato CSV standard: ne abbiamo scritto un lettore apposta (nessuna riga persa).',
+   '<b>Comune.</b> L&rsquo;elenco ds147 &egrave; stato pulito riga per riga: tipo di bene, stato (in uso, in attesa, ferme), tipo di ente (fondazione, cooperativa, associazione, gestione diretta del Comune, altro). I nomi non sono mai stati copiati nelle tabelle.',
+   '<b>Posizione.</b> Gli indirizzi sono stati abbinati ai numeri civici del Comune di Milano (ds634) dopo averli normalizzati (sigle, preposizioni, numeri romani, refusi); il quartiere (NIL) &egrave; quello del numero civico. Nessun servizio esterno di geocodifica.',
+   '<b>Abbinamento Agenzia&ndash;Comune.</b> Per le unit&agrave; del Comune l&rsquo;anno del decreto &egrave; quello degli immobili destinati dall&rsquo;Agenzia allo stesso numero civico (se ce n&rsquo;&egrave; pi&ugrave; di uno, il pi&ugrave; vecchio).',
+   '<b>Aziende.</b> Settore e forma giuridica dai file ANBSC; stato di attivit&agrave; e attivit&agrave; (Ateco) dai dati di Unioncamere. Gli identificativi dei due file non permettono di collegare ogni azienda dell&rsquo;uno all&rsquo;altro e non contengono nomi.',
+   '<b>Confronti.</b> Abitanti: ISTAT, residenti al 1/1/2025. Beni per 100.000 abitanti = (immobili + aziende del comune) &divide; abitanti &times; 100.000.',
+   '<b>Pubblicazione.</b> Indirizzi a livello di palazzo solo da due fonti aperte: l&rsquo;elenco del Comune (CC BY) e gli immobili destinati dell&rsquo;Agenzia (IODL 2.0). Per gli immobili in gestione e per tutte le aziende solo conteggi.'];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function files(){
+  setH('files','<a href="data/unita_comune.csv">unita_comune.csv</a> (le 274 unit&agrave; del Comune: tipo, indirizzo, quartiere, uso, tipo di ente), <a href="data/destinati_anbsc.csv">destinati_anbsc.csv</a> (i 319 immobili destinati), <a href="data/edifici.json">edifici.json</a> (i palazzi della mappa), <a href="data/nil.geojson">nil.geojson</a> (quartieri con i conteggi), <a href="data/aziende_per_settore.csv">aziende_per_settore.csv</a>, <a href="data/confronto_citta.csv">confronto_citta.csv</a>, <a href="data/confronto_comuni.csv">confronto_comuni.csv</a> (tutti i 2.005 comuni con beni confiscati), <a href="data/serie_milano.csv">serie_milano.csv</a>, <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina).');
+}
+})();
+</script></body></html>

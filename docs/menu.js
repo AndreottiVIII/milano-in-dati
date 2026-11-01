@@ -50,7 +50,8 @@
     { path: 'scuole-domani/', label: 'Scuole di domani' },
     { path: 'quartieri-che-cambiano/', label: 'Quartieri che cambiano' },
     { path: 'pollini/', label: 'Pollini' },
-    { path: 'case-popolari/', label: 'Case popolari vuote' }
+    { path: 'case-popolari/', label: 'Case popolari vuote' },
+    { path: 'beni-confiscati/', label: 'Beni confiscati' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
