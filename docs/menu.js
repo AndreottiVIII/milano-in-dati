@@ -41,7 +41,8 @@
     { path: 'scuole/',           label: 'Scuole' },
     { path: 'pioggia/',          label: 'Quanto piove' },
     { path: 'caldo/',            label: 'Il quartiere più caldo' },
-    { path: 'costo-vita/',       label: 'Quanto costa vivere' }
+    { path: 'costo-vita/',       label: 'Quanto costa vivere' },
+    { path: 'metro/',            label: 'Il metrò' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

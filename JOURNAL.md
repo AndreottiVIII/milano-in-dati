@@ -2467,3 +2467,11 @@ python -I scripts\inventario.py <cartella censimenti>
 
 - 2026-11-01 — **Davide: nelle pagine non si scrive più "trappole" ("sembriamo amatoriali")**, ma "limiti dei dati". Sostituito in 17 pagine, nei due `problemi.md` e nei modelli di beni culturali e derby. Nel JOURNAL e nelle NOTE la parola resta.
 
+## 33. Il metrò
+
+- 2026-11-01 — Fase 1 e pagina (`metro/`, `docs/metro/`), volute da Davide. Dettagli in `metro/NOTE.md`.
+- **Ingressi per stazione e per giorno: non esistono in dati aperti** (cercati Comune, ATM, AMAT, Regione, ISTAT). Nessun accesso civico (Davide non deve fare lavoro operativo).
+- Fonti: Comune (CC BY) per km di rete e veicoli; AMAT Report della Mobilità 2024 ("tutti i diritti riservati": citati solo i numeri, nessun grafico copiato) per i passeggeri per linea 2016-2024; Carte della Mobilità e bilanci ATM (© ATM, solo numeri); Wikipedia (CC BY-SA) per il 2025 per linea, segnato come non verificato sul Report AMAT 2025; Regione Lombardia/Trenord (CC0) per le stazioni ferroviarie; GTFS (CC BY).
+- Numeri: rete 96,8 → 111,3 km (+15%), passeggeri 384,9 → 352,4 milioni (−8,4%), per km −20% (2019 → 2025); 2020 −56,6%; nel 2025 M4 +21,1 milioni, M1+M2+M3 −9,7 (confronto, non prova). Stazioni del treno a novembre 2025 all'81% del 2019; la teoria "uffici e università" non regge (correlazione −0,10).
+- Limiti dei dati: passeggeri = ingressi ai tornelli; l'anno della Carta ATM è quello dei dati dell'anno prima; lo stesso anno ha totali diversi secondo la definizione; 134 stazioni-linea ma 125 stazioni; GTFS solo l'orario di oggi.
+

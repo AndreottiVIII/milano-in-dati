@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Il metrò</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:62vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer;white-space:nowrap} .ctl input[type=range]{flex:1 1 200px;min-width:140px;max-width:100%}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,34%) 1fr 130px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dum{margin:.4em 0} .dum .row{display:grid;grid-template-columns:minmax(110px,26%) 1fr 150px;gap:6px;align-items:center;font-size:.86rem;padding:3px 0}
+.dum .tr{height:14px;position:relative;background:linear-gradient(#eee,#eee) 0 50%/100% 2px no-repeat} .dum .tr .c100{position:absolute;top:-3px;height:20px;border-left:2px solid #666}
+.dum .tr b{position:absolute;top:2px;width:10px;height:10px;border-radius:50%;margin-left:-5px} .dum .tr b.a{background:#fff;border:2px solid var(--warm)} .dum .tr b.b{background:var(--acc)} .dum .tr .seg{position:absolute;top:6px;height:2px;background:#999}
+.dum .v{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0 18px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .dum .row{grid-template-columns:1fr 1fr} .dum .row .nm{grid-column:1/3} .dum .tr{grid-column:1/2} .bars .row{grid-template-columns:minmax(80px,32%) 1fr 96px}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.ln-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px;border:1px solid #555}
+#yr{font-size:1.3rem;font-weight:700;min-width:3.2em;color:var(--acc)}
+.tabmax{max-height:340px;overflow:auto}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Il metrò di Milano, in numeri</h1>
+<p>Cinque linee, 125 stazioni, 111 chilometri. Quanta gente la prende, come è cambiata dopo il Covid, che cosa ha cambiato la M4: qui si vede quello che i dati pubblici permettono di vedere, e si dice con franchezza quello che non permettono. <b>Un limite subito:</b> nessuno pubblica quanta gente entra in ogni stazione, giorno per giorno (vedi <a href="#nonsi">che cosa non si può sapere</a>).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="rete">Più rete, meno passeggeri</h2>
+<div id="rete-testo"></div>
+<div class="grid3">
+<div><h3>Chilometri di rete</h3><div class="ch" id="ch-km" role="img" aria-label="Grafico: chilometri di rete metropolitana per anno"></div></div>
+<div><h3>Passeggeri (milioni)</h3><div class="ch" id="ch-pass" role="img" aria-label="Grafico: passeggeri della metropolitana per anno, in milioni"></div></div>
+<div><h3>Passeggeri per km di rete</h3><div class="ch" id="ch-perkm" role="img" aria-label="Grafico: milioni di passeggeri per chilometro di rete, per anno"></div></div>
+</div>
+<p class="src">Passeggeri = ingressi ai tornelli della metropolitana (somma delle cinque linee). 2016&ndash;2024: AMAT, Report della Mobilit&agrave; 2024 (letto dal grafico, &plusmn;0,5 milioni per linea); 2025: fonte Wikipedia, non ancora verificato sul Report AMAT 2025. Chilometri: ATM, Carte della Mobilit&agrave;. Il 2020 &egrave; l&rsquo;anno del Covid.</p>
+
+<h2 id="linee">Le cinque linee, anno per anno</h2>
+<div id="linee-testo"></div>
+<div class="ch" id="ch-stack" role="img" aria-label="Grafico ad aree sovrapposte: passeggeri per linea, 2016-2025"></div>
+<div class="lgd" id="lg-stack"></div>
+<p class="src">Milioni di passeggeri per anno e per linea. 2016&ndash;2024: AMAT, Report della Mobilit&agrave; 2024, pagina 94 (letto dal grafico, &plusmn;0,5 milioni); <b>2025 (a tratteggio): fonte Wikipedia, non ancora verificato sul Report AMAT 2025.</b> La M4 apre a novembre 2022 (solo Linate&ndash;Dateo) e arriva fino a San Cristoforo a ottobre 2024.</p>
+<div class="scroll"><table id="tab-linee"></table></div>
+<h3>Quanto manca ancora al 2019</h3>
+<div id="covid-testo"></div>
+<div class="scroll"><table id="tab-covid"></table></div>
+
+<h2 id="m4">E la M4? Un confronto, non una prova</h2>
+<div id="m4-testo"></div>
+<div class="bars" id="b-m4"></div>
+<div class="warn"><b>Non &egrave; una prova.</b> Qui si vede solo che, nello stesso anno, la M4 sale e le linee vecchie scendono. Non sappiamo se chi prende la M4 prima prendeva la M2 (non ci sono i dati per stazione), se ci sono stati lavori o chiusure, o se i numeri del 2025 (da Wikipedia) e del 2024 (letti da un grafico) sono calcolati allo stesso modo.</div>
+
+<h3>La M4 a Linate, mese per mese</h3>
+<div id="linate-testo"></div>
+<div class="ch" id="ch-linate" role="img" aria-label="Grafico a barre: passeggeri mensili della stazione Linate M4, da dicembre 2022 a dicembre 2024"></div>
+<p class="src">Passeggeri in ingresso e in uscita dalla sola stazione <b>Linate</b>, migliaia al mese. Fonte: AMAT, Report della Mobilit&agrave; 2024, pagina 161 (letto dal grafico, &plusmn;3 mila). Le due barre arancioni sono i due buchi che il Report non spiega.</p>
+
+<h2 id="mappa">Quando sono nate le stazioni</h2>
+<p>Muovi il cursore: si vedono le stazioni aperte fino a quell&rsquo;anno. Il colore &egrave; quello della linea con cui la stazione &egrave; nata (le stazioni di interscambio hanno il bordo nero).</p>
+<div class="ctl"><button type="button" id="btn-play">&#9654; Avvia</button><span id="yr">1964</span><input type="range" id="rg" min="0" max="0" value="0" aria-label="Anno"><span class="sub" id="cnt"></span></div>
+<div class="ctl" id="ck-linee"></div>
+<div id="map" class="map" role="img" aria-label="Mappa delle stazioni della metropolitana di Milano per anno di apertura"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Stazioni: elenco e coordinate dall&rsquo;orario ATM/AMAT (GTFS, Comune di Milano, CC BY); date di apertura da Wikipedia (&laquo;Stazioni della metropolitana di Milano&raquo;, CC BY-SA 4.0). Mappa &copy; OpenStreetMap contributors. Le stazioni di interscambio contano una volta sola: sono 125 stazioni, ma 134 se si conta ogni linea che ci passa.</p>
+<details><summary>Aperture per anno</summary><div class="scroll"><table id="tab-ap"></table></div></details>
+
+<h2 id="treni">Le stazioni dei treni di Milano: 2019, 2020, 2025</h2>
+<div class="warm"><b>Attenzione: questi sono treni, non metropolitana.</b> Sono le stazioni ferroviarie di Milano (Trenord e servizio regionale: Cadorna, Centrale, Garibaldi, Lambrate, Rogoredo&hellip;). Le abbiamo messe perch&eacute; sono l&rsquo;unico dato pubblico per stazione, e molte sono interscambi con la metro. Non dicono quanti prendono la metro.</div>
+<div id="treni-testo"></div>
+<div class="lgd"><span><i class="ln" style="border-top-color:#8a4a10"></i>cerchio vuoto: novembre 2020</span><span><i class="ln" style="border-top-color:#00695c"></i>cerchio pieno: novembre 2025</span><span>linea verticale: livello del 2019 (100%)</span></div>
+<div class="dum" id="dum"></div>
+<p class="src">Viaggiatori saliti in un giorno feriale medio di novembre, per stazione, 2025 e 2020 in percentuale del 2019. Ordine: dalla stazione che ha recuperato meno. A destra: numero di saliti nel 2019 e nel 2025. Dati arrotondati a 10. Fonte: Regione Lombardia / Trenord, dati.lombardia.it (CC0), scaricati il 1 novembre 2026.</p>
+<div id="treni-testo2"></div>
+
+<h2 id="corse">Quanti treni della metro passano: feriale, sabato, domenica</h2>
+<div id="corse-testo"></div>
+<div class="bars" id="b-corse"></div>
+<p class="src">Corse al giorno per linea, dall&rsquo;orario ATM/AMAT valido dal 26 ottobre al 30 novembre 2026 (GTFS, Comune di Milano, CC BY). Dove l&rsquo;orario ha due varianti (M1, sabato e domenica) la barra &egrave; la maggiore e il testo d&agrave; l&rsquo;intervallo. Sono corse offerte, <b>non passeggeri</b>.</p>
+
+<h2 id="nonsi">Che cosa non si pu&ograve; sapere</h2>
+<div class="warm"><ul>
+<li><b>Qual &egrave; la stazione pi&ugrave; affollata.</b> ATM conta chi passa ai tornelli, ma non pubblica il numero per stazione. L&rsquo;unico dato per stazione trovato &egrave; vecchio e isolato: San Babila, circa 12.000 accessi al giorno nel primo mese dopo l&rsquo;apertura (ATM, riportato da Affaritaliani il 3 agosto 2023).</li>
+<li><b>A che ora si viaggia.</b> Nessun profilo orario degli ingressi. Per i treni c&rsquo;&egrave; solo la fascia 7&ndash;9; per la metro, nel Report AMAT, solo il carico sui tratti tra le 7 e le 9 di un feriale (per esempio oltre 20.000 passeggeri tra Pagano e Duomo sulla M1).</li>
+<li><b>Feriale contro festivo per la metro.</b> Nessun dato. Per i treni di Milano, a novembre 2025, il sabato vale il <span id="n-sab"></span>% e il festivo il <span id="n-fes"></span>% di un feriale.</li>
+<li><b>Giorni di partita e concerto a San Siro, Olimpiadi di febbraio 2026, scioperi.</b> Nessun conteggio giornaliero pubblico. Si sa solo, da ATM, che per i Giochi le cinque linee hanno tenuto aperto fino alle 2:00.</li>
+<li><b>Quale stazione vicina alla M4 ha perso o guadagnato.</b> Senza dati per stazione si pu&ograve; confrontare solo linea con linea.</li>
+</ul></div>
+
+<h2 id="metodo">Come &egrave; fatto, e i limiti dei dati</h2>
+<ul class="m" id="limiti"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/passeggeri_linea_anno.csv">passeggeri_linea_anno.csv</a> (milioni per linea e anno, con la fonte), <a href="data/rete_km_passeggeri.csv">rete_km_passeggeri.csv</a> (km, stazioni-linea, passeggeri per km), <a href="data/linate_m4_mese.csv">linate_m4_mese.csv</a>, <a href="data/stazioni_metro.csv">stazioni_metro.csv</a> (125 stazioni con apertura per linea e coordinate), <a href="data/treni_stazioni_milano_2019_2020_2025.csv">treni_stazioni_milano_2019_2020_2025.csv</a>, <a href="data/corse_giorno_per_linea.csv">corse_giorno_per_linea.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno). Sono valori aggregati. I PDF dell&rsquo;AMAT e di ATM non sono ripubblicati.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Passeggeri per linea e anno 2016&ndash;2024, mappa dei carichi e passeggeri di Linate: AMAT (Agenzia Mobilit&agrave; Ambiente e Territorio, Comune di Milano), <i>Report della Mobilit&agrave; 2024</i> (3&ordf; edizione), PDF scaricato il 1 novembre 2026; &laquo;tutti i diritti riservati&raquo;: i numeri sono citati come fatti con la fonte, il PDF e i suoi grafici non sono ripresi. 2025 per linea: Wikipedia, voce &laquo;Metropolitana di Milano&raquo; (CC BY-SA 4.0), che cita il Report AMAT 2025 (non ancora verificato). Chilometri di rete, stazioni-linea, corse medie: ATM, <i>Carte della Mobilit&agrave;</i> 2017&ndash;2026 (nessuna licenza dichiarata; solo numeri citati), scaricate il 1 novembre 2026. Orario e stazioni: GTFS ATM/AMAT, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, licenza Creative Commons Attribution (CC BY), feed 425 scaricato il 29 ottobre 2026. Date di apertura delle stazioni: Wikipedia, &laquo;Stazioni della metropolitana di Milano&raquo; (CC BY-SA 4.0), 1 novembre 2026. Stazioni dei treni: Regione Lombardia, <a href="https://www.dati.lombardia.it/">dati.lombardia.it</a>, set &laquo;Flussi Stazioni Ferroviarie&raquo; e &laquo;Frequentazione delle stazioni del servizio ferroviario regionale&raquo; (CC0), misure Trenord, scaricati il 1 novembre 2026. Totali annuali pubblicati dalla stampa usati come controllo: Il Giorno, 21 marzo 2024. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,RD=[];
+var ACC='#00695c',WARM='#c26a1b';
+var LC={M1:'#e53935',M2:'#43a047',M3:'#f9a825',M4:'#1e5bb8',M5:'#9c6bb5'};
+var LN=['M1','M2','M3','M4','M5'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?1:d)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function dot(l){return '<span class="ln-dot" style="background:'+LC[l]+'"></span>'}
+
+J('data/riepilogo.json').then(function(d){D=d;try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();rete();linee();m4();mappa();treni();corse();nonsi();limiti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- sorpresa ---------- */
+function sorpresa(){
+  var S=D.sorpresa,h='';
+  h+='<p><b>La rete è più lunga e ha una linea in più, ma porta meno gente.</b> Dal 2019 al 2025 i chilometri di rete sono passati da '+f1(S.km_2019)+' a '+f1(S.km_2025)+' (<b>+'+f0(S.km_var_pct)+'%</b>), le linee da '+S.linee_2019+' a '+S.linee_2025+'. I passeggeri sono scesi da <b>'+f1(S.pass_2019)+' a '+f1(S.pass_2025)+' milioni</b> ('+sg(S.pass_var_pct)+'%).</p>';
+  h+='<p>Per ogni chilometro di rete: <b>'+nf(S.perkm_2019,2)+' milioni di passeggeri nel 2019, '+nf(S.perkm_2025,2)+' nel 2025 ('+sg(S.perkm_var_pct,0)+'%)</b>.</p>';
+  h+='<p>E nel 2025 la M4 guadagna <b>'+f1(S.m4_delta)+' milioni</b> di passeggeri rispetto al 2024, mentre M1, M2 e M3 insieme ne perdono <b>'+f1(Math.abs(S.m123_delta))+'</b>: la rete nel complesso cresce solo di '+f1(S.totale_delta)+'. È un confronto, non una prova (<a href="#m4">vedi sotto</a>).</p>';
+  h+='<p class="src">Passeggeri = ingressi ai tornelli. 2016–2024: AMAT, Report della Mobilità 2024 (letto dal grafico); 2025: fonte Wikipedia, non ancora verificato sul Report AMAT 2025. Chilometri: ATM, Carte della Mobilità.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- grafico a linee ---------- */
+function lineChart(id,o){
+  var box=el(id);box.innerHTML='';
+  var W=box.clientWidth||300,H=o.h||210,m={l:40,r:16,t:10,b:24};
+  var xs=o.series[0].pts.map(function(p){return p[0]}),x0=xs[0],x1=xs[xs.length-1];
+  var all=[];o.series.forEach(function(s){s.pts.forEach(function(p){all.push(p[1])})});
+  var y0=o.y0!=null?o.y0:0,y1=Math.max.apply(null,all),sy=niceStep((y1-y0)/4);y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yf(v)+'</text>';
+  xs.forEach(function(x){if((x-x0)%(o.xstep||3)===0||x===x1)s+='<text class="mu" x="'+X(x)+'" y="'+(H-6)+'" text-anchor="middle">'+x+'</text>'});
+  o.series.forEach(function(se){
+    var d=se.pts.map(function(p,i){return (i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)}).join('');
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2.2"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
+    se.pts.forEach(function(p){s+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="2.6" fill="'+se.color+'"/>'});
+  });
+  if(o.ref){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.ref.v)+'" y2="'+Y(o.ref.v)+'" stroke="'+WARM+'" stroke-dasharray="4 4"/><text x="'+(W-m.r-2)+'" y="'+(Y(o.ref.v)-4)+'" text-anchor="end" style="fill:#8a4a10">'+o.ref.t+'</text>'}
+  s+='<line id="gl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-dasharray="2 3" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  hover(box,W,m,pw,x0,x1,xs,o.tipf);
+}
+function hover(box,W,m,pw,x0,x1,xs,tipf){
+  var svg=box.firstChild,tip=box.lastChild,gl=svg.querySelector('#gl'),rect=svg.querySelector('rect');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k;
+    var best=xs[0],bd=1e9;xs.forEach(function(x){var d=Math.abs(m.l+(x-x0)/(x1-x0)*pw-px);if(d<bd){bd=d;best=x}});
+    var gx=m.l+(best-x0)/(x1-x0)*pw;gl.setAttribute('x1',gx);gl.setAttribute('x2',gx);gl.style.display='';
+    tip.innerHTML=tipf(best);tip.style.display='';var tw=tip.offsetWidth,left=gx/k+10;if(left+tw>r.width)left=gx/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){tip.style.display='none';gl.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function rowOf(a){return D.linee_anno.filter(function(r){return r.anno===a})[0]}
+
+/* ---------- rete ---------- */
+function rete(){
+  var S=D.sorpresa,R=D.rete;
+  setH('rete-testo','<p>Nel 2019 la metro aveva '+S.linee_2019+' linee, '+f1(S.km_2019)+' km e '+S.stazioni_linea_2019+' stazioni (contando ogni linea che passa da una stazione). Nel 2025 ha '+S.linee_2025+' linee, '+f1(S.km_2025)+' km e '+S.stazioni_linea_2025+' stazioni. Il Covid ha dimezzato i passeggeri nel 2020 e da allora la ripresa non ha riportato la rete ai livelli del 2019: nel 2025 mancano ancora '+f1(S.pass_2019-S.pass_2025)+' milioni di ingressi, con più rete a disposizione.</p>');
+  function draw(){
+    var pk=function(k){return R.map(function(r){return [r.anno,r[k]]})};
+    var tf=function(fn){return function(a){var r=R.filter(function(x){return x.anno===a})[0];return '<b>'+a+'</b><br>'+fn(r)}};
+    lineChart('ch-km',{series:[{color:ACC,pts:pk('km')}],y0:0,yf:f0,tipf:tf(function(r){return f1(r.km)+' km, '+r.linee+' linee<br>'+r.stazioni_linea+' stazioni-linea'})});
+    lineChart('ch-pass',{series:[{color:'#1e5bb8',pts:pk('passeggeri_mln')}],y0:0,yf:f0,tipf:tf(function(r){return f1(r.passeggeri_mln)+' milioni'+(r.anno===2025?'<br>(fonte Wikipedia)':'')})});
+    lineChart('ch-perkm',{series:[{color:WARM,pts:pk('mln_per_km')}],y0:0,yf:function(v){return nf(v,1)},ref:{v:S.perkm_2019,t:'2019'},tipf:tf(function(r){return nf(r.mln_per_km,2)+' milioni per km'})});
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- linee ---------- */
+function linee(){
+  var S=D.sorpresa,C=D.covid;
+  setH('linee-testo','<p>La M1 è la linea più usata (118 milioni nel 2025, un terzo del totale). Nel 2020 tutte le linee hanno perso più della metà dei passeggeri (le quattro che c&rsquo;erano nel 2019: '+sg(C['M1+M2+M3+M5']['2020'],1)+'%). La ripresa è stata lenta: nel 2024 le quattro linee storiche erano ancora a '+sg(C['M1+M2+M3+M5']['2024'],1)+'% sul 2019. La M4 compare nel 2022 e nel 2025 porta '+f1(S.m4_2025)+' milioni.</p>');
+  function draw(){
+    var box=el('ch-stack');box.innerHTML='';
+    var W=box.clientWidth||320,H=290,m={l:40,r:10,t:10,b:24},R=D.linee_anno,order=['M1','M2','M3','M5','M4'];
+    var x0=2016,x1=2025,y1=400,pw=W-m.l-m.r,ph=H-m.t-m.b;
+    function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-v/y1*ph}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+    for(var v=0;v<=y1;v+=100)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>';
+    R.forEach(function(r){s+='<text class="mu" x="'+X(r.anno)+'" y="'+(H-6)+'" text-anchor="middle">'+r.anno+'</text>'});
+    var base=R.map(function(){return 0});
+    order.forEach(function(l){
+      var top=R.map(function(r,i){return base[i]+r[l]});
+      var up=R.map(function(r,i){return X(r.anno).toFixed(1)+' '+Y(top[i]).toFixed(1)}),dn=R.map(function(r,i){return X(r.anno).toFixed(1)+' '+Y(base[i]).toFixed(1)}).reverse();
+      s+='<path d="M'+up.join('L')+'L'+dn.join('L')+'Z" fill="'+LC[l]+'" fill-opacity=".85" stroke="#fff" stroke-width="1"/>';
+      base=top;
+    });
+    var i24=R.length-2,i25=R.length-1;
+    s+='<rect x="'+X(2024)+'" y="'+m.t+'" width="'+(X(2025)-X(2024))+'" height="'+ph+'" fill="url(#hat)" />';
+    s+='<defs><pattern id="hat" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#fff" stroke-width="2.5" stroke-opacity=".6"/></pattern></defs>';
+    s+='<text class="mu" x="'+(X(2025)-4)+'" y="'+(m.t+12)+'" text-anchor="end">2025: fonte Wikipedia</text>';
+    s+='<line id="gl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-dasharray="2 3" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+    box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+    hover(box,W,m,pw,x0,x1,R.map(function(r){return r.anno}),function(a){var r=rowOf(a);return '<b>'+a+'</b>: '+f1(r.totale)+' milioni<br>'+LN.map(function(l){return r[l]>0?dot(l)+l+' '+f1(r[l]):''}).filter(Boolean).join('<br>')+(a===2025?'<br><i>2025: fonte Wikipedia</i>':'')});
+  }
+  draw();RD.push(draw);
+  setH('lg-stack',LN.map(function(l){return '<span><i style="background:'+LC[l]+'"></i>'+l+'</span>'}).join(''));
+  table('tab-linee',['Anno','M1','M2','M3','M4','M5','Totale'],D.linee_anno.map(function(r){return [r.anno+(r.anno===2025?' *':''),f1(r.M1),f1(r.M2),f1(r.M3),r.M4?f1(r.M4):'–',f1(r.M5),'<b>'+f1(r.totale)+'</b>']}));
+  setH('covid-testo','<p>Variazione dei passeggeri rispetto al 2019, in percentuale. La M4 non c&rsquo;era. Il 2025 è <b>fonte Wikipedia, non ancora verificato sul Report AMAT 2025</b> (*).</p>');
+  var an=['2020','2021','2022','2023','2024','2025'];
+  table('tab-covid',['Linea'].concat(an.map(function(a){return a+(a==='2025'?' *':'')})),['M1','M2','M3','M5'].map(function(l){return [dot(l)+l].concat(an.map(function(a){return sg(C[l][a],1)+'%'}))}).concat([['<b>Insieme</b>',sg(C['M1+M2+M3+M5']['2020'],1)+'%','','','',sg(C['M1+M2+M3+M5']['2024'],1)+'%',sg(C['M1+M2+M3+M5']['2025'],1)+'%']]));
+}
+
+/* ---------- M4 ---------- */
+function m4(){
+  var S=D.sorpresa,d=S.delta_linea_2024_2025;
+  setH('m4-testo','<p>Dal 2024 al 2025 (milioni di passeggeri): la M4 passa da '+f1(S.m4_2024)+' a '+f1(S.m4_2025)+'. Nel 2024 la linea è stata completata fino a San Cristoforo (12 ottobre 2024), quindi il 2025 è il primo anno intero. Nello stesso anno la M2 cala di '+f1(Math.abs(d.M2))+' milioni, la M1 di '+f1(Math.abs(d.M1))+'; M3 e M5 restano quasi ferme. Il totale cresce di '+f1(S.totale_delta)+' milioni.</p>');
+  var rows=LN.map(function(l){return {l:l,v:d[l]}}),mx=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v)}));
+  setH('b-m4',rows.map(function(r){var w=Math.abs(r.v)/mx*50;return '<div class="row"><span class="nm">'+dot(r.l)+r.l+'</span><span class="tr" style="background:linear-gradient(#999,#999) 50% 0/1px 100% no-repeat,#f1f1f1"><span class="fill" style="position:absolute;top:0;width:'+w+'%;'+(r.v<0?'right:50%':'left:50%')+';background:'+(r.v<0?WARM:ACC)+'"></span></span><span class="v">'+sg(r.v,1)+' milioni</span></div>'}).join('')+'<p class="src">Variazione dei passeggeri 2024→2025. 2024: AMAT, Report della Mobilità 2024 (letto dal grafico, ±0,5); 2025: fonte Wikipedia, non ancora verificato sul Report AMAT 2025.</p>');
+  var L=D.linate,mx2=L.reduce(function(a,b){return b.migliaia>a.migliaia?b:a});
+  var MESI=['','gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+  function mlab(s){var a=s.split('-');return MESI[parseInt(a[1],10)]+' '+a[0]}
+  setH('linate-testo','<p>La stazione di Linate è l&rsquo;aeroporto in metro. Parte da '+f0(L[0].migliaia)+' mila passeggeri a dicembre 2022 (solo il tratto Linate–Dateo) e arriva al massimo di '+f0(mx2.migliaia)+' mila a '+mlab(mx2.mese)+'. <b>Due mesi sono bassi e il Report non dice perché</b>: giugno 2023 ('+f0(L[6].migliaia)+' mila) e luglio 2024 ('+f0(L[19].migliaia)+' mila). Il tratto fino a San Babila apre il 4 luglio 2023; per il resto non sappiamo se si tratti di chiusure, lavori o altro.</p>');
+  function draw(){
+    var box=el('ch-linate');box.innerHTML='';
+    var W=box.clientWidth||320,H=230,m={l:36,r:8,t:10,b:44},pw=W-m.l-m.r,ph=H-m.t-m.b,n=L.length,bw=pw/n,y1=400;
+    function Y(v){return m.t+ph-v/y1*ph}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+    for(var v=0;v<=y1;v+=100)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>';
+    L.forEach(function(r,i){var g=(i===6||i===19);s+='<rect x="'+(m.l+i*bw+1)+'" y="'+Y(r.migliaia)+'" width="'+Math.max(1,bw-2)+'" height="'+(m.t+ph-Y(r.migliaia))+'" fill="'+(g?WARM:'#1e5bb8')+'"/>';
+      if(i%3===0||i===n-1){var a=r.mese.split('-');s+='<text class="mu" transform="translate('+(m.l+i*bw+bw/2+3)+','+(m.t+ph+8)+') rotate(60)" text-anchor="start">'+MESI[parseInt(a[1],10)]+' '+a[0].slice(2)+'</text>'}});
+    s+='<rect id="hr" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+    box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+    var svg=box.firstChild,tip=box.lastChild,rc=svg.querySelector('#hr');
+    function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,i=Math.max(0,Math.min(n-1,Math.floor((px-m.l)/bw)));
+      tip.innerHTML='<b>'+mlab(L[i].mese)+'</b><br>'+f0(L[i].migliaia)+' mila passeggeri'+((i===6||i===19)?'<br>mese basso, causa non spiegata':'');tip.style.display='';var tw=tip.offsetWidth,left=(m.l+i*bw)/k+10;if(left+tw>r.width)left=(m.l+i*bw)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+    rc.addEventListener('mousemove',show);rc.addEventListener('mouseleave',function(){tip.style.display='none'});rc.addEventListener('touchstart',show,{passive:true});rc.addEventListener('touchmove',show,{passive:true});
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- mappa stazioni ---------- */
+function mappa(){
+  var ST=D.stazioni,yrs=Object.keys(D.stazioni_per_anno_prima_apertura).map(Number).sort(function(a,b){return a-b});
+  var MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  var grp=L.layerGroup().addTo(MAP),on={M1:1,M2:1,M3:1,M4:1,M5:1};
+  var rg=el('rg');rg.max=yrs.length-1;rg.value=yrs.length-1;
+  var pts=L.latLngBounds(ST.map(function(s){return [s.lat,s.lon]}));MAP.fitBounds(pts,{padding:[10,10]});
+  var mk=ST.map(function(s){
+    var inter=s.l.length>1;
+    var c=L.circleMarker([s.lat,s.lon],{radius:inter?6.5:5,fillColor:LC[s.c],fillOpacity:.95,color:inter?'#000':'#fff',weight:inter?2:1});
+    c.bindTooltip('<b>'+esc(s.n)+'</b><br>'+s.l.map(function(l){var d=s.ap[l];return l+': dal '+(d.length>=10?d.split('-').reverse().join('/'):d)}).join('<br>'),{sticky:true});
+    return c});
+  function upd(){
+    var y=yrs[parseInt(rg.value,10)],n=0,nl=0;grp.clearLayers();
+    ST.forEach(function(s,i){if(s.y<=y&&s.l.some(function(l){return on[l]})){grp.addLayer(mk[i]);n++}});
+    el('yr').textContent=y;
+    var tot=0;ST.forEach(function(s){if(s.y<=y)tot++});
+    el('cnt').textContent=n+' stazioni mostrate (su '+tot+' aperte fino al '+y+')';
+  }
+  rg.addEventListener('input',upd);
+  setH('ck-linee','<span class="sub">Linee:</span>'+LN.map(function(l){return '<label class="ck"><input type="checkbox" data-l="'+l+'" checked> '+dot(l)+l+'</label>'}).join(''));
+  Array.prototype.forEach.call(document.querySelectorAll('#ck-linee input'),function(b){b.addEventListener('change',function(){on[b.getAttribute('data-l')]=b.checked?1:0;upd()})});
+  var tm=null;
+  el('btn-play').addEventListener('click',function(){
+    var b=this;if(tm){clearInterval(tm);tm=null;b.innerHTML='&#9654; Avvia';return}
+    if(parseInt(rg.value,10)>=yrs.length-1)rg.value=0;b.innerHTML='&#10073;&#10073; Ferma';upd();
+    tm=setInterval(function(){var v=parseInt(rg.value,10)+1;if(v>=yrs.length){clearInterval(tm);tm=null;b.innerHTML='&#9654; Avvia';return}rg.value=v;upd()},700)});
+  setH('lg-map',LN.map(function(l){return '<span>'+dot(l)+l+'</span>'}).join('')+'<span><span class="ln-dot" style="background:#fff;border:2px solid #000"></span>interscambio</span>');
+  upd();
+  setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(pts,{padding:[10,10]})},500);window.addEventListener('resize',function(){MAP.invalidateSize()});
+  var ap=D.stazioni_per_anno_prima_apertura,cum=0;
+  table('tab-ap',['Anno','Stazioni nuove','Totale aperte'],yrs.map(function(y){cum+=ap[y];return [y,'+'+ap[y],cum]}));
+}
+
+/* ---------- treni ---------- */
+function treni(){
+  var T=D.treni,S=D.treni_somma;
+  setH('treni-testo','<p>Nelle '+D.treni_n+' stazioni ferroviarie di Milano per cui abbiamo i dati, a novembre 2020 sono saliti in treno il <b>'+S.p20+'%</b> dei viaggiatori di novembre 2019. A novembre 2025 il <b>'+S.p25+'%</b>. Non tutte sono tornate allo stesso modo: tra le stazioni grandi (oltre 15.000 saliti nel 2019) <b>Porta Garibaldi, Repubblica, Cadorna, Porta Venezia e Bovisa</b> sono ancora sotto il 75% del 2019 (le più piccole, come Romolo e Porta Romana, sono ancora più in basso), mentre Centrale è al 92% e alcune stazioni di periferia sono oltre il 100% (San Cristoforo, Quarto Oggiaro, Forlanini, Affori; San Cristoforo e Forlanini sono anche stazioni della M4).</p>');
+  var mx=200;
+  setH('dum',T.map(function(t){var a=t.p20/mx*100,b=t.p25/mx*100,lo=Math.min(a,b),hi=Math.max(a,b);
+    return '<div class="row"><span class="nm">'+esc(t.n.replace('Milano ',''))+'</span><span class="tr"><span class="c100" style="left:'+(100/mx*100)+'%"></span><span class="seg" style="left:'+lo+'%;width:'+(hi-lo)+'%"></span><b class="a" style="left:'+a+'%" title="2020: '+nf(t.p20,0)+'%"></b><b class="b" style="left:'+b+'%" title="2025: '+nf(t.p25,0)+'%"></b></span><span class="v"><b>'+nf(t.p25,0)+'%</b> <span class="sub">'+f0(t.s2019)+' → '+f0(t.s2025)+'</span></span></div>'}).join('')+'<p class="sub" style="margin:.2em 0">Scala da 0% a 200% del 2019.</p>');
+  var c=D.treni_corr,G=D.treni_giorno_tipo_2025_nov;
+  setH('treni-testo2','<p><b>La teoria degli uffici e delle università non regge.</b> Si potrebbe pensare che non siano tornate le stazioni dove la mattina si arriva per lavoro o studio (Cadorna, Bovisa Politecnico, Repubblica). Abbiamo provato: per ogni stazione, il rapporto tra chi scende e chi sale tra le 7 e le 9 nel 2019 e la ripresa nel 2025. La correlazione è <b>'+nf(c,2)+'</b> su '+D.treni_n+' stazioni, cioè nulla. Lambrate (università) è al 91%, Bovisa (Politecnico) al 74%. Pesa anche l&rsquo;offerta di treni, che nel frattempo è cambiata (lavori, linee S): questi numeri non sono domanda pura.</p><p class="sub">Nelle stesse stazioni, novembre 2025: il sabato vale il '+G.sabato_pct+'% e il festivo il '+G.festivo_pct+'% di un feriale.</p>');
+}
+
+/* ---------- corse ---------- */
+function corse(){
+  var C=D.corse,T=D.corse_totale;
+  setH('corse-testo','<p>In un giorno feriale la metro offre '+f0(T.feriale[1])+' corse; il sabato tra '+f0(T.sabato[0])+' e '+f0(T.sabato[1])+' ('+Math.round(100*T.sabato[0]/T.feriale[1])+'–'+Math.round(100*T.sabato[1]/T.feriale[1])+'%); la domenica tra '+f0(T.domenica[0])+' e '+f0(T.domenica[1])+' ('+Math.round(100*T.domenica[0]/T.feriale[1])+'–'+Math.round(100*T.domenica[1]/T.feriale[1])+'%). Colpisce la M4: il sabato ha più corse (554) che nei giorni feriali (472); la M5 la domenica è quasi come nei feriali.</p>');
+  var mx=Math.max.apply(null,C.map(function(c){return c.feriale[1]})),h='';
+  C.forEach(function(c){['feriale','sabato','domenica'].forEach(function(k,i){var r=c[k],txt=r[0]===r[1]?f0(r[1]):f0(r[0])+'–'+f0(r[1]);
+    h+='<div class="row"><span class="nm">'+(i===0?dot(c.linea)+c.linea+' ':'&nbsp;&nbsp;&nbsp;&nbsp;')+'<span class="sub">'+k+'</span></span><span class="tr"><span class="fill" style="width:'+(r[1]/mx*100)+'%;background:'+LC[c.linea]+'"></span></span><span class="v">'+txt+'</span></div>'})});
+  setH('b-corse',h);
+}
+
+function nonsi(){var G=D.treni_giorno_tipo_2025_nov;el('n-sab').textContent=G.sabato_pct;el('n-fes').textContent=G.festivo_pct}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var li=[
+   '<b>I passeggeri sono ingressi ai tornelli.</b> Il Report AMAT li chiama "passeggeri conteggiati dai tornelli": un viaggio con cambio di linea dentro la stazione conta una volta. Non sono &laquo;viaggi&raquo;, e non sono persone diverse.',
+   '<b>Numeri letti da un grafico.</b> I passeggeri per linea del 2016–2024 e quelli di Linate sono letti dai grafici del Report AMAT 2024 (non c&rsquo;è una tabella). Errore stimato: 0,5 milioni per linea, 3 mila per Linate. Controllo: la somma delle cinque linee è sempre entro l&rsquo;1% dei totali pubblicati (per esempio 2019: 384,9 contro 386,8 riportato dalla stampa su dati Comune e ATM).',
+   '<b>Il 2025 viene da Wikipedia.</b> I passeggeri 2025 per linea (M1 118,0, M2 93,5, M3 76,5, M4 34,5, M5 29,9 milioni) sono quelli della voce di Wikipedia, che cita il Report AMAT 2025 (presentato il 18 settembre 2026): non l&rsquo;abbiamo trovato e quindi non è ancora verificato. Prima di dire che la M4 ha tolto passeggeri alla M2, servirebbe controllarlo.',
+   '<b>Diritti dei documenti.</b> Il Report AMAT è "tutti i diritti riservati": qui ci sono i suoi numeri, citati come dati con la fonte, non il PDF né i suoi grafici. Anche i PDF di ATM sono usati solo per i numeri.',
+   '<b>L&rsquo;anno della Carta della Mobilità ATM è l&rsquo;anno dopo i dati.</b> La Carta 2026 descrive il 2025. Anche la stampa a volte sbaglia: "675 milioni nel 2025" è in realtà il 2024.',
+   '<b>Totali diversi per lo stesso anno.</b> Nel 2019: 806,5 milioni (rete ATM metro e superficie, Carta), 809,7 (grafico AMAT del trasporto pubblico), 830,8 (stampa: metro 386,8 più superficie 444), 820,4 (gruppo ATM in Italia). Non sono errori: sono perimetri diversi. Qui non si mescolano.',
+   '<b>Stazioni e stazioni-linea.</b> 134 sono le stazioni contate una volta per linea (38 sulla M1, 35 M2, 21 M3, 21 M4, 19 M5); le stazioni distinte sono 125, perché 9 sono di interscambio. Per l&rsquo;orario ATM le fermate fisiche sono 130 (Duomo, Cadorna, Loreto, Lotto e Sant&rsquo;Ambrogio hanno due fermate).',
+   '<b>L&rsquo;orario è solo quello di oggi.</b> Le corse al giorno vengono dall&rsquo;orario valido dal 26 ottobre al 30 novembre 2026: non c&rsquo;è lo storico. Il numero di corse feriali dell&rsquo;orario (2.770) è più basso della media 2025 scritta da ATM (3.261 "corse al giorno, lunedì–venerdì invernale"): non sappiamo spiegare la differenza.',
+   '<b>Il "1.244.700 passeggeri al giorno"</b> del Report AMAT 2024 per la metro non si può usare come media dell&rsquo;anno: 341 milioni diviso 365 fa circa 934 mila. È probabilmente la media dei giorni feriali, ma non è scritto.',
+   '<b>I treni non sono la metro.</b> I dati Trenord sono arrotondati a 10, contano solo chi sale (per 7–9 anche chi scende), cambiano nome ad alcune stazioni tra le due tabelle (per esempio Cadorna), e novembre 2020 era in piena seconda ondata. Le due stazioni di Porta Garibaldi (superficie e Passante) sono tenute separate.',
+   '<b>Il 2015 non è una buona base.</b> È l&rsquo;anno dell&rsquo;Expo: AMAT, nel Report, usa il 2016 come anno di confronto, e qui si parte dal 2016.',
+   '<b>I confronti sono confronti.</b> Che la M4 salga e le linee vecchie scendano nello stesso anno è un fatto dei numeri disponibili; che sia una causa non è dimostrato.'];
+  setH('limiti',li.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script></body></html>
