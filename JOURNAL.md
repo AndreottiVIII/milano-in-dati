@@ -2434,3 +2434,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: prestiti 1.301.765 (2013), 428.989 (2020), 986.954 (2025). Sorpresa: i libri non sono calati (861.254 nel 2013, 783.700 nel 2023; primo semestre 2024 +14,5% sul 2019), sono spariti DVD e CD (−75%, l'85% del calo). Sopra i 65 anni dal 19,2% al 26,6% dei prestiti.
 - Trappole: chiusure per lavori (Dergano 2018-2019 e altre) falsano i confronti per biblioteca; "interbibliotecario" registrato solo dal 2017; periodici contati solo dal 2018; nessun codice lettore (non si contano i lettori); le classifiche dei titoli dipendono anche dalle copie comprate; ds286 scrive il 2015 con il punto delle migliaia.
 
+## 29. Redditi dei milanesi dal 2000
+
+- 2026-11-01 — Fase 1 e pagina (`redditi/`, `docs/redditi/`), volute da Davide. Dettagli in `redditi/NOTE.md`.
+- Fonti: MEF Dipartimento Finanze, dichiarazioni IRPEF per comune 2000-2024 e per CAP (2011, 2015, 2019-2024), per regione e classe 2016-2024: CC BY 3.0 dai metadati RDF (la pagina web MEF lascia vuoto il campo); ISTAT popolazione (CC BY 4.0); FOI da `prezzi-case`. Niente poligoni dei CAP su disco: i CAP sono un grafico a barre.
+- Numeri (euro 2025 per contribuente): Milano 35.714 (2000), 40.595 (2006), 40.889 (2024); Italia 23.199 → 25.482. Dal 2006 Milano +0,7%, Roma −3,7%, Napoli −8,0%. Gini da classi 0,50 → 0,54 (sottostima, solo per confronti). Pensione per pensionato +30% reale dal 2002, reddito per dipendente fermo.
+- Trappole: contribuenti ≠ residenti (77 ogni 100); soglie delle classi fisse in euro nominali (rifatte con soglie reali); cedolare secca 2011, IMU 2012, forfettario 2019 cambiano cosa c'è nel reddito; definizione "dipendente" cambia nel 2008; CAP 20121 e 20122 riassegnati; **dal 2023 il MEF oscura la classe oltre 120.000 € in molti comuni (si perde il 2,4% del reddito italiano sommando i comuni)**: usati i file regionali; anomalia nazionale 2017 nella classe ≤0.
+

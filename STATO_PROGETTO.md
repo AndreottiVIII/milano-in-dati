@@ -40,7 +40,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 26 | Morti giorno per giorno | Online |
 | 27 | Matrimoni e separazioni | Online |
 | 28 | Biblioteche | Online |
-| — | In corso | Pagine di scuole e redditi; fase 1 di luoghi più cercati, pioggia e caldo, costo della vita |
+| 29 | Redditi dal 2000 | Online |
+| — | In corso | Pagina delle scuole; fase 1 di luoghi più cercati, pioggia e caldo, costo della vita |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.
