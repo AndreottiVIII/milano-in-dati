@@ -1,7 +1,7 @@
 """Passo 3 - indice dei quartieri che cambiano: standardizzazione, indice, varianti, robustezza.
 
-Indice di base: media semplice (pesi uguali) dei punteggi z di 7 indicatori di nucleo, sui NIL idonei (almeno 2.000
-residenti nel 2024). z = (x - media) / scarto, tagliato a +-3. Servono almeno 5 indicatori su 7. Verso: piu alto = piu
+Indice di base: media semplice (pesi uguali) dei punteggi z di 9 indicatori di nucleo, sui NIL idonei (almeno 2.000
+residenti nel 2024). z = (x - media) / scarto, tagliato a +-3. Servono almeno 6 indicatori su 9. Verso: piu alto = piu
 "salita" (reddito, prezzi, affitti, affitti brevi, locali, giovani adulti, laureati).
 Non e' una misura di cio' che succede alle persone: e' una sintesi di sette segnali, NIL contro NIL.
 Uscite (out/): indice_nil.csv, robustezza_varianti.csv, robustezza_loo.csv, robustezza_pesi_casuali.csv,
@@ -18,10 +18,12 @@ D = pd.read_csv(os.path.join(OUT, 'indicatori_nil.csv')).set_index('id_nil')
 civ = pd.read_csv(os.path.join(OUT, 'civici_collegamenti.csv'))
 capd = pd.read_csv(os.path.join(OUT, 'cap_reddito_variazione.csv')).set_index('cap')
 
-CORE = ['reddito_var', 'prezzo_var', 'affitto_var', 'airbnb_100', 'ristoranti_var', 'giovani_var', 'laureati_var']
-ETI = {'reddito_var': 'reddito', 'prezzo_var': 'prezzi', 'affitto_var': 'affitti', 'airbnb_100': 'affitti brevi',
-       'ristoranti_var': 'locali', 'giovani_var': '25-34 anni', 'laureati_var': 'laureati'}
-KMIN = 5
+CORE = ['reddito_var', 'prezzo_var', 'affitto_var', 'costruzioni_100', 'airbnb_100', 'ristoranti_var', 'botteghe_var', 'giovani_var', 'laureati_var']
+CORE7 = ['reddito_var', 'prezzo_var', 'affitto_var', 'airbnb_100', 'ristoranti_var', 'giovani_var', 'laureati_var']   # indice della prima versione
+BLOCCO = {'reddito_var': 'casa', 'prezzo_var': 'casa', 'affitto_var': 'casa', 'costruzioni_100': 'casa', 'airbnb_100': 'commercio',
+          'ristoranti_var': 'commercio', 'botteghe_var': 'commercio', 'giovani_var': 'persone', 'laureati_var': 'persone'}
+K = len(CORE)
+KMIN = 6
 CLIP = 3.0
 rng = np.random.default_rng(20261101)
 E = D[D.idoneo].copy()     # NIL idonei
@@ -59,14 +61,14 @@ n_ranked = int(E.indice.notna().sum())
 cor = E[CORE].corr(method='spearman')
 cor.to_csv(os.path.join(OUT, 'correlazioni_indicatori.csv'))
 Zc = S.dropna()
-ev = np.linalg.eigvalsh(np.corrcoef(Zc.values.T))[::-1]
 k = len(CORE)
-# alfa di Cronbach sui z (7 indicatori)
-cov = np.cov(Zc.values.T)
-alpha = k / (k - 1) * (1 - np.trace(cov) / cov.sum())
-pca = {'n_NIL_con_tutti_i_7': int(len(Zc)), 'autovalori_correlazione': [round(float(v), 3) for v in ev],
+# con le botteghe (solo 23 NIL) pochi NIL hanno tutti i segnali: autovalori e alfa dalla matrice di correlazione a coppie (Spearman)
+ev = np.linalg.eigvalsh(cor.values)[::-1]
+rbar = float(cor.values[np.triu_indices(k, 1)].mean())
+alpha = k * rbar / (1 + (k - 1) * rbar)     # alfa standardizzato
+pca = {'n_NIL_con_tutti_i_9': int(len(Zc)), 'autovalori_correlazione_a_coppie': [round(float(v), 3) for v in ev],
        'quota_prima_componente': round(float(ev[0] / ev.sum()), 3), 'alfa_cronbach': round(float(alpha), 3),
-       'correlazione_media_a_coppie_spearman': round(float(cor.values[np.triu_indices(k, 1)].mean()), 3)}
+       'correlazione_media_a_coppie_spearman': round(rbar, 3)}
 json.dump(pca, open(os.path.join(OUT, 'pca_indicatori.json'), 'w', encoding='utf-8'), indent=1)
 
 # ------------------------------------------------------------ varianti
@@ -74,12 +76,11 @@ V = {}   # nome -> serie indice
 V['base'] = E.indice
 V['percentili'] = indice(E, CORE, tipo='rank')[0]
 V['senza_taglio_z'] = indice(E, CORE, clip=None)[0]
-bl = {'reddito_var': 1 / 9, 'prezzo_var': 1 / 9, 'affitto_var': 1 / 9, 'airbnb_100': 1 / 6, 'ristoranti_var': 1 / 6,
-      'giovani_var': 1 / 6, 'laureati_var': 1 / 6}
-V['pesi_a_blocchi_3'] = indice(E, CORE, w=[bl[c] for c in CORE])[0]
-V['pesi_casa_x2'] = indice(E, CORE, w=[2, 2, 2, 1, 1, 1, 1])[0]
-V['pesi_negozi_x2'] = indice(E, CORE, w=[1, 1, 1, 2, 2, 1, 1])[0]
-V['pesi_persone_x2'] = indice(E, CORE, w=[1, 1, 1, 1, 1, 2, 2])[0]
+nb = pd.Series(BLOCCO).value_counts()
+V['pesi_a_blocchi_3'] = indice(E, CORE, w=[1 / (3 * nb[BLOCCO[c]]) for c in CORE])[0]
+for bk, nmv in [('casa', 'pesi_casa_x2'), ('commercio', 'pesi_negozi_x2'), ('persone', 'pesi_persone_x2')]:
+    V[nmv] = indice(E, CORE, w=[2 if BLOCCO[c] == bk else 1 for c in CORE])[0]
+V['solo_i_sette_indicatori_di_prima'] = indice(E, CORE7, kmin=5)[0]
 # varianti di dato
 E2 = E.copy()
 E2['reddito_var'] = E2['reddito_var_con_cap_instabili']
@@ -124,7 +125,7 @@ for soglia in (1000, 5000):
 LOO = {}
 for c in CORE:
     cols = [x for x in CORE if x != c]
-    LOO[c] = indice(E, cols, kmin=4)[0]
+    LOO[c] = indice(E, cols, kmin=5)[0]
 
 rk = lambda s: s.rank(ascending=False, method='min')
 base_r = rk(V['base'])
@@ -181,14 +182,13 @@ for c in LIV:
     E['z_' + c] = SL[c]
 E['rango_livello'] = E.livello.rank(ascending=False, method='min')
 # blocchi dell'indice (per leggere da dove viene)
-E['blocco_casa'] = E[['z_reddito_var', 'z_prezzo_var', 'z_affitto_var']].mean(axis=1)
-E['blocco_negozi'] = E[['z_airbnb_100', 'z_ristoranti_var']].mean(axis=1)
-E['blocco_persone'] = E[['z_giovani_var', 'z_laureati_var']].mean(axis=1)
+for bk, nmc in [('casa', 'blocco_casa'), ('commercio', 'blocco_negozi'), ('persone', 'blocco_persone')]:
+    E[nmc] = E[['z_' + c for c in CORE if BLOCCO[c] == bk]].mean(axis=1)
 
 cols = (['nil', 'residenti_2024', 'n_indicatori', 'indice', 'rango', 'rango_min_varianti', 'rango_max_varianti', 'rango_mediano', 'rango_p5',
          'rango_p95', 'quota_top10_pesi_casuali', 'quota_bottom10_pesi_casuali', 'livello', 'rango_livello', 'blocco_casa', 'blocco_negozi', 'blocco_persone']
         + ['z_' + c for c in CORE] + CORE + ['reddito_2024', 'prezzo_2026_reale', 'affitto_2026_reale', 'laureati_2023', 'giovani_2025', 'stranieri_2025',
-                                             'pop_var', 'stranieri_var', 'eta_media_var', 'scuole_var', 'airbnb_cresc_100', 'quota_civici_cap_instabili', 'copertura_omi'])
+                                             'pop_var', 'stranieri_var', 'eta_media_var', 'scuole_var', 'airbnb_cresc_100', 'quota_civici_cap_instabili', 'copertura_omi', 'botteghe_albo_2017', 'botteghe_chiuse', 'nuove_abitazioni_2014_2024'])
 E[cols].sort_values('rango').to_csv(os.path.join(OUT, 'indice_nil.csv'), index=True)
 D.loc[~D.idoneo, ['nil', 'residenti_2024'] + CORE].to_csv(os.path.join(OUT, 'nil_non_in_classifica.csv'))
 

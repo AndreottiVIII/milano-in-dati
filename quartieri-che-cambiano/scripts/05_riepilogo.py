@@ -17,7 +17,7 @@ tl = json.load(open(os.path.join(OUT, 'tipologie_log.json')))
 cl = json.load(open(os.path.join(OUT, 'collegamenti_log.json')))
 cor = pd.read_csv(os.path.join(OUT, 'correlazioni_indicatori.csv'), index_col=0)
 mun = pd.read_csv(os.path.join(OUT, 'municipi.csv'), index_col=0)
-CORE = ['reddito_var', 'prezzo_var', 'affitto_var', 'airbnb_100', 'ristoranti_var', 'giovani_var', 'laureati_var']
+CORE = ['reddito_var', 'prezzo_var', 'affitto_var', 'costruzioni_100', 'airbnb_100', 'ristoranti_var', 'botteghe_var', 'giovani_var', 'laureati_var']
 L = []
 P = L.append
 pd.set_option('display.width', 250)
@@ -28,7 +28,7 @@ P(f"NIL totali {len(D)}; idonei (>=2.000 residenti nel 2024, popolazione/pulito/
 P('NIL non in classifica: ' + '; '.join(D.loc[~D.idoneo, 'nil'] + ' (' + D.loc[~D.idoneo, 'residenti_2024'].fillna(0).astype(int).astype(str) + ')'))
 P('Indicatori mancanti tra gli idonei (n NIL senza valore):')
 P(str(D.loc[D.idoneo, CORE].isna().sum().to_dict()))
-P('NIL idonei con meno di 7 indicatori: ' + '; '.join(E.loc[E.n_indicatori < 7, 'nil'] + ' (' + E.loc[E.n_indicatori < 7, 'n_indicatori'].astype(int).astype(str) + ')'))
+P('NIL idonei con meno di 9 indicatori: ' + '; '.join(E.loc[E.n_indicatori < 9, 'nil'] + ' (' + E.loc[E.n_indicatori < 9, 'n_indicatori'].astype(int).astype(str) + ')'))
 P('NIL senza reddito (piu\' della meta\' dei civici in CAP 20121/20122): ' + '; '.join(D.loc[D.idoneo & D.reddito_var.isna() & (D.quota_civici_cap_instabili > 0.5), 'nil']))
 P('NIL senza locali (meno di 20 pratiche nel 2019): ' + '; '.join(D.loc[D.idoneo & D.ristoranti_var.isna(), 'nil']))
 P('NIL senza Airbnb (denominatore piccolo): ' + '; '.join(D.loc[D.idoneo & D.airbnb_100.isna(), 'nil']))

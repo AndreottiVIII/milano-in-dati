@@ -1,11 +1,11 @@
 """Passo 2 - indicatori grezzi per NIL (nessuna standardizzazione qui).
 
 Ogni indicatore: valore per NIL, finestra, fonte (file e campo) in out/indicatori_definizioni.csv.
-Indicatori "di nucleo" (entrano nell'indice): reddito_var, prezzo_var, affitto_var, airbnb_100, ristoranti_var,
-                                              giovani_var, laureati_var
+Indicatori "di nucleo" (entrano nell'indice): reddito_var, prezzo_var, affitto_var, costruzioni_100, airbnb_100, ristoranti_var,
+                                              botteghe_var, giovani_var, laureati_var
 Indicatori "di contesto" (non entrano nell'indice di base; servono per descrivere e per le varianti):
    pop_var, stranieri_var, eta_media_var, scuole_var, airbnb_cresc_100, ... e i livelli (reddito_2024, prezzo_2026, laureati_2023)
-Non disponibili al momento della stesura: botteghe storiche (botteghe/pulito vuota), nuove costruzioni (costruzioni/pulito vuota).
+Aggiunti il 1/11/2026 sera, a filoni chiusi: botteghe_var (botteghe/pulito/botteghe.csv) e costruzioni_100 (costruzioni/pulito/nil_costruzioni.csv).
 Uso: python -I -X utf8 02_indicatori.py <milano-in-dati> <quartieri-che-cambiano>
 """
 import sys, os, json
@@ -143,10 +143,23 @@ D['scuole_var'] = ((sg.iscritti_2024 / sg.iscritti_2015 - 1) * 100).where(sg.isc
 aggiungi('scuole_var', 'Iscritti alle scuole del NIL (infanzia+primaria+media): variazione', '%', 'contesto (calo demografico di tutta la citta)',
          'a.s. 2015/16 -> 2024/25', 'scuole/pulito/nil_iscritti_variazione_2015_2024.csv: iscritti_2015, iscritti_2024 (somma dei tre ordini; NIL con meno di 100 iscritti nel 2015 = vuoto)', 'contesto')
 
-# ---------------------------------------------------------------- non disponibili
-for nome, cart in [('botteghe', 'botteghe'), ('costruzioni', 'costruzioni')]:
-    pul = P(cart, 'pulito')
-    log[f'{nome}_file_presenti'] = len(os.listdir(pul)) if os.path.isdir(pul) else 0
+# ---------------------------------------------------------------- botteghe storiche (Albo del Comune 2017 -> 2024)
+bt = pd.read_csv(P('botteghe', 'pulito', 'botteghe.csv'))
+a17 = bt[bt.in_albo_2017 == 'sì'].copy()
+a17['chiusa'] = (a17.stato_albo_2024 == 'cessata') | a17.stato_albo_2024.isna()   # cessata nel 2024 o non piu' nel file 2024
+gb = a17.groupby('nil_id').agg(n17=('chiusa', 'size'), n_chiuse=('chiusa', 'sum'))
+D['botteghe_albo_2017'] = gb.n17
+D['botteghe_chiuse'] = gb.n_chiuse
+D['botteghe_var'] = (gb.n_chiuse / gb.n17 * 100).where(gb.n17 >= 5)
+aggiungi('botteghe_var', "Botteghe storiche dell'Albo 2017 cessate o uscite dall'Albo nel 2024", '% delle botteghe del 2017', '+ = piu botteghe perse',
+         'Albo 2017 -> Albo 2024', "botteghe/pulito/botteghe.csv: in_albo_2017, stato_albo_2024 (cessata o assente), nil_id; solo NIL con almeno 5 botteghe nell'Albo 2017", 'nucleo')
+
+# ---------------------------------------------------------------- nuove costruzioni (permessi di costruire 2014-2024)
+co = pd.read_csv(P('costruzioni', 'pulito', 'nil_costruzioni.csv'), sep=';').set_index('id_nil')
+D['costruzioni_100'] = co['abitazioni_nuove_per_1000_ab_2024']
+D['nuove_abitazioni_2014_2024'] = co['nuove_abitazioni_2014_2024']
+aggiungi('costruzioni_100', 'Abitazioni in nuovi fabbricati (permessi 2014-2024) ogni 1.000 residenti', 'abitazioni ogni 1.000 residenti', '+ = piu costruzione',
+         '2014 -> 2024', 'costruzioni/pulito/nil_costruzioni.csv: abitazioni_nuove_per_1000_ab_2024 (permessi di costruire del Comune, non cantieri finiti; le ricostruzioni dopo demolizione sono incluse)', 'nucleo')
 
 # idoneita': almeno 2.000 residenti nel 2024 (anagrafe)
 D['idoneo'] = D.residenti_2024 >= 2000
@@ -157,6 +170,6 @@ D.reset_index().to_csv(os.path.join(OUT, 'indicatori_nil.csv'), index=False)
 pd.DataFrame(defs).to_csv(os.path.join(OUT, 'indicatori_definizioni.csv'), index=False)
 json.dump(log, open(os.path.join(OUT, 'indicatori_log.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(json.dumps(log, ensure_ascii=False, indent=1))
-core = ['reddito_var', 'prezzo_var', 'affitto_var', 'airbnb_100', 'ristoranti_var', 'giovani_var', 'laureati_var']
+core = ['reddito_var', 'prezzo_var', 'affitto_var', 'costruzioni_100', 'airbnb_100', 'ristoranti_var', 'botteghe_var', 'giovani_var', 'laureati_var']
 print(D.loc[D.idoneo, core + ['pop_var', 'stranieri_var', 'scuole_var']].describe().round(2).T)
 print(D.loc[D.idoneo, core].isna().sum())

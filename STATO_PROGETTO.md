@@ -50,7 +50,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 36 | Pietre d'inciampo | Online |
 | 37 | Luoghi più cercati | Online |
 | 38 | Scuole di domani | Online |
-| 39 | Quartieri che cambiano | Online (senza botteghe e costruzioni, in arrivo) |
+| 39 | Quartieri che cambiano | Online, 9 segnali |
 | 40 | Pollini | Online (stazioni intorno a Milano) |
 | 41 | Case popolari vuote | Online (da PDF ufficiali) |
 | 42 | Beni confiscati | Online |

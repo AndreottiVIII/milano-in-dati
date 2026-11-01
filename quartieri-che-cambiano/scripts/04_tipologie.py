@@ -53,8 +53,8 @@ C['terzile_cambiamento'] = np.where(C.indice >= c_hi, 'alto', np.where(C.indice 
 C['terzile_stabile'] = ((C.rango_max_varianti <= n / 3 + 3) & (C.terzile_cambiamento == 'alto')) | \
                        ((C.rango_min_varianti >= 2 * n / 3 - 3) & (C.terzile_cambiamento == 'basso'))
 
-# ampiezza: numero di indicatori su 7 con z > 0,5 (segnali concordi)
-zc = [c for c in E.columns if c.startswith('z_') and c[2:] in ['reddito_var', 'prezzo_var', 'affitto_var', 'airbnb_100', 'ristoranti_var', 'giovani_var', 'laureati_var']]
+# ampiezza: numero di indicatori su 9 con z > 0,5 (segnali concordi)
+zc = [c for c in E.columns if c.startswith('z_') and c[2:] in ['reddito_var', 'prezzo_var', 'affitto_var', 'costruzioni_100', 'airbnb_100', 'ristoranti_var', 'botteghe_var', 'giovani_var', 'laureati_var']]
 C['n_segnali_alti'] = (C[zc] > 0.5).sum(axis=1)
 C['n_segnali_bassi'] = (C[zc] < -0.5).sum(axis=1)
 

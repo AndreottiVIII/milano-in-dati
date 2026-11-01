@@ -34,7 +34,7 @@ FIX = {"Citta' studi": 'Città Studi', "Monlue' - Ponte Lambro": 'Monluè - Pont
        'Pta Romana': 'Porta Romana', 'QT 8': 'QT8', 'Magenta - S.Vittore': 'Magenta - San Vittore', 'Giardini P.ta Venezia': 'Giardini Porta Venezia'}
 nome = lambda s: FIX.get(s, s)
 
-CORE = ['reddito_var', 'prezzo_var', 'affitto_var', 'airbnb_100', 'ristoranti_var', 'giovani_var', 'laureati_var']
+CORE = ['reddito_var', 'prezzo_var', 'affitto_var', 'costruzioni_100', 'airbnb_100', 'ristoranti_var', 'botteghe_var', 'giovani_var', 'laureati_var']
 IND = [
     dict(id='reddito_var', et='Reddito reale', blocco='casa', unita='%', dec=1, segno=True,
          desc='Variazione del reddito medio reale per contribuente (euro 2025), anno d\'imposta 2011 → 2024. È il dato del CAP, portato al quartiere.',
@@ -45,12 +45,18 @@ IND = [
     dict(id='affitto_var', et='Affitto (OMI)', blocco='casa', unita='%', dec=1, segno=True,
          desc='Variazione dell\'affitto stimato dall\'OMI, abitazioni civili, in euro 2025, 2014/2 → 2026/1. Stima, non affitti pagati.',
          fonte='Agenzia delle Entrate, OMI (stesso file)', link='../prezzi-case/'),
+    dict(id='costruzioni_100', et='Nuove abitazioni', blocco='casa', unita=' ogni 1.000 residenti', dec=1, segno=False,
+         desc='Abitazioni in nuovi fabbricati con permesso di costruire tra il 2014 e il 2024, ogni 1.000 residenti (2024). Sono permessi, non cantieri finiti; le ricostruzioni dopo demolizione sono incluse; ristrutturazioni e demolizioni senza ricostruzione non ci sono.',
+         fonte='Comune di Milano, permessi di costruire (costruzioni/pulito/nil_costruzioni.csv)', link=None),
     dict(id='airbnb_100', et='Affitti brevi', blocco='commercio', unita=' ogni 100 abitazioni', dec=1, segno=False,
          desc='Annunci Airbnb ogni 100 abitazioni, fotografia del 19 settembre 2026. È un livello, non una variazione.',
          fonte='Inside Airbnb, CC BY 4.0 (affitti-brevi/pulito/nil_riepilogo.csv)', link='../affitti-brevi/'),
     dict(id='ristoranti_var', et='Locali (bar, ristoranti)', blocco='commercio', unita='%', dec=1, segno=True,
          desc='Indirizzi con un locale di somministrazione nuovi meno scomparsi, 2019 → 2026, in percentuale delle pratiche del 2019.',
          fonte='Comune di Milano, registro pubblici esercizi (ristoranti/pulito/registro_2019_2026_nil.csv)', link='../ristoranti/'),
+    dict(id='botteghe_var', et='Botteghe storiche perse', blocco='commercio', unita='%', dec=1, segno=False,
+         desc="Quota delle botteghe dell'Albo comunale 2017 che nel 2024 risultano cessate o non sono più nell'Albo. Solo quartieri con almeno 5 botteghe nell'Albo 2017 (23). «Cessata» è l'etichetta del Comune, senza data.",
+         fonte="Comune di Milano, Albo delle Botteghe Storiche 2017 e 2024 (botteghe/pulito/botteghe.csv)", link=None),
     dict(id='giovani_var', et='Residenti 25-34 anni', blocco='persone', unita=' punti', dec=1, segno=True,
          desc='Variazione della quota di residenti di 25-34 anni, 2014 → 2025 (punti percentuali). Anagrafe del Comune.',
          fonte='Comune di Milano, residenti per età (popolazione/pulito/eta_nil_anno_indicatori.csv)', link=None),
@@ -81,14 +87,18 @@ def limiti(i):
         L.append('Prezzi e affitti sono quelli delle zone OMI (stime dell\'Agenzia); zona principale %s, %d%% delle case.' % (z.zona_2026_1, round(z.quota_nil * 100)))
     if pd.isna(d.ristoranti_var) and bool(d.idoneo):
         L.append('Locali non calcolati: meno di 20 pratiche nel registro 2019.')
+    if pd.isna(d.botteghe_var) and bool(d.idoneo):
+        L.append("Botteghe storiche non calcolate: meno di 5 botteghe nell'Albo 2017 (la quota sarebbe rumore).")
+    if not pd.isna(d.costruzioni_100) and d.costruzioni_100 > 100:
+        L.append('Molte case nuove con permesso 2014-2024: %d ogni 1.000 residenti. Il "cambiamento" qui è anche edilizia.' % round(d.costruzioni_100))
     if pd.isna(d.airbnb_100) and bool(d.idoneo):
         L.append('Affitti brevi non calcolati: troppo poche abitazioni per un rapporto sensato.')
     if not pd.isna(d.pop_var) and d.pop_var > 25:
         L.append('Quartiere con molte case nuove: residenti %+.0f%% dal 2014 al 2025. Il cambiamento qui è anche costruzione.' % d.pop_var)
     if bool(d.idoneo):
         n = int(E.loc[i, 'n_indicatori']) if i in E.index and not pd.isna(E.loc[i, 'n_indicatori']) else 0
-        if 0 < n < 7:
-            L.append('Indice calcolato su %d indicatori su 7.' % n)
+        if 0 < n < 9:
+            L.append('Indice calcolato su %d indicatori su 9.' % n)
     return L
 
 
@@ -137,9 +147,11 @@ Dn = D[D.idoneo]
 med = {c: r1(Dn[c].median(), 2) for c in CORE}
 m1 = T[T.municipio == 1].sort_values('rango')
 n_in_top10_mun1 = int(((T.municipio == 1) & (T.rango <= 10)).sum())
-sarpi, lamb = by('Sarpi'), by('Lambrate - Ortica')
+sarpi, lamb, magg = by('Sarpi'), by('Lambrate - Ortica'), by('Maggiore - Musocco - Certosa')
 lam_d = D.loc[int(T[T.nil == 'Lambrate - Ortica'].index[0])]
 sar_d = D.loc[int(T[T.nil == 'Sarpi'].index[0])]
+mag_d = D.loc[int(T[T.nil == 'Maggiore - Musocco - Certosa'].index[0])]
+rank_cos = int(Dn.costruzioni_100.rank(ascending=False)[int(T[T.nil == 'Lambrate - Ortica'].index[0])])
 b12 = pd.read_csv(os.path.join(BASE, 'docs', 'prezzi-case', 'data', 'zone_ultimo_semestre.csv')).set_index('zona').loc['B12', 'var_reale_2014_2_ultimo']
 rank_rent = int(Dn.affitto_var.rank(ascending=False)[int(T[T.nil == 'Lambrate - Ortica'].index[0])])
 rank_lau = int(Dn.laureati_var.rank(ascending=False)[int(T[T.nil == 'Lambrate - Ortica'].index[0])])
@@ -156,19 +168,19 @@ for k, col in [('casa', 'blocco_casa'), ('commercio', 'blocco_negozi'), ('person
     s = T[col].dropna().sort_values(ascending=False)
     blocchi[k] = dict(alti=[nome(T.loc[x, 'nil']) for x in s.index[:3]], bassi=[nome(T.loc[x, 'nil']) for x in s.index[-3:]])
 cor = COR.values
-iu = np.triu_indices(7, 1)
 bcor = T[['blocco_casa', 'blocco_negozi', 'blocco_persone']].corr(method='spearman')
 R = dict(
     generato=datetime.date.today().isoformat(),
     n_nil=int(len(D)), n_classificati=N, n_fuori=int(len(D) - N), fuori=[nome(x) for x in D[~D.idoneo].nil],
     ind=IND, mediane=med,
-    default_w=[1] * 7,
+    default_w=[1] * len(CORE),
     sorpresa=dict(
-        mun1=[dict(n=nome(r.nil), rk=int(r.rango)) for r in m1.itertuples()], mun1_n=int(len(m1)), mun1_peggior=int(m1.rango.min()),
+        mun1=[dict(n=nome(r.nil), rk=int(r.rango)) for r in m1.itertuples()], mun1_n=int(len(m1)), mun1_peggior=int(m1.rango.min()), mun1_ultimi=int(N - m1.rango.min() + 1),
         mun1_nel_top10=n_in_top10_mun1, b12=r1(b12 * 100, 1),
-        sarpi=dict(rk=int(sarpi.rango), red=r1(sar_d.reddito_var), pre=r1(sar_d.prezzo_var), aff=r1(sar_d.affitto_var), rist=r1(sar_d.ristoranti_var), air=r1(sar_d.airbnb_100)),
-        lamb=dict(rk=int(lamb.rango), red=r1(lam_d.reddito_var), pre=r1(lam_d.prezzo_var), aff=r1(lam_d.affitto_var), lau=r1(lam_d.laureati_var), rk_aff=rank_rent, rk_lau=rank_lau,
+        sarpi=dict(rk=int(sarpi.rango), rmin=int(sarpi.rango_min_varianti), rmax=int(sarpi.rango_max_varianti), red=r1(sar_d.reddito_var), pre=r1(sar_d.prezzo_var), aff=r1(sar_d.affitto_var), rist=r1(sar_d.ristoranti_var), air=r1(sar_d.airbnb_100)),
+        lamb=dict(rk=int(lamb.rango), red=r1(lam_d.reddito_var), pre=r1(lam_d.prezzo_var), aff=r1(lam_d.affitto_var), lau=r1(lam_d.laureati_var), cos=r1(lam_d.costruzioni_100, 0), rk_cos=rank_cos, rk_aff=rank_rent, rk_lau=rank_lau,
                   rmin=int(lamb.rango_min_varianti), rmax=int(lamb.rango_max_varianti)),
+        magg=dict(rk=int(magg.rango), cos=r1(mag_d.costruzioni_100, 0), lau=r1(mag_d.laureati_var), red=r1(mag_d.reddito_var)),
         top5=[dict(n=nome(r.nil), rk=int(r.rango), rmax=int(r.rango_max_varianti)) for r in top5.itertuples()],
         bot5=[dict(n=nome(r.nil), rk=int(r.rango), rmin=int(r.rango_min_varianti)) for r in bot5.itertuples()],
     ),
@@ -191,8 +203,7 @@ R = dict(
     municipi=[dict(m=int(i), n=int(r.n_NIL), ab=int(r.residenti_2024), ix=r1(r.indice_medio_pesato, 2), liv=r1(r.livello_medio_pesato, 2)) for i, r in MUN.iterrows()],
     collegamento=dict(civici=clog['civici_totali'], residenziali=clog['civici_residenziali'], con_omi=clog['residenziali_con_valore_omi']['prezzo_cresc'],
                       cap_dom90=clog['NIL_con_CAP_dominante_ge_90pct'], cap_dom60=clog['NIL_con_CAP_dominante_lt_60pct']),
-    n_reddito_mancante=int(Dn.reddito_var.isna().sum()), n_locali_mancanti=int(Dn.ristoranti_var.isna().sum()), n_airbnb_mancanti=int(Dn.airbnb_100.isna().sum()),
-    in_arrivo=['botteghe storiche perse', 'nuove costruzioni'],
+    n_reddito_mancante=int(Dn.reddito_var.isna().sum()), n_botteghe=int(Dn.botteghe_var.notna().sum()), n_botteghe_mancanti=int(Dn.botteghe_var.isna().sum()), n_locali_mancanti=int(Dn.ristoranti_var.isna().sum()), n_airbnb_mancanti=int(Dn.airbnb_100.isna().sum()),
 )
 json.dump(R, open(os.path.join(DATA, 'riepilogo.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 for f in sorted(os.listdir(DATA)):
