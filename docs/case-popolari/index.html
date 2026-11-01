@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Case popolari vuote</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.altre{border:1px dashed #888;background:#f7f7f7;padding:6px 12px;margin:.8em 0;font-size:.9rem}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd{max-width:100%} @media(max-width:760px){.lgd span{white-space:normal}}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed} .lgd i.ln.t{border-top-style:dotted}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.big{display:flex;flex-wrap:wrap;gap:8px 26px;margin:.6em 0} .big div{min-width:130px} .big b{display:block;font-size:1.9rem;line-height:1.1;color:var(--acc)} .big span{font-size:.85rem;color:var(--mut)}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(90px,28%) 1fr minmax(90px,36%);gap:6px;align-items:center;font-size:.88rem;padding:3px 0}
+.bars .tr{background:#f1f1f1;height:14px;position:relative;display:flex;overflow:hidden} .bars .seg{display:block;height:14px}
+.bars .v{font-variant-numeric:tabular-nums;line-height:1.25}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .bars .row{grid-template-columns:1fr} }
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.gap{color:var(--mut);font-style:italic}
+#tab-serie,#tab-aler,#tab-dom,#tab-piano{min-width:520px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Case popolari vuote a Milano</h1>
+<p>A Milano ci sono quasi <b id="n-tot">59.054</b> case popolari (quelle che la legge regionale chiama &laquo;servizi abitativi pubblici&raquo;, SAP): alloggi del Comune, gestiti da MM, e di ALER Milano, l&rsquo;azienda regionale. In questa pagina si guarda quante sono, di chi sono, quante risultano vuote e per quale motivo, come sono cambiati i numeri, e quante persone fanno domanda ogni anno. Sono <b>confronti tra numeri ufficiali</b>, non spiegazioni.</p>
+
+<div class="warm"><b>Prima di leggere.</b>
+<ul>
+<li><b>Non esiste un elenco aperto delle case popolari di Milano.</b> Il portale del Comune e quello della Regione non hanno dati su patrimonio, alloggi vuoti o graduatorie. Tutti i numeri qui vengono da <b>rapporti ufficiali in PDF</b> (Regione Lombardia, ALER Milano, Comune di Milano), letti con programmi e controllati. Per ogni numero ci sono documento e pagina in fondo (<a href="#fonti">fonti</a>). I PDF non sono ripubblicati.</li>
+<li><b>I perimetri cambiano da un numero all&rsquo;altro.</b> Alcuni riguardano la <b>citt&agrave;</b> (Comune + ALER, 59.054 alloggi); le serie di ALER riguardano <b>tutto il territorio di ALER Milano</b> (53.143 alloggi a canone sociale nel 2025, di cui 33.044 in citt&agrave;). Ogni grafico dice a quale perimetro appartiene: non vanno messi sulla stessa curva.</li>
+<li>&laquo;Vuoto&raquo; non ha un solo significato: ogni ente usa parole e caselle sue (sfitto, libero, in ristrutturazione, da valorizzare&hellip;). Vedi <a href="#limiti">i limiti dei dati</a>.</li>
+<li>Non ci sono dati su inquilini o occupanti, n&eacute; su singoli alloggi. Della distribuzione per quartiere si mostrano solo le quote per quartiere, non gli edifici.</li>
+</ul></div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="quante">Quante sono e di chi</h2>
+<div id="quante-testo"></div>
+<div class="big" id="big"></div>
+<div class="bars" id="b-own"></div>
+<div id="quante-testo2"></div>
+<details><summary>Le edizioni dei rapporti regionali (2017&ndash;2026)</summary><div class="scroll"><table id="tab-serie"></table></div></details>
+<p class="src">Fonti: Regione Lombardia, Rapporti annuali al Consiglio regionale (<a href="#fonti">pagine</a>); abitazioni: Comune di Milano / ISTAT. La data di ogni edizione &egrave; quella a cui la Regione riferisce i dati.</p>
+<div id="casi"></div>
+
+<h2 id="vuote">Quante sono vuote: la fotografia di marzo 2023</h2>
+<div id="vuote-testo"></div>
+<div class="bars" id="b-snap"></div>
+<div class="lgd" id="lg-snap"></div>
+<div id="vuote-testo2"></div>
+<p class="src">Fonte: Comune di Milano, &laquo;Una nuova strategia per la casa&raquo; (20/3/2023), p.38, tabella &laquo;analisi unit&agrave; per stato di utilizzo&raquo;; totali p.34. &Egrave; l&rsquo;<b>unico dato per la citt&agrave;</b> con il motivo: non c&rsquo;&egrave; una serie nel tempo per la citt&agrave;.</p>
+
+<h2 id="aler">Gli alloggi ALER vuoti, 2018&ndash;2025</h2>
+<div id="aler-testo"></div>
+<div class="ch" id="ch-aler" role="img" aria-label="Grafico a due linee: sfitti come scritti da ALER e alloggi vuoti per qualsiasi motivo, 2018-2025"></div>
+<div class="lgd" id="lg-aler"></div>
+<p class="src">Perimetro: <b>tutto il territorio di ALER Milano</b> (53.143 alloggi a canone sociale nel 2025), non solo la citt&agrave;. &laquo;Vuoti per qualsiasi motivo&raquo; = &laquo;sfitti&raquo; + dal 2022 le tre voci che ALER elenca a parte (valorizzazione, vendita, demolizione). Fonte: ALER Milano, Prospetto n.5 di ogni anno, p.1.</p>
+<h3>Perch&eacute; sono vuoti (ALER)</h3>
+<div class="bars" id="b-motivi"></div>
+<div class="lgd" id="lg-motivi"></div>
+<details><summary>Tutti gli anni in tabella</summary><div class="scroll"><table id="tab-aler"></table></div></details>
+
+<h2 id="domande">Domande e assegnazioni</h2>
+<div id="dom-testo"></div>
+<div class="bars" id="b-dom"></div>
+<p class="src">Barra = domande ogni alloggio messo in avviso nell&rsquo;anno (citt&agrave; di Milano). Le domande sono sommate sugli avvisi dell&rsquo;anno: lo stesso nucleo pu&ograve; comparire due volte. Fonti: Regione Lombardia, Rapporti 2020 (p.33, 36), 2022 (p.15), 2024 (p.11), 2025 (p.17).</p>
+<details><summary>Numeri in tabella, anche gli avvisi uno per uno</summary><div class="scroll"><table id="tab-dom"></table></div></details>
+<div id="dom-testo2"></div>
+
+<h2 id="piano">Gli alloggi che il Comune e ALER pensano di assegnare nel 2026</h2>
+<div id="piano-testo"></div>
+<div class="bars" id="b-piano"></div>
+<div class="lgd" id="lg-piano"></div>
+<p class="src">Fonte: Comune di Milano, Piano annuale dell&rsquo;offerta dei servizi abitativi pubblici e sociali 2026, slide della delibera di Giunta 30/2026, p.3&ndash;7. I Municipi sono quelli del Comune (9). Questo <b>non</b> &egrave; il numero degli alloggi vuoti: &egrave; quello che ente per ente pensa di poter assegnare in un anno.</p>
+<details><summary>Le cinque voci, Municipio per Municipio</summary><div class="scroll"><table id="tab-piano"></table></div></details>
+
+<h2 id="occupazioni">Alloggi occupati senza titolo (non sono alloggi vuoti)</h2>
+<div id="occ-testo"></div>
+<div class="ch" id="ch-occ" role="img" aria-label="Grafico: alloggi occupati senza titolo, ALER e Comune, 2013-2025"></div>
+<div class="lgd" id="lg-occ"></div>
+<p class="src">&laquo;Occupazioni consolidate&raquo; = alloggi abitati senza titolo che non sono stati liberati; sono contate a parte dai vuoti. ALER: relazioni sulla gestione 2021 (p.75) e 2023 (p.72), Rapporto regionale 2025 p.43; Prospetto n.5 p.2 (&laquo;senza contratto&raquo;); Comune/MM: Rapporto regionale 2025 p.43. Le serie ALER non coincidono tra loro (vedi <a href="#limiti">limiti</a>).</p>
+
+<h2 id="mappa">Dove: la presenza di ALER, quartiere per quartiere (2016)</h2>
+<p>Non esiste un dato sulle case popolari vuote per quartiere. L&rsquo;unico dato sul &laquo;dove&raquo; &egrave; l&rsquo;elenco degli edifici ALER con il canone fatturato nel 2016 (e nel 2013). Qui gli edifici sono sommati per quartiere (88 NIL) e si mostra la <b>quota del canone fatturato ALER a Milano</b> che sta in ciascun quartiere. <b>Solo ALER, affitto non alloggi</b>: mancano gli edifici del Comune (MM) e il canone comprende anche negozi e box.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="q16" class="on">Quota del canone ALER (2016)</button><button type="button" data-m="pa">Canone ALER 2016 per abitazione del quartiere</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per quota del canone fatturato ALER"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Solo ALER, affitto non alloggi. Mappa &copy; OpenStreetMap contributors; confini dei NIL: Comune di Milano (CC BY); canoni: ALER Milano, elenco degli edifici 2016 (agganciati ai quartieri tramite i numeri civici del Comune: 96,5% del canone). Abitazioni per quartiere: censimento/registri 2023.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<div id="top5"></div>
+
+<div class="altre"><b>Altre fonti (non ufficiali o non verificabili).</b> <span class="sub">Numeri di giornali e di Pagella Politica, che citano documenti non pubblici. Sono qui solo per confronto, non entrano in nessun grafico sopra.</span>
+<div class="scroll"><table id="tab-altre"></table></div></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p id="file-lista"></p>
+
+<h2 id="fonti">Fonti, pagine e data di scaricamento</h2>
+<ul class="m" id="fonti-lista"></ul>
+
+<footer>
+<p>Documenti scaricati il <b id="scarico">1 novembre 2026</b>. Nessuna licenza &egrave; dichiarata sui PDF di Regione, ALER e Comune: qui sono citati numeri, con documento e pagina, e i file non sono ripubblicati. Il sito del Comune (comune.milano.it) e quello di MM spa non rispondevano ai programmi al momento dello scaricamento: non sono stati aggirati. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Confini dei NIL e abitazioni: Comune di Milano / ISTAT (CC BY).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,NIL=[],RD=[];
+var ACC='#00695c',GRY='#bdbdbd',WARM='#c26a1b',MID='#62b0a4',DK='#052e29';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+f0(v)}
+function sgp(x){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,1)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function lgd(items){return items.map(function(it){if(it.line)return '<span><i class="ln'+(it.dash?' d':'')+(it.dot?' t':'')+'" style="border-top-color:'+it.c+'"></i>'+it.t+'</span>';return '<span><i style="background:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
+function A(y){for(var i=0;i<D.aler.serie.length;i++)if(D.aler.serie[i].anno===y)return D.aler.serie[i];return null}
+function DATA(d){var a=d.split('-');var m=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];return parseInt(a[2],10)+' '+m[parseInt(a[1],10)]+' '+a[0]}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];NF=a[1];NIL=NF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();quante();vuote();alerSez();domande();piano();occupazioni();mappa();altre();limiti();metodo();fonti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- grafico a linee ---------- */
+function lines(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||280,m={l:48,r:14,t:18,b:30};
+  var all=[];o.series.forEach(function(s){s.pts.forEach(function(p){all.push(p)})});
+  var x0=o.x0,x1=o.x1,y1=Math.max.apply(null,all.map(function(p){return p[1]})),sy=niceStep(y1/5);y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-v/y1*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var step=pw/(x1-x0)<28?2:1;
+  for(var x=x0;x<=x1;x+=1){if((x-x0)%step===0)s+='<line x1="'+X(x)+'" x2="'+X(x)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(x)+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+x+'</text>'}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/><text class="mu" x="'+m.l+'" y="'+(m.t-5)+'">'+o.yl+'</text>';
+  o.series.forEach(function(se){
+    s+='<polyline fill="none" stroke="'+se.c+'" stroke-width="2.4"'+(se.dash?' stroke-dasharray="6 4"':'')+(se.dot?' stroke-dasharray="2 3"':'')+' points="'+se.pts.map(function(p){return X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)}).join(' ')+'"/>';
+    se.pts.forEach(function(p){s+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3" fill="'+se.c+'"/>'})});
+  s+='<line id="gl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-dasharray="2 3" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,gl=svg.querySelector('#gl'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,yr=Math.round(x0+(px-m.l)/pw*(x1-x0));
+    if(yr<x0||yr>x1){tip.style.display='none';gl.style.display='none';return}
+    var h='<b>'+yr+'</b>';o.series.forEach(function(se){var q=null;se.pts.forEach(function(p){if(p[0]===yr)q=p});if(q)h+='<br><span style="color:'+se.c+'">&#9632;</span> '+se.n+': <b>'+f0(q[1])+'</b>'});
+    gl.setAttribute('x1',X(yr));gl.setAttribute('x2',X(yr));gl.style.display='';tip.innerHTML=h;tip.style.display='';
+    var tw=tip.offsetWidth,left=X(yr)/k+10;if(left+tw>r.width)left=X(yr)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
+  function hide(){tip.style.display='none';gl.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function segRow(label,segs,total,vtxt){
+  return '<div class="row"><span class="nm">'+label+'</span><span class="tr">'+segs.map(function(s){return '<span class="seg" title="'+esc(s.t)+'" style="width:'+(s.v/total*100)+'%;background:'+s.c+'"></span>'}).join('')+'</span><span class="v">'+vtxt+'</span></div>'}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var a21=A(2021),a25=A(2025),L=D.aler;
+  var h='<p><b>I &laquo;sfitti&raquo; di ALER sono scesi del '+nf(Math.abs(L.var_sfitti_pct),0)+'% in quattro anni, ma gli alloggi ALER vuoti per qualsiasi motivo solo del '+nf(Math.abs(L.var_vuoti_pct),0)+'%.</b> Dal 2021 al 2025 gli &laquo;sfitti&raquo; scritti da ALER vanno da '+f0(a21.sfitti)+' a '+f0(a25.sfitti)+'. Ma dal 2022 ALER elenca a parte, fuori dagli &laquo;sfitti&raquo;, gli alloggi destinati a valorizzazione ('+f0(a25.valorizzazione)+' nel 2025), a vendita ('+f0(a25.vendita)+') e a demolizione ('+f0(a25.demolizione)+'): fino al 2021 stavano dentro. Contando anche quelli, gli alloggi vuoti sono '+f0(a21.vuoti)+' nel 2021 e <b>'+f0(a25.vuoti)+'</b> nel 2025, circa '+nf(a25.vuoti_pct,1)+'% degli alloggi ALER.</p>';
+  h+='<p class="sub">Un confronto, non una spiegazione: i numeri dicono che cambiano le caselle in cui ALER li scrive, non il perch&eacute;. Le somme tornano con il totale ALER in tutti gli otto anni (<a href="#aler">grafico</a>). Perimetro: tutto il territorio di ALER Milano.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- quante ---------- */
+function quante(){
+  var S=D.stock,P=S.piano2026;
+  el('n-tot').textContent=f0(S.tot);
+  setH('quante-testo','<p>Al '+DATA(S.data)+' le case popolari della citt&agrave; di Milano sono <b>'+f0(S.tot)+'</b>: '+f0(S.comune)+' del Comune (gestite da MM) e '+f0(S.aler)+' di ALER Milano. Sono il <b>'+nf(S.quota_pct['2023'],1)+'%</b> delle '+f0(S.abitazioni['2023'])+' abitazioni di Milano (conteggio 2023). Con il dato 2021 la quota &egrave; '+nf(S.quota_pct['2021'],1)+'%, sulle sole abitazioni occupate '+nf(S.quota_pct.occupate_2023,1)+'%. Il Comune, nel 2023, scrive &laquo;circa il 10%&raquo; senza dire su quale totale.</p>');
+  setH('big','<div><b>'+f0(S.tot)+'</b><span>case popolari (SAP) in citt&agrave;</span></div><div><b>'+nf(S.quota_pct['2023'],1)+'%</b><span>delle abitazioni di Milano</span></div><div><b>'+f0(S.comune)+'</b><span>del Comune (MM)</span></div><div><b>'+f0(S.aler)+'</b><span>di ALER Milano</span></div>');
+  setH('b-own',segRow('Di chi sono',[{v:S.comune,c:ACC,t:'Comune'},{v:S.aler,c:WARM,t:'ALER'}],S.tot,'<span style="color:'+ACC+'">&#9632;</span> Comune '+f0(S.comune)+' ('+nf(100*S.comune/S.tot,0)+'%)<br><span style="color:'+WARM+'">&#9632;</span> ALER '+f0(S.aler)+' ('+nf(100*S.aler/S.tot,0)+'%)'));
+  var s0=S.serie[1],sl=S.serie[S.serie.length-1];
+  setH('quante-testo2','<p>Nel tempo il totale &egrave; quasi fermo: '+f0(s0.tot)+' al '+DATA(s0.data)+', '+f0(sl.tot)+' al '+DATA(sl.data)+' ('+sg(sl.tot-s0.tot)+'). Ma dentro il totale il Comune sale ('+f0(s0.comune)+' &rarr; '+f0(sl.comune)+') e ALER scende ('+f0(s0.aler)+' &rarr; '+f0(sl.aler)+'). La Regione scrive che l&rsquo;aumento del Comune viene dalla <b>riclassificazione</b> di alloggi comunali che prima erano &laquo;altri usi residenziali&raquo; (erano '+f0(S.altri_usi_comune_2018)+' nel 2018, sono '+f0(S.altri_usi_comune_2026)+' nel 2026): in parte &egrave; un cambio di etichetta, non case nuove. Oltre alle SAP ci sono '+f0(P.sas_comune+P.sas_aler)+' alloggi di servizio abitativo sociale (SAS) e '+f0(P.altri_usi_comune)+' alloggi del Comune per altri usi residenziali (Piano annuale 2026).</p>');
+  table('tab-serie',['Rapporto','Riferito al','Comune','ALER','Totale','Pagina'],S.serie.map(function(r){return [esc(r.rapporto)+(r.nota?' <span class="pill">non confrontabile</span>':''),DATA(r.data),f0(r.comune),f0(r.aler),f0(r.tot),'p.'+r.pagina]}));
+  var h='<h3>Alcuni grandi complessi, come li citano i documenti</h3><p>Il Comune conta <b>'+S.complessi_comunali_2023+' complessi</b> immobiliari in citt&agrave;, di cui '+S.complessi_cielo_terra_2023+' interamente comunali ('+f0(S.unita_cielo_terra_2023)+' unit&agrave; in '+f0(S.edifici_cielo_terra_2023)+' edifici; &laquo;Una nuova strategia per la casa&raquo;, 2023, p.34). Non esiste un elenco aperto con le dimensioni dei complessi: questi sono i numeri che i documenti ufficiali scrivono.</p><ul class="m">';
+  S.casi.forEach(function(c){h+='<li><b>'+esc(c.nome)+'</b>: '+esc(c.testo)+' <span class="sub">('+esc(c.fonte)+')</span></li>'});
+  setH('casi',h+'</ul>');
+}
+
+/* ---------- fotografia marzo 2023 ---------- */
+function vuote(){
+  var Sn=D.snapshot,C=Sn.righe[0],Al=Sn.righe[1];
+  setH('vuote-testo','<p>Nel marzo 2023 il Comune ha pubblicato, per la citt&agrave;, quante case popolari risultavano assegnate, libere o sfitte. Su '+f0(Sn.totale)+' alloggi SAP ne risultano <b>vuoti '+f0(Sn.vuoti)+' ('+nf(Sn.vuoti_pct,1)+'%)</b>: '+f0(C.vuoti)+' del Comune ('+nf(Sn.comune_pct,1)+'% dei suoi) e '+f0(Al.vuoti)+' di ALER ('+nf(Sn.aler_pct,1)+'%). Per il Comune &laquo;sfitti per carenze manutentive&raquo; sono quelli che richiedono lavori; &laquo;liberi&raquo; sono quelli in ristrutturazione o riatto (il documento dice che 600 dei 1.141 liberi sarebbero tornati disponibili entro fine 2023).</p>');
+  var cs=[{k:'assegnati',c:ACC,t:'assegnati'},{k:'liberi',c:MID,t:'liberi (in ristrutturazione o riatto)'},{k:'sfitti_carenze',c:WARM,t:'sfitti per carenze manutentive'},{k:'non_classificati',c:GRY,t:'non classificati nella tabella'}];
+  setH('b-snap',Sn.righe.map(function(r){var tot=r.totale;
+    return segRow(esc(r.ente),cs.map(function(c){return {v:r[c.k],c:c.c,t:c.t+': '+f0(r[c.k])}}),tot,'vuoti <b>'+f0(r.vuoti)+'</b> su '+f0(tot)+' ('+nf(100*r.vuoti/tot,1)+'%)<br><span class="sub">carenze '+f0(r.sfitti_carenze)+' ('+nf(100*r.sfitti_carenze/r.vuoti,0)+'% dei vuoti), liberi '+f0(r.liberi)+'</span>')}).join(''));
+  setH('lg-snap',lgd(cs));
+  setH('vuote-testo2','<p class="sub">Attenzione ad ALER: nella tabella del Comune gli alloggi assegnati, liberi e sfitti sommano '+f0(Al.totale-Al.non_classificati)+', non '+f0(Al.totale)+'. I '+f0(Al.non_classificati)+' alloggi mancanti non sono spiegati dal documento (verosimilmente alloggi occupati senza titolo e altre voci). Il Comune scrive anche, in un altro punto (p.57), 27.075 unit&agrave; comunali di cui 22.113 assegnate e 4.962 &laquo;sfitte e da ristrutturare&raquo; (le 27.075 comprendono anche SAS e SAT).</p>');
+}
+
+/* ---------- ALER ---------- */
+function alerSez(){
+  var S=D.aler.serie,a21=A(2021),a25=A(2025);
+  setH('aler-testo','<p>ALER pubblica ogni anno un prospetto con gli alloggi a canone sociale: quanti hanno un contratto, quanti sono occupati senza titolo, quanti sono &laquo;sfitti&raquo; e perch&eacute;. Nel grafico: la linea scura sono gli <b>&laquo;sfitti&raquo; come li scrive ALER</b>; la linea arancione conta <b>tutti gli alloggi vuoti</b>, aggiungendo dal 2022 le voci che ALER ha messo fuori dagli &laquo;sfitti&raquo;. Fino al 2021 le due linee coincidono; dopo si separano. Nel 2025: '+f0(a25.sfitti)+' contro '+f0(a25.vuoti)+'.</p>');
+  lines0();RD.push(lines0);
+  function lines0(){lines(el('ch-aler'),{x0:2018,x1:2025,yl:'alloggi',h:290,series:[
+    {n:'vuoti per qualsiasi motivo',c:WARM,pts:S.map(function(a){return [a.anno,a.vuoti]})},
+    {n:'«sfitti» come scritti da ALER',c:'#111',pts:S.map(function(a){return [a.anno,a.sfitti]})}]})}
+  setH('lg-aler',lgd([{line:1,c:'#111',t:'&laquo;sfitti&raquo; come scritti da ALER'},{line:1,c:WARM,t:'vuoti per qualsiasi motivo (stessa definizione in tutti gli anni)'}]));
+  var cs=[{k:'ristrutturazione',c:ACC,t:'in ristrutturazione'},{k:'riassegnazione',c:MID,t:'in riassegnazione'},{k:'valorizzazione',c:WARM,t:'da valorizzare'},{k:'vendita',c:'#8a8a8a',t:'destinati a vendita'},{k:'demolizione',c:DK,t:'in demolizione'}];
+  setH('b-motivi',[a21,a25].map(function(a){return segRow('Anno '+a.anno,cs.map(function(c){return {v:a[c.k],c:c.c,t:c.t+': '+f0(a[c.k])}}),a.vuoti,'<b>'+f0(a.vuoti)+'</b> vuoti<br><span class="sub">'+cs.filter(function(c){return a[c.k]>0}).map(function(c){return c.t+' '+nf(100*a[c.k]/a.vuoti,0)+'%'}).join(', ')+'</span>')}).join(''));
+  setH('lg-motivi',lgd(cs));
+  table('tab-aler',['Anno','Alloggi a canone sociale','«Sfitti» (ALER)','Vuoti per qualsiasi motivo','% del totale','In ristrutturazione','In riassegnazione','Da valorizzare','Vendita','Demolizione','Occupati senza titolo'],S.map(function(a){return [a.anno,f0(a.totale),f0(a.sfitti),'<b>'+f0(a.vuoti)+'</b>',nf(a.vuoti_pct,1)+'%',f0(a.ristrutturazione),f0(a.riassegnazione),a.valorizzazione?f0(a.valorizzazione):'–',f0(a.vendita),a.demolizione?f0(a.demolizione):'–',f0(a.senza_titolo)]}));
+}
+
+/* ---------- domande ---------- */
+function domande(){
+  var Dm=D.domande,anni=[2019,2020,2021,2022,2023,2024,2025],by={};Dm.anni.forEach(function(r){by[r.anno]=r});
+  var mx=45,R=Dm.regione_2025;
+  setH('dom-testo','<p>Ogni anno il Comune pubblica uno o pi&ugrave; avvisi con gli alloggi da assegnare; i cittadini fanno domanda. Per Milano citt&agrave;, negli anni per cui il dato &egrave; disponibile, le domande sono state <b>tra 24 e 40 ogni alloggio messo in avviso</b>. Nel 2025: '+f0(by[2025].alloggi)+' alloggi in avviso, '+f0(by[2025].domande)+' domande, '+f0(by[2025].assegnati)+' assegnati (a luglio 2026; le assegnazioni vengono registrate con ritardo, quindi il numero pu&ograve; ancora salire).</p>');
+  setH('b-dom',anni.map(function(y){var r=by[y];
+    if(!r)return '<div class="row"><span class="nm"><b>'+y+'</b></span><span class="tr"></span><span class="v gap">dato non disponibile (non nei rapporti pubblicati)</span></div>';
+    return '<div class="row"><span class="nm"><b>'+y+'</b></span><span class="tr"><span class="seg" style="width:'+(r.dom_per_alloggio/mx*100)+'%;background:'+ACC+'"></span></span><span class="v"><b>'+nf(r.dom_per_alloggio,0)+'</b> domande per alloggio<br><span class="sub">'+f0(r.alloggi)+' alloggi, '+f0(r.domande)+' domande, '+f0(r.assegnati)+' assegnati ('+nf(r.assegnati_pct,0)+'%)</span></span></div>'}).join(''));
+  table('tab-dom',['Anno','Avviso','Alloggi in avviso','Domande','Assegnati','Pagina'],Dm.anni.reduce(function(a,r){a.push(['<b>'+r.anno+'</b>',r.avvisi+(r.avvisi>1?' avvisi (somma)':' avviso'),f0(r.alloggi),f0(r.domande),f0(r.assegnati),r.pagine.map(function(p){return 'p.'+p}).join(', ')]);return a},[]));
+  var g=Dm.graduatoria_2016_2020;
+  setH('dom-testo2','<h3>Domande in graduatoria 2016&ndash;2020</h3><div class="scroll"><table><thead><tr><th>Anno</th><th class="r">Domande in graduatoria</th><th class="r">Assegnazioni</th><th>Nota</th></tr></thead><tbody>'+g.map(function(r){return '<tr><td>'+r.anno+'</td><td class="r">'+f0(r.domande)+'</td><td class="r">'+f0(r.assegnazioni)+'</td><td class="sub">'+esc(r.nota)+'</td></tr>'}).join('')+'</tbody></table></div><p class="sub">Dati dei Rapporti regionali 2017 (p.19), 2017_2 (p.16), 2018 (p.17), 2019 (p.45), 2020 (p.42). Il numero 25.192 &egrave; identico per tre anni di fila: probabile dato non aggiornato. Le assegnazioni qui contano tutte le assegnazioni ERP dell&rsquo;anno, non solo quelle degli avvisi.</p><p>In tutta la Lombardia, nel 2025: '+R.avvisi+' avvisi, '+f0(R.alloggi)+' alloggi, '+f0(R.domande)+' domande (circa '+f0(R.nuclei_stima)+' nuclei, stima della Regione); Milano citt&agrave; ha il '+nf(R.quota_milano_domande_pct,1)+'% delle domande. Alloggi assegnati nell&rsquo;anno in tutta la regione: '+f0(R.assegnati_2025)+' ('+f0(R.assegnati_comuni)+' dai comuni, '+f0(R.assegnati_aler)+' dalle ALER). Per Milano il totale annuo degli assegnati non &egrave; pubblicato.</p>');
+}
+
+/* ---------- piano 2026 ---------- */
+function piano(){
+  var Pn=D.piano,M=Pn.municipi,mx=0;M.forEach(function(r){mx=Math.max(mx,r.g_c+r.g_a)});
+  setH('piano-testo','<p>Nel Piano annuale 2026 il Comune indica quanti alloggi SAP potranno essere assegnati in citt&agrave;: <b>'+f0(Pn.tot)+'</b> ('+f0(Pn.tot_comune)+' del Comune, '+f0(Pn.tot_aler)+' di ALER). Vengono da: alloggi in carenza manutentiva assegnabili come sono (<b>'+f0(Pn.totali_voce.b[0]+Pn.totali_voce.b[1])+'</b>), alloggi da ristrutturare con lavori gi&agrave; programmati (<b>'+f0(Pn.totali_voce.c[0]+Pn.totali_voce.c[1])+'</b>), nuova costruzione ('+f0(Pn.totali_voce.d[0]+Pn.totali_voce.d[1])+'), alloggi liberi o che si liberano per il normale ricambio ('+f0(Pn.totali_voce.e[0]+Pn.totali_voce.e[1])+'). In pi&ugrave; ci sono '+f0(Pn.sat_comune+Pn.sat_aler)+' alloggi per servizi abitativi transitori (SAT).</p>');
+  setH('b-piano',M.map(function(r){var t=r.g_c+r.g_a;return segRow('Municipio '+r.municipio,[{v:r.g_c,c:ACC,t:'Comune'},{v:r.g_a,c:WARM,t:'ALER'}],mx,'<b>'+f0(t)+'</b> <span class="sub">(Comune '+f0(r.g_c)+', ALER '+f0(r.g_a)+')</span>')}).join(''));
+  setH('lg-piano',lgd([{c:ACC,t:'Comune (MM)'},{c:WARM,t:'ALER'}]));
+  var rows=[];M.forEach(function(r){rows.push(['Municipio '+r.municipio,f0(r.b_c)+' / '+f0(r.b_a),f0(r.c_c)+' / '+f0(r.c_a),f0(r.d_c)+' / '+f0(r.d_a),f0(r.e_c)+' / '+f0(r.e_a),'<b>'+f0(r.g_c)+' / '+f0(r.g_a)+'</b>'])});
+  var T=Pn.totali_voce;rows.push(['<b>Totale</b>',f0(T.b[0])+' / '+f0(T.b[1]),f0(T.c[0])+' / '+f0(T.c[1]),f0(T.d[0])+' / '+f0(T.d[1]),f0(T.e[0])+' / '+f0(T.e[1]),'<b>'+f0(Pn.tot_comune)+' / '+f0(Pn.tot_aler)+'</b>']);
+  table('tab-piano',['Municipio (Comune / ALER)','In carenza manutentiva, assegnabili com&rsquo;&egrave;','Dopo ristrutturazione programmata','Nuova costruzione','Liberi o che si liberano','Totale'],rows);
+}
+
+/* ---------- occupazioni ---------- */
+function occupazioni(){
+  var O=D.occupazioni;
+  var a=O.aler_bilanci,r=O.aler_regione;
+  var pk=a.reduce(function(m,p){return p[1]>m[1]?p:m},[0,0]);
+  setH('occ-testo','<p>Un alloggio occupato senza titolo non &egrave; un alloggio vuoto: &egrave; abitato, ma non da chi ne ha diritto. Qui sono tenuti separati dai vuoti. Per ALER le occupazioni &laquo;consolidate&raquo; erano '+f0(a[0][1])+' nel '+a[0][0]+', sono arrivate a '+f0(pk[1])+' nel '+pk[0]+' e sono '+f0(r[r.length-1][1])+' nel 2025. Per il Comune (MM): '+f0(O.comune[0][1])+' nel 2021, '+f0(O.comune[O.comune.length-1][1])+' nel 2025.</p>');
+  draw();RD.push(draw);
+  function draw(){lines(el('ch-occ'),{x0:2013,x1:2025,yl:'alloggi',h:290,series:[
+    {n:'ALER, consolidate (bilanci ALER)',c:'#111',pts:O.aler_bilanci},
+    {n:'ALER, consolidate (Rapporto regionale 2025)',c:'#111',dash:1,pts:O.aler_regione},
+    {n:'ALER, «senza contratto» (Prospetto n.5)',c:WARM,dot:1,pts:O.aler_senza_contratto},
+    {n:'Comune/MM, consolidate',c:ACC,pts:O.comune}]})}
+  setH('lg-occ',lgd([{line:1,c:'#111',t:'ALER, consolidate (bilanci)'},{line:1,dash:1,c:'#111',t:'ALER, consolidate (Rapporto regionale 2025)'},{line:1,dot:1,c:WARM,t:'ALER, &laquo;senza contratto&raquo; (Prospetto n.5)'},{line:1,c:ACC,t:'Comune/MM, consolidate'}]));
+}
+
+/* ---------- mappa NIL ---------- */
+var MAP=null,LAY=null,CUR='q16',SEL=null,MET={};
+function colore(v,m){if(!v)return '#f0f0f0';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function mappa(){
+  var N=D.nil;
+  MET={q16:{k:'q16',b:[0.5,1,2,3,5],c:SEQ,u:'% del canone ALER',t:'Quota del canone fatturato da ALER a Milano (2016) che sta in ciascun quartiere. Più scuro = più presenza ALER. In grigio chiaro i quartieri senza edifici ALER nell\'elenco. Solo ALER, affitto non alloggi: mancano gli edifici del Comune (MM). I primi 5 quartieri fanno il '+nf(N.top5.reduce(function(s,x){return s+x[1]},0),1)+'% del canone.',f:function(v){return nf(v,1)+'%'}},
+       pa:{k:'pa',b:[25,75,150,300,500],c:SEQ,u:' € di canone ALER (2016) per abitazione',t:'Canone fatturato da ALER nel 2016 diviso per le abitazioni del quartiere (censimento/registri 2023): un modo per dire quanto pesa ALER nel quartiere. Solo ALER, affitto non alloggi; il canone comprende anche negozi e box; le abitazioni di un quartiere non sono solo case popolari.',f:function(v){return f0(v)+' €'}}};
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tip(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+  var h5='<p><b>I cinque quartieri con la quota più alta (2016):</b> '+N.top5.map(function(x){return esc(x[0])+' '+nf(x[1],1)+'%'}).join('; ')+'. In tutto '+N.n_nil_con_edifici+' quartieri su 88 hanno almeno un edificio ALER nell\'elenco ('+f0(N.edifici_totali_2016)+' edifici, canone fatturato '+nf(N.canone_totale_milioni_2016,1)+' milioni di euro).</p>';
+  setH('top5',h5);
+}
+function tip(p){var m=MET[CUR];if(!p.ed16)return '<b>'+esc(p.n)+'</b><br>nessun edificio ALER nell\'elenco 2016';return '<b>'+esc(p.n)+'</b><br>'+m.f(p[m.k])+(CUR==='pa'?' per abitazione':' del canone ALER')+'<br><span style="color:#666">solo ALER, affitto non alloggi</span>'}
+function sty(f){var p=f.properties,m=MET[CUR];return {fillColor:colore(p[m.k],m),fillOpacity:.85,color:SEL===p.i?'#000':'#fff',weight:SEL===p.i?3:1}}
+function ricolora(){var m=MET[CUR];LAY.setStyle(sty);if(SEL)bringSel();
+  var h='<span><i style="background:#f0f0f0"></i>nessun edificio ALER</span>';
+  m.c.forEach(function(c,i){var t=i===0?'meno di '+nf(m.b[0],CUR==='q16'?1:0):i===m.b.length?nf(m.b[i-1],CUR==='q16'?1:0)+' o più':nf(m.b[i-1],CUR==='q16'?1:0)+' – '+nf(m.b[i],CUR==='q16'?1:0);h+='<span><i style="background:'+c+'"></i>'+t+(CUR==='q16'?'%':' €')+'</span>'});
+  setH('lg-map',h);setH('map-desc',m.t)}
+function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);bringSel();
+  if(zoom)LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})});
+  var p=nilById(i);
+  var h='<h3>'+esc(p.n)+' <span class="sub">(Municipio '+p.m+')</span></h3><div class="scroll"><table><tbody>';
+  if(!p.ed16){h+='<tr><td colspan="2">Nessun edificio ALER nell\'elenco del 2016. Gli edifici del Comune (MM) non sono nell\'elenco.</td></tr>'}
+  else{
+    h+='<tr><td>Quota del canone ALER cittadino, 2016</td><td class="r"><b>'+nf(p.q16,2)+'%</b> <span class="sub">(2013: '+nf(p.q13,2)+'%)</span></td></tr>';
+    h+='<tr><td>Edifici ALER nell\'elenco</td><td class="r">'+f0(p.ed16)+' <span class="sub">(2013: '+f0(p.ed13)+')</span></td></tr>';
+    h+='<tr><td>Canone fatturato ALER 2016</td><td class="r">'+nf(p.m16,2)+' milioni di €</td></tr>';
+    h+='<tr><td>Abitazioni nel quartiere (2023)</td><td class="r">'+f0(p.abit)+'</td></tr>';
+    h+='<tr><td>Canone ALER 2016 per abitazione del quartiere</td><td class="r">'+f0(p.pa)+' €</td></tr>'}
+  h+='</tbody></table></div><p class="sub">Solo ALER, affitto non alloggi: il canone comprende negozi e box e non è il numero di alloggi.</p>';
+  setH('scheda',h)}
+
+/* ---------- altre fonti ---------- */
+function altre(){table('tab-altre',['Che cosa','Numero','Data','Fonte','Avvertenza'],D.altre_fonti.map(function(r){return [esc(r.cosa),esc(r.valore),esc(r.data),esc(r.fonte)+'<br><span class="sub">'+esc(r.tipo)+'</span>','<span class="sub">'+esc(r.avvertenza)+'</span>']}))}
+
+/* ---------- limiti, metodo, fonti ---------- */
+function limiti(){
+  var L=['<b>Non esistono dati aperti.</b> Quasi tutto viene da PDF; sono stati letti con programmi che controllano che ogni numero compaia nella pagina citata, ma i PDF cambiano impaginazione da un anno all&rsquo;altro.',
+   '<b>Perimetri diversi.</b> Il Prospetto di ALER riguarda tutto il territorio di ALER Milano (53.143 alloggi a canone sociale nel 2025); le tabelle del Comune e della Regione riguardano la citt&agrave;. Gli sfitti di ALER non si possono dividere tra citt&agrave; e provincia.',
+   '<b>&laquo;Sfitto&raquo; non ha un significato fisso.</b> In ALER, fino al 2021, &laquo;sfitti&raquo; includeva vendita e valorizzazione, poi no. Per il Comune &laquo;sfitto&raquo; vuol dire in carenza manutentiva e &laquo;libero&raquo; in ristrutturazione o riatto. &laquo;In ristrutturazione&raquo; pu&ograve; essere un cantiere vero o un alloggio quasi pronto (lo fa notare anche Pagella Politica citando il sindacato Sicet). I bilanci ALER parlano di &laquo;unit&agrave; immobiliari&raquo;, che includono box e posti auto.',
+   '<b>Per la citt&agrave; c&rsquo;&egrave; una sola fotografia dei vuoti</b> (marzo 2023). Non c&rsquo;&egrave; una serie per il Comune/MM; il Piano annuale non misura gli sfitti.',
+   '<b>La tabella del Comune per ALER non torna del tutto</b>: 4.016 alloggi SAP su 32.017 non sono n&eacute; assegnati n&eacute; liberi n&eacute; sfitti nella tabella, e il documento non dice dove sono.',
+   '<b>Occupazioni senza titolo:</b> due serie ALER diverse per lo stesso anno (2021: 3.128 nei bilanci, 3.194 nel Rapporto regionale 2025); il &laquo;senza contratto&raquo; del Prospetto n.5 (2.713 nel 2025) conta pi&ugrave; cose delle sole occupazioni consolidate (2.324).',
+   '<b>Domande:</b> mancano il 2021 (il Rapporto 2021 non ha le tabelle degli avvisi) e il 2023 (il Rapporto 2023 non &egrave; sul sito della Regione); le domande sono sommate tra avvisi; il numero 25.192 &egrave; ripetuto per tre anni; le assegnazioni sono registrate con ritardo.',
+   '<b>Per quartiere:</b> gli edifici ALER sono del 2016, dieci anni fa; il canone fatturato include negozi e box, non &egrave; il numero degli alloggi, e la morosit&agrave; &egrave; alta; mancano gli edifici del Comune (MM); il quartiere &laquo;Lorenteggio&raquo; dei documenti sta in gran parte nel NIL Giambellino; i NIL a cavallo di due Municipi sono assegnati al Municipio prevalente. Il 3,5% del canone non &egrave; stato agganciato a un quartiere.',
+   '<b>Pagina Patrimonio di ALER</b> (usata solo nel controllo): nessuna data dei dati, e il totale scritto (70.947) supera di 1.080 la somma delle sue righe.',
+   '<b>Riclassificazioni:</b> parte della crescita delle case popolari del Comune dal 2018 &egrave; carta, non edilizia (lo scrive la Regione).',
+   '<b>Fonti bloccate:</b> il sito del Comune (503, poi 403) e quello di MM (403) non rispondevano ai programmi: non sono stati aggirati. Il piano annuale 2022&ndash;2025 e la delibera 2026 completa non sono stati letti.'];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var M=['Tutti i numeri vengono da PDF ufficiali, letti con programmi (Python); ogni numero &egrave; cercato nel testo della pagina citata, altrimenti il programma si ferma.',
+   'Le somme sono controllate: &laquo;con contratto + senza contratto + vuoti = totale ALER&raquo; torna in tutti gli otto anni (scarto 0); per il Comune assegnati + liberi + sfitti = 26.489; le cinque voci del Piano 2026 sommano al totale in tutti i Municipi.',
+   '&laquo;Vuoti per qualsiasi motivo&raquo; (ALER) = sfitti + demolizione + vendita + valorizzazione, contate una sola volta in ogni anno (dal 2022 le ultime tre sono fuori dagli &laquo;sfitti&raquo; scritti da ALER).',
+   'Gli edifici ALER dell&rsquo;elenco 2013/2015/2016 sono agganciati ai NIL tramite nome della via e numero civico confrontati con i civici del Comune (1.824 su 1.882 identici, 32 con civico vicino, 5 con nome approssimato, 21 non trovati). Della mappa si pubblica solo la quota per quartiere: gli indirizzi degli edifici non sono ripubblicati.',
+   'Quota sulle abitazioni: 59.054 diviso 827.648 (conteggio 2023, registri) = 7,1%; 809.990 (2021) = 7,3%; 722.273 occupate (2023) = 8,2%; il salto dal censimento 2011 (643.053) al 2021 dipende dal metodo, non da nuove case.',
+   'Nessun dato su persone: inquilini e occupanti non compaiono in nessun file.'];
+  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var F=['riepilogo.json','nil.csv','nil.geojson','patrimonio_sap_milano_serie.csv','stato_utilizzo_marzo_2023.csv','aler_vuoti_serie_2018_2025.csv','avvisi_milano.csv','domande_assegnazioni_2016_2020.csv','piano_2026_per_municipio.csv','occupazioni_abusive.csv','altre_fonti.csv'];
+  var ds={'riepilogo.json':'tutti i numeri di questa pagina, con le fonti','nil.csv':'quota del canone ALER per quartiere (2013 e 2016), nessun indirizzo','nil.geojson':'confini dei quartieri semplificati con gli stessi valori'};
+  setH('file-lista',F.map(function(f){return '<a href="data/'+f+'">'+f+'</a>'+(ds[f]?' ('+ds[f]+')':'')}).join(', ')+'. Sono tutti valori aggregati: gli edifici uno per uno e le persone non sono ripubblicati.');
+}
+function fonti(){
+  var F=D.fonti,h='';
+  Object.keys(F).forEach(function(k){var f=F[k];h+='<li><b>'+esc(f.titolo)+'</b>. <a href="'+esc(f.url)+'">link</a>. Pagine usate: '+esc(f.pagine)+'.</li>'});
+  setH('fonti-lista',h);el('scarico').textContent=DATA(D.scaricato);
+}
+})();
+</script></body></html>

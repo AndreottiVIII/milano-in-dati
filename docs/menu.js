@@ -49,7 +49,8 @@
     { path: 'luoghi-cercati/',   label: 'Luoghi più cercati' },
     { path: 'scuole-domani/', label: 'Scuole di domani' },
     { path: 'quartieri-che-cambiano/', label: 'Quartieri che cambiano' },
-    { path: 'pollini/', label: 'Pollini' }
+    { path: 'pollini/', label: 'Pollini' },
+    { path: 'case-popolari/', label: 'Case popolari vuote' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
