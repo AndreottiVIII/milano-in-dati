@@ -41,7 +41,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 27 | Matrimoni e separazioni | Online |
 | 28 | Biblioteche | Online |
 | 29 | Redditi dal 2000 | Online |
-| — | In corso | Pagina delle scuole; fase 1 di luoghi più cercati, pioggia e caldo, costo della vita |
+| 30 | Scuole | Online |
+| — | In corso (fase 1) | Luoghi più cercati, costo della vita, pietre d'inciampo, metrò, turisti per nazionalità, ristoranti (solo se i dati sono aggiornati); pioggia e caldo in attesa di ok |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.

@@ -2441,3 +2441,11 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri (euro 2025 per contribuente): Milano 35.714 (2000), 40.595 (2006), 40.889 (2024); Italia 23.199 → 25.482. Dal 2006 Milano +0,7%, Roma −3,7%, Napoli −8,0%. Gini da classi 0,50 → 0,54 (sottostima, solo per confronti). Pensione per pensionato +30% reale dal 2002, reddito per dipendente fermo.
 - Trappole: contribuenti ≠ residenti (77 ogni 100); soglie delle classi fisse in euro nominali (rifatte con soglie reali); cedolare secca 2011, IMU 2012, forfettario 2019 cambiano cosa c'è nel reddito; definizione "dipendente" cambia nel 2008; CAP 20121 e 20122 riassegnati; **dal 2023 il MEF oscura la classe oltre 120.000 € in molti comuni (si perde il 2,4% del reddito italiano sommando i comuni)**: usati i file regionali; anomalia nazionale 2017 nella classe ≤0.
 
+## 30. Scuole
+
+- 2026-11-01 — Fase 1 e pagina (`scuole/`, `docs/scuole/`), volute da Davide. Dettagli in `scuole/NOTE.md`.
+- Fonti: Ministero dell'Istruzione (dati.istruzione.it, IODL 2.0: testo letto, condizioni dell'art. 2 riportate in pagina), 2015/16-2024/25; Comune di Milano (CC BY) ds224-226 scuola per scuola 2009/10-2024/25 con private non paritarie, serie per municipio, residenti per età.
+- Scelte: quota di cittadinanza non italiana dal Comune (copre le private e i NIL), Ministero per le superiori e nel confronto; **Davide ha scelto di mostrare i nomi delle scuole** nel confronto scuola-quartiere, con testo neutro e l'avviso "cittadinanza non italiana ≠ nato all'estero" (almeno il 56% è nato in Italia).
+- Numeri: infanzia −19,6% dal picco, primaria −9,6%; i nati sono −26% dal 2012 (le scuole si svuotano soprattutto per questo); primaria statale −11,1%, paritaria −1,6% (2015-2024); il 54% dei bambini di primaria va a scuola fuori dal proprio NIL. Sorpresa: indice di dissimilarità 0,415 tra scuole contro 0,29 tra quartieri, uguale dal 2012.
+- Trappole: Comune e Ministero divergono per le statali dal 2020 (primaria 26,1% contro 30,4%), causa non trovata; il Ministero non ha le private non paritarie; salto dell'infanzia nel 2020/21; fusioni di scuole; dati fermi al 2024/25.
+

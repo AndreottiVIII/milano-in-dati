@@ -37,7 +37,8 @@
     { path: 'morti/',            label: 'Morti giorno per giorno' },
     { path: 'matrimoni/',        label: 'Matrimoni e separazioni' },
     { path: 'biblioteche/',      label: 'Biblioteche' },
-    { path: 'redditi/',          label: 'Redditi dal 2000' }
+    { path: 'redditi/',          label: 'Redditi dal 2000' },
+    { path: 'scuole/',           label: 'Scuole' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

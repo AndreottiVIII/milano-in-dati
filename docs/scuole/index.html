@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Le scuole</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:62vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select,.ctl input[type=text]{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl input[type=text]{cursor:text;min-width:0;width:260px}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .ctl input[type=text]{width:100%}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:380px;overflow:auto} #tab-sc{min-width:640px} #tab-conc,#tab-gest,#tab-mim{min-width:480px}
+th.sortable{cursor:pointer;color:var(--acc)}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px;border:1px solid #fff;box-shadow:0 0 0 1px #888}
+blockquote{margin:.5em 0;padding:4px 12px;border-left:3px solid var(--line);color:#333;font-size:.88rem}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Le scuole di Milano: quanti bambini, dove, e chi c&rsquo;&egrave; in ogni scuola</h1>
+<p>Da qualche anno le scuole di Milano perdono bambini all&rsquo;asilo e alle elementari. In questa pagina si vede <b>dove</b>, in quali scuole e quartieri, e come si distribuiscono gli alunni con cittadinanza non italiana tra le scuole e tra i quartieri. Sono dati del Comune di Milano (scuola dell&rsquo;infanzia, primaria e secondaria di primo grado: tutte le scuole, anche le private non paritarie) e del Ministero dell&rsquo;Istruzione (anche le superiori, ma solo scuole statali e paritarie). <b>I dati arrivano fino all&rsquo;anno scolastico 2024/25</b>: il 2025/26 non &egrave; ancora pubblicato. Quando scriviamo &laquo;2024&raquo; intendiamo l&rsquo;anno scolastico 2024/25.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm" id="avviso"><b>Prima di leggere.</b> Qui si parla di alunni con <b>cittadinanza non italiana</b>. Non vuol dire &laquo;nati all&rsquo;estero&raquo; e non dice nulla sull&rsquo;origine, sulla lingua o sulla famiglia: <span id="av-nati"></span> Una quota alta o bassa in una scuola non &egrave; un voto alla scuola n&eacute; alle famiglie: sono confronti tra numeri.</div>
+
+<h2 id="iscritti">Quanti bambini vanno a scuola</h2>
+<div id="isc-testo"></div>
+<div class="ctl"><span class="sub">Scuola:</span><span id="b-liv"></span><span class="sub">Scala:</span><span id="b-scala"></span></div>
+<div class="ch" id="ch-isc" role="img" aria-label="Grafico: alunni iscritti, bambini residenti della stessa et&agrave; e nati a Milano, dal 2009 al 2024"></div>
+<div class="lgd" id="lg-isc"></div>
+<p class="src" id="src-isc"></p>
+<div id="coorti"></div>
+
+<h2 id="quartieri">Quartiere per quartiere: 2015&ndash;2024</h2>
+<p>Ogni quartiere &egrave; un NIL (Nucleo di Identit&agrave; Locale, sono 88). La mappa confronta il 2015 con il 2024 per due cose: gli <b>alunni iscritti nelle scuole del quartiere</b> (infanzia, primaria e secondaria di primo grado insieme) e i <b>bambini residenti</b> di 3&ndash;13 anni. Clic su un quartiere per la scheda. Gli alunni sono contati dove sta la scuola, non dove abitano: <span id="p-fuori"></span></p>
+<div class="ctl"><span class="sub">Mostra:</span><button type="button" data-m="Iv" class="on">Alunni nelle scuole del quartiere</button><button type="button" data-m="Rv">Bambini residenti 3&ndash;13 anni</button></div>
+<p class="sub" id="map-desc-n"></p>
+<div id="mapn" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per variazione degli alunni dal 2015 al 2024"></div>
+<div class="lgd" id="lg-n"></div>
+<p class="src">Alunni: Comune di Milano, ds224/225/226 (CC BY), scuole raggruppate per NIL in cui si trovano. Residenti: Comune di Milano, ds27 (CC BY), al 31 dicembre. In grigio i quartieri con meno di 200 alunni (o 200 bambini) nel 2015: la percentuale non ha senso. Mappa &copy; OpenStreetMap contributors.</p>
+<div id="scheda-n" class="card"><span class="sub">Scegli un quartiere sulla mappa.</span></div>
+
+<h2 id="gestione">Scuole statali, comunali, paritarie, private</h2>
+<div id="gest-testo"></div>
+<div class="ctl"><span class="sub">Scuola:</span><span id="b-liv2"></span></div>
+<div class="ch" id="ch-gest" role="img" aria-label="Grafico: quota di alunni per tipo di gestione, dal 2009 al 2024"></div>
+<div class="lgd" id="lg-gest"></div>
+<p class="src" id="src-gest"></p>
+<h3>Chi perde e chi tiene, 2015&rarr;2024</h3>
+<p>Solo le scuole che esistono in entrambi gli anni (stesso codice del Comune), per tipo di gestione.</p>
+<div class="scroll"><table id="tab-gest"></table></div>
+<div id="var-testo"></div>
+
+<h2 id="mappa">Ogni scuola sulla mappa</h2>
+<p>Scuole aperte nel 2024/25, a colori per scuola oppure per quota di alunni con cittadinanza non italiana. Il cerchio &egrave; tanto pi&ugrave; grande quanto pi&ugrave; alunni ha. Clic su una scuola, oppure scrivi il nome qui sotto. <span id="p-mappa"></span></p>
+<div class="ctl"><span class="sub">Colora per:</span><button type="button" data-c="liv" class="on">tipo di scuola</button><button type="button" data-c="quota">quota con cittadinanza non italiana</button>
+<span id="ck-liv"></span></div>
+<div class="ctl"><input type="text" id="cerca" list="elenco" placeholder="Cerca una scuola" aria-label="Cerca una scuola per nome" autocomplete="off"><datalist id="elenco"></datalist></div>
+<div id="maps" class="map" role="img" aria-label="Mappa delle scuole di Milano"></div>
+<div class="lgd" id="lg-s"></div>
+<p class="src">Posizione: localizzazione delle scuole del Comune di Milano (ds40, ds46, ds671, ds3014&ndash;3016, CC BY); per le superiori e per le scuole del Ministero agganciate per indirizzo (vedi &laquo;Come &egrave; fatto&raquo;). Mappa &copy; OpenStreetMap contributors.</p>
+<div id="scheda-s" class="card"><span class="sub">Scegli una scuola sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="confronto">Scuola e quartiere a confronto</h2>
+<div id="conf-testo"></div>
+<div class="warm"><b>Come leggere.</b> La quota di una scuola dice quanti dei suoi alunni hanno cittadinanza non italiana; la quota del quartiere dice quanti dei bambini <i>residenti</i> in quel NIL, della stessa et&agrave;, ce l&rsquo;hanno. <b>Cittadinanza non italiana &ne; nato all&rsquo;estero e non dice nulla sull&rsquo;origine</b>: almeno <span id="c-56">56</span>% degli alunni di primaria con cittadinanza non italiana &egrave; nato in Italia. Una differenza tra scuola e quartiere non dice <i>perch&eacute;</i>: le scuole accolgono bambini di altri quartieri (<span id="c-fuori">54</span>% dei bambini di primaria va a scuola fuori dal proprio NIL) e scuole diverse (statali, paritarie, private) hanno regole di iscrizione diverse. Le scuole private non paritarie, tra cui alcune internazionali, sono un caso a s&eacute; e vanno lette separatamente.</div>
+<div class="ctl"><span class="sub">Scuola:</span><span id="b-liv3"></span></div>
+<div class="ctl"><label class="ck"><input type="checkbox" id="f-pub" checked> statali e comunali</label> <label class="ck"><input type="checkbox" id="f-par" checked> paritarie</label> <label class="ck"><input type="checkbox" id="f-npar" checked> private non paritarie</label> <label class="ck"><input type="checkbox" id="f-50" checked> almeno 50 alunni</label></div>
+<div class="ch" id="ch-conf" role="img" aria-label="Grafico: quota di alunni con cittadinanza non italiana in ogni scuola contro la quota tra i bambini residenti nello stesso quartiere"></div>
+<div class="lgd" id="lg-conf"></div>
+<p class="src">Ogni punto &egrave; una scuola, 2024/25. Orizzontale: quota di bambini con cittadinanza non italiana tra i residenti dello stesso NIL, nella fascia d&rsquo;et&agrave; di quel tipo di scuola (3&ndash;5, 6&ndash;10, 11&ndash;13, 14&ndash;18 anni; Comune di Milano ds27, 31/12/2024). Verticale: quota tra gli alunni della scuola (Comune ds224/225/226; per le superiori Ministero, solo statali e paritarie). Sulla linea tratteggiata scuola e quartiere hanno la stessa quota. Passa il dito o il mouse su un punto per il nome, clic per la scheda.</p>
+<div id="scheda-c" class="card"><span class="sub">Clic su un punto per la scheda della scuola.</span></div>
+<div class="grid2"><div><h3>Quota pi&ugrave; alta rispetto al quartiere</h3><div class="bars" id="b-alt"></div></div>
+<div><h3>Quota pi&ugrave; bassa rispetto al quartiere</h3><div class="bars" id="b-bas"></div></div></div>
+<p class="sub">Differenza in punti percentuali tra la quota della scuola e quella dei bambini residenti del suo NIL, tra le scuole del filtro scelto (prime 10 per parte). Una differenza non &egrave; un giudizio: pu&ograve; dipendere dalla scelta di scuole di famiglie che abitano in altri quartieri, dalla zona di iscrizione, dal tipo di scuola.</p>
+<details><summary>Tutte le scuole del filtro scelto (tabella ordinabile)</summary><div class="scroll tabmax"><table id="tab-sc"></table></div></details>
+<h3>Tra scuole e tra quartieri: quanto sono disuguali</h3>
+<div id="conc-testo"></div>
+<div class="scroll"><table id="tab-conc"></table></div>
+<p class="src">Indice di dissimilarit&agrave; = quota di alunni con cittadinanza non italiana che dovrebbe cambiare unit&agrave; (scuola o quartiere) perch&eacute; tutte le unit&agrave; avessero la stessa proporzione. 0 = ovunque uguale, 1 = completamente separati. Calcolato su tutte le scuole del Comune (anche private) per ogni anno; &laquo;tra quartieri&raquo; sui bambini residenti nello stesso intervallo d&rsquo;et&agrave; (ds27) e, a parte, sugli alunni contati nel quartiere dove sta la scuola.</p>
+
+<h2 id="metodo">Come &egrave; fatto e che cosa non dice</h2>
+<div class="warm"><ul id="trappole"></ul></div>
+<h3>Comune e Ministero non danno la stessa quota</h3>
+<div id="mim-testo"></div>
+<div class="scroll"><table id="tab-mim"></table></div>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/scuole_anno.csv">scuole_anno.csv</a> (una riga per scuola e anno: alunni, cittadinanza, coordinate, NIL), <a href="data/scuole_confronto_2024.csv">scuole_confronto_2024.csv</a> (scuola contro quartiere, 2024/25), <a href="data/serie_per_ordine.csv">serie_per_ordine.csv</a> (alunni, residenti e nati per anno), <a href="data/nil_scuole.csv">nil_scuole.csv</a> e <a href="data/nil.geojson">nil.geojson</a> (alunni e residenti per quartiere, 2015 e 2024), <a href="data/concentrazione_indici.csv">concentrazione_indici.csv</a>, <a href="data/confronto_MIM_Comune_quota_stranieri.csv">confronto_MIM_Comune_quota_stranieri.csv</a>, <a href="data/scuole.json">scuole.json</a> (i dati della mappa) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti gli altri numeri della pagina). Sono tutti dati per scuola, quartiere o citt&agrave; (istituzioni, non persone): nessun alunno singolo.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> <b>Comune di Milano</b> &ndash; dati.comune.milano.it, fonte ANASCO (Anagrafe Scolastica): scuole dell&rsquo;infanzia, primarie e secondarie di primo grado, caratteristiche per singola scuola (ds224, ds225, ds226), serie per municipio (ds102&ndash;ds105), localizzazione delle scuole (ds40, ds46, ds671, ds3014&ndash;ds3016, ds78), residenti per quartiere, et&agrave; e cittadinanza (ds27), residenti per et&agrave; (ds223), alunni residenti in un NIL diverso (ds1739&ndash;ds1741), serie del Comune (ds1742), confini dei NIL (ds964). Licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati dal portale il 1 novembre 2026. Nascite: ds289 (CC BY).
+<br><b>Ministero dell&rsquo;Istruzione e del Merito</b> &ndash; Portale Unico dei Dati della Scuola, <a href="https://dati.istruzione.it/opendata/">dati.istruzione.it/opendata</a>: anagrafe delle scuole statali e paritarie, studenti per anno di corso, cittadinanza, classe e genere (anni scolastici 2015/16&ndash;2024/25, infanzia dal 2017/18), scaricati il 1 novembre 2026. Licenza <b>Italian Open Data License 2.0 (IODL 2.0)</b>, testo su <a href="https://www.dati.gov.it/content/italian-open-data-license-v20">dati.gov.it/content/italian-open-data-license-v20</a> (letto il 1 novembre 2026). L&rsquo;articolo 2 la concede &laquo;a condizione di&raquo;:</p>
+<blockquote>&laquo;indicare la fonte delle Informazioni e il nome del Licenziante, includendo, se possibile, una copia di questa licenza o un collegamento (link) ad essa. non riutilizzare le Informazioni in un modo che suggerisca che abbiano carattere di ufficialit&agrave; o che il Licenziante approvi l&rsquo;uso che fai delle Informazioni; prendere ogni misura ragionevole affinch&eacute; gli usi innanzi consentiti non traggano in inganno altri soggetti e le Informazioni medesime non vengano travisate.&raquo;</blockquote>
+<p><b>Questa pagina non &egrave; ufficiale</b>: i numeri qui mostrati sono elaborazioni di &laquo;Milano in dati&raquo; sui dati aperti del Comune di Milano e del Ministero dell&rsquo;Istruzione e del Merito, che non hanno rivisto n&eacute; approvato l&rsquo;uso che ne facciamo. Le informazioni sono &laquo;cos&igrave; come sono&raquo;; il confronto tra le due fonti &egrave; spiegato sopra.
+<br>Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var R=null,SC=[],NF=null,NILP={},BYID={};
+var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
+var LIVC=['#c26a1b','#00695c','#3b5ba5','#7a4a8a'];
+var GC={statale:'#00695c',comunale:'#3b5ba5',privata_paritaria:'#c26a1b',privata_non_paritaria:'#7a4a8a',paritaria_mim:'#c26a1b'};
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var LIVN=['Infanzia','Primaria','Secondaria di I grado','Secondaria di II grado'];
+var LIVS=['infanzia','primaria','sec1','sec2'];
+var GN=['Statale','Comunale','Privata paritaria','Privata non paritaria','Paritaria (Ministero)'];
+var GK=['statale','comunale','privata_paritaria','privata_non_paritaria','paritaria_mim'];
+var RD=[];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows,left){left=left||1;setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i>=left?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i>=left?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function buttons(id,names,cur,cb){
+  var box=el(id);box.innerHTML='';
+  names.forEach(function(n,i){var b=document.createElement('button');b.type='button';b.textContent=n;if(i===cur)b.className='on';
+    b.addEventListener('click',function(){Array.prototype.forEach.call(box.children,function(x){x.classList.toggle('on',x===b)});cb(i)});box.appendChild(b)});
+}
+function lgd(items){return items.map(function(it){return '<span><i class="'+(it.line?'ln'+(it.dash?' d':''):'')+'" style="'+(it.line?'border-top-color:'+it.color:'background:'+it.color)+'"></i>'+it.t+'</span>'}).join('')}
+
+Promise.all([J('data/riepilogo.json'),J('data/scuole.json'),J('data/nil.geojson')]).then(function(a){
+  R=a[0];SC=a[1];NF=a[2];
+  NF.features.forEach(function(f){NILP[f.properties.i]=f.properties});
+  SC.forEach(function(s){BYID[s.id]=s});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();iscritti();quartieri();gestione();scuoleMappa();confronto();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function nilNome(i){return NILP[i]?NILP[i].n:''}
+
+/* ---------- grafico a linee ---------- */
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:46,r:12,t:14,b:26};
+  var xs=o.xs,all=[];
+  o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});
+  var y0=o.y0!=null?o.y0:Math.min.apply(null,all),y1=Math.max.apply(null,all);
+  var sy=niceStep((y1-y0)/5);y0=Math.floor(y0/sy)*sy;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,xa=xs[0],xb=xs[xs.length-1];
+  function X(v){return m.l+(v-xa)/(xb-xa)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yf(v)+'</text>';
+  var lx=-99;xs.forEach(function(x){var xx=X(x);if(xx-lx>(o.tickw||44)){lx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+x+'</text>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.ref!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.ref)+'" y2="'+Y(o.ref)+'" stroke="#999" stroke-dasharray="2 3"/>';
+  o.series.forEach(function(se){
+    var d='',pen=false;
+    se.v.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(xs[i]).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+'/>';
+  });
+  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bi=0,bd=1e9;
+    xs.forEach(function(x,i){var d=Math.abs(X(x)-px);if(d<bd){bd=d;bi=i}});
+    var h='<b>'+xs[bi]+(o.xlab?o.xlab:'')+'</b>';
+    o.series.forEach(function(se){if(se.v[bi]!=null)h+='<br><span class="dot" style="background:'+se.color+'"></span>'+se.name+': '+(se.tf?se.tf(bi):o.yf(se.v[bi]))});
+    tip.innerHTML=h;tip.style.display='';cur.setAttribute('x1',X(xs[bi]));cur.setAttribute('x2',X(xs[bi]));cur.style.display='';
+    var tw=tip.offsetWidth,left=X(xs[bi])/k+10;if(left+tw>r.width)left=X(xs[bi])/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){tip.style.display='none';cur.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- grafico a colonne impilate (quote) ---------- */
+function stackChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:40,r:8,t:10,b:26},xs=o.xs,pw=W-m.l-m.r,ph=H-m.t-m.b,bw=pw/xs.length;
+  function Y(v){return m.t+ph-v/100*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=100;v+=25)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'%</text>';
+  var lx=-99;
+  xs.forEach(function(x,i){
+    var tot=0;o.series.forEach(function(se){tot+=se.v[i]||0});
+    var acc=0,xx=m.l+i*bw+bw*.12;
+    if(tot>0)o.series.forEach(function(se){var p=100*(se.v[i]||0)/tot;if(p<=0)return;s+='<rect x="'+xx.toFixed(1)+'" y="'+Y(acc+p).toFixed(1)+'" width="'+(bw*.76).toFixed(1)+'" height="'+(p/100*ph).toFixed(1)+'" fill="'+se.color+'"/>';acc+=p});
+    var cx=m.l+i*bw+bw/2;if(cx-lx>40){lx=cx;s+='<text class="mu" x="'+cx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+x+'</text>'}
+  });
+  s+='<rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,i=Math.max(0,Math.min(xs.length-1,Math.floor((px-m.l)/bw)));
+    var tot=0;o.series.forEach(function(se){tot+=se.v[i]||0});if(!tot){tip.style.display='none';return}
+    var h='<b>'+xs[i]+'</b> ('+f0(tot)+' alunni)';
+    o.series.forEach(function(se){if(se.v[i])h+='<br><span class="dot" style="background:'+se.color+'"></span>'+se.name+': '+f0(se.v[i])+' ('+f1(100*se.v[i]/tot)+'%)'});
+    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=(m.l+i*bw+bw/2)/k+10;if(left+tw>r.width)left=(m.l+i*bw+bw/2)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- grafico a punti (scuola contro quartiere) ---------- */
+function scatter(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||340,m={l:46,r:12,t:14,b:44},mx=o.max||100;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+v/mx*pw} function Y(v){return m.t+ph-v/mx*ph}
+  var st=niceStep(mx/5),s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=mx+st/2;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'%</text>';
+    s+='<text class="mu" x="'+X(v)+'" y="'+(m.t+ph+15)+'" text-anchor="middle">'+v+'%</text>'}
+  s+='<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(mx)+'" y2="'+Y(mx)+'" stroke="#8a4a10" stroke-dasharray="5 4"/><text x="'+(X(mx)-4)+'" y="'+(Y(mx)+14)+'" text-anchor="end" style="fill:#8a4a10">stessa quota di scuola e quartiere</text>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">bambini residenti nel quartiere con cittadinanza non italiana</text><text class="mu" x="'+m.l+'" y="'+(m.t-3)+'" text-anchor="start">alunni della scuola con cittadinanza non italiana</text>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.4" fill="'+p.c+'" fill-opacity=".72" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7.5" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y;cursor:pointer"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function near(ev){var t=ev.touches?ev.touches[0]:(ev.changedTouches?ev.changedTouches[0]:ev),r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});return {bi:bi,bd:bd,k:k,r:r}}
+  function show(ev){var q=near(ev);if(q.bi<0||q.bd>400){tip.style.display='none';ring.style.display='none';return}
+    var p=o.pts[q.bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tip.innerHTML=p.t;tip.style.display='';var tw=tip.offsetWidth,left=X(p.x)/q.k+10;if(left+tw>q.r.width)left=X(p.x)/q.k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.y)/q.k-50)+'px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none';ring.style.display='none'});
+  rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+  rect.addEventListener('click',function(ev){var q=near(ev);if(q.bi>=0&&q.bd<=900)o.click(o.pts[q.bi].id)});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var c=R.concentrazione.primaria,c24=c['2024'],c12=c['2012'];
+  var coo=R.coorti.filter(function(x){return x.rapp_res5!=null}),mn=Math.min.apply(null,coo.map(function(x){return x.rapp_res5})),mxx=Math.max.apply(null,coo.map(function(x){return x.rapp_res5}));
+  var r0=R.residenti_0_anni,rc=Math.round(100*(r0['2025']/r0['2012']-1));
+  var h='<p><b>Gli alunni con cittadinanza non italiana sono distribuiti in modo molto pi&ugrave; disuguale tra le scuole che tra i quartieri, e da dodici anni nello stesso modo.</b> Alle elementari, per avere in ogni scuola la stessa proporzione, dovrebbe cambiare scuola il <b>'+nf(c24.D_scuole*100,1)+'%</b> di questi alunni (indice 0,'+f0(c24.D_scuole*1000)+'). Tra i quartieri, contando i bambini residenti della stessa et&agrave;, ne basterebbe il <b>'+nf(c24.D_nil_residenti*100,1)+'%</b> (0,'+f0(c24.D_nil_residenti*1000)+'). Nel 2012 era 0,'+f0(c12.D_scuole*1000)+' tra le scuole: non &egrave; cambiato.</p>';
+  h+='<p><b>Le scuole si svuotano soprattutto perch&eacute; nascono meno bambini.</b> I residenti di 0 anni erano '+f0(r0['2012'])+' nel 2012 e sono '+f0(r0['2025'])+' nel 2025 ('+sgp(rc,0)+'). I bambini che entrano in prima elementare sono ogni anno circa il <b>94%</b> dei residenti che cinque anni prima avevano 5 anni (da '+nf(mn*100,1)+'% a '+nf(mxx*100,1)+'% nelle coorti 2009&ndash;2018): il numero di alunni segue i residenti.</p>';
+  h+='<p class="src">Comune di Milano, ds224&ndash;226 (alunni, cittadinanza), ds27 e ds223 (residenti), CC BY; Ministero dell&rsquo;Istruzione e del Merito, prime classi (IODL 2.0). Indice di dissimilarit&agrave;: vedi <a href="#confronto">Scuola e quartiere a confronto</a>.</p>';
+  setH('sorpresa',h);
+  el('av-nati').textContent='nelle elementari almeno il '+Math.round(100*(R.stranieri.primaria.comune[15]-R.nati_fuori_italia_2024.primaria)/R.stranieri.primaria.comune[15])+'% degli alunni con cittadinanza non italiana è nato in Italia, e il Comune stesso conta '+nf(R.stranieri_nati_italia_comune_2023_24.primaria,1)+'% (2023/24).';
+  el('c-56').textContent=Math.round(100*(R.stranieri.primaria.comune[15]-R.nati_fuori_italia_2024.primaria)/R.stranieri.primaria.comune[15]);
+  el('c-fuori').textContent=nf(R.fuori_nil.primaria['2023/24'],1);
+  el('p-fuori').textContent='il '+nf(R.fuori_nil.primaria['2023/24'],1)+'% dei bambini di primaria residenti a Milano va a scuola in un NIL diverso da quello dove abita (infanzia '+nf(R.fuori_nil.infanzia['2023/24'],1)+'%, secondaria di primo grado '+nf(R.fuori_nil.sec1['2023/24'],1)+'%, 2023/24).';
+}
+
+/* ---------- iscritti, residenti e nati ---------- */
+var LIV=1,SCALA=0;
+function iscritti(){
+  buttons('b-liv',LIVN.concat(['Tutte, solo alunni']),LIV,function(i){LIV=i;dIsc()});
+  buttons('b-scala',['Indice (2009 = 100)','Numeri veri'],SCALA,function(i){SCALA=i;dIsc()});
+  var P=R.serie,pk=R.picchi,t='';
+  t+='<p>Alla scuola dell&rsquo;infanzia i bambini erano al massimo '+f0(pk.infanzia[1])+' (anno '+pk.infanzia[0]+'), oggi '+f0(P.infanzia.iscritti[15])+' ('+sgp(100*(P.infanzia.iscritti[15]/pk.infanzia[1]-1),1)+'). Alla primaria il massimo &egrave; stato '+f0(pk.primaria[1])+' ('+pk.primaria[0]+'), oggi '+f0(P.primaria.iscritti[15])+' ('+sgp(100*(P.primaria.iscritti[15]/pk.primaria[1]-1),1)+'). Alle medie '+f0(pk.sec1[1])+' ('+pk.sec1[0]+'), oggi '+f0(P.sec1.iscritti[15])+' ('+sgp(100*(P.sec1.iscritti[15]/pk.sec1[1]-1),1)+'). Le superiori sono ancora quasi sul massimo: '+f0(pk.sec2[1])+' nel '+pk.sec2[0]+', '+f0(P.sec2.iscritti[14])+' nel 2023 (il Comune non ha ancora pubblicato il 2024 per le superiori).</p>';
+  t+='<p>Il grafico mette sulla stessa linea gli alunni, i <b>bambini residenti nella stessa fascia d&rsquo;et&agrave;</b> (3&ndash;5 anni per l&rsquo;infanzia, 6&ndash;10 per la primaria, 11&ndash;13 per le medie, 14&ndash;18 per le superiori) e i <b>nati a Milano</b>. I nati sono per anno di nascita: arrivano in prima elementare sei anni dopo. Le superiori attirano anche ragazzi che abitano fuori Milano: nel 2024 gli iscritti sono '+nf(R.iscritti_su_residenti_2024.sec2,2)+' volte i residenti di 14&ndash;18 anni (e comprendono anche i maggiori di 18).</p>';
+  setH('isc-testo',t);
+  setH('src-isc','Alunni: Comune di Milano, ds224/225/226 (somma delle scuole, comprese le private non paritarie) e, per le superiori, ds105 (fino al 2023/24). Residenti: Comune di Milano, ds27, al 31 dicembre di ciascun anno. Nati avvenuti a Milano (per luogo del parto, non per residenza): ds289, fino al 2020. Indice: 2009 = 100 (per tutte le linee, nati compresi).');
+  dIsc();RD.push(dIsc);
+}
+function idx(a){var b=a[0];return a.map(function(v){return v==null||b==null?null:100*v/b})}
+function dIsc(){
+  var A=R.anni,P=R.serie,ser=[],lg=[];
+  var abs=SCALA===1;
+  if(LIV===4){
+    LIVS.forEach(function(o,k){var v=P[o].iscritti;ser.push({name:LIVN[k],color:LIVC[k],v:abs?v:idx(v),tf:(function(vv,ii){return function(i){return f0(vv[i])+(abs?'':' ('+nf(ii[i],0)+')')}})(v,idx(v))});lg.push({line:1,color:LIVC[k],t:LIVN[k]})});
+  }else{
+    var o=LIVS[LIV],v=P[o].iscritti,rs=P[o].residenti_fascia,nas=A.map(function(a){var x=R.nascite[String(a)];return x==null?null:x});
+    var vi=idx(v),ri=idx(rs),ni=idx(nas);
+    ser.push({name:'Alunni',color:LIVC[LIV],v:abs?v:vi,w:3,tf:function(i){return f0(v[i])+(abs?'':' (indice '+nf(vi[i],0)+')')}});
+    ser.push({name:'Bambini residenti '+P[o].residenti_fascia_nome+' anni',color:'#111',dash:1,v:abs?rs:ri,w:2,tf:function(i){return f0(rs[i])+(abs?'':' (indice '+nf(ri[i],0)+')')}});
+    ser.push({name:'Nati a Milano',color:'#8a8a8a',v:abs?nas:ni,w:2,tf:function(i){return f0(nas[i])+(abs?'':' (indice '+nf(ni[i],0)+')')}});
+    lg.push({line:1,color:LIVC[LIV],t:'Alunni iscritti'},{line:1,dash:1,color:'#111',t:'Bambini residenti '+P[o].residenti_fascia_nome+' anni'},{line:1,color:'#8a8a8a',t:'Nati a Milano (nell&rsquo;anno)'});
+  }
+  var box=el('ch-isc');
+  lineChart(box,{xs:A,series:ser,h:300,yf:function(v){return abs?f0(v):nf(v,0)},y0:abs?0:null,ref:abs?null:100,xlab:' (anno scolastico di inizio)'});
+  setH('lg-isc',lgd(lg));
+  coorti();
+}
+function coorti(){
+  var c=R.coorti.filter(function(x){return x.prima!=null});
+  var h='<details><summary>Dai nati alla prima elementare, coorte per coorte</summary><div class="scroll"><table><thead><tr><th>Nati nell&rsquo;anno</th><th class="r">Nati a Milano</th><th class="r">Residenti di 5 anni (5 anni dopo)</th><th class="r">Prima primaria (6 anni dopo)</th><th class="r">Prima / residenti</th><th class="r">Prima / nati</th></tr></thead><tbody>';
+  c.forEach(function(x){h+='<tr><td>'+x.coorte+'</td><td class="r">'+f0(x.nati)+'</td><td class="r">'+f0(x.res5)+'</td><td class="r">'+f0(x.prima)+'</td><td class="r">'+nf(x.rapp_res5,2)+'</td><td class="r">'+nf(x.rapp_nati,2)+'</td></tr>'});
+  h+='</tbody></table></div><p class="src">Prima primaria: Ministero, alunni al primo anno di corso (statali e paritarie), a.s. 2015/16&ndash;2024/25. Residenti di 5 anni: Comune ds223. Il rapporto con i nati scende perch&eacute; &laquo;nati a Milano&raquo; conta i parti avvenuti a Milano, anche di non residenti.</p></details>';
+  setH('coorti',h);
+}
+
+/* ---------- quartieri ---------- */
+var MN=null,NL=null,NM='Iv';
+var BRK=[-20,-10,0,10,20],NCOL=['#a8540f','#e0a96d','#f3dcc0','#c5e3dd','#62b0a4','#136459'];
+function ncol(v){if(v==null)return '#bdbdbd';var i=0;while(i<BRK.length&&v>=BRK[i])i++;return NCOL[i]}
+function quartieri(){
+  MN=L.map('mapn',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MN);
+  NL=L.geoJSON(NF,{style:nsty,onEachFeature:function(f,l){l.bindTooltip(function(){return ntip(f.properties)},{sticky:true});l.on('click',function(){selN=f.properties.i;NL.setStyle(nsty);schedaN(f.properties.i)})}}).addTo(MN);
+  MN.fitBounds(NL.getBounds());
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-m]'),function(b){b.addEventListener('click',function(){NM=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('button[data-m]'),function(x){x.classList.toggle('on',x===b)});NL.setStyle(nsty);nleg()})});
+  nleg();
+  setTimeout(function(){MN.invalidateSize();MN.fitBounds(NL.getBounds())},600);
+  window.addEventListener('resize',function(){MN.invalidateSize()});
+}
+var selN=null;
+function nsty(f){var p=f.properties,v=p[NM];return {fillColor:ncol(v),fillOpacity:.85,color:selN===p.i?'#000':'#fff',weight:selN===p.i?3:1}}
+function ntip(p){
+  if(NM==='Iv')return '<b>'+esc(p.n)+'</b><br>'+(p.Iv==null?(p.I24? f0(p.I24)+' alunni nel 2024 (meno di 200 nel 2015)':'nessuna scuola di infanzia, primaria o media'):sgp(p.Iv,1)+' ('+f0(p.I15)+' → '+f0(p.I24)+' alunni)');
+  return '<b>'+esc(p.n)+'</b><br>'+(p.Rv==null?'meno di 200 bambini di 3–13 anni':sgp(p.Rv,1)+' ('+f0(p.R15)+' → '+f0(p.R24)+' bambini di 3–13 anni)')}
+function nleg(){
+  var t=['calo oltre 20%','da −20% a −10%','da −10% a 0','da 0 a +10%','da +10% a +20%','oltre +20%'];
+  setH('lg-n',NCOL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+t[i]+'</span>'}).join('')+'<span><i style="background:#bdbdbd"></i>meno di 200 nel 2015 o nessuna scuola</span>');
+  setH('map-desc-n',NM==='Iv'?'Come sono cambiati gli alunni iscritti nelle scuole del quartiere tra il 2015/16 e il 2024/25. Più arancione = più calo. Un quartiere può guadagnare alunni perché si costruiscono case, o perché una scuola nuova prende alunni da fuori.':'Come sono cambiati i bambini residenti di 3–13 anni tra il 31 dicembre 2015 e il 31 dicembre 2024. Confronta con la mappa degli alunni: dove le due non coincidono, le scuole prendono (o perdono) bambini di altri quartieri.');
+}
+function schedaN(i){
+  var p=NILP[i],h='<h3>'+esc(p.n)+'</h3><div class="scroll"><table><thead><tr><th>Scuola</th><th class="r">Alunni 2015</th><th class="r">Alunni 2024</th><th class="r">Variazione</th><th class="r">Scuole 2024</th><th class="r">Residenti 2015</th><th class="r">Residenti 2024</th><th class="r">Variazione</th></tr></thead><tbody>';
+  for(var k=0;k<3;k++){var a=p['i15_'+k],b=p['i24_'+k],r1=p['r15_'+k],r2=p['r24_'+k];
+    h+='<tr><td>'+LIVN[k]+'</td><td class="r">'+f0(a)+'</td><td class="r">'+f0(b)+'</td><td class="r">'+(a>=50?sgp(100*(b/a-1),1):'')+'</td><td class="r">'+p['s24_'+k]+'</td><td class="r">'+f0(r1)+'<div class="sub">'+['3–5','6–10','11–13'][k]+' anni</div></td><td class="r">'+f0(r2)+'</td><td class="r">'+(r1>=50?sgp(100*(r2/r1-1),1):'')+'</td></tr>'}
+  h+='<tr><td><b>Tre livelli</b></td><td class="r"><b>'+f0(p.I15)+'</b></td><td class="r"><b>'+f0(p.I24)+'</b></td><td class="r"><b>'+(p.Iv==null?'':sgp(p.Iv,1))+'</b></td><td class="r">'+(p.s24_0+p.s24_1+p.s24_2)+'</td><td class="r">'+f0(p.R15)+'</td><td class="r">'+f0(p.R24)+'</td><td class="r">'+(p.Rv==null?'':sgp(p.Rv,1))+'</td></tr></tbody></table></div>';
+  var sch=SC.filter(function(s){return s.nil===i&&s.o<3}).length;
+  h+='<p class="sub">Alunni: scuole del quartiere (le percentuali compaiono solo con almeno 50 alunni). Residenti: bambini che abitano nel quartiere. Le due colonne non coincidono perché molti bambini vanno a scuola in un altro quartiere. '+(sch?sch+' scuole di questo quartiere sono sulla mappa qui sotto.':'')+' <a href="#mappa">Vai alla mappa delle scuole</a>.</p>';
+  setH('scheda-n',h);
+}
+
+/* ---------- gestione ---------- */
+var LIV2=1;
+function gestione(){
+  buttons('b-liv2',LIVN,LIV2,function(i){LIV2=i;dGest()});
+  var q=R.quota_gestione_2024,find=function(o,g){return q.filter(function(x){return x.ordine===o&&x.gestione===g})[0]};
+  var inf=R.gestione.infanzia,tot=inf.statale[15]+inf.comunale[15]+inf.privata_paritaria[15]+inf.privata_non_paritaria[15];
+  var pr=R.gestione.primaria,tp=pr.statale[15]+pr.privata_paritaria[15]+pr.privata_non_paritaria[15];
+  var t='<p><b>L&rsquo;infanzia a Milano &egrave; soprattutto comunale.</b> Nel 2024 il '+f1(100*inf.comunale[15]/tot)+'% dei bambini dell&rsquo;infanzia &egrave; in una scuola del Comune, il '+f1(100*inf.statale[15]/tot)+'% in una scuola statale, il '+f1(100*inf.privata_paritaria[15]/tot)+'% in una privata paritaria e il '+f1(100*inf.privata_non_paritaria[15]/tot)+'% in una privata non paritaria. Alla primaria il '+f1(100*pr.statale[15]/tp)+'% &egrave; in una scuola statale (era 78,7% nel 2016).</p>';
+  t+='<p>La scuola comunale dell&rsquo;infanzia ha, per legge, lo status di paritaria: qui la teniamo a parte perch&eacute; &egrave; gestita dal Comune. Per le superiori il Ministero non ha le private non paritarie: il grafico mostra solo statali e paritarie.</p>';
+  setH('gest-testo',t);
+  dGest();RD.push(dGest);
+}
+function dGest(){
+  var o=LIVS[LIV2],A=R.anni,G=R.gestione[o],ks=o==='sec2'?['statale','paritaria_mim']:o==='infanzia'?['statale','comunale','privata_paritaria','privata_non_paritaria']:['statale','privata_paritaria','privata_non_paritaria'];
+  var ser=ks.map(function(k){return {name:GN[GK.indexOf(k)],color:GC[k],v:G[k]}});
+  stackChart(el('ch-gest'),{xs:A,series:ser,h:280});
+  setH('lg-gest',lgd(ser.map(function(s){return {color:s.color,t:s.name}})));
+  setH('src-gest',o==='sec2'?'Superiori: Ministero dell’Istruzione e del Merito, solo scuole statali e paritarie, dal 2015/16 (le private non paritarie non ci sono). Quote sul totale delle due.':'Comune di Milano, ds224/225/226. Quote di alunni sul totale di ciascun anno scolastico (anno di inizio).');
+  var rows=R.variazione_gestione.map(function(x){return [LIVN[LIVS.indexOf(x.ordine)],{statale:'Statale',paritaria:'Paritaria (comunale e privata)',non_paritaria:'Privata non paritaria'}[x.gruppo]||x.gruppo,x.scuole,f0(x.v2015),f0(x.v2024),'<b>'+sgp(x.var_pct,1)+'</b>']});
+  table('tab-gest',['Scuola','Gestione','Scuole','Alunni 2015','Alunni 2024','Variazione'],rows,2);
+  var v=R.variazione_scuole,c=R.scuole_chiuse_nuove;
+  setH('var-testo','<p class="sub">Scuola per scuola, 2015&rarr;2024: alla primaria '+(v.primaria.si_svuota_oltre_20pct)+' scuole su '+Object.keys(v.primaria).reduce(function(a,k){return a+v.primaria[k]},0)+' perdono oltre il 20% degli alunni e '+(v.primaria.si_riempie_oltre_20pct)+' ne guadagnano oltre il 20%; all&rsquo;infanzia '+v.infanzia.si_svuota_oltre_20pct+' perdono oltre il 20% e '+v.infanzia.si_riempie_oltre_20pct+' ne guadagnano oltre il 20%. Alcune grandi variazioni sono fusioni o trasferimenti con cambio di codice: la scuola &laquo;sparisce&raquo; e ne &egrave; nata un&rsquo;altra (nel periodo: infanzia '+c.infanzia.non_piu+' codici spariti e '+c.infanzia.nuove+' nuovi; primaria '+c.primaria.non_piu+' e '+c.primaria.nuove+'; medie '+c.sec1.non_piu+' e '+c.sec1.nuove+').</p>');
+}
+
+/* ---------- scuole sulla mappa ---------- */
+var MS=null,SL_=null,SCOL='liv',LVON=[1,1,1,1],SELS=null,MK={};
+function q24(s){var i=s.i[15],n=s.s[15];return i?100*n/i:null}
+function qcol(v){if(v==null)return '#bdbdbd';var b=[5,15,25,40,60],i=0;while(i<b.length&&v>=b[i])i++;return SEQ[i]}
+function scuoleMappa(){
+  setH('p-mappa','Per le superiori e per alcune scuole del Ministero le posizioni sono ricostruite dall’indirizzo: '+SC.filter(function(s){return s.o===3}).length+' superiori su 196 sono sulla mappa. Le scuole senza posizione non si vedono qui ma sono nei file.');
+  var cl=el('ck-liv');cl.innerHTML=LIVN.map(function(n,i){return '<label class="ck"><input type="checkbox" data-l="'+i+'" checked> <span class="dot" style="background:'+LIVC[i]+'"></span>'+n+'</label>'}).join(' ');
+  Array.prototype.forEach.call(cl.querySelectorAll('input'),function(c){c.addEventListener('change',function(){LVON[+c.getAttribute('data-l')]=c.checked?1:0;drawS()})});
+  MS=L.map('maps',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MS);
+  SL_=L.layerGroup().addTo(MS);
+  SC.forEach(function(s){
+    var m=L.circleMarker([s.y,s.x],{radius:3.2+Math.sqrt(s.i[15]||10)/5,weight:1,color:'#fff',fillOpacity:.82,fillColor:LIVC[s.o]});
+    m.bindTooltip('<b>'+esc(s.n)+'</b><br>'+LIVN[s.o]+' · '+GN[s.g]+'<br>'+f0(s.i[15])+' alunni',{sticky:true});
+    m.on('click',function(){sceltaS(s.id,false)});MK[s.id]=m});
+  var dl=document.getElementById('elenco');
+  dl.innerHTML=SC.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(s){return '<option value="'+esc(s.n+' ('+LIVN[s.o]+', '+nilNome(s.nil)+')')+'" data-id="'+s.id+'">'}).join('');
+  el('cerca').addEventListener('change',function(){var v=this.value,o=Array.prototype.filter.call(dl.options,function(x){return x.value===v})[0];if(o)sceltaS(o.getAttribute('data-id'),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-c]'),function(b){b.addEventListener('click',function(){SCOL=b.getAttribute('data-c');Array.prototype.forEach.call(document.querySelectorAll('button[data-c]'),function(x){x.classList.toggle('on',x===b)});drawS()})});
+  drawS();
+  setTimeout(function(){MS.invalidateSize()},600);window.addEventListener('resize',function(){MS.invalidateSize()});
+}
+function drawS(){
+  SL_.clearLayers();
+  SC.forEach(function(s){if(!LVON[s.o])return;var m=MK[s.id],q=q24(s);
+    m.setStyle({fillColor:SCOL==='liv'?LIVC[s.o]:qcol(q),color:SELS===s.id?'#000':'#fff',weight:SELS===s.id?3:1});SL_.addLayer(m)});
+  if(SCOL==='liv')setH('lg-s',lgd(LIVN.map(function(n,i){return {color:LIVC[i],t:n}})));
+  else{var t=['meno di 5%','5–15%','15–25%','25–40%','40–60%','60% o più'];setH('lg-s',lgd(SEQ.map(function(c,i){return {color:c,t:t[i]}}))+'<span class="sub">quota di alunni con cittadinanza non italiana, 2024/25</span>')}
+}
+function sceltaS(id,zoom){SELS=id;drawS();var s=BYID[id];if(zoom)MS.setView([s.y,s.x],15);if(MK[id])MK[id].bringToFront();schedaScuola(id,'scheda-s')}
+function sparkSerie(s){return s.i}
+function schedaScuola(id,target){
+  var s=BYID[id],i15=s.i[15],n15=s.s[15],q=q24(s),idx15=s.i[6];
+  var h='<h3>'+esc(s.n)+'</h3><p class="sub">'+LIVN[s.o]+' · '+GN[s.g]+' · '+esc(s.a)+' · quartiere '+esc(nilNome(s.nil))+(s.fonte==='M'?' · dati del Ministero':' · dati del Comune')+'</p>';
+  h+='<div class="scroll"><table><tbody>';
+  h+='<tr><td>Alunni 2024/25</td><td class="r"><b>'+f0(i15)+'</b>'+(idx15?' <span class="sub">(2015/16: '+f0(idx15)+', '+sgp(100*(i15/idx15-1),1)+')</span>':'')+'</td></tr>';
+  h+='<tr><td>Con cittadinanza non italiana</td><td class="r"><b>'+(q==null?'':f1(q)+'%')+'</b> <span class="sub">('+f0(n15)+' alunni)</span></td></tr>';
+  h+='<tr><td>Bambini residenti nel quartiere con cittadinanza non italiana, stessa et&agrave;</td><td class="r">'+(s.r==null?'':f1(s.r)+'%')+'</td></tr>';
+  if(s.z!=null)h+='<tr><td>Altre scuole dello stesso tipo nel quartiere (insieme)</td><td class="r">'+f1(s.z)+'%</td></tr>';
+  if(q!=null&&s.r!=null)h+='<tr><td>Differenza scuola &minus; quartiere</td><td class="r"><b>'+sg(q-s.r,1)+' punti</b></td></tr>';
+  h+='</tbody></table></div><div class="ch" id="sp-'+target+'"></div>';
+  h+='<p class="sub">Cittadinanza non italiana &ne; nato all&rsquo;estero e non dice nulla sull&rsquo;origine. Il quartiere &egrave; il NIL della scuola; molti alunni vengono da altri quartieri. '+(s.o===3?'Superiori: dati del Ministero (solo statali e paritarie); la posizione &egrave; ricostruita dall&rsquo;indirizzo.':'')+'</p>';
+  setH(target,h);
+  var box=el('sp-'+target);
+  function dr(){lineChart(box,{xs:R.anni,series:[{name:'Alunni',color:LIVC[s.o],v:s.i,tf:function(k){return f0(s.i[k])}},{name:'di cui cittadinanza non italiana',color:'#111',dash:1,v:s.s,tf:function(k){return f0(s.s[k])}}],h:160,y0:0,yf:function(v){return f0(v)},tickw:60})}
+  dr();
+  RD=RD.filter(function(f){return !f.sp});dr.sp=1;RD.push(dr);
+}
+
+/* ---------- confronto ---------- */
+var LIV3=1,SORTK='d',SORTD=-1;
+function filtrati(){
+  var pub=el('f-pub').checked,par=el('f-par').checked,np=el('f-npar').checked,m50=el('f-50').checked;
+  return SC.filter(function(s){
+    if(s.o!==LIV3||s.r==null||q24(s)==null)return false;
+    var g=GK[s.g],ok=(g==='statale'||g==='comunale')?pub:(g==='privata_non_paritaria')?np:par;
+    return ok&&(!m50||s.i[15]>=50)})
+}
+function confronto(){
+  buttons('b-liv3',LIVN,LIV3,function(i){LIV3=i;dConf()});
+  ['f-pub','f-par','f-npar','f-50'].forEach(function(id){el(id).addEventListener('change',dConf)});
+  var C=R.concentrazione,c24=C.primaria['2024'];
+  setH('conf-testo','<p>Per ogni scuola si confronta la quota di alunni con cittadinanza non italiana con quella dei <b>bambini residenti nello stesso NIL e della stessa et&agrave;</b>. Alle elementari, nel 2024, '+c24.oltre50+' scuole su '+c24.scuole+' hanno pi&ugrave; della met&agrave; di alunni con cittadinanza non italiana e ne ospitano il '+f0(c24.quota_in_oltre50)+'% di tutti; '+c24.sotto10+' ne hanno meno del 10% e ospitano il '+f0(c24.it_in_sotto10)+'% degli alunni con cittadinanza italiana. Nello stesso quartiere, tra due scuole pubbliche, la quota pu&ograve; differire di 20 punti o pi&ugrave; (divario mediano: 20,9 punti alla primaria, 38 quartieri con almeno due scuole pubbliche).</p>');
+  var rows=[];['infanzia','primaria','sec1'].forEach(function(o,k){[2012,2024].forEach(function(a){var c=C[o][String(a)];rows.push([LIVN[k]+' '+a,nf(c.D_scuole,2),nf(c.D_scuole_pubbliche,2),nf(c.D_nil_residenti,2),nf(c.D_nil_sede,2),c.oltre50+' / '+c.scuole])})});
+  table('tab-conc',['Scuola, anno','Tra scuole','Tra scuole pubbliche (statali e comunali)','Tra quartieri (bambini residenti)','Tra quartieri (alunni, dove sta la scuola)','Scuole oltre 50% / totale'],rows);
+  setH('conc-testo','<p>Alle elementari l&rsquo;indice tra le scuole sta tra 0,41 e 0,43 in ogni anno guardato (2012, 2015, 2018, 2021, 2024; vedi il file), mentre tra i quartieri (bambini residenti) sta tra 0,28 e 0,31. Anche solo tra le scuole pubbliche resta pi&ugrave; alto (0,37). Il solo tipo di gestione (statale, comunale, paritaria, privata) spiega una parte: 0,18.</p>');
+  dConf();RD.push(dConf);
+}
+function dConf(){
+  var l=filtrati();
+  var pts=l.map(function(s){var q=q24(s);return {x:s.r,y:q,c:GC[GK[s.g]],id:s.id,t:'<b>'+esc(s.n)+'</b><br>'+GN[s.g]+' · '+esc(nilNome(s.nil))+'<br>scuola '+f1(q)+'% · quartiere '+f1(s.r)+'% · '+f0(s.i[15])+' alunni'}});
+  scatter(el('ch-conf'),{pts:pts,h:340,max:100,click:function(id){schedaScuola(id,'scheda-c')}});
+  var ks=LIV3===3?['statale','paritaria_mim']:LIV3===0?['statale','comunale','privata_paritaria','privata_non_paritaria']:['statale','privata_paritaria','privata_non_paritaria'];
+  setH('lg-conf',lgd(ks.map(function(k){return {color:GC[k],t:GN[GK.indexOf(k)]}}))+'<span class="sub">'+l.length+' scuole</span>');
+  var d=l.map(function(s){return {s:s,d:q24(s)-s.r}}).sort(function(a,b){return b.d-a.d});
+  function bar(arr,col,id){var mx=Math.max.apply(null,arr.map(function(x){return Math.abs(x.d)}).concat([1]));
+    setH(id,arr.map(function(x){return '<div class="row"><span class="nm"><a href="#" data-id="'+x.s.id+'">'+esc(x.s.n)+'</a><i>'+GN[x.s.g]+' · '+esc(nilNome(x.s.nil))+' · scuola '+f0(q24(x.s))+'%, quartiere '+f0(x.s.r)+'%</i></span><span class="tr"><span class="fill" style="width:'+(Math.abs(x.d)/mx*100)+'%;background:'+(GC[GK[x.s.g]])+'"></span></span><span class="v">'+sg(x.d,0)+' punti</span></div>'}).join(''));
+    Array.prototype.forEach.call(el(id).querySelectorAll('a'),function(a){a.addEventListener('click',function(e){e.preventDefault();schedaScuola(a.getAttribute('data-id'),'scheda-c');el('scheda-c').scrollIntoView({block:'nearest'})})})}
+  bar(d.slice(0,10),ACC,'b-alt');bar(d.slice().reverse().slice(0,10),WARM,'b-bas');
+  dTab(l);
+}
+function dTab(l){
+  var rows=l.map(function(s){var q=q24(s);return {s:s,n:s.n,g:GN[s.g],nil:nilNome(s.nil),i:s.i[15],q:q,r:s.r,d:q-s.r}});
+  rows.sort(function(a,b){var x=a[SORTK],y=b[SORTK];if(typeof x==='string')return SORTD*x.localeCompare(y,'it');return SORTD*(x-y)});
+  var H=[['n','Scuola'],['g','Gestione'],['nil','Quartiere'],['i','Alunni'],['q','Scuola %'],['r','Quartiere %'],['d','Differenza']];
+  var h='<thead><tr>'+H.map(function(x,i){return '<th class="sortable'+(i>2?' r':'')+'" data-k="'+x[0]+'">'+x[1]+(SORTK===x[0]?(SORTD<0?' ▼':' ▲'):'')+'</th>'}).join('')+'</tr></thead><tbody>';
+  rows.forEach(function(r){h+='<tr><td><a href="#" data-id="'+r.s.id+'">'+esc(r.n)+'</a></td><td>'+r.g+'</td><td>'+esc(r.nil)+'</td><td class="r">'+f0(r.i)+'</td><td class="r">'+f1(r.q)+'</td><td class="r">'+f1(r.r)+'</td><td class="r">'+sg(r.d,1)+'</td></tr>'});
+  setH('tab-sc',h+'</tbody>');
+  Array.prototype.forEach.call(el('tab-sc').querySelectorAll('th'),function(t){t.addEventListener('click',function(){var k=t.getAttribute('data-k');if(SORTK===k)SORTD=-SORTD;else{SORTK=k;SORTD=(k==='n'||k==='g'||k==='nil')?1:-1}dTab(l)})});
+  Array.prototype.forEach.call(el('tab-sc').querySelectorAll('a'),function(a){a.addEventListener('click',function(e){e.preventDefault();schedaScuola(a.getAttribute('data-id'),'scheda-c');el('scheda-c').scrollIntoView({block:'nearest'})})});
+}
+
+/* ---------- metodo e trappole ---------- */
+function metodo(){
+  var cm=R.confronto_mim_comune,g=function(a,o,t){return cm.filter(function(x){return x.anno===a&&x.ordine===o&&x.tipo===t})[0]};
+  setH('trappole',[
+   '<b>Cittadinanza non italiana non è nascita all’estero né origine.</b> Alle elementari almeno il '+el('c-56').textContent+'% degli alunni con cittadinanza non italiana è nato in Italia. Non si deve dedurre nulla su origine, lingua o religione.',
+   '<b>I dati si fermano al 2024/25.</b> Il 2025/26 non è ancora pubblicato né dal Comune né dal Ministero.',
+   '<b>Comune e Ministero non danno la stessa quota nelle scuole statali</b> (vedi sotto). Qui, per infanzia, primaria e medie, mostriamo il Comune: copre anche le private non paritarie e il quartiere di ogni scuola.',
+   '<b>Le scuole private non paritarie</b> (compresi alcuni istituti internazionali) ci sono nei dati del Comune, non in quelli del Ministero; hanno quote molto diverse dalle altre scuole e vanno lette a parte.',
+   '<b>L’infanzia ha un salto nel 2020/21</b> (da 30.342 a 27.896 bambini, −8%, in quasi tutte le scuole) che non rientra: non sappiamo se sia l’effetto del periodo Covid o un cambio di conteggio.',
+   '<b>Fusioni e trasferimenti</b> di scuole appaiono come chiusure e nuove aperture (il codice cambia): alcune forti variazioni di singole scuole sono di questo tipo.',
+   '<b>Gli alunni non sono i residenti</b>: sono contati dove sta la scuola. Più di un bambino su due va a scuola fuori dal proprio quartiere. Le superiori accolgono anche ragazzi che abitano fuori Milano.',
+   '<b>Il campo «non residenti a Milano» del 2024/25 è incompleto</b> e non si può confrontare con gli anni prima: non lo usiamo.',
+   '<b>I nati a Milano</b> sono i parti avvenuti in città (anche di non residenti): per questo il rapporto con la prima elementare scende (da 0,94 a 0,88), mentre quello con i residenti resta intorno a 0,94.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join(''));
+  setH('mim-testo','<p>Il Comune e il Ministero partono dagli stessi iscritti (per le statali alle elementari la differenza nel totale degli alunni è dello 0,2%), ma contano in modo diverso gli alunni con cittadinanza non italiana nelle scuole <b>statali</b>: alle elementari nel 2024 il Comune ne conta il '+f1(g(2024,'primaria','statale').comune)+'%, il Ministero il '+f1(g(2024,'primaria','statale').mim)+'%; alle medie '+f1(g(2024,'sec1','statale').comune)+'% contro '+f1(g(2024,'sec1','statale').mim)+'%. Nel 2018 la differenza era di circa un punto. Nelle scuole paritarie le due fonti coincidono. Non ne abbiamo trovato la causa (data della rilevazione? definizione?).</p>');
+  var rows=[];[2018,2024].forEach(function(a){['infanzia','primaria','sec1'].forEach(function(o,k){['statale','paritaria'].forEach(function(t){var x=g(a,o,t);if(x)rows.push([LIVN[LIVS.indexOf(o)]+', '+(t==='statale'?'statali':'paritarie')+' '+a,f1(x.comune)+'%',f1(x.mim)+'%',sg(x.differenza_pp,1)+' punti'])})})});
+  table('tab-mim',['Scuole','Comune','Ministero','Ministero − Comune'],rows);
+  setH('metodo-lista',[
+   '<b>Chi è nei dati.</b> Comune di Milano (ANASCO): per ogni scuola di infanzia, primaria e secondaria di primo grado, dal 2009/10, statale, comunale, privata paritaria e non paritaria. Ministero: anche le superiori, solo statali e paritarie, dal 2015/16 (infanzia dal 2017/18). La somma delle scuole del Comune coincide con la serie per municipio (48 confronti su 48).',
+   '<b>Quartiere (NIL).</b> Ogni scuola è assegnata al NIL in cui cade la sua posizione (88 NIL vigenti). Per le scuole del Comune il quartiere calcolato coincide con quello scritto nel file in 698 casi su 701. Le scuole del Ministero non hanno coordinate: le abbiamo ricavate dall’indirizzo (91,7% degli alunni 2024/25 ha un quartiere; circa 8% non è sulla mappa).',
+   '<b>Bambini residenti.</b> Comune di Milano, residenti per quartiere, età e cittadinanza al 31 dicembre (ds27): 3–5, 6–10, 11–13, 14–18 anni, secondo il tipo di scuola. La fascia è approssimata (alcuni bambini sono in anticipo o in ritardo).',
+   '<b>Indice di dissimilarità</b> calcolato su tutte le scuole di ogni livello per ciascun anno; «tra scuole pubbliche» solo statali e comunali.',
+   '<b>Che cosa non c’è.</b> Iscritti ai nidi e alla refezione (il Comune pubblica solo l’elenco dei nidi e le tariffe), dati 2025/26, risultati scolastici, la «capienza» delle scuole (il Comune non la spiega e non la usiamo).',
+   'Programmi: <code>scuole/scripts/build.py</code>, <code>analisi.py</code> e <code>pagina.py</code>; tutti i numeri sono nei file qui sotto.'
+  ].map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script></body></html>
