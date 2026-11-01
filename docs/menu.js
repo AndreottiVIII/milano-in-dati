@@ -60,7 +60,9 @@
     { path: 'eta/', label: 'Età e centenari' },
     { path: 'benessere/', label: 'Benessere ISTAT' },
     { path: 'statue/', label: 'Statue e monumenti' },
-    { path: 'incroci/', label: 'Incroci e incidenti' }
+    { path: 'incroci/', label: 'Incroci e incidenti' },
+    { path: 'amministratori/', label: 'Chi governa Milano' },
+    { path: 'botteghe/', label: 'Botteghe storiche' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

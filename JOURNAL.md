@@ -2590,3 +2590,18 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: microdati ISTAT/PoliS-Lombardia degli incidenti con lesioni 2010-2024 (CC BY 4.0; via in testo libero, solo mese), Comune ds175/ds177 (totali mensili 2001-2025), ds1438 zone a velocità limitata, Regione y7qm-hfqy (fasce orarie 2000-2011), OSM per gli incroci (ODbL). Nessuna fonte aperta con le coordinate dei singoli incidenti a Milano.
 - Numeri: 131.435 incidenti con lesioni, 676 morti in 15 anni; 46% agganciati a uno dei 5.382 incroci; il peggiore (viale Marche/viale Zara) ha lo 0,5% degli incidenti. Sorpresa: nessun incrocio "killer", ma i peggiori restano i peggiori (11 dei primi 20 del 2010-14 lo sono ancora nel 2020-24); pedoni 1 incidente su 7 ma circa 4 mortali su 10. Zone 30: nessun effetto chiaro (confronto).
 - Limiti dei dati: posizione ricostruita da indirizzi in testo; niente traffico (concentrazione, non rischio); solo mese dal 2012; data di avvio di Area C non confermata; in ds175 un campo vuoto dei morti vale 0 (corretto).
+
+## 50. Chi governa Milano
+
+- 2026-11-01 notte — Fase 1 e pagina (`amministratori/`, `docs/amministratori/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `amministratori/NOTE.md`.
+- Fonti: Ministero dell'Interno (DAIT), Anagrafe degli amministratori locali, fotografie al 31/12 2007-2025 e al 24/8/2026 (CC BY 4.0 secondo dati.gov.it e Comune; la pagina DAIT non scrive la licenza); Wikipedia/Wikidata per i 13 sindaci dal 1946. Prima del 2007 nessun file aperto delle persone.
+- Privacy: online solo aggregati e l'elenco in carica di Milano (nome, ruolo, lista, sesso, fascia d'età, titolo, categoria di professione); niente data o luogo di nascita.
+- Numeri: donne in consiglio 11,7% (2007) → 39,6% (2016) → 35,4% (2025); giunta da 1 donna su 16 (2010) a 6 su 11 (2011); una sola sindaca dal 1946 (Moratti). Sorpresa: le donne in consiglio triplicano, ma tra i sindaci delle dieci maggiori città no (3 nel 2007, 2 oggi).
+- Limiti dei dati: professione indicata sempre meno (98% nel 2006, 12 su 48 oggi), mostrata solo per il 2007; liste non raggruppate in schieramenti.
+
+## 51. Botteghe storiche
+
+- 2026-11-01 notte — Fase 1 e pagina (`botteghe/`, `docs/botteghe/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `botteghe/NOTE.md`.
+- Fonti: Albo Botteghe Storiche del Comune (ds290 2017, ds2858 2024 con stato attiva/cessata; CC BY), elenco regionale Negozi e Locali Storici (ds612 e dati.lombardia.it, CC0) con 10 edizioni ricostruite dalla Wayback Machine, OSM (solo sì/no in pagina), registri commerciali 2026. 760 attività uniche; solo insegne, mai ragioni sociali.
+- Controllo a campione su 40 schede: 24 su 25 con stato deciso coerenti; 35% "probabili" non verificabili (scritto in pagina). 18 unioni incerte (fonti a oltre 1 km) escluse da mappa e schede.
+- Numeri: 120 cessate su 625 nell'Albo 2024 ("cessata secondo l'Albo del Comune, data non indicata"); Duomo ha il 28% delle botteghe. Sorpresa: bar storici 1 chiuso su 45, panifici e pasticcerie 12 su 34; chiudono di più le nate nel dopoguerra.

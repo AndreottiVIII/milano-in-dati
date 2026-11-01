@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Botteghe storiche</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2;--cess:#c26a1b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid var(--cess);padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer;white-space:nowrap}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px;border-radius:50%;border:2px solid #444}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px} .card ul{margin:.2em 0;padding-left:1.1em} .card li{margin:.1em 0;font-size:.92rem}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) minmax(0,1fr) auto;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars.w .fill{background:var(--cess)} .bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} .bars .hl .nm{font-weight:700}
+.bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal}
+@media(max-width:560px){.bars .row{grid-template-columns:minmax(0,1fr) auto}.bars .row .tr{grid-column:1 / 3;order:3}}
+.grid2>div{min-width:0}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.pill{display:inline-block;font-size:.78rem;border:1px solid var(--cess);color:var(--warm);background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Le botteghe storiche di Milano: chi c&rsquo;è, da quanto, chi ha chiuso</h1>
+<p>Milano ha due elenchi ufficiali di negozi, bar e laboratori &laquo;storici&raquo;: l&rsquo;<b>Albo delle Botteghe Storiche del Comune</b> (almeno 50 anni di attività) e l&rsquo;elenco <b>Negozi e Locali Storici della Regione Lombardia</b> (almeno 40 anni). Li abbiamo messi insieme: sono <b id="n-tot">760</b> attività diverse. L&rsquo;Albo del Comune, nel 2024, segna anche quali sono <b>cessate</b>: da qui si vede chi chiude.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b>
+<ul>
+<li>&laquo;Cessata&raquo; è la parola dell&rsquo;Albo del Comune: <b>non dice quando</b> ha chiuso né se è chiusa o solo decaduta dall&rsquo;Albo. Qui la chiamiamo &laquo;cessata secondo l&rsquo;Albo del Comune (data non indicata)&raquo;.</li>
+<li>Per ogni bottega abbiamo cercato prove di presenza oggi (un punto con lo stesso nome su OpenStreetMap, una pratica con la stessa insegna nel registro commerciale del Comune). Dove non ci sono, lo stato è &laquo;probabile&raquo; e basta: <b>non è una verifica</b>. Su 40 schede controllate a caso l&rsquo;errore è piccolo dove c&rsquo;è una prova, ma un terzo non è confermabile (<a href="#limiti">limiti dei dati</a>).</li>
+</ul></div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Ogni punto è una bottega. Scegli lo stato, il tipo e gli anni di nascita; clicca un punto per la scheda.</p>
+<div class="ctl"><span class="sub">Stato:</span>
+<label class="ck"><input type="checkbox" class="st" value="A" checked> attiva con prova</label>
+<label class="ck"><input type="checkbox" class="st" value="P" checked> probabile</label>
+<label class="ck"><input type="checkbox" class="st" value="C" checked> cessata (Albo)</label>
+<label class="ck"><input type="checkbox" class="st" value="D" checked> dubbia</label></div>
+<div class="ctl"><label class="sub" for="f-tipo">Tipo:</label><select id="f-tipo" aria-label="Tipo di bottega"></select>
+<label class="sub" for="f-da">nate dal</label><select id="f-da" aria-label="Anno minimo"></select>
+<label class="sub" for="f-a">al</label><select id="f-a" aria-label="Anno massimo"></select>
+<span class="sub" id="f-n"></span></div>
+<div id="map" class="map" role="img" aria-label="Mappa delle botteghe storiche di Milano colorate per stato"></div>
+<div class="lgd"><span><i style="background:#00695c;border-color:#00695c"></i>attiva con prova</span><span><i style="background:#fff;border-color:#00695c"></i>probabile (solo negli elenchi)</span><span><i style="background:#c26a1b;border-color:#c26a1b"></i>cessata secondo l&rsquo;Albo</span><span><i style="background:#999;border-color:#555"></i>dubbia</span></div>
+<p class="src" id="map-src"></p>
+<div id="scheda" class="card"><span class="sub">Clicca un punto sulla mappa per la scheda: insegna, indirizzo, anno, stato e prove.</span></div>
+
+<h2 id="chiude">Chi chiude</h2>
+<p id="chiude-intro"></p>
+<h3>Per tipo di bottega</h3>
+<div class="bars w" id="b-tipo"></div>
+<p class="src">Albo delle Botteghe Storiche, edizione 2024, dicembre 2024 (Comune di Milano, ds2858, CC BY). Tipi con almeno 10 botteghe; la classificazione per tipo è nostra, fatta con parole chiave. La barra è la quota di &laquo;cessata&raquo;.</p>
+<p id="chiude-test"></p>
+<div class="grid2"><div>
+<h3>Per anno di nascita</h3>
+<div class="bars w" id="b-epoca"></div>
+</div><div>
+<h3>Centro e resto della città</h3>
+<div class="bars w" id="b-centro"></div>
+<p class="sub">Centro = Municipio 1.</p>
+</div></div>
+<p id="chiude-tempo"></p>
+
+<h2 id="anni">Da quanto ci sono</h2>
+<p id="anni-intro"></p>
+<div class="ch" id="ch-anni" role="img" aria-label="Numero di botteghe per decennio di fondazione"></div>
+<p class="src">Anno di inizio attività come dichiarato dai titolari negli elenchi; non è verificato e non vuol dire che il negozio sia rimasto lo stesso.</p>
+<h3>Le più antiche ancora aperte (o probabilmente aperte)</h3>
+<div class="scroll"><table id="t-vecchie"></table></div>
+<p id="anni-nota" class="sub"></p>
+
+<h2 id="dove">Dove sono</h2>
+<p id="dove-intro"></p>
+<div class="bars" id="b-nil"></div>
+<p class="src">Botteghe per quartiere (NIL, Nuclei di Identità Locale, Comune di Milano ds964 e ds634, CC BY). Il numero ogni 10.000 residenti usa i residenti del 2024 e non conta chi lavora o visita il quartiere.</p>
+
+<h2 id="liste">Comune e Regione: due elenchi che non coincidono</h2>
+<p id="liste-intro"></p>
+<div class="bars" id="b-liste"></div>
+<h3>Quanto è cresciuto l&rsquo;elenco della Regione, e il salto del 2019</h3>
+<div class="bars" id="b-reg"></div>
+<p id="liste-2019"></p>
+
+<h2 id="limiti">Come è stato fatto e limiti dei dati</h2>
+<div id="metodo"></div>
+
+<h2 id="file">I file</h2>
+<p>Tutti i file sono nella cartella <a href="data/">data/</a>. In <code>botteghe.csv</code> ci sono solo insegne, mai ragioni sociali o nomi dei titolari. La colonna &laquo;trovata su OpenStreetMap&raquo; deriva da OpenStreetMap (licenza ODbL, &copy; OpenStreetMap contributors): chi la riutilizza deve ripubblicarla con la stessa licenza. Il resto viene da dati del Comune (CC BY) e della Regione (CC0).</p>
+<ul class="m">
+<li><a href="data/botteghe.csv">botteghe.csv</a>: le 760 attività, con tipo, anni, indirizzo, quartiere, stato e prove (per 18 la posizione non è pubblicata)</li>
+<li><a href="data/botteghe.json">botteghe.json</a>: i punti della mappa (742)</li>
+<li><a href="data/chi_chiude_per_tipo.csv">chi_chiude_per_tipo.csv</a> e <a href="data/chi_chiude_per_epoca.csv">chi_chiude_per_epoca.csv</a></li>
+<li><a href="data/elenco_regione_per_edizione.csv">elenco_regione_per_edizione.csv</a> e <a href="data/elenco_regione_uscite_entrate.csv">elenco_regione_uscite_entrate.csv</a></li>
+<li><a href="data/campione_controllo_40.csv">campione_controllo_40.csv</a>: le 40 schede controllate a caso e il giudizio</li>
+<li><a href="data/riepilogo.json">riepilogo.json</a>: tutti i numeri di questa pagina</li>
+</ul>
+
+<footer>
+<p><b>Fonti e licenze</b> (scaricate il 1 novembre 2026). Albo delle Botteghe Storiche, 2017 (ds290) e 2024 (ds2858): Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, CC BY. Elenco Negozi e Locali Storici (ds612 e dataset della Regione su dati.lombardia.it): Regione Lombardia, CC0; le edizioni dal 2019 al 2026 sono ricostruite da copie archiviate su web.archive.org (Wayback Machine). Registro commerciale 2026 (ds49, ds58, ds59, ds250), civici (ds634), quartieri NIL (ds964), residenti 2024: Comune di Milano, CC BY. OpenStreetMap, estratto Geofabrik del 31 ottobre 2026: &copy; OpenStreetMap contributors, ODbL. Per la cerimonia 2019 abbiamo letto i soli nomi di un PDF del sito del Comune (copia Wayback), non ripubblicato.</p>
+<p>Altre pagine: <a href="../ristoranti/">Cosa si mangia a Milano</a> &middot; <a href="../quartieri-che-cambiano/">Quartieri che cambiano</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var R=null,P=null,TIPI={};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function f0(x){return Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return Number(x).toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function nilN(t){var x=String(t).toLowerCase().replace(/([aeiou])'(?=\s|$)/g,function(m,v){return {a:'à',e:'è',i:'ì',o:'ò',u:'ù'}[v]});return x.replace(/(^|[\s\-(.])([a-zà-ù])/g,function(m,a,b){return a+b.toUpperCase()}).replace(/ Pta /,' Porta ').replace(/^Pta /,'Porta ')}
+function pc(n,d){return f1(100*n/d)+'%'}
+function bars(id,rows,max){
+  var m=max||Math.max.apply(null,rows.map(function(r){return r.v}));
+  setH(id,rows.map(function(r){return '<div class="row'+(r.hl?' hl':'')+'"><span class="nm">'+r.nm+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="fill" style="width:'+Math.max(0,100*r.v/m)+'%"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+function dd(s){var a=s.split('-'),m=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];return parseInt(a[2],10)+' '+m[parseInt(a[1],10)]+' '+a[0]}
+Promise.all([J('data/riepilogo.json'),J('data/botteghe.json')]).then(function(a){
+  R=a[0];P=a[1].punti;TIPI=a[1].tipi;
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){sorpresa();mappa();chiude();anni();dove();liste();metodo();var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(anni,200)})}
+
+function sorpresa(){
+  el('n-tot').textContent=f0(R.tot);
+  var h='<p><b>Nell&rsquo;Albo del Comune '+R.albo24_cessata+' botteghe su '+R.in_albo24+' ('+f1(R.albo24_cessata_pct)+'%) sono segnate &laquo;cessata&raquo;.</b> Ma non chiudono tutte allo stesso modo.</p>';
+  h+='<p><b>Bar e caffè storici: '+R.bar_cess+' su '+R.bar_n+'.</b> Panifici e pasticcerie: <b>'+R.pan_past_cess+' su '+R.pan_past_n+'</b>, uno su tre. Farmacie: '+R.farm_cess+' su '+R.farm_n+' (troppo poche per dire che sia una regola).</p>';
+  var e=R.per_epoca;function ep(n){return e.filter(function(x){return x.epoca===n})[0]}
+  h+='<p>Chiudono di più le botteghe nate nel dopoguerra che quelle più vecchie: tra quelle nate nel 1945&ndash;59 il <b>'+f0(ep('1945-59').pct)+'%</b> è cessato, tra quelle nate fino al 1919 il '+f0(ep('fino al 1919').pct)+'%.</p>';
+  h+='<p>Un quarto di quelle dell&rsquo;Albo 2017 non c&rsquo;è più: <b>'+R.albo17_cessata_2024+' su '+R.albo17_n+'</b> sono cessate a dicembre 2024 e altre '+R.albo17_assenti_2024+' non sono più nel file.</p>';
+  h+='<p class="src">Albo delle Botteghe Storiche del Comune di Milano, edizioni 2017 e 2024 (ds290 e ds2858, CC BY). Senza data di chiusura: i numeri dicono quante, non quando.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null;
+var STY={A:{c:'#00695c',f:'#00695c',fo:.85},P:{c:'#00695c',f:'#ffffff',fo:.9},C:{c:'#c26a1b',f:'#c26a1b',fo:.85},D:{c:'#555',f:'#999',fo:.85}};
+var STT={A:'attiva, con una prova indipendente',P:'probabile: sta negli elenchi, senza prova indipendente',C:'cessata secondo l’Albo del Comune (data non indicata)',D:'dubbia: le fonti si contraddicono o mancano'};
+function mappa(){
+  var tp=el('f-tipo');var tc={};P.forEach(function(p){tc[p.t]=(tc[p.t]||0)+1});
+  var ks=Object.keys(tc).sort(function(a,b){return tc[b]-tc[a]});
+  tp.innerHTML='<option value="">tutti i tipi</option>'+ks.map(function(k){return '<option value="'+k+'">'+esc(TIPI[k])+' ('+tc[k]+')</option>'}).join('');
+  var anni=P.map(function(p){return p.a});var mn=Math.min.apply(null,anni);
+  var opt=[1284,1800,1850,1900,1910,1920,1930,1940,1950,1960,1970,1980];
+  el('f-da').innerHTML=opt.map(function(y){return '<option value="'+y+'">'+(y===1284?'qualsiasi':y)+'</option>'}).join('');
+  el('f-a').innerHTML=[1899,1909,1919,1929,1939,1949,1959,1969,1979,1986,3000].map(function(y){return '<option value="'+y+'"'+(y===3000?' selected':'')+'>'+(y===3000?'oggi':y)+'</option>'}).join('');
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.layerGroup().addTo(MAP);
+  disegna();
+  [].forEach.call(document.querySelectorAll('.st'),function(c){c.addEventListener('change',disegna)});
+  ['f-tipo','f-da','f-a'].forEach(function(i){el(i).addEventListener('change',disegna)});
+  setH('map-src','Mappa &copy; OpenStreetMap contributors. Botteghe: Albo del Comune (CC BY) ed elenco della Regione (CC0). Le '+R.incerte_escluse+' botteghe la cui posizione è incerta (le fonti la danno a più di 1 km di distanza) non sono sulla mappa e non hanno scheda: sono contate nei totali.');
+}
+function disegna(){
+  var on={};[].forEach.call(document.querySelectorAll('.st'),function(c){if(c.checked)on[c.value]=1});
+  var t=el('f-tipo').value,da=+el('f-da').value,a=+el('f-a').value,n=0;
+  LAY.clearLayers();
+  P.forEach(function(p){
+    if(!on[p.s]||(t&&p.t!==t)||p.a<da||p.a>a)return;
+    var s=STY[p.s];n++;
+    var m=L.circleMarker([p.y,p.x],{radius:5.5,color:s.c,weight:2,fillColor:s.f,fillOpacity:s.fo});
+    m.bindTooltip(esc(p.n)+' ('+p.a+')',{sticky:true});
+    m.on('click',function(){scheda(p)});
+    m.addTo(LAY);
+  });
+  el('f-n').textContent=n+' botteghe mostrate';
+}
+function scheda(p){
+  var pr=[];
+  if(p.al==='a')pr.push('Albo del Comune, dicembre 2024: attiva');
+  else if(p.al==='c')pr.push('Albo del Comune, dicembre 2024: cessata (data non indicata)');
+  else if(p.al==='v')pr.push('Albo del Comune 2017: sì; non più nell’Albo 2024');
+  else pr.push('Albo del Comune: non iscritta');
+  pr.push('Elenco della Regione, ottobre 2026: '+(p.r?'presente':'non presente'));
+  pr.push('Registro commerciale del Comune 2026: '+({f:'pratica con insegna simile sul posto',d:'pratica dello stesso settore sul posto (prova debole)',n:'nessuna pratica compatibile'})[p.g]);
+  pr.push('OpenStreetMap (31 ottobre 2026): '+(p.oc?'punto segnato come chiuso':(p.o?'punto con lo stesso nome':'nessun punto con nome simile')));
+  setH('scheda','<h3>'+esc(p.n)+'</h3><table><tbody><tr><th>Indirizzo</th><td>'+esc(p.ind)+(p.q?' &middot; '+esc(p.q):'')+'</td></tr><tr><th>Tipo</th><td>'+esc(TIPI[p.t])+'</td></tr><tr><th>Anno di inizio</th><td>'+p.a+' (dichiarato)</td></tr><tr><th>Stato</th><td><b>'+STT[p.s]+'</b></td></tr></tbody></table><ul>'+pr.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'+(p.k?'':'<p class="sub">La posizione sul punto va controllata (non coincide con il civico dello stradario del Comune).</p>'));
+}
+
+/* ---------- chi chiude ---------- */
+function chiude(){
+  setH('chiude-intro','Questi numeri vengono solo dall&rsquo;Albo del Comune, che nel 2024 ha la colonna &laquo;stato&raquo;: <b>'+R.albo24_attiva+' attive e '+R.albo24_cessata+' cessate</b> su '+R.in_albo24+'. Per le botteghe che sono solo nell&rsquo;elenco della Regione non abbiamo un dato simile.');
+  var rows=R.per_tipo.filter(function(x){return x.n>=10}).sort(function(a,b){return b.pct-a.pct}).map(function(x){
+    return {nm:esc(x.tipo),v:x.pct,txt:x.cessate+' su '+x.n+' &middot; '+f0(x.pct)+'%',hl:['bar_caffe','panificio','pasticceria_gelateria','farmacia'].indexOf(x.settore)>=0};
+  });
+  bars('b-tipo',rows,60);
+  var t='<p>Per i bar la differenza con il resto è probabilmente reale (test statistico: p = '+R.p_bar.toString().replace('.',',')+'); per panifici e pasticcerie insieme anche (p = '+R.p_pan_past.toString().replace('.',',')+'); per le farmacie, con 12 casi, non si può concludere (p = '+R.p_farmacie.toString().replace('.',',')+'). Un p piccolo vuol dire che è improbabile che la differenza sia solo fortuna.</p>';
+  setH('chiude-test',t);
+  bars('b-epoca',R.per_epoca.map(function(x){return {nm:x.epoca,v:x.pct,txt:x.cessate+' su '+x.n+' &middot; '+f0(x.pct)+'%'}}),60);
+  bars('b-centro',[{nm:'Municipio 1 (centro)',v:100*R.centro.cessate/R.centro.n,txt:R.centro.cessate+' su '+R.centro.n+' &middot; '+pc(R.centro.cessate,R.centro.n)},{nm:'Altri municipi',v:100*R.resto.cessate/R.resto.n,txt:R.resto.cessate+' su '+R.resto.n+' &middot; '+pc(R.resto.cessate,R.resto.n)}],60);
+  setH('chiude-tempo','Il confronto tra le due edizioni dell&rsquo;Albo dice quanto tempo ci mette una bottega a uscire: delle '+R.albo17_n+' del 2017, '+R.albo17_attiva_2024+' sono ancora attive a dicembre 2024, '+R.albo17_cessata_2024+' sono cessate e '+R.albo17_assenti_2024+' non ci sono più nel file. Delle '+R.albo24_nuove+' entrate dopo il 2017 ne sono già cessate '+R.albo24_nuove_cessate+'. Le nate nel 1945&ndash;59 sono quelle che reggono meno (p = '+R.p_45_59.toString().replace('.',',')+'): arrivano oggi ai 65&ndash;80 anni di attività, il tempo in cui i fondatori e i figli smettono. È una lettura, il dato non lo dice.');
+}
+
+/* ---------- anni ---------- */
+function anni(){
+  var H=R.decenni,W=400,Ht=190,pl=8,pb=26,pt=18,bw=(W-pl*2)/H.length,mx=Math.max.apply(null,H.map(function(h){return h.n}));
+  var s='<svg viewBox="0 0 '+W+' '+Ht+'" preserveAspectRatio="xMidYMid meet">';
+  H.forEach(function(h,i){
+    var x=pl+i*bw,hh=(Ht-pb-pt)*h.n/mx,y=Ht-pb-hh;
+    s+='<rect x="'+(x+3)+'" y="'+y+'" width="'+(bw-6)+'" height="'+hh+'" fill="#00695c"><title>'+(h.dec===1800?'prima del 1900':'anni '+h.dec)+': '+h.n+' botteghe</title></rect>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle">'+h.n+'</text>';
+    s+='<text class="mu" x="'+(x+bw/2)+'" y="'+(Ht-10)+'" text-anchor="middle">'+(h.dec===1800?'&lt;1900':h.dec)+'</text>';
+  });
+  el('ch-anni').innerHTML=s+'</svg>';
+  setH('anni-intro','Le botteghe storiche non sono così antiche: l&rsquo;anno di inizio mediano è il <b>'+Math.round(R.anno_mediano)+'</b>. Solo '+R.prima_1900+' su '+R.tot+' sono nate prima del 1900; <b>'+f0(R.dal_1945_al_1975)+'</b> ('+pc(R.dal_1945_al_1975,R.tot)+') tra il 1945 e il 1975, gli anni della ricostruzione e del boom. '+R.cento_anni+' hanno cent&rsquo;anni o più.');
+  var v=R.piu_antiche_aperte;
+  setH('t-vecchie','<thead><tr><th>Insegna</th><th class="r">Anno</th><th>Tipo</th><th>Quartiere</th></tr></thead><tbody>'+v.map(function(r){return '<tr><td>'+esc(r.n)+(r.st==='P'?' <span class="pill">probabile</span>':'')+'</td><td class="r">'+r.a+'</td><td>'+esc(r.tipo)+'</td><td>'+esc(nilN(r.nil))+'</td></tr>'}).join('')+'</tbody>');
+  var c=R.piu_antiche_cessate;
+  setH('anni-nota','La più antica è l&rsquo;<b>Antica Trattoria Bagutto, 1284</b>: è l&rsquo;anno che il titolare ha dichiarato, non un documento. Tra le cessate per l&rsquo;Albo la più antica è '+esc(c[0].n)+' ('+c[0].a+'). &laquo;Probabile&raquo; = sta ancora negli elenchi e non c&rsquo;è prova contraria, ma nessuna prova indipendente.');
+}
+
+/* ---------- dove ---------- */
+function dove(){
+  setH('dove-intro','Il <b>Municipio 1 ha '+R.mun1+' botteghe su '+R.tot+' ('+pc(R.mun1,R.tot)+')</b>, il solo quartiere <b>Duomo ne ha '+R.nil_duomo+' ('+pc(R.nil_duomo,R.tot)+')</b>: '+f0(R.nil_top[0].p10)+' ogni 10.000 residenti, contro '+f1(R.per_10000_citta)+' nella media della città. I primi 5 quartieri ne hanno il '+f0(R.top5_quota)+'%; '+R.nil_zero+' quartieri su '+R.nil_tot+' non ne hanno nessuna (periferie e parchi).');
+  var T=R.nil_top.slice(0,8);
+  bars('b-nil',T.map(function(x){return {nm:esc(nilN(x.nil)),sub:f1(x.p10)+' ogni 10.000 residenti',v:x.n,txt:x.n+' &middot; '+pc(x.n,R.tot)}}));
+}
+
+/* ---------- liste ---------- */
+function liste(){
+  setH('liste-intro','Il Comune e la Regione usano criteri diversi (50 anni contro 40) e non si sono mai allineati: <b>solo '+R.in_entrambi+' attività sono in tutti e due</b>. '+R.solo_albo+' sono solo nell&rsquo;Albo del Comune, '+R.solo_reg+' solo nell&rsquo;elenco della Regione'+(R.in_nessuna_lista_recente?' ('+R.in_nessuna_lista_recente+' non sono in nessuno dei due elenchi recenti, ma erano in uno precedente)':'')+'. Se chiedi &laquo;quante botteghe storiche ha Milano&raquo;, la risposta dipende da quale elenco guardi: '+R.in_albo24+' (Albo 2024), '+R.in_reg26+' (Regione, ottobre 2026), '+R.tot+' insieme.');
+  bars('b-liste',[{nm:'In entrambi gli elenchi',v:R.in_entrambi,txt:R.in_entrambi},{nm:'Solo Albo del Comune (50+ anni)',v:R.solo_albo,txt:R.solo_albo},{nm:'Solo elenco della Regione (40+ anni)',v:R.solo_reg,txt:R.solo_reg}],R.in_entrambi);
+  bars('b-reg',R.edizioni_regione.map(function(e){return {nm:dd(e.data_edizione),v:e.righe,txt:e.righe,hl:e.data_edizione==='2019-08-23'}}),600);
+  setH('liste-2019','L&rsquo;elenco della Regione a Milano passa da '+R.edizioni_regione[0].righe+' righe (23 luglio 2019) a '+R.edizioni_regione[1].righe+' (23 agosto): <b>'+R.regione_uscite_2019+' botteghe escono insieme</b> e non tornano più. Delle '+R.regione_uscite_2026+' che oggi non ci sono più, '+R.regione_uscite_stato_albo24.cessata+' sono cessate per l&rsquo;Albo del Comune, '+R.regione_uscite_stato_albo24.attiva+' risultano attive e nessuna ha un punto con lo stesso nome su OpenStreetMap. <b>Attenzione:</b> il confronto è tra due esportazioni diverse del portale (un CSV del 23 luglio e un file JSON del 23 agosto 2019) e il motivo non è scritto: può essere una pulizia, ma una parte potrebbe essere un effetto dell&rsquo;esportazione. Per contro, l&rsquo;elenco 2026 contiene ancora <b>'+R.regione26_cessata_albo+'</b> attività che il Comune dà per cessate: l&rsquo;elenco della Regione non si ripulisce abbastanza.');
+}
+
+/* ---------- metodo e limiti ---------- */
+function metodo(){
+  var C=R.campione;
+  var h='<p><b>Come.</b> Abbiamo scaricato i due elenchi e le copie archiviate (Wayback Machine) delle loro edizioni: '+f0(R.righe_edizioni)+' righe in 12 edizioni, unite in '+R.tot+' attività con regole automatiche (stesso numero della Regione; stesso civico e nome simile; stesso nome, anno di inizio e distanza). Per ognuna abbiamo cercato prove di presenza oggi: lo stato dell&rsquo;Albo 2024, l&rsquo;elenco 2026, un punto con lo stesso nome su OpenStreetMap (nome, tipo compatibile e meno di 90 m), una pratica con insegna simile nel registro commerciale del Comune (meno di 40 m). Gli indirizzi sono controllati con i numeri civici del Comune: '+R.coord_ok50+' punti su '+R.tot+' stanno a meno di 50 m dal civico.</p>';
+  h+='<p><b>Quanto sbaglia lo stato: controllo su 40 schede a caso</b> (estratte con un seme fisso, poi lette una per una: nome, prove, indirizzo). Le <b>'+C.decise+'</b> con uno stato deciso (attiva con prova o cessata): <b>'+C.regge+' reggono</b>, '+C.dubbio+' è dubbia (un punto OpenStreetMap con lo stesso nome ma modificato l&rsquo;ultima volta nel 2022). Una è ambigua (cessata per l&rsquo;Albo ma il registro 2026 ha la stessa insegna). <b>'+C.non_confermabile+' su 40 ('+pc(C.non_confermabile,40)+') sono &laquo;probabile&raquo; e non si possono confermare</b>: qui l&rsquo;errore non è misurabile. Indirizzi: '+C.coord_ok+' su 40 a meno di 50 m dal civico, '+C.coord_scarto+' con scarto maggiore, '+C.coord_non_trovato+' con civico non nello stradario. <b>Il controllo usa le stesse fonti, senza visite sul posto né telefonate</b>: misura se le prove sono coerenti, non la verità. Con 25 casi decisi l&rsquo;errore vero potrebbe stare, con un margine ampio, tra lo 0,1% e il 20%. Le 40 schede e il giudizio sono nel file <a href="data/campione_controllo_40.csv">campione_controllo_40.csv</a>.</p>';
+  h+='<p><b>Limiti dei dati.</b></p><ul class="m">';
+  h+='<li><b>&laquo;Cessata&raquo; non è definita e non ha data.</b> L&rsquo;Albo prevede la decadenza quando vengono meno i requisiti: può voler dire che l&rsquo;attività è cambiata, non solo che ha chiuso. Tuttavia OpenStreetMap trova il '+f0(R.osm_attive_pct)+'% delle attive e solo il '+f0(R.osm_cessate_pct)+'% delle cessate: l&rsquo;etichetta sembra coerente con la realtà.</li>';
+  h+='<li><b>OpenStreetMap non è completo</b>: trova meno della metà delle attività che il Comune dà per attive, quindi &laquo;nessun punto&raquo; non vuol dire chiusa. Il registro commerciale mostra pratiche dello stesso settore anche sugli indirizzi di attività cessate (cambi di gestione): lo usiamo solo come prova debole.</li>';
+  h+='<li><b>Indirizzi sbagliati nell&rsquo;Albo 2024.</b> Il Comune ha rifatto le posizioni su uno stradario e in '+R.albo2024_indirizzo_discordante+' casi la via è cambiata (per esempio &laquo;Piazza Mercanti 17&raquo; è diventata &laquo;Via Luigi Mercantini 17&raquo;). Dove un&rsquo;altra fonte ha l&rsquo;indirizzo giusto, abbiamo usato quello. Le <b>'+R.incerte_escluse+' attività</b> per cui le fonti restano a più di 1 km di distanza non hanno punto né scheda: sono contate nei totali, ma non mostrate come un negozio solo.</li>';
+  h+='<li><b>Nomi e anni.</b> Nel file del 2024 alcuni nomi hanno le lettere accentate rovinate; l&rsquo;anno di inizio lo dichiara il titolare e in 45 casi le fonti discordano di un anno o due. Mostriamo solo insegne, mai ragioni sociali o nomi dei titolari.</li>';
+  h+='<li><b>Due elenchi, due criteri</b> (sezione sopra). Nell&rsquo;elenco della Regione Milano ha il '+f0(R.lombardia.quota)+'% delle attività storiche della Lombardia, ma solo '+R.lombardia.artigiane_mi+' delle '+R.lombardia.artigiane_lomb+' botteghe artigiane: non vuol dire che a Milano ci siano pochi artigiani, ma pochi riconosciuti.</li>';
+  h+='<li><b>Il tipo di bottega</b> (bar, panificio, farmacia&hellip;) è una nostra classificazione automatica per parole chiave: qualche attività può essere nel gruppo sbagliato; i tipi con pochi casi (farmacie: 12) non permettono conclusioni.</li>';
+  h+='<li><b>Cambi di gestione:</b> un&rsquo;insegna può continuare con altri titolari; gli elenchi non lo dicono.</li>';
+  h+='</ul>';
+  setH('metodo',h);
+}
+})();
+</script></body></html>
