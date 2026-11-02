@@ -90,7 +90,8 @@
     { path: 'musei/', label: 'Musei' },
     { path: 'aeroporti/', label: 'Aeroporti' },
     { path: 'bici/', label: 'BikeMi e bici' },
-    { path: 'medici-farmacie/', label: 'Medici e farmacie' }
+    { path: 'medici-farmacie/', label: 'Medici e farmacie' },
+    { path: 'consiglio/', label: 'Consiglio comunale' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

@@ -2800,3 +2800,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-02 — Fase 1 e pagina (`medici-farmacie/`, `docs/medici-farmacie/`). Dettagli in `medici-farmacie/NOTE.md`.
 - Fonti: Comune ds234/ds235 medici e pediatri (CC BY-NC: sito non commerciale, in pagina solo conteggi aggregati e fasce d'età con fonte, mai nomi, date di nascita o codici), Ministero della Salute elenco farmacie con date dal 2005, tempi a piedi dal filone 15 minuti, PDF ATS 2022 degli ambiti carenti (con data). Nessun dato aperto sui pazienti per medico.
 - Numeri: 677 medici di famiglia titolari, il 27% ha 65 anni o più (190 avranno 70 anni entro il 2031); 322 incaricati provvisori, 291 a tre indirizzi di servizio (esclusi dai conteggi per quartiere); "sulla carta" 708 medici × 1.500 coprono l'85% dei residenti di 14+ anni; pediatri forse incompleti (118); farmacie 423 (2005) → 427, residenti per farmacia da 3.091 a 3.277; mediana 3,9 minuti a piedi da una farmacia.
+
+## 80. Il consiglio comunale: presenze
+
+- 2026-11-02 — Fase 1 e pagina (`consiglio/`, `docs/consiglio/`). Dettagli in `consiglio/NOTE.md`.
+- Fonti: Comune ds743, ds1643 (fino a maggio 2026), ds1914 (CC BY). I dati aperti non hanno il voto dei singoli consiglieri né i titoli delle delibere: niente analisi di chi vota con chi (detto in pagina).
+- Numeri: presenze alle sedute 86% ma partecipazione alle votazioni 63% nel 2021-26 (89% e 66% nel 2016-21); il divario va da 15 punti (PD) a 41 (FdI e Forza Italia); minimo a metà mandato. Donne e uomini: differenza piccola, scritta con cautela (congedi non distinguibili).
+- Limiti dei dati: ds1914 incompleto (4 righe contro 10 ingressi e 10 uscite visti); cumulati che scendono; refusi nei nomi corretti; il sindaco escluso dai confronti; presenza non vuol dire lavoro.

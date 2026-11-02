@@ -91,6 +91,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 77 | Aeroporti | Online |
 | 78 | BikeMi e bici | Online |
 | 79 | Medici e farmacie | Online |
+| 80 | Consiglio comunale | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
