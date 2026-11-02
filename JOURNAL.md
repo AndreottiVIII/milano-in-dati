@@ -2729,3 +2729,5 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-02 — Fase 1 e pagina piccola (`targhe/`, `docs/targhe/`), scelta di Davide dopo il verdetto: non esiste un archivio aperto. L'unico archivio vero, Pietre della Memoria (ANMIG: 496 voci per Milano, 326 targhe), è "tutti i diritti riservati": citato con link, non usato; le sue pagine scaricate restano in `raw/pdm` e non vanno pubblicate. Il Comune non pubblica nulla.
 - Fonti usate: OSM (ODbL), Wikidata (CC0), 10 foto di Wikimedia Commons (solo titolo e coordinate), lapidi del filone statue: 228 targhe, una su otto delle circa 1.800 stimate. Sesso solo da Wikidata P21: 3 donne su 80 persone (3,8%).
 - Limiti dei dati: soggetto mancante nel 62%; anno di posa noto per 13 targhe; categorie da regole semplici; centro sovra-rappresentato.
+- 2026-11-02 — **Davide: "ANMIG mi autorizza"** a usare i dati di Pietre della Memoria (pietredellamemoria.it) per la pagina targhe. Autorizzazione dichiarata da Davide in chat, nessun documento scritto nel progetto. Si usano solo campi fattuali con citazione; niente foto dei volontari. Fase 2 delle targhe avviata.
+
