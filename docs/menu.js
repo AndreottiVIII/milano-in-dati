@@ -85,7 +85,8 @@
     { path: 'reati-citta/', label: 'Reati e sicurezza in città' },
     { path: 'nascite/', label: 'Nascite e mamme' },
     { path: 'tribunale/', label: 'Il tribunale di Milano' },
-    { path: 'auto/', label: 'Le auto dei milanesi' }
+    { path: 'auto/', label: 'Le auto dei milanesi' },
+    { path: 'carceri/', label: 'Le carceri di Milano' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

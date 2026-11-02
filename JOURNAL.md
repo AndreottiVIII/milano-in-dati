@@ -2767,3 +2767,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: ACI Autoritratto 2019-2025 (CC BY 4.0), Comune ds529, ds1081, ds530, ds545 (CC BY), ISTAT. Totali ACI uguali al Comune 2019-2025.
 - Trappole del dato (per il JOURNAL): **ds530 del Comune non ha le righe Euro 0 nel 2007-2023** e il totale non coincide con ds529 (usati ds1081 + ACI; da segnalare al Comune); **ds545 è un elenco di veicoli uno per uno con dati personali**: usato solo per conteggi aggregati, mai pubblicato; picco di radiazioni 2024-25 (60.765 contro 28.487 nel 2022) non spiegato.
 - Numeri: 519 auto ogni 1.000 abitanti (584 nel 2007, minimo 491 nel 2019); tra i 10 grandi comuni solo Genova ne ha meno (Torino e Firenze gonfiate dal noleggio a lungo termine); moto +47%; in provincia diesel dal 33% al 21%, ibride dal 2,1% al 13,8%; 68.968 auto Euro 0 rimaste; il calo delle Euro 0-3 non accelera dopo Area B. SUV non misurabili.
+
+## 75. Le carceri di Milano
+
+- 2026-11-02 — Fase 1 e pagina (`carceri/`, `docs/carceri/`). Dettagli in `carceri/NOTE.md`.
+- Fonte: Ministero della Giustizia (giustizia.it), tabelle mensili per istituto gen 2019-set 2026, schede dei 3 istituti, PDF del minorile Beccaria; termini: uso non commerciale con citazione, nessuna licenza aperta. Antigone e Garante non usati per i numeri.
+- Numeri (30/9/2026): San Vittore 1.219 detenuti per 748 posti, 163 ogni 100 (massimo della serie; circa 229 sui posti davvero disponibili); Bollate da 101 a 127; Opera stabile a 148; Italia 129. Beccaria da 33 presenze medie (2020) a 72 (2025). Nessuna eccezione milanese: 131 carceri italiane su 172 sopra il 100%.
+- Limiti dei dati: posizione giuridica solo per regione; morti e suicidi solo nazionali; capienza del Ministero senza togliere i posti non disponibili; salto di dicembre 2025 (San Vittore −285, Bollate +178) senza causa nei dati (frase resa neutra dal coordinatore).
