@@ -73,7 +73,8 @@
     { path: 'case-vuote/', label: 'Le case vuote' },
     { path: 'fondi-quartieri/', label: 'Soldi per i quartieri popolari' },
     { path: 'quartiere-ideale/', label: 'Il mio quartiere ideale' },
-    { path: 'divisa/', label: 'Quanto è divisa Milano' }
+    { path: 'divisa/', label: 'Quanto è divisa Milano' },
+    { path: 'sfratti/', label: 'Gli sfratti' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati – Gli sfratti</title>
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer;white-space:nowrap}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{max-width:100%} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.defs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 14px;margin:.6em 0} @media(max-width:760px){.defs{grid-template-columns:1fr}} .defs div{border:1px solid var(--line);padding:6px 10px;font-size:.92rem} .defs b{display:block}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Gli sfratti a Milano</h1>
+<p>Quando un inquilino non paga l&rsquo;affitto, o il contratto finisce, o il proprietario rivuole la casa, un giudice pu&ograve; emettere un <b>ordine di sfratto</b>. Se l&rsquo;inquilino non esce, il proprietario chiede all&rsquo;<b>ufficiale giudiziario</b> di eseguirlo. Il Ministero dell&rsquo;Interno conta ogni anno questi passaggi, provincia per provincia, dal 2001. Qui li guardiamo per Milano, nel tempo e rispetto a Roma, Torino, Napoli, Bologna, Firenze e all&rsquo;Italia, sempre in rapporto al numero di famiglie.</p>
+
+<div class="defs">
+<div><b>1. Ordini di sfratto emessi</b>Il giudice ordina il rilascio della casa. Il Ministero li divide per motivo: morosit&agrave; (affitto non pagato), finita locazione (contratto scaduto), necessit&agrave; del locatore (il proprietario ha bisogno della casa).</div>
+<div><b>2. Richieste di esecuzione</b>Il proprietario chiede all&rsquo;ufficiale giudiziario di far eseguire lo sfratto. &Egrave; un conteggio di richieste, non di famiglie.</div>
+<div><b>3. Sfratti eseguiti</b>Sfratti eseguiti &laquo;con l&rsquo;intervento dell&rsquo;ufficiale giudiziario&raquo;. Il Ministero non scrive &laquo;con la forza pubblica&raquo; e il dato non dice se c&rsquo;era la polizia.</div>
+</div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> I numeri sono del Ministero dell&rsquo;Interno e per Milano <b>valgono solo a met&agrave;</b>: gli ordini di sfratto sono abbastanza stabili e si possono confrontare; le richieste di esecuzione e gli sfratti eseguiti cambiano in modo cos&igrave; brusco da non essere affidabili (vedi <a href="#esecuzioni">la sezione sulle esecuzioni</a>). Il 2020 di Milano &egrave; ricostruito, non letto. Tutti i dettagli sono in <a href="#limiti">i limiti dei dati</a>.</div>
+
+<h2 id="serie">Quanti sfratti, dal 2001 a oggi</h2>
+<div id="serie-testo"></div>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="tasso" class="on">Ogni 1.000 famiglie</button><button type="button" data-m="num">Numero di ordini emessi</button>
+<label class="ck"><input type="checkbox" id="ck-comune"> aggiungi il Comune di Milano (dal 2013)</label></div>
+<div class="lgd" id="lg-serie"></div>
+<div class="ch" id="ch-serie" role="img" aria-label="Grafico: ordini di sfratto emessi nella provincia di Milano e in Italia dal 2001 al 2025"></div>
+<p class="src" id="src-serie"></p>
+
+<h2 id="motivi">Perch&eacute; si viene sfrattati</h2>
+<div id="motivi-testo"></div>
+<div class="ctl"><label class="sub" for="sel-mot">Territorio:</label><select id="sel-mot" aria-label="Scegli il territorio"></select>
+<button type="button" data-mm="num" class="on">Numeri</button><button type="button" data-mm="pct">Quote %</button></div>
+<div class="lgd" id="lg-mot"></div>
+<div class="ch" id="ch-mot" role="img" aria-label="Grafico a barre: ordini di sfratto per motivo"></div>
+<p class="src" id="src-mot"></p>
+
+<h2 id="esecuzioni">Richieste ed esecuzioni: perch&eacute; Milano non si pu&ograve; leggere</h2>
+<div id="esec-testo"></div>
+<div class="grid2"><div><h3>Provincia di Milano (con Monza e Brianza)</h3><div class="lgd" id="lg-esm"></div><div class="ch" id="ch-esm" role="img" aria-label="Grafico: ordini, richieste ed esecuzioni, provincia di Milano"></div></div>
+<div><h3>Italia</h3><div class="lgd" id="lg-esi"></div><div class="ch" id="ch-esi" role="img" aria-label="Grafico: ordini, richieste ed esecuzioni, Italia"></div></div></div>
+<p class="src">Numeri assoluti per anno. Cerchi vuoti: anni con dati incompleti secondo il Ministero. Le scale dei due grafici sono diverse.</p>
+<div class="scroll"><table id="tab-esec"></table></div>
+<p class="src">Richieste per ogni ordine emesso e sfratti eseguiti ogni 100 ordini emessi, calcolati da noi sui numeri del Ministero. Gli eseguiti di un anno non sono per forza gli ordini dello stesso anno.</p>
+
+<h2 id="confronto">Milano contro le altre grandi citt&agrave;</h2>
+<div id="conf-testo"></div>
+<div class="ctl" id="ck-citta"></div>
+<div class="ch" id="ch-citta" role="img" aria-label="Grafico: ordini di sfratto ogni 1.000 famiglie, sei province e Italia"></div>
+<p class="src" id="src-citta"></p>
+<div class="scroll"><table id="tab-citta"></table></div>
+<p class="src" id="src-tab-citta"></p>
+<h3>Solo i comuni capoluogo</h3>
+<div id="comuni-testo"></div>
+<div class="scroll"><table id="tab-comuni"></table></div>
+<p class="src">Ordini emessi nel solo comune capoluogo (il Ministero distingue &laquo;capoluogo&raquo; e &laquo;resto della provincia&raquo; solo per gli ordini emessi), diviso per le famiglie residenti nel comune. Famiglie: ISTAT.</p>
+
+<h2 id="affitti">E gli affitti?</h2>
+<div id="aff-testo"></div>
+<div class="lgd" id="lg-aff"></div>
+<div class="ch" id="ch-aff" role="img" aria-label="Grafico: ordini di sfratto per famiglia e affitti a Milano, 2013 = 100"></div>
+<p class="src" id="src-aff"></p>
+<div class="warn"><b>Un confronto, non una prova.</b> Qui mettiamo vicini due andamenti. Non misuriamo che cosa li lega: gli sfratti dipendono anche da tribunali, leggi, aiuti pubblici, contratti, lavoro e redditi. Per l&rsquo;affitto in rapporto al reddito vedi <a href="../costo-vita/">Quanto costa vivere a Milano</a>, <a href="../permettersi/">Chi può permettersi dove</a>.</div>
+
+<h2 id="limiti">Che cosa non dice questo dato</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p id="file-lista"></p>
+
+<h2 id="altro">Per capire il contesto</h2>
+<ul class="m">
+<li><a href="../case-popolari/">Case popolari vuote</a>: quante sono, quante vuote, quante domande.</li>
+<li><a href="../costo-vita/">Quanto costa vivere a Milano</a>: prezzi, affitti e redditi.</li>
+</ul>
+
+<footer id="fonti">
+<p><b>Fonti e licenze.</b> Sfratti: Ministero dell&rsquo;Interno &ndash; Ufficio centrale di statistica, indagine INT 00004 &laquo;Procedure di rilascio di immobili ad uso abitativo&raquo;, <a href="https://ucs.interno.gov.it/it/le-statistiche/le-indagini/territorio/procedure-di-rilascio-di-immobili-ad-uso-abitativo">pagina dell&rsquo;indagine</a>; file Excel 2013&ndash;2025 e rapporti PDF 2004&ndash;2013 scaricati il 1 novembre 2026. Licenza: le <a href="https://ucs.interno.gov.it/it/note-legali">note legali del sito</a> (aggiornate il 27/1/2025) non indicano una licenza aperta: consentono di riprodurre e distribuire i documenti citando la fonte, e chiedono un permesso scritto per l&rsquo;uso a fini di lucro. Qui li usiamo senza scopo di lucro, citando la fonte, e pubblichiamo solo le tabelle riassunte, non i file originali.</p>
+<p>Famiglie: ISTAT, <a href="https://esploradati.istat.it/">esploradati</a> &ndash; censimenti della popolazione e delle abitazioni 2001 e 2011 (file DICA_FAM_CARATT) e censimento permanente 2018&ndash;2024 (DCSS_FAM_POP); licenza Creative Commons Attribuzione 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>), scaricati il 1 novembre 2026. Affitti: Agenzia delle Entrate (OMI, CC BY 4.0) e ISTAT con il Comune di Milano (CC BY), dal filone <a href="../costo-vita/">costo-vita</a>.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a> (cartella <code>sfratti/</code>).</p>
+</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var D=null;
+var ACC='#00695c',GRY='#555',WARM='#c26a1b';
+var MIL='Milano (provincia con Monza e Brianza)';
+var COL={'Milano':ACC,'Italia':GRY,'Roma':'#c26a1b','Napoli':'#1565c0','Torino':'#7b1fa2','Bologna':'#2e7d32','Firenze':'#8d6e63'};
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)} function f2(x){return nf(x,2)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?0:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function lgdBox(items){return items.map(function(it){return '<span><i style="background:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){if(!(r>0))return 1;var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+var RD=[];
+function byYear(u){var o={};(D.serie[u]||[]).forEach(function(r){o[r.a]=r});return o}
+function flagged(r){return !!(r&&r.nota&&(r.nota.indexOf('incompleti')>=0||r.nota.indexOf('derivato')>=0))}
+
+Promise.all([J('data/riepilogo.json')]).then(function(a){
+  D=a[0];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();serie();motivi();esecuzioni();confronto();affitti();limiti();metodo();file();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- grafico a linee ---------- */
+/* o: {box, series:[{name,color,dash,pts:[{x,y,flag,note}]}], x0,x1, yfmt, yl, h, bands:[{x0,x1,label}], vlines:[{x,label}], ymin} */
+function lines(o){
+  var box=o.box;box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:46,r:12,t:18,b:30};
+  var ys=[];o.series.forEach(function(s){s.pts.forEach(function(p){if(p.y!=null)ys.push(p.y)})});
+  var y0=o.ymin!=null?o.ymin:0,y1=Math.max.apply(null,ys.concat([0.001]));
+  var sy=niceStep((y1-y0)/5);y1=Math.ceil(y1/sy)*sy;
+  var x0=o.x0,x1=o.x1,pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  (o.bands||[]).forEach(function(b){s+='<rect x="'+X(b.x0)+'" y="'+m.t+'" width="'+(X(b.x1)-X(b.x0))+'" height="'+ph+'" fill="#f1e3cf" fill-opacity=".75"/><text x="'+(X(b.x0)+3)+'" y="'+(m.t+11)+'" style="fill:#8a4a10;font-size:10px">'+b.label+'</text>'});
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yfmt(v)+'</text>';
+  var step=W<520?4:2,lastx=-99;
+  for(v=x0;v<=x1;v++){ if(((v-x0)%step)!==0&&v!==x1)continue; var xx=X(v); if(xx-lastx<30&&v!==x1)continue; lastx=xx; s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+v+'</text>'}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  (o.vlines||[]).forEach(function(l){s+='<line x1="'+X(l.x)+'" x2="'+X(l.x)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#999" stroke-dasharray="2 3"/><text x="'+(X(l.x)+3)+'" y="'+(m.t+ph-5)+'" style="fill:#666;font-size:10px">'+l.label+'</text>'});
+  s+='<text class="mu" x="'+m.l+'" y="'+(m.t-6)+'" text-anchor="start">'+o.yl+'</text>';
+  o.series.forEach(function(se){
+    var d='',pen=false;
+    se.pts.forEach(function(p){ if(p.y==null){pen=false;return} d+=(pen?'L':'M')+X(p.x).toFixed(1)+','+Y(p.y).toFixed(1); pen=true });
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+' stroke-linejoin="round"/>';
+    se.pts.forEach(function(p){ if(p.y==null)return;
+      s+= p.flag? '<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3.6" fill="#fff" stroke="'+se.color+'" stroke-width="1.6"/>' : '<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="2.2" fill="'+se.color+'"/>'});
+  });
+  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k;
+    var yr=Math.round(x0+(px-m.l)/pw*(x1-x0));if(yr<x0)yr=x0;if(yr>x1)yr=x1;
+    var h='<b>'+yr+'</b>';
+    o.series.forEach(function(se){var p=null;se.pts.forEach(function(q){if(q.x===yr)p=q}); if(p&&p.y!=null){h+='<br><span style="color:'+se.color+'">&#9632;</span> '+esc(se.name)+': <b>'+o.yfmt(p.y,true)+'</b>'+(p.note?' <span style="color:#8a4a10">('+esc(p.note)+')</span>':'')}});
+    cur.setAttribute('x1',X(yr));cur.setAttribute('x2',X(yr));cur.style.display='';
+    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=X(yr)/k+10;if(left+tw>r.width)left=X(yr)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
+  function hide(){tip.style.display='none';cur.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function pts(u,key,x0,x1){var by=byYear(u),o=[];for(var a=x0;a<=x1;a++){var r=by[a];o.push({x:a,y:r&&r[key]!=null?r[key]:null,flag:flagged(r),note:r&&r.nota?(r.nota.indexOf('derivato')>=0?'ricostruito dal file 2021':(r.nota.indexOf('incompleti')>=0?'dati incompleti':'')):''})}return o}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var N=D.numeri;
+  var h='<p><b>A Milano gli ordini di sfratto, in rapporto alle famiglie, sono calati di due terzi in undici anni, e Milano è passata da sopra a sotto la media italiana.</b> Nella provincia di Milano (con Monza e Brianza) nel 2014 c&rsquo;erano <b>'+f1(N.tasso_milano_2014)+'</b> ordini di sfratto ogni 1.000 famiglie (Italia: '+f1(N.tasso_italia_2014)+'); nel 2025 sono <b>'+f2(N.tasso_milano_2025)+'</b> (Italia: '+f2(N.tasso_italia_2025)+'). Milano &egrave; scesa del '+f0(Math.abs(N.calo_tasso_milano_2014_2025_pct))+'%, l&rsquo;Italia del '+f0(Math.abs(N.calo_tasso_italia_2014_2025_pct))+'%. Dal '+N.milano_sotto_italia_di_seguito_dal+' Milano sta sotto la media nazionale; tra il 2010 e il 2016 era quasi sempre sopra (non nel 2012).</p>';
+  h+='<p>Nello stesso periodo gli affitti sono saliti: i nuovi contratti stimati dall&rsquo;Agenzia delle Entrate '+sgp(N.omi_var_2013_2024_pct)+' tra il 2013 e il 2024, i canoni dei contratti in corso '+sgp(N.istat_affitti_var_2013_2025_pct)+' tra il 2013 e il 2025 (<a href="#affitti">vedi</a>). Non diciamo che le due cose siano collegate: sono due numeri messi vicini.</p>';
+  h+='<p><b>L&rsquo;altra sorpresa &egrave; un avvertimento:</b> le richieste di esecuzione di Milano vanno da '+f0(N.richieste_milano_min[1])+' (nel '+N.richieste_milano_min[0]+') a '+f0(N.richieste_milano_max[1])+' (nel '+N.richieste_milano_max[0]+'). Nel 2019 la provincia di Milano ha il '+f0(N.quota_milano_richieste_italia_2019_pct)+'% delle richieste d&rsquo;Italia ma solo il '+f1(N.quota_milano_emessi_italia_2019_pct).replace('.',',')+'% degli ordini. Sono numeri che non si possono usare per dire se gli sfratti eseguiti crescono o calano (<a href="#esecuzioni">perch&eacute;</a>).</p>';
+  h+='<p class="src">Ministero dell&rsquo;Interno, indagine INT 00004 (file 2013&ndash;2025 e rapporti 2004&ndash;2013); famiglie ISTAT, interpolate negli anni tra un censimento e l&rsquo;altro (<a href="#limiti">limiti</a>). Provincia di Milano con Monza e Brianza: stesso perimetro per tutti gli anni (il Ministero le separa solo dal 2013).</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- serie ---------- */
+var SERIE_M='tasso';
+function serie(){
+  var N=D.numeri;
+  var h='<p>Quanti ordini di sfratto sono stati emessi ogni anno. Per confrontare anni e citt&agrave; diverse conviene dividere per il numero di famiglie: <b>ogni 1.000 famiglie</b>. La striscia gialla &egrave; il periodo in cui per legge le esecuzioni degli sfratti sono state sospese per l&rsquo;epidemia (dal marzo 2020 al 31 dicembre 2021; vedi i <a href="#limiti">limiti</a>): i dati sono annuali, quindi la striscia &egrave; approssimata.</p>';
+  h+='<p>In Italia gli ordini emessi passano da '+f0(D.numeri.italia_emessi_2019)+' nel 2019 a '+f0(N.italia_emessi_2020)+' nel 2020 ('+sgp(N.italia_var_emessi_2020_pct)+'); le richieste di esecuzione calano del '+f0(Math.abs(N.italia_var_richieste_2020_pct))+'% e gli sfratti eseguiti dell&rsquo;'+f0(Math.abs(N.italia_var_eseguiti_2020_pct))+'%. Poi il rimbalzo: nel 2022 le richieste sono quasi '+f0(N.italia_richieste_2022_su_2021)+' volte quelle del 2021 ('+f0(N.italia_richieste_2022)+' contro '+f0(N.italia_richieste_2021)+'). Per Milano il 2020 &egrave; ricostruito: '+f0(N.milano_emessi_2020_derivato)+' ordini nella provincia, '+sgp(N.milano_var_emessi_2020_pct_derivata)+' sul 2019.</p>';
+  h+='<p>Un salto che non sappiamo spiegare: tra il 2009 e il 2010 gli ordini nella provincia di Milano passano da '+f0(N.emessi_milano_2009)+' a '+f0(N.emessi_milano_2010)+' ('+sgp(N.salto_milano_2009_2010_pct)+'), mentre in Italia '+sgp(N.salto_italia_2009_2010_pct,1).replace('.',',')+'. Il Ministero segnala dati incompleti per Milano in pi&ugrave; anni prima del 2010: i valori bassi di Milano nel 2003&ndash;2009 vanno presi con cautela.</p>';
+  setH('serie-testo',h);
+  document.querySelectorAll('.ctl button[data-m="tasso"],.ctl button[data-m="num"]').forEach(function(b){b.addEventListener('click',function(){SERIE_M=b.getAttribute('data-m');drawSerie()})});
+  el('ck-comune').addEventListener('change',drawSerie);
+  RD.push(drawSerie);drawSerie();
+  setH('src-serie','Provvedimenti di sfratto emessi (somma dei tre motivi), Ministero dell&rsquo;Interno; famiglie ISTAT. Cerchi vuoti: anni con dati incompleti secondo il Ministero o (2020) ricostruiti. Linea punteggiata: salto 2009&rarr;2010.');
+}
+function drawSerie(){
+  var tasso=SERIE_M==='tasso',com=el('ck-comune').checked;
+  document.querySelectorAll('.ctl button[data-m="tasso"],.ctl button[data-m="num"]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-m')===SERIE_M)});
+  var k=tasso?'r_em':'em',se=[{name:'Provincia di Milano (con Monza e Brianza)',color:ACC,pts:pts(MIL,k,2001,2025)}];
+  var lg=[{t:'Provincia di Milano (con Monza e Brianza)',color:ACC}];
+  if(tasso){se.push({name:'Italia',color:GRY,dash:true,pts:pts('Italia',k,2001,2025)});lg.push({t:'Italia',color:GRY,dash:true})}
+  if(com){se.push({name:'Comune di Milano (solo capoluogo)',color:'#1565c0',pts:pts('Comune di Milano',k,2001,2025)});lg.push({t:'Comune di Milano (solo capoluogo)',color:'#1565c0'})}
+  setH('lg-serie',lgdLine(lg)+(tasso?'':'<span class="sub">In Italia gli ordini sono 37.000&ndash;77.000 l&rsquo;anno: nella vista dei numeri non entrano.</span>'));
+  lines({box:el('ch-serie'),series:se,x0:2001,x1:2025,h:320,yl:tasso?'ordini ogni 1.000 famiglie':'ordini di sfratto emessi',ymin:0,
+    yfmt:function(v,t){return tasso?(t?f2(v):f1(v)):f0(v)},bands:[{x0:2019.5,x1:2021.5,label:'blocco'}],vlines:[{x:2009.5,label:'2009→2010'}]});
+}
+
+/* ---------- motivi ---------- */
+var MOT_U='Milano (provincia con Monza e Brianza)',MOT_M='num';
+function motivi(){
+  var N=D.numeri;
+  var h='<p>Il Ministero divide gli ordini in tre motivi. La <b>morosit&agrave;</b> (affitto non pagato) &egrave; di gran lunga il pi&ugrave; frequente. Nel comune di Milano era il '+f0(N.mor_pct_comune_milano_2013)+'% degli ordini nel 2013 ed &egrave; il '+f0(N.mor_pct_comune_milano_2025)+'% nel 2025. In Italia la quota passa dall&rsquo;'+f0(N.mor_pct_italia_2012)+'% del 2012 al '+f0(N.mor_pct_italia_2025)+'% del 2025: gli ordini per morosit&agrave; sono '+sgp(N.mor_italia_var_2019_2025_pct)+' rispetto al 2019, mentre quelli per <b>finita locazione</b> (contratto scaduto) '+sgp(N.fin_italia_var_2019_2025_pct)+' (da '+f0(N.fin_italia_2019)+' a '+f0(N.fin_italia_2025)+'). La <b>necessit&agrave; del locatore</b> &egrave; piccola: '+f0(N.nec_italia_2025)+' ordini in tutta Italia nel 2025.</p><p>I dati non dicono perch&eacute; la finita locazione cresce: &egrave; un fatto da tenere d&rsquo;occhio, non una spiegazione. Prima del 2010 la quota di morosit&agrave; a Milano era molto pi&ugrave; bassa (tra il 32 e il 63%) di quella italiana: &egrave; uno dei motivi per cui i numeri milanesi prima del 2010 sembrano diversi (<a href="#limiti">limiti</a>).</p>';
+  setH('motivi-testo',h);
+  var sel=el('sel-mot'),opts=[[MIL,'Provincia di Milano (con Monza e Brianza), 2001–2025'],['Comune di Milano','Comune di Milano (solo capoluogo), 2013–2025'],['Italia','Italia, 2001–2025'],['Roma','Provincia di Roma'],['Napoli','Provincia di Napoli'],['Torino','Provincia di Torino'],['Bologna','Provincia di Bologna'],['Firenze','Provincia di Firenze']];
+  sel.innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>'}).join('');
+  sel.addEventListener('change',function(){MOT_U=sel.value;drawMot()});
+  document.querySelectorAll('.ctl button[data-mm]').forEach(function(b){b.addEventListener('click',function(){MOT_M=b.getAttribute('data-mm');drawMot()})});
+  RD.push(drawMot);drawMot();
+  setH('src-mot','Provvedimenti di sfratto emessi per motivo, Ministero dell&rsquo;Interno. Il 2020 della provincia di Milano non ha il dettaglio per motivo (file originale non scaricabile). Per le province dal 2013 si sommano capoluogo e resto della provincia; prima, i totali dei rapporti.');
+}
+function drawMot(){
+  document.querySelectorAll('.ctl button[data-mm]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-mm')===MOT_M)});
+  var by=byYear(MOT_U),yrs=[];for(var a=2001;a<=2025;a++)if(by[a])yrs.push(a);
+  if(MOT_U==='Comune di Milano'){yrs=yrs.filter(function(a){return a>=2013})}
+  var st=[{k:'mor',name:'Morosità / altra causa',color:ACC},{k:'fin',name:'Finita locazione',color:'#8d6e63'},{k:'nec',name:'Necessità del locatore',color:WARM}];
+  setH('lg-mot',lgdBox(st.map(function(s){return {t:s.name,color:s.color}})));
+  bars({box:el('ch-mot'),years:yrs,by:by,stacks:st,pct:MOT_M==='pct',h:300});
+}
+function bars(o){
+  var box=o.box;box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:46,r:8,t:14,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,n=o.years.length;
+  var tot=o.years.map(function(a){var r=o.by[a];var sum=0,ok=false;o.stacks.forEach(function(s){if(r[s.k]!=null){sum+=r[s.k];ok=true}});return ok?sum:null});
+  var max=o.pct?100:Math.max.apply(null,tot.filter(function(x){return x!=null}).concat([1]));
+  var sy=o.pct?20:niceStep(max/5),y1=o.pct?100:Math.ceil(max/sy)*sy;
+  function Y(v){return m.t+ph-v/y1*ph}
+  var bw=pw/n,s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.pct?v+'%':f0(v))+'</text>';
+  var step=W<520?4:2;
+  o.years.forEach(function(a,i){var x=m.l+i*bw,r=o.by[a],acc=0,t=tot[i];
+    if(t!=null&&t>0){o.stacks.forEach(function(se){var val=r[se.k];if(val==null)return;var hv=o.pct?100*val/t:val;if(hv<=0)return;s+='<rect x="'+(x+bw*.12).toFixed(1)+'" y="'+Y(acc+hv).toFixed(1)+'" width="'+(bw*.76).toFixed(1)+'" height="'+(Y(acc)-Y(acc+hv)).toFixed(1)+'" fill="'+se.color+'"/>';acc+=hv})}
+    else s+='<text class="mu" x="'+(x+bw/2)+'" y="'+(m.t+ph-4)+'" text-anchor="middle" style="font-size:9px">n.d.</text>';
+    if(i%step===0||i===n-1)s+='<text class="mu" x="'+(x+bw/2)+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+a+'</text>'});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,i=Math.floor((px-m.l)/bw);if(i<0||i>=n){tip.style.display='none';return}
+    var a=o.years[i],rr=o.by[a],h='<b>'+a+'</b>'+(rr.nota?' <span style="color:#8a4a10">('+(rr.nota.indexOf('derivato')>=0?'ricostruito':'dati incompleti')+')</span>':'');
+    o.stacks.forEach(function(se){if(rr[se.k]!=null)h+='<br><span style="color:'+se.color+'">&#9632;</span> '+se.name+': <b>'+f0(rr[se.k])+'</b>'+(tot[i]?' ('+f0(100*rr[se.k]/tot[i])+'%)':'')});
+    if(rr.em!=null)h+='<br>Totale: <b>'+f0(rr.em)+'</b>';
+    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=(m.l+(i+.5)*bw)/k+10;if(left+tw>r.width)left=(m.l+(i+.5)*bw)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
+  function hide(){tip.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- esecuzioni ---------- */
+function esecuzioni(){
+  var N=D.numeri;
+  var h='<p>Dopo l&rsquo;ordine, il proprietario pu&ograve; chiedere l&rsquo;esecuzione all&rsquo;ufficiale giudiziario; gli sfratti eseguiti sono quelli in cui l&rsquo;ufficiale giudiziario &egrave; intervenuto. Per l&rsquo;Italia le tre curve si muovono insieme: richieste e eseguiti crollano nel 2020&ndash;2021 (il blocco) e risalgono nel 2022. Per la provincia di Milano no.</p>';
+  h+='<p>Le richieste di Milano passano da '+f0(N.richieste_milano_2015)+' nel 2015 a '+f0(N.richieste_milano_2020)+' nel 2020, poi '+f0(N.richieste_milano_2023)+' nel 2023, '+f0(N.richieste_milano_2024)+' nel 2024 e '+f0(N.richieste_milano_2025)+' nel 2025. Nel 2019, per ogni ordine emesso, a Milano ci sono '+f1(N.richieste_su_emessi_milano_2019)+' richieste, in Italia '+f1(N.richieste_su_emessi_italia_2019)+'. Il Ministero non spiega la differenza: non sappiamo se a Milano la stessa pratica venga contata pi&ugrave; volte, se cambino i criteri tra un anno e l&rsquo;altro o se i dati arrivino a pezzi dai vari uffici. Per questo <b>per Milano non traiamo conclusioni sulle esecuzioni</b>.</p>';
+  setH('esec-testo',h);
+  [['esm',MIL,'Provincia di Milano'],['esi','Italia','Italia']].forEach(function(c){
+    var lg=[{t:'Ordini emessi',color:ACC},{t:'Richieste di esecuzione',color:'#1565c0'},{t:'Sfratti eseguiti',color:WARM}];
+    setH('lg-'+c[0],lgdLine(lg));
+    function d(){lines({box:el('ch-'+c[0]),series:[{name:'Ordini emessi',color:ACC,pts:pts(c[1],'em',2001,2025)},{name:'Richieste di esecuzione',color:'#1565c0',pts:pts(c[1],'ric',2001,2025)},{name:'Sfratti eseguiti',color:WARM,pts:pts(c[1],'ese',2001,2025)}],
+      x0:2001,x1:2025,h:260,ymin:0,yl:'numero per anno',yfmt:function(v){return f0(v)},bands:[{x0:2019.5,x1:2021.5,label:'blocco'}]})}
+    RD.push(d);d();
+  });
+  var rows=[],ys=[2005,2010,2015,2019,2022,2024,2025],bm=byYear(MIL),bi=byYear('Italia');
+  ys.forEach(function(a){var m=bm[a],i=bi[a];rows.push([a,f1(m.ric/m.em),f1(i.ric/i.em),f0(100*m.ese/m.em),f0(100*i.ese/i.em)])});
+  table('tab-esec',['Anno','Richieste per ordine, Milano','Richieste per ordine, Italia','Eseguiti ogni 100 ordini, Milano','Eseguiti ogni 100 ordini, Italia'],rows);
+}
+
+/* ---------- confronto citta' ---------- */
+var CIT=['Milano','Roma','Napoli','Torino','Bologna','Firenze','Italia'],ON={};
+function ord(a){var v=CIT.slice(0,6).map(function(c){return [c,byYear(uCit(c))[a].r_em]}).sort(function(x,y){return y[1]-x[1]}),i=0;v.forEach(function(x,k){if(x[0]==='Milano')i=k+1});return ['','prima','seconda','terza','quarta','quinta','sesta'][i]}
+function uCit(c){return c==='Milano'?MIL:c}
+function confronto(){
+  var N=D.numeri,t=N.tassi_2025,o=N.ordine_2025.map(function(u){return u===MIL?'Milano':u});
+  var h='<p>Nel 2025, ogni 1.000 famiglie, gli ordini di sfratto sono: '+o.map(function(c){return c+' <b>'+f2(t[uCit(c)])+'</b>'}).join(', ')+'; Italia <b>'+f2(t.Italia)+'</b>. Milano &egrave; '+ord(2025)+' su sei (dall&rsquo;alto), sotto la media italiana; nel 2019 era '+ord(2019)+', nel 2014 '+ord(2014)+'. La classifica cambia molto da un anno all&rsquo;altro, quindi conviene guardare la linea e non un solo anno.</p>';
+  h+='<p>Se si divide per le sole famiglie <b>in affitto</b> (quelle del censimento 2011, perch&eacute; gli sfratti riguardano solo gli affitti), Roma &egrave; fuori scala: <b>'+f1(N.tassi_2025_su_affittuari_2011.Roma)+'</b> ordini ogni 1.000 famiglie in affitto contro '+f1(N.tassi_2025_su_affittuari_2011[MIL])+' di Milano, perch&eacute; a Roma le famiglie in affitto erano solo il '+f0(N.quota_affitto_2011_pct.Roma)+'% (Milano '+f0(N.quota_affitto_2011_pct[MIL])+'%, Napoli '+f0(N.quota_affitto_2011_pct.Napoli)+'%). &Egrave; un calcolo approssimato (l&rsquo;affitto &egrave; cambiato dal 2011), buono solo per il confronto tra citt&agrave;.</p>';
+  setH('conf-testo',h);
+  setH('ck-citta','<span class="sub">Mostra:</span>'+CIT.map(function(c){ON[c]=true;return '<label class="ck"><input type="checkbox" data-c="'+c+'" checked> <span style="color:'+COL[c]+'">&#9632;</span> '+c+'</label>'}).join(''));
+  document.querySelectorAll('#ck-citta input').forEach(function(i){i.addEventListener('change',function(){ON[i.getAttribute('data-c')]=i.checked;drawCit()})});
+  RD.push(drawCit);drawCit();
+  setH('src-citta','Ordini di sfratto emessi nella provincia (ogni 1.000 famiglie della provincia), Ministero dell&rsquo;Interno e ISTAT. Milano comprende Monza e Brianza. Cerchi vuoti: dati incompleti secondo il Ministero. Il 2020 delle province &egrave; ricostruito dal file 2021.');
+  var cols=['Anno'].concat(CIT),rows=[];
+  [2014,2019,2023,2025].forEach(function(a){rows.push([a].concat(CIT.map(function(c){var r=byYear(uCit(c))[a];return r?f2(r.r_em):''})))});
+  rows.push(['Media 2022–2025'].concat(CIT.map(function(c){return f2(N.tassi_media_2022_2025[uCit(c)])})));
+  table('tab-citta',cols,rows);
+  setH('src-tab-citta','Ordini emessi ogni 1.000 famiglie.');
+  var hc='<p>Guardando solo il comune di Milano (non tutta la provincia), gli ordini emessi sono '+f0(N.emessi_comune_milano_2013)+' nel 2013 ('+f1(N.tasso_comune_milano_2013)+' ogni 1.000 famiglie) e '+f0(N.emessi_comune_milano_2025)+' nel 2025 ('+f1(N.tasso_comune_milano_2025)+'). Napoli e Torino hanno valori molto pi&ugrave; alti. La divisione tra capoluogo e resto della provincia cambia da un anno all&rsquo;altro (nel 2013 il capoluogo era il 68% degli ordini della provincia di Milano senza Monza, nel 2019 il 48%), quindi anche questo dato va letto con cautela.</p>';
+  setH('comuni-testo',hc);
+  var cc=['Comune di Milano','Comune di Roma','Comune di Napoli','Comune di Torino','Comune di Bologna','Comune di Firenze'],rows2=[];
+  cc.forEach(function(u){rows2.push([u.replace('Comune di ',''),f0(N.emessi_comuni_2025[u]),f2(N.tassi_comuni_2019[u]),f2(N.tassi_comuni_2025[u])])});
+  table('tab-comuni',['Comune','Ordini emessi 2025','Ogni 1.000 famiglie, 2019','Ogni 1.000 famiglie, 2025'],rows2);
+}
+function drawCit(){
+  var se=[];
+  CIT.forEach(function(c){if(!ON[c])return;se.push({name:c==='Milano'?'Milano (provincia)':c,color:COL[c],dash:c==='Italia',w:c==='Milano'?3:1.8,pts:pts(uCit(c),'r_em',2001,2025)})});
+  lines({box:el('ch-citta'),series:se,x0:2001,x1:2025,h:340,ymin:0,yl:'ordini ogni 1.000 famiglie',yfmt:function(v,t){return t?f2(v):f1(v)},bands:[{x0:2019.5,x1:2021.5,label:'blocco'}]});
+}
+
+/* ---------- affitti ---------- */
+function affitti(){
+  var N=D.numeri,A=D.affitti,by=byYear(MIL),b13=by[2013].r_em,o13=A.filter(function(x){return x.a===2013})[0];
+  var h='<p>Per mettere accanto sfratti e affitti portiamo tutto a 100 nel 2013. Gli sfratti sono quelli della provincia di Milano ogni 1.000 famiglie ('+f1(N.tasso_milano_2013)+' nel 2013, '+f2(N.tasso_milano_2025)+' nel 2025, '+sgp(N.calo_tasso_milano_2013_2025_pct)+'). Gli affitti sono di due tipi, che dicono cose diverse: il <b>canone dei contratti in corso</b> (indice ISTAT per Milano, '+sgp(N.istat_affitti_var_2013_2025_pct)+' tra 2013 e 2025) e il <b>prezzo dei nuovi contratti</b> (stima dalle quotazioni OMI dell&rsquo;Agenzia delle Entrate, mediana delle zone di Milano, '+sgp(N.omi_var_2013_2024_pct)+' tra 2013 e 2024, ultimo anno disponibile). Chi sta gi&agrave; in affitto vede il primo; chi cerca casa vede il secondo.</p>';
+  setH('aff-testo',h);
+  var lg=[{t:'Ordini di sfratto ogni 1.000 famiglie (provincia di Milano)',color:ACC},{t:'Canoni in corso (ISTAT)',color:'#1565c0'},{t:'Nuovi contratti (OMI, stima)',color:WARM}];
+  setH('lg-aff',lgdLine(lg));
+  function d(){
+    var sf=[],si=[],so=[];
+    for(var a=2013;a<=2025;a++){var r=by[a],x=A.filter(function(q){return q.a===a})[0];
+      sf.push({x:a,y:r?100*r.r_em/b13:null,flag:flagged(r),note:r&&r.nota?(r.nota.indexOf('derivato')>=0?'ricostruito':'dati incompleti'):''});
+      si.push({x:a,y:x?100*x.istat/o13.istat:null,note:x&&x.mesi<12?'media di '+x.mesi+' mesi':''});
+      so.push({x:a,y:x&&x.omi!=null?100*x.omi/o13.omi:null})}
+    lines({box:el('ch-aff'),series:[{name:'Ordini di sfratto per famiglia',color:ACC,pts:sf},{name:'Canoni in corso (ISTAT)',color:'#1565c0',pts:si},{name:'Nuovi contratti (OMI)',color:WARM,pts:so}],
+      x0:2013,x1:2025,h:300,ymin:0,yl:'2013 = 100',yfmt:function(v,t){return t?f0(v):f0(v)},bands:[{x0:2019.5,x1:2021.5,label:'blocco'}]});
+  }
+  RD.push(d);d();
+  setH('src-aff','Sfratti: Ministero dell&rsquo;Interno e ISTAT. Canoni in corso: indice ISTAT dei prezzi al consumo, voce &laquo;affitti&raquo; di Milano, media annua (2024: 11 mesi). Nuovi contratti: Agenzia delle Entrate, OMI, abitazioni civili, mediana delle zone di Milano (filone <a href="../costo-vita/">costo-vita</a>); nel 2025 non c&rsquo;&egrave; ancora la media annua.');
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var N=D.numeri,L=[
+   '<b>Che cosa si conta.</b> Ordini di rilascio di immobili <b>ad uso abitativo</b> legati a un contratto di affitto, richieste all&rsquo;ufficiale giudiziario e sfratti eseguiti. Non sono famiglie, non sono persone, non sono sgomberi di case occupate senza contratto. Il Ministero non dice se la stessa famiglia possa comparire in pi&ugrave; righe.',
+   '<b>&laquo;Eseguiti&raquo; non vuol dire &laquo;con la polizia&raquo;.</b> Il Ministero scrive &laquo;con l&rsquo;intervento dell&rsquo;ufficiale giudiziario&raquo;. Il dato non distingue se sia servita la forza pubblica.',
+   '<b>Provincia, non solo citt&agrave;.</b> Richieste ed eseguiti esistono solo per la provincia. Gli ordini emessi hanno anche il dato del &laquo;capoluogo&raquo;, ma per Milano lo troviamo compilato solo dal 2013 (nei rapporti 2004&ndash;2012 il capoluogo risulta a zero). Il confronto tra citt&agrave; usa quindi le province.',
+   '<b>Monza e Brianza.</b> Fino al 2012 la provincia di Milano del Ministero comprende Monza e Brianza; dal 2013 le due sono separate. Per avere un perimetro unico abbiamo sommato Milano e Monza e Brianza dal 2013 (le famiglie sono sommate allo stesso modo). Il dato di Monza ha una regola diversa: il resto della provincia comprende il capoluogo e la &laquo;necessit&agrave; del locatore&raquo; &egrave; dentro la morosit&agrave;.',
+   '<b>Dati incompleti.</b> Il Ministero segnala che i dati della provincia di Milano sono incompleti nel '+N.nota_incompleti_milano.join(', ')+'. In quegli anni il numero vero &egrave; pi&ugrave; alto di quello scritto, di quanto non si sa. Nei grafici sono cerchi vuoti. Per alcune delle altre province vale lo stesso (tooltip).',
+   '<b>Il salto 2009&rarr;2010.</b> Gli ordini di Milano passano da '+f0(N.emessi_milano_2009)+' a '+f0(N.emessi_milano_2010)+' ('+sgp(N.salto_milano_2009_2010_pct)+') mentre in Italia sono '+sgp(N.salto_italia_2009_2010_pct,1).replace('.',',')+'. Il Ministero non lo spiega; pu&ograve; essere un cambio di come i dati arrivavano dagli uffici. Perci&ograve; confrontiamo con cautela i valori di Milano prima e dopo il 2010.',
+   '<b>Richieste ed eseguiti di Milano.</b> Cambiano di 10&ndash;30 volte da un anno all&rsquo;altro senza un riscontro in Italia. Li mostriamo ma non li usiamo per dire se gli sfratti crescono o calano.',
+   '<b>2020 di Milano ricostruito.</b> Il file Excel del 2020 sul sito del Ministero non risponde ai programmi (pi&ugrave; tentativi, nessuna scorciatoia). Il 2020 delle province &egrave; calcolato dal file 2021, che scrive la variazione percentuale sull&rsquo;anno prima: valore 2021 diviso (1 + variazione). Vale solo per ordini totali, richieste ed eseguiti, non per i motivi. La somma delle province ricostruite d&agrave; 32.504 ordini contro i 32.536 del totale nazionale del 2020. Se il file originale diventa scaricabile, il programma lo user&agrave; al posto della ricostruzione.',
+   '<b>Revisioni.</b> I numeri nazionali sono stati rivisti col tempo (per esempio il 2012: 67.790 nel rapporto di allora, 70.315 nella serie attuale). Per l&rsquo;Italia usiamo la serie attuale; per le province, il file dell&rsquo;anno. La somma delle province dei file annuali coincide con il totale nazionale attuale nel 2022, 2023 e 2025 e se ne scosta nel 2013&ndash;2019 (fino al 3,4% sugli sfratti eseguiti, tra l&rsquo;1% e il 2% sugli ordini).',
+   '<b>Famiglie (il denominatore).</b> Sono famiglie ISTAT dei censimenti 2001 e 2011 e del censimento permanente 2018&ndash;2024; negli anni in mezzo sono interpolate in linea retta, il 2025 &egrave; uguale al 2024. Tra il 2011 (censimento sul campo) e il 2018 (conteggio da registri) l&rsquo;ISTAT cambia metodo e le famiglie di Milano risultano molto pi&ugrave; numerose (+10% in sette anni per la provincia): i tassi 2012&ndash;2017 sono quindi calcolati su un denominatore incerto di qualche punto percentuale.',
+   '<b>Il blocco per l&rsquo;epidemia.</b> Le esecuzioni sono state sospese per legge dal marzo 2020 (decreto Cura Italia) e prorogate pi&ugrave; volte fino al 31 dicembre 2021 (art. 40-quater del DL 41/2021 convertito dalla legge 69/2021; la Corte costituzionale, sentenza 213/2021, ha escluso altre proroghe). Queste date vengono da testi giuridici letti sul web, non dai dati del Ministero; i dati annuali non mostrano i mesi.',
+   '<b>Gli affitti sono un confronto.</b> Sono serie di altre fonti (ISTAT, Agenzia delle Entrate) con perimetri e metodi diversi, e per Milano citt&agrave;. Non sono la causa degli sfratti e il grafico non lo dimostra.',
+   '<b>Non sappiamo perch&eacute;.</b> Il dato non dice quali famiglie, che redditi, quali proprietari. Per le cause servirebbero altri dati.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var L=[
+   '<b>Fonte dei numeri.</b> Tutti i numeri sui tre conteggi vengono dai file Excel (2013&ndash;2025) e dai rapporti PDF (2004&ndash;2013) dell&rsquo;Ufficio centrale di statistica del Ministero dell&rsquo;Interno. Per ogni riga del nostro file <code>serie_unita.csv</code> c&rsquo;&egrave; il nome del file, il foglio e la riga (o la pagina del PDF) di origine.',
+   '<b>Controlli fatti dal programma.</b> In ogni riga i tre motivi sommano al totale (0 differenze su 1.276 righe); le province lombarde sommano al totale della Lombardia in tutti gli anni 2013&ndash;2025; la somma delle province coincide con il totale nazionale nel 2022, 2023 e 2025 (e con scarti sotto lo 0,3% nel 2021 e 2024); il rapporto del Ministero su Italia 2001 (1 sfratto ogni 539 famiglie) coincide con il nostro (1,86 ogni 1.000).',
+   '<b>Province dal 2001 al 2012.</b> Dalle tabelle &laquo;province dei grandi comuni&raquo; del rapporto 2012 (Torino, Milano, Bologna, Firenze, Roma, Napoli). I rapporti 2004&ndash;2011 servono come controllo.',
+   '<b>Province dal 2013 al 2025.</b> Dalle tabelle provinciali dei file annuali. Capoluogo e resto della provincia sono sommati; per Milano si somma anche Monza e Brianza.',
+   '<b>Tasso.</b> Ordini emessi / famiglie dell&rsquo;unit&agrave; (provincia o comune) &times; 1.000. Per le famiglie in affitto: famiglie in abitazione in affitto al censimento 2011.',
+   '<b>Quota di morosit&agrave;.</b> Ordini per morosit&agrave; o altra causa / ordini emessi. Le tre voci sono quelle del Ministero.',
+   '<b>Pagina costruita da un programma</b> (<code>sfratti/scripts/pagina.py</code>) che legge le tabelle pulite e scrive i file di <code>data/</code>; ogni numero scritto in questa pagina viene da <a href="data/riepilogo.json">riepilogo.json</a>. Scaricamento: <code>scarica.py</code>; estrazione: <code>estrai.py</code>; serie: <code>serie.py</code>.'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+function file(){
+  setH('file-lista','<a href="data/serie_unita.csv">serie_unita.csv</a> (una riga per territorio e anno: ordini per motivo, richieste, eseguiti, famiglie, tassi, fonte di ogni riga), <a href="data/province_2013_2025.csv">province_2013_2025.csv</a> (tutte le province, capoluogo e resto, 2013&ndash;2025), <a href="data/grandi_province_2001_2012.csv">grandi_province_2001_2012.csv</a>, <a href="data/italia_2001_2025.csv">italia_2001_2025.csv</a>, <a href="data/famiglie_per_anno.csv">famiglie_per_anno.csv</a> (famiglie ISTAT e interpolate), <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina). Dati scaricati il 1 novembre 2026; pagina costruita il '+esc(D.generato)+'.');
+}
+})();
+</script>
+</body></html>

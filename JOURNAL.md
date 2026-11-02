@@ -2681,3 +2681,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Misure: dissimilarità D, isolamento, H di Theil, entropia a ordine di rango (Reardon) per reddito ed età; intervalli da ricampionamento. Dati su disco: MEF per CAP (8 anni d'imposta, 22 città), ds27 per NIL 1999-2025, censimenti per i laureati.
 - Numeri: reddito, quota spiegata dal CAP 2,08% (2011) → 2,34% (2024), ferma dal 2015, Milano 8ª su 22 città (Napoli e Roma più separate); italiani/stranieri D 17,1% (1999) → 22,1% (2015) → 18,8% (2025); età D al minimo nel 2025; laureati D 31,4% → 19,8%. Sorpresa: Milano non si sta dividendo di più dal 2015 nonostante più stranieri e più redditi alti; Cina e Bangladesh si disperdono.
 - Limiti dei dati: la fascia "≤0 euro" svuotata dal MEF dal 2019 gonfiava l'indice (unita a "fino a 10.000"); celle oltre 120.000 nascoste nel 2023-24 ricostruite per differenza; CAP 20121/20122; registro anagrafico; CAP e NIL non confrontabili tra loro; cittadinanza non è origine.
+
+## 63. Gli sfratti
+
+- 2026-11-02 notte — Fase 1 e pagina (`sfratti/`, `docs/sfratti/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `sfratti/NOTE.md`.
+- Fonti: Ministero dell'Interno, UCS, indagine sulle procedure di rilascio (Excel 2013-2025, PDF 2004-2015; licenza non aperta: riproduzione con citazione, in pagina solo tabelle riassunte); ISTAT famiglie (CC BY 4.0). Il file 2020 del Ministero non risponde: 2020 ricostruito dal 2021 e segnato. "Eseguiti" = con l'ufficiale giudiziario, non con la forza pubblica.
+- Numeri: ordini di sfratto per 1.000 famiglie, provincia di Milano con Monza, 3,57 (2014) → 1,25 (2025), −65% (Italia −55%), sotto la media italiana dal 2017; comune di Milano 2.802 (2013) → 1.107 (2025); morosità dal 95% al 69% nel comune. Sorpresa: gli ordini calano di due terzi mentre gli affitti salgono (confronto, non causa).
+- Limiti dei dati: richieste ed eseguiti di Milano incoerenti (salti di 10-30 volte), mostrati ma non usati; salto 2009-2010 non spiegato; famiglie interpolate e cambio di metodo ISTAT; date del blocco Covid da riassunti giuridici.
