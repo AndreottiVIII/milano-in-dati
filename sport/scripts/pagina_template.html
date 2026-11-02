@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Impianti sportivi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.5em 0;font-size:1.02rem} .surp b{color:var(--acc)}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.35em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer;white-space:nowrap}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888} .lgd i.dot{width:12px;height:12px;border-radius:50%}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars.w .fill{background:#c26a1b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .bars .row{grid-template-columns:1fr 70px}.bars .tr{grid-column:1/-1}}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.links{display:flex;flex-wrap:wrap;gap:6px 14px;margin:.6em 0;font-size:.92rem}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Dove si fa sport a Milano</h1>
+<p>Piscine, palestre, campi e centri sportivi, pubblici e privati, quartiere per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale). Abbiamo unito cinque elenchi diversi, dal Comune alla Regione a OpenStreetMap, e ne abbiamo ricavato <b>@@N_IMP@@ impianti</b> (circa <b>@@PK@@ ogni 10.000 abitanti</b>), pi&ugrave; @@N_CL@@ campi sparsi in giardini e cortili. Poi abbiamo contato quanti milanesi ne raggiungono uno <b>in 15 minuti a piedi</b>. Vedi anche <a href="../citta-15-minuti/">la citt&agrave; dei 15 minuti</a> e <a href="../quartiere/">il tuo quartiere</a>.</p>
+
+<div class="surp" id="sorpresa">@@SORPRESA@@</div>
+
+<div class="warm"><b>Prima di leggere.</b> Non esiste un elenco unico e aggiornato degli impianti sportivi di Milano. Questa pagina mette insieme fonti di anni diversi (dal 2011 al 2026) e non sa se un impianto sia aperto a tutti, quanto costi, n&eacute; se oggi funzioni. Va letta come una stima: i totali della citt&agrave; sono pi&ugrave; solidi dei numeri del singolo quartiere. Tutti i dettagli sono in <a href="#limiti">Limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Scegli come colorare i quartieri e quali impianti mostrare. Clic su un quartiere (o sceglilo dall&rsquo;elenco) per la sua scheda.</p>
+<div class="ctl"><span class="sub">Colora i quartieri per:</span>
+<button type="button" data-m="p" class="on">Impianti ogni 10.000 abitanti</button><button type="button" data-m="qt">Residenti a 15&prime; da un impianto</button><button type="button" data-m="qp">&hellip; da una piscina</button><button type="button" data-m="qc">&hellip; da un impianto comunale</button><button type="button" data-m="qm">&hellip; da Milanosport</button></div>
+<div class="ctl"><span class="sub">Tipo:</span>
+<label class="ck"><input type="checkbox" class="ft" value="1" checked> piscine</label><label class="ck"><input type="checkbox" class="ft" value="2" checked> palestre e fitness</label><label class="ck"><input type="checkbox" class="ft" value="4" checked> campi e palazzetti</label><label class="ck"><input type="checkbox" class="ft" value="8" checked> centri con pi&ugrave; discipline</label></div>
+<div class="ctl"><span class="sub">Chi gestisce:</span>
+<label class="ck"><input type="checkbox" class="fg" value="0" checked> Milanosport</label><label class="ck"><input type="checkbox" class="fg" value="1" checked> Comune in concessione</label><label class="ck"><input type="checkbox" class="fg" value="2" checked> Comune da verificare</label><label class="ck"><input type="checkbox" class="fg" value="3"> campi liberi del Comune</label><label class="ck"><input type="checkbox" class="fg" value="4" checked> palestre di scuole</label><label class="ck"><input type="checkbox" class="fg" value="5" checked> non risulta comunale</label></div>
+<div class="ctl"><label class="ck"><input type="checkbox" id="ck-cl"> campi liberi (giardini e cortili)</label><label class="ck"><input type="checkbox" id="ck-2f"> solo luoghi presenti in 2 o pi&ugrave; fonti</label><label class="ck"><input type="checkbox" id="ck-ol"> sedi olimpiche 2026</label>
+<label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select><span class="sub" id="n-vis"></span></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per impianti sportivi e punti degli impianti"></div>
+<div class="lgd" id="lg-map"></div><div class="lgd" id="lg-pt"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors (ODbL). Impianti: Comune di Milano (CC BY), Regione Lombardia (CC0), OpenStreetMap (ODbL), vedi <a href="#fonti">fonti</a>. I quartieri con meno di 1.000 residenti sono in grigio nella mappa &laquo;ogni 10.000 abitanti&raquo;.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="quanti">Quanti arrivano a piedi in 15 minuti</h2>
+<p>Quota dei milanesi che hanno almeno un impianto di questo tipo a meno di 15 minuti a piedi da casa, con la distanza mediana in minuti. Stesso metodo della pagina <a href="../citta-15-minuti/">citt&agrave; dei 15 minuti</a>.</p>
+<div class="bars" id="b-acc"></div>
+<p class="src">Residenti 2025 (Comune di Milano, ds27) per quartiere distribuiti sui civici residenziali; rete pedonale OpenStreetMap; luoghi di questa pagina.</p>
+
+<h2 id="chi">Chi li gestisce</h2>
+<p>Numero di impianti (esclusi i campi sparsi) per tipo e per gestore. Un impianto con pi&ugrave; discipline compare in pi&ugrave; righe: la riga &laquo;Tutti gli impianti&raquo; conta ogni impianto una volta.</p>
+<div class="scroll"><table id="tab-chi"></table></div>
+<p class="src">&laquo;Non risulta comunale&raquo; = non &egrave; nell&rsquo;elenco delle concessioni del Comune, n&eacute; tra i campi dei giardini, n&eacute; tra le scuole; non dice se sia privato o aperto a tutti (vedi <a href="#limiti">limiti</a>).</p>
+
+<h2 id="classifica">Chi ha pi&ugrave; e meno impianti</h2>
+<p>Solo i quartieri con almeno 1.000 residenti (@@N_BIG@@ su 87 con residenti). <b>Attenzione:</b> in cima ci sono quartieri con pochi abitanti e grandi centri sportivi che servono tutta la citt&agrave;; il rapporto &egrave; fragile (vedi &laquo;Le tre fonti non coincidono&raquo; sopra). @@N_SENZA_IMP@@ quartieri non hanno nessun impianto nei dati (@@LISTA_SENZA_IMP@@); in @@N_SENZA_COM@@ non ce n&rsquo;&egrave; nessuno comunale e in @@N_SENZA_POOL@@ nessuna piscina.</p>
+<div class="grid2"><div><h3>Pi&ugrave; impianti ogni 10.000 abitanti</h3><div class="bars" id="b-top"></div></div>
+<div><h3>Meno impianti ogni 10.000 abitanti</h3><div class="bars w" id="b-bot"></div></div></div>
+<h3>Dove la piscina &egrave; pi&ugrave; lontana</h3>
+<p class="sub">Quota di residenti che raggiunge una piscina in 15 minuti, i 10 quartieri (con almeno 1.000 residenti) dove &egrave; pi&ugrave; bassa.</p>
+<div class="bars w" id="b-pool"></div>
+<p class="src">Impianti: luoghi di questa pagina, nel quartiere in cui cadono. Residenti: Comune di Milano, 2025.</p>
+
+<h2 id="olimpiadi">Le Olimpiadi 2026, come contesto</h2>
+@@OLIMPIADI@@
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul>@@LIMITI@@</ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m">@@METODO@@</ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil_sport.csv">nil_sport.csv</a> (impianti, ogni 10.000 abitanti e quote di residenti a 15 minuti, per quartiere), <a href="data/nil.geojson">nil.geojson</a> (i confini dei quartieri, semplificati, con gli stessi valori), <a href="data/siti.csv">siti.csv</a> e <a href="data/siti.json">siti.json</a> (i @@N_TOT_LUOGHI@@ luoghi con tipo, gestore, fonti e quartiere), <a href="data/sedi_olimpiche.csv">sedi_olimpiche.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Il file dei luoghi contiene dati di OpenStreetMap: per l&rsquo;insieme vale la licenza ODbL; i dati del Comune sono CC BY. Dal censimento della Regione non sono ripresi telefoni n&eacute; email.</p>
+
+<h2 id="fonti">Fonti e licenze</h2>
+<div class="scroll"><table>
+<thead><tr><th>Fonte</th><th>Licenza</th><th>Anno dei dati</th><th>Scaricato</th></tr></thead><tbody>
+<tr><td>Comune di Milano, impianti sportivi (ds34), localizzazione</td><td>CC BY</td><td>31/1/2011 dichiarato (file 2020&ndash;2023)</td><td>2/11/2026</td></tr>
+<tr><td>Comune di Milano, impianti sportivi comunali in concessione (ds2941)</td><td>CC BY</td><td>28/2/2025</td><td>2/11/2026</td></tr>
+<tr><td>Comune di Milano, centri balneari e piscine (ds32)</td><td>CC BY</td><td>2011&ndash;2017</td><td>2/11/2026</td></tr>
+<tr><td>Comune di Milano, campi sportivi nei giardini (ds1640)</td><td>CC BY</td><td>ottobre 2024</td><td>2/11/2026</td></tr>
+<tr><td>Comune di Milano, spazi degli edifici scolastici statali (ds1867)</td><td>attribuzione (&laquo;altro&raquo; sul portale)</td><td>a.s. 2020/21</td><td>2/11/2026</td></tr>
+<tr><td>Comune di Milano, impianti gestiti da Milanosport nel 2019 (ds1491), solo per controllare i nomi</td><td>CC BY</td><td>2019</td><td>2/11/2026</td></tr>
+<tr><td>Regione Lombardia, &laquo;Elenco centri sportivi georef&raquo; (qkfs-wmmh)</td><td>CC0</td><td>aprile 2016</td><td>2/11/2026</td></tr>
+<tr><td>OpenStreetMap (Overpass), leisure=sports_centre, pitch, swimming_pool, fitness_centre, sports_hall e simili</td><td>ODbL</td><td>2/11/2026 (09:28 UTC)</td><td>2/11/2026</td></tr>
+<tr><td>Confini dei NIL (ds964), residenti per NIL (ds27, anno 2025), civici (ds634), confine del Comune (ds2841)</td><td>CC BY</td><td>2020; 2025; 2026; &ndash;</td><td>29/10/2026</td></tr>
+<tr><td>Rete pedonale: OpenStreetMap, estratto Lombardia di Geofabrik</td><td>ODbL</td><td>29/10/2026</td><td>29/10/2026</td></tr>
+</tbody></table></div>
+<footer>
+<p>Dati del Comune dal portale <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>; dati della Regione da <a href="https://www.dati.lombardia.it/">dati.lombardia.it</a>. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Sedi olimpiche: <a href="https://en.wikipedia.org/wiki/2026_Winter_Olympics">Wikipedia</a>, <a href="https://www.ilpost.it/2026/09/25/arena-santa-giulia-milano-sport-no-pallavolo-spostamento/">Il Post</a>, <a href="https://www.ilgiorno.it/milano/cronaca/impianti-olimpici-milano-lavori-scalo-romana-arena-santa-giulia-cma1evcl">Il Giorno</a>.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,ST=[],NIL={},MAP=null,LAY=null,PTS=null,OLY=null,CUR='p',SEL=null;
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var GC=['#00695c','#1f77b4','#6ba3d6','#9467bd','#7f7f7f','#c26a1b'];
+var BREAKS={p:[2,4,6,8,12],qt:[50,90,98,99.5],qp:[10,30,50,70,90],qc:[20,50,75,90,99],qm:[10,25,40,60,80]};
+var DESC={p:'Impianti (esclusi i campi sparsi) ogni 10.000 residenti. Media della città: @@PK@@. In grigio i quartieri con meno di 1.000 residenti.',
+ qt:'Quota di residenti che arriva a piedi in 15 minuti ad almeno un impianto sportivo.',
+ qp:'Quota di residenti che arriva a piedi in 15 minuti ad almeno una piscina.',
+ qc:'Quota di residenti che arriva a piedi in 15 minuti ad almeno un impianto comunale (Milanosport, concessioni, da verificare).',
+ qm:'Quota di residenti che arriva a piedi in 15 minuti ad almeno un impianto gestito da Milanosport (elenco 2025 del Comune).'};
+var FIELD={p:'p',qt:'qt',qp:'qp',qc:'qc',qm:'qm'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function el(id){return document.getElementById(id)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function cap(s){return String(s).toLowerCase().replace(/(^|[\s\-\(\/'])([a-zàèéìòù])/g,function(m,a,b){return a+b.toUpperCase()})}
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/siti.json')]).then(function(a){
+  D=a[0];NF=a[1];ST=a[2];NF.features.forEach(function(f){NIL[f.properties.i]=f.properties});
+  try{ tutto(); }catch(e){ console.error(e); el('map-desc').innerHTML='<b>Errore nella pagina.</b> '+esc(e.message); }
+}).catch(function(e){el('map-desc').innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+
+function color(v,m){if(v==null)return '#bdbdbd';var b=BREAKS[m],i=0;while(i<b.length&&v>=b[i])i++;return SEQ[Math.round(i*5/b.length)]}
+function val(p,m){if(m==='p')return p.cl?p.p:null;return p.r>0?p[FIELD[m]]:null}
+function sty(f){return {fillColor:color(val(f.properties,CUR),CUR),fillOpacity:.78,color:'#444',weight:.8}}
+function unit(m){return m==='p'?' ogni 10.000 ab.':'%'}
+function tipNil(p){var v=val(p,CUR);return '<b>'+esc(p.n)+'</b><br>'+(v==null?(CUR==='p'?'meno di 1.000 residenti: '+p.t+' impianti':'n.d.'):nf(v,CUR==='p'?1:0)+unit(CUR))+'<br>'+f0(p.r)+' residenti'}
+function bits(b){var t=[];if(b&1)t.push('piscina');if(b&2)t.push('palestra/fitness');if(b&4)t.push('campi/palazzetto');if(b&8)t.push('centro con più discipline');return t.join(', ')}
+function vis(){
+  var ft=0,fg={};document.querySelectorAll('.ft').forEach(function(c){if(c.checked)ft|=parseInt(c.value,10)});
+  document.querySelectorAll('.fg').forEach(function(c){if(c.checked)fg[c.value]=1});
+  var cl=el('ck-cl').checked,f2=el('ck-2f').checked;
+  return ST.filter(function(s){ if(s[7]===1&&!cl) return false; if(!fg[s[5]]) return false; if(!(s[4]&ft)) return false; if(f2&&s[6]<2) return false; return true });
+}
+function punti(){
+  if(PTS)MAP.removeLayer(PTS);PTS=L.layerGroup();
+  var v=vis();el('n-vis').textContent=f0(v.length)+' luoghi mostrati';
+  v.forEach(function(s){
+    var m=L.circleMarker([s[1],s[0]],{radius:s[7]===1?2.6:4,fillColor:GC[s[5]],fillOpacity:.9,color:'#fff',weight:.7});
+    m.bindTooltip('<b>'+esc(s[2])+'</b>'+(s[3]?'<br>'+esc(s[3]):'')+'<br>'+esc(bits(s[4]))+'<br>'+esc(D.gest[D.gk[s[5]]])+'<br>'+(s[7]?'campo libero · ':'')+s[6]+(s[6]===1?' fonte':' fonti'),{sticky:true});
+    PTS.addLayer(m)});
+  PTS.addTo(MAP);
+}
+function legenda(){
+  var b=BREAKS[CUR],u=CUR==='p'?'':'%',t=[];
+  for(var i=0;i<=b.length;i++){var lo=i?b[i-1]:null,hi=i<b.length?b[i]:null;t.push('<span><i style="background:'+SEQ[Math.round(i*5/b.length)]+'"></i>'+(lo==null?'meno di '+nf(hi,hi%1?1:0):hi==null?nf(lo,lo%1?1:0)+' o più':nf(lo,lo%1?1:0)+'–'+nf(hi,hi%1?1:0))+u+'</span>')}
+  t.push('<span><i style="background:#bdbdbd"></i>'+(CUR==='p'?'meno di 1.000 residenti':'senza residenti')+'</span>');
+  el('lg-map').innerHTML=t.join('');
+  el('lg-pt').innerHTML=D.gk.map(function(k,i){return '<span><i class="dot" style="background:'+GC[i]+'"></i>'+esc(D.gest[k])+'</span>'}).join('')+'<span><i class="dot" style="background:#fff;border:2px solid #111"></i>sede olimpica 2026</span>';
+  el('map-desc').textContent=DESC[CUR];
+}
+function scheda(id){
+  var p=NIL[id];if(!p)return;var c=ST.filter(function(s){return s[8]===id});
+  var imp=c.filter(function(s){return s[7]===0}),cl=c.filter(function(s){return s[7]===1});
+  var g=[0,0,0,0,0,0];imp.forEach(function(s){g[s[5]]++});
+  var pool=imp.filter(function(s){return s[4]&1}).length,pal=imp.filter(function(s){return s[4]&2}).length,cam=imp.filter(function(s){return s[4]&4}).length;
+  var h='<h3>'+esc(p.n)+'</h3><p class="sub">'+f0(p.r)+' residenti</p>';
+  h+='<table><tbody><tr><td>Impianti</td><td class="r"><b>'+p.t+'</b>'+(p.cl?' ('+nf(p.p,1)+' ogni 10.000 ab.)':'')+'</td></tr>';
+  h+='<tr><td>di cui: Milanosport / Comune in concessione / da verificare</td><td class="r">'+g[0]+' / '+g[1]+' / '+g[2]+'</td></tr><tr><td>di cui: palestre di scuole</td><td class="r">'+g[4]+'</td></tr><tr><td>di cui: non risultano comunali</td><td class="r">'+g[5]+'</td></tr>';
+  h+='<tr><td>Piscine / palestre e fitness / campi e palazzetti</td><td class="r">'+pool+' / '+pal+' / '+cam+'</td></tr><tr><td>Campi liberi (giardini, cortili)</td><td class="r">'+cl.length+'</td></tr>';
+  h+='<tr><td>Residenti a 15&prime; da un impianto</td><td class="r">'+(p.qt==null?'n.d.':nf(p.qt,0)+'%')+'</td></tr><tr><td>&hellip; da una piscina</td><td class="r">'+(p.qp==null?'n.d.':nf(p.qp,0)+'%')+'</td></tr><tr><td>&hellip; da un impianto comunale</td><td class="r">'+(p.qc==null?'n.d.':nf(p.qc,0)+'%')+'</td></tr></tbody></table>';
+  if(p.r<1000)h+='<p class="sub">Meno di 1.000 residenti: i rapporti per abitante non sono confrontabili.</p>';
+  el('scheda').innerHTML=h;
+}
+function scegli(id,zoom){
+  SEL=id;el('sel-nil').value=String(id);scheda(id);
+  LAY.eachLayer(function(l){var on=l.feature.properties.i===id;l.setStyle({weight:on?3:.8,color:on?'#000':'#444'});if(on&&zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})});
+}
+function bars(id,rows,fmt,max){
+  var m=max||Math.max.apply(null,rows.map(function(r){return r.v}));
+  el(id).innerHTML=rows.map(function(r){return '<div class="row"><div class="nm">'+esc(r.n)+(r.s?'<i>'+esc(r.s)+'</i>':'')+'</div><div class="tr"><span class="fill" style="width:'+Math.max(1,r.v/m*100)+'%"></span></div><div class="v">'+fmt(r.v)+'</div></div>'}).join('');
+}
+function tutto(){
+  var sel=el('sel-nil');
+  NF.features.map(function(f){return f.properties}).sort(function(a,b){return a.n<b.n?-1:1}).forEach(function(p){var o=document.createElement('option');o.value=p.i;o.textContent=p.n;sel.appendChild(o)});
+  var ph=document.createElement('option');ph.value='';ph.textContent='— scegli —';sel.insertBefore(ph,sel.firstChild);sel.value='';
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  punti();legenda();
+  sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  document.querySelectorAll('.ctl button[data-m]').forEach(function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');document.querySelectorAll('.ctl button[data-m]').forEach(function(x){x.classList.toggle('on',x===b)});
+    LAY.setStyle(sty);if(SEL)scegli(SEL,false);legenda()})});
+  document.querySelectorAll('.ft,.fg,#ck-cl,#ck-2f').forEach(function(c){c.addEventListener('change',punti)});
+  el('ck-ol').addEventListener('change',function(){
+    if(OLY){MAP.removeLayer(OLY);OLY=null}
+    if(el('ck-ol').checked){OLY=L.layerGroup();D.sedi.forEach(function(s){OLY.addLayer(L.circleMarker([s.lat,s.lon],{radius:9,fillColor:'#fff',fillOpacity:.9,color:'#111',weight:3}).bindTooltip('<b>'+esc(s.sede)+'</b><br>'+esc(s.evento)+' · '+esc(s.stato)+'<br>'+esc(s.comune),{sticky:true}))});OLY.addTo(MAP)}});
+  // barre
+  var A=@@BARS_ACC@@;
+  bars('b-acc',A.map(function(r){return {n:r[0],s:r[2]+' luoghi nel calcolo · mediana '+nf(r[3],1)+' min',v:r[1]}}),function(v){return nf(v,1)+'%'},100);
+  bars('b-top',@@BARS_TOP@@.map(function(r){return {n:r[0],s:r[2]+' impianti · '+f0(r[3])+' residenti',v:r[1]}}),function(v){return nf(v,1)});
+  bars('b-bot',@@BARS_BOT@@.map(function(r){return {n:r[0],s:r[2]+' impianti · '+f0(r[3])+' residenti',v:r[1]}}),function(v){return nf(v,1)},12);
+  bars('b-pool',@@BARS_POOL@@.map(function(r){return {n:r[0],s:f0(r[2])+' residenti',v:r[1]}}),function(v){return nf(v,1)+'%'},100);
+  // tabella
+  var T=@@TAB@@,h='<thead><tr><th>Tipo</th><th class="r">Milanosport</th><th class="r">Comune in concessione</th><th class="r">Comune da verificare</th><th class="r">Palestre di scuole</th><th class="r">Non risulta comunale</th><th class="r">Totale</th></tr></thead><tbody>';
+  T.forEach(function(r,i){h+='<tr'+(i===T.length-1?' style="font-weight:700"':'')+'><td>'+esc(r[0])+'</td>'+r.slice(1).map(function(x){return '<td class="r">'+f0(x)+'</td>'}).join('')+'</tr>'});
+  el('tab-chi').innerHTML=h+'</tbody>';
+}
+})();
+</script></body></html>

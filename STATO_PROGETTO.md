@@ -93,6 +93,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 79 | Medici e farmacie | Online |
 | 80 | Consiglio comunale | Online |
 | 81 | Parchi e verde | Online (stima per quartiere) |
+| 82 | Impianti sportivi | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 

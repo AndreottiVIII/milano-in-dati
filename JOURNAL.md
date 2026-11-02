@@ -2814,3 +2814,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Comune ds89 (74 parchi come poligoni), ds339 (2.917 aree, 2014, senza mappa), ds1323 (verde in città 2011-2024), ds2926/2927 (copie ISTAT); OSM solo controllo. Nessuna mappa completa del verde: stima per NIL con i poligoni più le aree ds339 collocate tramite il censimento degli alberi (95% dell'area nel NIL giusto sui 71 parchi controllabili).
 - Numeri: 10,7 m² di verde pubblico per residente (7,3 senza i 4 parchi oltre 40 ha); 44 NIL su 64 sotto i 9 m², il 73,5% dei residenti; mediana 8,7 minuti a piedi dal parco più vicino. Lo standard dei 9 m² (DI 1444/1968 art. 3, testo letto) vale per i nuovi insediamenti, non per i quartieri esistenti: detto in pagina.
 - Limiti dei dati: stima per NIL ferma al 2014; Bosco in città non collocato; legame con gli alberi in parte costruito dal metodo.
+
+## 82. Impianti sportivi
+
+- 2026-11-02 — Fase 1 e pagina (`sport/`, `docs/sport/`). Dettagli in `sport/NOTE.md`.
+- Fonti: Comune ds34 (base dichiarata 2011), ds2941 (concessioni, febbraio 2025), ds32, ds1640, ds1867 (CC BY); Regione qkfs-wmmh (CC0, 2016); OSM (ODbL: i file con dati OSM sono share-alike, detto in pagina). Censimento CONI/Sport e Salute non aperto.
+- Numeri: 851 impianti (6,1 ogni 10.000 abitanti) più 593 campi sparsi; solo 124 comunali; il 99,2% dei residenti ha un impianto entro 15 minuti a piedi, solo il 62,2% una piscina (36,6% una piscina Milanosport). Duomo 21 impianti, nessuno comunale.
+- Limiti dei dati: 411 impianti in una sola fonte; classifiche per quartiere poco stabili tra fonti; il totale dipende dal raggio di unione dei punti; la classe "Milanosport" dal campo concessionario, non verificata sul sito.

@@ -92,7 +92,8 @@
     { path: 'bici/', label: 'BikeMi e bici' },
     { path: 'medici-farmacie/', label: 'Medici e farmacie' },
     { path: 'consiglio/', label: 'Consiglio comunale' },
-    { path: 'verde/', label: 'Parchi e verde' }
+    { path: 'verde/', label: 'Parchi e verde' },
+    { path: 'sport/', label: 'Impianti sportivi' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
