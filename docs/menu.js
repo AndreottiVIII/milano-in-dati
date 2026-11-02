@@ -77,7 +77,8 @@
     { path: 'sfratti/', label: 'Gli sfratti' },
     { path: 'lavoro/', label: 'Il lavoro per quartiere' },
     { path: 'rigenerazione/', label: 'Progetti di rigenerazione' },
-    { path: 'rifiuti/', label: 'Rifiuti e differenziata' }
+    { path: 'rifiuti/', label: 'Rifiuti e differenziata' },
+    { path: 'poverta-educativa/', label: 'Povertà educativa' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

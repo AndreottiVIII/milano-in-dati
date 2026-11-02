@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Povertà educativa</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,34%) 1fr 70px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative;display:flex} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars .row.hl .nm{font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} }
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.tip i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+#tab14{min-width:640px} #tab14 th.s{cursor:pointer;text-decoration:underline dotted} #tab14 tr.hl td{background:var(--soft);font-weight:600}
+#tab-mun{min-width:420px} #tab-ecc{min-width:520px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Povertà educativa: nidi, tempo pieno, mense</h1>
+<p>Per «povertà educativa» si intende la mancanza di occasioni di apprendimento per i bambini: un posto al nido, un tempo pieno a scuola, la mensa, competenze di base alla fine delle medie. L&rsquo;idea di guardare queste cose insieme viene dall&rsquo;<a href="https://www.conibambini.org/">Osservatorio povertà educativa #conibambini</a> (Con i Bambini e <a href="https://www.openpolis.it/">Openpolis</a>). Qui usiamo dati aperti per due domande: <b>come sta Milano rispetto alle altre grandi città</b>, e <b>quanto cambia da un quartiere all&rsquo;altro</b>. La prima domanda ha risposte solide; la seconda, per i nidi, ha dati vecchi e incompleti (<a href="#limiti">vedi i limiti</a>).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> I confronti tra città sono su 14 città: i capoluoghi delle 14 città metropolitane (Torino, Milano, Genova, Venezia, Bologna, Firenze, Roma, Napoli, Bari, Reggio Calabria, Palermo, Messina, Catania, Cagliari). I nidi sono &laquo;posti autorizzati&raquo;, non bambini che li usano. La serie dei nidi di Milano ha dei salti che non sappiamo spiegare (<a href="#nidi">vedi sotto</a>). Il tempo pieno è calcolato sugli alunni della primaria; la mensa dice se l&rsquo;edificio ha uno spazio mensa, non se il servizio funziona.</div>
+
+<h2 id="tabella">Le 14 città in una tabella</h2>
+<p>Per ogni città, gli indicatori dell&rsquo;ultimo anno disponibile. Clicca sull&rsquo;intestazione di una colonna per ordinare. Milano è evidenziata.</p>
+<div class="scroll"><table id="tab14"></table></div>
+<p class="src">Fonti: reddito medio per contribuente, anno d&rsquo;imposta 2024 (MEF); nidi, 2024 (ISTAT); tempo pieno, mensa, a.s. 2024/25 (MIM); dispersione implicita, 2024-25 (INVALSI). Il reddito è il reddito complessivo diviso per i contribuenti, in euro correnti. Le colonne sono spiegate nelle sezioni qui sotto.</p>
+
+<h2 id="nidi">Asili nido: Milano e le altre grandi città</h2>
+<div id="nidi-testo"></div>
+<h3>Posti ogni 100 bambini di 0-2 anni, 2013&ndash;2024</h3>
+<div class="ch" id="ch-nidi" role="img" aria-label="Grafico: posti nei nidi ogni 100 bambini di 0-2 anni, sei città, 2013-2024"></div>
+<div class="lgd" id="lg-nidi"></div>
+<p class="src">Posti autorizzati nei servizi per la prima infanzia (nidi, micronidi, sezioni primavera e servizi integrativi), pubblici e privati, ogni 100 residenti di 0-2 anni. Fonte: ISTAT, IstatData, flusso <i>Servizi sul territorio &ndash; prov. e com.</i> (CC BY 4.0). Per Milano la linea tratteggiata segna gli anni fino al 2022, con salti che non si spiegano (<a href="#limiti">limiti</a>).</p>
+<div class="warm" id="nidi-salti"></div>
+<div class="grid2"><div><h3>Le 14 città, 2024</h3><div class="bars" id="b-nidi14"></div></div>
+<div><h3>Quanti posti sono pubblici e quanti privati, 2024</h3><div class="bars" id="b-nidi-pp"></div><div class="lgd" id="lg-pp"></div></div></div>
+<p class="src">A sinistra posti per 100 bambini di 0-2 anni (tutte le 14 città, Lombardia e Italia). A destra, per le sei città in cui il dato è stato scaricato: posti per 100 bambini nei servizi di titolarità pubblica e privata. «Pubblico» vuol dire gestito da un ente pubblico (spesso in appalto); «privato» comprende anche i nidi convenzionati con il Comune. Fonte: ISTAT.</p>
+<div id="nidi-utenti"></div>
+
+<h2 id="tempo">Tempo pieno alla primaria</h2>
+<div id="tp-testo"></div>
+<div class="ctl"><span class="sub">Mostra gli alunni di:</span>
+<button type="button" data-g="totale" class="on">tutte le scuole</button><button type="button" data-g="statale">scuole statali</button><button type="button" data-g="paritaria">scuole paritarie</button></div>
+<div class="ch" id="ch-tp" role="img" aria-label="Grafico: quota di alunni della primaria a tempo pieno, sei città e Italia, 2015-2024"></div>
+<div class="lgd" id="lg-tp"></div>
+<p class="src">Quota di alunni della scuola primaria iscritti a tempo pieno (classificazione del MIM: «tempo pieno» contro «tempo normale»), nelle scuole che stanno nel comune, a.s. 2015/16&ndash;2024/25. Fonte: MIM, Portale unico dei dati della scuola, DS0090 (statali) e DS0100 (paritarie), IODL 2.0. La linea nera tratteggiata è l&rsquo;Italia intera.</p>
+<div class="grid2"><div><h3>Le 14 città, tutte le scuole, 2024/25</h3><div class="bars" id="b-tp14"></div></div>
+<div><h3>Solo scuole statali, 2024/25</h3><div class="bars" id="b-tp14s"></div></div></div>
+
+<h2 id="mense">Mense</h2>
+<div id="mensa-testo"></div>
+<div class="bars" id="b-mensa"></div>
+<p class="src">Quota di alunni della primaria statale che frequentano una scuola in cui almeno un edificio ha uno spazio mensa (campo <code>MENSA</code> degli ambienti funzionali, a.s. 2024/25), sul totale degli alunni di primaria statale. Fonti: MIM, edilizia scolastica statale (dati caricati dagli enti locali) e DS0090 per gli alunni, IODL 2.0. Solo scuole statali: per le paritarie il dato non c&rsquo;è.</p>
+
+<h2 id="competenze">Competenze, dispersione implicita, NEET</h2>
+<div id="inv-testo"></div>
+<h3>Terza media: studenti a rischio di dispersione implicita (%)</h3>
+<div class="ch" id="ch-inv" role="img" aria-label="Grafico: percentuale di studenti di terza media a rischio dispersione implicita, sei città, 2017-18 e 2024-25"></div>
+<div class="lgd" id="lg-inv"></div>
+<p class="src">Percentuale di studenti della terza secondaria di I grado che si fermano ai livelli 1-2 sia in italiano sia in matematica e non raggiungono il livello A2 in inglese (definizione INVALSI). Scuole che stanno nel comune; non c&rsquo;è l&rsquo;anno 2019-20 (prove non svolte). Fonte: INVALSI, Servizio statistico, open data (licenza Creative Commons, citando la fonte).</p>
+<div class="grid2"><div><h3>Le 14 città, 2024-25: terza media</h3><div class="bars" id="b-inv8"></div></div>
+<div><h3>Ultimo anno delle superiori</h3><div class="bars" id="b-inv13"></div></div></div>
+<div id="inv-origine"></div>
+<h3>NEET e altri indicatori della Città metropolitana</h3>
+<div id="bes-testo"></div>
+<div class="scroll"><table id="tab-bes"></table></div>
+<p class="src">Attenzione: &laquo;Milano&raquo; qui è la <b>Città metropolitana</b> (133 comuni), non il solo comune. Fonte: ISTAT, Il Bes dei territori, edizione 2025 (CC BY 4.0), tramite il filone <a href="../benessere/">benessere</a>. NEET = giovani di 15-29 anni che non studiano e non lavorano.</p>
+
+<h2 id="mappa">Dentro Milano: i quartieri</h2>
+<p>Scegli che cosa mostrare sulla mappa. Clic su un quartiere (NIL, Nucleo di Identità Locale) per la scheda, o scegli dall&rsquo;elenco. I dati dei nidi sono del 2018/19 (gli ultimi per sede); quelli delle scuole del 2024/25.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="tp" class="on">Tempo pieno (tutte)</button><button type="button" data-m="ts">Tempo pieno (statali)</button><button type="button" data-m="par">Alunni nelle paritarie</button><button type="button" data-m="me">Mensa (statali)</button><button type="button" data-m="sp">Sedi di nido</button><button type="button" data-m="rd">Reddito stimato</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per l'indicatore scelto"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa © OpenStreetMap contributors. Quartieri: Comune di Milano (CC BY). In grigio i quartieri senza dato: senza scuole primarie (o senza scuole statali), o con meno di 150 bambini di 0-2 anni per i nidi.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<div id="nil-testo"></div>
+<h3>Sedi di nido per municipio, 2018/19</h3>
+<div class="scroll"><table id="tab-mun"></table></div>
+<p class="src">Sedi di nido d&rsquo;infanzia distinte (una sede conta una volta anche se ha più sezioni) nell&rsquo;elenco del Comune di Milano per l&rsquo;a.s. 2018/19 (ds47, CC BY). Bambini di 0-2 anni: residenti 2018 (ds27), sommando i quartieri che stanno per la maggior parte nel municipio. Le sedi dicono dove sono i nidi, non quanti posti hanno.</p>
+<h3>I quartieri con meno tempo pieno (tutte le scuole)</h3>
+<div class="scroll"><table id="tab-ecc"></table></div>
+<p class="src">Quartieri con almeno una scuola primaria. Il valore dipende da poche scuole: un quartiere con 200 alunni è una sola scuola. Dove la colonna «statali» è vuota non ci sono scuole statali. Alunni per scuola, non per residenza.</p>
+
+<h2 id="reddito">Reddito e servizi</h2>
+<div id="red-testo"></div>
+<div class="ctl"><span class="sub">Verticale:</span><button type="button" data-y="tot" class="on">tempo pieno, tutte le scuole</button><button type="button" data-y="sta">tempo pieno, scuole statali</button><button type="button" data-y="par">quota di alunni nelle paritarie</button></div>
+<div class="ch" id="ch-cap" role="img" aria-label="Grafico: reddito medio per CAP e indicatori delle scuole primarie"></div>
+<p class="src">Ogni punto è un CAP (38) con almeno una scuola primaria. Orizzontale: reddito complessivo medio per contribuente, anno d&rsquo;imposta 2024, in euro 2025 (filone <a href="../redditi/">redditi</a>; Comune di Milano ds3009, CC BY). Verticale: dall&rsquo;elenco delle scuole del MIM, per il CAP della scuola (non per la residenza degli alunni).</p>
+<div class="warn"><b>Un confronto, non una prova.</b> Il CAP della scuola non è quello in cui abitano i bambini, e il reddito è per contribuente, non per famiglia con figli.</div>
+<div id="red-nil"></div>
+
+<p class="sub">Per le scuole, quartiere per quartiere, e per le previsioni sugli alunni: <a href="../scuole/">Scuole di Milano</a> e <a href="../scuole-domani/">Le scuole di domani</a>. Per il confronto con le altre province su istruzione e benessere: <a href="../benessere/">Il benessere di Milano</a>. Per i redditi: <a href="../redditi/">Redditi</a>.</p>
+
+<h2 id="limiti">Che cosa non dicono questi dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come è fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p>Tutti i file sono valori aggregati (per città, quartiere o CAP): nessuna scuola e nessun nido singolo. <a href="data/nidi_6citta_serie.csv">nidi_6citta_serie.csv</a>, <a href="data/nidi_14citta_italia_serie.csv">nidi_14citta_italia_serie.csv</a>, <a href="data/nidi_milano_municipi_2018_19.csv">nidi_milano_municipi_2018_19.csv</a>, <a href="data/tempo_pieno_primaria_citta_serie.csv">tempo_pieno_primaria_citta_serie.csv</a>, <a href="data/mensa_primaria_statale_2024_25_citta.csv">mensa_primaria_statale_2024_25_citta.csv</a>, <a href="data/invalsi_dispersione_citta_serie.csv">invalsi_dispersione_citta_serie.csv</a>, <a href="data/invalsi_dispersione_per_origine.csv">invalsi_dispersione_per_origine.csv</a>, <a href="data/bes_istruzione_citta_metropolitane.csv">bes_istruzione_citta_metropolitane.csv</a>, <a href="data/reddito_citta_2024.csv">reddito_citta_2024.csv</a>, <a href="data/milano_cap_tempo_pieno_reddito_2024_25.csv">milano_cap_tempo_pieno_reddito_2024_25.csv</a>, <a href="data/milano_nil_poverta_educativa.csv">milano_nil_poverta_educativa.csv</a>, <a href="data/nil.geojson">nil.geojson</a> (confini dei quartieri, semplificati, con i valori), <a href="data/dati.json">dati.json</a> e <a href="data/riepilogo.json">riepilogo.json</a> (i numeri del testo, con l&rsquo;origine di ciascuno).</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> <b>ISTAT</b>, IstatData (<a href="https://esploradati.istat.it/">esploradati.istat.it</a>), flussi <i>Servizi socio-educativi per la prima infanzia</i> (servizi sul territorio e servizi offerti dai comuni, comuni), scaricati il 1&ndash;2 novembre 2026; licenza Creative Commons Attribuzione 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>). <b>MIM</b> (Ministero dell&rsquo;Istruzione e del Merito), <a href="https://dati.istruzione.it/opendata/">Portale unico dei dati della scuola</a>: alunni per tempo scuola (DS0090, DS0100), edilizia scolastica (ambienti funzionali), anagrafe delle scuole; scaricati il 1&ndash;2 novembre 2026; Italian Open Data License v2.0 (IODL 2.0). <b>INVALSI</b>, Servizio statistico, open data <i>Eccellenza accademica e dispersione scolastica implicita</i> (aggiornato al 3 dicembre 2025), scaricato il 2 novembre 2026, senza registrazione; licenza Creative Commons (la pagina non indica la versione) con obbligo di citare la fonte. <b>Comune di Milano</b>, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: nidi (ds47), residenti per quartiere (ds27), confini dei NIL (ds964), redditi per CAP (ds3009), CC BY. <b>ISTAT Bes dei territori</b> 2025 (CC BY 4.0) e <b>MEF</b>, Redditi e principali variabili IRPEF (CC BY 3.0), tramite i filoni benessere e redditi. Mappa di sfondo: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (ODbL). Dell&rsquo;Osservatorio #conibambini/Openpolis non è stato usato nessun file: i loro numeri sui nidi vengono dai dati ISTAT, che qui sono scaricati alla fonte.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,R=null,NF=null,NIL=[],RD=[];
+var ACC='#00695c',GRY='#9a9a9a',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var COL={'Milano':'#00695c','Roma':'#c26a1b','Torino':'#4b5fa8','Napoli':'#b0357a','Bologna':'#7a7a7a','Firenze':'#9c8400','Italia':'#111','Lombardia':'#5a8f29'};
+var SEI=['Milano','Roma','Torino','Napoli','Bologna','Firenze'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?0:d)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows,hl){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r,k){return '<tr'+(hl&&hl(k)?' class="hl"':'')+'>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+
+Promise.all([J('data/dati.json'),J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];R=a[1];NF=a[2];NIL=NF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();tabella14();nidi();tempo();mense();competenze();mappa();reddito();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- grafici ---------- */
+function bars(id,rows,max,fmt){
+  setH(id,rows.map(function(r){return '<div class="row'+(r.hl?' hl':'')+'"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(Math.max(0,r.v)/max*100)+'%;background:'+(r.c||(r.hl?ACC:GRY))+'"></span></span><span class="v">'+(r.txt!=null?r.txt:fmt(r.v))+'</span></div>'}).join(''));
+}
+function barsPP(id,rows,max){
+  setH(id,rows.map(function(r){return '<div class="row'+(r.hl?' hl':'')+'"><span class="nm">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.a/max*100)+'%;background:'+ACC+'"></span><span class="fill" style="width:'+(r.b/max*100)+'%;background:'+WARM+'"></span></span><span class="v">'+f1(r.a)+' + '+f1(r.b)+'</span></div>'}).join(''));
+}
+/* linee: o={series:[{name,color,w,dash,pts:[[x,y]],dashTo}],x0,x1,ymax,xlab:function,fmt,h,xticks} */
+function lines(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:40,r:W<520?58:78,t:10,b:28};
+  var ys=[];o.series.forEach(function(s){s.pts.forEach(function(p){if(p[1]!=null)ys.push(p[1])})});
+  var y1=o.ymax!=null?o.ymax:Math.max.apply(null,ys),y0=0,sy=niceStep(y1/5);y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,x0=o.x0,x1=o.x1;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var step=(o.xstep||1),lastx=-99;
+  for(v=x0;v<=x1+0.001;v+=step){var xx=X(v);if(xx-lastx>(W<520?30:36)){lastx=xx;s+='<text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xlab(v)+'</text><line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+3)+'" stroke="#888"/>'}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  o.series.forEach(function(se){
+    for(var i=1;i<se.pts.length;i++){var a=se.pts[i-1],b=se.pts[i];if(a[1]==null||b[1]==null)continue;
+      var d=se.dashTo!=null&&b[0]<=se.dashTo;
+      s+='<line x1="'+X(a[0]).toFixed(1)+'" y1="'+Y(a[1]).toFixed(1)+'" x2="'+X(b[0]).toFixed(1)+'" y2="'+Y(b[1]).toFixed(1)+'" stroke="'+se.color+'" stroke-width="'+(se.w||2)+'"'+((d||se.dash)?' stroke-dasharray="'+(se.dash?'3 3':'5 4')+'"':'')+' stroke-linecap="round"/>'}
+    se.pts.forEach(function(p){if(p[1]!=null)s+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="'+((se.w||2)>2?2.8:2)+'" fill="'+se.color+'"/>'});
+  });
+  /* etichette a destra, senza sovrapposizioni */
+  var lab=o.series.map(function(se){var p=se.pts.filter(function(q){return q[1]!=null}).slice(-1)[0];return {n:se.name,c:se.color,y:Y(p[1])}}).sort(function(a,b){return a.y-b.y});
+  for(var k=1;k<lab.length;k++)if(lab[k].y-lab[k-1].y<12)lab[k].y=lab[k-1].y+12;
+  lab.forEach(function(l){s+='<text x="'+(W-m.r+5)+'" y="'+(l.y+4)+'" style="fill:'+l.c+';font-weight:700">'+esc(l.n)+'</text>'});
+  s+='<line id="vl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,vl=svg.querySelector('#vl'),rect=svg.querySelector('rect:last-of-type');
+  var xsall={};o.series.forEach(function(se){se.pts.forEach(function(p){xsall[p[0]]=1})});var xs=Object.keys(xsall).map(Number).sort(function(a,b){return a-b});
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bx=xs[0],bd=1e9;
+    xs.forEach(function(x){var d=Math.abs(X(x)-px);if(d<bd){bd=d;bx=x}});
+    vl.setAttribute('x1',X(bx));vl.setAttribute('x2',X(bx));vl.style.display='';
+    var rows=[];o.series.forEach(function(se){se.pts.forEach(function(p){if(p[0]===bx&&p[1]!=null)rows.push([se.name,se.color,p[1]])})});rows.sort(function(a,b){return b[2]-a[2]});
+    tip.innerHTML='<b>'+o.tiplab(bx)+'</b><br>'+rows.map(function(q){return '<i style="background:'+q[1]+'"></i>'+esc(q[0])+': '+o.fmt(q[2])}).join('<br>');
+    tip.style.display='';var tw=tip.offsetWidth,left=X(bx)/k+10;if(left+tw>r.width)left=X(bx)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){tip.style.display='none';vl.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function scatter(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:44,r:12,t:12,b:42};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=0,y1=o.ymax||Math.max.apply(null,ys);
+  var sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);x0=Math.floor(x0/sx)*sx;x1=Math.ceil(x1/sx)*sx;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var lastx=-99;
+  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);if(xx-lastx>40){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(v)+'</text>'}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-1)+'" text-anchor="start">'+o.yl+'</text>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.2" fill="'+ACC+'" fill-opacity=".72" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tip.style.display='none';ring.style.display='none';return}
+    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tip.innerHTML=p.t;tip.style.display='';var tw=tip.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  function hide(){tip.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function ser(rows,ix,yi){return rows.map(function(r){return [r[0],r[yi==null?1:yi]]})}
+function pct(x){return nf(x,1)+'%'}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var tpa=R.tp_milano_2024_statale,tps=R.tp_statale_seconda,pr=R.paritarie_milano_quota_2024,sc=R.spearman_cap;
+  var h='<p><b>A Milano il tempo pieno alla primaria c&rsquo;è già, quasi ovunque: ci va il '+pct(tpa)+' degli alunni delle scuole statali</b>, la quota più alta delle 14 grandi città (seconda '+esc(tps[0])+', '+pct(tps[1])+'). In '+(R.tp_nil_statali_unita_sotto_50[1]-R.tp_nil_statali_unita_sotto_50[0])+' delle '+R.tp_nil_statali_unita_sotto_50[1]+' scuole primarie statali oltre metà degli alunni è a tempo pieno.</p>';
+  h+='<p><b>La differenza sta soprattutto tra statale e privato, più che tra quartieri.</b> Nelle paritarie, dove va il '+pct(pr)+' degli alunni di primaria, il tempo pieno è al '+pct(R.tp_milano_2024_paritaria)+'. I CAP più ricchi hanno più alunni nelle paritarie (Spearman '+sg(sc.quota_paritaria_vs_reddito[0],2)+') e per questo, con tutte le scuole insieme, hanno <i>meno</i> tempo pieno (Spearman '+sg(sc.tempo_pieno_tot_vs_reddito[0],2)+').</p>';
+  h+='<p>Un secondo dato: il tempo pieno di Milano è fermo da dieci anni ('+pct(R.tp_milano_2015_tot)+' nel 2015, '+pct(R.tp_milano_2024_tot)+' nel 2024), mentre l&rsquo;Italia è passata da '+pct(R.tp_italia_2015_tot)+' a '+pct(R.tp_italia_2024_tot)+'. Non c&rsquo;è un calo: Milano era già in alto.</p>';
+  var s14=R.spearman_14_citta_reddito;
+  h+='<p>Tra le 14 città, infine, il reddito medio spiega quasi tutto: più è alto, più ci sono posti al nido (Spearman '+sg(s14.nidi_p100[0],2)+'), più tempo pieno ('+sg(s14.tp_stat[0],2)+' nelle statali) e meno dispersione implicita in terza media ('+sg(s14.disp8[0],2)+'). Milano ha il reddito più alto ma è quarta per posti al nido: sui servizi alla prima infanzia non è la prima.</p>';
+  h+='<p class="sub">Per i nidi, Milano ha '+nf(R.nidi_milano_p100_2024,1)+' posti ogni 100 bambini di 0-2 anni (Italia '+nf(R.nidi_italia_p100_2024,1)+'), ma metà è privata. <a href="#nidi">Dettagli</a>. Fonti: MIM (DS0090, DS0100), ISTAT.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- tabella 14 città ---------- */
+var T14=null,T14K='reddito',T14D=-1;
+function tabella14(){
+  T14=D.tab14.slice();draw14();
+}
+function draw14(){
+  var cols=[['citta','Città'],['reddito','Reddito medio per contribuente (€)'],['nidi_p100','Posti nido ogni 100 bambini 0-2'],['tp_tot','Tempo pieno primaria, tutte (%)'],['tp_stat','Tempo pieno, statali (%)'],['mensa','Alunni statali con mensa (%)'],['disp8','Dispersione implicita, 3ª media (%)'],['disp13','Dispersione implicita, ultimo anno superiori (%)']];
+  var rows;
+  rows=T14.slice().sort(function(a,b){if(T14K==='citta')return a.citta.localeCompare(b.citta,'it')*(T14D<0?1:-1);var x=a[T14K],y=b[T14K];if(x==null)return 1;if(y==null)return -1;return (y-x)*(T14D<0?1:-1)});
+  var h='<thead><tr>'+cols.map(function(c,i){return '<th class="s'+(i?' r':'')+'" data-k="'+c[0]+'" title="Clicca per ordinare">'+c[1]+(T14K===c[0]?(T14D<0?' ▾':' ▴'):'')+'</th>'}).join('')+'</tr></thead><tbody>';
+  h+=rows.map(function(r){return '<tr'+(r.citta==='Milano'?' class="hl"':'')+'><td>'+esc(r.citta)+'</td><td class="r">'+f0(r.reddito)+'</td><td class="r">'+f1(r.nidi_p100)+'</td><td class="r">'+f1(r.tp_tot)+'</td><td class="r">'+f1(r.tp_stat)+'</td><td class="r">'+f1(r.mensa)+'</td><td class="r">'+f1(r.disp8)+'</td><td class="r">'+f1(r.disp13)+'</td></tr>'}).join('')+'</tbody>';
+  setH('tab14',h);
+  Array.prototype.forEach.call(document.querySelectorAll('#tab14 th.s'),function(th){th.addEventListener('click',function(){var k=th.getAttribute('data-k');if(k===T14K)T14D=-T14D;else{T14K=k;T14D=-1}draw14()})});
+}
+
+/* ---------- nidi ---------- */
+function nidi(){
+  var M=D.nidi.Milano,m=R;
+  var h='<p>I servizi per la prima infanzia (nidi, micronidi, sezioni primavera) sono il primo gradino. L&rsquo;obiettivo europeo è offrire un posto ad almeno 33 bambini su 100 sotto i 3 anni. Nel 2024 <b>Milano ha '+nf(m.nidi_milano_posti_2024,0)+' posti autorizzati, '+f1(m.nidi_milano_p100_2024)+' ogni 100 bambini di 0-2 anni</b>: sopra la media italiana ('+f1(m.nidi_italia_p100_2024)+') e lombarda ('+f1(m.nidi_lombardia_p100_2024)+'), sotto Firenze, Bologna e Roma.</p>';
+  h+='<p><b>La metà di questi posti è privata</b>: '+f1(m.nidi_milano_p100_pub_2024)+' posti pubblici e '+f1(m.nidi_milano_p100_priv_2024)+' privati ogni 100 bambini ('+pct(m.nidi_milano_quota_privati_2024)+' dei posti è privato). A Bologna i posti pubblici sono 40,5 ogni 100 bambini, e i privati 16,9. Un posto privato non è per forza più caro o meno accessibile, ma queste fonti non lo dicono.</p>';
+  setH('nidi-testo',h);
+  var sr=SEI.map(function(c){return {name:c,color:COL[c],w:c==='Milano'?3:2,dashTo:c==='Milano'?2022:null,pts:ser(D.nidi[c],0,1)}});
+  function draw(){lines(el('ch-nidi'),{series:sr,x0:2013,x1:2024,ymax:60,xlab:function(v){return W5()?String(v).slice(2):String(v)},tiplab:function(v){return 'Anno '+v},fmt:function(v){return nf(v,1)}})}
+  draw();RD.push(draw);
+  setH('lg-nidi',lgdLine([{color:COL.Milano,t:'Milano'},{color:COL.Milano,dash:true,t:'Milano, anni con salti di serie'}]));
+  var S=m.milano_salti_serie;
+  setH('nidi-salti','<b>Attenzione alla serie di Milano.</b> Secondo l&rsquo;ISTAT i posti pubblici di Milano scendono da '+f0(S.posti_pubblici_2019)+' (2019) a '+f0(S.posti_pubblici_2020)+' (2020), e i posti privati passano da '+f0(S.posti_privati_2021)+' (2021) a '+f0(S.posti_privati_2022)+' (2022): i servizi privati contati sono '+S.servizi_privati_2021+' nel 2021 e '+S.servizi_privati_2022+' nel 2022. Così il rapporto va da '+f1(S.p100_2019)+' a '+f1(S.p100_2021)+' e poi a '+f1(S.p100_2022)+'. Non sembra un cambiamento reale: gli utenti dei servizi del Comune (sotto) restano più o meno gli stessi, e l&rsquo;elenco delle sedi del Comune (ds47) non cambia (371, 373 e 378 sedi tra 2016/17 e 2018/19). Il motivo non si ricava dai dati aperti: può essere un cambio di fonte per i servizi privati. <b>Il livello 2022&ndash;2024 è la stima più recente; il confronto con gli anni prima non è affidabile.</b> Le altre cinque città non hanno salti simili.');
+  var rk=D.nidi_rank_2024.map(function(r){return {nm:r[0],v:r[1],hl:r[0]==='Milano',c:r[0]==='Italia'||r[0]==='Lombardia'?'#111':null}});
+  bars('b-nidi14',rk,60,function(v){return f1(v)});
+  var pp=['Bologna','Firenze','Roma','Milano','Torino','Napoli'].map(function(c){var r=D.nidi[c].filter(function(x){return x[0]===2024})[0];return {nm:c,a:r[2],b:r[3],hl:c==='Milano'}});
+  barsPP('b-nidi-pp',pp,60);
+  setH('lg-pp','<span><i style="background:'+ACC+'"></i>pubblico</span><span><i style="background:'+WARM+'"></i>privato</span>');
+  var u=m.milano_utenti_per100_0_2_ds27;
+  var hu='<h3>Chi usa i servizi del Comune</h3><p>Un altro modo di guardare: gli <b>utenti dei servizi per la prima infanzia offerti dal Comune</b> (nidi comunali e posti pagati o convenzionati dal Comune). A Milano sono '+f0(m.milano_utenti_servizi_comune_2013)+' nel 2013 e '+f0(m.milano_utenti_servizi_comune_2024)+' nel 2024, mentre i residenti di 0-2 anni sono scesi del '+nf(Math.abs(m.milano_0_2_calo_2013_2024_pct),0)+'% (da '+f0(m.milano_0_2_ds27_2013)+' a '+f0(m.milano_0_2_ds27_2024)+'). Ogni 100 bambini di 0-2 anni sono <b>'+f1(100*m.milano_utenti_servizi_comune_2024/m.nidi_milano_bambini_0_2_istat_2024)+'</b> utenti nel 2024 (con i residenti del Comune: '+f1(u['2024'])+'; tra 24,7 e 28,8 dal 2014, 32,2 nel 2013). Nel 2024 la stessa misura è '+f1(D.nidi.Roma[11][10])+' a Roma, '+f1(D.nidi.Bologna[11][10])+' a Bologna, '+f1(D.nidi.Firenze[11][10])+' a Firenze, '+f1(D.nidi.Torino[11][10])+' a Torino, '+f1(D.nidi.Napoli[11][10])+' a Napoli.</p><p class="src">Utenti: ISTAT, flusso <i>Servizi offerti dai comuni</i> (utenti dei servizi). Per confrontare le città il denominatore è quello implicito di ISTAT (posti divisi per posti ogni 100 bambini); per Milano si può usare anche quello del Comune (residenti 0-2 anni, ds27), che dà un numero un po&rsquo; più alto perché i bambini sono meno.</p>';
+  setH('nidi-utenti',hu);
+}
+function W5(){return window.innerWidth<520}
+
+/* ---------- tempo pieno ---------- */
+function tempo(){
+  var h='<p>Il tempo pieno (40 ore settimanali, con la mensa) è la forma di scuola primaria che lascia più ore di scuola ai bambini e meno ore da riempire alle famiglie. In Italia è molto più diffuso al Nord e al Centro che al Sud. Nel 2024/25 a Milano sono a tempo pieno <b>'+pct(R.tp_milano_2024_tot)+'</b> degli alunni di primaria ('+f0(R.tp_alunni_milano_2024)+' alunni in totale): <b>'+pct(R.tp_milano_2024_statale)+'</b> nelle scuole statali e '+pct(R.tp_milano_2024_paritaria)+' nelle paritarie. In Italia la quota è '+pct(R.tp_italia_2024_tot)+' ('+pct(R.tp_italia_2015_tot)+' nel 2015).</p>';
+  h+='<p>Il grafico mostra anche che le altre città si stanno avvicinando: Napoli sale da 18,9% a 34,5% e Venezia da 61,7% a 80,6% in dieci anni. Milano parte più in alto e resta ferma.</p>';
+  setH('tp-testo',h);
+  var G='totale';
+  function draw(){
+    var sr=SEI.concat(['Italia']).map(function(c){return {name:c,color:COL[c],w:c==='Milano'?3:2,dash:c==='Italia',pts:ser(D.tp[c][G],0,2)}});
+    lines(el('ch-tp'),{series:sr,x0:2015,x1:2024,ymax:100,xlab:function(v){return W5()?String(v).slice(2):(v+'/'+String(v+1).slice(2))},tiplab:function(v){return 'a.s. '+v+'/'+String(v+1).slice(2)},fmt:pct});
+  }
+  draw();RD.push(draw);
+  setH('lg-tp',lgdLine([{color:'#111',dash:true,t:'Italia'}]));
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-g]'),function(b){b.addEventListener('click',function(){G=b.getAttribute('data-g');Array.prototype.forEach.call(document.querySelectorAll('button[data-g]'),function(x){x.classList.toggle('on',x===b)});draw()})});
+  var t=D.tp14.filter(function(r){return r[0]!=='Italia'});
+  bars('b-tp14',D.tp14.map(function(r){return {nm:r[0],v:r[1],hl:r[0]==='Milano',c:r[0]==='Italia'?'#111':null}}),100,pct);
+  bars('b-tp14s',D.tp14.slice().sort(function(a,b){return b[2]-a[2]}).map(function(r){return {nm:r[0],v:r[2],hl:r[0]==='Milano',c:r[0]==='Italia'?'#111':null}}),100,pct);
+}
+
+/* ---------- mense ---------- */
+function mense(){
+  var m=R;
+  var h='<p>Una scuola a tempo pieno ha bisogno di una mensa. I dati aperti non dicono se il servizio di mensa c&rsquo;è: dicono se l&rsquo;edificio scolastico ha uno <b>spazio mensa</b>, e questo è già molto diverso da città a città. A Milano il '+pct(m.mensa_milano_pct)+' degli alunni della primaria statale va in una scuola con uno spazio mensa. A Roma il '+pct(m.mensa_roma_pct)+', a Napoli solo il <b>'+pct(m.mensa_napoli_pct)+'</b>; in Italia il '+pct(m.mensa_italia_pct)+'. Il dato non va letto come &laquo;a Napoli non ci sono mense&raquo;: è lo spazio dichiarato dall&rsquo;ente locale (vedi <a href="#limiti">limiti</a>).</p>';
+  setH('mensa-testo',h);
+  bars('b-mensa',D.mensa.map(function(r){return {nm:r[0]==='Italia, altri comuni'?'Italia, esclusi i 14':r[0],v:r[1],hl:r[0]==='Milano',c:r[0]==='Italia'||r[0]==='Italia, altri comuni'?'#111':null}}),100,pct);
+}
+
+/* ---------- competenze ---------- */
+function competenze(){
+  var m=R,pos=m.invalsi8_posizione_milano,O=m.invalsi_per_origine_2024;
+  var h='<p>L&rsquo;INVALSI misura ogni anno le competenze in italiano, matematica e inglese. Dai suoi dati aperti si ricava la <b>dispersione implicita</b>: studenti che arrivano in fondo alla scuola, ma con competenze molto basse. Non è l&rsquo;abbandono scolastico (chi lascia gli studi): sono studenti che restano a scuola con livelli di apprendimento che non bastano. Nel 2024-25 a Milano è in questa condizione il <b>'+pct(m.invalsi8_milano_2024)+'</b> degli studenti di terza media (Italia '+pct(m.invalsi8_italia_2024)+', Napoli '+pct(m.invalsi8_napoli_2024)+') e il '+pct(m.invalsi13_milano_2024)+' di chi è all&rsquo;ultimo anno delle superiori (Italia '+pct(m.invalsi13_italia_2024)+'). Tra le 14 città Milano è seconda per il valore più basso in terza media, dopo '+esc(pos[1])+'.</p>';
+  setH('inv-testo',h);
+  function xi(a){return parseInt(a.slice(0,4),10)}
+  var sr=SEI.map(function(c){return {name:c,color:COL[c],w:c==='Milano'?3:2,pts:D.inv['8'][c].map(function(r){return [xi(r[0]),r[1]]})}});
+  sr.push({name:'Italia',color:'#111',dash:true,pts:D.inv['8'].Italia.map(function(r){return [xi(r[0]),r[1]]})});
+  function draw(){lines(el('ch-inv'),{series:sr,x0:2017,x1:2024,ymax:35,xlab:function(v){return W5()?String(v).slice(2):(v+'-'+String(v+1).slice(2))},tiplab:function(v){return v+'-'+String(v+1).slice(2)},fmt:pct})}
+  draw();RD.push(draw);
+  setH('lg-inv',lgdLine([{color:'#111',dash:true,t:'Italia'}]));
+  var r8=D.inv_rank.slice().filter(function(r){return r[1]!=null&&r[0]!=='Italia'}),r13=D.inv_rank.slice().filter(function(r){return r[2]!=null&&r[0]!=='Italia'}).sort(function(a,b){return a[2]-b[2]});
+  var it8=D.inv['8'].Italia.slice(-1)[0][1],it13=D.inv['13'].Italia.slice(-1)[0][1];
+  bars('b-inv8',r8.map(function(r){return {nm:r[0],v:r[1],hl:r[0]==='Milano'}}).concat([{nm:'Italia',v:it8,c:'#111'}]),35,pct);
+  bars('b-inv13',r13.map(function(r){return {nm:r[0],v:r[2],hl:r[0]==='Milano'}}).concat([{nm:'Italia',v:it13,c:'#111'}]),35,pct);
+  var oi=O.Italia['8'],om=O['Provincia di Milano']['8'];
+  setH('inv-origine','<h3>Chi resta indietro</h3><p>Il dato per origine degli studenti non è dato per i singoli comuni, ma per l&rsquo;intera provincia di Milano e per l&rsquo;Italia. In terza media (2024-25), nella provincia di Milano è a rischio di dispersione implicita il <b>'+pct(om.Nativo)+'</b> degli studenti nati in Italia da genitori italiani e il <b>'+pct(om['Straniero I generazione'])+'</b> di quelli nati all&rsquo;estero ("stranieri di prima generazione"), contro il '+pct(om['Straniero II generazione'])+' degli stranieri nati in Italia. In Italia: '+pct(oi.Nativo)+', '+pct(oi['Straniero I generazione'])+' e '+pct(oi['Straniero II generazione'])+'. Il divario a Milano è grande, ed è tutto sulla prima generazione.</p><p class="src">INVALSI open data, aggregato «Provincia» (Milano) e «Italia», 2024-25. All&rsquo;ultimo anno delle superiori il divario è molto più piccolo: nativi '+pct(O['Provincia di Milano']['13'].Nativo)+', prima generazione '+pct(O['Provincia di Milano']['13']['Straniero I generazione'])+' (provincia di Milano).</p>');
+  var neet=m.neet_milano,B=D.bes;
+  var rowsB=Object.keys(B['02IST006-N22']).filter(function(t){return t!=='Italia'}).map(function(t){var g=function(c){var x=B[c][t];return x?x[1]:null};return {t:t,n:g('02IST006-N22'),s:g('02IST001'),sc:g('12SER002'),mn:g('02IST010P'),ma:g('02IST011P')}});
+  rowsB.sort(function(a,b){return a.n-b.n});
+  var it={n:B['02IST006-N22'].Italia[1],s:B['02IST001'].Italia[1],sc:B['12SER002'].Italia?B['12SER002'].Italia[1]:null,mn:B['02IST010P'].Italia[1],ma:B['02IST011P'].Italia[1]};
+  setH('bes-testo','<p>I NEET (giovani di 15-29 anni che non studiano e non lavorano) nella Città metropolitana di Milano sono il <b>'+pct(neet[1])+'</b> nel '+neet[0]+'. Per questo indicatore l&rsquo;ISTAT non dà il solo comune. Nella tabella le 14 Città metropolitane, in ordine di NEET crescente (anno più recente disponibile per ogni colonna).</p>');
+  table('tab-bes',['Città metropolitana','NEET (%)','Bambini di 4-5 anni a scuola (%)','Bambini nei servizi comunali per l&rsquo;infanzia (%)','Competenza numerica non adeguata, 3ª media (%)','Competenza alfabetica non adeguata, 3ª media (%)'],
+    rowsB.map(function(r){return [esc(r.t),f1(r.n),f1(r.s),f1(r.sc),f1(r.mn),f1(r.ma)]}).concat([['Italia',f1(it.n),f1(it.s),f1(it.sc),f1(it.mn),f1(it.ma)]]),function(k){return rowsB[k]&&rowsB[k].t==='Milano'});
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,CUR='tp',SEL=null,MET={};
+function mkb(vals,k){var s=vals.filter(function(v){return v!=null}).sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]*10)/10);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
+function colore(v,m){if(v==null)return '#bdbdbd';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function mappa(){
+  var ok=function(k){return NIL.map(function(p){return p[k]})};
+  MET={
+   tp:{k:'tp',b:[50,70,90,100],c:pick(5),lab:['meno di 50%','50–70%','70–90%','90–99%','100%'],f:pct,t:'Quota di alunni della primaria a tempo pieno (scuole statali e paritarie che stanno nel quartiere), a.s. 2024/25. Più scuro = più tempo pieno. In grigio i quartieri senza scuole primarie.'},
+   ts:{k:'ts',b:[70,90,99.9],c:pick(4),lab:['meno di 70%','70–90%','90–99%','100%'],f:pct,t:'Come sopra, ma solo scuole statali. Quasi tutta la città è al 100%. In grigio i quartieri senza scuole primarie statali.'},
+   par:{k:'par',b:[10,30,50,99.9],c:pick(5),lab:['meno di 10%','10–30%','30–50%','50–99%','100%'],f:pct,t:'Quota degli alunni della primaria che frequentano una scuola paritaria (privata riconosciuta), a.s. 2024/25. In grigio i quartieri senza scuole primarie. 100% = ci sono solo paritarie.'},
+   me:{k:'me',b:[60,90,99.9],c:pick(4),lab:['meno di 60%','60–90%','90–99%','100%'],f:pct,t:'Quota di alunni della primaria statale in scuole con uno spazio mensa, a.s. 2024/25. Dice che c&rsquo;è lo spazio, non che il servizio funziona. In grigio i quartieri senza scuole primarie statali.'},
+   sp:{k:'sp',b:mkb(ok('sp'),5),c:pick(5),f:function(v){return nf(v,1)},t:'Sedi di nido d&rsquo;infanzia ogni 1.000 bambini di 0-2 anni (residenti 2018), a.s. 2018/19. Conta le sedi, non i posti. In grigio i quartieri con meno di 150 bambini di 0-2 anni, o senza sedi con posizione nota. 66 sedi su 378 non hanno coordinate e non sono sulla mappa (ma sono nel conteggio per municipio).'},
+   rd:{k:'rd',b:mkb(ok('rd'),6),c:pick(6),f:function(v){return f0(v)+' €'},t:'Reddito complessivo medio per contribuente (a.i. 2024, euro 2025), <b>stimato</b> per quartiere dalla media dei CAP pesata con i civici del quartiere in ciascun CAP: i redditi sono noti per CAP, non per quartiere.'}
+  };
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});
+    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+  nilTesto();
+}
+function valNil(p,k){
+  if(k==='tp'||k==='par')return p.al>0?p[k]:null;
+  if(k==='ts'||k==='me')return p.as>0?p[k]:null;
+  if(k==='sp')return p.r02>=150?p.sp:null;
+  return p[k];
+}
+function tipNil(p){var m=MET[CUR],v=valNil(p,CUR);
+  return '<b>'+esc(p.n)+'</b><br>'+(v==null?'nessun dato':m.f(v))}
+function sty(f){var p=f.properties,m=MET[CUR],sel=SEL===p.i;
+  return {fillColor:colore(valNil(p,CUR),m),fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:1}}
+function ricolora(){
+  var m=MET[CUR];LAY.setStyle(sty);if(SEL)bringSel();
+  var h='';
+  m.c.forEach(function(c,i){var t,F=m.f;
+    if(m.lab)t=m.lab[i];else if(i===0)t='meno di '+F(m.b[0]);else if(i===m.b.length)t=F(m.b[i-1])+' o più';else t=F(m.b[i-1])+' – '+F(m.b[i]);
+    h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+  h+='<span><i style="background:#bdbdbd"></i>nessun dato</span>';
+  setH('lg-map',h);setH('map-desc',m.t);
+}
+function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);bringSel();
+  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}
+  scheda(i)}
+function scheda(i){
+  var p=nilById(i);if(!p)return;
+  var h='<h3>'+esc(p.n)+' <span class="sub">(municipio '+p.m+')</span></h3><div class="scroll"><table><tbody>';
+  h+='<tr><td>Alunni di primaria nelle scuole del quartiere</td><td class="r">'+(p.al>0?'<b>'+f0(p.al)+'</b>':'<span class="sub">nessuna scuola primaria</span>')+'</td></tr>';
+  h+='<tr><td>Tempo pieno, tutte le scuole</td><td class="r">'+(p.al>0?'<b>'+pct(p.tp)+'</b>':'')+'</td></tr>';
+  h+='<tr><td>Tempo pieno, scuole statali</td><td class="r">'+(p.as>0?pct(p.ts)+' <span class="sub">('+f0(p.as)+' alunni)</span>':'<span class="sub">nessuna scuola statale</span>')+'</td></tr>';
+  h+='<tr><td>Alunni nelle paritarie</td><td class="r">'+(p.al>0?pct(p.par):'')+'</td></tr>';
+  h+='<tr><td>Alunni statali con spazio mensa</td><td class="r">'+(p.as>0?pct(p.me):'')+'</td></tr>';
+  h+='<tr><td>Bambini di 0-2 anni (residenti 2018)</td><td class="r">'+f0(p.r02)+'</td></tr>';
+  h+='<tr><td>Sedi di nido 2018/19 (con posizione)</td><td class="r">'+f0(p.sd)+(p.r02>=150?' <span class="sub">('+nf(p.sp,1)+' ogni 1.000 bambini)</span>':' <span class="sub">(troppo pochi bambini per un rapporto)</span>')+'</td></tr>';
+  h+='<tr><td>Reddito medio stimato (€, 2024)</td><td class="r">'+f0(p.rd)+(p.cc!=null&&p.cc<60?' <span class="sub">(stima incerta: i civici sono in più CAP)</span>':'')+'</td></tr>';
+  h+='</tbody></table></div><p class="sub">Scuole assegnate al quartiere dalla loro posizione. Pochi alunni = poche scuole.</p>';
+  setH('scheda',h);
+}
+function nilTesto(){
+  var m=R,mx=m.ds47_municipio_max,mn=m.ds47_municipio_min,sp=m.spearman_nil_sedi_nido_reddito;
+  var pm=m.ds47_municipi_altri_min_max,ts=m.nil_tp_statali_sotto_70,mz=m.nil_mensa_sotto_50;
+  setH('nil-testo','<p><b>Nidi.</b> Per sapere dove sono i nidi dentro Milano l&rsquo;unica fonte aperta è l&rsquo;elenco delle sedi del Comune (ds47), fermo al 2018/19: '+m.ds47_sedi_2018_19+' sedi, delle quali '+m.ds47_sedi_comunali_2018_19+' classificate «comunali» (nello stesso elenco la classificazione cambia da un anno all&rsquo;altro: nel 2016/17 le comunali erano 174). Non ci sono posti per sede né liste d&rsquo;attesa né domande: <b>non esistono dati aperti</b> su questi. Con le sedi: il municipio '+mx[0]+' ha '+nf(mx[1],1)+' sedi ogni 1.000 bambini di 0-2 anni, il municipio '+mn[0]+' il più basso con '+nf(mn[1],1)+'; gli altri sette municipi sono tra '+nf(pm[0],1)+' e '+nf(pm[1],1)+'. Tra i '+sp[2]+' quartieri con almeno 150 bambini di 0-2 anni, il legame tra sedi per bambino e reddito stimato è praticamente nullo (Spearman '+sg(sp[0],2)+', da '+sg(sp[3][0],2)+' a '+sg(sp[3][1],2)+').</p><p><b>Scuole.</b> Il tempo pieno in tutte le scuole è sotto il 55% in '+m.nil_tp_tot_sotto_55+' quartieri; in tutti almeno il '+f0(m.nil_tp_tot_sotto_55_quota_paritaria_min)+'% degli alunni è in una scuola paritaria. Nelle statali i quartieri sotto il 70% sono '+ts.length+' ('+ts.map(function(x){return esc(x[0])+' '+pct(x[1])}).join(', ')+'). Per la mensa, i quartieri con meno della metà degli alunni statali in scuole con spazio mensa sono '+mz.length+' ('+mz.map(function(x){return esc(x[0])+' '+pct(x[1])}).join(', ')+').</p>');
+  table('tab-mun',['Municipio','Sedi di nido','di cui «comunali»','Bambini 0-2 (2018)','Sedi ogni 1.000 bambini'],D.nidi_municipi.map(function(r){return [r[0],f0(r[1]),f0(r[2]),f0(r[4]),nf(r[5],1)]}));
+  table('tab-ecc',['Quartiere','Municipio','Alunni primaria','Tempo pieno, tutte (%)','Tempo pieno, statali (%)','Alunni nelle paritarie (%)'],D.nil_eccez_tp.map(function(r){return [esc(r[0]),r[1],f0(r[2]),f1(r[3]),r[4]==null?'—':f1(r[4]),f1(r[5])]}));
+}
+
+/* ---------- reddito ---------- */
+function reddito(){
+  var sc=R.spearman_cap;
+  var cs=R.cap_statali_sotto_90;
+  var h='<p>I redditi sono noti per CAP (38 zone), non per quartiere. Mettendo i CAP in fila per reddito medio per contribuente, il legame con il tempo pieno è <b>negativo</b> se si contano tutte le scuole (Spearman <b>'+sg(sc.tempo_pieno_tot_vs_reddito[0],2)+'</b>, intervallo di confidenza al 95%: da '+sg(sc.tempo_pieno_tot_vs_reddito[2][0],2)+' a '+sg(sc.tempo_pieno_tot_vs_reddito[2][1],2)+'). La ragione sta nelle paritarie: nei CAP più ricchi una quota più alta di alunni va in una scuola paritaria (<b>'+sg(sc.quota_paritaria_vs_reddito[0],2)+'</b>, da '+sg(sc.quota_paritaria_vs_reddito[2][0],2)+' a '+sg(sc.quota_paritaria_vs_reddito[2][1],2)+'), e lì il tempo pieno è raro. Anche tra le sole scuole statali il legame è '+sg(sc.tempo_pieno_statali_vs_reddito[0],2)+', ma viene da pochi CAP: solo '+cs[0]+' su '+cs[1]+' hanno meno del 90% di alunni statali a tempo pieno ('+cs[2].map(function(x){return x[0]+', '+pct(x[1])+', reddito '+f0(x[2])+' €'}).join('; ')+'): sono quasi tutti CAP ad alto reddito, ma sono pochi per dire di più.</p><p class="sub">In parole semplici: quasi tutte le scuole statali hanno il tempo pieno ovunque; nei CAP con redditi alti più alunni vanno in una scuola paritaria, dove il tempo pieno è meno diffuso.</p>';
+  setH('red-testo',h);
+  var Y='tot';
+  function pts(){var o=[];D.cap.forEach(function(r){var y=Y==='tot'?r[2]:(Y==='sta'?r[3]:r[4]);if(y==null||r[5]==null)return;o.push({x:r[5]/1000,y:y,t:'<b>CAP '+r[0]+'</b><br>reddito medio '+f0(r[5])+' €<br>'+(Y==='par'?'alunni nelle paritarie: ':'tempo pieno: ')+pct(y)+'<br>'+f0(r[1])+' alunni di primaria'})});return o}
+  var yl={tot:'tempo pieno, tutte le scuole (%)',sta:'tempo pieno, scuole statali (%)',par:'alunni nelle paritarie (%)'};
+  function draw(){scatter(el('ch-cap'),{pts:pts(),h:300,ymax:100,xl:'reddito medio per contribuente (migliaia di €, 2024)',yl:yl[Y],xf:function(v){return f0(v)}})}
+  draw();RD.push(draw);
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-y]'),function(b){b.addEventListener('click',function(){Y=b.getAttribute('data-y');Array.prototype.forEach.call(document.querySelectorAll('button[data-y]'),function(x){x.classList.toggle('on',x===b)});draw()})});
+  var s14=R.spearman_14_citta_reddito;
+  setH('red-nil','<h3>Tra le città</h3><p>Tra le 14 città il legame con il reddito medio per contribuente è molto più forte che tra i CAP di Milano: nidi (posti ogni 100 bambini) <b>'+sg(s14.nidi_p100[0],2)+'</b> (da '+sg(s14.nidi_p100[2][0],2)+' a '+sg(s14.nidi_p100[2][1],2)+'), tempo pieno in tutte le scuole <b>'+sg(s14.tp_tot[0],2)+'</b>, nelle statali <b>'+sg(s14.tp_stat[0],2)+'</b>, alunni con mensa <b>'+sg(s14.mensa[0],2)+'</b>, dispersione implicita in terza media <b>'+sg(s14.disp8[0],2)+'</b> (da '+sg(s14.disp8[2][0],2)+' a '+sg(s14.disp8[2][1],2)+'); all&rsquo;ultimo anno delle superiori il legame è debole ('+sg(s14.disp13[0],2)+', da '+sg(s14.disp13[2][0],2)+' a '+sg(s14.disp13[2][1],2)+'). Il reddito qui fa da riassunto della distanza tra Nord e Sud: non si può dire quale parte sia &laquo;causa&raquo; del reddito e quale dei servizi. Milano ha il reddito più alto, ma non il primo posto per i nidi.</p><p class="src">Spearman tra le posizioni delle 14 città; intervalli di confidenza al 95% con 5.000 ricampionamenti. Con 14 città il risultato è indicativo.</p>');
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var L=[
+   '<b>Nidi: posti, non bambini.</b> I dati ISTAT contano i posti autorizzati, pubblici e privati, nei servizi per la prima infanzia (nidi, micronidi, sezioni primavera, servizi integrativi). Non dicono quanti posti sono occupati, quanto costano, né quanti bambini restano senza (liste d&rsquo;attesa). Il rapporto è con i residenti di 0-2 anni; per i bambini di 3 anni (ancora al nido) il rapporto è diverso.',
+   '<b>Nidi di Milano: la serie ha salti.</b> Posti pubblici e privati cambiano di migliaia da un anno all&rsquo;altro (2020 e 2022) senza motivo visibile nelle altre fonti. Il confronto tra il 2022&ndash;2024 e gli anni prima non è affidabile. Non abbiamo avuto modo di chiedere chiarimenti all&rsquo;ISTAT.',
+   '<b>Nidi dentro Milano: dati vecchi e senza posti.</b> L&rsquo;elenco del Comune (ds47) è del 2018/19 (ultimo anno), conta sedi e non posti, e per '+R.ds47_senza_posizione_2018_19+' sedi su '+R.ds47_sedi_2018_19+' manca la posizione. La classificazione «comunale / privato» cambia tra un anno e l&rsquo;altro (le sedi «comunali» sono 174 nel 2016/17 e 27 nel 2018/19). Per questo non ci sono dati per quartiere sui posti, e non si può dire quanti nidi manchino in un quartiere. Domande, graduatorie e liste d&rsquo;attesa del Comune non sono dati aperti: sulla stampa ci sono cifre, ma senza un file non le abbiamo usate.',
+   '<b>Tempo pieno.</b> Classificazione del MIM (tempo pieno e tempo normale): non dice quante ore in più, né la qualità. Alunni contati nella scuola, non nel quartiere in cui abitano (più di metà dei bambini di Milano va a scuola fuori dal proprio quartiere, vedi <a href="../scuole/">Scuole di Milano</a>). Per '+f0(R.milano_alunni_primaria_senza_nil)+' alunni di Milano (7,3%) la scuola non è stata assegnata a un quartiere. Le paritarie qui sono scuole private riconosciute; le private non paritarie non sono nel dato del MIM.',
+   '<b>Mensa.</b> Il dato dice che almeno un edificio della scuola ha uno <i>spazio mensa</i>, caricato dall&rsquo;ente locale proprietario; non dice se il servizio di refezione c&rsquo;è, né quanti bambini lo usano, né la tariffa (le tariffe di Milano sono nei dati del Comune, ds2427 e ds2428, ma non il numero di utenti). Dove si mangia in aula o in sala condivisa il dato può essere «no». Solo scuole statali. Per Milano il '+pct(R.mensa_milano_non_nel_file_pct)+' degli alunni è in scuole che non compaiono nel file.',
+   '<b>Dispersione implicita (INVALSI).</b> È una definizione dell&rsquo;INVALSI sulle prove di fine media e di fine superiori, non il dato sull&rsquo;abbandono (che l&rsquo;ISTAT dà per regione, non per comune). Riguarda gli studenti che hanno fatto tutte le prove (a Milano il '+pct(R.invalsi8_milano_copertura_pct)+' degli attesi in terza media). Scuole che stanno nel comune, qualunque sia la residenza degli studenti. Per quartiere o per scuola i dati aperti non ci sono.',
+   '<b>NEET e Bes.</b> «Milano» è la Città metropolitana (133 comuni): i NEET, le competenze e i bambini di 4-5 anni a scuola non sono del solo comune.',
+   '<b>Reddito.</b> Per CAP, per contribuente (non per famiglia con figli). Il collegamento tra CAP e quartiere è stimato (filone città dei 15 minuti). Il CAP delle scuole è quello della scuola.',
+   '<b>Correlazioni.</b> I legami sono tra CAP o quartieri (38 o 63 unità), non tra famiglie: dire che i CAP ricchi hanno meno tempo pieno nelle scuole non vuol dire che i bambini ricchi ne abbiano meno bisogno. Nessuna causa è dimostrata.',
+   '<b>Non incluso.</b> Abbandono scolastico a livello di comune (non trovato nei dati aperti), risultati INVALSI per scuola o quartiere (riservati alle scuole), rette dei nidi, qualità dei servizi, spesa per bambino. Dei dati di Openpolis non è stato usato nessun file.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var L=[
+   '<b>Le 14 città.</b> I capoluoghi delle 14 Città metropolitane, per codice ISTAT del comune (ISTAT, MEF) e codice catastale (MIM). I dati sono per comune.',
+   '<b>Nidi.</b> ISTAT, flusso «Servizi sul territorio – prov. e com.»: posti autorizzati e posti per 100 bambini di 0-2 anni, per titolare pubblico, privato, totale; i due scarichi (6 e 14 città) coincidono nei valori comuni. Milano, utenti dei servizi: flusso «Servizi offerti dai comuni». Il rapporto per 100 bambini degli utenti usa i residenti 0-2 anni del Comune (ds27).',
+   '<b>Sedi dei nidi.</b> Ds47 del Comune: una riga per sede e per fascia d&rsquo;età; le sedi sono contate una volta per anno (nome completo). Il quartiere viene dalle coordinate (punto in poligono, 88 NIL); il municipio dal campo del file, presente per tutte le sedi. Bambini di 0-2 anni per municipio = somma dei residenti dei quartieri che stanno in prevalenza in quel municipio.',
+   '<b>Tempo pieno.</b> File nazionali del MIM «Studenti per tempo scuola» (statali e paritarie), solo righe di «Scuola primaria»; il comune della scuola viene dall&rsquo;anagrafe delle scuole dello stesso anno. Quota = alunni in «Tempo pieno» / alunni. Per i quartieri: scuole di Milano agganciate al NIL dalla posizione (filone scuole); 65 quartieri hanno almeno una primaria.',
+   '<b>Mensa.</b> Dal file «Ambienti funzionali» dell&rsquo;edilizia scolastica statale 2024/25: la scuola ha mensa se almeno un suo edificio ha il campo <code>MENSA</code> = SI. Alunni dalle righe di primaria statale del tempo scuola.',
+   '<b>INVALSI.</b> File «Eccellenza accademica e dispersione scolastica implicita», aggregato «Comune plesso» (scuole che stanno nel comune), riga «Totale»; per origine, «Italia» e «Provincia» di Milano. Il codice 999 (dato mancante) è tolto.',
+   '<b>Redditi.</b> Per le città, reddito complessivo / contribuenti (MEF, 2024, euro correnti). Per i CAP di Milano e per i quartieri vedi il filone redditi; reddito per quartiere = media dei CAP pesata con i civici stimati. Spearman: correlazione tra le posizioni in classifica; intervalli di confidenza al 95% con 5.000 ricampionamenti.',
+   '<b>Pagina costruita da programmi</b> (<code>poverta-educativa/scripts/build.py</code> e <code>pagina.py</code>) che leggono i file scaricati, fanno i controlli (somme, coincidenze tra scarichi, coperture) e scrivono i file di <code>data/</code>. Ogni numero del testo ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a>.'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>
