@@ -2739,3 +2739,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Numeri: 54% delle abitazioni abitate in edifici del 1946-1970, 90% prima del 1981, 6% dopo il 1990. Più vecchi Magenta-S. Vittore e Porta Venezia; più nuovi Barona, Rogoredo-Santa Giulia, Gratosoglio; boom del dopoguerra a Lorenteggio (83%). Prezzi OMI più alti dove i palazzi sono più vecchi (confronto, centralità).
 
 - 2026-11-02 — **Controllo generale del sito** (report in `_controllo/controllo_sito.md`): corretti un link rotto, un fetch senza no-cache, sbordi a 375 px; aggiunta la sezione "Limiti dei dati" a 7 pagine (testi presi solo da NOTE e JOURNAL), titolo uniforme "Limiti dei dati" in 13 pagine, favicon vuota su tutte, titoli "Milano in dati · …", frase della home aggiornata. Generatori aggiornati di conseguenza (vie, censimenti, beni culturali, popolazione e altri modelli).
+
+## 71. Reati e sicurezza in città
+
+- 2026-11-02 — Ricerca e pagina (`reati-citta/`, `docs/reati-citta/`), richiesta di Davide ("qualcosa sui reati commessi in città"). Dettagli in `reati-citta/NOTE.md`.
+- Verdetto: nessun dato aperto sui reati sotto il livello del comune (Comune, Regione, Polizia Locale, ATM cercati). Pagina fatta con tre serie ufficiali aperte non presenti in `reati/`: ISTAT "altri delitti" mensili per provincia (maltrattamenti in famiglia, stalking, diffusione di immagini intime), ISTAT sicurezza percepita nei 27 grandi comuni 2022-2024, Comune ds516 interventi per aggressioni 2004-2015 (serie chiusa). Tutto CC BY.
+- Numeri: maltrattamenti in famiglia 2024 47,5 ogni 100.000 abitanti (Italia 49,0), dal 2018 +25% (Italia +68%); stalking 30,4 (Italia 36,1). Milano 1ª su 27 grandi comuni per chi si sente insicuro a camminare da solo al buio (43,2% nel 2024).
+- Limiti dei dati: provincia, non città; reati denunciati, non commessi; la percezione non è un conteggio dei reati.

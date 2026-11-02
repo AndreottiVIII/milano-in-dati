@@ -81,7 +81,8 @@
     { path: 'poverta-educativa/', label: 'Povertà educativa' },
     { path: 'parcheggi/', label: 'Parcheggi' },
     { path: 'targhe/', label: 'Lapidi e targhe' },
-    { path: 'palazzi/', label: 'Età dei palazzi' }
+    { path: 'palazzi/', label: 'Età dei palazzi' },
+    { path: 'reati-citta/', label: 'Reati e sicurezza in città' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
