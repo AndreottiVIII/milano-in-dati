@@ -6,7 +6,6 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 
 ## Decisioni aperte per Davide
 
-1. **Grafica della home**: 24 bozze in `bozze-home/`. Davide vuole una copertina di tutte le ricerche; "forse la 21 (tessere), ma per ora non scegliamo".
 
 ## Filone per filone
 
@@ -98,6 +97,6 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 84 | Terzo settore | Online |
 | 85 | Imprese | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
-| — | Home | Bozze grafiche pronte, scelta in attesa |
+| — | Home | Online: tessere per tema (bozza 21), con ricerca |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.

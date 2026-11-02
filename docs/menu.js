@@ -96,7 +96,8 @@
     { path: 'sport/', label: 'Impianti sportivi' },
     { path: 'violenza-donne/', label: 'Violenza contro le donne' },
     { path: 'terzo-settore/', label: 'Associazioni e terzo settore' },
-    { path: 'imprese/', label: 'Imprese che nascono e muoiono' }
+    { path: 'imprese/', label: 'Imprese che nascono e muoiono' },
+    { path: 'elenco/', label: 'Elenco di tutte le pagine' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
@@ -208,7 +209,7 @@
   // ---- "Pagine vicine": in fondo a ogni pagina (non sulla home né sulle bozze), 3-5 link a pagine dello stesso tema.
   // L'elenco dei temi sta in docs/temi.json (letto una volta); se manca o qualcosa va storto, la pagina resta com'è.
   try {
-    if (!isHome && current && here.indexOf(rootPath + 'prova-home/') !== 0 && window.fetch) {
+    if (!isHome && current && here.indexOf(rootPath + 'elenco/') !== 0 && window.fetch) {
       fetch(new URL('temi.json', rootUrl).href, { cache: 'no-cache' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (T) {
