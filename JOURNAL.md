@@ -2732,3 +2732,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-02 — **Davide: "ANMIG mi autorizza"** a usare i dati di Pietre della Memoria (pietredellamemoria.it) per la pagina targhe. Autorizzazione dichiarata da Davide in chat, nessun documento scritto nel progetto. Si usano solo campi fattuali con citazione; niente foto dei volontari. Fase 2 delle targhe avviata.
 - 2026-11-02 — **Targhe, fase 2 con Pietre della Memoria (autorizzazione ANMIG dichiarata da Davide)**: 395 schede scaricate a 1 richiesta ogni 1,3 s (pietre d'inciampo escluse), pubblicati solo campi fattuali e link alle schede, niente foto. 519 targhe in tutto; solo 40 delle 334 di Pietre della Memoria compaiono anche nei dati aperti. Resistenza 159 targhe; donne 4 su 114 persone di sesso noto (solo Wikidata P21, sottostima dichiarata); anno di posa noto per 89. Il risultato "i dati aperti vedono una targa su otto" resta a parte.
 
+## 70. Quanto sono vecchi i palazzi
+
+- 2026-11-02 — Analisi e pagina (`palazzi/`, `docs/palazzi/`). Dettagli in `palazzi/NOTE.md`.
+- Fonti: censimento 2011 per sezione (epoca di costruzione degli edifici, ISTAT CC BY 4.0, dal filone censimenti); abitazioni per epoca solo per municipio (Comune ds1456) e per NIL nel 1991. Il 2021 non ha l'epoca; il DBT non ha l'anno di costruzione.
+- Numeri: 54% delle abitazioni abitate in edifici del 1946-1970, 90% prima del 1981, 6% dopo il 1990. Più vecchi Magenta-S. Vittore e Porta Venezia; più nuovi Barona, Rogoredo-Santa Giulia, Gratosoglio; boom del dopoguerra a Lorenteggio (83%). Prezzi OMI più alti dove i palazzi sono più vecchi (confronto, centralità).
+
+- 2026-11-02 — **Controllo generale del sito** (report in `_controllo/controllo_sito.md`): corretti un link rotto, un fetch senza no-cache, sbordi a 375 px; aggiunta la sezione "Limiti dei dati" a 7 pagine (testi presi solo da NOTE e JOURNAL), titolo uniforme "Limiti dei dati" in 13 pagine, favicon vuota su tutte, titoli "Milano in dati · …", frase della home aggiornata. Generatori aggiornati di conseguenza (vie, censimenti, beni culturali, popolazione e altri modelli).

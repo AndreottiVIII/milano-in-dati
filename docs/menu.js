@@ -80,7 +80,8 @@
     { path: 'rifiuti/', label: 'Rifiuti e differenziata' },
     { path: 'poverta-educativa/', label: 'Povertà educativa' },
     { path: 'parcheggi/', label: 'Parcheggi' },
-    { path: 'targhe/', label: 'Lapidi e targhe' }
+    { path: 'targhe/', label: 'Lapidi e targhe' },
+    { path: 'palazzi/', label: 'Età dei palazzi' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

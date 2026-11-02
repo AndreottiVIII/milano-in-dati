@@ -1,7 +1,7 @@
 """Parti comuni (CSS e funzioni JS) delle tre pagine popolazione. Usato da pagine_html.py. Stesso stile di docs/alberi/index.html."""
 
 HEAD = """<!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · @@TITOLO@@</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>

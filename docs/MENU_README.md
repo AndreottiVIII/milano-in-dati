@@ -16,7 +16,7 @@ I link "← Milano in dati" che stavano in alcune pagine sono stati tolti: li so
 ## Pagine che portano il tag
 
 - `docs/index.html` (tag `menu.js`, senza `../`)
-- `docs/<sezione>/index.html` per tutte e 16 le sezioni: temperature, vie, beni-culturali, elezioni, aria, area-c, bici-auto-mezzi, scala, citta-15-minuti, violenza-politica, milano-raccontata, neve-e-nebbia, derby, nomi-fermate, cinema-spariti, acqua-del-sindaco.
+- `docs/<sezione>/index.html` per tutte le sezioni elencate in `SEZIONI` dentro `docs/menu.js` (ogni cartella con un `index.html`).
 
 ## Programmi e modelli che scrivono una pagina (il tag c'è, così una ricostruzione lo mantiene)
 
@@ -26,4 +26,4 @@ I link "← Milano in dati" che stavano in alcune pagine sono stati tolti: li so
 - `cinema-spariti/scripts/pagina_template.html` (usato da `pagina_dati.py`)
 - `derby/scripts/pagina_template.html` (usato da `pagina_dati.py`)
 
-Le altre pagine (temperature, elezioni, aria, area-c, citta-15-minuti, scala, violenza-politica, milano-raccontata, neve-e-nebbia, nomi-fermate, bici-auto-mezzi, prezzi-case, bilancio-comune, appalti, affitti-brevi, case-servizi-reddito, alberi, cani, morti, matrimoni, biblioteche, redditi, scuole, pioggia, caldo, costo-vita, metro, ristoranti, turisti, pietre-inciampo, luoghi-cercati, scuole-domani, quartieri-che-cambiano, pollini, case-popolari, beni-confiscati, voto-reddito, antenne, costruzioni, arrivi-partenze, comunita, eta, benessere, statue, incroci, amministratori, botteghe, suolo, pendolari, reati, quartiere, permettersi, viaggio-linea, speranza-vita, case-vuote, fondi-quartieri, quartiere-ideale, divisa, sfratti, lavoro, rigenerazione, rifiuti, poverta-educativa, parcheggi, targhe) sono scritte a mano: i programmi di quelle cartelle producono solo `data/`. `bici-auto-mezzi/scripts/f4_inserisci.py` inserisce soltanto una sezione dentro la pagina esistente e non tocca il `<head>`.
+Le altre pagine (temperature, elezioni, aria, area-c, citta-15-minuti, scala, violenza-politica, milano-raccontata, neve-e-nebbia, nomi-fermate, bici-auto-mezzi, prezzi-case, bilancio-comune, appalti, affitti-brevi, case-servizi-reddito, alberi, cani, morti, matrimoni, biblioteche, redditi, scuole, pioggia, caldo, costo-vita, metro, ristoranti, turisti, pietre-inciampo, luoghi-cercati, scuole-domani, quartieri-che-cambiano, pollini, case-popolari, beni-confiscati, voto-reddito, antenne, costruzioni, arrivi-partenze, comunita, eta, benessere, statue, incroci, amministratori, botteghe, suolo, pendolari, reati, quartiere, permettersi, viaggio-linea, speranza-vita, case-vuote, fondi-quartieri, quartiere-ideale, divisa, sfratti, lavoro, rigenerazione, rifiuti, poverta-educativa, parcheggi, targhe, palazzi) sono scritte a mano: i programmi di quelle cartelle producono solo `data/`. `bici-auto-mezzi/scripts/f4_inserisci.py` inserisce soltanto una sezione dentro la pagina esistente e non tocca il `<head>`.

@@ -75,7 +75,7 @@ n_inc = int((W.confidenza == 'incerto').sum())
 osm_ts = P.get('osm_timestamp', '2026-10-29T14:21Z')
 
 page = f"""<!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · Le vie intitolate a donne</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
@@ -113,6 +113,17 @@ Fonte dei numeri: <a href="data/percentuali.json">data/percentuali.json</a> (cal
 <div class="scroll"><table><tr><th>Via</th><th>Persona</th><th>Anni</th><th>Professione</th><th>Intitolata il</th><th>Note</th></tr>{''.join(lis)}</table></div>
 <p class="src">Fonti: persona e anni da Wikidata (<code>strade_classificate_v2.csv</code>: persona, nascita, morte, professioni); data di intitolazione dal registro del Comune (campo <code>DATA_INTITOLAZIONE</code>, spesso vuoto). I 56 casi dubbi sono stati decisi uno per uno il 29/10/2026: <a href="data/decisioni_davide.csv">elenco delle decisioni (CSV)</a>; tra questi, le vie "Santa Maria…" contano come donna (la Madonna) e Via Donna Prassede come personaggio dei Promessi Sposi.</p>
 
+<h2 id="limiti">Limiti dei dati</h2>
+<ul>
+<li><b>Il conteggio dipende da OpenStreetMap e da Wikidata, che cambiano di continuo.</b> I dati sono del 29 ottobre 2026: tra qualche mese i conteggi cambieranno, e vanno sempre citati con la data.</li>
+<li><b>L'etimologia in OpenStreetMap è incompleta.</b> Solo il 28% delle strade ha il tag; di quelle che lo hanno, il 27% non punta a una persona. Per le altre la persona è stata cercata su Wikidata dal nome della via: funziona bene sui nomi completi, male su titoli e nomi parziali (Santa, Madre, Don, Padre) e sulle sante, difficili da distinguere dalle chiese.</li>
+<li><b>«Sicuro» non vuol dire verificato a mano.</b> Un solo candidato su Wikidata può comunque essere l'omonimo sbagliato; il controllo a campione è stato fatto solo sulle donne. Alcuni tag sono indiretti: Piazza della Scala punta a Regina della Scala, ed è contata come donna perché è il tag di OpenStreetMap.</li>
+<li><b>Casi dubbi.</b> Le vie «Santa Maria…» sono quasi sempre chiese, non persone: qui contano come donna (la Madonna) per scelta, come i 56 casi dubbi decisi uno per uno (elenco nel CSV). Le percentuali con e senza i casi incerti danno un intervallo, non un solo numero.</li>
+<li><b>La data di intitolazione c'è solo per circa il 31% delle vie</b> e manca soprattutto per le vie storiche; ci sono anche valori segnaposto (come 1700-01-01). Per decennio i numeri sono molto piccoli.</li>
+<li><b>Le vie non sono i nomi.</b> Un nome in OpenStreetMap può essere più strade, e una stessa via può avere più nomi scritti in modo diverso; il registro del Comune e OpenStreetMap non coincidono del tutto (248 vie sono solo in OpenStreetMap).</li>
+<li><b>Confronti con altre cifre.</b> Mapping Diversity (febbraio 2023) e il censimento citato dalla stampa (2019) usano altri metodi e altre date: le differenze vanno lette con cautela.</li>
+</ul>
+
 <footer>
 <p><b>Fonti e licenze.</b> Vie, geometrie ed etimologie: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, licenza ODbL; i dati derivati qui pubblicati (<code>vie_donne.geojson</code>, tabelle CSV) sono quindi anch&rsquo;essi ODbL (condivisione alla pari, con attribuzione). Persone, sesso, date: <a href="https://www.wikidata.org">Wikidata</a>, CC0. Registro dei numeri civici e date di intitolazione: <a href="https://dati.comune.milano.it/dataset/ds634-numeri-civici-coordinate">Comune di Milano, ds634</a>, CC BY. Mappa di base: tessere OpenStreetMap (&copy; OpenStreetMap contributors), rese in grigio.</p>
 <p>Confronti: Mapping Diversity (OBC Transeuropa / EDJNet, febbraio 2023) conta per Milano 135 donne su 2.677 vie dedicate a persone (5,0%); un censimento citato dalla stampa nel 2019 ne contava 141 su 4.250 vie. Le differenze di metodo sono spiegate in <code>NOTE.md</code> (sezione Fase 2).</p>
@@ -125,7 +136,7 @@ var map = L.map('map').setView([45.4642, 9.19], 12);
 L.tileLayer('https://tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}}).addTo(map);
 function esc(s) {{ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) {{ return {{'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}}[c]; }}); }}
-fetch('data/vie_donne.geojson').then(function(r) {{ return r.json(); }}).then(function(g) {{
+fetch('data/vie_donne.geojson',{{cache:'no-cache'}}).then(function(r) {{ return r.json(); }}).then(function(g) {{
   var layer = L.geoJSON(g, {{
     style: function(f) {{ var inc = f.properties.confidenza === 'incerto'; return {{color: '#c2185b', weight: inc ? 3 : 5, opacity: inc ? 0.75 : 1, dashArray: inc ? '6 6' : null}}; }},
     onEachFeature: function(f, l) {{
