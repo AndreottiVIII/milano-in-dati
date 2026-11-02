@@ -2848,3 +2848,12 @@ python -I scripts\inventario.py <cartella censimenti>
 ## 86. Fonti e metodo
 
 - 2026-11-02 — Pagina `docs/fonti/` (programma `fonti/scripts/pagina.py`, voluta da Davide): tutte le fonti di tutte le pagine con licenza, data e limiti, come lavoriamo, e 32 frasi sui dati che non esistono in forma aperta. 87 pagine, 305 righe pagina × editore, 50 editori (Comune di Milano in 66 pagine, OpenStreetMap 55, ISTAT 35). Estrazione automatica dalle pagine, corretta a mano su circa 45 pagine in `fonti/scripts/correzioni.json`; alcune righe restano approssimate (segnalate); 16 righe senza data.
+
+## 87. Incroci tra tutti i dati
+
+- 2026-11-02 — Studio esplorativo chiesto da Davide prima di fare nuove schede (`incroci-esplorativi/`, risultati e limiti in `RAPPORTO.md`). Nessuna pagina, nessun dato nuovo scaricato, `docs/` non toccato.
+- Metodo: 70 quartieri con almeno 3.000 residenti, 11.439 coppie di variabili, correzione per le prove multiple, controlli per distanza dal Duomo, reddito, età e densità, permutazioni spaziali; serie mensili e annuali senza stagione, tendenza e Covid. Poi un secondo agente ha rifatto i calcoli da zero senza leggere le conclusioni (`verifica/`). Dove i giudizi divergono vale la tabella in testa al rapporto.
+- Reggono: affluenza e mortalità (-0,68 a parità); il reddito per CAP descrive male San Siro, Giambellino e Rogoredo-Santa Giulia; la pioggia toglie moto dall'Area C (da -22% a -33%) e quasi non cambia le auto; le Olimpiadi raddoppiano le letture dall'estero, ma su poche voci; i municipi spiegano poco; la mappa del Covid 2020 per quartiere non si distingue dal caso.
+- Ridimensionati: voto e laureati ("il reddito non conta" non si può dire), laureati del 1991, denunce da fine 2023 (solo maltrattamenti), Airbnb e aree gioco (il primo studio sbagliava sulla vicinanza). Riaperto come indizio: Airbnb e bambini 2019-2024. Morti al ricontrollo: famiglie piccole e sinistra, divario di lavoro e affluenza, notti in albergo e Linate.
+- Difetti nei programmi segnati in testa al rapporto e non corretti: da sistemare prima di riusare quelle colonne.
+- Confronti tra zone, non tra persone; correlazione non è causa. Nessuna scoperta su cittadinanza o comunità straniere: usate solo come controllo.
