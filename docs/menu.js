@@ -98,7 +98,8 @@
     { path: 'terzo-settore/', label: 'Associazioni e terzo settore' },
     { path: 'imprese/', label: 'Imprese che nascono e muoiono' },
     { path: 'elenco/', label: 'Elenco di tutte le pagine' },
-    { path: 'fonti/', label: 'Fonti e metodo' }
+    { path: 'fonti/', label: 'Fonti e metodo' },
+    { path: 'oltre-il-reddito/', label: 'Oltre il reddito' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

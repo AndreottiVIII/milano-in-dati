@@ -4,7 +4,7 @@ Il 2 novembre 2026 un secondo agente ha rifatto i calcoli da zero, senza leggere
 
 | Risultato | Primo studio | Dopo il ricontrollo | Motivo |
 |---|---|---|---|
-| Affluenza e mortalità | FORTE | **FORTE** | -0,68 per entrambi; 84 prove su 84 negative; nessun meccanismo lo crea. Con i laureati -0,45, nello stesso CAP -0,42 |
+| Affluenza e mortalità | FORTE | **FORTE** | -0,68 per entrambi; 84 prove su 84 negative; nessun meccanismo lo crea. Tenendo pari anche i laureati va da -0,57 (Camera 2022, morti 2022-24) a -0,30 (media di otto elezioni, morti 2012-19); nello stesso CAP da -0,55 a -0,42. Nella fascia di reddito più bassa 1,11 contro 1,02 sommando le morti: 1,15 e 0,98 sono la media semplice dei quartieri |
 | Reddito per CAP e quartieri | FORTE | **FORTE per 3 quartieri** | San Siro, Giambellino, Rogoredo-Santa Giulia. Il resto della lista cambia con i pesi |
 | Pioggia e moto in Area C | FORTE | **FORTE, misura da -22% a -33%** | Dipende da come si definisce la giornata di pioggia. Auto da +1% a +3% |
 | Olimpiadi e Wikipedia | FORTE | **FORTE, ma solo su poche voci** | Meazza e Unipol Dome fanno il 57% del salto, 10 voci il 94%; senza le prime 20 resta +7% |

@@ -2857,3 +2857,13 @@ python -I scripts\inventario.py <cartella censimenti>
 - Ridimensionati: voto e laureati ("il reddito non conta" non si può dire), laureati del 1991, denunce da fine 2023 (solo maltrattamenti), Airbnb e aree gioco (il primo studio sbagliava sulla vicinanza). Riaperto come indizio: Airbnb e bambini 2019-2024. Morti al ricontrollo: famiglie piccole e sinistra, divario di lavoro e affluenza, notti in albergo e Linate.
 - Difetti nei programmi segnati in testa al rapporto e non corretti: da sistemare prima di riusare quelle colonne.
 - Confronti tra zone, non tra persone; correlazione non è causa. Nessuna scoperta su cittadinanza o comunità straniere: usate solo come controllo.
+
+## 88. Oltre il reddito
+
+- 2026-11-02 — Pagina `docs/oltre-il-reddito/` (programma `oltre-il-reddito/scripts/build.py`, dettagli in `oltre-il-reddito/NOTE.md`), scelta da Davide tra i risultati di `incroci-esplorativi/`.
+- Numeri: 70 quartieri. Nel terzo con meno affluenza alla Camera 2022 16.913 morti 2022-2024 contro 15.661 attese (+8%), nel terzo con più affluenza 13.445 contro 14.665 (-8%); legame -0,80, a parità di reddito, età, distanza e densità -0,69. Un indice senza reddito, senza morti e senza affluenza segue la mortalità meglio del reddito (-0,61 contro -0,03; con le morti 2012-2019 -0,47 contro -0,29). Con 5.000 pesi casuali restano stabili solo Giambellino, San Siro e Rogoredo-Santa Giulia.
+- Limiti dei dati: confronto tra zone, non tra persone; tenendo pari i laureati il legame va da -0,57 a -0,30 secondo la misura; residenze per anziani non note (Morivione segnato con cautela); indice in parte del 2011.
+- Scelta rispetto ai primi calcoli: nella fascia di reddito più bassa i rapporti sono 1,11 e 1,02 sommando le morti; 1,15 e 0,98 sono la media semplice, indicata sotto il grafico.
+- Avviso sul reddito per CAP aggiunto ai limiti dei dati di `speranza-vita`, `lavoro` (anche nel template), `voto-reddito`, `quartiere`, chiesto da Davide.
+- Davide: le 100 pagine non hanno fretta, gli interessava capire cosa emerge dai dati.
+- Pagina Fonti e metodo rigenerata con la pagina nuova: 88 pagine, 311 righe.

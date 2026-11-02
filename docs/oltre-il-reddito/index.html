@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Oltre il reddito</title>
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#555;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--org:#c26a1b;--hi:#ffd600}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600;background:#fff}
+td.r,th.r{text-align:right}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.82rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.lim{background:#fff;border:1px solid var(--org);border-left:6px solid var(--org);padding:6px 12px;margin:.6em 0;font-size:.95rem} .lim ul{margin:.3em 0;padding-left:1.2em} .lim li{margin:.45em 0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl input[type=search]{font:inherit;font-size:16px;border:1px solid #777;padding:7px 10px;border-radius:6px;width:100%;max-width:380px;background:#fff;color:var(--ink)}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:5px;border:1px solid #333;border-radius:50%} .lgd i.sq{border-radius:2px}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;height:auto;font:12px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#555} .ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #666;padding:4px 8px;font-size:.82rem;line-height:1.35;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.2);max-width:240px}
+.found{font-size:.9rem;margin:.3em 0;min-height:1.4em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:.6em 0} @media(max-width:620px){.two{grid-template-columns:1fr}}
+.big{border:1px solid var(--line);padding:8px 12px} .big b.n{display:block;font-size:1.9rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.bar{height:14px;background:#eee;margin:.3em 0 .2em} .bar i{display:block;height:100%}
+.tabbox{max-height:480px;overflow:auto;border:1px solid var(--line)} .tabbox th{position:sticky;top:0;z-index:1;box-shadow:0 1px 0 var(--line)}
+td.nm{overflow-wrap:anywhere} .pill{display:inline-block;font-size:.76rem;border:1px solid var(--org);color:var(--warm);background:#fff;border-radius:10px;padding:0 6px;margin-left:4px}
+ul.m li{margin:.35em 0} ol.m li{margin:.4em 0}
+@media(max-width:620px){th,td{padding:5px 4px;font-size:.88rem} h1{font-size:1.5rem}}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Oltre il reddito</h1>
+<p>Il reddito medio per CAP basta a descrivere un quartiere? Per rispondere mettiamo accanto al reddito altre misure, che non sono reddito, e le confrontiamo con quante persone muoiono in ciascun quartiere. Il confronto riguarda i <b id="n-q">70</b> quartieri di Milano con almeno 3.000 residenti (le zone che il Comune chiama Nuclei di Identità Locale). Sono confronti tra zone, non tra persone: leggi prima i <a href="#limiti">limiti dei dati</a>.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="punti">Un punto per quartiere</h2>
+<p>Ogni punto è un quartiere. In orizzontale c&rsquo;è la quota di elettori che ha votato alle politiche del 2022 (Camera); in verticale il rapporto tra le persone morte nel 2022&ndash;2024 e quelle che ci si aspetterebbe per l&rsquo;età dei residenti: <b>1,00</b> vuol dire &laquo;quanto atteso&raquo;, <b>1,10</b> il 10% in più, <b>0,90</b> il 10% in meno. Passa il mouse sul punto, o toccalo, per leggere il nome; oppure cerca un quartiere.</p>
+<div class="ctl"><label for="cerca-sc" class="sub">Cerca un quartiere:</label><input id="cerca-sc" type="search" list="elenco-q" autocomplete="off" placeholder="per esempio San Siro" aria-describedby="found-sc"><datalist id="elenco-q"></datalist></div>
+<div class="found" id="found-sc" aria-live="polite"></div>
+<div class="ch" id="ch-sc" role="img" aria-label="Grafico a punti: affluenza alla Camera 2022 e morti osservate su attese 2022-2024, un punto per ognuno dei 70 quartieri"></div>
+<div class="lgd" id="lg-sc"></div>
+<p class="src" id="src-sc"></p>
+
+<h2 id="tre-gruppi">Tre gruppi di quartieri</h2>
+<div id="terzi-testo"></div>
+<div class="ch" id="ch-terzi" role="img" aria-label="Grafico a barre: morti osservate e attese nei tre gruppi di quartieri per affluenza"></div>
+<div class="lgd" id="lg-terzi"></div>
+<p class="src" id="src-terzi"></p>
+
+<h2 id="stesso-reddito">A parità di reddito</h2>
+<div id="fasce-testo"></div>
+<div class="ch" id="ch-fasce" role="img" aria-label="Grafico: morti osservate su attese, dentro ogni terzo di reddito, per i quartieri con affluenza più bassa e più alta"></div>
+<div class="lgd" id="lg-fasce"></div>
+<p class="src" id="src-fasce"></p>
+
+<h2 id="indice">Un indice senza reddito</h2>
+<div id="indice-testo"></div>
+<div class="ch" id="ch-slope" role="img" aria-label="Grafico a due colonne: posizione di ogni quartiere per reddito e per l'indice senza reddito; evidenziati San Siro, Giambellino e Rogoredo-Santa Giulia"></div>
+<p class="src" id="src-slope"></p>
+<div id="stabili-testo"></div>
+
+<h2 id="risultato">Quale dei due segue meglio la mortalità</h2>
+<div id="risultato-testo"></div>
+
+<h2 id="tabella">I 70 quartieri</h2>
+<p>In ordine alfabetico. Scrivi per cercare un quartiere. I numeri sono quelli dei grafici.</p>
+<div class="ctl"><label for="cerca-tab" class="sub">Filtra:</label><input id="cerca-tab" type="search" autocomplete="off" placeholder="nome del quartiere"></div>
+<div class="found" id="found-tab" aria-live="polite"></div>
+<div class="tabbox"><table id="tab-q"></table></div>
+<p class="src">Reddito: media per contribuente del CAP (anno d&rsquo;imposta 2024), non del quartiere. Affluenza: elettori che hanno votato alla Camera 2022. Morti osservate su attese: 2022&ndash;2024, tutte le età insieme; tra parentesi le morti osservate e quelle attese.</p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="lim"><ul id="limiti-lista"></ul></div>
+
+<h2 id="fonti">Fonti</h2>
+<ul class="m" id="fonti-lista"></ul>
+
+<h2 id="metodo">Come è fatto, in breve</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/quartieri.csv">quartieri.csv</a> (una riga per quartiere: residenti, reddito, affluenza, morti osservate e attese, posizioni; separatore punto e virgola, virgola per i decimali) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Si rifanno con il programma <code>oltre-il-reddito/scripts/build.py</code>.</p>
+<p>Sullo stesso sito: <a href="../speranza-vita/">quanto si vive nei quartieri</a>, <a href="../voto-reddito/">il voto e il reddito</a>, <a href="../lavoro/">il lavoro</a> e <a href="../quartiere/">la scheda di ogni quartiere</a>.</p>
+
+<footer><p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>. Elaborazioni nostre su dati aperti aggregati: nessun dato personale.</p></footer>
+</main>
+<script>
+(function(){
+'use strict';
+var D=null,Q=[];
+var ACC='#00695c',HI='#ffd600';
+var COL3={'San Siro':'#d81b60','Giambellino':'#1565c0','Rogoredo - Santa Giulia':'#ef6c00'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?0:d)}
+function pc(r){return sg(Math.round((r-1)*100),0)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
+function pos(v){return Number.isInteger(v)?v+'°':'circa '+Math.round(v)+'°'}
+function dispName(n){return n.replace(/ - /g,' – ')}
+function nameOf(i){return Q[i]}
+var RD=[];
+
+J('data/riepilogo.json').then(function(d){
+  D=d;Q=d.quartieri;
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  el('n-q').textContent=D.n_quartieri;
+  sorpresa();punti();terzi();fasce();indice();risultato();tabella();limiti();fonti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- apertura ---------- */
+function sorpresa(){
+  var T=D.terzi,A=D.affluenza_mortalita;
+  var h='<p><b>Dove si vota meno, si muore di più: a parità di età, e anche a parità di reddito.</b> Nei quartieri di Milano con meno elettori alle urne alle politiche del 2022, nel 2022&ndash;2024 sono morte più persone di quante ne aspetterebbe l&rsquo;età dei residenti.</p>';
+  h+='<p>Nel terzo di quartieri con meno affluenza: <b>'+f0(T[0].O)+'</b> morti contro '+f0(T[0].E)+' attese (<b>'+pc(T[0].rapporto)+'</b>). Nel terzo con più affluenza: <b>'+f0(T[2].O)+'</b> contro '+f0(T[2].E)+' (<b>'+pc(T[2].rapporto)+'</b>).</p>';
+  h+='<p>Il legame resta anche quando si tengono pari reddito, età media dei residenti, distanza dal Duomo e densità (<b>'+sg(A.parz_4controlli,2)+'</b> su una scala da 0, nessun legame, a &minus;1, legame perfetto). Non vuol dire che votare faccia vivere di più: vuol dire che l&rsquo;affluenza segnala qualcosa dei quartieri che il reddito per CAP non vede bene.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- grafico a punti ---------- */
+var HLT={};   // indici evidenziati dalla ricerca
+function punti(){
+  var dl='';Q.forEach(function(q){dl+='<option value="'+esc(dispName(q.n))+'">'});setH('elenco-q',dl);
+  setH('lg-sc','<span><i style="background:'+ACC+';opacity:.75"></i>un quartiere</span><span><i style="background:'+HI+'"></i>quartiere cercato</span><span><i class="sq" style="background:#fff;border:2px dashed #c26a1b"></i>riga tratteggiata: morti quanto atteso (1,00)</span>');
+  setH('src-sc','Affluenza: votanti su elettori, Camera 2022. Morti osservate su attese: 2022&ndash;2024, tutte le età, attese calcolate con i tassi per età della città. Tra i quartieri, quanto l&rsquo;affluenza e le morti vanno in senso opposto: '+sg(D.affluenza_mortalita.spearman_grezzo,2)+' (da 0 a &minus;1). Tolti reddito, età media, distanza dal Duomo e densità: '+sg(D.affluenza_mortalita.parz_4controlli,2)+'.');
+  function draw(){scatter(el('ch-sc'))}
+  draw();RD.push(draw);
+  el('cerca-sc').addEventListener('input',function(){
+    var v=norm(this.value);HLT={};var hits=[];
+    if(v){Q.forEach(function(q,i){if(norm(q.n).indexOf(v)>=0){HLT[i]=1;hits.push(i)}})}
+    var f=el('found-sc');
+    if(!v)f.innerHTML='';
+    else if(!hits.length)f.textContent='Nessun quartiere con questo nome.';
+    else if(hits.length===1){var q=Q[hits[0]];f.innerHTML='<b>'+esc(dispName(q.n))+'</b>: affluenza '+nf(q.aff,1)+'%, morti osservate su attese '+nf(q.smr,2)+' ('+f0(q.O)+' su '+f0(q.E)+')'+(q.c?' <span class="pill">da leggere con cautela</span>':'')+'.'}
+    else f.textContent=hits.length+' quartieri trovati, evidenziati nel grafico.';
+    scatter(el('ch-sc'));
+  });
+}
+function tipHtml(q){
+  return '<b>'+esc(dispName(q.n))+'</b><br>affluenza '+nf(q.aff,1)+'%<br>morti osservate su attese <b>'+nf(q.smr,2)+'</b><br>('+f0(q.O)+' su '+f0(q.E)+')'+(q.c?'<br><i>da leggere con cautela: possibile residenza per anziani</i>':'');
+}
+function scatter(box){
+  box.innerHTML='';
+  var Wd=Math.max(box.clientWidth||320,260),H=Wd<520?340:400,m={l:42,r:12,t:22,b:46};
+  var x0=50,x1=80,y0=.6,y1=1.5;
+  var pw=Wd-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+Wd+' '+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+1e-9;v+=.1)s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end">'+nf(v,1)+'</text>';
+  for(v=x0;v<=x1+1e-9;v+=5){var xx=X(v);s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+17)+'" text-anchor="middle">'+v+'%</text>'}
+  s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+Y(1).toFixed(1)+'" y2="'+Y(1).toFixed(1)+'" stroke="#c26a1b" stroke-width="1.5" stroke-dasharray="5 4"/>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">affluenza alla Camera 2022</text><text class="mu" x="'+m.l+'" y="'+(m.t-8)+'">morti osservate su attese, 2022–2024</text>';
+  Q.forEach(function(q,i){if(!HLT[i])s+='<circle cx="'+X(q.aff).toFixed(1)+'" cy="'+Y(q.smr).toFixed(1)+'" r="4.5" fill="'+ACC+'" fill-opacity=".7" stroke="#fff" stroke-width="1"/>'});
+  Object.keys(HLT).forEach(function(k){var q=Q[k],cx=X(q.aff),cy=Y(q.smr),left=cx>Wd*.6;
+    s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="7" fill="'+HI+'" stroke="#111" stroke-width="2"/>';
+    s+='<text class="halo" x="'+(left?cx-11:cx+11).toFixed(1)+'" y="'+(cy+4).toFixed(1)+'" text-anchor="'+(left?'end':'start')+'" font-weight="700">'+esc(dispName(q.n))+'</text>'});
+  s+='<circle id="ring" r="8" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=Wd/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    Q.forEach(function(q,i){var d=Math.pow(X(q.aff)-px,2)+Math.pow(Y(q.smr)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tip.style.display='none';ring.style.display='none';return}
+    var q=Q[bi];ring.setAttribute('cx',X(q.aff));ring.setAttribute('cy',Y(q.smr));ring.style.display='';
+    tip.innerHTML=tipHtml(q);tip.style.display='';var tw=tip.offsetWidth,th=tip.offsetHeight,left=X(q.aff)/k+12;if(left+tw>r.width)left=X(q.aff)/k-tw-12;if(left<0)left=0;
+    var top=Y(q.smr)/k-th-8;if(top<0)top=Y(q.smr)/k+12;tip.style.left=left+'px';tip.style.top=top+'px'}
+  function hide(){tip.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- tre gruppi ---------- */
+function terzi(){
+  var T=D.terzi,NM=['Meno affluenza','Affluenza intermedia','Più affluenza'];
+  var h='<p>Mettiamo i '+D.n_quartieri+' quartieri in fila per affluenza e li dividiamo in tre gruppi. Per ogni gruppo confrontiamo le persone morte nel 2022&ndash;2024 con quelle attese per l&rsquo;età dei residenti.</p>';
+  h+='<p>Nel gruppo con meno affluenza ('+T[0].n+' quartieri, dal '+nf(T[0].aff_min,0)+'% al '+nf(T[0].aff_max,0)+'%) i morti sono <b>'+f0(T[0].O)+'</b> contro <b>'+f0(T[0].E)+'</b> attesi: <b>'+pc(T[0].rapporto)+'</b>. Nel gruppo con più affluenza ('+T[2].n+' quartieri, dal '+nf(T[2].aff_min,0)+'% al '+nf(T[2].aff_max,0)+'%) sono <b>'+f0(T[2].O)+'</b> contro <b>'+f0(T[2].E)+'</b>: <b>'+pc(T[2].rapporto)+'</b>. In mezzo, il gruppo intermedio è praticamente sull&rsquo;atteso ('+pc(T[1].rapporto)+').</p>';
+  setH('terzi-testo',h);
+  setH('lg-terzi','<span><i class="sq" style="background:'+ACC+'"></i>morti osservate</span><span><i class="sq" style="background:#fff;border:2px solid #111"></i>morti attese per l&rsquo;età dei residenti</span>');
+  setH('src-terzi','Morti dei residenti nel 2022&ndash;2024, somma dei quartieri di ciascun gruppo. Le attese sono calcolate con i tassi per età di tutta la città applicati ai residenti di ogni quartiere. Un gruppo ha un quartiere in più perché 70 non si divide per tre.');
+  function draw(){
+    var box=el('ch-terzi');box.innerHTML='';
+    var Wd=Math.max(box.clientWidth||320,260),H=320,m={l:46,r:8,t:26,b:62};
+    var pw=Wd-m.l-m.r,ph=H-m.t-m.b,mx=18000;
+    function Y(v){return m.t+ph-v/mx*ph}
+    var s='<svg viewBox="0 0 '+Wd+' '+H+'" aria-hidden="true">';
+    for(var v=0;v<=mx;v+=3000)s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end">'+(v>=1000?f0(v):v)+'</text>';
+    s+='<text class="mu" x="'+m.l+'" y="'+(m.t-10)+'">persone morte nel 2022–2024</text>';
+    var gw=pw/3,bw=Math.min(gw*.36,56);
+    T.forEach(function(t,i){
+      var cx=m.l+gw*i+gw/2,xo=cx-bw-2,xa=cx+2;
+      s+='<rect x="'+xo.toFixed(1)+'" y="'+Y(t.O).toFixed(1)+'" width="'+bw+'" height="'+(Y(0)-Y(t.O)).toFixed(1)+'" fill="'+ACC+'"/>';
+      s+='<rect x="'+xa.toFixed(1)+'" y="'+Y(t.E).toFixed(1)+'" width="'+bw+'" height="'+(Y(0)-Y(t.E)).toFixed(1)+'" fill="#fff" stroke="#111" stroke-width="2"/>';
+      s+='<text x="'+(xo+bw/2).toFixed(1)+'" y="'+(Y(t.O)-5).toFixed(1)+'" text-anchor="middle" font-weight="700">'+f0(t.O)+'</text>';
+      s+='<text x="'+(xa+bw/2).toFixed(1)+'" y="'+(Y(t.E)-5).toFixed(1)+'" text-anchor="middle">'+f0(t.E)+'</text>';
+      s+='<text x="'+cx.toFixed(1)+'" y="'+(m.t+ph+18)+'" text-anchor="middle" font-weight="700">'+pc(t.rapporto)+'</text>';
+      s+='<text class="mu" x="'+cx.toFixed(1)+'" y="'+(m.t+ph+34)+'" text-anchor="middle">'+NM[i]+'</text>';
+      s+='<text class="mu" x="'+cx.toFixed(1)+'" y="'+(m.t+ph+50)+'" text-anchor="middle">'+t.n+' quartieri</text>';
+    });
+    s+='<line x1="'+m.l+'" x2="'+(Wd-m.r)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#888"/></svg>';
+    box.innerHTML=s;
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- dentro le fasce di reddito ---------- */
+function fasce(){
+  var F=D.fasce,C=D.fasce_soglie_reddito;
+  function g(r,a){for(var i=0;i<F.length;i++)if(F[i].reddito===r&&F[i].affluenza===a)return F[i]}
+  var b0=g('basso','bassa'),b1=g('basso','alta');
+  var h='<p>Si potrebbe pensare che l&rsquo;affluenza sia solo un altro modo di dire &laquo;reddito&raquo;. Controlliamo: dividiamo i quartieri in tre fasce di reddito (circa 23 quartieri ciascuna) e, dentro ogni fascia, in due metà, quelli con meno e con più affluenza.</p>';
+  h+='<p>Nella fascia con il reddito più basso (fino a '+f0(C[1])+' &euro;) i quartieri con meno affluenza hanno <b>'+pc(b0.rapporto)+'</b> di morti rispetto alle attese (rapporto '+nf(b0.rapporto,2)+'), quelli con più affluenza <b>'+pc(b1.rapporto)+'</b> ('+nf(b1.rapporto,2)+'). La differenza c&rsquo;è, nello stesso senso, anche nelle altre due fasce: '+pc(g('medio','bassa').rapporto)+' contro '+pc(g('medio','alta').rapporto)+' in quella di mezzo, '+pc(g('alto','bassa').rapporto)+' contro '+pc(g('alto','alta').rapporto)+' in quella con il reddito più alto.</p>';
+  setH('fasce-testo',h);
+  setH('lg-fasce','<span><i style="background:#e65100"></i>meno affluenza (metà più bassa della fascia)</span><span><i style="background:'+ACC+'"></i>più affluenza (metà più alta)</span>');
+  setH('src-fasce','Rapporto tra morti osservate e attese nel 2022&ndash;2024, somma dei quartieri di ogni gruppo (11 o 12 quartieri per gruppo). Fasce di reddito medio per CAP: fino a '+f0(C[1])+' &euro;, da '+f0(C[1])+' a '+f0(C[2])+' &euro;, oltre '+f0(C[2])+' &euro;. Facendo invece la media semplice dei rapporti dei singoli quartieri, che dà lo stesso peso a quartieri grandi e piccoli, la fascia con il reddito più basso dà '+nf(b0.media_dei_rapporti,2)+' contro '+nf(b1.media_dei_rapporti,2)+'. Gruppi piccoli: i numeri sono indicazioni, non misure precise.');
+  var NM={basso:'Reddito più basso',medio:'Reddito intermedio',alto:'Reddito più alto'};
+  function draw(){
+    var box=el('ch-fasce');box.innerHTML='';
+    var Wd=Math.max(box.clientWidth||320,260),rh=64,H=36+rh*3+34,m={l:14,r:14,t:30};
+    var x0=.85,x1=1.2,pw=Wd-m.l-m.r;
+    function X(v){return m.l+(v-x0)/(x1-x0)*pw}
+    var s='<svg viewBox="0 0 '+Wd+' '+H+'" aria-hidden="true">';
+    for(var v=.85;v<=1.2+1e-9;v+=.05){s+='<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+rh*3)+'" stroke="#e3e3e3"/><text class="mu" x="'+X(v).toFixed(1)+'" y="'+(m.t+rh*3+16)+'" text-anchor="middle">'+nf(v,2)+'</text>'}
+    s+='<line x1="'+X(1).toFixed(1)+'" x2="'+X(1).toFixed(1)+'" y1="'+(m.t-6)+'" y2="'+(m.t+rh*3)+'" stroke="#c26a1b" stroke-width="1.5" stroke-dasharray="5 4"/><text class="mu" x="'+X(1).toFixed(1)+'" y="'+(m.t-10)+'" text-anchor="middle">morti quanto attese (1,00)</text>';
+    s+='<text class="mu" x="'+(Wd/2)+'" y="'+(H-4)+'" text-anchor="middle">morti osservate su attese, 2022–2024</text>';
+    ['basso','medio','alto'].forEach(function(r,i){
+      var a=g(r,'bassa'),b=g(r,'alta'),y=m.t+rh*i+rh*.62;
+      s+='<text x="'+m.l+'" y="'+(m.t+rh*i+16)+'" font-weight="700">'+NM[r]+'</text>';
+      s+='<line x1="'+X(a.rapporto).toFixed(1)+'" x2="'+X(b.rapporto).toFixed(1)+'" y1="'+y+'" y2="'+y+'" stroke="#999" stroke-width="3"/>';
+      var aL=a.rapporto<b.rapporto;
+      s+='<circle cx="'+X(a.rapporto).toFixed(1)+'" cy="'+y+'" r="8" fill="#e65100" stroke="#fff" stroke-width="1.5"/><text class="halo" x="'+(X(a.rapporto)+(aL?-13:13)).toFixed(1)+'" y="'+(y+4)+'" text-anchor="'+(aL?'end':'start')+'" font-weight="700">'+nf(a.rapporto,2)+'</text>';
+      s+='<circle cx="'+X(b.rapporto).toFixed(1)+'" cy="'+y+'" r="8" fill="'+ACC+'" stroke="#fff" stroke-width="1.5"/><text class="halo" x="'+(X(b.rapporto)+(aL?13:-13)).toFixed(1)+'" y="'+(y+4)+'" text-anchor="'+(aL?'start':'end')+'" font-weight="700">'+nf(b.rapporto,2)+'</text>';
+    });
+    s+='</svg>';box.innerHTML=s;
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- indice senza reddito ---------- */
+var SS=[];
+function indice(){
+  var I=D.indice,P=I.pesi_casuali,ST=P.stabili;
+  SS=ST;
+  var lst=I.indicatori.map(function(x){return x.nome}).join('; ');
+  var h='<p>Il reddito è una media per CAP, cioè per zone di codice postale che spesso contengono quartieri diversi. Come controllo abbiamo costruito un <b>indice senza reddito</b> con sette misure: '+esc(lst)+'. Ogni misura conta uguale. <b>L&rsquo;indice non contiene né morti né affluenza</b>: quindi si può confrontare con tutte e due senza che il confronto sia costruito in partenza.</p>';
+  h+='<p>In generale reddito e indice vanno d&rsquo;accordo (legame '+nf(I.spearman_indice_reddito,2)+' su una scala da 0 a 1). Ma per alcuni quartieri le due posizioni sono molto lontane. Nel grafico ogni linea è un quartiere: a sinistra la sua posizione per reddito, a destra per indice (1 = valore più alto, 70 = più basso). Le linee grigie sono gli altri 67 quartieri e non hanno il nome: per loro la posizione esatta dipende da come si pesano le sette misure.</p>';
+  setH('indice-testo',h);
+  setH('src-slope','Posizione tra i '+D.n_quartieri+' quartieri. Le tre barre colorate a destra mostrano dove cade il quartiere cambiando a caso i pesi delle sette misure (da 5% a 95% di '+f0(P.n_estrazioni)+' prove).');
+  function draw(){slope(el('ch-slope'))}
+  draw();RD.push(draw);
+  var t='<p>Per vedere quali quartieri restano diversi in ogni caso abbiamo rifatto l&rsquo;indice <b>'+f0(P.n_estrazioni)+' volte con pesi scelti a caso</b> e, ogni volta, guardato quali sono i 10 quartieri con la differenza maggiore tra le due posizioni. Solo tre ci sono quasi sempre: ';
+  t+=ST.map(function(s){return '<b>'+esc(dispName(s.nome))+'</b> ('+nf(s.freq_top10*100,0)+'% delle prove; reddito '+pos(s.pos_red)+', indice '+pos(s.pos_ind)+')'}).join(', ')+'. Nessun altro quartiere supera il '+nf(P.altri_freq_max*100,0)+'%.</p>';
+  t+='<p>San Siro e Giambellino stanno molto più in alto per reddito che per l&rsquo;indice; Rogoredo&ndash;Santa Giulia fa il contrario. Per tutti gli altri la posizione sull&rsquo;indice cambia con i pesi: in 9 prove su 10 resta dentro una fascia larga, tipicamente, circa '+nf(P.altri_ampiezza_mediana,0)+' posti. Per questo non nominiamo nessun altro quartiere, e non c&rsquo;è una graduatoria.</p>';
+  setH('stabili-testo',t);
+}
+function slope(box){
+  box.innerHTML='';
+  var Wd=Math.max(box.clientWidth||320,300),H=600,m={l:112,r:62,t:56,b:12};
+  var xL=m.l,xR=Wd-m.r,n=D.n_quartieri;
+  function Y(p){return m.t+(p-1)/(n-1)*(H-m.t-m.b)}
+  var s='<svg viewBox="0 0 '+Wd+' '+H+'" aria-hidden="true">';
+  s+='<text x="'+xL+'" y="16" text-anchor="middle" font-weight="700">Per reddito</text><text class="mu" x="'+xL+'" y="32" text-anchor="middle">(CAP)</text>';
+  s+='<text x="'+xR+'" y="16" text-anchor="middle" font-weight="700">Per indice</text><text class="mu" x="'+xR+'" y="32" text-anchor="middle">senza reddito</text>';
+  s+='<text class="mu" x="'+xL+'" y="'+(m.t-8)+'" text-anchor="middle">1</text><text class="mu" x="'+xR+'" y="'+(m.t-8)+'" text-anchor="middle">1</text>';
+  s+='<text class="mu" x="'+xL+'" y="'+(H-1)+'" text-anchor="middle" style="display:none">70</text>';
+  var named={};SS.forEach(function(x){named[x.nome]=x});
+  Q.forEach(function(q){if(named[q.n])return;
+    s+='<line x1="'+xL+'" x2="'+xR+'" y1="'+Y(q.pr).toFixed(1)+'" y2="'+Y(q.pi).toFixed(1)+'" stroke="#9aa0a6" stroke-opacity=".55" stroke-width="1"/>'});
+  Q.forEach(function(q){if(named[q.n])return;
+    s+='<circle cx="'+xL+'" cy="'+Y(q.pr).toFixed(1)+'" r="2" fill="#9aa0a6"/><circle cx="'+xR+'" cy="'+Y(q.pi).toFixed(1)+'" r="2" fill="#9aa0a6"/>'});
+  SS.forEach(function(x){var c=COL3[x.nome]||'#111';
+    s+='<rect x="'+(xR-4)+'" y="'+Y(x.pos_ind_p5).toFixed(1)+'" width="8" height="'+(Y(x.pos_ind_p95)-Y(x.pos_ind_p5)).toFixed(1)+'" fill="'+c+'" fill-opacity=".28" rx="3"/>';
+    s+='<line x1="'+xL+'" x2="'+xR+'" y1="'+Y(x.pos_red).toFixed(1)+'" y2="'+Y(x.pos_ind).toFixed(1)+'" stroke="'+c+'" stroke-width="3.5"/>';
+    s+='<circle cx="'+xL+'" cy="'+Y(x.pos_red).toFixed(1)+'" r="5" fill="'+c+'"/><circle cx="'+xR+'" cy="'+Y(x.pos_ind).toFixed(1)+'" r="5" fill="'+c+'"/>';
+    var nm=dispName(x.nome).split(' – '),y=Y(x.pos_red),lines=nm.concat([pos(x.pos_red)]),y0=y-(lines.length-1)*7;
+    lines.forEach(function(l,j){s+='<text x="'+(xL-12)+'" y="'+(y0+j*14+4).toFixed(1)+'" text-anchor="end" font-weight="'+(j<nm.length?'700':'400')+'" style="fill:'+(j<nm.length?c:'#111')+'">'+esc(l)+'</text>'});
+    s+='<text x="'+(xR+14)+'" y="'+(Y(x.pos_ind)+4).toFixed(1)+'" font-weight="700" style="fill:'+c+'">'+esc(pos(x.pos_ind))+'</text>';
+  });
+  s+='</svg>';box.innerHTML=s;
+}
+
+/* ---------- il risultato ---------- */
+function risultato(){
+  var I=D.indice,a=I['indice_a_parita_reddito_2022-2024'],r=I['reddito_a_parita_indice_2022-2024'];
+  var h='<p><b>L&rsquo;indice senza reddito segue la mortalità meglio del reddito, anche se di morti non sa niente.</b> Mettendo i quartieri in fila, l&rsquo;indice resta legato alle morti anche dopo aver tolto tutto ciò che il reddito spiega (<b>'+sg(a,2)+'</b>). Il reddito, invece, una volta tolto ciò che spiega l&rsquo;indice, non aggiunge quasi niente (<b>'+sg(r,2)+'</b>).</p>';
+  h+='<div class="two"><div class="big"><b class="n" style="color:'+ACC+'">'+sg(a,2)+'</b><span>l&rsquo;indice, a parità di reddito</span><div class="bar"><i style="width:'+(Math.abs(a)*100).toFixed(0)+'%;background:'+ACC+'"></i></div></div>';
+  h+='<div class="big"><b class="n" style="color:#555">'+sg(r,2)+'</b><span>il reddito, a parità di indice</span><div class="bar"><i style="width:'+Math.max(Math.abs(r)*100,1).toFixed(0)+'%;background:#555"></i></div></div></div>';
+  h+='<p class="src">Scala da 0 (nessun legame) a &minus;1 (legame perfetto), con la mortalità del 2022&ndash;2024. &laquo;A parità&raquo; vuol dire che nel confronto sono tenuti uguali anche età media dei residenti, distanza dal Duomo e densità. Con le morti del 2012&ndash;2019 la differenza è meno netta: indice '+sg(I['indice_a_parita_reddito_2012-2019'],2)+', reddito '+sg(I['reddito_a_parita_indice_2012-2019'],2)+'. Anche togliendo i laureati dall&rsquo;indice il legame resta ('+sg(I['indice_senza_laureati_a_parita_reddito_2022-2024'],2)+'). È un confronto tra zone: non dice che cosa fa vivere di più o di meno.</p>';
+  setH('risultato-testo',h);
+}
+
+/* ---------- tabella ---------- */
+function tabella(){
+  var h='<thead><tr><th>Quartiere</th><th class="r">Reddito (&euro;)</th><th class="r">Affluenza</th><th class="r">Morti osservate su attese</th></tr></thead><tbody>';
+  Q.forEach(function(q,i){h+='<tr data-n="'+esc(norm(q.n))+'"><td class="nm">'+esc(dispName(q.n))+(q.c?'<span class="pill">cautela</span>':'')+'</td><td class="r">'+f0(q.red)+'</td><td class="r">'+nf(q.aff,1)+'%</td><td class="r">'+nf(q.smr,2)+'<div class="sub">('+f0(q.O)+' su '+f0(q.E)+')</div></td></tr>'});
+  setH('tab-q',h+'</tbody>');
+  var rows=el('tab-q').tBodies[0].rows;
+  el('cerca-tab').addEventListener('input',function(){
+    var v=norm(this.value),c=0;
+    for(var i=0;i<rows.length;i++){var ok=!v||rows[i].getAttribute('data-n').indexOf(v)>=0;rows[i].style.display=ok?'':'none';if(ok)c++}
+    el('found-tab').textContent=v?(c?(c===1?'1 quartiere trovato.':c+' quartieri trovati.'):'Nessun quartiere con questo nome.'):'';
+  });
+}
+
+/* ---------- limiti, fonti, metodo ---------- */
+function limiti(){
+  var A=D.affluenza_mortalita,M8=A.media_otto_elezioni,E=A.estero,P=D.indice.pesi_casuali;
+  var mor=null;Q.forEach(function(q){if(q.c)mor=q});
+  var L=[
+   '<b>Confronto tra zone, non tra persone.</b> Dire che nei quartieri con meno affluenza si muore di più non dice nulla su chi vota e chi no, né su chi muore. Dentro ogni quartiere vivono persone molto diverse.',
+   '<b>Correlazione non è causa.</b> Nessuno vive di più perché vota. L&rsquo;affluenza è una <b>misura di svantaggio</b>, fine e gratuita, che si ha per sezione elettorale; non è una spiegazione di per sé. Lo stesso vale per l&rsquo;indice.',
+   '<b>Il legame si indebolisce con altri controlli, ma non sparisce.</b> Con la Camera 2022 e le morti 2022&ndash;2024 il legame passa da '+sg(A.parz_4controlli,2)+' a '+sg(A.parz_con_laureati,2)+' tenendo pari anche la quota di laureati, e vale '+sg(A.stesso_cap_spearman,2)+' dentro lo stesso CAP ('+A.stesso_cap_n+' quartieri). Con una misura più prudente, la media di otto elezioni contro le morti del 2012&ndash;2019, il legame è '+sg(M8['2012-2019'].a_parita,2)+', scende a '+sg(M8['2012-2019'].con_laureati,2)+' tenendo pari i laureati e a '+sg(M8['2012-2019'].stesso_cap_spearman,2)+' dentro lo stesso CAP.',
+   '<b>Il reddito è per CAP e del contribuente.</b> Esiste solo per 38 CAP: quartieri dello stesso CAP hanno lo stesso valore. È il reddito di chi presenta la dichiarazione con domicilio fiscale nel CAP, non quello dei residenti del quartiere.',
+   '<b>L&rsquo;indice è una costruzione nostra.</b> Sette misure con lo stesso peso; quattro sono del censimento 2011 (occupazione, disoccupazione, metri quadri a persona, case di proprietà) e i laureati sono una media 2021&ndash;2023. Cambiando i pesi la posizione di quasi ogni quartiere si sposta: solo tre restano quasi sempre diversi dal reddito ('+P.stabili.map(function(s){return esc(dispName(s.nome))}).join(', ')+').',
+   '<b>Case ALER senza quelle del Comune.</b> La misura usa il canone medio delle case ALER nel 2016 (Regione Lombardia): non comprende le case popolari del Comune, gestite da MM, né i dati più recenti.',
+   '<b>Quotazioni OMI stimate.</b> I prezzi delle case sono quotazioni per zona dell&rsquo;Agenzia delle Entrate, portate ai quartieri con i civici: sono stime, non prezzi di vendita.',
+   '<b>Residenze per anziani non note.</b> Se gli ospiti di una casa di riposo sono iscritti all&rsquo;anagrafe del quartiere, il quartiere ha più morti di quanti l&rsquo;età suggerisca. Non abbiamo l&rsquo;elenco con i posti letto. Il caso più evidente è '+(mor?esc(mor.n):'Morivione')+' (rapporto '+(mor?nf(mor.smr,2):'')+'): è segnato &laquo;cautela&raquo;. Senza di lui il legame tra affluenza e morti è '+sg(A.parz_senza_morivione,2)+' (con lui '+sg(A.parz_4controlli,2)+'). Altri quartieri potrebbero essere toccati senza che lo sappiamo.',
+   '<b>Residenti solo sulla carta.</b> Le morti attese si calcolano sui residenti del registro del Comune. Se nel registro restano persone che non abitano più a Milano, le morti attese sono sovrastimate e il rapporto sottostimato; non sappiamo quanto, né se in modo uguale in tutti i quartieri.',
+   '<b>Pochi morti nei quartieri piccoli.</b> Con tre anni di dati e quartieri da 3.000 a 5.000 residenti il rapporto oscilla anche per caso. Il grafico non mostra incertezze: una differenza piccola tra due quartieri non vuol dire niente.',
+   '<b>Nessuna affluenza per età.</b> Non sappiamo chi ha votato: l&rsquo;affluenza è per sezione, non per età né per sesso. Elettori e residenti non sono lo stesso insieme (stranieri, giovani, iscritti all&rsquo;estero).',
+   '<b>I residenti all&rsquo;estero indeboliscono il legame, non lo creano.</b> Alcune elezioni (Comunali 2021, Europee 2024) hanno al denominatore anche gli iscritti all&rsquo;anagrafe degli italiani all&rsquo;estero, soprattutto nei quartieri centrali. Con quelle elezioni il legame è '+sg(E.com21.con_estero,2)+' e '+sg(E.eur24.con_estero,2)+'; senza gli iscritti all&rsquo;estero sale a '+sg(E.com21.senza_estero,2)+' e '+sg(E.eur24.senza_estero,2)+'. La Camera 2022, usata qui, ha già solo gli elettori residenti in Italia.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function fonti(){
+  var L=[
+   '<b>Morti e residenti per quartiere.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: decessi dei residenti per quartiere (ds137 e ds1940; usiamo il 2022&ndash;2024) e residenti per età al 31/12 (ds27), licenza Creative Commons Attribution (CC BY). Tassi di mortalità per età della città: ISTAT, decessi giornalieri comunali, <a href="https://www.istat.it/it/archivio/240401">istat.it</a>, CC BY 4.0. Dalla sezione <a href="../speranza-vita/">Quanto si vive</a>.',
+   '<b>Affluenza.</b> Comune di Milano, risultati per sezione elettorale (Camera 2022, ed elezioni 2016&ndash;2024 per i controlli), CC BY 4.0, riportati ai quartieri con i civici. Dalle sezioni <a href="../elezioni/">Elezioni</a> e <a href="../voto-reddito/">Il voto e il reddito</a>.',
+   '<b>Reddito.</b> Ministero dell&rsquo;Economia e delle Finanze, <a href="https://www1.finanze.gov.it/finanze/analisi_stat/public/index.php?opendata=yes">Redditi e principali variabili IRPEF per CAP</a>, anno d&rsquo;imposta 2024, CC BY 3.0, attribuito ai quartieri con i civici (sezione <a href="../quartieri-che-cambiano/">I quartieri che cambiano</a>).',
+   '<b>Laureati, occupazione, disoccupazione, metri quadri e proprietà.</b> ISTAT, censimenti per sezione (2011 per occupazione, disoccupazione, abitazioni; 2021 e 2023 per i laureati), CC BY 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>), sezioni portate ai quartieri. Dalle sezioni <a href="../lavoro/">Il lavoro</a> e Censimenti.',
+   '<b>Prezzi delle case.</b> Agenzia delle Entrate, <a href="https://www.agenziaentrate.gov.it/portale/web/guest/schede/fabbricatiterreni/omi">Osservatorio del Mercato Immobiliare</a> (quotazioni OMI), CC BY 4.0, prezzi reali a euro 2025, ultimo semestre disponibile (2026/1). Dalla sezione <a href="../prezzi-case/">Prezzi delle case</a>.',
+   '<b>Case ALER.</b> Regione Lombardia, <a href="https://www.regione.lombardia.it/">Osservatorio regionale sulla condizione abitativa</a>, rapporti sui servizi abitativi pubblici: canone fatturato 2016 per abitazione. Nessuna licenza dichiarata sui documenti: citiamo i numeri, non ripubblichiamo i file. Dalla sezione <a href="../case-popolari/">Case popolari</a>.'
+  ];
+  setH('fonti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var P=D.indice.pesi_casuali;
+  var L=[
+   '<b>Quartieri.</b> I 88 Nuclei di Identità Locale (NIL) di Milano; restano i '+D.n_quartieri+' con almeno 3.000 residenti nel registro al 31/12/2024.',
+   '<b>Morti osservate su attese.</b> Per ogni quartiere, le morti 2022&ndash;2024 divise per quelle che ci si aspetterebbe se ad ogni età si morisse come nella città intera (standardizzazione indiretta). Il totale delle '+f0(D.tot_O)+' morti osservate coincide con quello del Comune.',
+   '<b>Affluenza.</b> Votanti diviso elettori alla Camera 2022, somma delle sezioni di ogni quartiere.',
+   '<b>Legame e &laquo;a parità&raquo;.</b> Misuriamo quanto due cose vanno in senso opposto o concorde con un numero tra &minus;1 e +1, calcolato sulle posizioni dei quartieri in fila (correlazione di rango). &laquo;A parità&raquo; usa la stessa misura dopo aver tolto, con una regressione sulle posizioni, l&rsquo;effetto di reddito (o di indice), età media, distanza dal Duomo e densità (correlazione parziale).',
+   '<b>Tre gruppi e fasce.</b> Gruppi di quartieri per affluenza di uguale numero (24, 23 e 23); fasce di reddito di uguale numero e, dentro ognuna, due metà per affluenza. I rapporti sono somme delle morti osservate diviso somme delle attese.',
+   '<b>Indice senza reddito.</b> Per ognuna delle sette misure si mette in fila i '+D.n_quartieri+' quartieri (al contrario per disoccupazione e canoni ALER), si standardizzano le posizioni e si fa la media semplice. Posizione 1 = indice più alto.',
+   '<b>Prova dei pesi.</b> '+f0(P.n_estrazioni)+' vettori di pesi casuali (distribuzione uniforme tra le possibili combinazioni di sette pesi, seme fisso); per ogni prova si guardano i 10 quartieri con la differenza maggiore tra posizione per indice e per reddito. Si considerano stabili quelli che ci sono in almeno l&rsquo;80% delle prove.',
+   '<b>Rifare i calcoli.</b> <code>python -I -X utf8 oltre-il-reddito/scripts/build.py</code> riscrive i file di questa pagina dai file originali dei filoni; i controlli contro il rapporto del ricontrollo stanno in <code>oltre-il-reddito/NOTE.md</code>.'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>
