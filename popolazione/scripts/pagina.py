@@ -173,6 +173,26 @@ pd.DataFrame(rows, columns=["cittadinanza", "id_nil", "nil", "anno", "residenti"
 pd.DataFrame([{"anno": y, "cittadinanza": c["k"], "residenti": c["c"][j]} for c in cit for j, y in enumerate(ANNI)]).to_csv(os.path.join(O2, "residenti_per_cittadinanza_citta.csv"), index=False, sep=";")
 pd.DataFrame([{"anno": y, **{k: v for k, v in d.items()}} for y in (1999, 2011, 2025) for d in div[str(y)]]).rename(columns={"n": "nil", "ne": "numero_effettivo_cittadinanze", "qs": "quota_stranieri_pct", "top": "prima_cittadinanza", "tq": "quota_prima_su_stranieri_pct", "res": "residenti", "str": "stranieri"}).to_csv(os.path.join(O2, "diversita_nil.csv"), index=False, sep=";")
 
+# --- tutte le cittadinanze: citta' (serie complete) e per NIL (un file per anno, caricato a richiesta)
+GEN = ("Altre nazioni o n.d.", "Apolide")
+order = sorted(tot_ct.index, key=lambda k: (-tot_ct.loc[k, 2025], -tot_ct.loc[k].max(), k))
+IX = {k: j for j, k in enumerate(order)}
+distinte = [int((tot_ct[y] > 0).sum()) for y in ANNI]
+distinte_senza_generiche = [int(((tot_ct[y] > 0) & ~tot_ct.index.isin(GEN)).sum()) for y in ANNI]
+check("cittadinanze straniere presenti 1999", distinte[0], 157); check("cittadinanze straniere presenti 2025", distinte[-1], 173)
+dump({"anni": ANNI, "cit": [{"k": k, "l": lab(k), "c": [int(tot_ct.loc[k, y]) for y in ANNI]} for k in order], "distinte": distinte, "distinte_senza_generiche": distinte_senza_generiche,
+      "generiche": list(GEN), "nota": "ds27 non ha raggruppamenti per continente: nessun raggruppamento in questa pagina"}, os.path.join(O2, "cittadinanze_tutte.json"))
+os.makedirs(os.path.join(O2, "anno"), exist_ok=True)
+allc = cn[cn.cittadinanza != "Italia"]
+for y in ANNI:
+    d = allc[allc.anno == y]
+    o = {}
+    for i, g in d.groupby("id_nil"):
+        g = g[g.residenti > 0].sort_values(["residenti", "cittadinanza"], ascending=[False, True])
+        o[str(int(i))] = [[IX[k], int(n)] for k, n in zip(g.cittadinanza, g.residenti)]
+    check(f"somma NIL {y} = stranieri citta'", sum(n for v in o.values() for _, n in v), int(str_city[y]))
+    dump({"a": y, "n": o}, os.path.join(O2, "anno", f"{y}.json"))
+
 # =================================================================== PAGINA 3: eta' e centenari
 O3 = out("eta")
 cen_n = rd("centenari_nil_anno.csv").pivot(index="id_nil", columns="anno", values="centenari").reindex(index=sorted(NOME), columns=ANNI).fillna(0).astype(int)

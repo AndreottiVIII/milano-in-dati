@@ -1,5 +1,5 @@
 TITOLO = "Le comunità quartiere per quartiere"
-CSS = ".chips{display:flex;flex-wrap:wrap;gap:6px;margin:.5em 0} .chips button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:#fff;padding:2px 10px;border-radius:14px;cursor:pointer} .chips button.on{color:#fff;border-color:transparent} #yr{font-weight:700;min-width:3.2em;display:inline-block}"
+CSS = ".chips{display:flex;flex-wrap:wrap;gap:6px;margin:.5em 0} .chips button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:#fff;padding:2px 10px;border-radius:14px;cursor:pointer} .chips button.on{color:#fff;border-color:transparent} #yr{font-weight:700;min-width:3.2em;display:inline-block} th.so{cursor:pointer;user-select:none} th.so:hover{color:var(--ink)} #q{font:inherit;border:1px solid var(--line);border-radius:14px;padding:4px 10px;min-width:0;flex:1 1 180px;max-width:320px}"
 BODY = """
 <h1>Le comunità quartiere per quartiere</h1>
 @@NAV@@
@@ -20,6 +20,16 @@ BODY = """
 <div class="lgd" id="lg-map"></div>
 <p class="src">Residenti al 31 dicembre di ogni anno, per quartiere e cittadinanza: Comune di Milano, «Popolazione: residenti per cittadinanza e quartiere (1999-2025)» (ds27, CC BY, scaricato il 1° novembre 2026). Mappa © OpenStreetMap contributors. I colori sono gli stessi per tutti gli anni (soglie calcolate su tutti gli anni insieme), così si vede il cambiamento. In grigio, nella mappa delle quote, i quartieri con meno di 3.000 residenti in quell’anno. Le 30 cittadinanze in elenco sono le più numerose nel 2025.</p>
 <div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall’elenco.</span></div>
+<div id="nilcit" class="card" style="display:none"></div>
+
+<h2 id="tutte">Tutte le cittadinanze di Milano</h2>
+<div class="ctl"><label class="sub" for="sel-yr">Anno:</label><select id="sel-yr" aria-label="Anno"></select><span class="sub">(è lo stesso cursore della mappa)</span></div>
+<div id="tutte-testo"></div>
+<div class="ch" id="ch-dist" role="img" aria-label="Numero di cittadinanze straniere diverse presenti, 1999-2025"></div>
+<div class="lgd" id="lg-dist"></div>
+<div class="ctl"><label class="sub" for="q">Cerca:</label><input type="search" id="q" placeholder="per esempio: Perù" aria-label="Cerca una cittadinanza"><span class="sub" id="q-n"></span></div>
+<div class="scroll tabmax"><table id="tab-tutte"></table></div>
+<p class="src">Residenti con cittadinanza non italiana al 31 dicembre, tutte le voci del registro (ds27, Comune di Milano, CC BY, scaricato il 1° novembre 2026). Clic sulle intestazioni per ordinare. La variazione dal 1999 e dal 2011 è la differenza di residenti; «nuova» = nessun residente con quella cittadinanza nell’anno di partenza. Il file non raggruppa le cittadinanze per continente: non lo facciamo noi, per non inventare categorie. Le voci sono quelle dell’anagrafe e cambiano nel tempo («ex Jugoslavia», «Serbia», «Montenegro», «Kosovo»); «Altre nazioni o n.d.» e «Apolide» non sono paesi. Cittadinanza, non origine.</p>
 
 <h2 id="classifica">Quali cittadinanze, e come cambiano</h2>
 <div id="class-testo"></div>
@@ -68,14 +78,15 @@ BODY = """
 
 <h2 id="file">Fonti e file</h2>
 <p><b>Fonti e licenze.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: ds27 (residenti per cittadinanza e quartiere 1999-2025), ds74 (stranieri per cittadinanza dal 1979), ds221, ds1963, ds1964 (cittadinanza italiana acquisita), ds205 (controllo), confini dei NIL ds964; tutti Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1° novembre 2026. ISTAT, <a href="https://demo.istat.it/">demo.istat.it</a>: popolazione straniera al 1° gennaio 2026 (STRASA), CC BY 4.0, scaricato il 30 ottobre 2026. Mappa: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL. Per i censimenti 1991-2023 per quartiere vedi <a href="../censimenti/">I censimenti di Milano</a>.</p>
-<p>File: <a href="data/residenti_per_cittadinanza_nil.csv">residenti_per_cittadinanza_nil.csv</a> (le 30 cittadinanze, per quartiere e anno), <a href="data/residenti_per_cittadinanza_citta.csv">residenti_per_cittadinanza_citta.csv</a>, <a href="data/diversita_nil.csv">diversita_nil.csv</a>, <a href="data/nil.geojson">nil.geojson</a>, <a href="data/cittadinanze.json">cittadinanze.json</a>, <a href="data/riepilogo.json">riepilogo.json</a>.</p>
+<p>File: <a href="data/residenti_per_cittadinanza_nil.csv">residenti_per_cittadinanza_nil.csv</a> (le 30 cittadinanze, per quartiere e anno), <a href="data/residenti_per_cittadinanza_citta.csv">residenti_per_cittadinanza_citta.csv</a>, <a href="data/diversita_nil.csv">diversita_nil.csv</a>, <a href="data/nil.geojson">nil.geojson</a>, <a href="data/cittadinanze.json">cittadinanze.json</a>, <a href="data/cittadinanze_tutte.json">cittadinanze_tutte.json</a> (tutte le voci di cittadinanza, città, 1999-2025), <code>data/anno/&lt;anno&gt;.json</code> (tutte le cittadinanze per quartiere, un file per anno: <a href="data/anno/2025.json">2025</a>), <a href="data/riepilogo.json">riepilogo.json</a>.</p>
 <footer><p>Altre pagine: <a href="../arrivi-partenze/">Chi arriva e chi lascia Milano</a> · <a href="../eta/">Età e centenari</a> · <a href="../censimenti/">I censimenti di Milano</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p></footer>
 """
 JS = r"""
 var Z=null,RZ=null,NF=null,ANNI=[],IDX={},CUR='ALL',MET='q',YI=26,SEL=null,MAP=null,LAY=null,BR=[],TIMER=null;
 var PAL=['#00695c','#c26a1b','#3a6ea5','#8e44ad','#b03a48','#6d6d6d','#2e7d32','#d4a017','#0b4f45','#7a5230'];
-Promise.all([J('data/cittadinanze.json'),J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){Z=a[0];RZ=a[1];NF=a[2];ANNI=Z.anni;ANNI.forEach(function(y,i){IDX[y]=i});
-  try{sorpresa();mappa();classifica();dove();diversita();ucraina()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+var T=null,YC={},TS={k:'n',d:-1},TQ='';
+Promise.all([J('data/cittadinanze.json'),J('data/riepilogo.json'),J('data/nil.geojson'),J('data/cittadinanze_tutte.json')]).then(function(a){Z=a[0];RZ=a[1];NF=a[2];T=a[3];ANNI=Z.anni;ANNI.forEach(function(y,i){IDX[y]=i});
+  try{sorpresa();mappa();tutteInit();classifica();dove();diversita();ucraina()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
 }).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
 function citBy(k){for(var i=0;i<Z.cit.length;i++)if(Z.cit[i].k===k)return Z.cit[i]}
 function sorpresa(){var c=citBy('Cinese, Rep. Popolare'),cm=c.n['82'],sa=c.n['69'],vi=c.n['71'],r=Z.nil['82'].r,rs=Z.nil['69'].r,s82=Z.nil['82'].s;
@@ -102,7 +113,7 @@ function mappa(){
   var r=el('rng');r.addEventListener('input',function(){YI=IDX[parseInt(r.value,10)];ric(false)});
   el('play').addEventListener('click',function(){if(TIMER){clearInterval(TIMER);TIMER=null;this.textContent='▶ anni';return}var b=this;b.textContent='■ ferma';if(YI>=26)YI=0;TIMER=setInterval(function(){YI++;if(YI>=26){clearInterval(TIMER);TIMER=null;b.textContent='▶ anni'}r.value=ANNI[YI];ric(false)},550)});
   ric(true)}
-function ric(soglie){if(soglie)calcolaSoglie();LAY.setStyle(stile);el('yr').textContent=ANNI[YI];
+function ric(soglie){if(soglie)calcolaSoglie();LAY.setStyle(stile);el('yr').textContent=ANNI[YI];el('rng').value=ANNI[YI];if(el('sel-yr')&&T){el('sel-yr').value=ANNI[YI];tutte()}
   var pal=SEQ.slice(6-BR.length-1),t=[];
   for(var i=0;i<=BR.length;i++){var u=MET==='q'?'%':'';t.push(i===0?'meno di '+nf(BR[0],MET==='q'?1:0)+u:i===BR.length?nf(BR[i-1],MET==='q'?1:0)+u+' o più':nf(BR[i-1],MET==='q'?1:0)+u+' – '+nf(BR[i],MET==='q'?1:0)+u)}
   setH('lg-map',pal.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+t[i]+'</span>'}).join('')+'<span><i style="background:#f4f4f4"></i>nessuno</span>'+(MET==='q'?'<span><i style="background:#bdbdbd"></i>meno di 3.000 residenti</span>':''));
@@ -114,6 +125,7 @@ function scheda(i){var n=Z.nil[i],pts=[],pc=[];
   for(var y=0;y<ANNI.length;y++){var v=valore(i,y),r=n.r[y];pts.push([ANNI[y],MET==='q'?(r>=3000?100*v/r:null):v]);pc.push([ANNI[y],100*(CUR==='ALL'?Z.citta.stranieri[y]:Z.cit_cur.c[y])/Z.citta.totale[y]])}
   var v=valore(i,YI),r=n.r[YI],s=n.s[YI];
   setH('scheda','<h3>'+esc(n.n)+'</h3><p>Nel '+ANNI[YI]+': <b>'+f0(r)+'</b> residenti, di cui <b>'+f0(s)+'</b> con cittadinanza non italiana ('+nf(r?100*s/r:0,1)+'%).'+(CUR==='ALL'?'':' Con cittadinanza '+esc(Z.cit_cur.l.toLowerCase())+': <b>'+f0(v)+'</b> ('+nf(r?100*v/r:0,1)+'% dei residenti, '+(s?nf(100*v/s,1):'0')+'% degli stranieri del quartiere).')+'</p><div class="ch" id="ch-sch"></div><p class="sub">'+esc(lbl())+(MET==='q'?', quota dei residenti del quartiere (linea continua) e della città (tratteggio)':', numero di residenti nel quartiere')+'. Dal 1999 al 2025.</p>');
+  nilcit(i);
   var ser=[{n:n.n,c:ACC,pts:pts}];if(MET==='q')ser.push({n:'Tutta la città',c:GRY,dash:1,pts:pc});
   lineChart('ch-sch',{series:ser,xmin:1999,xmax:2025,xt:[2000,2005,2010,2015,2020,2025],ymin:0,h:200,yf:MET==='q'?function(v){return nf(v,1)+'%'}:f0})}
 /* ---- classifica ---- */
@@ -151,4 +163,33 @@ function diversita(){setH('div-testo','<p>Quanto è variata la composizione per 
 function ucraina(){var u=citBy('Ucraina').c;
   setH('ucr-testo','<p>Con la guerra del febbraio 2022 ci si aspetterebbe un salto. Nel registro dei residenti, invece: <b>8.530</b> persone con cittadinanza ucraina a fine 2021, <b>8.817</b> a fine 2022 (<b>solo +287</b>), 9.704 nel 2023, 9.865 nel 2024, 9.811 nel 2025. Il registro conta le persone <i>residenti</i>; chi è arrivato con la protezione temporanea può non avere (ancora) la residenza a Milano. È un’ipotesi: i dati non lo dicono.</p>');
   lineChart('ch-ucr',{series:[{n:'Cittadinanza ucraina',c:ACC,pts:u.map(function(v,j){return [ANNI[j],v]}).filter(function(p){return p[0]>=2010})}],xmin:2010,xmax:2025,xt:[2010,2013,2016,2019,2022,2025],ymin:0,h:240,yf:f0,marks:[{x:2022,t:'2022'}]})}
+
+/* ---- tutte le cittadinanze: citta' ---- */
+function tutteInit(){var sel=el('sel-yr');sel.innerHTML=ANNI.slice().reverse().map(function(y){return '<option value="'+y+'">'+y+'</option>'}).join('');sel.value=ANNI[YI];
+  sel.addEventListener('change',function(){YI=IDX[parseInt(sel.value,10)];ric(false)});
+  el('q').addEventListener('input',function(){TQ=this.value.trim().toLowerCase();tutte()});
+  setH('lg-dist',lgd([{c:ACC,t:'Cittadinanze straniere diverse presenti'},{c:GRY,t:'Senza «Altre nazioni o n.d.» e «Apolide»',dash:1}]));
+  lineChart('ch-dist',{series:[{n:'Cittadinanze diverse',c:ACC,pts:T.distinte.map(function(v,j){return [ANNI[j],v]})},{n:'Senza le voci generiche',c:GRY,dash:1,pts:T.distinte_senza_generiche.map(function(v,j){return [ANNI[j],v]})}],xmin:1999,xmax:2025,xt:[2000,2005,2010,2015,2020,2025],ymin:140,ymax:180,h:200,yf:f0,ml:44});
+  tutte()}
+function tutte(){var y=YI,Y=ANNI[y],tot=Z.citta.totale[y],st=Z.citta.stranieri[y];
+  var rows=T.cit.map(function(c){var n=c.c[y];return {l:c.l,k:c.k,n:n,pf:st?100*n/st:0,pr:100*n/tot,d99:n-c.c[0],d11:n-c.c[12],n99:c.c[0],n11:c.c[12]}}).filter(function(r){return r.n>0});
+  var nuove=0,sparite=0;T.cit.forEach(function(c){if(c.c[y]>0&&c.c[0]===0)nuove++;if(c.c[0]>0&&c.c[y]===0)sparite++});
+  var di=T.distinte[y],dg=T.distinte_senza_generiche[y];
+  setH('tutte-testo','<p>Nel <b>'+Y+'</b> il registro del Comune ha <b>'+f0(st)+'</b> residenti con cittadinanza non italiana ('+nf(100*st/tot,1)+'% dei '+f0(tot)+' residenti), divisi in <b>'+di+' cittadinanze diverse</b> ('+dg+' senza contare le voci generiche «Altre nazioni o n.d.» e «Apolide»). Nel 1999 erano <b>'+T.distinte[0]+'</b> ('+T.distinte_senza_generiche[0]+' senza le voci generiche) e nel 2011 '+T.distinte[12]+'. '+(Y>1999?'Rispetto al 1999 ci sono '+nuove+' voci che allora non avevano residenti e '+sparite+' che non ne hanno più: in parte sono cambi di nome o di confini (ex Jugoslavia, Serbia, Montenegro, Kosovo e simili). ':'')+'Le ultime voci della lista hanno pochissimi residenti ciascuna.</p>');
+  var q=TQ,list=q?rows.filter(function(r){return r.l.toLowerCase().indexOf(q)>=0||r.k.toLowerCase().indexOf(q)>=0}):rows;
+  var k=TS.k,d=TS.d;list.sort(function(a,b){var c=k==='l'?a.l.localeCompare(b.l,'it'):(a[k]-b[k]);return d>0?c:-c});
+  function dl(v,base,ok){if(!ok)return '<span class="sub">—</span>';return base===0?'<b>'+sg(v)+'</b> <span class="sub">nuova</span>':sg(v)}
+  var H=[['l','Cittadinanza'],['n','Residenti'],['pf','% degli stranieri'],['pr','% dei residenti'],['d99','Variazione dal 1999'],['d11','Variazione dal 2011']];
+  el('tab-tutte').innerHTML='<thead><tr>'+H.map(function(h,i){return '<th class="so'+(i?' r':'')+'" data-s="'+h[0]+'" title="Ordina">'+h[1]+(TS.k===h[0]?(TS.d<0?' ▼':' ▲'):'')+'</th>'}).join('')+'</tr></thead><tbody>'+list.map(function(r){return '<tr><td>'+esc(r.l)+'</td><td class="r">'+f0(r.n)+'</td><td class="r">'+nf(r.pf,r.pf<1?2:1)+'%</td><td class="r">'+nf(r.pr,r.pr<0.1?3:2)+'%</td><td class="r">'+dl(r.d99,r.n99,Y>1999)+'</td><td class="r">'+dl(r.d11,r.n11,Y>2011)+'</td></tr>'}).join('')+'</tbody>';
+  Array.prototype.forEach.call(el('tab-tutte').querySelectorAll('th.so'),function(th){th.addEventListener('click',function(){var s=th.getAttribute('data-s');if(TS.k===s)TS.d=-TS.d;else{TS.k=s;TS.d=s==='l'?1:-1}tutte()})});
+  el('q-n').textContent=list.length+' di '+rows.length+' cittadinanze'}
+/* ---- un quartiere: tutte le cittadinanze ---- */
+function loadY(y){return YC[y]?Promise.resolve(YC[y]):J('data/anno/'+y+'.json').then(function(d){YC[y]=d;return d})}
+function nilcit(i){var Y=ANNI[YI],box=el('nilcit');box.style.display='';box.innerHTML='<p class="sub">Caricamento…</p>';
+  loadY(Y).then(function(D){if(SEL!==i||ANNI[YI]!==Y)return;var l=D.n[String(i)]||[],n=Z.nil[i],r=n.r[YI],s=n.s[YI],sh=l.map(function(x){return {c:T.cit[x[0]],n:x[1]}});
+    if(!l.length){box.innerHTML='<h3>'+esc(n.n)+', '+Y+': cittadinanze</h3><p>Nessun residente con cittadinanza non italiana in questo quartiere nel '+Y+'.</p>';return}
+    var top=sh.slice(0,15),rest=sh.slice(15),mx=top[0].n;
+    function rows(a){return a.map(function(x){return {nm:x.c.l,nmh:esc(x.c.l)+'<br><span class="sub">'+nf(100*x.n/s,1)+'% degli stranieri · '+nf(100*x.n/r,x.n/r<0.001?2:1)+'% dei residenti</span>',v:x.n,txt:f0(x.n),t:x.c.l}})}
+    box.innerHTML='<h3>'+esc(n.n)+', '+Y+': tutte le cittadinanze</h3><p><b>'+f0(s)+'</b> residenti con cittadinanza non italiana ('+nf(r?100*s/r:0,1)+'% di '+f0(r)+'), divisi in <b>'+l.length+' cittadinanze diverse</b> (la prima, '+esc(top[0].c.l)+', è il '+nf(100*top[0].n/s,1)+'% degli stranieri). Cittadinanza, non origine.</p><div class="bars" id="b-nc"></div>'+(rest.length?'<details><summary>Altre '+rest.length+' cittadinanze (da '+f0(rest[0].n)+' a '+f0(rest[rest.length-1].n)+' residenti)</summary><div class="bars" id="b-nc2"></div></details>':'')+'<p class="sub">Prime 15 per numero di residenti. Fonte: ds27, Comune di Milano, CC BY.</p>';
+    hbars('b-nc',rows(top),{max:mx});if(rest.length)hbars('b-nc2',rows(rest),{max:mx})}).catch(function(e){box.innerHTML='<p class="sub">Dati non caricati: '+esc(e.message)+'</p>'})}
 """

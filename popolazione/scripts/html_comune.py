@@ -61,7 +61,7 @@ function lgdBox(items){return items.map(function(it){return '<span><i style="bac
 /* barre orizzontali (anche divergenti) */
 function hbars(id,rows,o){o=o||{};var mx=o.max||Math.max.apply(null,rows.map(function(r){return Math.abs(r.v)}))||1;
   setH(id,rows.map(function(r){var col=r.c||(o.dv&&r.v<0?WARM:ACC);var w=Math.abs(r.v)/mx*(o.dv?50:100);
-    return '<div class="row"><span class="nm" title="'+esc(r.t||r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+w+'%;background:'+col+(o.dv?(';'+(r.v<0?'right:50%':'left:50%')):'')+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+    return '<div class="row"><span class="nm" title="'+esc(r.t||r.nm)+'">'+(r.nmh||esc(r.nm))+'</span><span class="tr"><span class="fill" style="width:'+w+'%;background:'+col+(o.dv?(';'+(r.v<0?'right:50%':'left:50%')):'')+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
 /* grafico SVG: tooltip e guida */
 function mkSvg(box,W,H){box.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img"></svg><div class="tip" style="display:none"></div>';return box.firstChild}
 function S(tag,at,txt){var e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(var k in at)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;return e}

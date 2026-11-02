@@ -2787,3 +2787,5 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Eurostat avia_paoa/avia_gooa (CC BY 4.0, dal 2004), ENAC Annuario 2003 per il 1994-2003 (pagine citate). Assaeroporti non usato: le sue note legali vietano la riproduzione senza consenso scritto. Eurostat e ENAC coincidono entro lo 0,5%.
 - Numeri: Bergamo da 1,17 a 17,4 milioni di passeggeri (2000-2024), davanti a Linate dal 2015; Malpensa il 62% delle merci aeree italiane; Linate dal 27% al 57% di passeggeri internazionali. Sorpresa: con Linate chiuso tra agosto e ottobre 2019 i tre aeroporti insieme crescono del 2,7%.
 - Limiti dei dati: "voli" Eurostat diversi dai movimenti ENAC; date della chiusura di Linate dalla stampa; aviazione generale assente.
+- 2026-11-02 — **Comunità, richiesta di Davide**: scheda del quartiere con tutte le cittadinanze straniere (prime 15 e le altre a richiesta) e nuova sezione "Tutte le cittadinanze di Milano" con tabella ordinabile. Cittadinanze diverse presenti: 173 nel 2025, 157 nel 1999 (172 e 155 senza "Altre nazioni o n.d." e "Apolide"). ds27 non ha i continenti: nessun raggruppamento. Dati per anno caricati a richiesta.
+
