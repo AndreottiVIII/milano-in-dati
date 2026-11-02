@@ -74,7 +74,8 @@
     { path: 'fondi-quartieri/', label: 'Soldi per i quartieri popolari' },
     { path: 'quartiere-ideale/', label: 'Il mio quartiere ideale' },
     { path: 'divisa/', label: 'Quanto è divisa Milano' },
-    { path: 'sfratti/', label: 'Gli sfratti' }
+    { path: 'sfratti/', label: 'Gli sfratti' },
+    { path: 'lavoro/', label: 'Il lavoro per quartiere' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

@@ -2688,3 +2688,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Ministero dell'Interno, UCS, indagine sulle procedure di rilascio (Excel 2013-2025, PDF 2004-2015; licenza non aperta: riproduzione con citazione, in pagina solo tabelle riassunte); ISTAT famiglie (CC BY 4.0). Il file 2020 del Ministero non risponde: 2020 ricostruito dal 2021 e segnato. "Eseguiti" = con l'ufficiale giudiziario, non con la forza pubblica.
 - Numeri: ordini di sfratto per 1.000 famiglie, provincia di Milano con Monza, 3,57 (2014) → 1,25 (2025), −65% (Italia −55%), sotto la media italiana dal 2017; comune di Milano 2.802 (2013) → 1.107 (2025); morosità dal 95% al 69% nel comune. Sorpresa: gli ordini calano di due terzi mentre gli affitti salgono (confronto, non causa).
 - Limiti dei dati: richieste ed eseguiti di Milano incoerenti (salti di 10-30 volte), mostrati ma non usati; salto 2009-2010 non spiegato; famiglie interpolate e cambio di metodo ISTAT; date del blocco Covid da riassunti giuridici.
+
+## 64. Il lavoro quartiere per quartiere
+
+- 2026-11-02 notte — Analisi e pagina (`lavoro/`, `docs/lavoro/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `lavoro/NOTE.md`.
+- Fonti (già su disco): censimenti ISTAT per sezione 1991, 2001, 2011 e censimento permanente 2021, 2023 (CC BY 4.0, dal filone censimenti); record individuali del Comune 1991 e 2001 solo per controllo; reddito per CAP→NIL.
+- Numeri: occupati ogni 100 residenti di 15-64 anni 56,6 (1991) → 71,2 (2011) → 71,1 (2023); donne 44,4 → 66,3, divario uomini-donne da 25,2 a 9,3 punti; casalinghe e casalinghi da 227.501 a 81.743. Sorpresa: occupati quasi uguali nel 1991 e nel 2011 con 127.108 residenti in meno, ma è uno scambio (−38.795 uomini, +35.763 donne).
+- Limiti dei dati: rottura 2011→2021 (serie a parte, nessun confronto quartiere per quartiere; definizione 2021 non trovata nei documenti ISTAT); 2021-23 solo occupati 15-64 per sesso; fino al 2011 occupati con 65+; 22 NIL non robusti in grigio.

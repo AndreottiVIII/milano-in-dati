@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Il lavoro quartiere per quartiere</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl button:disabled{color:#aaa;cursor:not-allowed;border-style:dashed}
+.ctl button.nuova{border-color:#c26a1b} .ctl button.nuova.on{color:#8a4a10;border-color:#c26a1b}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.card td.sep,.card th.sep,#tab-citta td.sep,#tab-citta th.sep{border-left:2px solid #c26a1b}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars.dv .tr .fill{position:absolute;top:0} .bars.dv .tr:after{content:"";position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+#tab-citta{min-width:560px} #tab-nil{min-width:640px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Il lavoro quartiere per quartiere</h1>
+<p>Chi lavora, chi cerca lavoro, chi studia, chi &egrave; in pensione, chi sta a casa: lo dicono i censimenti, che a Milano si possono leggere per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale) in cinque momenti, dal <b>1991</b> al <b>2023</b>. Qui si guarda soprattutto <b>chi abita</b> nel quartiere, non chi ci lavora. Dal 2021 il censimento cambia modo di contare: leggi prima <a href="#limiti">i limiti dei dati</a>.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> I censimenti 1991, 2001 e 2011 si possono confrontare tra loro. I dati 2021 e 2023 sono un&rsquo;altra serie (il censimento &egrave; diventato &laquo;permanente&raquo;, con registri e indagini a campione) e <b>non vanno messi in fila</b> con quelli di prima, quartiere per quartiere. Nella pagina sono sempre segnati con un filo arancione. Dettagli nella sezione <a href="#limiti">limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Scegli che cosa mostrare e l&rsquo;anno. Clic su un quartiere per la scheda con tutti gli anni, oppure scegli il quartiere dall&rsquo;elenco.</p>
+<div class="ctl" id="ctl-met"><span class="sub">Mostra:</span></div>
+<div class="ctl" id="ctl-anno"><span class="sub">Anno:</span></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per l'indicatore scelto"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src" id="map-src"></p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="donne">Donne e uomini</h2>
+<div id="donne-testo"></div>
+<h3>Quanti occupati: uomini e donne, 1991&ndash;2011</h3>
+<div class="bars dv" id="b-sw"></div>
+<p class="src">Residenti occupati, di ogni et&agrave;, somma di tutte le sezioni di censimento di Milano (ISTAT, censimenti 1991 e 2011).</p>
+<h3>Occupati ogni 100 residenti di 15&ndash;64 anni</h3>
+<div class="ch" id="ch-serie" role="img" aria-label="Grafico: donne e uomini occupati ogni 100 residenti di 15-64 anni, 1991-2023"></div>
+<div class="lgd" id="lg-serie"></div>
+<p class="src">Milano intera. Fino al 2011 gli occupati comprendono anche chi ha 65 anni o pi&ugrave; (circa il 2% degli occupati nel 1991, il 2,7% nel 2001); dal 2021 sono solo i 15&ndash;64 anni. Il tratto tra 2011 e 2021 &egrave; tratteggiato perch&eacute; cambia il metodo.</p>
+<h3>Donne e uomini, quartiere per quartiere</h3>
+<div class="ctl" id="ctl-sc-anno"><span class="sub">Anno:</span></div>
+<div class="ch" id="ch-sc" role="img" aria-label="Grafico: occupazione degli uomini e delle donne in ogni quartiere"></div>
+<p class="src" id="sc-src"></p>
+<div id="donne-testo2"></div>
+
+<h2 id="citta">Milano nel tempo</h2>
+<div id="citta-testo"></div>
+<div class="scroll"><table id="tab-citta"></table></div>
+<p class="src">Milano intera (anche le sezioni dei senza fissa dimora, che non stanno in nessun quartiere). Fonte: ISTAT, censimenti 1991, 2001, 2011 e censimento permanente 2021 e 2023, dati per sezione di censimento; somme e rapporti calcolati da noi.</p>
+<h3>Chi cerca lavoro</h3>
+<div id="dis-testo"></div>
+<div class="bars" id="b-dis"></div>
+<h3>Chi non lavora</h3>
+<div id="non-testo"></div>
+<div class="bars" id="b-non"></div>
+
+<h2 id="reddito">Lavoro e reddito</h2>
+<div id="red-testo"></div>
+<div class="ctl" id="ctl-rd-anno"><span class="sub">Anno del censimento:</span></div>
+<div class="ch" id="ch-rd" role="img" aria-label="Grafico: reddito medio per contribuente e occupazione nei quartieri"></div>
+<p class="src" id="rd-src"></p>
+<h3>Tre gruppi di quartieri</h3>
+<div id="gr-testo"></div>
+<div class="scroll"><table id="tab-gr"></table></div>
+<div class="warn"><b>Un confronto, non una prova.</b> Il reddito &egrave; del contribuente (chi fa la dichiarazione), per CAP e riportato ai quartieri; il lavoro &egrave; del residente. Dice dove le due cose vanno insieme, non perch&eacute;.</div>
+<p class="sub">Altre pagine: <a href="../redditi/">redditi dal 2000</a>, <a href="../censimenti/">censimenti</a>, <a href="../quartiere/">il tuo quartiere</a>, <a href="../quartieri-che-cambiano/">quartieri che cambiano</a>.</p>
+
+<h2 id="classifica">Chi sta meglio e chi peggio (2011)</h2>
+<div id="class-testo"></div>
+<div class="grid2"><div><h3>Pi&ugrave; occupati</h3><div class="bars" id="b-top"></div></div><div><h3>Meno occupati</h3><div class="bars" id="b-bot"></div></div></div>
+<div class="grid2"><div><h3>Meno disoccupazione</h3><div class="bars" id="b-dtop"></div></div><div><h3>Pi&ugrave; disoccupazione</h3><div class="bars" id="b-dbot"></div></div></div>
+<p class="src">Solo i 66 quartieri con dati confrontabili (almeno 2.000 abitanti nel 1991 e nel 2023, confini stabili). 2011 perch&eacute; &egrave; l&rsquo;ultimo censimento &laquo;classico&raquo;.</p>
+<details><summary>Tutti i quartieri: tabella</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
+
+<h2 id="limiti">I limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil_lavoro.csv">nil_lavoro.csv</a> (una riga per quartiere e anno: conteggi e indicatori, reddito 2024), <a href="data/comune_lavoro.csv">comune_lavoro.csv</a> (Milano intera), <a href="data/dati.json">dati.json</a> (i dati della mappa), <a href="data/nil.geojson">nil.geojson</a> (confini dei quartieri, semplificati) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri del testo con i controlli). Sono tutti valori aggregati per quartiere o per comune.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Condizione professionale per sezione di censimento: ISTAT, 13&deg; censimento 1991, 14&deg; censimento 2001, 15&deg; censimento 2011, censimento permanente 2021 e 2023 (&laquo;Dati per sezione di censimento&raquo;), licenza Creative Commons Attribution 4.0 dichiarata dall&rsquo;ISTAT nelle note legali del sito, scaricati il 30 ottobre 2026 da <a href="https://www.istat.it/">istat.it</a>. Record individuali dei censimenti 1991 e 2001 (usati solo per due controlli sull&rsquo;intera citt&agrave;): Comune di Milano, dataset ds1636 e ds1518, CC BY, scaricati il 30 ottobre 2026 da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Quartieri (NIL) e confini: Comune di Milano, ricostruiti sulle sezioni 2021 dall&rsquo;ISTAT (vedi <a href="../censimenti/">Censimenti</a>). Reddito medio per contribuente, anno d&rsquo;imposta 2024, per CAP: Ministero dell&rsquo;Economia e delle Finanze, Dipartimento delle Finanze, CC BY 3.0, scaricato il 1 novembre 2026 e riportato ai quartieri nel lavoro &laquo;quartieri che cambiano&raquo;. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var R=null,D=null,NF=null,NIL=[],RD=[];
+var ACC='#00695c',WARM='#c26a1b',GRY='#bdbdbd';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var AN=[1991,2001,2011,2021,2023],AI={1991:0,2001:1,2011:2,2021:3,2023:4};
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows,sepFrom){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th class="'+(i?'r':'')+(sepFrom!=null&&i===sepFrom?' sep':'')+'">'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td class="'+(i?'r':'')+(sepFrom!=null&&i===sepFrom?' sep':'')+'">'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function divBars(id,rows,max){setH(id,rows.map(function(r){var w=Math.abs(r.v)/max*50,col=r.v<0?WARM:ACC;
+  return '<div class="row"><span class="nm">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+w+'%;'+(r.v<0?'right:50%':'left:50%')+';background:'+col+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+function barsPlain(id,rows,max,col){setH(id,rows.map(function(r){return '<div class="row"><span class="nm">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+function btn(box,label,on,cb,cls){var b=document.createElement('button');b.type='button';b.textContent=label;if(cls)b.className=cls;if(on)b.classList.add('on');b.addEventListener('click',function(){cb(b)});el(box).appendChild(b);return b}
+
+Promise.all([J('data/riepilogo.json'),J('data/dati.json'),J('data/nil.geojson')]).then(function(a){
+  R=a[0];D=a[1];NF=a[2];NIL=D.nil;
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function C(y){return D.comune[String(y)]}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+function tutto(){
+  sorpresa();mappa();donne();citta();reddito();classifica();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var d=R.comune_differenze_1991_2011,c1=C(1991),c3=C(2011),G=R.donne_1991_2011;
+  var h='<p><b>Milano ha quasi lo stesso numero di lavoratori residenti di vent&rsquo;anni fa, ma non sono le stesse persone.</b> Gli occupati che abitano in citt&agrave; erano <b>'+f0(c1.occ)+'</b> nel 1991 e sono <b>'+f0(c3.occ)+'</b> nel 2011 ('+sg(d.occ)+'), mentre i residenti sono scesi di '+f0(-d.pop)+'. Sotto, uno scambio quasi alla pari: <b>'+sg(d.occ_m)+' uomini occupati</b> e <b>'+sg(d.occ_f)+' donne occupate</b>.</p>';
+  h+='<p>Intanto le <b>casalinghe e i casalinghi</b> passano da '+f0(c1.cas)+' a '+f0(c3.cas)+' ('+sg(d.cas)+'): da '+f0(c1.casalinghe_100_donne)+' a '+f0(c3.casalinghe_100_donne)+' ogni 100 donne. Le donne occupate ogni 100 residenti di 15&ndash;64 anni salgono da '+f0(c1.tasso_occ_f)+' a '+f0(c3.tasso_occ_f)+' e <b>in ognuno dei '+G.n+' quartieri con dati confrontabili sale di almeno '+f1(G.min)+' punti</b> (fino a '+f1(G.max)+', a '+esc(G.nome_max)+').</p>';
+  h+='<p>Il divario tra uomini e donne si chiude da '+f0(c1.gap_occ_mf)+' punti (1991) a '+f0(c3.gap_occ_mf)+' (2011), e a '+f0(C(2023).gap_occ_mf)+' nel 2023 con il nuovo metodo.</p>';
+  h+='<p class="src">Somma delle sezioni di censimento di Milano, ISTAT 1991 e 2011 (occupati: campi P61 e P67/P65; casalinghe: P148/P130; vedi <a href="#metodo">come &egrave; fatto</a>). I punti sono occupati ogni 100 residenti di 15&ndash;64 anni.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,CURM='occ',CURY=2011,SEL=null,MM={};
+var MDEF=[
+ {k:'occ',t:'Occupati',u:' ogni 100 residenti di 15–64 anni',yrs:[1991,2001,2011,2021,2023],d:'Occupati ogni 100 residenti di 15–64 anni. Fino al 2011 gli occupati contano anche chi ha 65 anni o più; dal 2021 no, e il metodo è un altro.'},
+ {k:'occ_f',t:'Donne occupate',u:' ogni 100 donne di 15–64 anni',yrs:[1991,2001,2011,2021,2023],d:'Donne occupate ogni 100 donne di 15–64 anni.'},
+ {k:'occ_m',t:'Uomini occupati',u:' ogni 100 uomini di 15–64 anni',yrs:[1991,2001,2011,2021,2023],d:'Uomini occupati ogni 100 uomini di 15–64 anni.'},
+ {k:'gap',t:'Divario uomini–donne',u:' punti',yrs:[1991,2001,2011,2021,2023],d:'Differenza, in punti, tra la quota di uomini occupati e quella di donne occupate. Più scuro = divario più grande.'},
+ {k:'dis',t:'Disoccupazione',u:' ogni 100 persone che lavorano o cercano lavoro',yrs:[1991,2001,2011],d:'Persone in cerca di lavoro (compreso il primo lavoro) ogni 100 persone nelle forze di lavoro, cioè occupati più in cerca. Non esiste per il 2021 e il 2023.'},
+ {k:'pen',t:'Pensionati',u:' ogni 100 residenti',yrs:[1991,2001,2011],d:'Ritirati dal lavoro ogni 100 residenti (di tutte le età). Nel 2011 la categoria comprende anche chi vive di altri redditi da capitale. Non esiste per il 2021 e il 2023.'},
+ {k:'stu',t:'Studenti',u:' ogni 100 residenti',yrs:[1991,2001,2011],d:'Studenti ogni 100 residenti (di tutte le età). Nel 1991 sono compresi i 14enni (circa il 9% degli studenti). Non esiste per il 2021 e il 2023.'},
+ {k:'cas',t:'Casalinghe e casalinghi',u:' ogni 100 donne',yrs:[1991,2001,2011],d:'Casalinghe e casalinghi ogni 100 donne residenti (di tutte le età). Non esiste per il 2021 e il 2023.'},
+ {k:'d_occ_f',t:'Donne occupate: cambiamento 1991–2011',u:' punti',yrs:null,d:'Quanti punti in più (o in meno) di donne occupate ogni 100 donne di 15–64 anni tra il 1991 e il 2011. Solo i 66 quartieri confrontabili.'},
+ {k:'d_occ',t:'Occupati: cambiamento 1991–2011',u:' punti',yrs:null,d:'Variazione, in punti, degli occupati ogni 100 residenti di 15–64 anni tra il 1991 e il 2011. Solo i 66 quartieri confrontabili.'}
+];
+function val(p,m,y){var v=m.yrs?p[m.k][AI[y]]:p[m.k];return v}
+function qb(vals,k){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]*2)/2);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
+function colore(v,m){if(v==null)return GRY;var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function mappa(){
+  MDEF.forEach(function(m){
+    var all=[];NIL.forEach(function(p){if(!p.rob)return;if(m.yrs){m.yrs.forEach(function(y){var v=val(p,m,y);if(v!=null)all.push(v)})}else if(p[m.k]!=null)all.push(p[m.k])});
+    m.b=qb(all,6);m.c=pick(m.b.length+1);MM[m.k]=m;
+  });
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){return tip(nilById(f.properties.i))},{sticky:true});
+    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  MDEF.forEach(function(m){var b=btn('ctl-met',m.t,m.k===CURM,function(){CURM=m.k;if(m.yrs&&m.yrs.indexOf(CURY)<0)CURY=2011;aggiornaBtn()});b.setAttribute('data-m',m.k)});
+  AN.forEach(function(y){var b=btn('ctl-anno',String(y),y===CURY,function(){CURY=y;aggiornaBtn()},y>=2021?'nuova':'');b.setAttribute('data-y',y);b.title=y>=2021?'Censimento permanente: altro metodo, non confrontabile con gli anni prima':'Censimento '+y});
+  aggiornaBtn();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function aggiornaBtn(){
+  var m=MM[CURM];
+  Array.prototype.forEach.call(document.querySelectorAll('#ctl-met button'),function(b){b.classList.toggle('on',b.getAttribute('data-m')===CURM)});
+  Array.prototype.forEach.call(document.querySelectorAll('#ctl-anno button'),function(b){var y=parseInt(b.getAttribute('data-y'),10);var ok=!m.yrs?false:m.yrs.indexOf(y)>=0;b.disabled=!ok;b.classList.toggle('on',m.yrs&&y===CURY)});
+  ricolora();
+}
+function tip(p){var m=MM[CURM],v=val(p,m,CURY);
+  if(!p.rob)return '<b>'+esc(p.n)+'</b><br>quartiere con pochi abitanti o confini cambiati: non confrontabile';
+  if(v==null)return '<b>'+esc(p.n)+'</b><br>dato non disponibile';
+  return '<b>'+esc(p.n)+'</b><br>'+(m.yrs?'':'')+(m.k.indexOf('d_')===0?sg(v,1):f1(v))+m.u+(m.yrs?' ('+CURY+')':'')}
+function sty(f){var p=nilById(f.properties.i),m=MM[CURM],sel=SEL===p.i,v=p.rob?val(p,m,CURY):null;
+  return {fillColor:colore(v,m),fillOpacity:.82,color:sel?'#000':'#fff',weight:sel?3:1,dashArray:p.rob?null:'3 3'}}
+function ricolora(){
+  var m=MM[CURM];LAY.setStyle(sty);if(SEL)bringSel();
+  var h='';
+  m.c.forEach(function(c,i){var t,sg1=m.k.indexOf('d_')===0;
+    function F(x){return sg1?sg(x,1):f1(x)}
+    t=i===0?'meno di '+F(m.b[0]):i===m.b.length?F(m.b[i-1])+' o più':F(m.b[i-1])+' – '+F(m.b[i]);
+    h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+  h+='<span><i style="background:'+GRY+'"></i>non confrontabile o senza dato</span>';
+  setH('lg-map',h);
+  var d=m.d+(m.yrs&&CURY>=2021?' <b>Attenzione: '+CURY+' è la nuova serie, non va confrontata con i censimenti precedenti.</b>':'');
+  setH('map-desc',d+' Colori uguali per tutti gli anni: così, spostando l’anno, si vede il cambiamento.');
+  setH('map-src','Quartieri in grigio tratteggiato: i '+(NIL.filter(function(p){return !p.rob}).length)+' con meno di 2.000 abitanti nel 1991 o nel 2023, o con confini troppo cambiati (restano nel file con i loro numeri). ISTAT, censimenti per sezione, elaborazione nostra. Mappa © OpenStreetMap contributors.');
+}
+function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);bringSel();
+  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}
+  scheda(i)}
+function cell(v,d,suf){return v==null?'<span class="sub">–</span>':nf(v,d==null?1:d)+(suf||'')}
+function scheda(i){
+  var p=nilById(i);if(!p)return;
+  var h='<h3>'+esc(p.n)+'</h3>';
+  if(!p.rob)h+='<p class="sub"><b>Pochi abitanti o confini cambiati:</b> i numeri qui sotto vanno presi con cautela e il quartiere non entra nei confronti nel tempo.</p>';
+  var rows=[['Residenti',p.pop.map(function(v){return f0(v)})],
+   ['Occupati ogni 100 residenti di 15–64 anni',p.occ.map(function(v){return cell(v)})],
+   ['&nbsp;&nbsp;donne',p.occ_f.map(function(v){return cell(v)})],
+   ['&nbsp;&nbsp;uomini',p.occ_m.map(function(v){return cell(v)})],
+   ['Divario uomini–donne (punti)',p.gap.map(function(v){return cell(v)})],
+   ['Disoccupazione (%)',p.dis.map(function(v){return cell(v)})],
+   ['Pensionati ogni 100 residenti',p.pen.map(function(v){return cell(v)})],
+   ['Studenti ogni 100 residenti',p.stu.map(function(v){return cell(v)})],
+   ['Casalinghe/i ogni 100 donne',p.cas.map(function(v){return cell(v)})]];
+  h+='<div class="scroll"><table><thead><tr><th></th>'+AN.map(function(y,k){return '<th class="r'+(k===3?' sep':'')+'">'+y+'</th>'}).join('')+'</tr></thead><tbody>'+
+    rows.map(function(r){return '<tr><td>'+r[0]+'</td>'+r[1].map(function(c,k){return '<td class="r'+(k===3?' sep':'')+'">'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>';
+  if(p.d_occ_f!=null)h+='<p>Donne occupate 1991–2011: <b>'+sg(p.d_occ_f,1)+' punti</b>; occupati in totale: '+sg(p.d_occ,1)+' punti.</p>';
+  if(p.rd!=null&&!p.inst)h+='<p class="sub">Reddito medio per contribuente (2024): '+f0(p.rd)+' €.</p>';
+  h+='<p class="sub">Le colonne 2021 e 2023 (filo arancione) sono un’altra serie. Il 1991 conta anche i 14enni tra gli studenti.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- grafici ---------- */
+function scatter(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||320,m={l:46,r:12,t:14,b:42};
+  var x0=o.x0,x1=o.x1,y0=o.y0,y1=o.y1;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yf(v)+'</text>';
+  var lastx=-99;
+  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);if(xx-lastx>40){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(v)+'</text>'}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.diag){var a=Math.max(x0,y0),b=Math.min(x1,y1);s+='<line x1="'+X(a)+'" y1="'+Y(a)+'" x2="'+X(b)+'" y2="'+Y(b)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(X(b)-4)+'" y="'+(Y(b)+14)+'" text-anchor="end" style="fill:#8a4a10">uomini e donne uguali</text>'}
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-3)+'" text-anchor="start">'+o.yl+'</text>';
+  o.pts=o.pts.filter(function(p){return p.x>=x0&&p.x<=x1&&p.y>=y0&&p.y<=y1});o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.2" fill="'+(p.g?GRY:ACC)+'" fill-opacity=".75" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tp=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tp.style.display='none';ring.style.display='none';return}
+    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tp.innerHTML=p.t;tp.style.display='';var tw=tp.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tp.style.left=left+'px';tp.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  function hide(){tp.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:40,r:14,t:16,b:34},pw=W-m.l-m.r,ph=H-m.t-m.b;
+  var y0=o.y0,y1=o.y1,sy=niceStep((y1-y0)/5);
+  var xs=o.xs,xmin=xs[0],xmax=xs[xs.length-1];
+  function X(v){return m.l+(v-xmin)/(xmax-xmin)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  xs.forEach(function(x){s+='<line x1="'+X(x)+'" x2="'+X(x)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(x)+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+x+'</text>'});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  s+='<line x1="'+X(2016)+'" x2="'+X(2016)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="2 3"/><text class="mu" x="'+(X(2016)-3)+'" y="'+(m.t+10)+'" text-anchor="end" style="fill:#8a4a10">cambia il metodo</text>';
+  o.series.forEach(function(se){
+    var pts=se.v.map(function(v,i){return v==null?null:[X(xs[i]),Y(v)]});
+    var a=pts.slice(0,3),b=pts.slice(3);
+    function path(p,dash){return p.length>1?'<polyline fill="none" stroke="'+se.c+'" stroke-width="2.4"'+(dash?' stroke-dasharray="5 4"':'')+' points="'+p.map(function(q){return q[0].toFixed(1)+','+q[1].toFixed(1)}).join(' ')+'"/>':''}
+    s+=path(a,false)+path(b,false)+path([pts[2],pts[3]],true);
+    pts.forEach(function(q,i){if(q)s+='<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="3.6" fill="'+se.c+'"/><text x="'+q[0].toFixed(1)+'" y="'+(q[1]-8).toFixed(1)+'" text-anchor="middle" style="fill:'+se.c+';font-weight:600">'+f0(se.v[i])+'</text>'});
+  });
+  box.innerHTML=s+'</svg>';
+}
+
+/* ---------- donne e uomini ---------- */
+function donne(){
+  var d=R.comune_differenze_1991_2011,c1=C(1991),c2=C(2001),c3=C(2011),c5=C(2021),c6=C(2023),G=R.gap_2011;
+  var h='<p>Nel 1991 lavorava il <b>'+f0(c1.tasso_occ_m)+'%</b> degli uomini tra i 15 e i 64 anni e il <b>'+f0(c1.tasso_occ_f)+'%</b> delle donne: '+f0(c1.gap_occ_mf)+' punti di distanza. Nel 2011 sono '+f0(c3.tasso_occ_m)+'% e '+f0(c3.tasso_occ_f)+'%: '+f0(c3.gap_occ_mf)+' punti. Il divario si chiude non perch&eacute; gli uomini lavorino meno (anche loro salgono, da '+f0(c1.tasso_occ_m)+' a '+f0(c3.tasso_occ_m)+'), ma perch&eacute; le donne salgono molto di pi&ugrave;. Con il metodo nuovo il divario &egrave; '+f0(c5.gap_occ_mf)+' punti nel 2021 e '+f0(c6.gap_occ_mf)+' nel 2023.</p>';
+  h+='<p>Non tutti i quartieri sono uguali: nel 2011 il divario pi&ugrave; grande, tra i quartieri confrontabili, &egrave; nel centro ('+(R.classifiche['gap_occ_mf_2011_max'].slice(0,3).map(function(a){return esc(a[1])+' '+f0(a[2])}).join(', '))+' punti); il pi&ugrave; piccolo in quartieri come '+(R.classifiche['gap_occ_mf_2011_min'].slice(0,3).map(function(a){return esc(a[1])+' '+f0(a[2])}).join(', '))+' punti.</p>';
+  setH('donne-testo',h);
+  divBars('b-sw',[{nm:'Uomini occupati',v:d.occ_m,txt:sg(d.occ_m)},{nm:'Donne occupate',v:d.occ_f,txt:sg(d.occ_f)},{nm:'Residenti in tutto',v:d.pop,txt:sg(d.pop)},{nm:'Casalinghe e casalinghi',v:d.cas,txt:sg(d.cas)}],Math.max(Math.abs(d.cas),Math.abs(d.pop)));
+  var ser=function(k){return AN.map(function(y){return C(y)[k]})};
+  function draw(){lineChart(el('ch-serie'),{xs:[1991,2001,2011,2021,2023],y0:30,y1:90,series:[{v:ser('tasso_occ_m'),c:'#2b5f8a'},{v:ser('tasso_occ_f'),c:WARM},{v:ser('tasso_occ'),c:ACC}]})}
+  draw();RD.push(draw);
+  setH('lg-serie','<span><i class="ln" style="border-top-color:#2b5f8a"></i>uomini</span><span><i class="ln" style="border-top-color:'+WARM+'"></i>donne</span><span><i class="ln" style="border-top-color:'+ACC+'"></i>tutti</span>');
+  [1991,2001,2011,2021,2023].forEach(function(y){btn('ctl-sc-anno',String(y),y===2011,function(b){Array.prototype.forEach.call(document.querySelectorAll('#ctl-sc-anno button'),function(x){x.classList.toggle('on',x===b)});SCY=y;drawSc()},y>=2021?'nuova':'')});
+  drawSc();RD.push(drawSc);
+  setH('donne-testo2','<p>Ogni punto &egrave; un quartiere: pi&ugrave; sta a destra, pi&ugrave; gli uomini sono occupati; pi&ugrave; sta in alto, pi&ugrave; lo sono le donne. Sotto la linea tratteggiata gli uomini sono pi&ugrave; occupati delle donne. Nel 1991 <b>tutti</b> i quartieri con dati sono sotto la linea; nel 2011 i punti si sono avvicinati alla linea e spostati in alto. Nel 2011 c&rsquo;&egrave; una sola eccezione, un quartiere con pochissimi abitanti (Quintosole), che per questo non compare nel grafico: i suoi numeri sono pochi e poco affidabili.</p>');
+}
+var SCY=2011;
+function drawSc(){
+  var pts=NIL.filter(function(p){return p.occ_f[AI[SCY]]!=null}).map(function(p){var k=AI[SCY];return {x:p.occ_m[k],y:p.occ_f[k],g:!p.rob,t:'<b>'+esc(p.n)+'</b>'+(p.rob?'':' (pochi abitanti)')+'<br>uomini '+f1(p.occ_m[k])+'<br>donne '+f1(p.occ_f[k])+'<br>divario '+f1(p.gap[k])+' punti'}});
+  
+  scatter(el('ch-sc'),{pts:pts,h:340,x0:50,x1:90,y0:30,y1:90,xl:'uomini occupati ogni 100 uomini di 15–64 anni',yl:'donne occupate ogni 100 donne di 15–64 anni',xf:f0,yf:f0,diag:true});
+  setH('sc-src','Anno '+SCY+(SCY>=2021?' (nuova serie: non confrontabile con gli anni prima)':'')+'. Quartieri con almeno 500 residenti di 15–64 anni; in grigio quelli con pochi abitanti o confini cambiati. Fonte: ISTAT, censimenti per sezione.');
+}
+
+/* ---------- citta ---------- */
+function citta(){
+  var c1=C(1991),c2=C(2001),c3=C(2011),c5=C(2021),c6=C(2023),M=R.record_individuali;
+  setH('citta-testo','<p>Il tasso di occupazione (occupati ogni 100 residenti di 15&ndash;64 anni) sale da <b>'+f1(c1.tasso_occ)+'</b> a <b>'+f1(c2.tasso_occ)+'</b> a <b>'+f1(c3.tasso_occ)+'</b> tra il 1991 e il 2011, e vale '+f1(c5.tasso_occ)+' nel 2021 e '+f1(c6.tasso_occ)+' nel 2023. Non &egrave; tutta crescita vera: per i 15&ndash;64 anni in senso stretto il 1991 sarebbe '+f1(M['1991'].tasso_occ_1564_esatto)+' e il 2001 '+f1(M['2001'].tasso_occ_1564_esatto)+' (controllo sui record individuali del Comune, che permettono di escludere gli occupati con 65 anni o pi&ugrave;); per il 2011 il controllo non si pu&ograve; fare. Quindi la salita 1991&ndash;2011 c&rsquo;&egrave;, ma i valori fino al 2011 sono un po&rsquo; pi&ugrave; alti di quelli 2021&ndash;2023: di '+f1(M['1991'].tasso_occ_tabelle_ISTAT-M['1991'].tasso_occ_1564_esatto)+' punti nel 1991 e di '+f1(M['2001'].tasso_occ_tabelle_ISTAT-M['2001'].tasso_occ_1564_esatto)+' nel 2001 (di cui una parte, nel 2001, per le classificazioni diverse).</p>');
+  var rows=[
+   ['Residenti',f0],['Residenti di 15–64 anni',f0],['Occupati',f0],['&nbsp;&nbsp;uomini',f0],['&nbsp;&nbsp;donne',f0],['Persone in cerca di lavoro',f0],['Studenti',f0],['Pensionati',f0],['Casalinghe e casalinghi',f0],
+   ['Occupati ogni 100 residenti di 15–64 anni',f1],['&nbsp;&nbsp;uomini',f1],['&nbsp;&nbsp;donne',f1],['Disoccupazione (%)',f1],['&nbsp;&nbsp;uomini',f1],['&nbsp;&nbsp;donne',f1]];
+  var keys=['pop','p1564','occ','occ_m','occ_f','cerca','stu','rit','cas','tasso_occ','tasso_occ_m','tasso_occ_f','tasso_disocc','tasso_disocc_m','tasso_disocc_f'];
+  table('tab-citta',['']  .concat(AN.map(String)),rows.map(function(r,i){return [r[0]].concat(AN.map(function(y){var v=C(y)[keys[i]];return v==null?'<span class="sub">–</span>':r[1](v)}))}),4);
+  setH('dis-testo','<p>Chi cerca lavoro (compreso chi cerca il primo impiego) &egrave; il <b>'+f1(c1.tasso_disocc)+'%</b> delle persone che lavorano o cercano nel 1991, il <b>'+f1(c2.tasso_disocc)+'%</b> nel 2001 e il <b>'+f1(c3.tasso_disocc)+'%</b> nel 2011. Nel 1991 le donne erano pi&ugrave; colpite ('+f1(c1.tasso_disocc_f)+'% contro '+f1(c1.tasso_disocc_m)+'%); nel 2011 i due valori sono quasi uguali ('+f1(c3.tasso_disocc_f)+'% e '+f1(c3.tasso_disocc_m)+'%). Per il 2021 e il 2023 la disoccupazione non &egrave; nei dati per sezione. Il calo del 2001 pu&ograve; essere in parte un effetto di come il censimento ha chiesto e classificato (probabile, non misurato: <a href="#limiti">limiti</a>).</p>');
+  var dm=Math.max(c1.tasso_disocc,c1.tasso_disocc_f);
+  var dr=[];[1991,2001,2011].forEach(function(y){var c=C(y);dr.push({nm:y+' · tutti',v:c.tasso_disocc,txt:f1(c.tasso_disocc)+'%'});dr.push({nm:y+' · donne',v:c.tasso_disocc_f,txt:f1(c.tasso_disocc_f)+'%'});dr.push({nm:y+' · uomini',v:c.tasso_disocc_m,txt:f1(c.tasso_disocc_m)+'%'})});
+  barsPlain('b-dis',dr,dm);
+  setH('non-testo','<p>Ogni 100 residenti (di tutte le et&agrave;), i <b>pensionati</b> passano da '+f1(c1.pensionati_100)+' a '+f1(c2.pensionati_100)+' a '+f1(c3.pensionati_100)+': sono '+f0(c3.rit-c1.rit)+' in pi&ugrave; mentre i residenti calano. Le <b>casalinghe e i casalinghi</b> da '+f1(c1.casalinghe_100)+' a '+f1(c2.casalinghe_100)+' a '+f1(c3.casalinghe_100)+'. Gli <b>studenti</b> da '+f1(c1.studenti_100)+' a '+f1(c2.studenti_100)+' a '+f1(c3.studenti_100)+' (nel 1991 sono contati anche i 14enni, circa il '+f0(M['1991'].quota_studenti_14anni)+'% degli studenti: senza, sarebbero circa '+f1((c1.stu-M['1991'].studenti_14anni)/c1.pop*100)+' ogni 100 residenti). Nel 2011 la voce &laquo;pensionati&raquo; comprende anche chi vive di redditi da capitale. Questi numeri non esistono per il 2021 e il 2023.</p>');
+  var nr=[];[1991,2001,2011].forEach(function(y){var c=C(y);nr.push({nm:y+' · pensionati',v:c.pensionati_100,txt:f1(c.pensionati_100)});nr.push({nm:y+' · casalinghe/i',v:c.casalinghe_100,txt:f1(c.casalinghe_100)});nr.push({nm:y+' · studenti',v:c.studenti_100,txt:f1(c.studenti_100)})});
+  barsPlain('b-non',nr,26,'#2b5f8a');
+}
+
+/* ---------- reddito ---------- */
+var RDY=2011;
+function reddito(){
+  var S=R.reddito_spearman,G=R.gruppi_reddito;
+  var a=S['2011'].tasso_occ.solo_cap_stabili,b=S['2023'].tasso_occ.solo_cap_stabili,a1=S['1991'].tasso_occ.solo_cap_stabili,d=S['2011'].tasso_disocc.solo_cap_stabili;
+  setH('red-testo','<p>I quartieri con redditi pi&ugrave; alti sono anche quelli dove pi&ugrave; persone lavorano e meno ne cercano un impiego. Mettendo i quartieri in fila per reddito medio dei contribuenti (2024) e per occupati ogni 100 residenti di 15&ndash;64 anni, la correlazione di Spearman &egrave; <b>'+sg(a1.rho,2)+'</b> con il censimento 1991 e <b>'+sg(a.rho,2)+'</b> con il 2011 ('+a.n+' quartieri); con la disoccupazione 2011 &egrave; <b>'+sg(d.rho,2)+'</b>. In parole semplici: dove il reddito &egrave; pi&ugrave; alto lavora una quota maggiore di residenti, e lo faceva gi&agrave; nel 1991, quando il reddito di oggi non c&rsquo;era ancora. Con i dati 2023 (altro metodo) il legame scende a <b>'+sg(b.rho,2)+'</b>: non va letto come una svolta, ma come l&rsquo;effetto del cambio di metodo (<a href="#limiti">limiti</a>).</p><p class="sub">Quattro quartieri (Duomo, Brera, Guastalla, Porta Vigentina) non hanno un reddito affidabile, perch&eacute; i CAP del centro cambiano &laquo;sede fiscale&raquo; di molti contribuenti, e sono tolti da questo confronto.</p>');
+  [1991,2001,2011,2021,2023].forEach(function(y){btn('ctl-rd-anno',String(y),y===2011,function(bt){Array.prototype.forEach.call(document.querySelectorAll('#ctl-rd-anno button'),function(x){x.classList.toggle('on',x===bt)});RDY=y;drawRd()},y>=2021?'nuova':'')});
+  drawRd();RD.push(drawRd);
+  var rows=[];
+  ['terzo con reddito piu\' basso','terzo di mezzo','terzo con reddito piu\' alto'].forEach(function(k,i){
+    var lab=['Reddito più basso','Reddito di mezzo','Reddito più alto'][i];
+    function g(y,f){var v=G.gruppi[String(y)][k][f];return v==null?'<span class="sub">–</span>':nf(v,1)}
+    rows.push([lab+' <span class="sub">('+G.gruppi['2011'][k].nil+' quartieri)</span>',g(1991,'tasso_occ'),g(2011,'tasso_occ'),g(2023,'tasso_occ'),g(2011,'tasso_occ_f'),g(2011,'tasso_occ_m'),g(2011,'tasso_disocc'),g(2011,'pensionati_100'),g(2011,'casalinghe_100_donne')]);
+  });
+  table('tab-gr',['Gruppo','Occupati 1991','Occupati 2011','Occupati 2023 (nuova serie)','Donne 2011','Uomini 2011','Disoccupazione 2011 (%)','Pensionati 2011 (ogni 100 res.)','Casalinghe 2011 (ogni 100 donne)'],rows);
+  setH('gr-testo','<p>Divisi i '+G.nil_nel_gruppo+' quartieri con reddito affidabile in tre gruppi di uguale numerosit&agrave; (reddito medio per contribuente da '+f0(G.soglie_reddito_euro[0])+' a '+f0(G.soglie_reddito_euro[1])+' &euro; il gruppo pi&ugrave; basso, oltre '+f0(G.soglie_reddito_euro[2])+' &euro; il pi&ugrave; alto), nel 2011 il gruppo pi&ugrave; ricco ha '+f1(G.gruppi['2011']["terzo con reddito piu' alto"].tasso_occ)+' occupati ogni 100 residenti contro '+f1(G.gruppi['2011']["terzo con reddito piu' basso"].tasso_occ)+' del pi&ugrave; povero; la disoccupazione &egrave; '+f1(G.gruppi['2011']["terzo con reddito piu' alto"].tasso_disocc)+'% contro '+f1(G.gruppi['2011']["terzo con reddito piu' basso"].tasso_disocc)+'%. Le casalinghe, invece, sono quasi le stesse in tutti e tre i gruppi. Nel 1991 erano '+f1(G.gruppi['1991']["terzo con reddito piu' alto"].casalinghe_100_donne)+' ogni 100 donne nel gruppo pi&ugrave; ricco e '+f1(G.gruppi['1991']["terzo con reddito piu' basso"].casalinghe_100_donne)+' nel pi&ugrave; povero; nel 2011 '+f1(G.gruppi['2011']["terzo con reddito piu' alto"].casalinghe_100_donne)+' e '+f1(G.gruppi['2011']["terzo con reddito piu' basso"].casalinghe_100_donne)+'.</p>');
+}
+function drawRd(){
+  var k=AI[RDY];
+  var pts=NIL.filter(function(p){return p.rd!=null&&!p.inst&&p.occ[k]!=null}).map(function(p){return {x:p.rd/1000,y:p.occ[k],g:!p.rob,t:'<b>'+esc(p.n)+'</b>'+(p.rob?'':' (pochi abitanti)')+'<br>reddito medio '+f0(p.rd)+' €<br>'+f1(p.occ[k])+' occupati ogni 100 residenti di 15–64 anni'}});
+  scatter(el('ch-rd'),{pts:pts,h:320,x0:15,x1:95,y0:45,y1:85,xl:'reddito medio per contribuente, 2024 (migliaia di € 2025)',yl:'occupati ogni 100 residenti di 15–64 anni',xf:f0,yf:f0});
+  var r=R.reddito_spearman[String(RDY)].tasso_occ.solo_cap_stabili;
+  setH('rd-src','Anno del censimento: '+RDY+(RDY>=2021?' (nuova serie)':'')+'. Spearman '+sg(r.rho,2)+' su '+r.n+' quartieri. Ogni punto &egrave; un quartiere (grigio: pochi abitanti o confini cambiati). Reddito: MEF, anno d&rsquo;imposta 2024, euro 2025, riportato ai quartieri dai CAP; lavoro: ISTAT.');
+}
+
+/* ---------- classifica ---------- */
+function classifica(){
+  var K=R.classifiche,mx=80;
+  setH('class-testo','<p>Nel 2011 gli occupati ogni 100 residenti di 15&ndash;64 anni vanno, tra i quartieri confrontabili, da '+f1(K.tasso_occ_2011_min[0][2])+' ('+esc(K.tasso_occ_2011_min[0][1])+') a '+f1(K.tasso_occ_2011_max[0][2])+' ('+esc(K.tasso_occ_2011_max[0][1])+'); la disoccupazione da '+f1(K.tasso_disocc_2011_min[0][2])+'% ('+esc(K.tasso_disocc_2011_min[0][1])+') a '+f1(K.tasso_disocc_2011_max[0][2])+'% ('+esc(K.tasso_disocc_2011_max[0][1])+'). In fondo alle graduatorie tornano gli stessi quartieri di periferia: Barona, Gratosoglio e Quarto Oggiaro hanno pochi occupati e molta disoccupazione.</p>');
+  function R5(a){return a.map(function(r){return {nm:r[1],v:r[2],txt:f1(r[2])}})}
+  barsPlain('b-top',R5(K.tasso_occ_2011_max),mx);barsPlain('b-bot',R5(K.tasso_occ_2011_min),mx,WARM);
+  barsPlain('b-dtop',R5(K.tasso_disocc_2011_min).map(function(r){r.txt=r.txt+'%';return r}),14);barsPlain('b-dbot',R5(K.tasso_disocc_2011_max).map(function(r){r.txt=r.txt+'%';return r}),14,WARM);
+  var ok=NIL.filter(function(p){return p.occ[2]!=null}).sort(function(a,b){return b.occ[2]-a.occ[2]});
+  table('tab-nil',['Quartiere','Occupati 2011','Donne 2011','Uomini 2011','Disocc. 2011 (%)','Pensionati 2011','Occupati 2023 (nuova serie)'],ok.map(function(p){return [esc(p.n)+(p.rob?'':' <span class="pill">pochi abitanti</span>'),f1(p.occ[2]),f1(p.occ_f[2]),f1(p.occ_m[2]),cell(p.dis[2]),cell(p.pen[2]),cell(p.occ[4])]}));
+}
+
+/* ---------- limiti e metodo ---------- */
+function limiti(){
+  var Z=R.rottura_2011_2021,M=R.record_individuali,T=Z.variazione_media_per_terzile_laureati;
+  var L=[
+   '<b>Dal 2021 il censimento cambia modo di contare.</b> Fino al 2011 era &laquo;porta a porta&raquo;; dal 2021 &egrave; permanente: l&rsquo;ISTAT usa i registri (anagrafe, lavoro, scuola, fisco) e indagini a campione, e le persone sono collocate nelle sezioni di censimento collegando i registri ai luoghi. Nella documentazione scaricata non ho trovato la definizione esatta di &laquo;occupato&raquo; del 2021, quindi non so dire cosa cambi. Lo si vede per&ograve; nei dati: tra 2011 e 2021, nei '+Z.n+' quartieri confrontabili, chi aveva pi&ugrave; laureati nel 2011 &laquo;perde&raquo; occupati e chi ne aveva meno ne &laquo;guadagna&raquo; (correlazione di Spearman '+sg(Z.rho_variazione_vs_laureati_2011,2)+'; variazione media '+sg(T["piu' laureati"],1)+' punti nel terzo con pi&ugrave; laureati, '+sg(T["meno laureati"],1)+' in quello con meno). Tra 1991 e 2011 questo non succede. Per questo <b>non confronto 2011 e 2021&ndash;2023 quartiere per quartiere</b>; 2021 e 2023 tra loro s&igrave; (le due graduatorie quasi coincidono: Spearman '+nf(R.stabilita_rank_occupazione.tot_2021_2023.rho,2)+').',
+   '<b>Per il 2021 e il 2023 mancano disoccupati, studenti, pensionati e casalinghe.</b> Nei dati per sezione di quegli anni c&rsquo;&egrave; solo il numero di occupati tra 15 e 64 anni, per sesso. Per questo la disoccupazione e le altre condizioni si fermano al 2011.',
+   '<b>Gli occupati 1991&ndash;2011 comprendono chi ha 65 anni o pi&ugrave;; quelli 2021&ndash;2023 no.</b> Nei record individuali del Comune i 65+ sono il '+nf(M['1991'].quota_occupati_65p,1)+'% degli occupati nel 1991 e il '+nf(M['2001'].quota_occupati_65p,1)+'% nel 2001; per il 2011 non c&rsquo;&egrave; un dato. Il tasso 15&ndash;64 anni di quegli anni &egrave; quindi un po&rsquo; pi&ugrave; alto del reale.',
+   '<b>Le definizioni cambiano anche tra 1991, 2001 e 2011.</b> Nel 1991 la condizione &egrave; quella dichiarata dalla persona; nel 2001 e nel 2011 le tabelle ISTAT classificano anche con altre risposte (nel 2001 la voce si chiama &laquo;disoccupati e altre persone in cerca di occupazione&raquo;). Nel 2001 le tabelle per sezione danno '+f0(C(2001).occ)+' occupati, mentre la condizione dichiarata nei record del Comune ne d&agrave; '+f0(M['2001'].occupati)+' (+'+nf((C(2001).occ/M['2001'].occupati-1)*100,1)+'%); gli studenti sono '+f0(C(2001).stu)+' contro '+f0(M['2001'].studenti_dichiarati)+'. La disoccupazione 1991&ndash;2011 &egrave; &laquo;in cerca di lavoro&raquo;, compreso il primo impiego, e il salto del 2001 (da '+f1(C(1991).tasso_disocc)+'% a '+f1(C(2001).tasso_disocc)+'%) pu&ograve; essere in parte un effetto delle domande (probabile, non misurato).',
+   '<b>I pensionati sono i &laquo;ritirati dal lavoro&raquo;</b> (1991, 2001) e, nel 2011, chi percepisce una pensione o altri redditi da capitale: non sono perfettamente la stessa cosa. Casalinghi uomini: nel 1991 sono zero nei record del Comune e nelle tabelle 2001 le somme tornano senza di loro; nel 2011 ce ne sono circa '+f0(R.casalinghi_uomini_per_differenza['2011'])+' (per differenza). Il confronto tra le casalinghe/i dei tre anni &egrave; quindi leggermente sfalsato.',
+   '<b>I quartieri piccoli.</b> '+(88-R.copertura_nil['2011'].robusti)+' quartieri su 88 hanno meno di 2.000 abitanti nel 1991 o nel 2023, o confini troppo cambiati: sono in grigio sulla mappa e fuori dai confronti nel tempo e dalle graduatorie. I tassi non si calcolano con meno di 500 residenti di 15&ndash;64 anni. I quartieri sono ricostruiti sulle sezioni 2021: le sezioni del 1991, 2001 e 2011 sono assegnate al quartiere con cui hanno pi&ugrave; area in comune (&egrave; il lavoro fatto per la pagina <a href="../censimenti/">Censimenti</a>); nel 1991 il 5,8% degli abitanti sta in sezioni mezze fuori dal quartiere scelto.',
+   '<b>Residenti, non posti di lavoro.</b> Gli occupati sono quelli che abitano nel quartiere, non quelli che ci lavorano: il centro ha molti posti di lavoro ma questi dati non li contano. Chi vive a Milano e lavora fuori (o il contrario) compare solo per il luogo dove abita.',
+   '<b>Il reddito &egrave; un\'altra cosa.</b> Il reddito medio &egrave; per contribuente, per CAP e del 2024, riportato ai quartieri; quattro quartieri del centro non hanno un valore affidabile. Il confronto con il lavoro dice quali zone vanno insieme, non il perch&eacute;.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var L=[
+   '<b>Dati:</b> tabelle ISTAT per sezione di censimento (circa 6.000 sezioni a Milano per anno), campi sulla popolazione per et&agrave; e sesso e sulla condizione professionale. Ogni sezione &egrave; assegnata a uno degli 88 NIL con la tabella di raccordo del lavoro <a href="../censimenti/">Censimenti</a> (nessuna sezione &egrave; unita in silenzio; le sezioni dei senza fissa dimora non stanno in nessun quartiere ma contano nella citt&agrave;).',
+   '<b>Occupati ogni 100 residenti di 15&ndash;64 anni</b> = occupati / residenti da 15 a 64 anni. 1991, 2001, 2011: occupati di ogni et&agrave; (campo P61); 2021 e 2023: occupati 15&ndash;64 anni (campo P101). Uomini: P67 (1991) e P65 (2001, 2011), P102 (2021, 2023); donne = totale meno uomini (2021 e 2023: P103). I residenti 15&ndash;64 sono la somma delle classi di et&agrave; 15&ndash;19 &hellip; 60&ndash;64, per sesso.',
+   '<b>Disoccupazione</b> = (forze di lavoro &minus; occupati) / forze di lavoro, quindi comprende chi cerca il primo lavoro (campo P60 meno P61; uomini: P69+P70 nel 1991, P64 nel 2001 e 2011).',
+   '<b>Studenti</b> (P149; P131), <b>pensionati</b> (P151; P133; P139) e <b>casalinghe/i</b> (P148; P130): ogni 100 residenti di tutte le et&agrave;; le casalinghe ogni 100 donne. Controlli aritmetici: nel 2011, forze di lavoro non occupate + casalinghe + studenti + pensionati + altra condizione tornano al totale della popolazione non in forze di lavoro; occupati uomini e donne tornano nei due sensi (2021, 2023). Il campo P139 del 2011 &egrave; indicato come &laquo;percettori di reddito da lavoro o capitale&raquo; ma coincide al numero con i ritirati dal lavoro ottenuti per differenza (289.498), quindi lo usiamo cos&igrave;.',
+   '<b>Controllo con i record individuali</b> (1991, 2001), aggregati per et&agrave; e condizione sull&rsquo;intera citt&agrave;: nel 1991 i totali coincidono al numero con le tabelle ISTAT (occupati, casalinghe, studenti, ritirati), nel 2001 differiscono (vedi limiti).',
+   '<b>Quartieri robusti e piccoli:</b> sono quelli del campo <code>robusto</code> del lavoro Censimenti (almeno 2.000 abitanti nel 1991 e nel 2023, differenza di assegnazione sotto il 5%); le variazioni e le graduatorie usano solo questi.',
+   '<b>Correlazioni:</b> Spearman (sui ranghi) tra il reddito medio per contribuente 2024 (MEF, per CAP, riportato ai NIL nel lavoro &laquo;quartieri che cambiano&raquo;) e gli indicatori di lavoro di ogni censimento; tolti i 4 quartieri con troppi civici in CAP &laquo;instabili&raquo;. I tre gruppi sono terzili di numero di quartieri e i loro tassi sono calcolati sommando i conteggi, non facendo la media dei tassi.',
+   '<b>Programmi</b> (Python 3.12): <code>lavoro/scripts/01_micro_controllo.py</code>, <code>02_indicatori.py</code>, <code>03_analisi.py</code>, <code>pagina.py</code>. Tutti i numeri del testo vengono da <a href="data/riepilogo.json">riepilogo.json</a> e <a href="data/dati.json">dati.json</a>.'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script></body></html>
