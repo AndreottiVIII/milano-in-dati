@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · BikeMi e bici in città</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#1b5fa8;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eaf1f9;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:4px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed} .lgd i.dot{width:12px;height:12px;border-radius:50%}
+.scroll{overflow-x:auto}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars .tr .mk{position:absolute;top:-3px;height:16px;border-left:2px solid #666}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .bars .row{grid-template-columns:minmax(90px,38%) 1fr 70px}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+#tab-anni{min-width:620px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>BikeMi e le bici in città</h1>
+<p>BikeMi è il servizio di biciclette in condivisione del Comune di Milano. Oggi ha <b id="n-staz">325</b> stazioni e <b id="n-bici">5.430</b> biciclette, di cui <b id="n-eb">1.150</b> elettriche. Nel 2025, in media, sono state noleggiate <b id="n-nol">8.321</b> bici al giorno. Qui si vede come è cambiato l&rsquo;uso dal 2011, dove sono le stazioni e le piste ciclabili (<b id="n-km">213</b> km tra piste e corsie), e che cosa si può dire sulle ore del giorno, sulle stagioni e sulla pioggia. <b>Una cosa manca</b>: non ho trovato dati aperti con i conteggi delle biciclette lungo le piste (vedi <a href="#contatori">i contatori</a>).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> BikeMi è <b>solo una parte</b> delle biciclette di Milano: le bici private, che sono la grande maggioranza, in questi dati non si contano da nessuna parte. &laquo;Noleggio&raquo; qui vuol dire un prelievo di una bici. I numeri 2011&ndash;2025 sono del Comune; quelli sulle ore, le stazioni più usate e la pioggia vengono da un archivio del 2013 e sono <b>un ordine di grandezza</b>, non una misura precisa (vedi <a href="#limiti">i limiti</a>).</div>
+
+<h2 id="anni">BikeMi anno per anno</h2>
+<div id="anni-testo"></div>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-g="nol" class="on">Noleggi al giorno</button><button type="button" data-g="abb">Abbonati annuali</button><button type="button" data-g="bici">Biciclette</button></div>
+<div class="lgd" id="lg-anni"></div>
+<div class="ch" id="ch-anni" role="img" aria-label="Grafico: noleggi medi al giorno, abbonati o biciclette di BikeMi per anno, dal 2011 al 2025"></div>
+<p class="src" id="src-anni"></p>
+<div class="scroll"><table id="tab-anni"></table></div>
+<p class="src">Fonte: Comune di Milano, &laquo;Servizi di Car Sharing, Bike Sharing, Scooter sharing e monopattini&raquo; (ds574, CC BY, scheda aggiornata il 4/8/2026). &laquo;Noleggi/anno&raquo; = noleggi medi al giorno &times; giorni dell&rsquo;anno: è un calcolo nostro. Stazioni e bici sono i valori di fine anno indicati dal Comune. Free floating = bici in condivisione senza stazioni, di operatori privati autorizzati dal Comune.</p>
+<div id="anni-testo2"></div>
+
+<h2 id="mappa">Stazioni e piste ciclabili sulla mappa</h2>
+<p>Le stazioni BikeMi (un cerchio ciascuna, più grande dove ci sono più stalli) e gli itinerari ciclabili del Comune. Clic o tocco su un elemento per i dettagli. Le piste si possono colorare per tipo o per periodo in cui sono state finite.</p>
+<div class="ctl"><span class="sub">Piste per:</span>
+<button type="button" data-p="tipo" class="on">tipo</button><button type="button" data-p="anno">anno di fine lavori</button>
+<span class="sub">Stazioni:</span>
+<button type="button" data-s="tutte" class="on">tutte</button><button type="button" data-s="mov">più movimentate nel 2013</button><button type="button" data-s="no">nascoste</button></div>
+<div class="ctl"><label class="ck"><input type="checkbox" id="ck-prom"> mostra anche i percorsi promiscui (con pedoni o auto)</label></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa di Milano con le stazioni BikeMi e gli itinerari ciclabili"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors; stazioni (ds65, file del settembre 2022) e itinerari ciclabili (ds60, aggiornati il 25/10/2026): Comune di Milano, CC BY. Le geometrie sono semplificate (circa 3 metri).</p>
+
+<h2 id="quando">Quando si usa BikeMi (dati del 2013)</h2>
+<div id="quando-testo"></div>
+<h3>Le ore del giorno</h3>
+<div class="lgd" id="lg-ore"></div>
+<div class="ch" id="ch-ore" role="img" aria-label="Grafico: quota del movimento di BikeMi in ogni ora del giorno, giorni feriali e fine settimana, 2013"></div>
+<p class="src" id="src-ore"></p>
+<div class="grid2"><div><h3>I giorni della settimana</h3><div class="bars" id="b-dow"></div></div>
+<div><h3>I mesi</h3><div class="bars" id="b-mese"></div></div></div>
+<p class="src" id="src-mese"></p>
+<h3 id="top">Le stazioni più movimentate</h3>
+<div id="top-testo"></div>
+<div class="bars" id="b-top"></div>
+<p class="src" id="src-top"></p>
+
+<h2 id="tempo">Pioggia e temperatura</h2>
+<div id="tempo-testo"></div>
+<div class="grid2"><div><h3>Ore con pioggia</h3><div class="bars" id="b-ore-pioggia"></div></div>
+<div><h3>Giorni feriali per temperatura media</h3><div class="bars" id="b-temp"></div></div></div>
+<p class="src" id="src-tempo"></p>
+<div class="warn"><b>Un confronto, non una prova.</b> Quando piove, di solito fa anche più fresco, è più buio e molti si spostano diversamente: qui non si separa la pioggia da tutto il resto. Ho confrontato ore dello stesso mese e della stessa ora del giorno, e giorni rispetto alla media del loro mese, per togliere almeno l&rsquo;effetto della stagione.</div>
+
+<h2 id="piste">Le piste ciclabili: quanti chilometri e da quando</h2>
+<div id="piste-testo"></div>
+<div class="lgd" id="lg-km"></div>
+<div class="ch" id="ch-km" role="img" aria-label="Grafico: chilometri di piste e corsie ciclabili finiti ogni anno"></div>
+<p class="src" id="src-km"></p>
+<div class="scroll"><table id="tab-km"></table></div>
+<div id="piste-testo2"></div>
+
+<h2 id="contatori">I contatori di biciclette: che cosa non c&rsquo;è</h2>
+<div id="cont-testo"></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come è fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/bikemi_serie.csv">bikemi_serie.csv</a> (la serie 2011&ndash;2025 di BikeMi e free floating), <a href="data/stazioni_bikemi.csv">stazioni_bikemi.csv</a> (le 325 stazioni, con l&rsquo;indice di movimento 2013 dove abbinabile), <a href="data/stazioni_cumulate_per_anno_installazione.csv">stazioni_cumulate_per_anno_installazione.csv</a>, <a href="data/ciclabili_km_per_anno.csv">ciclabili_km_per_anno.csv</a>, <a href="data/ciclabili.json">ciclabili.json</a> (itinerari semplificati), <a href="data/stazioni_movimento_2013.csv">stazioni_movimento_2013.csv</a>, <a href="data/profilo_orario_2011_2013.csv">profilo_orario_2011_2013.csv</a>, <a href="data/giorno_settimana_2013.csv">giorno_settimana_2013.csv</a>, <a href="data/mese_2013.csv">mese_2013.csv</a>, <a href="data/temperatura_2013_feriali.csv">temperatura_2013_feriali.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Sono tutti valori aggregati.</p>
+
+<h2>Altre pagine</h2>
+<p>Per confrontare le bici con auto e mezzi pubblici: <a href="../bici-auto-mezzi/">Bici, auto o mezzi pubblici</a>. Per i punti dove le piste incontrano il traffico: <a href="../incroci/">Gli incroci</a>. Per lo spazio che la città dà alle auto, a confronto con le piste: <a href="../parcheggi/">Parcheggi</a>.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Servizi di sharing (ds574, CC BY), stazioni BikeMi (ds65, CC BY) e itinerari ciclabili (ds60, CC BY): Comune di Milano, portale <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, scaricati il 2 novembre 2026. Fotografia del feed pubblico di BikeMi (GBFS, <a href="https://bikemi.com/en/open-data/realtime">bikemi.com/en/open-data/realtime</a>, licenza NLOD 2.0 indicata dal sito) del 2 novembre 2026, ore 10:28: ripubblicati solo i totali. Disponibilità orarie delle stazioni 2011&ndash;2013: A. Trentini, &laquo;Scraped Data BikeMI 2011-2014&raquo;, Zenodo, <a href="https://doi.org/10.5281/zenodo.1209115">doi:10.5281/zenodo.1209115</a>, CC BY 4.0; elaborazione nostra. Pioggia: ARPA Lombardia (pluviometri Rosellini, Zavattari, Lambrate), dati.lombardia.it, licenza CC0; temperatura: serie giornaliera di questo sito (filone <a href="../temperature/">temperature</a>). Cifra del 2022 di Corso Buenos Aires: Moto.it, 27/2/2023, che cita dati AMAT (di seconda mano). Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,ST=null,CI=null,RD=[];
+var ACC='#1b5fa8',WARM='#c26a1b',GRY='#8a8a8a',DARK='#222';
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function sgp(x,d){return sg(x,d==null?1:d)+'%'}
+function pct(a,b){return 100*(a/b-1)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceMax(v){var p=Math.pow(10,Math.floor(Math.log(v)/Math.LN10)),f=v/p;return (f<=1?1:f<=1.5?1.5:f<=2?2:f<=3?3:f<=4?4:f<=5?5:f<=7.5?7.5:10)*p}
+function lgd(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
+function lgb(items){return items.map(function(it){return '<span><i style="background:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
+var S={}; /* serie per anno */
+Promise.all([J('data/riepilogo.json'),J('data/stazioni.json'),J('data/ciclabili.json')]).then(function(a){
+  D=a[0];ST=a[1];CI=a[2];
+  D.serie.forEach(function(r){S[r.anno]=r});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+function tutto(){
+  testa();sorpresa();anni();mappa();quando();tempo();piste();contatori();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function testa(){
+  el('n-staz').textContent=f0(S[2025].stazioni);el('n-bici').textContent=f0(S[2025].bici_sb);el('n-eb').textContent=f0(S[2025].ebike_sb);
+  el('n-nol').textContent=f0(S[2025].noleggi_giorno_sb);el('n-km').textContent=f0(D.ciclabili.km_piste_e_corsie);
+}
+/* ---------- grafici SVG ---------- */
+function chart(id,build){
+  var box=el(id);
+  function draw(){
+    var w=Math.max(280,box.clientWidth||600);
+    box.innerHTML='';
+    build(box,w);
+  }
+  draw();RD.push(draw);
+}
+function tipShow(box,x,y,html){
+  var t=box.querySelector('.tip');if(!t){t=document.createElement('div');t.className='tip';box.appendChild(t)}
+  t.innerHTML=html;t.style.display='block';
+  var bw=box.clientWidth,tw=t.offsetWidth;var left=x+12;if(left+tw>bw)left=Math.max(0,x-tw-12);
+  t.style.left=left+'px';t.style.top=Math.max(0,y-10)+'px';
+}
+function tipHide(box){var t=box.querySelector('.tip');if(t)t.style.display='none'}
+/* grafico a linee: o={xs,series:[{n,c,v,dash}],h,yfmt,xfmt,xtick,ymax,ytitle} */
+function lineChart(id,o){
+  chart(id,function(box,w){
+    var h=o.h||270,m={l:o.ml||48,r:12,t:12,b:26},iw=w-m.l-m.r,ih=h-m.t-m.b;
+    var xs=o.xs,x0=xs[0],x1=xs[xs.length-1];
+    var mx=0;o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null&&v>mx)mx=v})});
+    var ymax=o.ymax||niceMax(mx*1.04);
+    function X(x){return m.l+iw*(x-x0)/(x1-x0)}function Y(v){return m.t+ih*(1-v/ymax)}
+    var g='';
+    for(var i=0;i<=4;i++){var v=ymax*i/4,y=Y(v);g+='<line x1="'+m.l+'" x2="'+(w-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(y+4)+'" text-anchor="end">'+(o.yfmt?o.yfmt(v):f0(v))+'</text>'}
+    var step=o.xtick||(w<480?4:2);
+    xs.forEach(function(x,k){if(((x-x0)%step)===0){g+='<text class="mu" x="'+X(x)+'" y="'+(h-8)+'" text-anchor="middle">'+(o.xfmt?o.xfmt(x):x)+'</text>'}});
+    o.series.forEach(function(s){
+      var d='',on=false;
+      s.v.forEach(function(v,k){if(v==null){on=false;return}d+=(on?'L':'M')+X(xs[k]).toFixed(1)+' '+Y(v).toFixed(1);on=true});
+      g+='<path d="'+d+'" fill="none" stroke="'+s.c+'" stroke-width="2.5"'+(s.dash?' stroke-dasharray="6 4"':'')+'/>';
+      s.v.forEach(function(v,k){if(v!=null&&xs.length<=30)g+='<circle cx="'+X(xs[k]).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="2.8" fill="'+s.c+'"/>'});
+    });
+    g+='<line id="gd" x1="0" x2="0" y1="'+m.t+'" y2="'+(m.t+ih)+'" stroke="#666" stroke-dasharray="3 3" style="display:none"/>';
+    box.innerHTML='<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'">'+g+'<rect x="'+m.l+'" y="'+m.t+'" width="'+iw+'" height="'+ih+'" fill="transparent" id="ov"/></svg>';
+    var ov=box.querySelector('#ov'),gd=box.querySelector('#gd');
+    function mv(e){
+      var r=box.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+      var xv=x0+(cx-m.l)/iw*(x1-x0),bi=0,bd=1e9;xs.forEach(function(x,k){var dd=Math.abs(x-xv);if(dd<bd){bd=dd;bi=k}});
+      var hh='<b>'+(o.xfmt?o.xfmt(xs[bi]):xs[bi])+'</b>';
+      o.series.forEach(function(s){if(s.v[bi]!=null)hh+='<br><span style="color:'+s.c+'">&#9632;</span> '+s.n+': '+(o.tfmt?o.tfmt(s.v[bi]):f0(s.v[bi]))});
+      gd.setAttribute('x1',X(xs[bi]));gd.setAttribute('x2',X(xs[bi]));gd.style.display='block';
+      tipShow(box,X(xs[bi]),cy,hh);
+    }
+    ov.addEventListener('mousemove',mv);ov.addEventListener('touchstart',mv,{passive:true});ov.addEventListener('touchmove',mv,{passive:true});
+    ov.addEventListener('mouseleave',function(){tipHide(box);gd.style.display='none'});
+  });
+}
+/* barre impilate per anno */
+function stackChart(id,o){
+  chart(id,function(box,w){
+    var h=o.h||260,m={l:40,r:8,t:10,b:26},iw=w-m.l-m.r,ih=h-m.t-m.b,n=o.xs.length;
+    var mx=0;o.xs.forEach(function(x,i){var t=0;o.series.forEach(function(s){t+=s.v[i]||0});if(t>mx)mx=t});
+    var ymax=niceMax(mx*1.05),bw=iw/n,g='';
+    function Y(v){return m.t+ih*(1-v/ymax)}
+    for(var i=0;i<=4;i++){var v=ymax*i/4,y=Y(v);g+='<line x1="'+m.l+'" x2="'+(w-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(y+4)+'" text-anchor="end">'+f0(v)+'</text>'}
+    var step=w<480?10:5;
+    o.xs.forEach(function(x,i){
+      var base=0,xx=m.l+i*bw;
+      o.series.forEach(function(s){var v=s.v[i]||0;if(v>0){g+='<rect x="'+(xx+bw*.12).toFixed(1)+'" y="'+Y(base+v).toFixed(1)+'" width="'+(bw*.76).toFixed(1)+'" height="'+(ih*v/ymax).toFixed(1)+'" fill="'+s.c+'"/>';}base+=v});
+      if(x%step===0)g+='<text class="mu" x="'+(xx+bw/2)+'" y="'+(h-8)+'" text-anchor="middle">'+x+'</text>';
+      g+='<rect class="hv" data-i="'+i+'" x="'+xx.toFixed(1)+'" y="'+m.t+'" width="'+bw.toFixed(1)+'" height="'+ih+'" fill="transparent"/>';
+    });
+    box.innerHTML='<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'">'+g+'</svg>';
+    Array.prototype.forEach.call(box.querySelectorAll('.hv'),function(r){
+      function sh(e){var i=+r.getAttribute('data-i'),b=box.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-b.left,cy=(e.touches?e.touches[0].clientY:e.clientY)-b.top;
+        tipShow(box,cx,cy,o.tip(i))}
+      r.addEventListener('mousemove',sh);r.addEventListener('touchstart',sh,{passive:true});r.addEventListener('mouseleave',function(){tipHide(box)});
+    });
+  });
+}
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var A=D.sharing,a=S[2025],b=S[2017],c=S[2024];
+  var h='<p><b>BikeMi è più grande di prima, ma si usa meno.</b> Il picco è del '+A.picco_anno_sb+': '+f0(A.picco_noleggi_giorno_sb)+' noleggi al giorno con '+f0(b.stazioni)+' stazioni e '+f0(b.bici_sb)+' bici. Nel 2025 sono '+f0(a.noleggi_giorno_sb)+' con '+f0(a.stazioni)+' stazioni e '+f0(a.bici_sb)+' bici: <b>'+sgp(A.var_2025_su_picco_pct)+'</b>. Ogni bici viene noleggiata '+nf(A.noleggi_per_bici_2025,1)+' volte al giorno invece di '+nf(A.noleggi_per_bici_2017,1)+'. Gli abbonati annuali sono passati da '+f0(b.abbonati_sb)+' a '+f0(a.abbonati_sb)+' ('+sgp(A.abbonati_var_2025_su_2017_pct,0)+'). Ma il 2025 è in ripresa: '+sgp(pct(a.noleggi_giorno_sb,c.noleggi_giorno_sb),0)+' noleggi e '+sgp(A.abbonati_var_2025_su_2024_pct,0)+' abbonati sul 2024.</p>';
+  h+='<p><b>Le bici elettriche sono 1 su '+nf(100/A.ebike_quota_flotta_2025_pct,0)+' ma fanno il '+f0(A.quota_ebike_2025)+'% dei noleggi.</b> Nel 2025: '+f0(a.ebike_sb)+' e-bike su '+f0(a.bici_sb)+' ('+f1(A.ebike_quota_flotta_2025_pct)+'%), noleggiate in media '+nf(A.ebike_noleggi_per_bici_giorno_2025,1)+' volte al giorno ciascuna contro '+nf(A.muscolari_noleggi_per_bici_giorno_2025,1)+' delle altre: <b>'+nf(A.ebike_rapporto_uso_2025,1)+' volte di più</b>.</p>';
+  h+='<p><b>Il Covid ha fermato BikeMi, ma ha fatto correre le piste.</b> Nel 2020 i noleggi sono scesi del '+f0(Math.abs(A.var_2020_su_2019_pct))+'% sul 2019, e solo nel 2025 superano il 2019 ('+sgp(A.var_2025_su_2019_pct)+'). Nello stesso 2020 i cantieri hanno finito <b>'+f0(D.ciclabili.km_2020)+' km</b> di piste e corsie, il record: <b>'+f0(D.ciclabili.quota_2020_su_totale_datato_pct)+'%</b> di tutti i chilometri con una data, e '+f0(D.ciclabili.km_2020_ordinanza)+' km sono messi con una &laquo;ordinanza lavori stradali&raquo;.</p>';
+  h+='<p class="src">Comune di Milano, ds574, ds60 (CC BY); "noleggi" e "km" sono quelli indicati nelle schede. Vedi <a href="#anni">anno per anno</a> e <a href="#piste">le piste</a>.</p>';
+  setH('sorpresa',h);
+}
+/* ---------- anno per anno ---------- */
+var GRAF='nol';
+function anni(){
+  var A=D.sharing,a=S[2025];
+  var ys=D.serie.map(function(r){return r.anno});
+  function col(k){return D.serie.map(function(r){return r[k]})}
+  function disegna(){
+    var cfg;
+    if(GRAF==='nol')cfg={series:[{n:'BikeMi (stazioni)',c:ACC,v:col('noleggi_giorno_sb')},{n:'Free floating',c:WARM,v:col('noleggi_giorno_ff'),dash:true}],lg:lgd([{c:ACC,t:'BikeMi (con stazioni)'},{c:WARM,t:'free floating (senza stazioni)',dash:true}]),src:'Noleggi medi al giorno. Il free floating comincia a settembre 2017.'};
+    else if(GRAF==='abb')cfg={series:[{n:'Abbonati annuali',c:ACC,v:col('abbonati_sb')}],lg:lgd([{c:ACC,t:'abbonati annuali di BikeMi'}]),src:'Abbonati annuali di BikeMi (con stazioni). Il dato non è disponibile per il free floating.'};
+    else cfg={series:[{n:'BikeMi: bici',c:ACC,v:col('bici_sb')},{n:'BikeMi: e-bike',c:DARK,v:col('ebike_sb')},{n:'Free floating: bici',c:WARM,v:col('bici_ff'),dash:true}],lg:lgd([{c:ACC,t:'BikeMi: bici in tutto'},{c:DARK,t:'di cui elettriche'},{c:WARM,t:'free floating: bici',dash:true}]),src:'Biciclette in flotta a fine anno. Dal 2020 le e-bike del free floating sono quasi tutta la flotta; nel 2025 sono '+f0(A.ff_ebike_2025)+' su '+f0(A.ff_bici_2025)+'.'};
+    setH('lg-anni',cfg.lg);setH('src-anni',cfg.src);
+    lineChart('ch-anni',{xs:ys,series:cfg.series,h:280,xtick:2});
+  }
+  disegna();
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-g]'),function(b){b.addEventListener('click',function(){GRAF=b.getAttribute('data-g');Array.prototype.forEach.call(document.querySelectorAll('button[data-g]'),function(x){x.classList.toggle('on',x===b)});disegna()})});
+  var rows=D.serie.map(function(r){return [r.anno,f0(r.stazioni),f0(r.bici_sb),r.ebike_sb==null?'&ndash;':f0(r.ebike_sb),f0(r.abbonati_sb),f0(r.noleggi_giorno_sb),f0(r.noleggi_anno_sb_stima),r.noleggi_giorno_ff==null?'&ndash;':f0(r.noleggi_giorno_ff),r.km_annui_sb_ff==null?'&ndash;':nf(r.km_annui_sb_ff/1e6,1)]});
+  table('tab-anni',['Anno','Stazioni','Bici','di cui e-bike','Abbonati','Noleggi/giorno','Noleggi/anno (stima)','Free floating, noleggi/giorno','Km percorsi (milioni, BikeMi + free floating)'],rows);
+  setH('anni-testo','<p>Dal 2011 al 2017 BikeMi cresce di continuo: da '+f0(S[2011].stazioni)+' a '+f0(S[2017].stazioni)+' stazioni e da '+f0(S[2011].noleggi_giorno_sb)+' a '+f0(S[2017].noleggi_giorno_sb)+' noleggi al giorno (circa '+nf(S[2017].noleggi_anno_sb_stima/1e6,1)+' milioni di noleggi in quell&rsquo;anno). Poi scende: da settembre 2017 ci sono anche le bici in free floating, e nel 2018 i noleggi di BikeMi calano a '+f0(S[2018].noleggi_giorno_sb)+'. (Non è detto che una cosa sia la causa dell&rsquo;altra.) Con il Covid il minimo: '+f0(S[2020].noleggi_giorno_sb)+' nel 2020. Dopo, una risalita lenta fino al 2024 ('+f0(S[2024].noleggi_giorno_sb)+') e un salto nel 2025.</p>');
+  setH('anni-testo2','<h3>Il free floating</h3><p>Le bici senza stazioni sono di operatori privati. Nel 2017 erano '+f0(A.ff_bici_2017)+' con '+f0(A.ff_noleggi_giorno_2017)+' noleggi al giorno; nel 2025 sono '+f0(A.ff_bici_2025)+' (tutte elettriche) con '+f0(A.ff_noleggi_giorno_2025)+' noleggi al giorno, cio&egrave; '+nf(A.ff_noleggi_per_bici_giorno_2025,1)+' per bici. Mettendo insieme i due servizi, nel 2025 si contano circa <b>'+f0(A.totale_noleggi_giorno_2025)+' noleggi al giorno</b>. I chilometri percorsi in tutto (BikeMi + free floating, stima del Comune) sono stati '+nf(A.km_annui_2025/1e6,1)+' milioni nel 2025, '+nf(A.km_annui_2020/1e6,1)+' nel 2020 e '+nf(A.km_annui_2018/1e6,1)+' nel 2018.</p>');
+}
+/* ---------- mappa ---------- */
+var MAP=null,LCI=null,LST=null,PMODE='tipo',SMODE='tutte',PROM=false;
+var TC=['#1b5fa8','#4fa3e0','#9a9a9a','#cfcfcf'],TN=['pista in sede propria','corsia dipinta','percorso promiscuo con pedoni','percorso promiscuo con veicoli'];
+var AC=[{m:2009,c:'#7a7a7a',t:'fino al 2009'},{m:2019,c:'#4fa3e0',t:'2010–2019'},{m:2020,c:'#c26a1b',t:'2020'},{m:9999,c:'#1b5fa8',t:'dal 2021'}];
+function colPista(p){
+  if(PMODE==='tipo')return TC[p.t];
+  if(!p.a)return '#bbbbbb';
+  for(var i=0;i<AC.length;i++)if(p.a<=AC[i].m)return AC[i].c;
+}
+function mappa(){
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LCI=L.geoJSON(CI,{filter:function(f){return PROM||f.properties.t<2},style:function(f){var p=f.properties;return {color:colPista(p),weight:p.t<2?3:2,opacity:.85,dashArray:p.t>=2?'3 4':null}},
+    onEachFeature:function(f,l){l.bindTooltip(function(){var p=f.properties;return '<b>'+esc(p.n)+'</b><br>'+TN[p.t]+'<br>'+(p.a?'finita nel '+p.a:'anno non indicato')+(p.o?'<br>norma: ordinanza lavori stradali':'')+'<br>'+f0(p.l)+' m'},{sticky:true})}}).addTo(MAP);
+  stazioni();
+  setTimeout(function(){MAP.invalidateSize()},500);
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(b){b.addEventListener('click',function(){PMODE=b.getAttribute('data-p');Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(x){x.classList.toggle('on',x===b)});ricarica()})});
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-s]'),function(b){b.addEventListener('click',function(){SMODE=b.getAttribute('data-s');Array.prototype.forEach.call(document.querySelectorAll('button[data-s]'),function(x){x.classList.toggle('on',x===b)});stazioni();leggenda()})});
+  el('ck-prom').addEventListener('change',function(){PROM=this.checked;ricarica()});
+  leggenda();
+}
+function ricarica(){
+  MAP.removeLayer(LCI);
+  LCI=L.geoJSON(CI,{filter:function(f){return PROM||f.properties.t<2},style:function(f){var p=f.properties;return {color:colPista(p),weight:p.t<2?3:2,opacity:.85,dashArray:p.t>=2?'3 4':null}},
+    onEachFeature:function(f,l){l.bindTooltip(function(){var p=f.properties;return '<b>'+esc(p.n)+'</b><br>'+TN[p.t]+'<br>'+(p.a?'finita nel '+p.a:'anno non indicato')+(p.o?'<br>norma: ordinanza lavori stradali':'')+'<br>'+f0(p.l)+' m'},{sticky:true})}}).addTo(MAP);
+  if(LST)LST.bringToFront&&LST.eachLayer(function(l){l.bringToFront()});
+  leggenda();
+}
+function stazioni(){
+  if(LST){MAP.removeLayer(LST);LST=null}
+  if(SMODE==='no')return;
+  LST=L.layerGroup();
+  var mxs=0;ST.righe.forEach(function(r){if(r[8]!=null&&r[8]>mxs)mxs=r[8]});
+  ST.righe.forEach(function(r){
+    var mov=SMODE==='mov';
+    if(mov&&r[8]==null)return;
+    var rad=mov?4+10*r[8]/mxs:3+r[4]/6;
+    var mk=L.circleMarker([r[3],r[2]],{radius:rad,color:'#fff',weight:1,fillColor:mov?WARM:DARK,fillOpacity:mov?.7:.8});
+    mk.bindTooltip('<b>'+esc(r[1])+'</b> (n. '+esc(r[0])+')<br>'+r[4]+' stalli · Municipio '+r[6]+(r[5]?' · installata nel '+r[5]:'')+(r[8]!=null?'<br>indice di movimento 2013: '+nf(r[8],1)+' al giorno':''),{sticky:true});
+    LST.addLayer(mk);
+  });
+  LST.addTo(MAP);
+}
+function leggenda(){
+  var h=PMODE==='tipo'?lgb(TC.slice(0,PROM?4:2).map(function(c,i){return {c:c,t:TN[i]}})):lgb(AC.map(function(a){return {c:a.c,t:a.t}}).concat([{c:'#bbbbbb',t:'anno non indicato'}]));
+  if(SMODE==='tutte')h+='<span><i class="dot" style="background:#222"></i>stazione (più grande = più stalli)</span>';
+  if(SMODE==='mov')h+='<span><i class="dot" style="background:'+WARM+'"></i>stazione (più grande = più movimento nel 2013)</span>';
+  setH('lg-map',h);
+  var s=D.stazioni,c=D.ciclabili;
+  setH('map-desc','Ci sono '+f0(s.n)+' stazioni con '+f0(s.stalli)+' stalli; '+f0(s.per_municipio['1'].stazioni)+' ('+f0(s.quota_municipio1_pct)+'%) sono nel Municipio 1, il centro. '+(SMODE==='mov'?'Sono mostrate solo le '+f0(ST.righe.filter(function(r){return r[8]!=null}).length)+' stazioni del 2013 che ho potuto abbinare con la lista attuale per numero.':'')+' Gli itinerari ciclabili misurano '+f0(c.km_tutti_itinerari)+' km in tutto, dei quali '+f0(c.km_piste_e_corsie)+' sono piste e corsie ciclabili.');
+}
+/* ---------- quando ---------- */
+function quando(){
+  var Z=D.zenodo,P=D.profilo_orario,pk=P.picchi_feriali_2013,T=D.stazioni_top_2013_meta;
+  setH('quando-testo','<p>Il Comune non dà i noleggi per ora né per stazione. L&rsquo;unica fonte aperta che permette di guardarli è un archivio di un ricercatore del Dipartimento di Informatica di Milano (A. Trentini), che per anni ha salvato ogni ora il numero di bici in ogni stazione (Zenodo, CC BY 4.0). Dal cambiamento da un&rsquo;ora all&rsquo;altra ho calcolato un <b>indice di movimento</b>: quante bici sono entrate o uscite da ogni stazione. Per il 2013 l&rsquo;indice vale in media <b>'+f0(Z['2013'].indice_medio_giorno)+'</b> al giorno, contro i <b>'+f0(Z['2013'].noleggi_medi_giorno_ds574)+'</b> noleggi indicati dal Comune: circa <b>la met&agrave;</b> (rapporto '+nf(Z['2013'].rapporto_indice_su_ds574,2)+'; '+nf(Z['2012'].rapporto_indice_su_ds574,2)+' nel 2012 e '+nf(Z['2011'].rapporto_indice_su_ds574,2)+' nel 2011). Perch&eacute; sia pi&ugrave; piccolo: un&rsquo;andata e ritorno nella stessa ora non si vede. Va letto come &laquo;quando e dove succede di pi&ugrave;&raquo;, non come un conteggio.</p><p>Il 2013 &egrave; l&rsquo;anno pi&ugrave; recente con misure ogni ora (dal 2014 sono ogni 20&ndash;30 minuti, con nomi diversi). All&rsquo;epoca BikeMi aveva '+f0(S[2013].stazioni)+' stazioni e '+f0(S[2013].bici_sb)+' bici: oggi la rete &egrave; pi&ugrave; grande.</p>');
+  var xs=[];for(var i=0;i<24;i++)xs.push(i);
+  setH('lg-ore',lgd([{c:ACC,t:'giorni feriali (lun–ven)'},{c:WARM,t:'sabato e domenica',dash:true}]));
+  lineChart('ch-ore',{xs:xs,series:[{n:'Feriali',c:ACC,v:P.feriale_2013},{n:'Sabato e domenica',c:WARM,v:P.festivo_2013,dash:true}],h:260,xtick:3,yfmt:function(v){return f0(v)+'%'},tfmt:function(v){return nf(v,1)+'% del movimento'},xfmt:function(x){return (x<10?'0':'')+x+':00'}});
+  setH('src-ore','Quota del movimento giornaliero in ogni ora (l&rsquo;ora indicata è quella in cui finisce la misura: 09:00 = tra le 8 e le 9, con incertezza di circa un&rsquo;ora sull&rsquo;orologio dell&rsquo;archivio). Giorni con quasi tutte le misure: 2013, da gennaio al 2 dicembre. Nei giorni feriali il picco del mattino ('+nf(pk.mattina_quota,1)+'% tra le '+(pk.mattina_ora-1)+' e le '+pk.mattina_ora+') è molto pi&ugrave; forte di quello della sera ('+nf(pk.sera_quota,1)+'% tra le '+(pk.sera_ora-1)+' e le '+pk.sera_ora+'); di notte (0&ndash;6) il movimento è '+nf(pk.notte_0_5_pct,1)+'% e può includere i camion che rimettono le bici nelle stazioni. Nel fine settimana non c&rsquo;è picco del mattino, e il movimento dura fino a tarda sera.');
+  var dn=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'],S3=D.stagioni_2013;
+  function barre(id,labels,vals){
+    var mx=Math.max.apply(null,vals)*1.05,h='';
+    labels.forEach(function(l,i){h+='<div class="row"><div class="nm">'+l+'</div><div class="tr"><span class="fill" style="width:'+(100*vals[i]/mx).toFixed(1)+'%"></span><span class="mk" style="left:'+(100/mx).toFixed(1)+'%"></span></div><div class="v">'+nf(vals[i]*100,0)+'</div></div>'});
+    setH(id,h);
+  }
+  barre('b-dow',dn,S3.dow_rel);
+  var mn=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre'],mv=[];
+  for(var k=1;k<=11;k++)mv.push(S3.mese_rel[k]);
+  barre('b-mese',mn.map(function(n,i){return n+' <span class="sub">('+S3.mese_giorni[i+1]+' gg)</span>'}),mv);
+  setH('src-mese','100 = media del 2013 ('+f0(S3.media_2013)+' al giorno; linea verticale). Tra parentesi i giorni con misure complete. Dicembre non c&rsquo;è (i dati finiscono il 2 dicembre). Luglio e giugno sono i mesi più forti; <b>agosto crolla</b> ('+nf(S3.mese_rel[8]*100,0)+'), quando la città si svuota; gennaio&ndash;marzo sono intorno a 70&ndash;75. Il fine settimana è più debole dei giorni feriali: la domenica '+nf(S3.dow_rel[6]*100,0)+', il mercoled&igrave; '+nf(S3.dow_rel[2]*100,0)+'.');
+  setH('top-testo','<p>Le 15 stazioni con più movimento nel 2013 (indice medio al giorno, '+f0(T.stazioni_valutate)+' stazioni con dati per più della metà del periodo). Sono soprattutto nel centro e vicino alle stazioni ferroviarie e del metro: Cadorna, Duomo, Palazzo Marino, Garibaldi. Insieme fanno il '+f0(T.quota_top15_pct)+'% del movimento (se fossero tutte uguali 15 stazioni su '+f0(T.stazioni_valutate)+' ne farebbero l&rsquo;8%): c&rsquo;&egrave; concentrazione, ma moderata.</p>');
+  var tp=D.stazioni_top_2013,mx2=tp[0].indice_giorno,h2='';
+  tp.forEach(function(r){var nm=r.nome_ds65||r.nome.replace(/^\d+\s*-?\s*/,'');h2+='<div class="row"><div class="nm">'+esc(nm)+' <span class="sub">n. '+esc(r.num||'')+'</span></div><div class="tr"><span class="fill" style="width:'+(100*r.indice_giorno/mx2).toFixed(1)+'%"></span></div><div class="v">'+nf(r.indice_giorno,1)+'</div></div>'});
+  setH('b-top',h2);
+  setH('src-top','Indice di movimento al giorno nel 2013 (circa la metà dei noleggi veri, vedi sopra). Un indice di 37 vuol dire che ogni giorno circa 37 bici sono entrate o uscite da quella stazione. Nel 2013 c&rsquo;erano '+f0(S[2013].stazioni)+' stazioni; il nome mostrato è quello di oggi dove la stazione esiste ancora con lo stesso numero. Dove le stazioni del 2013 si abbinano con quelle attuali per numero, '+f0(T.quota_municipio1_movimento_pct)+'% del movimento è nel Municipio 1, che ha il '+f0(T.quota_municipio1_stazioni_abbinate_pct)+'% di quelle stazioni.');
+}
+/* ---------- tempo ---------- */
+function tempo(){
+  var T=D.tempo_2013,po=T.pioggia_ora,gp=T.giorno_piovoso;
+  setH('tempo-testo','<p><b>La pioggia pesa molto.</b> Nelle '+f0(po.ore_bagnate)+' ore feriali (7&ndash;20, da marzo a novembre 2013) in cui è caduta pioggia, il movimento di BikeMi è stato <b>'+nf(po.rapporto_movimento_bagnato_su_asciutto,2)+' volte</b> quello delle ore asciutte dello stesso mese e della stessa ora del giorno: cioè <b>circa la met&agrave;</b>. Con pioggia forte (3 mm o pi&ugrave; in due ore) &egrave; '+nf(T.pioggia_classi[2].rapporto,2)+'. Se si guardano i giorni interi, i '+f0(gp.giorni_pioggia_ge1mm)+' giorni feriali con almeno 1 mm di pioggia hanno un indice di '+f0(gp.indice_pioggia)+' contro '+f0(gp.indice_asciutto)+' dei '+f0(gp.giorni_asciutti)+' giorni asciutti; rispetto alla media del loro mese: '+nf(gp.rel_mese_pioggia*100,0)+' contro '+nf(gp.rel_mese_asciutto*100,0)+'. <b>La temperatura conta meno</b>: a parit&agrave; di mese, i giorni freddi e quelli molto caldi sono tra '+nf(Math.min.apply(null,T.temperatura_classi.map(function(r){return r.rel_mese}))*100,0)+' e '+nf(Math.max.apply(null,T.temperatura_classi.map(function(r){return r.rel_mese}))*100,0)+' (100 = media del mese): differenze piccole, su pochi giorni per classe.</p>');
+  var h='';var mx=1.1;
+  var rows=[{n:'ore asciutte (riferimento)',v:1}].concat(T.pioggia_classi.map(function(r){return {n:'pioggia '+r.classe+' <span class="sub">('+f0(r.ore)+' ore)</span>',v:r.rapporto}}));
+  rows.forEach(function(r){h+='<div class="row"><div class="nm">'+r.n+'</div><div class="tr"><span class="fill" style="width:'+(100*r.v/mx).toFixed(1)+'%;'+(r.v<1?'background:'+WARM:'')+'"></span></div><div class="v">'+nf(r.v,2)+'</div></div>'});
+  setH('b-ore-pioggia',h);
+  var h3='';
+  T.temperatura_classi.forEach(function(r){h3+='<div class="row"><div class="nm">'+r.classe+' °C <span class="sub">('+r.giorni+' gg)</span></div><div class="tr"><span class="fill" style="width:'+(100*r.rel_mese/1.1).toFixed(1)+'%"></span><span class="mk" style="left:'+(100/1.1).toFixed(1)+'%"></span></div><div class="v">'+nf(r.rel_mese*100,0)+'</div></div>'});
+  setH('b-temp',h3);
+  setH('src-tempo','A sinistra: movimento nelle ore con pioggia diviso il movimento medio nelle ore asciutte dello stesso mese e della stessa ora (1 = uguale). Ora con pioggia = almeno 0,4 mm nell&rsquo;ora della misura e in quella prima; ora asciutta = meno di 0,05 mm; media di 3 pluviometri ARPA (Rosellini, Zavattari, Lambrate); l&rsquo;orario dell&rsquo;ARPA è solare, quello dell&rsquo;archivio probabilmente locale, per questo si guardano due ore. A destra: indice del giorno diviso la media del suo mese (100 = media), giorni feriali da marzo a novembre 2013, per temperatura media del giorno (serie di questo sito). Giorni con pioggia: pluviometri con almeno 20 ore di dati.');
+}
+/* ---------- piste ---------- */
+function piste(){
+  var C=D.ciclabili,K=D.km_anno,ys=K.map(function(r){return r.anno_fine_lavori});
+  var byY={};K.forEach(function(r){byY[r.anno_fine_lavori]=r});
+  setH('piste-testo','<p>Il Comune pubblica il tracciato di ogni tratto di itinerario ciclabile, con l&rsquo;<b>anno di fine lavori</b>. Mettendo insieme i tratti si può ricostruire come è cresciuta la rete. Le piste in sede propria e le corsie dipinte oggi sono <b>'+f1(C.km_piste_e_corsie)+' km</b> ('+f1(C.km_sede_propria)+' di piste in sede propria e '+f1(C.km_corsie_segnaletica)+' di corsie dipinte); con i percorsi promiscui (con pedoni o veicoli) gli itinerari arrivano a '+f1(C.km_tutti_itinerari)+' km. Fino alla fine del 2010 c&rsquo;erano '+f1(C.km_cumulati_fine_2010)+' km, fino al 2019 '+f1(C.km_cumulati_fine_2019)+', fino al 2020 '+f1(C.km_cumulati_fine_2020)+', fino al 2025 '+f1(C.km_cumulati_fine_2025)+', pi&ugrave; '+f1(C.km_2026)+' km con fine lavori nel 2026 (anno in corso).</p>');
+  setH('lg-km',lgb([{c:ACC,t:'pista in sede propria'},{c:'#4fa3e0',t:'corsia dipinta'}]));
+  stackChart('ch-km',{xs:ys,series:[{c:ACC,v:K.map(function(r){return r.sede_propria_km})},{c:'#4fa3e0',v:K.map(function(r){return r.corsia_segnaletica_km})}],
+    tip:function(i){var r=K[i];return '<b>'+r.anno_fine_lavori+'</b><br>nuovi: '+nf(r.nuovi_km,1)+' km<br>sede propria '+nf(r.sede_propria_km,1)+' · corsie '+nf(r.corsia_segnaletica_km,1)+'<br>in tutto, fino a quell&rsquo;anno: '+nf(r.cumulati_km,1)+' km<br>di cui con ordinanza lavori: '+nf(r.di_cui_ordinanza_lavori_km,1)}});
+  setH('src-km','Chilometri di piste e corsie ciclabili per anno di fine lavori (solo i tratti che esistono oggi). Fonte: Comune di Milano, itinerari ciclabili (ds60, CC BY, aggiornato il 25/10/2026). Un tratto senza anno ('+nf(C.km_senza_anno,1)+' km) non è nel grafico.');
+  var pick=[2000,2010,2015,2019,2020,2021,2022,2023,2024,2025,2026],rows=[];
+  pick.forEach(function(y){var r=byY[y];rows.push([y,nf(r.nuovi_km,1),nf(r.cumulati_km,1),nf(r.di_cui_ordinanza_lavori_km,1)])});
+  table('tab-km',['Anno di fine lavori','Nuovi km nell&rsquo;anno','Km in tutto fino a quell&rsquo;anno','di cui con ordinanza lavori'],rows);
+  setH('piste-testo2','<div class="surp"><p><b>Quasi un terzo delle piste e corsie esiste per ordinanza.</b> Per '+f1(C.km_ordinanza_lavori)+' km su '+f1(C.km_piste_e_corsie)+' ('+f0(C.quota_ordinanza_pct)+'%) la norma indicata dal Comune è &laquo;ordinanza lavori stradali&raquo;. Nel 2020 sono '+f1(C.km_2020_ordinanza)+' km su '+f1(C.km_2020)+'. Il dato non spiega che cosa significhi; la mia lettura (non verificata) &egrave; che siano tratti istituiti con un provvedimento temporaneo, in particolare le corsie dell&rsquo;emergenza Covid, e non ancora trasformati in corsie ciclabili definitive.</p></div><p>Il numero è più basso dei 194 km che si leggono nella pagina sui <a href="../parcheggi/">parcheggi</a>, perch&eacute; l&agrave; non si contavano gli attraversamenti: qui ci sono tutti i tratti classificati come pista o corsia ('+f1(C.km_piste_e_corsie_senza_attraversamenti)+' km senza attraversamenti, d&rsquo;accordo con i 194). Gli itinerari sono divisi in classi di progetto: '+Object.keys(C.per_gerarchia_km).map(function(k){return k+' '+f1(C.per_gerarchia_km[k])+' km'}).join(', ')+' (solo piste e corsie).</p>');
+}
+/* ---------- contatori ---------- */
+function contatori(){
+  var K=D.contatori;
+  setH('cont-testo','<p>Quante biciclette passano davvero sulle piste? Dovrebbero dirlo i contatori installati lungo le ciclabili. <b>Non ho trovato nessun dato aperto</b>: ho cercato nel catalogo del Comune (che ha '+f0(K.schede_catalogo_comune)+' schede) con le parole &laquo;'+K.parole_cercate.slice(0,8).join('&raquo;, &laquo;')+'&raquo; e altre; le schede che parlano di &laquo;transiti&raquo; o di &laquo;accessi giornalieri&raquo; riguardano l&rsquo;Area C, non le biciclette. Ho cercato anche sul web (AMAT, Regione Lombardia, Citt&agrave; metropolitana) senza trovare file scaricabili. Per questo la pagina non ha grafici per ora del giorno, stagione o pioggia delle <b>piste</b>: quelli che vedi sopra riguardano solo BikeMi e il 2013.</p><p>Si trova qualche cifra di seconda mano: Moto.it (27/2/2023) scrive che i dati AMAT del 2022 per Corso Buenos Aires danno una media di <b>6.792 biciclette al giorno</b>, con punte vicine a 10.000. Non ho il dato originale n&eacute; so quale contatore sia, quindi non lo uso in nessun calcolo.</p><div class="warn">Se il Comune o AMAT pubblicassero i conteggi giornalieri per contatore, questa sezione diventerebbe la più interessante della pagina.</div>');
+}
+/* ---------- limiti e metodo ---------- */
+function limiti(){
+  var Z=D.zenodo,C=D.ciclabili,G=D.gbfs;
+  var L=[
+   '<b>Noleggi al giorno.</b> Sono medie annuali indicate dal Comune: non so se calcolate su 365 giorni o sui giorni di servizio. I noleggi per anno sono il mio calcolo (media &times; giorni). Il Comune annota solo che il free floating parte a settembre 2017 e che i chilometri sono una stima.',
+   '<b>Solo il servizio comunale.</b> BikeMi e il free floating non dicono quanti milanesi vanno in bici: le bici private non sono contate. Il free floating cambia operatori e flotte ogni anno; il dato dei chilometri è una stima del Comune.',
+   '<b>Stazioni.</b> Il file con le 325 stazioni (ds65) risale al settembre 2022 (anno di installazione fino al 2021). Il feed pubblico di BikeMi del '+G.istante.slice(8,10)+'/11/2026 ha '+f0(G.stazioni)+' stazioni (3 sono virtuali), tutte nell&rsquo;elenco del Comune; '+f0(G.ds65_non_in_gbfs)+' stazioni del Comune non ci sono più nel feed. La rete è quindi rimasta praticamente la stessa dal 2021. Il feed dà solo la situazione del momento: alle '+G.istante.slice(11)+' di quel lunedì c&rsquo;erano '+f0(G.bici_disponibili)+' bici nelle stazioni ('+f1(G.ebike_su_bici_pct)+'% elettriche), '+f0(G.stazioni_vuote)+' stazioni vuote e '+f0(G.stazioni_piene)+' piene. Non esiste uno storico.',
+   '<b>Le ore e le stazioni più usate vengono dal 2013.</b> Sono dati raccolti da un privato (Zenodo), non dal Comune: una misura all&rsquo;ora, '+f0(Z['2013'].giorni_completi)+' giorni completi su 336 (i dati finiscono il 2 dicembre; giorni con troppe misure mancanti scartati). L&rsquo;indice include anche i camion che rimettono le bici nelle stazioni, e perde le andate e ritorno nella stessa ora: vale circa la met&agrave; dei noleggi del Comune. Il '+f1(Z['2013'].righe_senza_numero_stazione_pct)+'% delle righe del 2013 (circa il 10% nel 2011) non ha il numero della stazione, e i nomi cambiano nel tempo: l&rsquo;abbinamento con le stazioni attuali è per numero e per '+f0(D.stazioni_top_2013_meta.senza_corrispondenza_ds65)+' stazioni del 2013 non riesce. Righe illeggibili scartate nel 2013: '+f0(Z['2013'].righe_scartate_lettura)+'. Il 2014 ha misure ogni 20&ndash;30 minuti e nomi diversi: non usato.',
+   '<b>Pioggia e temperatura sono un confronto.</b> I tre pluviometri non sono vicini a ogni stazione, e la pioggia va insieme a tante altre cose (freddo, buio, giorno della settimana). I giorni per classe di temperatura sono pochi (16&ndash;52).',
+   '<b>Piste.</b> Il dato mostra solo i tratti che esistono oggi, con l&rsquo;anno di fine lavori: le piste cancellate o rifatte non compaiono, quindi il grafico degli anni passati sottostima la rete di allora. '+f0(C.segmenti_senza_anno)+' tratto ('+nf(C.km_senza_anno,1)+' km) non ha l&rsquo;anno. La lunghezza è quella del tratto: una pista a due sensi conta una volta sola. Non si sa nulla della qualità (larghezza, sicurezza, manutenzione) né di quante bici ci passino. L&rsquo;anno 2026 è in corso: i '+nf(C.km_2026,1)+' km sono quelli finiti finora.',
+   '<b>Contatori.</b> Non ci sono (vedi la sezione apposita). Non ho trovato i rapporti AMAT sul bike sharing in versione scaricabile: citati qui solo i dati del Comune.'
+  ];
+  setH('limiti-lista',L.map(function(t){return '<li>'+t+'</li>'}).join(''));
+}
+function metodo(){
+  var M=[
+   '<b>Serie BikeMi 2011&ndash;2025</b> (ds574, Comune di Milano): usate le righe &laquo;bike sharing&raquo;; controllo: per il 2022&ndash;2025 i noleggi di bici, e-bike e e-bike con seggiolino sommano al totale (verificato). Noleggi per anno = media giornaliera &times; 365 (366 negli anni bisestili).',
+   '<b>Chilometri di piste</b> (ds60): somma della lunghezza dei tratti con tipologia &laquo;ciclabile sede propria&raquo; e &laquo;ciclabile segnaletica&raquo;, raggruppati per l&rsquo;anno del campo &laquo;fine_lavor&raquo; (0 = non indicato).',
+   '<b>Indice di movimento</b> (Zenodo 2011&ndash;2013): per ogni stazione e ogni ora, differenza assoluta tra il numero di bici alle ore <i>h</i> e alle <i>h</i>&minus;1 (solo se le due misure distano un&rsquo;ora esatta); somma su tutte le stazioni, divisa per due (ogni bici che si sposta esce da una stazione ed entra in un&rsquo;altra). Stazioni identificate dal numero nel nome, altrimenti dal nome ripulito. Si tengono i giorni in cui le misure sono almeno il 90% del giorno tipico. Il rapporto con i noleggi del Comune (0,57; 0,49; 0,54) è stabile nei tre anni, e questo giustifica di usare l&rsquo;indice come misura relativa.',
+   '<b>Pioggia e temperatura:</b> pioggia oraria 2013 media di 3 pluviometri ARPA di Milano (dati del filone pioggia-e-caldo), solo ore con almeno 2 pluviometri; temperatura media giornaliera dalla serie del filone temperature. Confronti a parit&agrave; di mese e di ora (pioggia) o relativi alla media del mese (temperatura).',
+   '<b>Fotografia del feed BikeMi</b> (GBFS): una sola richiesta il 2/11/2026, con l&rsquo;intestazione di identificazione richiesta dal sito; nessuna raccolta continua. Ripubblicati solo i totali.',
+   '<b>Verifiche:</b> stazioni ds65 = 325 = valore 2021 di ds574 (ok); tratti ds60 = 4.411 (ok); piste e corsie senza attraversamenti = 194,8 km, d&rsquo;accordo con i 194,3 km del filone parcheggi (ok); numeri della pagina presi da <code>riepilogo.json</code>.'
+  ];
+  setH('metodo-lista',M.map(function(t){return '<li>'+t+'</li>'}).join(''));
+}
+})();
+</script></body></html>

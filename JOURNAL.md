@@ -2789,3 +2789,8 @@ python -I scripts\inventario.py <cartella censimenti>
 - Limiti dei dati: "voli" Eurostat diversi dai movimenti ENAC; date della chiusura di Linate dalla stampa; aviazione generale assente.
 - 2026-11-02 — **Comunità, richiesta di Davide**: scheda del quartiere con tutte le cittadinanze straniere (prime 15 e le altre a richiesta) e nuova sezione "Tutte le cittadinanze di Milano" con tabella ordinabile. Cittadinanze diverse presenti: 173 nel 2025, 157 nel 1999 (172 e 155 senza "Altre nazioni o n.d." e "Apolide"). ds27 non ha i continenti: nessun raggruppamento. Dati per anno caricati a richiesta.
 
+## 78. BikeMi e bici in città
+
+- 2026-11-02 — Fase 1 e pagina (`bici/`, `docs/bici/`). Dettagli in `bici/NOTE.md`.
+- Fonti: Comune ds574 (bike sharing 2011-2025), ds65 (stazioni), ds60 (tratti ciclabili con anno di fine lavori), CC BY; archivio Zenodo BikeMi 2011-2013 (Trentini, CC BY 4.0) per ore e stagioni (indice, ordine di grandezza); feed GBFS di BikeMi letto una volta con l'identificativo richiesto, solo totali. Contatori di bici: nessun dato aperto.
+- Numeri: noleggi BikeMi 11.740 al giorno nel 2017, 8.321 nel 2025 (−29%) con più stazioni e bici; e-bike 21% della flotta e 42% dei noleggi; 2020 noleggi −41,5% mentre le piste fanno il record (32 km). 62 km su 213 con norma "ordinanza lavori stradali" (lettura come provvedimento temporaneo non verificata).

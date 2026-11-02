@@ -88,7 +88,8 @@
     { path: 'auto/', label: 'Le auto dei milanesi' },
     { path: 'carceri/', label: 'Le carceri di Milano' },
     { path: 'musei/', label: 'Musei' },
-    { path: 'aeroporti/', label: 'Aeroporti' }
+    { path: 'aeroporti/', label: 'Aeroporti' },
+    { path: 'bici/', label: 'BikeMi e bici' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
