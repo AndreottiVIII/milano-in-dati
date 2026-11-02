@@ -2716,3 +2716,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: ISTAT nidi per comune 2013-2024 (CC BY 4.0); MIM tempo scuola e spazio mensa (IODL 2.0); INVALSI dispersione implicita per comune (sezione open data, senza registrazione); BES per NEET; Comune ds47 sedi nido.
 - Numeri: nidi 49,3 posti ogni 100 bambini 0-2 (Italia 33,2), metà privati; tempo pieno 82,1% (96,8% nelle statali, il più alto delle 14 città), fermo da dieci anni; spazio mensa 94,2% degli alunni delle statali (Napoli 2,5%); dispersione implicita in terza media 6,9% (Italia 12,3%). Sorpresa: la differenza sul tempo pieno è tra statale e paritaria, e i CAP ricchi hanno più paritarie.
 - Limiti dei dati: salti non spiegati nella serie ISTAT dei nidi di Milano 2019-2022 (affidabile solo 2022-24); posti e liste d'attesa per quartiere non aperti; mensa = spazio nell'edificio, non servizio; dispersione implicita non è abbandono.
+
+## 68. Parcheggi: quanto spazio alle auto
+
+- 2026-11-02 — Fase 1 e pagina (`parcheggi/`, `docs/parcheggi/`). Pubblicata dopo l'ok di Davide "con avviso sulla fonte": il Comune non pubblica gli stalli su strada; il totale (~297.000 stalli, quote per tipo) viene da una presentazione del Comune riportata da Sicurauto (7/2/2025), non verificabile sul PDF (risponde 403 ai programmi, non aggirato). Avviso aggiunto dal coordinatore in cima alla pagina. Controllo indipendente OSM: 286.000-312.000.
+- Altre fonti: Comune (ds83 ambiti, ds342 e ds45 parcheggi in struttura e di interscambio, ds60 ciclabili, ds51 aree pedonali; CC BY), ACI Autoritratto 2024 (CC BY 4.0), tariffe ATM (solo valori).
+- Numeri (stime, 12 m² a stallo): circa 3,6 km² di sosta su strada, il 2% del comune, circa 500 campi da calcio; 0,42 stalli per auto. Sorpresa: lo spazio per le auto ferme è circa 10 volte quello delle ciclabili e 12 volte quello delle aree pedonali.
+- Limiti dei dati: posti per quartiere solo modellati (densità uniforme per km di strada); box privati assenti; larghezze delle ciclabili ipotizzate.
