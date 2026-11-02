@@ -99,7 +99,8 @@
     { path: 'imprese/', label: 'Imprese che nascono e muoiono' },
     { path: 'elenco/', label: 'Elenco di tutte le pagine' },
     { path: 'fonti/', label: 'Fonti e metodo' },
-    { path: 'oltre-il-reddito/', label: 'Oltre il reddito' }
+    { path: 'oltre-il-reddito/', label: 'Oltre il reddito' },
+    { path: 'hinterland/', label: 'Hinterland' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

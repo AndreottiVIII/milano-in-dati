@@ -99,6 +99,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 86 | Fonti e metodo | Online |
 | 87 | Incroci tra tutti i dati | Studio finito e ricontrollato, nessuna pagina: decide Davide |
 | 88 | Oltre il reddito | Online |
+| 89 | Hinterland | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Online: tessere per tema (bozza 21), con ricerca |
 

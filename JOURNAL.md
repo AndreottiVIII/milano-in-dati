@@ -2867,3 +2867,11 @@ python -I scripts\inventario.py <cartella censimenti>
 - Avviso sul reddito per CAP aggiunto ai limiti dei dati di `speranza-vita`, `lavoro` (anche nel template), `voto-reddito`, `quartiere`, chiesto da Davide.
 - Davide: le 100 pagine non hanno fretta, gli interessava capire cosa emerge dai dati.
 - Pagina Fonti e metodo rigenerata con la pagina nuova: 88 pagine, 311 righe.
+
+## 89. Hinterland
+
+- 2026-11-02 — Pagina `docs/hinterland/` (programma `hinterland/scripts/build.py`, dettagli in `hinterland/NOTE.md`), chiesta da Davide con le aggiunte redditi, voto, età e metropolitana. Perimetro scelto da lui: 187 comuni, 132 della Città metropolitana senza Milano e 55 di Monza e Brianza, visibili anche separati.
+- Numeri: 2.773.644 residenti contro 1.362.863 a Milano (1/1/2026, stima); dal 2001 hinterland +13,2%, Milano +8,5%. Stranieri 316.894 contro 267.986, ma 11,4 contro 19,7 su 100. Over 65 nel 2002 15,9% contro 22,9%, sorpasso nel 2021, nel 2026 24,1% contro 22,7%. Reddito medio 2024 29.278 contro 40.316 euro, sopra Milano solo Basiglio e Cusago. Dal 2015 nell'hinterland i morti superano i nati. Pendolari verso Milano 341.731 (stima 2021), 338.646 nel 1991. Sinistra e centrosinistra nei 40 comuni con il PCI sopra il 45% nel 1976: 64% nel 1976, 27% nel 2022; resto dell'hinterland 48% e 25%.
+- Metropolitana: 12 comuni con fermata; crescita sopra il confronto in 8 casi su 12, con San Donato 7 su 13: nessuna differenza chiara, scritto sulla pagina.
+- Scelte del coordinatore dopo il ricontrollo: PCI riportato in Sinistra (l'agente lo aveva messo in Centrosinistra, contro la scelta di Davide); età allungata al 2002 con la ricostruzione ISTAT già in `redditi/raw/istat_pop/`; fermate ricontrollate sui confini ISTAT più precisi; tolte dalla pagina le scritte interne.
+- Limiti dei dati: ricalcolo ISTAT 2020-2021 (Milano -27.193 e -23.365 persone), che coincide con il primo anno del sorpasso sull'età; pendolari 2021 da modello; matrice ISTAT dei trasferimenti tra comuni non ottenuta (nessuna risposta in 90 s); nazionalità per comune non disponibili come file; licenza Eligendo non indicata, online solo percentuali per famiglia.

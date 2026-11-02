@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Hinterland</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2;--mi:#c26a1b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap} th.s{cursor:pointer;text-decoration:underline dotted}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.5em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid var(--mi);padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
+.map{height:62vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.perim{background:#fff;border-bottom:1px solid var(--line);padding:6px 0;margin:0 0 .4em}@media(min-width:761px){.perim{position:sticky;top:0;z-index:5}}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative;display:flex} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.seg{margin:.3em 0} .seg .row{display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center;font-size:.86rem;padding:3px 0}
+.seg .bar{display:flex;height:26px;border:1px solid #888;background:#f1f1f1} .seg .bar span{display:block;height:100%;font-size:.75rem;line-height:24px;text-align:center;overflow:hidden;white-space:nowrap;color:#fff;font-variant-numeric:tabular-nums}
+.seg .bar span.lt{color:#111}
+.seg .nm b{display:block;font-weight:600;line-height:1.15} .seg .nm i{font-style:normal;font-size:.76rem;color:var(--mut)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 24px} .grid2>*{min-width:0}
+@media(max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)} th,td{padding:5px 4px;font-size:.88rem} .seg .row{grid-template-columns:1fr;gap:2px} .bars .row{grid-template-columns:minmax(90px,36%) 1fr 78px}}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:360px;overflow:auto} .tab-min{min-width:520px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid var(--mi);color:var(--warm);background:var(--warmbg);border-radius:10px;padding:0 6px;margin:0 4px 0 0}
+.pill.g{border-color:var(--acc);color:var(--acc);background:var(--soft)}
+tr.hl td{background:#fff3c4}
+.ch{position:relative;margin:.3em 0} .ch svg{display:block;max-width:100%} .ch text{font:12px system-ui,Arial,sans-serif;fill:#333}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:3px 7px;font-size:12px;line-height:1.35;white-space:nowrap;z-index:3;display:none;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>L&rsquo;hinterland di Milano</h1>
+<p id="intro">Caricamento&hellip;</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Questa pagina mette a confronto numeri. Se due cose vanno insieme, non vuol dire che una sia la causa dell&rsquo;altra: quando facciamo un&rsquo;ipotesi lo scriviamo. I numeri del 2001&ndash;2026 passano da ricostruzioni e ricalcoli dell&rsquo;ISTAT, e il 2021 dei pendolari &egrave; una stima: tutti i dettagli sono in <a href="#limiti">Limiti dei dati</a>.</div>
+
+<div class="perim"><div class="ctl"><span class="sub">Guarda:</span>
+<button type="button" data-p="HINT" class="on">Tutto l&rsquo;hinterland</button><button type="button" data-p="MI">Solo Citt&agrave; metropolitana (senza Milano)</button><button type="button" data-p="MB">Solo Monza e Brianza</button></div>
+<div class="sub" id="perim-desc"></div></div>
+
+<h2 id="quanti">1. Quanti sono e quanto crescono</h2>
+<div id="t-quanti"></div>
+<h3>Quanti abitanti, rispetto al 2001 (2001 = 100)</h3>
+<div class="lgd" id="lg-pop"></div><div class="ch" id="ch-pop"></div>
+<p class="src">Residenti al 1&deg; gennaio; il 2001 &egrave; il censimento del 21 ottobre. Fonte: ISTAT, ricostruzione intercensuaria (RBD) 2001&ndash;2018 e popolazione per et&agrave; (POSAS) 2019&ndash;2026; il 2026 &egrave; una stima. La fascia grigia 2020&ndash;2022 &egrave; il ricalcolo dopo il censimento (vedi sotto).</p>
+<div class="warm" id="w-salti"></div>
+<h3>Da dove viene la crescita</h3>
+<div id="t-comp"></div>
+<div class="ctl"><span class="sub">Mostra:</span><button type="button" data-cg="SEL" class="on" id="b-cg-sel">Hinterland</button><button type="button" data-cg="MILANO">Milano</button></div>
+<div class="lgd" id="lg-comp"></div><div class="ch" id="ch-comp"></div>
+<div class="scroll"><table id="tab-comp" class="tab-min"></table></div>
+<p class="src">Per ogni anno: nati meno morti; iscritti meno cancellati con altri comuni italiani (per l&rsquo;hinterland: tutti i comuni fuori dall&rsquo;area, Milano compresa); iscritti meno cancellati con l&rsquo;estero; &laquo;ricalcoli e altro&raquo; = differenza che resta (aggiustamento statistico dell&rsquo;ISTAT, variazioni di confine). Fonte: ISTAT, bilancio demografico ricostruito 2002&ndash;2018 (RBD), bilancio mensile 2019&ndash;2024 (D7B), bilancio 2025 (P2, provvisorio).</p>
+<h3>I comuni che crescono e quelli che calano</h3>
+<div class="ctl"><label class="ck"><input type="checkbox" id="ck-min1"> solo comuni con almeno 5.000 abitanti</label></div>
+<div id="t-rank1"></div>
+<div class="grid2"><div><h3>Crescono di pi&ugrave; (%)</h3><div class="bars" id="b-su"></div></div><div><h3>Crescono meno o calano (%)</h3><div class="bars" id="b-giu"></div></div></div>
+<p class="src">Crescita dal censimento 2001 al 1&deg; gennaio 2026 (stima). Bollate e Baranzate sono contate insieme (Baranzate &egrave; nata da Bollate nel 2004). Sotto il nome, i residenti 2026. Nei comuni piccoli bastano poche decine di persone per cambiare la percentuale.</p>
+
+<h2 id="stranieri">2. Stranieri</h2>
+<div id="t-stran"></div>
+<div class="grid2"><div><h3>Stranieri su 100 residenti</h3><div class="lgd" id="lg-sq"></div><div class="ch" id="ch-sq"></div></div>
+<div><h3>Stranieri residenti (numero)</h3><div class="lgd" id="lg-sn"></div><div class="ch" id="ch-sn"></div></div></div>
+<p class="src">Cittadini stranieri residenti al 1&deg; gennaio. Fonte: ISTAT, RBD (cittadinanza &laquo;Straniera&raquo;) 2001&ndash;2018 e STRASA 2019&ndash;2026. Il salto del 2022 a Milano &egrave; in gran parte il ricalcolo dopo il censimento.</p>
+<div class="ctl"><label class="ck"><input type="checkbox" id="ck-min2"> solo comuni con almeno 5.000 abitanti</label></div>
+<div class="grid2"><div><h3>Quota pi&ugrave; alta, 2026</h3><div class="bars" id="b-sa"></div></div><div><h3>Quota pi&ugrave; bassa, 2026</h3><div class="bars" id="b-sb"></div></div></div>
+<h3>Chi prende la cittadinanza esce dal conteggio</h3>
+<div id="t-acq"></div><div class="lgd" id="lg-acq"></div><div class="ch" id="ch-acq"></div>
+<p class="src">Acquisizioni di cittadinanza italiana per anno. Fonte: ISTAT, RBD 2001&ndash;2018 (nei file successivi il dato non c&rsquo;&egrave;). Una persona che diventa italiana non &egrave; pi&ugrave; &laquo;straniera&raquo; nei conteggi, anche se vive nello stesso posto: la quota di stranieri sottostima quindi chi ha origini straniere. Non mostriamo le nazionalit&agrave;: vedi Limiti dei dati.</p>
+
+<h2 id="scambio">3. Lo scambio con Milano</h2>
+<div id="t-scambio"></div>
+<div class="grid2"><div><h3>Vanno a Milano per lavoro o studio</h3><div class="bars" id="b-entra"></div></div><div><h3>Da Milano vanno a lavorare o studiare nell&rsquo;area</h3><div class="bars" id="b-esce"></div></div></div>
+<div class="lgd" id="lg-pend"></div>
+<p class="src">Persone che ogni giorno vanno al luogo abituale di lavoro o studio in un altro comune (una persona conta una volta). Fonte: ISTAT, matrici del pendolarismo 1991, 2001, 2011 (censimenti) e 2021 (stima fatta con un modello, non un conteggio).</p>
+<div id="t-scambio2"></div>
+<div class="grid2"><div><h3>Chi manda pi&ugrave; persone a Milano (2021)</h3><div class="bars" id="b-pe"></div></div><div><h3>Quota diretta a Milano (2021)</h3><div class="bars" id="b-pq"></div></div></div>
+<p class="src">La quota &egrave; su 100 residenti del comune che lavorano o studiano (anche nel proprio comune): quanti lo fanno a Milano.</p>
+<h3>Comuni che ricevono da Milano pi&ugrave; persone di quante ne mandano</h3>
+<div id="t-pos"></div>
+<details><summary>Tutti i comuni, in una tabella (clic sulle intestazioni per ordinare)</summary><div class="scroll tabmax"><table id="tab-pend" class="tab-min"></table></div></details>
+<h3>Cambi di residenza con Milano, 2020&ndash;2024</h3>
+<div id="t-cambi"></div><div class="scroll"><table id="tab-cambi" class="tab-min"></table></div>
+<p class="src">Cambi di residenza registrati all&rsquo;anagrafe di Milano per provincia di provenienza o destinazione. Fonte: Comune di Milano, iscrizioni e cancellazioni per provenienza e destinazione (come nella pagina <a href="../arrivi-partenze/">Chi arriva e chi lascia</a>).</p>
+
+<h2 id="eta">4. Et&agrave;</h2>
+<div id="t-eta"></div>
+<div class="grid2"><div><h3>Anziani (65 anni e pi&ugrave;), su 100 residenti</h3><div class="lgd" id="lg-e1"></div><div class="ch" id="ch-e1"></div></div>
+<div><h3>Bambini (0&ndash;14 anni), su 100 residenti</h3><div class="lgd" id="lg-e2"></div><div class="ch" id="ch-e2"></div></div></div>
+<div class="grid2"><div><h3>Et&agrave; media (anni)</h3><div class="lgd" id="lg-e3"></div><div class="ch" id="ch-e3"></div></div><div></div></div>
+<p class="src">Residenti al 1&deg; gennaio per et&agrave;. Fonte: ISTAT, ricostruzione della popolazione per et&agrave; 2002&ndash;2018 e POSAS 2019&ndash;2026 (2026 stima). Et&agrave; media calcolata sugli anni compiuti, 100 anni per chi ne ha 100 e pi&ugrave;; solo dal 2019.</p>
+<div class="ctl"><label class="ck"><input type="checkbox" id="ck-min3"> solo comuni con almeno 5.000 abitanti</label></div>
+<div class="grid2"><div><h3>Pi&ugrave; anziani, 2026</h3><div class="bars" id="b-ea"></div></div><div><h3>Pi&ugrave; giovani, 2026</h3><div class="bars" id="b-eb"></div></div></div>
+
+<h2 id="redditi">5. Redditi</h2>
+<div id="t-red"></div>
+<div class="lgd" id="lg-red"></div><div class="ch" id="ch-red"></div>
+<p class="src">Reddito complessivo dichiarato ai fini IRPEF diviso per il numero di contribuenti (euro correnti: l&rsquo;inflazione non &egrave; tolta). L&rsquo;hinterland &egrave; la somma dei redditi diviso la somma dei contribuenti di tutti i suoi comuni, non la media delle medie. Anno d&rsquo;imposta t = redditi dell&rsquo;anno t, dichiarati nel t+1. Fonte: MEF, Dipartimento delle Finanze, Redditi e principali variabili IRPEF su base comunale (CC BY 3.0).</p>
+<div class="warn"><b>Una media alta pu&ograve; ingannare.</b> Una media si alza anche se a guadagnare molto sono in pochi. Nei comuni piccoli bastano alcune decine di redditi molto alti; a Milano pesa il vertice. La media non dice cosa guadagna una persona &laquo;tipica&raquo;, e i contribuenti non sono i residenti.</div>
+<div class="ctl"><label class="ck"><input type="checkbox" id="ck-min4"> solo comuni con almeno 5.000 contribuenti</label></div>
+<div class="grid2"><div><h3>Reddito medio pi&ugrave; alto, 2024</h3><div class="bars" id="b-ra"></div></div><div><h3>Reddito medio pi&ugrave; basso, 2024</h3><div class="bars" id="b-rb"></div></div></div>
+<div id="t-red2"></div>
+
+<h2 id="voto">6. Voto: la ex cintura rossa</h2>
+<div id="t-voto"></div>
+<details><summary>I comuni della cintura, con la quota del PCI nel 1976</summary><div id="l-cintura"></div></details>
+<h3>Come votano, elezione per elezione</h3>
+<div class="ctl"><span class="sub">Famiglia:</span><span id="b-fam"></span></div>
+<div class="lgd" id="lg-v"></div><div class="ch" id="ch-v"></div>
+<p class="src">Quota dei voti di lista alla Camera dei deputati. Cintura = comuni dell&rsquo;hinterland con PCI sopra la soglia nel 1976. Fonte: Ministero dell&rsquo;Interno, Eligendo (archivio storico), voti di lista per comune; famiglie politiche: elaborazione Milano in dati (vedi Limiti dei dati).</p>
+<div class="ctl"><span class="sub">Elezione:</span><span id="b-ele"></span></div>
+<div id="t-ele"></div>
+<div class="seg" id="s-voto"></div><div class="lgd" id="lg-sv"></div>
+<div class="scroll"><table id="tab-voto" class="tab-min"></table></div>
+<div id="t-voto2"></div>
+
+<h2 id="metro">7. Metropolitana</h2>
+<div id="t-metro"></div>
+<div class="scroll"><table id="tab-metro" class="tab-min"></table></div>
+<p class="src">Fermate: coordinate dagli orari ATM/AMAT (GTFS), anno di apertura da Wikipedia, collocate nei confini ISTAT 2021. L&rsquo;unica fermata di Segrate &egrave; Linate Aeroporto, aperta nel 2022: non pu&ograve; spiegare la crescita precedente. Pero conta dal 1986 per Molino Dorino, a circa 100 metri dal confine con Milano; la fermata Pero &egrave; del 2005. Confronto: i 5 comuni senza fermata con distanza stradale da Milano pi&ugrave; vicina a quella del comune con fermata (mediana). Distanze: ISTAT, strada, 2021.</p>
+<h3>Crescita e distanza da Milano</h3>
+<div class="lgd" id="lg-mt"></div><div class="ch" id="ch-mt"></div>
+<div id="t-metro2"></div>
+
+<h2 id="scheda">8. Scheda del comune</h2>
+<p>Scegli una misura per colorare la mappa, poi un comune: sulla mappa o dal menu.</p>
+<div class="ctl"><span class="sub">Misura:</span>
+<button type="button" data-m="cr" class="on">Crescita 2001&ndash;2026</button><button type="button" data-m="st">Stranieri</button><button type="button" data-m="q">Quota verso Milano</button><button type="button" data-m="red">Reddito</button><button type="button" data-m="o65">Anziani</button><button type="button" data-m="em">Et&agrave; media</button></div>
+<div class="ctl"><label class="sub" for="sel-com">Il tuo comune:</label><select id="sel-com" aria-label="Scegli un comune"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei comuni dell'hinterland colorati per la misura scelta"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Confini dei comuni: ISTAT al 1/1/2021 (CC BY 4.0). Mappa &copy; OpenStreetMap contributors. Milano &egrave; il contorno nero. I colori dividono i 187 comuni in sei gruppi di uguale numerosit&agrave;.</p>
+<div id="scheda-c" class="card"><span class="sub">Scegli un comune.</span></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="fonti">Fonti e licenze</h2>
+<ul class="m" id="fonti-lista"></ul>
+<h3>Pagine collegate</h3>
+<p><a href="../pendolari/">Pendolari</a> &middot; <a href="../arrivi-partenze/">Arrivi e partenze</a> &middot; <a href="../comunita/">Comunit&agrave;</a> &middot; <a href="../redditi/">Redditi</a> &middot; <a href="../elezioni/">Elezioni</a> &middot; <a href="../metro/">Metropolitana</a> &middot; <a href="../rifiuti/">Rifiuti</a></p>
+<h3>File</h3>
+<p><a href="data/comuni.csv">comuni.csv</a> (una riga per comune), <a href="data/gruppi_serie.csv">gruppi_serie.csv</a> (serie per Milano e hinterland), <a href="data/comuni.json">comuni.json</a>, <a href="data/gruppi.json">gruppi.json</a>, <a href="data/voto.json">voto.json</a> (percentuali per famiglia, non i file grezzi), <a href="data/metro.json">metro.json</a>, <a href="data/comuni.geojson">comuni.geojson</a>. Sono tutti valori aggregati per comune: nessun dato su singole persone.</p>
+<footer><p>Milano in dati &middot; elaborazioni e programmi: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p></footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D={},SEL='HINT',COMPG='SEL',MIL=null,HC=[],UN=[],CHARTS=[];
+var ACC='#00695c',MID='#2b8a7d',LGT='#62b0a4',WARM='#c26a1b',GREY='#9a9a9a',INK='#111';
+var SEQ=['#e3f1ee','#b7dbd3','#7cbdb1','#3e9a8c','#136459','#052e29'];
+var FAMC={'Centrosinistra':'#e53935','Sinistra':'#8e0000','Centro':'#ffb300','Centrodestra':'#1e88e5','Destra':'#0d3b7a','Lega':'#2e7d32','M5S':'#8e44ad','Altri':'#9e9e9e'};
+var GL={HINT:'Hinterland (187 comuni)',MI:'Città metropolitana senza Milano (132)',MB:'Monza e Brianza (55)',MILANO:'Milano'};
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){if(x==null||isNaN(x))return '–';return Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){if(x==null||isNaN(x))return '–';var r=Math.round(Math.abs(x)).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (x<0?'−':'')+r}
+function pc(x,d){return x==null?'–':nf(x,d==null?1:d)+'%'}
+function sg(x,d){if(x==null)return '–';var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?1:d)}
+function sgn(x){if(x==null)return '–';return (x<0?'−':(x>0?'+':''))+f0(Math.abs(x))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){var e=el(id);if(e)e.innerHTML=SEL==='HINT'?h.replace(/area scelta/g,'hinterland').replace(/resto dell&rsquo;area/g,'resto dell&rsquo;hinterland'):h}
+function sum(a,f){var s=0;a.forEach(function(r){s+=f(r)});return s}
+function lgd(items){return items.map(function(it){return '<span><i style="background:'+it[1]+'"></i>'+it[0]+'</span>'}).join('')}
+function med(a){a=a.filter(function(v){return v!=null}).sort(function(x,y){return x-y});var n=a.length;return n?(n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2):null}
+/* ---------- dati ---------- */
+function G(k){return D.gr.g[k]}
+function yi(y){return D.gr.anni.indexOf(y)}
+function selKey(){return SEL}
+function inSel(c){return c.g!=='MILANO'&&(SEL==='HINT'||c.g===SEL)}
+function selC(){return HC.filter(inSel)}
+function selUnits(){return UN.filter(function(u){return SEL==='HINT'||u.g===SEL})}
+function nomeSel(){return SEL==='HINT'?'hinterland':(SEL==='MI'?'Città metropolitana (senza Milano)':'Monza e Brianza')}
+function minPop(id,f){return el(id)&&el(id).checked?f:0}
+function top(a,f,n,desc){var b=a.filter(function(x){return f(x)!=null}).sort(function(x,y){return desc?f(y)-f(x):f(x)-f(y)});return b.slice(0,n)}
+/* ---------- grafici SVG ---------- */
+function niceTicks(lo,hi,n){var span=hi-lo;if(!(span>0))span=Math.abs(hi)||1;var step=Math.pow(10,Math.floor(Math.log(span/n)/Math.LN10));var err=span/n/step;step*=err>=7?10:(err>=3?5:(err>=1.5?2:1));var a=Math.floor(lo/step+1e-9)*step,b=Math.ceil(hi/step-1e-9)*step,t=[];for(var v=a;v<=b+step/2;v+=step)t.push(+v.toFixed(8));return t}
+function tipBox(box){var t=box.querySelector('.tip');if(!t){t=document.createElement('div');t.className='tip';box.appendChild(t)}return t}
+function lineChart(id,o){CHARTS.push([id,'line',o]);drawLine(id,o)}
+function drawLine(id,o){
+  var box=el(id);if(!box)return;var W=Math.max(250,box.clientWidth||300),H=o.h||230,ml=o.ml||48,mr=12,mt=8,mb=26;
+  var xs=[],ys=[];o.series.forEach(function(s){s.pts.forEach(function(p){if(p[1]!=null){xs.push(p[0]);ys.push(p[1])}})});
+  if(!xs.length){box.innerHTML='<span class="sub">Nessun dato.</span>';return}
+  var x0=o.x0!=null?o.x0:Math.min.apply(null,xs),x1=o.x1!=null?o.x1:Math.max.apply(null,xs);
+  var yl=o.y0!=null?o.y0:Math.min.apply(null,ys),yh=o.y1!=null?o.y1:Math.max.apply(null,ys);
+  var yt=niceTicks(yl,yh,4),y0=o.y0!=null?o.y0:yt[0],y1=yt[yt.length-1];if(o.y0!=null&&yt[0]<o.y0)yt=yt.filter(function(v){return v>=o.y0});
+  function X(x){return ml+(x-x0)/(x1-x0)*(W-ml-mr)}function Y(y){return mt+(1-(y-y0)/(y1-y0))*(H-mt-mb)}
+  var s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.aria||'Grafico a linee')+'">';
+  (o.bands||[]).forEach(function(b){s+='<rect x="'+X(b.x0)+'" y="'+mt+'" width="'+(X(b.x1)-X(b.x0))+'" height="'+(H-mt-mb)+'" fill="#ececec"/>'});
+  yt.forEach(function(v){if(v<y0-1e-9||v>y1+1e-9)return;s+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text x="'+(ml-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.fy?o.fy(v):nf(v,0))+'</text>'});
+  var step=(x1-x0)>12?5:((x1-x0)>6?2:1),xt=o.xt;if(!xt){xt=[];var st=Math.ceil(x0/step)*step;for(var v=st;v<=x1+1e-9;v+=step)xt.push(v);if(xt.indexOf(x0)<0&&xt[0]-x0>=2)xt.unshift(x0)}
+  xt.forEach(function(v){s+='<line x1="'+X(v)+'" x2="'+X(v)+'" y1="'+(H-mb)+'" y2="'+(H-mb+4)+'" stroke="#666"/><text x="'+X(v)+'" y="'+(H-6)+'" text-anchor="middle">'+v+'</text>'});
+  s+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+(H-mb)+'" y2="'+(H-mb)+'" stroke="#666"/>';
+  o.series.forEach(function(se){var d='',pen=false;se.pts.forEach(function(p){if(p[1]==null){pen=false;return}d+=(pen?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.col+'" stroke-width="'+(se.w||2.4)+'"'+(se.dash?' stroke-dasharray="'+se.dash+'"':'')+' stroke-linejoin="round"/>';
+    if(se.dots)se.pts.forEach(function(p){if(p[1]!=null)s+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3.2" fill="'+se.col+'"/>'})});
+  s+='<line class="guide" x1="0" x2="0" y1="'+mt+'" y2="'+(H-mb)+'" stroke="#888" stroke-dasharray="3 3" style="display:none"/><rect class="hit" x="'+ml+'" y="'+mt+'" width="'+(W-ml-mr)+'" height="'+(H-mt-mb)+'" fill="transparent"/></svg>';
+  box.innerHTML=s;var tip=tipBox(box),svg=box.querySelector('svg'),guide=svg.querySelector('.guide'),hit=svg.querySelector('.hit');
+  var allx=o.xs||o.series[0].pts.map(function(p){return p[0]});
+  function mv(ev){var r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)*(W/r.width);var xv=x0+(px-ml)/(W-ml-mr)*(x1-x0);var best=allx[0];allx.forEach(function(a){if(Math.abs(a-xv)<Math.abs(best-xv))best=a});
+    guide.setAttribute('x1',X(best));guide.setAttribute('x2',X(best));guide.style.display='';
+    var h='<b>'+(o.fx?o.fx(best):best)+'</b>';o.series.forEach(function(se){var p=se.pts.filter(function(q){return q[0]===best})[0];if(p&&p[1]!=null)h+='<br><span style="color:'+se.col+'">&#9632;</span> '+esc(se.name)+': '+(o.ft?o.ft(p[1]):nf(p[1],1))});
+    tip.innerHTML=h;tip.style.display='block';var tw=tip.offsetWidth,lx=X(best)+10;if(lx+tw>W)lx=X(best)-tw-10;tip.style.left=Math.max(0,lx)+'px';tip.style.top='6px'}
+  hit.addEventListener('pointermove',mv);hit.addEventListener('pointerdown',mv);hit.addEventListener('pointerleave',function(){tip.style.display='none';guide.style.display='none'})
+}
+function stackChart(id,o){CHARTS.push([id,'stack',o]);drawStack(id,o)}
+function drawStack(id,o){
+  var box=el(id);if(!box)return;var W=Math.max(250,box.clientWidth||300),H=o.h||260,ml=54,mr=8,mt=8,mb=26,n=o.cats.length;
+  var pos=[],neg=[];for(var i=0;i<n;i++){var p=0,q=0;o.comps.forEach(function(c){var v=c.v[i]||0;if(v>=0)p+=v;else q+=v});pos.push(p);neg.push(q)}
+  var yt=niceTicks(Math.min.apply(null,neg.concat([0])),Math.max.apply(null,pos.concat([0])),5),y0=yt[0],y1=yt[yt.length-1];
+  function Y(y){return mt+(1-(y-y0)/(y1-y0))*(H-mt-mb)}var bw=(W-ml-mr)/n;
+  var s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.aria||'Grafico a barre')+'">';
+  yt.forEach(function(v){s+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+(v===0?'#666':'#e3e3e3')+'"/><text x="'+(ml-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>'});
+  for(var i=0;i<n;i++){var up=0,dn=0;o.comps.forEach(function(c){var v=c.v[i]||0,a,b;if(v>=0){a=up;b=up+v;up=b}else{a=dn+v;b=dn;dn=a}s+='<rect x="'+(ml+i*bw+bw*0.15).toFixed(1)+'" y="'+Y(Math.max(a,b)).toFixed(1)+'" width="'+(bw*0.7).toFixed(1)+'" height="'+Math.max(0.5,Math.abs(Y(a)-Y(b))).toFixed(1)+'" fill="'+c.c+'"/>'});
+    var every=bw<14?4:(bw<24?2:1);if(i%every===0)s+='<text x="'+(ml+i*bw+bw/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+(bw<14?String(o.cats[i]).slice(2):o.cats[i])+'</text>'}
+  s+='<line class="guide" x1="0" x2="0" y1="'+mt+'" y2="'+(H-mb)+'" stroke="#888" stroke-dasharray="3 3" style="display:none"/><rect class="hit" x="'+ml+'" y="'+mt+'" width="'+(W-ml-mr)+'" height="'+(H-mt-mb)+'" fill="transparent"/></svg>';
+  box.innerHTML=s;var tip=tipBox(box),svg=box.querySelector('svg'),guide=svg.querySelector('.guide'),hit=svg.querySelector('.hit');
+  function mv(ev){var r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)*(W/r.width);var i=Math.max(0,Math.min(n-1,Math.floor((px-ml)/bw)));var cx=ml+i*bw+bw/2;guide.setAttribute('x1',cx);guide.setAttribute('x2',cx);guide.style.display='';
+    var h='<b>'+o.cats[i]+'</b>',tot=0;o.comps.forEach(function(c){var v=c.v[i]||0;tot+=v;h+='<br><span style="color:'+c.c+'">&#9632;</span> '+esc(c.n)+': '+sgn(v)});h+='<br>Totale: '+sgn(tot);
+    tip.innerHTML=h;tip.style.display='block';var tw=tip.offsetWidth,lx=cx+10;if(lx+tw>W)lx=cx-tw-10;tip.style.left=Math.max(0,lx)+'px';tip.style.top='6px'}
+  hit.addEventListener('pointermove',mv);hit.addEventListener('pointerdown',mv);hit.addEventListener('pointerleave',function(){tip.style.display='none';guide.style.display='none'})
+}
+function scatter(id,o){CHARTS.push([id,'sc',o]);drawSc(id,o)}
+function drawSc(id,o){
+  var box=el(id);if(!box)return;var W=Math.max(250,box.clientWidth||300),H=o.h||260,ml=46,mr=10,mt=8,mb=34;
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var xt=niceTicks(Math.min.apply(null,xs),Math.max.apply(null,xs),5),yt=niceTicks(Math.min.apply(null,ys),Math.max.apply(null,ys),5);
+  var x0=xt[0],x1=xt[xt.length-1],y0=yt[0],y1=yt[yt.length-1];
+  function X(x){return ml+(x-x0)/(x1-x0)*(W-ml-mr)}function Y(y){return mt+(1-(y-y0)/(y1-y0))*(H-mt-mb)}
+  var s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.aria||'Grafico a punti')+'">';
+  yt.forEach(function(v){s+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+(v===0?'#666':'#e3e3e3')+'"/><text x="'+(ml-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>'});
+  xt.forEach(function(v){s+='<line x1="'+X(v)+'" x2="'+X(v)+'" y1="'+(H-mb)+'" y2="'+(H-mb+4)+'" stroke="#666"/><text x="'+X(v)+'" y="'+(H-mb+17)+'" text-anchor="middle">'+f0(v)+'</text>'});
+  s+='<text x="'+((ml+W-mr)/2)+'" y="'+(H-3)+'" text-anchor="middle">'+esc(o.xl)+'</text>';
+  o.pts.filter(function(p){return !p.big}).forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="'+(p.r||3)+'" fill="'+p.c+'" fill-opacity=".75"><title>'+esc(p.t)+'</title></circle>'});
+  o.pts.filter(function(p){return p.big}).forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="'+(p.r||6)+'" fill="'+p.c+'" stroke="#fff" stroke-width="1.2"><title>'+esc(p.t)+'</title></circle>'});
+  box.innerHTML=s+'</svg>'
+}
+window.addEventListener('resize',function(){clearTimeout(window.__rz);window.__rz=setTimeout(function(){CHARTS.forEach(function(c){if(c[1]==='line')drawLine(c[0],c[2]);else if(c[1]==='stack')drawStack(c[0],c[2]);else drawSc(c[0],c[2])})},150)});
+function clearCharts(){CHARTS=[]}
+/* barre orizzontali */
+function bars(id,rows,max,col){
+  setH(id,rows.length?rows.map(function(r){var w=Math.min(100,Math.abs(r.v)/max*100);return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+(r.sub?'<i>'+esc(r.sub)+'</i>':'')+'</span><span class="tr">'+(r.parts?r.parts.map(function(p){return '<span class="fill" style="width:'+(p.v/max*100)+'%;background:'+p.c+'"></span>'}).join(''):'<span class="fill" style="width:'+w+'%;background:'+(r.col||col||ACC)+'"></span>')+'</span><span class="v">'+r.txt+'</span></div>'}).join(''):'<span class="sub">Nessun comune.</span>')
+}
+function segs(id,rows){
+  setH(id,rows.map(function(r){var tot=sum(r.parts,function(p){return p.v});if(!tot)return '';
+    return '<div class="row"><span class="nm"><b>'+esc(r.nm)+'</b>'+(r.sub?'<i>'+esc(r.sub)+'</i>':'')+'</span><span class="bar" role="img" aria-label="'+esc(r.nm+': '+r.parts.map(function(p){return p.t+' '+nf(p.v/tot*100,0)+'%'}).join(', '))+'">'+r.parts.map(function(p){var w=p.v/tot*100;return '<span class="'+(p.lt?'lt':'')+'" style="width:'+w+'%;background:'+p.c+'" title="'+esc(p.t+': '+nf(p.v/tot*100,1)+'%')+'">'+(w>=8?Math.round(w):'')+'</span>'}).join('')+'</span></div>'}).join(''))
+}
+function tabella(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr'+(r.cls?' class="'+r.cls+'"':'')+'>'+r.c.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+/* ---------- avvio ---------- */
+Promise.all([J('data/comuni.json'),J('data/gruppi.json'),J('data/voto.json'),J('data/metro.json'),J('data/riepilogo.json'),J('data/comuni.geojson')]).then(function(a){
+  D.com=a[0];D.gr=a[1];D.vo=a[2];D.me=a[3];D.ri=a[4];D.geo=a[5];
+  MIL=D.com.filter(function(c){return c.g==='MILANO'})[0];HC=D.com.filter(function(c){return c.g!=='MILANO'});
+  var seen={};HC.forEach(function(c){if(seen[c.unita])return;seen[c.unita]=1;var m=HC.filter(function(x){return x.unita===c.unita});
+    var p01=sum(m,function(x){return x.pop[0]}),p26=sum(m,function(x){return x.pop[25]});
+    UN.push({cod:c.unita,nome:m.length>1?m.map(function(x){return x.nome}).join(' + ')+' (insieme)':c.nome,g:c.g,pop:p26,cr:100*(p26/p01-1)})});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  Array.prototype.forEach.call(document.querySelectorAll('.perim button'),function(b){b.addEventListener('click',function(){SEL=b.getAttribute('data-p');Array.prototype.forEach.call(document.querySelectorAll('.perim button'),function(x){x.classList.toggle('on',x===b)});ridisegna()})});
+  Array.prototype.forEach.call(document.querySelectorAll('[data-cg]'),function(b){b.addEventListener('click',function(){COMPG=b.getAttribute('data-cg');Array.prototype.forEach.call(document.querySelectorAll('[data-cg]'),function(x){x.classList.toggle('on',x===b)});sComp()})});
+  ['ck-min1','ck-min2','ck-min3','ck-min4'].forEach(function(id){el(id).addEventListener('change',function(){ridisegna()})});
+  intro();sorpresa();limiti();fonti();ridisegna();voceMappa();
+}
+function ridisegna(){
+  clearCharts();
+  setH('perim-desc',SEL==='HINT'?'Le linee tratteggiate sono le due parti dell’hinterland.':'Stai guardando solo: '+GL[SEL]+'. Milano resta sempre a confronto.');
+  el('b-cg-sel').textContent=SEL==='HINT'?'Hinterland':(SEL==='MI'?'Città metropolitana':'Monza e Brianza');
+  sQuanti();sComp();sRank1();sStran();sScambio();sEta();sRed();sVoto();sMetro();aggiornaMappa();
+}
+function seriesPair(fn,xs,opt){ /* fn(key)->array valori allineati a xs ; Milano, selezione, (parti) */
+  opt=opt||{};var out=[];
+  out.push({name:'Milano',col:WARM,w:2.8,pts:xs.map(function(x,i){return [x,fn('MILANO')[i]]})});
+  out.push({name:SEL==='HINT'?'Hinterland':GL[SEL],col:ACC,w:3,pts:xs.map(function(x,i){return [x,fn(SEL)[i]]})});
+  if(SEL==='HINT'&&!opt.nopar){out.push({name:'Città metropolitana (senza Milano)',col:MID,w:1.6,dash:'6 3',pts:xs.map(function(x,i){return [x,fn('MI')[i]]})});out.push({name:'Monza e Brianza',col:LGT,w:1.8,dash:'2 3',pts:xs.map(function(x,i){return [x,fn('MB')[i]]})})}
+  return out}
+function legSeries(se){return lgd(se.map(function(s){return [s.name,s.col]}))}
+/* ---------- intro e sorprese ---------- */
+function intro(){
+  var h=G('HINT'),m=G('MILANO');
+  setH('intro','Intorno a Milano ci sono <b>187 comuni</b>: 132 della Città metropolitana (Milano esclusa) e 55 della provincia di Monza e Brianza. Ci vivono <b>'+f0(h.pop[25])+' persone</b> al 1° gennaio 2026 (stima), più del doppio dei milanesi ('+f0(m.pop[25])+'). Qui li mettiamo a confronto con Milano: quanti sono, stranieri, pendolari, età, redditi, voto e metropolitana. Con i pulsanti qui sotto puoi guardare le due parti separate.')
+}
+function sorpresa(){
+  var s=D.ri.sorprese,h='';
+  h+='<p><b>Nell&rsquo;hinterland vivono più stranieri che a Milano</b>: '+f0(s.str_hint)+' contro '+f0(s.str_mi)+' (1° gennaio 2026). Ma su 100 residenti sono '+nf(s.str_q_hint,1)+' contro '+nf(s.str_q_mi,1)+'. Solo '+s.n_q_sopra_mi+' comuni dell&rsquo;hinterland hanno una quota più alta di quella di Milano.</p>';
+  var _h=D.gr.g.HINT.eta_l,_m=D.gr.g.MILANO.eta_l;h+='<p><b>L&rsquo;hinterland ora è più vecchio di Milano.</b> Nel 2002 gli over 65 erano il '+nf(_h.o65[0],1)+'% nell&rsquo;hinterland e il '+nf(_m.o65[0],1)+'% a Milano. Il sorpasso arriva nel '+_h.anni[_h.o65.findIndex(function(v,i){return v>_m.o65[i]})]+'; nel 2026 sono il '+nf(_h.o65[24],1)+'% contro il '+nf(_m.o65[24],1)+'%.</p>';
+  h+='<p><b>La cintura rossa non c&rsquo;è più.</b> Nei '+s.n_cintura+' comuni dove il PCI era più forte nel 1976, sinistra e centrosinistra insieme prendevano il '+nf(s.sx_cint_76,0)+'% dei voti di lista alla Camera, contro il '+nf(s.sx_resto_76,0)+'% nel resto dell&rsquo;hinterland. Nel 2022 sono il '+nf(s.sx_cint_22,0)+'% contro il '+nf(s.sx_resto_22,0)+'%: la differenza è quasi sparita. A Milano nel 2022 sono il '+nf(s.sx_mi_22,0)+'%.</p>';
+  h+='<p><b>Quasi nessun comune dell&rsquo;hinterland è ricco quanto Milano.</b> Il reddito medio dichiarato per contribuente nel 2024 è '+f0(s.red_hint_24)+' euro nell&rsquo;hinterland e '+f0(s.red_mi_24)+' a Milano. Solo '+s.n_sopra_mi.length+' comuni su 187 ('+s.n_sopra_mi.join(' e ')+') stanno sopra Milano.</p>';
+  h+='<p class="src">Calcoli su dati ISTAT (popolazione per età e stranieri), MEF (redditi) e Ministero dell&rsquo;Interno (voto); sezioni 2, 4, 5 e 6 qui sotto.</p>';
+  setH('sorpresa',h)
+}
+/* ---------- 1. quanti ---------- */
+function sQuanti(){
+  var a=D.gr.anni,m=G('MILANO'),h=G(SEL);
+  function idx(k){var p=G(k).pop;return p.map(function(v){return 100*v/p[0]})}
+  var se=seriesPair(idx,a);
+  lineChart('ch-pop',{series:se,x0:2001,x1:2026,bands:[{x0:2020,x1:2022}],fy:function(v){return nf(v,0)},ft:function(v){return nf(v,1)},aria:'Abitanti, 2001 uguale 100: Milano e hinterland'});
+  setH('lg-pop',legSeries(se));
+  var cm=100*(m.pop[25]/m.pop[0]-1),ch=100*(h.pop[25]/h.pop[0]-1);
+  var hh=G('HINT'),mi=G('MI'),mb=G('MB');
+  var t='<p>Dal censimento del 2001 al 2026 <b>Milano è passata da '+f0(m.pop[0])+' a '+f0(m.pop[25])+' abitanti ('+sg(cm)+'%)</b>. ';
+  if(SEL==='HINT')t+='L&rsquo;hinterland da '+f0(hh.pop[0])+' a '+f0(hh.pop[25])+' (<b>'+sg(100*(hh.pop[25]/hh.pop[0]-1))+'%</b>): la Città metropolitana senza Milano '+sg(100*(mi.pop[25]/mi.pop[0]-1))+'%, Monza e Brianza '+sg(100*(mb.pop[25]/mb.pop[0]-1))+'%.';
+  else t+=GL[SEL]+': da '+f0(h.pop[0])+' a '+f0(h.pop[25])+' (<b>'+sg(ch)+'%</b>).';
+  var calano=selUnits().filter(function(u){return u.cr<0}).length;
+  t+=' Nell&rsquo;area scelta '+calano+' comuni su '+selUnits().length+' hanno meno abitanti di allora.</p>';
+  setH('t-quanti',t);
+  var aj=D.gr.aggiustamento;
+  setH('w-salti','<b>Attenzione ai salti.</b> Tra il 2018 e il 2019 la serie è continua (i due file danno gli stessi numeri). Tra il 2020 e il 2022 l&rsquo;ISTAT ha ricalcolato la popolazione dopo il censimento permanente, con un &laquo;aggiustamento statistico&raquo;: a Milano <b>'+sgn(aj.MILANO['2020'])+'</b> persone nel 2020 e <b>'+sgn(aj.MILANO['2021'])+'</b> nel 2021 (entrano nel conteggio del 1° gennaio 2021 e 2022); nell&rsquo;hinterland '+sgn(aj.HINT['2020'])+' e '+sgn(aj.HINT['2021'])+'. Non sono persone che si sono spostate: sono correzioni dei conti. Per questo la linea di Milano scende tra il 2020 e il 2022.')
+}
+function compOf(k){var g=G(k),n=g.nat.length,c={nat:[],int:[],est:[],altro:[]},cats=[];for(var i=1;i<n;i++){cats.push(2001+i);c.nat.push(g.nat[i]);c.int.push(g.int[i]);c.est.push(g.est[i]);c.altro.push(g.altro[i])}return {cats:cats,c:c}}
+function sComp(){
+  var k=COMPG==='SEL'?SEL:'MILANO',o=compOf(k);
+  var comps=[{n:'Nati meno morti',c:ACC,v:o.c.nat},{n:'Da/verso altri comuni italiani',c:LGT,v:o.c.int},{n:'Da/verso l’estero',c:WARM,v:o.c.est},{n:'Ricalcoli e altro',c:GREY,v:o.c.altro}];
+  stackChart('ch-comp',{cats:o.cats,comps:comps,aria:'Variazione annuale degli abitanti per causa: '+GL[k]});
+  setH('lg-comp',lgd(comps.map(function(c){return [c.n,c.c]})));
+  var hk=G(SEL),mk=G('MILANO');
+  function tot(g,f){var s=0;for(var i=1;i<g[f].length;i++)s+=g[f][i];return s}
+  var rows=[['Nati meno morti','nat'],['Cambi di residenza con altri comuni italiani','int'],['Arrivi dall’estero (saldo)','est'],['Ricalcoli e altro','altro']];
+  var tt=function(g){return tot(g,'nat')+tot(g,'int')+tot(g,'est')+tot(g,'altro')};
+  var rr=rows.map(function(r){return {c:[r[0],sgn(tot(mk,r[1])),sgn(tot(hk,r[1]))]}});
+  rr.push({cls:'hl',c:['<b>Totale, dal 1° gennaio 2002 al 1° gennaio 2026</b>','<b>'+sgn(tt(mk))+'</b>','<b>'+sgn(tt(hk))+'</b>']});
+  tabella('tab-comp',['Somma degli anni 2002–2025','Milano',SEL==='HINT'?'Hinterland':(SEL==='MI'?'Città metropolitana':'Monza e Brianza')],rr);
+  var firstNeg=function(g){var y=null;for(var i=g.nat.length-1;i>=1;i--){if(g.nat[i]<0)y=2001+i;else break}return y};
+  var fn=firstNeg(hk);
+  var t='<p>Una città cresce per tre strade: nascono più persone di quante muoiono, arriva gente da altri comuni italiani, arriva gente dall&rsquo;estero. ';
+  t+='<b>A Milano i morti superano i nati in quasi tutti gli anni e il saldo con il resto d&rsquo;Italia è negativo ('+sgn(tot(mk,'int'))+'): a tenere su la popolazione sono gli arrivi dall&rsquo;estero ('+sgn(tot(mk,'est'))+').</b> ';
+  t+='Nell&rsquo;area scelta le nascite superavano le morti fino al '+(fn?(fn-1):'–')+'; <b>dal '+(fn||'–')+' in poi i morti sono più dei nati</b>, e la crescita viene da chi arriva: dall&rsquo;Italia '+sgn(tot(hk,'int'))+', dall&rsquo;estero '+sgn(tot(hk,'est'))+' (somma 2002–2025).</p>';
+  setH('t-comp',t)
+}
+function rigaCr(u){return {nm:u.nome,sub:f0(u.pop)+' residenti',v:u.cr,txt:sg(u.cr,1)+'%',col:u.cr<0?WARM:ACC}}
+function sRank1(){
+  var mp=minPop('ck-min1',5000),us=selUnits().filter(function(u){return u.pop>=mp});
+  var su=top(us,function(u){return u.cr},10,true),gi=top(us,function(u){return u.cr},10,false);
+  var mx=Math.max.apply(null,su.map(function(u){return Math.abs(u.cr)}).concat(gi.map(function(u){return Math.abs(u.cr)})));
+  bars('b-su',su.map(rigaCr),mx);bars('b-giu',gi.map(rigaCr),mx);
+  var cal=us.filter(function(u){return u.cr<0});
+  setH('t-rank1','<p>Su '+us.length+' comuni, <b>'+cal.length+' hanno meno abitanti che nel 2001</b>'+(cal.length?' (i più grandi: '+top(cal,function(u){return u.pop},3,true).map(function(u){return esc(u.nome)+' '+f0(u.pop)}).join(', ')+')':'')+'. Tra i '+su.length+' che crescono di più, '+su.filter(function(u){return u.pop<10000}).length+' hanno oggi meno di 10.000 abitanti: in percentuale un comune piccolo cambia più in fretta di uno grande.</p>')
+}
+/* ---------- 2. stranieri ---------- */
+function qStr(k){var g=G(k);return g.stran.map(function(v,i){return 100*v/g.pop[i]})}
+function sStran(){
+  var a=D.gr.anni,m=G('MILANO'),h=G(SEL);
+  var s1=seriesPair(qStr,a);lineChart('ch-sq',{series:s1,x0:2001,x1:2026,y0:0,bands:[{x0:2020,x1:2022}],fy:function(v){return nf(v,0)},ft:function(v){return nf(v,1)+'%'},aria:'Quota di stranieri tra i residenti',h:230});setH('lg-sq',legSeries(s1));
+  var s2=seriesPair(function(k){return G(k).stran},a,{nopar:true});lineChart('ch-sn',{series:s2,x0:2001,x1:2026,y0:0,bands:[{x0:2020,x1:2022}],fy:f0,ft:f0,aria:'Numero di stranieri residenti',h:230,ml:56});setH('lg-sn',legSeries(s2));
+  var cross=null;for(var i=0;i<a.length;i++){if(h.stran[i]>m.stran[i]){cross=a[i];break}}
+  var t='<p>Nel 2026 gli stranieri residenti sono <b>'+f0(m.stran[25])+' a Milano ('+pc(qStr('MILANO')[25])+' dei residenti)</b> e <b>'+f0(h.stran[25])+' nell&rsquo;area scelta ('+pc(qStr(SEL)[25])+')</b>. ';
+  if(SEL==='HINT'){var hh=G('HINT');var first=null;for(var j=0;j<a.length;j++){if(hh.stran[j]>m.stran[j]){first=a[j];break}}t+='In numeri assoluti l&rsquo;hinterland ha superato Milano nel '+first+' (nel 2001 gli stranieri erano '+f0(hh.stran[0])+' contro '+f0(m.stran[0])+'). Su 100 residenti, però, a Milano sono molti di più. '}
+  else if(cross)t+='In numeri assoluti questa area ha superato Milano nel '+cross+'. ';
+  t+='Nell&rsquo;area scelta la quota è passata da '+nf(qStr(SEL)[0],1)+' a '+nf(qStr(SEL)[25],1)+' su 100 residenti (a Milano da '+nf(qStr('MILANO')[0],1)+' a '+nf(qStr('MILANO')[25],1)+'): in proporzione sono cresciuti più in fretta nell&rsquo;hinterland.</p>';
+  setH('t-stran',t);
+  var mp=minPop('ck-min2',5000),cs=selC().filter(function(c){return c.pop[25]>=mp});
+  function q(c){return 100*c.stran[25]/c.pop[25]}
+  var up=top(cs,q,10,true),dn=top(cs,q,10,false),mx=Math.max.apply(null,up.map(q));
+  function rg(c){return {nm:c.nome,sub:f0(c.pop[25])+' residenti, '+f0(c.stran[25])+' stranieri',v:q(c),txt:nf(q(c),1)+'%'}}
+  bars('b-sa',up.map(rg),mx);bars('b-sb',dn.map(rg),mx);
+  var ga=G(SEL),gm=G('MILANO');
+  var se=[{name:'Milano',col:WARM,w:2.6,pts:gm.acq.map(function(v,i){return [2001+i,v]})},{name:SEL==='HINT'?'Hinterland':GL[SEL],col:ACC,w:3,pts:ga.acq.map(function(v,i){return [2001+i,v]})}];
+  function sa(g){return sum(g.acq.slice(1),function(v){return v})}
+  lineChart('ch-acq',{series:se,x0:2002,x1:2018,y0:0,fy:f0,ft:f0,aria:'Acquisizioni di cittadinanza italiana per anno',h:200,ml:56});setH('lg-acq',legSeries(se));
+  setH('t-acq','<p>Tra il 2002 e il 2018 hanno preso la cittadinanza italiana <b>'+f0(sa(gm))+' stranieri a Milano</b> e <b>'+f0(sa(ga))+' nell&rsquo;area scelta</b>. Chi la prende esce dai conteggi degli stranieri anche se vive nello stesso posto.</p>')
+}
+/* ---------- 3. scambio con Milano ---------- */
+function sScambio(){
+  var yrs=D.gr.pend_anni,gm=G('MI'),gb=G('MB'),gs=G(SEL);
+  var ent=yrs.map(function(y,i){return {y:y,mi:SEL==='MB'?0:gm.pend.entra[i],mb:SEL==='MI'?0:gb.pend.entra[i],es:gs.pend.esce[i]}});
+  var mx=Math.max.apply(null,ent.map(function(e){return e.mi+e.mb}));
+  bars('b-entra',ent.map(function(e){var p=[];if(e.mi)p.push({v:e.mi,c:MID});if(e.mb)p.push({v:e.mb,c:LGT});return {nm:String(e.y)+(e.y===2021?' (stima)':''),parts:p,v:e.mi+e.mb,txt:f0(e.mi+e.mb)}}),mx);
+  bars('b-esce',ent.map(function(e){return {nm:String(e.y)+(e.y===2021?' (stima)':''),v:e.es,txt:f0(e.es),col:WARM}}),mx);
+  var it=[];if(SEL!=='MB')it.push(['Città metropolitana (senza Milano)',MID]);if(SEL!=='MI')it.push(['Monza e Brianza',LGT]);it.push(['Da Milano verso l’area',WARM]);setH('lg-pend',lgd(it));
+  var e21=ent[3],e91=ent[0];
+  setH('t-scambio','<p>Ogni giorno <b>'+f0(e21.mi+e21.mb)+' persone</b> dell&rsquo;area scelta vanno a Milano per lavoro o studio (stima 2021; erano '+f0(e91.mi+e91.mb)+' nel 1991), mentre <b>'+f0(e21.es)+'</b> milanesi fanno il percorso inverso. Per ogni milanese che va a lavorare o studiare nell&rsquo;area ne arrivano <b>'+nf((e21.mi+e21.mb)/e21.es,1)+'</b> in direzione di Milano. Rispetto al 1991 il flusso verso Milano è cambiato del '+sg(100*((e21.mi+e21.mb)/(e91.mi+e91.mb)-1),1)+'% (nel 2001 era '+sg(100*(ent[1].mi+ent[1].mb)/(e91.mi+e91.mb)-100,1)+'%): è rimasto quasi fermo per trent&rsquo;anni, mentre gli abitanti dell&rsquo;area crescevano.</p>');
+  var cs=selC();
+  function e(c){return c.pend.e[3]}
+  var tp=top(cs,e,10,true);bars('b-pe',tp.map(function(c){return {nm:c.nome,sub:'ne ricevono da Milano '+f0(c.pend.x[3]),v:e(c),txt:f0(e(c))}}),e(tp[0]));
+  function q(c){return c.pend.q[3]}
+  var tq=top(cs.filter(function(c){return c.pop[25]>=3000}),q,10,true);bars('b-pq',tq.map(function(c){return {nm:c.nome,sub:f0(c.pend.e[3])+' persone',v:q(c),txt:nf(q(c),1)+'%'}}),q(tq[0]));
+  var pos=cs.filter(function(c){return c.pend.x[3]>c.pend.e[3]});
+  var pp='<p>Nel 2021 <b>'+(pos.length===1?'un solo comune':pos.length+' comuni')+' su '+cs.length+'</b> '+(pos.length===1?'riceve':'ricevono')+' da Milano più persone di quante ne mandi';
+  if(pos.length)pp+=': '+pos.map(function(c){return '<b>'+esc(c.nome)+'</b> ('+f0(c.pend.x[3])+' milanesi ci vanno a lavorare o studiare, '+f0(c.pend.e[3])+' suoi residenti vanno a Milano)'}).join('; ');
+  pp+='. Negli anni precedenti i comuni in questa situazione erano ' +[0,1,2].map(function(i){return sum(cs.filter(function(c){return c.pend.x[i]>c.pend.e[i]}),function(){return 1})}).join(', ')+' (1991, 2001, 2011).</p>';
+  setH('t-pos',pp);
+  setH('t-scambio2','<p>I comuni che mandano più persone a Milano sono i più grandi e i più vicini. Per un confronto tra comuni di dimensioni diverse conta di più <b>quale parte di chi lavora o studia va a Milano</b>: in '+cs.filter(function(c){return c.pend.q[3]>=30}).length+' comuni dell&rsquo;area scelta riguarda almeno 30 persone su 100.</p>');
+  /* tabella */
+  tabPend();
+  var cm=D.gr.cambi['Prov. MI'],ca=D.gr.cambi['Altre prov. Lombardia'],ys=['2020','2021','2022','2023','2024'];
+  tabella('tab-cambi',['Anno','Da Prov. MI a Milano','Da Milano a Prov. MI','Saldo Prov. MI','Saldo altre prov. Lombardia'],ys.map(function(y){return {c:[y,f0(cm[y].isc),f0(cm[y].canc),'<b>'+sgn(cm[y].saldo)+'</b>',sgn(ca[y].saldo)]}}));
+  setH('t-cambi','<p>Chi cambia residenza lasciando Milano per un comune della provincia è sempre più di chi arriva: il saldo era <b>'+sgn(cm['2020'].saldo)+' nel 2020 e '+sgn(cm['2024'].saldo)+' nel 2024</b>. Nel 2024 sono partiti '+f0(cm['2024'].canc)+' milanesi e ne sono arrivati '+f0(cm['2024'].isc)+'.</p><div class="warn"><b>Limite.</b> &laquo;Prov. MI&raquo; è la Città metropolitana di Milano, che non comprende la Brianza: i trasferimenti verso Monza e Brianza sono dentro &laquo;Altre prov. Lombardia&raquo; e non si possono isolare. La matrice completa ISTAT comune per comune non è stata scaricata (vedi Limiti dei dati).</div>')
+}
+var PSORT={k:'e',d:-1};
+function tabPend(){
+  var cs=selC().slice();
+  var keys={n:function(c){return c.nome},e:function(c){return c.pend.e[3]},x:function(c){return c.pend.x[3]},s:function(c){return c.pend.e[3]-c.pend.x[3]},q:function(c){return c.pend.q[3]}};
+  cs.sort(function(a,b){var f=keys[PSORT.k],x=f(a),y=f(b);return PSORT.k==='n'?x.localeCompare(y,'it')*PSORT.d*-1:(x-y)*PSORT.d});
+  var head=[['n','Comune'],['e','Vanno a Milano'],['x','Vengono da Milano'],['s','Saldo'],['q','Quota verso Milano']];
+  setH('tab-pend','<thead><tr>'+head.map(function(h,i){return '<th class="s'+(i?' r':'')+'" data-k="'+h[0]+'">'+h[1]+(PSORT.k===h[0]?(PSORT.d<0?' ▼':' ▲'):'')+'</th>'}).join('')+'</tr></thead><tbody>'+cs.map(function(c){return '<tr><td>'+esc(c.nome)+'</td><td class="r">'+f0(c.pend.e[3])+'</td><td class="r">'+f0(c.pend.x[3])+'</td><td class="r">'+sgn(c.pend.e[3]-c.pend.x[3])+'</td><td class="r">'+nf(c.pend.q[3],1)+'%</td></tr>'}).join('')+'</tbody>');
+  Array.prototype.forEach.call(el('tab-pend').querySelectorAll('th.s'),function(th){th.addEventListener('click',function(){var k=th.getAttribute('data-k');if(PSORT.k===k)PSORT.d*=-1;else{PSORT.k=k;PSORT.d=k==='n'?-1:-1}tabPend()})})
+}
+/* ---------- 4. età ---------- */
+function sEta(){
+  var a=[2019,2020,2021,2022,2023,2024,2025,2026];
+  function mk(f,id,lg,fmt,y0,lunga){var se=seriesPair(function(k){return lunga?G(k).eta_l[f]:G(k).eta[f]},lunga?G('MILANO').eta_l.anni:a);lineChart(id,{series:se,x0:lunga?2002:2019,x1:2026,xt:lunga?[2002,2010,2018,2026]:[2019,2022,2026],y0:y0,fy:function(v){return nf(v,fmt)},ft:function(v){return nf(v,1)},h:200,aria:id,ml:42});setH(lg,legSeries(se))}
+  mk('o65','ch-e1','lg-e1',1,undefined,true);mk('u15','ch-e2','lg-e2',1,undefined,true);mk('em','ch-e3','lg-e3',1);
+  var m=G('MILANO'),h=G(SEL);
+  var hl=h.eta_l,ml=m.eta_l,sor=hl.anni[hl.o65.findIndex(function(v,i){return v>ml.o65[i]})];
+  setH('t-eta','<p>Nel 2002 Milano era molto più vecchia: gli over 65 erano il '+pc(ml.o65[0])+' contro il '+pc(hl.o65[0])+' dell&rsquo;area scelta. Poi nell&rsquo;area scelta la quota è salita in fretta, mentre a Milano è scesa dal 2009. <b>Il sorpasso arriva nel '+sor+'; nel 2026 siamo a '+pc(hl.o65[24])+' contro '+pc(ml.o65[24])+'.</b> Il primo anno del sorpasso coincide con il ricalcolo dell&rsquo;ISTAT (vedi Limiti dei dati), ma il distacco continua ad allargarsi anche dopo. I bambini sotto i 15 anni sono il '+pc(h.eta.u15[7])+' nell&rsquo;area scelta e l&rsquo;'+nf(m.eta.u15[7],1)+'% a Milano; l&rsquo;età media è '+nf(h.eta.em[7],1)+' anni contro '+nf(m.eta.em[7],1)+'. <i>Ipotesi, non misurata:</i> chi comprava casa nell&rsquo;hinterland trent&rsquo;anni fa sta invecchiando lì, mentre a Milano gli arrivi dall&rsquo;estero hanno portato soprattutto adulti più giovani.</p>');
+  var mp=minPop('ck-min3',5000),cs=selC().filter(function(c){return c.pop[25]>=mp});
+  function o(c){return c.o65[7]}
+  var up=top(cs,o,10,true),dn=top(cs,o,10,false);
+  function rg(c){return {nm:c.nome,sub:f0(c.pop[25])+' residenti · età media '+nf(c.em[7],1),v:o(c),txt:nf(o(c),1)+'%'}}
+  var mx=Math.max.apply(null,up.map(o));bars('b-ea',up.map(rg),mx);bars('b-eb',dn.map(rg),mx)
+}
+/* ---------- 5. redditi ---------- */
+function sRed(){
+  var a=[];for(var y=2000;y<=2024;y++)a.push(y);
+  var se=seriesPair(function(k){return G(k).red.medio},a);
+  lineChart('ch-red',{series:se,x0:2000,x1:2024,y0:0,fy:f0,ft:function(v){return f0(v)+' euro'},ml:56,aria:'Reddito medio per contribuente'});setH('lg-red',legSeries(se));
+  var m=G('MILANO'),h=G(SEL),r0=h.red.medio[0]/m.red.medio[0],r1=h.red.medio[24]/m.red.medio[24];
+  setH('t-red','<p>Nel 2024 il reddito medio dichiarato per contribuente è <b>'+f0(m.red.medio[24])+' euro a Milano</b> e <b>'+f0(h.red.medio[24])+' euro nell&rsquo;area scelta</b>: '+nf(100*r1,0)+' euro ogni 100 di Milano (nel 2000: '+nf(100*r0,0)+'). Il distacco '+(r1<r0?'è aumentato':'è diminuito')+'. I numeri sono in euro correnti. Dal 2000 al 2024 il reddito medio è salito del '+nf(100*(m.red.medio[24]/m.red.medio[0]-1),0)+'% a Milano e del '+nf(100*(h.red.medio[24]/h.red.medio[0]-1),0)+'% nell&rsquo;area scelta; i prezzi sono saliti del '+nf(100*D.ri.foi_2000_2024,0)+'% (indice ISTAT FOI), quindi tolta l&rsquo;inflazione la crescita è di circa '+nf(100*((m.red.medio[24]/m.red.medio[0])/(1+D.ri.foi_2000_2024)-1),0)+'% a Milano e '+nf(100*((h.red.medio[24]/h.red.medio[0])/(1+D.ri.foi_2000_2024)-1),0)+'% nell&rsquo;area scelta. Dal 2023 il MEF dà anche il reddito complessivo completo: vedi Limiti dei dati.</p>');
+  var mp=minPop('ck-min4',5000),cs=selC().filter(function(c){return c.red[24]&&c.red[24][2]>=mp});
+  function r(c){return c.red[24][0]}
+  var up=top(cs,r,10,true),dn=top(cs,r,10,false);
+  function rg(c){return {nm:c.nome,sub:f0(c.red[24][2])+' contribuenti',v:r(c),txt:f0(r(c))+' €',col:r(c)>m.red.medio[24]?WARM:ACC}}
+  var mx=Math.max(r(up[0]),m.red.medio[24]);bars('b-ra',up.map(rg),mx);bars('b-rb',dn.map(rg),mx);
+  var sop=selC().filter(function(c){return c.red[24]&&c.red[24][0]>m.red.medio[24]});
+  setH('t-red2','<p>Milano è a '+f0(m.red.medio[24])+' euro: <b>'+sop.length+' comuni su '+selC().length+'</b> dell&rsquo;area scelta stanno sopra'+(sop.length?' ('+sop.map(function(c){return esc(c.nome)+' '+f0(c.red[24][0])}).join(', ')+')':'')+'. Le barre arancioni sono i comuni sopra Milano.</p><p><b>Quanto pesano i redditi molto alti.</b> Nel 2022 (ultimo anno con tutte le fasce di reddito complete) i contribuenti con più di 120.000 euro erano il '+nf(D.ri.alti_2022.MILANO.pc_contr,1)+'% a Milano e dichiaravano il <b>'+nf(D.ri.alti_2022.MILANO.pc_red,1)+'% di tutto il reddito</b>; nell&rsquo;hinterland erano il '+nf(D.ri.alti_2022.HINT.pc_contr,1)+'% e dichiaravano il '+nf(D.ri.alti_2022.HINT.pc_red,1)+'%. Se pochi redditi enormi spariscono, la media di Milano scende più di quella dell&rsquo;hinterland: il confronto tra medie dice meno di quanto sembri.</p>')
+}
+/* ---------- 6. voto ---------- */
+var VF='SX',VE=2022;
+var VFAM={SX:{n:'Sinistra e centrosinistra',f:['Centrosinistra','Sinistra']},DX:{n:'Centrodestra, destra e Lega',f:['Centrodestra','Destra','Lega']}};
+function vgroups(){
+  var cin=D.vo.cintura;var inS=function(u){var c=D.com.filter(function(x){return x.cod===u})[0];return c&&(SEL==='HINT'||c.g===SEL)};
+  var cc=cin.filter(inS),rest=Object.keys(D.vo.unita).filter(function(u){return u!=='015146'&&cin.indexOf(u)<0&&inS(u)});
+  return [{k:'CINT',nm:'Cintura rossa ('+cc.length+' comuni)',units:cc,col:ACC,w:3.2},{k:'REST',nm:'Resto dell’area ('+rest.length+')',units:rest,col:LGT,w:2.4,dash:'6 3'},{k:'MIL',nm:'Milano',units:['015146'],col:WARM,w:2.8},{k:'SES',nm:'Sesto San Giovanni',units:['015209'],col:INK,w:1.6,dots:true}]
+}
+function aggV(units,i){ /* percentuali per famiglia all'elezione i, ponderate sui voti validi */
+  var t=D.vo.famiglie.map(function(){return 0}),s=0;
+  units.forEach(function(u){var d=D.vo.unita[u];if(!d)return;var v=d.v[i];s+=v;d.p[i].forEach(function(p,j){t[j]+=p*v/100})});
+  return {p:t.map(function(x){return s?100*x/s:null}),v:s}
+}
+function sVoto(){
+  var V=D.vo,fam=V.famiglie,anni=V.anni,gr=vgroups(),n=gr[0].units.length;
+  var m=D.com.filter(function(c){return c.cintura&&c.g!=='MILANO'});
+  var nu=Object.keys(V.unita).length-1;
+  setH('t-voto','<p>Per dire cosa fosse la &laquo;cintura rossa&raquo; usiamo i dati: sono i comuni dell&rsquo;hinterland dove il <b>PCI aveva almeno il '+nf(100*V.soglia_pci,0)+'% dei voti di lista alla Camera del 1976</b>, l&rsquo;anno del suo massimo. Sono <b>'+V.cintura.length+' comuni su '+nu+'</b> (Milano, per confronto: PCI al '+nf(V.pci76_milano,1)+'%). La soglia è una nostra scelta: con il 40% i comuni sarebbero di più, con il 50% meno.</p>');
+  setH('l-cintura',V.cintura.map(function(u){var c=D.com.filter(function(x){return x.cod===u})[0];return c}).sort(function(a,b){return b.pci76-a.pci76}).map(function(c){return esc(c.nome)+' '+nf(c.pci76,0)+'%'}).join(' · ')+'<p class="sub">Bollate comprende Baranzate (nata nel 2004). I comuni in <i>Monza e Brianza</i> e in <i>Città metropolitana</i> sono mescolati: la cintura non coincide con una delle due parti.</p>');
+  var fl=Object.keys(VFAM).map(function(k){return '<button type="button" data-vf="'+k+'"'+(VF===k?' class="on"':'')+'>'+VFAM[k].n+'</button>'}).concat(fam.map(function(f){return '<button type="button" data-vf="'+f+'"'+(VF===f?' class="on"':'')+'>'+f+'</button>'})).join('');
+  setH('b-fam',fl);
+  Array.prototype.forEach.call(el('b-fam').querySelectorAll('button'),function(b){b.addEventListener('click',function(){VF=b.getAttribute('data-vf');sVoto()})});
+  function val(p){var fs=VFAM[VF]?VFAM[VF].f:[VF];return sum(fs,function(f){return p[fam.indexOf(f)]})}
+  var se=gr.map(function(g){return {name:g.nm,col:g.col,w:g.w,dash:g.dash,dots:g.dots,pts:anni.map(function(y,i){var a=aggV(g.units,i);return [y,a.v?val(a.p):null]})}});
+  lineChart('ch-v',{series:se,x0:1976,x1:2022,xt:[1976,1987,1996,2006,2013,2022],y0:0,fy:function(v){return nf(v,0)+'%'},ft:function(v){return nf(v,1)+'%'},ml:44,h:250,xs:anni,aria:'Quota di voto per famiglia politica: '+(VFAM[VF]?VFAM[VF].n:VF)});
+  setH('lg-v',legSeries(se));
+  /* elezione */
+  setH('b-ele',anni.map(function(y){return '<button type="button" data-ve="'+y+'"'+(y===VE?' class="on"':'')+'>'+y+'</button>'}).join(''));
+  Array.prototype.forEach.call(el('b-ele').querySelectorAll('button'),function(b){b.addEventListener('click',function(){VE=+b.getAttribute('data-ve');sVoto()})});
+  var i=anni.indexOf(VE),sist=V.sistema[String(VE)];
+  segs('s-voto',gr.map(function(g){var a=aggV(g.units,i);return {nm:g.nm,sub:f0(a.v)+' voti di lista',parts:fam.map(function(f,j){return {v:a.p[j]||0,c:FAMC[f],t:f,lt:['Centro','Altri'].indexOf(f)>=0}})}}));
+  setH('lg-sv',lgd(fam.map(function(f){return [f,FAMC[f]]})));
+  tabella('tab-voto',['Camera '+VE].concat(fam),gr.map(function(g){var a=aggV(g.units,i);return {c:[g.nm].concat(a.p.map(function(p){return nf(p,1)+'%'}))}}));
+  setH('t-ele','<p class="sub">Sistema elettorale '+VE+': '+esc(sist)+'. Voti di lista in liste che non abbiamo attribuito a nessuna famiglia (finiscono in &laquo;Altri&raquo;): '+nf(V.nonattr[String(VE)],1)+'% di tutta l&rsquo;area'+(V.liste_non_attribuite[String(VE)]&&V.liste_non_attribuite[String(VE)].length?' (le più grandi: '+V.liste_non_attribuite[String(VE)].slice(0,2).map(function(x){return esc(x[0])}).join(', ')+')':'')+'.</p>');
+  var a76=aggV(gr[0].units,0),r76=aggV(gr[1].units,0),a22=aggV(gr[0].units,anni.length-1),r22=aggV(gr[1].units,anni.length-1),mi22=aggV(['015146'],anni.length-1),ses22=aggV(['015209'],anni.length-1);
+  function sx(a){return a.p[0]+a.p[1]}function dx(a){return a.p[3]+a.p[4]+a.p[5]}
+  setH('t-voto2','<p><b>Cosa si vede.</b> Nel 1976 la cintura votava a sinistra molto più del resto: sinistra e centrosinistra '+nf(sx(a76),0)+'% contro '+nf(sx(r76),0)+'%. Poi la differenza si è consumata: nel 2022 è '+nf(sx(a22),0)+'% contro '+nf(sx(r22),0)+'%, e centrodestra, destra e Lega insieme prendono il '+nf(dx(a22),0)+'% nella ex cintura, il '+nf(dx(r22),0)+'% nel resto dell&rsquo;area e il '+nf(dx(mi22),0)+'% a Milano. <b>Sesto San Giovanni</b>, la &laquo;Stalingrado d&rsquo;Italia&raquo;, nel 2022 è a '+nf(sx(ses22),0)+'% per sinistra e centrosinistra e a '+nf(dx(ses22),0)+'% per il centrodestra allargato. <i>Ipotesi, non misurata:</i> i comuni sono cambiati (nuovi residenti, industrie chiuse) e il voto con loro. Con questi dati non possiamo dire se siano cambiati gli elettori o chi li abita.</p><div class="warn"><b>Per leggere i confronti.</b> Le famiglie politiche sono una scelta nostra (vedi Limiti dei dati): il PCI sta in Sinistra, PDS, DS e PD in Centrosinistra, come nel resto del sito. Per questo i confronti nel tempo sommano le due famiglie. M5S e Centro (dove stanno Azione, Italia Viva e +Europa) restano fuori dalla somma. I sistemi elettorali cambiano (tabella sopra), e dal 1996 a ogni elezione il confronto è tra liste diverse. Un voto per lista non è un voto per persona: in 46 anni gli elettori di ogni comune sono cambiati.</div>')
+}
+/* ---------- 7. metro ---------- */
+function sMetro(){
+  var M=D.me,S=M.sintesi,rows=M.confronto;
+  setH('t-metro','<p>Su 187 comuni dell&rsquo;hinterland <b>solo '+rows.length+' hanno almeno una fermata della metropolitana</b> dentro i loro confini ('+M.stazioni.length+' stazioni, contro '+M.stazioni_milano+' dentro Milano). Per capire se la metropolitana fa differenza li confrontiamo con comuni <b>senza fermata alla stessa distanza da Milano</b>: per ognuno, i cinque più simili per distanza. <b>È un confronto, non una prova che il merito sia della metro</b>: i comuni con fermata hanno anche strade, treni e prezzi delle case diversi, e '+M.sintesi_aperte_prima_2001.n+' su '+rows.length+' avevano la fermata già prima del 2001.</p>');
+  var sel=rows;tabella('tab-metro',['Comune','Linee, dal','km da Milano','Crescita 2001–2026','Confronto*','Verso Milano 2021**','Confronto*'],sel.map(function(r){return {c:[esc(r.nome),r.linee.join('+')+', '+r.anno,nf(r.km,0),sg(r.cr,1)+'%',sg(r.ctl_cr,1)+'%',nf(r.q21,0)+'%',nf(r.ctl_q21,0)+'%']}}));
+  var pts=[];D.com.forEach(function(c){if(c.g==='MILANO'||c.insieme&&c.cod==='015250')return;var st=c.ferm_n>0;pts.push({x:c.km,y:c.cr,c:st?ACC:GREY,r:st?6:3,big:st,t:c.nome+(st?' (con fermata)':'')+': '+nf(c.km,0)+' km, '+sg(c.cr,1)+'%'})});
+  scatter('ch-mt',{pts:pts,xl:'Chilometri di strada da Milano',aria:'Crescita 2001-2026 e distanza da Milano; in verde i comuni con fermata'});
+  setH('lg-mt',lgd([['Comuni con fermata',ACC],['Comuni senza fermata',GREY]])+'<span class="sub">Asse verticale: crescita 2001–2026, %</span>');
+  var verdict=S.p_cr>0.2?'<b>Il confronto non dà una differenza chiara.</b> ':'<b>Il confronto mostra una differenza, ma resta un confronto.</b> ';
+  var t='<p>'+verdict+'La crescita 2001–2026 è sopra quella dei comuni di confronto in '+S.cr_sopra+' casi su '+S.n+' (mediana '+sg(S.cr_mediana,1)+'% contro '+sg(S.ctl_cr_mediana,1)+'%). Ma con soli '+S.n+' comuni un risultato così capita anche lanciando una moneta (probabilità circa '+nf(100*S.p_cr,0)+'%). Per fasce di distanza il quadro non è uniforme:';
+  t+='</p><div class="scroll"><table class="tab-min"><thead><tr><th>Distanza da Milano</th><th class="r">Con fermata (n)</th><th class="r">Crescita mediana</th><th class="r">Senza fermata (n)</th><th class="r">Crescita mediana</th></tr></thead><tbody>'+M.fasce.map(function(b){return '<tr><td>'+(b.a>=200?'oltre '+b.da+' km':b.da+'–'+b.a+' km')+'</td><td class="r">'+b.n_stop+'</td><td class="r">'+(b.cr_stop==null?'–':sg(b.cr_stop,1)+'%')+'</td><td class="r">'+b.n_senza+'</td><td class="r">'+(b.cr_senza==null?'–':sg(b.cr_senza,1)+'%')+'</td></tr>'}).join('')+'</tbody></table></div>';
+  t+='<p>Nella quota di chi lavora o studia a Milano nel 2021 i comuni con fermata hanno una mediana di '+nf(S.q21_mediana,0)+' su 100, quelli di confronto '+nf(S.ctl_q21_mediana,0)+': sopra in '+S.q21_sopra+' casi su '+S.n+'. Anche qui è poco per concludere.</p>';
+  t+='<p class="src">* Mediana dei cinque comuni senza fermata più vicini per distanza. ** Su 100 residenti che lavorano o studiano, quanti vanno a Milano. Se si conta anche San Donato Milanese (la stazione &laquo;San Donato&raquo; della M3 è a circa 100 metri dal confine, dentro Milano) il risultato non cambia: crescita sopra il confronto in '+M.sintesi_con_san_donato.cr_sopra+' casi su '+M.sintesi_con_san_donato.n+'. Considerando solo le fermate aperte prima del 2001: '+M.sintesi_aperte_prima_2001.cr_sopra+' su '+M.sintesi_aperte_prima_2001.n+'. Il confronto vale per l&rsquo;hinterland intero anche se in alto hai scelto una sola parte.</p>';
+  setH('t-metro2',t)
+}
+/* ---------- 8. mappa e scheda ---------- */
+var MAP=null,LAY=null,MIS='cr',SELC=null,LMAP={};
+var MDEF={cr:{n:'Crescita 2001–2026',f:function(c){return c.cr},d:1,u:'%',sg:1},st:{n:'Stranieri tra i residenti, 2026',f:function(c){return 100*c.stran[25]/c.pop[25]},d:1,u:'%'},q:{n:'Su 100 che lavorano o studiano, quanti vanno a Milano (2021)',f:function(c){return c.pend?c.pend.q[3]:null},d:1,u:'%'},red:{n:'Reddito medio per contribuente, 2024',f:function(c){return c.red[24]?c.red[24][0]:null},d:0,u:' euro'},o65:{n:'Anziani (65 anni e più), 2026',f:function(c){return c.o65[7]},d:1,u:'%'},em:{n:'Età media, 2026',f:function(c){return c.em[7]},d:1,u:' anni'}};
+var BRK=null;
+function calcBrk(){
+  BRK={};Object.keys(MDEF).forEach(function(k){var v=HC.map(MDEF[k].f).filter(function(x){return x!=null}).sort(function(a,b){return a-b});var b=[];for(var i=1;i<6;i++)b.push(v[Math.floor(i*v.length/6)]);BRK[k]=b})
+}
+function colM(v){if(v==null)return '#e4e4e4';var b=BRK[MIS],i=0;while(i<b.length&&v>=b[i])i++;return SEQ[i]}
+function styM(f){var c=CC(f.properties.i);if(!c)return {};if(c.g==='MILANO')return {fillColor:'#000',fillOpacity:.05,color:'#000',weight:2.4};
+  var on=inSel(c);return {fillColor:on?colM(MDEF[MIS].f(c)):'#f1f1f1',fillOpacity:on?.88:.6,color:SELC===c.cod?'#000':'#fff',weight:SELC===c.cod?3:.6}}
+function CC(cod){return D.com.filter(function(c){return c.cod===cod})[0]}
+function voceMappa(){
+  calcBrk();
+  var sel=el('sel-com');sel.innerHTML='<option value="">Scegli…</option>'+D.com.slice().sort(function(a,b){return a.nome.localeCompare(b.nome,'it')}).map(function(c){return '<option value="'+c.cod+'">'+esc(c.nome)+(c.g==='MB'?' (MB)':'')+'</option>'}).join('');
+  sel.addEventListener('change',function(){if(sel.value)scegli(sel.value,true)});
+  Array.prototype.forEach.call(document.querySelectorAll('[data-m]'),function(b){b.addEventListener('click',function(){MIS=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('[data-m]'),function(x){x.classList.toggle('on',x===b)});aggiornaMappa()})});
+  if(typeof L==='undefined'){setH('map','<p class="sub" style="padding:10px">La mappa non si carica (libreria Leaflet non raggiungibile). La scheda funziona lo stesso: scegli un comune dal menu.</p>');return}
+  MAP=L.map('map',{preferCanvas:true}).setView([45.52,9.2],10);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(D.geo,{style:styM,onEachFeature:function(f,l){LMAP[f.properties.i]=l;l.bindTooltip(function(){return tip(f.properties.i)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());aggiornaMappa();setTimeout(function(){MAP.invalidateSize();if(!SELC)MAP.fitBounds(LAY.getBounds())},400)
+}
+function tip(cod){var c=CC(cod),d=MDEF[MIS],v=d.f(c);return '<b>'+esc(c.nome)+'</b><br>'+d.n+': '+(v==null?'dato non disponibile':(d.sg?sg(v,d.d):nf(v,d.d))+d.u)}
+function aggiornaMappa(){
+  if(!BRK)return;var d=MDEF[MIS],b=BRK[MIS];
+  if(LAY)LAY.setStyle(styM);
+  var labs=[];for(var i=0;i<6;i++){var lo=i===0?null:b[i-1],hi=i===5?null:b[i];labs.push([(lo==null?'fino a '+nf(hi,d.d):(hi==null?'da '+nf(lo,d.d):nf(lo,d.d)+' – '+nf(hi,d.d))),SEQ[i]])}
+  setH('lg-map',lgd(labs)+'<span class="sub">'+d.u.trim()+'</span>');
+  setH('map-desc','Misura: <b>'+d.n+'</b>.'+(SEL==='HINT'?'':' In grigio i comuni fuori dall’area scelta in alto.'));
+  if(SELC)scheda(SELC)
+}
+function scegli(cod,daMenu){
+  SELC=cod;el('sel-com').value=cod;if(LAY)LAY.setStyle(styM);
+  if(daMenu&&MAP&&LMAP[cod])MAP.fitBounds(LMAP[cod].getBounds(),{maxZoom:12});
+  scheda(cod)
+}
+function scheda(cod){
+  var c=CC(cod),m=MIL,hg=G('HINT');
+  function aggI(units,i){return aggV(units,i)}
+  var gl=c.g==='MILANO'?'Milano':(c.g==='MI'?'Città metropolitana di Milano':'Monza e Brianza');
+  var pills='<span class="pill g">'+gl+'</span>';
+  if(c.cintura)pills+='<span class="pill">Ex cintura rossa (PCI '+nf(c.pci76,0)+'% nel 1976'+(c.insieme?', Bollate e Baranzate insieme':'')+')</span>';
+  if(c.ferm_n>0)pills+='<span class="pill g">Metro '+c.fermata.join('+')+', '+c.ferm_n+(c.ferm_n===1?' stazione':' stazioni')+'</span>';
+  var h='<h3>'+esc(c.nome)+'</h3><div>'+pills+'</div>';
+  function row(lbl,fc,fm,fh,fmt){return {c:[lbl,fmt(fc),fmt(fm),fh==null?'–':fmt(fh)]}}
+  var rows=[];
+  var crM=m.cr,crH=100*(hg.pop[25]/hg.pop[0]-1);
+  rows.push({c:['Residenti 1/1/2026 (stima)',f0(c.pop[25]),f0(m.pop[25]),f0(hg.pop[25])]});
+  rows.push({c:['Residenti 2001 (censimento)',c.pop[0]?f0(c.pop[0]):'non esisteva',f0(m.pop[0]),f0(hg.pop[0])]});
+  rows.push({c:['Crescita 2001–2026'+(c.insieme?' (con '+(c.cod==='015027'?'Baranzate':'Bollate')+')':''),sg(c.cr,1)+'%',sg(m.cr,1)+'%',sg(crH,1)+'%']});
+  rows.push({c:['Stranieri su 100 residenti, 2026',nf(100*c.stran[25]/c.pop[25],1),nf(100*m.stran[25]/m.pop[25],1),nf(100*hg.stran[25]/hg.pop[25],1)]});
+  rows.push({c:['Anziani (65+) su 100, 2026',nf(c.o65[7],1),nf(m.o65[7],1),nf(hg.eta.o65[7],1)]});
+  rows.push({c:['Bambini (0–14) su 100, 2026',nf(c.u15[7],1),nf(m.u15[7],1),nf(hg.eta.u15[7],1)]});
+  rows.push({c:['Età media, 2026',nf(c.em[7],1),nf(m.em[7],1),nf(hg.eta.em[7],1)]});
+  rows.push({c:['Reddito medio per contribuente, 2024 (euro)',c.red[24]?f0(c.red[24][0]):'–',f0(m.red[24][0]),f0(hg.red.medio[24])]});
+  if(c.pend){rows.push({c:['Vanno a Milano ogni giorno, 2021 (stima)',f0(c.pend.e[3]),'–',f0(hg.pend.entra[3])]});
+    rows.push({c:['Da Milano vengono nel comune (lavoro o studio), 2021',f0(c.pend.x[3]),'–',f0(hg.pend.esce[3])]});
+    rows.push({c:['Su 100 che lavorano o studiano, vanno a Milano (2021)',nf(c.pend.q[3],1),'–','–']})}
+  var iv=D.vo.anni.length-1,vc=D.vo.unita[c.unita],vm=D.vo.unita['015146'],gh=aggI(Object.keys(D.vo.unita).filter(function(u){return u!=='015146'}),iv),gh76=aggI(Object.keys(D.vo.unita).filter(function(u){return u!=='015146'}),0);
+  function sx(p){return p[0]+p[1]}
+  if(vc){rows.push({c:['Sinistra e centrosinistra, Camera 1976 (%)',nf(sx(vc.p[0]),1),nf(sx(vm.p[0]),1),nf(sx(gh76.p),1)]});
+    rows.push({c:['Sinistra e centrosinistra, Camera 2022 (%)',nf(sx(vc.p[iv]),1),nf(sx(vm.p[iv]),1),nf(sx(gh.p),1)]});
+    rows.push({c:['Centrodestra, destra e Lega, Camera 2022 (%)',nf(vc.p[iv][3]+vc.p[iv][4]+vc.p[iv][5],1),nf(vm.p[iv][3]+vm.p[iv][4]+vm.p[iv][5],1),nf(gh.p[3]+gh.p[4]+gh.p[5],1)]})}
+  setH('scheda-c',h+'<div class="scroll"><table id="tab-sc"></table></div><div class="grid2"><div><h3>Abitanti (2001 = 100)</h3><div class="lgd" id="lg-s1"></div><div class="ch" id="ch-s1"></div></div><div><h3>Voto alla Camera, per famiglia</h3><div class="seg" id="s-sv"></div></div></div><p class="src">Colonna &laquo;Hinterland&raquo;: totale dei 187 comuni (somma dei valori, non media dei comuni). '+(c.insieme?'Bollate e Baranzate hanno crescita e voto calcolati insieme (Baranzate nasce da Bollate nel 2004). ':'')+(c.cod==='015251'?'Vermezzo e Zelo Surrigone sono sommati negli anni prima della fusione (2019). ':'')+'Le fonti sono in fondo alla pagina.</p>');
+  tabella('tab-sc',['Misura',esc(c.nome),'Milano','Hinterland'],rows);
+  var a=D.gr.anni;
+  function ix(arr){return arr.map(function(v){return 100*v/arr[0]})}
+  var uc=D.com.filter(function(x){return x.unita===c.unita}),pu=a.map(function(y,i){return sum(uc,function(x){return x.pop[i]})}),p0=pu[0];
+  var se=[{name:c.nome,col:INK,w:2.6,pts:a.map(function(y,i){return [y,100*pu[i]/p0]})},{name:'Milano',col:WARM,w:2,pts:a.map(function(y,i){return [y,ix(m.pop)[i]]})},{name:'Hinterland',col:ACC,w:2,pts:a.map(function(y,i){return [y,ix(hg.pop)[i]]})}];
+  CHARTS=CHARTS.filter(function(x){return x[0]!=='ch-s1'});
+  lineChart('ch-s1',{series:se,x0:2001,x1:2026,h:200,fy:function(v){return nf(v,0)},ft:function(v){return nf(v,0)},ml:42,aria:'Abitanti del comune, di Milano e dell’hinterland'});setH('lg-s1',legSeries(se));
+  if(vc)segs('s-sv',D.vo.anni.map(function(y,i){return {nm:String(y),parts:D.vo.famiglie.map(function(f,j){return {v:vc.p[i][j]||0,c:FAMC[f],t:f,lt:['Centro','Altri'].indexOf(f)>=0}})}}))
+}
+/* ---------- limiti e fonti ---------- */
+function limiti(){
+  var aj=D.gr.aggiustamento,V=D.vo,s=D.ri.sorprese;
+  var L=[
+  '<b>I confini cambiano, i numeri qui no.</b> Tutto è riportato ai 188 comuni (187 più Milano) del 1/1/2021. Baranzate nasce da Bollate nel 2004: per crescita e voto i due comuni sono sommati e segnati &laquo;insieme&raquo;. Vermezzo e Zelo Surrigone, fusi nel 2019 in Vermezzo con Zelo, sono sommati negli anni prima. Monza e Brianza esiste come provincia dal 2009: qui è ricostruita sui comuni attuali anche per gli anni prima. I codici dei comuni differiscono tra i file (nei redditi si usa il codice catastale).',
+  '<b>La popolazione ha dei salti.</b> 2001: censimento del 21 ottobre. 2002–2018: ricostruzione ISTAT. Fine 2018 e 1° gennaio 2019 coincidono al numero (nessun salto). Poi l&rsquo;ISTAT corregge i conti con il censimento permanente: &laquo;aggiustamento statistico&raquo; di '+sgn(aj.MILANO['2020'])+' (2020) e '+sgn(aj.MILANO['2021'])+' (2021) persone a Milano, '+sgn(aj.HINT['2020'])+' e '+sgn(aj.HINT['2021'])+' nell&rsquo;hinterland. Per questo le linee fanno un gradino tra il 2020 e il 2022. Il 2026 è una stima e il bilancio 2025 è provvisorio.',
+  '<b>Stranieri.</b> Sono i residenti con cittadinanza straniera: chi prende la cittadinanza italiana esce dal conteggio (vedi la sezione 2). Non mostriamo le nazionalità: sulla pagina iniziale di demo.istat.it la popolazione per cittadinanza e comune è una consultazione a tabelle da comporre, non un file da scaricare, e non l&rsquo;abbiamo usata.',
+  '<b>Pendolari.</b> Il 2021 è una stima fatta con un modello, solo con il numero di persone (niente mezzo o durata); conta chi si sposta almeno tre giorni a settimana, i censimenti chi dichiara di farlo ogni giorno. Lo 0,2% circa dei flussi verso Milano non si aggancia a un comune attuale. I pendolari 1991 e 2001 di Baranzate sono dentro Bollate. La quota è su tutti i residenti che lavorano o studiano, anche nel proprio comune.',
+  '<b>Cambi di residenza.</b> I dati di Milano separano &laquo;Prov. MI&raquo; (Città metropolitana) da &laquo;Altre prov. Lombardia&raquo;, dove sta la Brianza. La matrice ISTAT dei trasferimenti tra comuni (esploradati.istat.it) non ha risposto alla richiesta del 2 novembre 2026 (attesa di 90 secondi): non è stata usata.',
+  '<b>Età.</b> Fino al 2018 viene dalla ricostruzione ISTAT, poi dai file POSAS: i due danno gli stessi numeri nel 2019, e la ricostruzione torna con la serie dei residenti in tutti gli anni controllati. Il ricalcolo del 2021–2022 ha tolto molti residenti a Milano e può aver spostato di un anno il sorpasso. L&rsquo;età media è calcolata sugli anni compiuti; i bambini sono 0–14 anni.',
+  '<b>Redditi.</b> Il contribuente non è un residente, il reddito è lordo e in euro correnti. Il MEF lascia vuote alcune celle nei comuni piccoli: dal 2023 la somma delle fasce di reddito sottostima di circa il 5% per l&rsquo;hinterland, quindi dal 2023 si usa il campo &laquo;reddito complessivo&raquo; (completo); fino al 2022 mancano al massimo alcune fasce in pochi comuni (solo la fascia dei redditi negativi non si somma). Le regole fiscali cambiano nel tempo (cedolare secca dal 2011, regime forfettario dal 2019): non tutti i salti sono reali. Una media alta può dipendere da pochi redditi molto alti.',
+  '<b>Voto.</b> Eligendo (Ministero dell&rsquo;Interno) non indica una licenza chiara: pubblichiamo solo percentuali per comune aggregate per famiglia, con citazione, e non i file grezzi. Camere considerate: 1976, 1979, 1987, 1992, 1996, 2001, 2006, 2008, 2013, 2018, 2022. I sistemi elettorali sono diversi (sopra). Nel 1996 e 2001 si conta solo il voto di lista della parte proporzionale; nel 2018 e 2022 i voti di lista del sistema misto. Le famiglie sono una scelta nostra: il PCI sta in Sinistra, PDS, DS e PD in Centrosinistra. Liste non attribuite a nessuna famiglia (in &laquo;Altri&raquo;): da '+nf(Math.min.apply(null,Object.keys(V.nonattr).map(function(k){return V.nonattr[k]})),1)+'% a '+nf(Math.max.apply(null,Object.keys(V.nonattr).map(function(k){return V.nonattr[k]})),1)+'% dei voti a seconda dell&rsquo;anno. Nel file del 2006 Triuggio è scritto &laquo;Truggio&raquo; (corretto). Bollate comprende Baranzate in tutti gli anni.',
+  '<b>Metropolitana.</b> Le fermate sono collocate per coordinate nei confini ISTAT; gli anni di apertura vengono da Wikipedia. Sono 12 comuni: poco per concludere. Il confronto non tiene conto di tutto il resto (treni, strade, case) e non dice che la metro causi crescita o pendolarismo.',
+  '<b>Correlazione non è causa.</b> Quando due cose vanno insieme (metro e crescita, cintura e voto, reddito e distanza) i dati non dicono perché. Le ipotesi sono segnate come tali.'];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''))
+}
+function fonti(){
+  var F=[
+  '<b>Residenti per età e sesso</b>: ISTAT, demo.istat.it, POSAS 2019–2026 (campo &laquo;Totale&raquo; per età); stranieri: STRASA 2019–2026. Licenza CC BY 4.0. Scaricati il 2 novembre 2026.',
+  '<b>Ricostruzione 2001–2018</b>: ISTAT, ricostruzione intercensuaria del bilancio demografico (RBD), per comune, sesso e cittadinanza; campi: popolazione inizio e fine periodo, nati, morti, iscritti e cancellati dall&rsquo;interno e dall&rsquo;estero, acquisizioni di cittadinanza. CC BY 4.0. Scaricati il 1° novembre 2026.',
+  '<b>Bilancio demografico</b>: ISTAT, bilancio mensile D7B 2019–2024 (con l&rsquo;&laquo;aggiustamento statistico&raquo;) e bilancio P2 2025 (provvisorio). CC BY 4.0. Il 2 novembre 2026 per P2.',
+  '<b>Redditi</b>: MEF, Dipartimento delle Finanze, &laquo;Redditi e principali variabili IRPEF su base comunale&raquo;, anni d&rsquo;imposta 2000–2024; campi: numero contribuenti, reddito complessivo e importo per fascia. CC BY 3.0. Scaricati il 1° novembre 2026.',
+  '<b>Pendolari</b>: ISTAT, matrici del pendolarismo 1991, 2001, 2011 (censimenti) e 2021 (lavoro e studio, stima), CC BY 4.0; distanze stradali ISTAT. Scaricati il 1° novembre 2026.',
+  '<b>Cambi di residenza di Milano</b>: Comune di Milano (dati.comune.milano.it), residenti per luogo di provenienza e destinazione 2020–2024, CC BY.',
+  '<b>Voto</b>: Ministero dell&rsquo;Interno, Eligendo (<a href="https://elezionistorico.interno.gov.it/">elezionistorico.interno.gov.it</a>), Camera dei deputati, voti di lista per comune. Licenza non indicata: citazione della fonte e solo percentuali aggregate. Camere 1976 e 1979 scaricate il 29 ottobre 2026, le altre il 2 novembre 2026.',
+  '<b>Metropolitana</b>: 125 stazioni: coordinate dal GTFS di ATM/AMAT e anni di apertura da Wikipedia, «Stazioni della metropolitana di Milano» (CC BY-SA 4.0).',
+  '<b>Confini</b>: ISTAT, limiti amministrativi dei comuni al 1/1/2021 (CC BY 4.0), semplificati. Mappa di sfondo: &copy; OpenStreetMap contributors, ODbL.',
+  '<b>Elaborazione</b>: Milano in dati. Programma nel repository, cartella hinterland/scripts.'];
+  setH('fonti-lista',F.map(function(x){return '<li>'+x+'</li>'}).join(''))
+}
+})();
+</script></body></html>
