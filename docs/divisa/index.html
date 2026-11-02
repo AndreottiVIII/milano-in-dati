@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quanto è divisa Milano</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.4em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)} .surp ul{margin:.3em 0;padding-left:1.2em} .surp li{margin:.3em 0}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:60vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer;white-space:nowrap} .ctl input[type=range]{flex:1 1 160px;min-width:120px;max-width:100%}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed} .lgd i.ln.t{border-top-style:dotted}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.76rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:#9aa;}
+.bars .row.me .fill{background:var(--acc)} .bars .row.me .nm{font-weight:700}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .bars .row{grid-template-columns:minmax(90px,40%) 1fr 78px}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+dl.mis dt{font-weight:700;margin-top:.7em} dl.mis dd{margin:.1em 0 0 0}
+.nav a{margin-right:12px;white-space:nowrap}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quanto è divisa Milano?</h1>
+<p>Si può vivere vicino o lontano da chi ha un reddito, una cittadinanza o un&rsquo;età diversa dalla nostra. Gli studiosi lo chiamano <i>segregazione residenziale</i>; qui diciamo semplicemente <b>quanto è divisa Milano</b>. Se ogni quartiere avesse lo stesso mix di persone di tutta la città, Milano non sarebbe divisa per niente; se ogni gruppo vivesse in quartieri tutti suoi, lo sarebbe del tutto. Misuriamo questa distanza nel tempo per tre differenze: il <a href="#reddito"><b>reddito</b></a> (per CAP, 2011&ndash;2024), la <a href="#cittadinanza"><b>cittadinanza</b></a> e l&rsquo;<a href="#eta"><b>età</b></a> (per quartiere, 1999&ndash;2025). L&rsquo;idea di seguire la separazione nel tempo viene dal City Observatory, un centro di ricerca americano sulle città; i dati e i conti sono tutti di Milano e i metodi sono quelli standard della letteratura (<a href="#metodo">spiegati qui</a>).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Come si legge.</b> Ogni misura va da 0% (i due gruppi sono mescolati allo stesso modo in ogni zona) a 100% (non sono mai nella stessa zona). Conta come cambia <b>la stessa misura nel tempo</b>: le misure di temi diversi non si confrontano tra loro, perché i gruppi sono definiti in modo diverso e le zone hanno dimensioni diverse (38 CAP contro 88 quartieri). Questa pagina descrive e confronta; <b>non dice che cosa causa</b> i cambiamenti. Tutti i limiti sono nella sezione <a href="#limiti">limiti dei dati</a>.</div>
+
+<!-- ============================ REDDITO ============================ -->
+<h2 id="reddito">1. Il reddito: ricchi e poveri nello stesso CAP?</h2>
+<div id="r-testo"></div>
+<div class="ctl" id="btn-r"><span class="sub">Mostra:</span>
+<button type="button" data-k="hr" class="on">Quanto spiega il CAP</button><button type="button" data-k="d">Quarto più ricco contro quarto più povero</button><button type="button" data-k="iso">Isolamento del quarto più ricco</button></div>
+<p class="sub" id="r-desc"></p>
+<div class="ch" id="ch-r" role="img" aria-label="Grafico della separazione per reddito tra i CAP, 2011-2024"></div>
+<div class="lgd" id="lg-r"></div>
+<p class="src">Anni d&rsquo;imposta 2011, 2015, 2019&ndash;2024 (gli altri anni non esistono nei dati aperti: tratteggio). Fascia colorata = intervallo al 95% da ricampionamento (a Milano è così stretta che quasi non si vede: misura solo il caso dei conteggi, non gli errori dei dati). Fonte: MEF, Dipartimento delle Finanze, redditi per CAP (CC BY 3.0); conti nostri.</p>
+<div id="r-tab"></div>
+
+<h3 id="r-citta">Milano e le altre città</h3>
+<div id="r-citta-testo"></div>
+<div class="bars" id="b-citta"></div>
+<p class="src">Quanta parte delle differenze di reddito si spiega con il CAP, anno d&rsquo;imposta 2024 (tra parentesi il 2011). Solo città con almeno 10 CAP. Il confronto tra città è <b>meno solido</b> di quello nel tempo: il numero e la grandezza dei CAP cambiano da città a città (sotto il nome). Fonte: MEF (CC BY 3.0); conti nostri.</p>
+
+<h3 id="r-laur">Una misura più lunga: i laureati, 1991&ndash;2023</h3>
+<div id="l-testo"></div>
+<div class="ch" id="ch-l" role="img" aria-label="Grafico della separazione tra laureati e non laureati per quartiere, 1991-2023"></div>
+<div class="lgd" id="lg-l"></div>
+<p class="src">Cinque censimenti (1991, 2001, 2011, 2021, 2023). Laureati = titolo terziario; la base è la popolazione di 6 anni e più fino al 2011 e di 9 anni e più dal 2021. Fonte: ISTAT e Comune di Milano (censimenti per sezione, riportati ai 88 quartieri; CC BY), conti nostri.</p>
+
+<h3 id="r-mappa">Dove stanno i redditi alti e bassi</h3>
+<div class="ctl" id="ctl-mr"></div>
+<p class="sub" id="map-desc-r"></p>
+<div id="map-r" class="map" role="img" aria-label="Mappa dei quartieri di Milano per quota di contribuenti con reddito alto o basso"></div>
+<div class="lgd" id="lg-mr"></div>
+<div id="top-mr" class="grid2"></div>
+<p class="src">Il reddito è dato per CAP, non per quartiere: ogni quartiere prende il valore dei CAP che lo coprono, pesato con i numeri civici (collegamento CAP&ndash;quartiere dal filone <a href="../quartieri-che-cambiano/">I quartieri che cambiano</a>). È una stima, utile per vedere dove stanno i gruppi, non per confrontare due quartieri vicini. Fasce in euro dell&rsquo;anno (alto = oltre 55.000 euro, basso = fino a 15.000 euro): per questo la quota di &laquo;alti&raquo; sale ogni anno anche senza dividere nulla (<a href="../redditi/">redditi</a>). Mappa &copy; OpenStreetMap contributors; redditi: MEF (CC BY 3.0); civici e confini dei quartieri: Comune di Milano (CC BY).</p>
+
+<!-- ============================ CITTADINANZA ============================ -->
+<h2 id="cittadinanza">2. La cittadinanza: italiani e stranieri nei quartieri</h2>
+<div id="c-testo"></div>
+<div class="ctl" id="btn-c"><span class="sub">Mostra:</span>
+<button type="button" data-k="d" class="on">Italiani contro stranieri</button><button type="button" data-k="iso">Isolamento degli stranieri</button><button type="button" data-k="h_tutte">Tutte le cittadinanze insieme</button><button type="button" data-k="h_stranieri">Solo tra le comunità straniere</button></div>
+<p class="sub" id="c-desc"></p>
+<div class="ch" id="ch-c" role="img" aria-label="Grafico della separazione per cittadinanza tra i quartieri, 1999-2025"></div>
+<div class="lgd" id="lg-c"></div>
+<p class="src">Residenti al 31 dicembre di ogni anno, 88 quartieri (87 con residenti dal 2020). Fascia colorata = intervallo al 95% da ricampionamento. Linea tratteggiata grigia = valore che si avrebbe se le persone fossero assegnate ai quartieri a caso. Fonte: Comune di Milano, dataset ds27 (CC BY); conti nostri.</p>
+
+<h3 id="c-com">Le comunità una per una</h3>
+<div id="c-com-testo"></div>
+<div class="ctl" id="ctl-com"></div>
+<div class="ch" id="ch-com" role="img" aria-label="Grafico della concentrazione di ogni comunità nei quartieri, 1999-2025"></div>
+<div class="lgd" id="lg-com"></div>
+<p class="src">Per ogni comunità: quanti dei suoi residenti dovrebbero cambiare quartiere perché siano distribuiti come tutti gli altri residenti. Si parte dal primo anno in cui la comunità ha almeno 300 residenti (sotto, il caso pesa troppo). Cittadinanza scritta in anagrafe, non origine. Fonte: Comune di Milano, ds27 (CC BY); conti nostri. Le persone di una comunità hanno spesso storie molto diverse tra loro: qui si guarda solo dove risultano residenti.</p>
+<div id="com-tab"></div>
+
+<h3 id="c-mappa">Dove si concentrano</h3>
+<div class="ctl" id="ctl-mc"></div>
+<p class="sub" id="map-desc-c"></p>
+<div id="map-c" class="map" role="img" aria-label="Mappa dei quartieri di Milano per quota di residenti con cittadinanza straniera"></div>
+<div class="lgd" id="lg-mc"></div>
+<div id="top-mc" class="grid2"></div>
+<p class="src">Quota dei residenti del quartiere con quella cittadinanza, al 31 dicembre. In grigio i quartieri con meno di 500 residenti. Per le comunità più piccole le quote sono basse ovunque: i colori mostrano dove sono più alte, non quanto è grande la comunità (il numero di persone compare passando o toccando il quartiere). Mappa &copy; OpenStreetMap contributors; residenti e confini: Comune di Milano (ds27 e ds964, CC BY). Approfondimento: <a href="../comunita/">comunità quartiere per quartiere</a>.</p>
+
+<!-- ============================ ETA ============================ -->
+<h2 id="eta">3. L&rsquo;età: anziani e giovani nei quartieri</h2>
+<div id="e-testo"></div>
+<div class="ctl" id="btn-e"><span class="sub">Mostra:</span>
+<button type="button" data-k="d" class="on">Over 65 contro under 35</button><button type="button" data-k="d_75_2534">Over 75 contro 25&ndash;34 anni</button><button type="button" data-k="hr">Tutte le età insieme</button></div>
+<p class="sub" id="e-desc"></p>
+<div class="ch" id="ch-e" role="img" aria-label="Grafico della separazione per età tra i quartieri, 1999-2025"></div>
+<div class="lgd" id="lg-e"></div>
+<p class="src">Residenti al 31 dicembre per età singola, 88 quartieri. Fascia colorata = intervallo al 95% da ricampionamento. Linea tratteggiata grigia = valore a caso. Fonte: Comune di Milano, ds27 (CC BY); conti nostri.</p>
+
+<h3 id="e-mappa">Dove stanno giovani e anziani</h3>
+<div class="ctl" id="ctl-me"></div>
+<p class="sub" id="map-desc-e"></p>
+<div id="map-e" class="map" role="img" aria-label="Mappa dei quartieri di Milano per quota di anziani o giovani"></div>
+<div class="lgd" id="lg-me"></div>
+<div id="top-me" class="grid2"></div>
+<p class="src">Quota dei residenti del quartiere in quella fascia d&rsquo;età, al 31 dicembre. In grigio i quartieri con meno di 500 residenti. Mappa &copy; OpenStreetMap contributors; residenti e confini: Comune di Milano (ds27 e ds964, CC BY). Approfondimento: <a href="../eta/">età e centenari quartiere per quartiere</a>.</p>
+
+<!-- ============================ METODO ============================ -->
+<h2 id="metodo">Come sono fatte le misure, in parole semplici</h2>
+<dl class="mis">
+<dt>Dissimilarità (D)</dt><dd>Quanti, tra i due gruppi, dovrebbero cambiare zona perché i due gruppi siano distribuiti allo stesso modo. 0% = distribuiti uguale; 100% = mai nella stessa zona. Esempio: D del 19% tra italiani e stranieri vuol dire che il 19% degli stranieri (o il 19% degli italiani) dovrebbe cambiare quartiere.</dd>
+<dt>Isolamento</dt><dd>Tra i residenti del quartiere di una persona di un gruppo, quanti in media sono del suo stesso gruppo. Va letto contro la quota del gruppo in tutta la città: se uno straniero ha il 24% di stranieri nel quartiere e in città sono il 21%, l&rsquo;isolamento è poco sopra la media; se i gruppi fossero mescolati i due numeri sarebbero uguali.</dd>
+<dt>Entropia (H di Theil)</dt><dd>Per più gruppi insieme (tutte le cittadinanze): quanta parte della varietà della città si spiega con il quartiere in cui si vive. 0% = ogni quartiere è una copia in piccolo della città; 100% = ogni quartiere ha un solo gruppo.</dd>
+<dt>Entropia a ordine di rango</dt><dd>La stessa idea per categorie in ordine (le fasce di reddito, le età): confronta le persone per <i>posizione</i> (più su o più giù), non per euro, e quindi non cambia se i redditi salgono tutti insieme per l&rsquo;inflazione. Si legge come: &laquo;quanta parte delle differenze di reddito (o di età) si spiega con la zona&raquo;. Con poche categorie può sottostimare la separazione dentro la stessa categoria; provato sull&rsquo;età (il valore con 7 gruppi invece di 101 età singole cambia di meno dell&rsquo;1%), per il reddito non si può verificare.</dd>
+<dt>Quarto più ricco contro quarto più povero</dt><dd>Con le fasce di reddito si prendono il 25% dei contribuenti di una città con i redditi più bassi e il 25% con quelli più alti (la fascia di confine è divisa in proporzione) e si calcola D tra i due. Se fossero mescolati, un contribuente del quarto più ricco avrebbe il 25% di contribuenti del quarto più ricco nel suo CAP: l&rsquo;isolamento si legge contro questo 25%.</dd>
+<dt>Valore «a caso»</dt><dd>Anche senza nessuna separazione, gli indici non sono zero: dove le zone sono piccole il caso sposta qualche persona e fa salire il numero. Per questo ogni grafico ha una linea tratteggiata: il valore medio di 25&ndash;100 estrazioni in cui le persone sono assegnate alle zone a caso (stesse dimensioni delle zone, stesse quote di gruppo nella città).</dd>
+<dt>Intervalli</dt><dd>Si rifanno 100&ndash;300 volte i conti, ricampionando a caso le persone di ogni zona secondo le quote osservate; la fascia contiene il 95% dei risultati. Misura il rumore dei conteggi, non gli errori dei dati: quelli sono nei <a href="#limiti">limiti</a> e nelle varianti.</dd>
+</dl>
+<p class="sub">Programmi: <code>divisa/scripts/</code> (<code>misure.py</code>, <code>01_reddito.py</code>, <code>02_cittadinanza.py</code>, <code>03_eta.py</code>, <code>04_laureati.py</code>, <code>pagina.py</code>), sul sito del progetto in fondo alla pagina.</p>
+
+<!-- ============================ LIMITI ============================ -->
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul>
+<li><b>Il CAP è un indirizzo fiscale, non una casa.</b> I dati del reddito dicono dove risiedono i contribuenti nella dichiarazione, non dove vivono o lavorano. I CAP di Milano sono grandi (circa <span id="n-percap">26.500</span> contribuenti ciascuno): la separazione tra isolati o tra vie non si vede, quindi i valori sono bassi per forza.</li>
+<li><b>I CAP 20121 e 20122 cambiano contribuenti senza motivo economico</b> (20122: da 20.361 nel 2015 a 32.776 nel 2019; 20121: da 16.612 nel 2022 a 22.090 nel 2023). Per questo il 2011 pesa: con tutti i CAP la parte spiegata dal CAP passa da <span id="n-v-tutti11"></span> a <span id="n-v-tutti24"></span>, senza quei due CAP da <span id="n-v-senza11"></span> a <span id="n-v-senza24"></span>. Resta vero che dal 2015 è ferma; quanto sia salita prima dipende da come si trattano quei due CAP.</li>
+<li><b>Pochi anni e fasce larghe.</b> I redditi per CAP esistono solo per otto anni d&rsquo;imposta e per sette fasce (la fascia &laquo;zero o negativo&raquo; è unita a &laquo;fino a 10.000&raquo;, perché dal 2019 il MEF la lascia quasi vuota). Nel 2023&ndash;24 il MEF nasconde la fascia &laquo;oltre 120.000&raquo; in 11&ndash;18 CAP di Milano: la ricostruiamo per differenza (<span id="n-imp"></span> celle in tutte le 41 città, la differenza torna esatta dove il dato c&rsquo;è). Le fasce sono in euro dell&rsquo;anno: la quota di redditi «alti» sale anche solo per l&rsquo;inflazione; per questo la misura principale guarda le posizioni, non gli euro.</li>
+<li><b>Cittadinanza non è origine.</b> Chi ha preso la cittadinanza italiana conta come italiano (7.660&ndash;9.021 persone l&rsquo;anno nel 2022&ndash;2024); i figli di stranieri nati a Milano restano stranieri. Dentro ogni comunità ci sono storie molto diverse.</li>
+<li><b>Il registro del Comune ha salti.</b> Residenti totali: &minus;53.857 tra 2002 e 2003 e +24.579 tra 2011 e 2012, per revisioni dell&rsquo;anagrafe. Nelle misure di cittadinanza e di età questi anni cambiano poco (separazione italiani&ndash;stranieri: <span id="n-j02"></span> nel 2002 e <span id="n-j03"></span> nel 2003; <span id="n-j11"></span> nel 2011 e <span id="n-j12"></span> nel 2012), ma sono punti da guardare con cautela. Dal 2020 il registro ha più persone di ISTAT (stranieri +10,4% nel 2025), quindi sono &laquo;iscritti in anagrafe&raquo;, non un conteggio.</li>
+<li><b>I quartieri prima del 2012.</b> I 88 NIL nascono con il PGT del 2012; il Comune non spiega come ha assegnato ai NIL i residenti 1999&ndash;2011. Le serie lunghe vanno lette come &laquo;stessi confini, persone riassegnate&raquo;. Dal 2020 il quartiere Parco Sempione non ha più residenti nel registro: 87 quartieri con dati.</li>
+<li><b>Quartieri e comunità piccoli.</b> Più la zona o il gruppo sono piccoli, più il caso conta (vedi la linea «a caso»). Le comunità sono disegnate solo da quando hanno 300 residenti; i quartieri con meno di 500 residenti sono in grigio sulle mappe.</li>
+<li><b>Zone diverse, misure diverse.</b> Il reddito è per CAP (38 zone), cittadinanza ed età per quartiere (88): zone più piccole fanno apparire più separazione. Per questo i numeri dei tre temi non si confrontano tra loro, e il confronto tra città dipende dal numero di CAP di ciascuna.</li>
+<li><b>I laureati nei censimenti</b> sono ricostruiti per quartiere dalle sezioni di censimento, con confini che cambiano; la base della popolazione passa da 6+ a 9+ anni nel 2021. Sui 66 quartieri con confini stabili il risultato è lo stesso.</li>
+<li><b>Reddito complessivo</b> = lordo di imposte, solo quanto si dichiara in IRPEF: mancano redditi esenti e tassati a parte; i più ricchi sono sottostimati. Dettagli in <a href="../redditi/">redditi</a>.</li>
+</ul></div>
+
+<!-- ============================ FILE ============================ -->
+<h2 id="file">File</h2>
+<p>Tutto scaricabile (CSV, separatore virgola, numeri con il punto decimale):</p>
+<ul class="m">
+<li><a href="data/reddito_serie.csv">reddito_serie.csv</a> &ndash; per Milano, Roma, Torino, Napoli, Bologna e anno: indici, intervalli, valore a caso, numero di CAP.</li>
+<li><a href="data/reddito_41_citta.csv">reddito_41_citta.csv</a> &ndash; stessi indici per 41 città, anni 2011 e 2024.</li>
+<li><a href="data/reddito_varianti_milano.csv">reddito_varianti_milano.csv</a> &ndash; Milano con i CAP 20121 e 20122 uniti o tolti.</li>
+<li><a href="data/reddito_cap_milano.csv">reddito_cap_milano.csv</a> e <a href="data/reddito_nil_milano.csv">reddito_nil_milano.csv</a> &ndash; contribuenti per fascia in ogni CAP e quote portate ai quartieri.</li>
+<li><a href="data/cittadinanza_serie.csv">cittadinanza_serie.csv</a> e <a href="data/cittadinanza_comunita.csv">cittadinanza_comunita.csv</a> &ndash; italiani contro stranieri e dieci comunità, 1999&ndash;2025.</li>
+<li><a href="data/eta_serie.csv">eta_serie.csv</a> &ndash; età, 1999&ndash;2025. <a href="data/laureati_serie.csv">laureati_serie.csv</a> &ndash; laureati, 1991&ndash;2023.</li>
+<li><a href="data/riepilogo.json">riepilogo.json</a> e <a href="data/mappa.json">mappa.json</a> &ndash; i dati che disegnano la pagina; <a href="data/nil.geojson">nil.geojson</a> &ndash; confini dei quartieri.</li>
+</ul>
+
+<p class="nav"><b>Per approfondire:</b> <a href="../comunita/">Le comunità quartiere per quartiere</a> <a href="../redditi/">Redditi dal 2000</a> <a href="../eta/">Età e centenari</a> <a href="../quartieri-che-cambiano/">I quartieri che cambiano</a> <a href="../censimenti/">Censimenti</a></p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Redditi per CAP: Ministero dell&rsquo;Economia e delle Finanze, Dipartimento delle Finanze, &laquo;Redditi e principali variabili IRPEF su base subcomunale&raquo;, anni d&rsquo;imposta 2011, 2015, 2019&ndash;2024 (licenza CC BY 3.0 indicata nei metadati dei file). Residenti per quartiere, età e cittadinanza: Comune di Milano, dataset ds27 (CC BY), 31 dicembre 1999&ndash;2025, scaricato il 1 novembre 2026 da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Confini dei NIL (ds964) e numeri civici per CAP e quartiere: Comune di Milano (CC BY). Censimenti 1991&ndash;2023: ISTAT (CC BY 4.0) e Comune di Milano. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Idea dell&rsquo;analisi: City Observatory. Metodi: indice di dissimilarità (Duncan e Duncan, 1955), isolamento (Lieberson), entropia (Theil), entropia a ordine di rango (Reardon, Bischoff, Farrell e Firebaugh).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,MP=null,RD=[];
+var ACC='#00695c',GRY='#8a8a8a',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function pc(x,d){return x==null?'':nf(x*100,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+(it.dot?' t':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(head,rows){return '<div class="scroll"><table><thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>'}
+function pts(arr,years){var o=[];for(var i=0;i<years.length;i++)if(arr[i]!=null)o.push([years[i],arr[i]]);return o}
+function band(lo,hi,years){var o=[];for(var i=0;i<years.length;i++)if(lo[i]!=null&&hi[i]!=null)o.push([years[i],lo[i],hi[i]]);return o}
+
+/* ---------- grafico a linee con fascia ---------- */
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:o.ml||46,r:14,t:14,b:28};
+  var xs=[],ys=[];
+  o.series.forEach(function(s){s.pts.forEach(function(p){xs.push(p[0]);ys.push(p[1])});(s.band||[]).forEach(function(p){ys.push(p[1]);ys.push(p[2])})});
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs);
+  var y0=o.y0!=null?o.y0:Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
+  var sy=niceStep((y1-y0)/5);y0=o.y0!=null?o.y0:Math.floor(y0/sy)*sy;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yf(v)+'</text>';
+  (o.xticks||[]).forEach(function(t){var xx=X(t);s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+t+'</text>'});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  (o.vlines||[]).forEach(function(vl){var xx=X(vl.x);s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="4 3"/><text x="'+(xx+3)+'" y="'+(m.t+10+(vl.dy||0))+'" style="fill:#8a4a10;font-size:10px">'+vl.t+'</text>'});
+  o.series.forEach(function(se){
+    if(se.band&&se.band.length){var up='',dn='';se.band.forEach(function(p,i){up+=(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[2]).toFixed(1)});for(var i=se.band.length-1;i>=0;i--)dn+='L'+X(se.band[i][0]).toFixed(1)+' '+Y(se.band[i][1]).toFixed(1);
+      s+='<path d="'+up+dn+'Z" fill="'+se.color+'" fill-opacity=".18" stroke="none"/>'}
+    var d='',dg='';
+    se.pts.forEach(function(p,i){
+      if(i>0&&p[0]-se.pts[i-1][0]>1.5&&o.gapdash){dg+='M'+X(se.pts[i-1][0]).toFixed(1)+' '+Y(se.pts[i-1][1]).toFixed(1)+'L'+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1);d+='M'+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)}
+      else d+=(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2)+'" '+(se.dash?'stroke-dasharray="6 4"':'')+(se.dot?'stroke-dasharray="1 3" stroke-linecap="round"':'')+' stroke-linejoin="round"/>';
+    if(dg)s+='<path d="'+dg+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2)+'" stroke-dasharray="3 4" opacity=".7"/>';
+    if(o.dots&&!se.dot)se.pts.forEach(function(p){s+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="'+((se.w||2)>2?3.2:2.2)+'" fill="'+se.color+'"/>'});
+  });
+  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
+  var allx=[];xs.forEach(function(v){if(allx.indexOf(v)<0)allx.push(v)});allx.sort(function(a,b){return a-b});
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bx=allx[0],bd=1e9;
+    allx.forEach(function(v){var d=Math.abs(X(v)-px);if(d<bd){bd=d;bx=v}});
+    cur.setAttribute('x1',X(bx));cur.setAttribute('x2',X(bx));cur.style.display='';
+    var h='<b>'+bx+'</b>';
+    o.series.forEach(function(se){se.pts.forEach(function(p){if(p[0]===bx){var b='';(se.band||[]).forEach(function(q){if(q[0]===bx)b=' <span class="sub">('+o.tf(q[1])+'&ndash;'+o.tf(q[2])+')</span>'});h+='<br><span style="color:'+se.color+'">&#9632;</span> '+esc(se.name)+': '+o.tf(p[1])+b}})});
+    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=X(bx)/k+10;if(left+tw>r.width)left=X(bx)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
+  function hide(){tip.style.display='none';cur.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function reg(fn){RD.push(fn);fn()}
+function btns(sel,cb){var bs=document.querySelectorAll(sel);Array.prototype.forEach.call(bs,function(b){b.addEventListener('click',function(){Array.prototype.forEach.call(bs,function(x){x.classList.toggle('on',x===b)});cb(b.getAttribute('data-k'))})})}
+function rowBars(id,rows,max){setH(id,rows.map(function(r){return '<div class="row'+(r.me?' me':'')+'"><span class="nm">'+r.nm+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+
+Promise.all([J('data/riepilogo.json'),J('data/mappa.json'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];MP=a[1];NF=a[2];
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();reddito();cittadinanza();eta();limiti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var N=D.numeri,h='<p><b>Milano non si sta dividendo di più: dal 2015&ndash;2016 la separazione è ferma o scende.</b> Lo dicono tutte e tre le misure, ognuna con le sue regole:</p><ul>';
+  h+='<li><b>Reddito.</b> La parte delle differenze di reddito che si spiega con il CAP è del '+pc(N.reddito_hr_2015)+' nel 2015 e del '+pc(N.reddito_hr_2024)+' nel 2024 ('+pc(N.reddito_hr_2011)+' nel 2011). Nel frattempo la quota di contribuenti sopra 55.000 euro è salita dall&rsquo;'+pc(N.reddito_quota_alto_2011)+' al '+pc(N.reddito_quota_alto_2024)+' (soglia fissa in euro: in parte è inflazione), ma senza raggrupparsi di più. Il quarto più ricco ha, nel proprio CAP, il '+pc(N.reddito_iso_2024)+' di vicini del quarto più ricco (il 25% se fossero mescolati).</li>';
+  h+='<li><b>Cittadinanza.</b> La separazione tra italiani e stranieri tra i quartieri è salita dal '+pc(N.citt_d_1999)+' (1999) al '+pc(N.citt_d_picco)+' ('+N.citt_anno_picco+'), poi è scesa al '+pc(N.citt_d_2025)+' (2025), mentre gli stranieri passavano dal '+pc(N.citt_quota_1999)+' al '+pc(N.citt_quota_2025)+' dei residenti.</li>';
+  h+='<li><b>Età.</b> La separazione tra over 65 e under 35 è passata dall&rsquo;'+pc(N.eta_d_1999)+' (1999) al '+pc(N.eta_d_picco)+' ('+N.eta_anno_picco+') e oggi è al '+pc(N.eta_d_2025)+': il valore più basso della serie.</li></ul>';
+  h+='<p>Più indietro nel tempo la direzione è la stessa: tra i quartieri i laureati erano separati dai non laureati al '+pc(N.laureati_d_1991)+' nel 1991 e al '+pc(N.laureati_d_2023)+' nel 2023 (ma i laureati sono passati dal '+pc(N.laureati_q_1991,0)+' al '+pc(N.laureati_q_2023,0)+'). Tra le grandi città, per reddito Milano è '+N.reddito_posto_milano_2024+'ª su '+N.reddito_n_citta_10cap+' (la più separata è '+esc(N.reddito_prima)+', la meno '+esc(N.reddito_ultima)+').</p>';
+  h+='<p class="src">Sono confronti nel tempo e tra città, non cause: i dati non dicono perché. Le zone sono grandi (CAP e quartieri): a livello di isolato si vedrebbe di più. Dettagli e cautele nelle sezioni e nei <a href="#limiti">limiti dei dati</a>.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- 1. reddito ---------- */
+var CCOL={Milano:ACC,Roma:'#c26a1b',Torino:'#555555',Napoli:'#7b3f98',Bologna:'#1f6fb5'};
+function reddito(){
+  var R=D.reddito,N=D.numeri,M=R.citta.Milano,yrs=R.anni;
+  setH('r-testo','<p>Il Ministero dell&rsquo;Economia pubblica, per ogni CAP, quanti contribuenti hanno dichiarato un reddito in ognuna di sette fasce (da &laquo;fino a 10.000 euro&raquo; a &laquo;oltre 120.000&raquo;). Milano ha '+M.n_cap[0]+' CAP, in media circa '+f0(N.reddito_per_cap_2024)+' contribuenti l&rsquo;uno. Con questi numeri si vede quanto il CAP in cui si risiede &laquo;spiega&raquo; il reddito: se ogni CAP avesse la stessa distribuzione di redditi, non spiegherebbe nulla (0%). Il dato esiste solo per otto anni d&rsquo;imposta.</p>'
+   +'<p><b>A Milano il CAP spiega il '+pc(N.reddito_hr_2024)+' delle differenze di reddito nel 2024</b> ('+pc(N.reddito_hr_2011)+' nel 2011, '+pc(N.reddito_hr_2015)+' nel 2015): dal 2015 la misura è praticamente ferma ('+(N.reddito_hr_cambio_2015_2024_pct>=0?'+':'&minus;')+nf(Math.abs(N.reddito_hr_cambio_2015_2024_pct),0)+'% in nove anni). Prima, la salita dipende da come si trattano due CAP che cambiano confini fiscali (<a href="#limiti">limiti</a>).</p>');
+  var CUR='hr',MET={
+    hr:{t:'Quanta parte delle differenze di reddito si spiega con il CAP (entropia a ordine di rango, 0&ndash;100%). Non cambia se i redditi salgono tutti insieme.',yf:function(v){return pc(v,1)},tf:function(v){return pc(v,2)}},
+    d:{t:'Quarto più ricco contro quarto più povero dei contribuenti della città: quanti di loro dovrebbero cambiare CAP perché le due metà siano distribuite allo stesso modo (D, 0&ndash;100%).',yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)}},
+    iso:{t:'Tra i contribuenti del CAP di una persona del quarto più ricco, quanti sono del quarto più ricco (media). Se fossero mescolati: 25%.',yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)}}};
+  btns('#btn-r button',function(k){CUR=k;draw()});
+  function draw(){
+    var m=MET[CUR];setH('r-desc',m.t);
+    var ser=[],lg=[];
+    ['Milano','Roma','Torino','Napoli','Bologna'].forEach(function(c){var C=R.citta[c],v=C[CUR],isM=c==='Milano';
+      var se={name:c,color:CCOL[c],w:isM?3:1.6,pts:pts(v,C.anni)};
+      if(isM&&CUR!=='iso')se.band=band(C[CUR+'_lo'],C[CUR+'_hi'],C.anni);
+      ser.push(se);lg.push({color:CCOL[c],t:c})});
+    if(CUR==='iso'){ser.push({name:'Se fossero mescolati',color:'#999',dash:true,w:1.4,pts:pts(yrs.map(function(){return .25}),yrs)});lg.push({color:'#999',dash:true,t:'se fossero mescolati (25%)'})}
+    else{var b=R.citta.Milano[CUR+'_base'];ser.push({name:'Milano, persone assegnate ai CAP a caso',color:'#999',dot:true,w:1.8,pts:pts(b,M.anni)});lg.push({color:'#999',dot:true,t:'Milano a caso'})}
+    lineChart(el('ch-r'),{series:ser,yf:m.yf,tf:m.tf,y0:0,xticks:[2011,2015,2019,2021,2024],gapdash:true,dots:true,h:300});
+    setH('lg-r',lgdLine(lg));
+  }
+  reg(draw);
+  /* tabella Milano */
+  var rows=M.anni.map(function(y,i){return [y,pc(M.hr[i],2),pc(M.hr_lo[i],2)+' &ndash; '+pc(M.hr_hi[i],2),pc(M.d[i],1),pc(M.iso[i],1),pc(M.quota_alto[i],1),f0(M.contribuenti[i])]});
+  setH('r-tab','<details><summary>Tabella dei numeri per Milano</summary>'+table(['Anno d&rsquo;imposta','Spiega il CAP','Intervallo 95%','Quarto ricco/povero (D)','Isolamento quarto ricco','Oltre 55.000 euro','Contribuenti'],rows)+'<p class="src">Contribuenti = somma delle sette fasce nei 38 CAP. «Oltre 55.000 euro» = fasce nominali dell&rsquo;anno.</p></details>');
+  /* varianti */
+  var V=R.varianti,vn=['tutti i 38 CAP','20121 e 20122 uniti','senza 20121 e 20122'];
+  var vr=V[vn[0]].anni.map(function(y,i){return [y].concat(vn.map(function(n){return pc(V[n].hr[i],2)}))});
+  el('r-tab').innerHTML+='<details><summary>Quanto dipende dai due CAP che cambiano (20121 e 20122)</summary>'+table(['Anno d&rsquo;imposta'].concat(vn),vr)+'<p class="src">Stessa misura (quanto spiega il CAP), rifatta con i due CAP uniti in uno o tolti.</p></details>';
+  /* citta */
+  var C41=R.citta41.filter(function(x){return x.n_cap>=10}),mx=Math.max.apply(null,C41.map(function(x){return x.hr24}));
+  setH('r-citta-testo','<p>Con lo stesso conto si possono mettere accanto le città di cui il MEF pubblica i CAP. A Milano il CAP spiega il '+pc(N.reddito_hr_2024)+' delle differenze di reddito: '+N.reddito_posto_milano_2024+'ª su '+C41.length+' città con almeno 10 CAP. In testa '+esc(N.reddito_prima)+' ('+pc(N.reddito_prima_hr)+'), in fondo '+esc(N.reddito_ultima)+' ('+pc(N.reddito_ultima_hr)+'). Nelle cinque grandi città il quadro nel tempo è simile: valori stabili o in salita lenta (Roma e Torino le più veloci dal 2011), senza scatti dopo il 2019 (grafico sopra).</p>');
+  rowBars('b-citta',C41.map(function(x){return {nm:esc(x.citta),sub:x.n_cap+' CAP, circa '+f0(x.per_cap)+' contribuenti ciascuno',v:x.hr24,txt:pc(x.hr24,1)+' <span class="sub">('+pc(x.hr11,1)+')</span>',me:x.citta==='Milano'}}),mx);
+  /* laureati */
+  var L=D.reddito.laureati,A=L['88 NIL'],B=L['66 NIL con confini stabili'];
+  setH('l-testo','<p>I censimenti dicono quanti laureati vivono in ogni quartiere. Nel 1991 erano il '+pc(A.quota[0],1)+' di chi ha 6 anni e più; nel 2023 il '+pc(A.quota[4],1)+' (di chi ha 9 anni e più). La separazione tra laureati e non laureati tra i 88 quartieri (D) è scesa dal '+pc(A.d[0],1)+' al '+pc(A.d[4],1)+'. Attenzione: quando un gruppo diventa tre volte più grande si distribuisce più facilmente come tutti gli altri, quindi il calo di D è in parte un effetto delle dimensioni. L&rsquo;isolamento (quanti laureati hanno i vicini di un laureato) racconta lo stesso: '+pc(A.iso[0],1)+' contro il '+pc(A.quota[0],1)+' della città nel 1991, '+pc(A.iso[4],1)+' contro il '+pc(A.quota[4],1)+' nel 2023.</p>');
+  reg(function(){
+    lineChart(el('ch-l'),{series:[{name:'88 quartieri',color:ACC,w:3,pts:pts(A.d,A.anni),band:band(A.d_lo,A.d_hi,A.anni)},{name:'66 quartieri con confini stabili',color:'#1f6fb5',w:1.6,pts:pts(B.d,B.anni)},{name:'a caso',color:'#999',dot:true,w:1.8,pts:pts(A.d_base,A.anni)}],
+      yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)},y0:0,xticks:[1991,2001,2011,2021,2023],gapdash:true,dots:true,h:260});
+    setH('lg-l',lgdLine([{color:ACC,t:'laureati contro non laureati, 88 quartieri'},{color:'#1f6fb5',t:'66 quartieri con confini stabili'},{color:'#999',dot:true,t:'valore a caso'}]));
+  });
+  /* mappa */
+  var yy=MP.reddito.anni,G=function(lay,yi,i){var w=MP.reddito[lay][yi][i];return w==null?null:{v:w,n:null,res:MP.cittadinanza.res[MP.cittadinanza.anni.length-1][i]}};
+  mkMap({id:'map-r',ctl:'ctl-mr',desc:'map-desc-r',lg:'lg-mr',top:'top-mr',years:yy,yearLabel:function(y){return 'Anno d’imposta '+y},
+    layers:[{k:'alto',lab:'Redditi alti (oltre 55.000 euro)',t:'Quota dei contribuenti con reddito complessivo oltre 55.000 euro (euro correnti dell’anno), stimata dai CAP.'},{k:'basso',lab:'Redditi bassi (fino a 15.000 euro)',t:'Quota dei contribuenti con reddito complessivo fino a 15.000 euro (euro correnti dell’anno), stimata dai CAP.'}],
+    get:G,minRes:500,fmt:function(v){return pc(v,1)},unit:'dei contribuenti',noN:true});
+}
+
+/* ---------- 2. cittadinanza ---------- */
+function cittadinanza(){
+  var Z=D.cittadinanza,N=D.numeri,Y=Z.anni;
+  setH('c-testo','<p>Il Comune pubblica ogni anno quanti residenti ha ogni quartiere (88 NIL, Nuclei di Identità Locale) per età e cittadinanza. Qui «straniero» vuol dire <b>cittadinanza non italiana scritta in anagrafe</b>: non è origine né luogo di nascita. Gli stranieri sono passati dal '+pc(N.citt_quota_1999)+' dei residenti (1999) al '+pc(N.citt_quota_2025)+' (2025).</p>'
+   +'<p><b>La separazione tra italiani e stranieri tra i quartieri era del '+pc(N.citt_d_1999)+' nel 1999, ha toccato il '+pc(N.citt_d_picco)+' nel '+N.citt_anno_picco+' ed è oggi del '+pc(N.citt_d_2025)+'.</b> Vuol dire che il '+pc(N.citt_d_2025,0)+' degli stranieri dovrebbe cambiare quartiere perché siano distribuiti come gli italiani. Se le persone fossero assegnate ai quartieri a caso, il numero sarebbe intorno all&rsquo;'+pc(N.citt_d_base_max,0)+'.</p>'
+   +'<p>Un modo diverso di vederlo: oggi un residente straniero ha, nel suo quartiere, il '+pc(N.citt_iso_2025)+' di stranieri tra i vicini, contro il '+pc(N.citt_quota_2025)+' della città. Nel 1999 era il '+pc(N.citt_iso_1999)+' contro il '+pc(N.citt_quota_1999)+'. Il rapporto è quasi lo stesso ('+nf(N.citt_iso_2025/N.citt_quota_2025,2)+' contro '+nf(N.citt_iso_1999/N.citt_quota_1999,2)+'): la crescita degli stranieri nei quartieri è andata di pari passo con la crescita in città.</p>');
+  var CUR='d',MET={
+    d:{t:'Italiani contro stranieri: quanti dovrebbero cambiare quartiere perché i due gruppi siano distribuiti allo stesso modo (D, 0&ndash;100%).',yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)}},
+    iso:{t:'Quota media di residenti stranieri nel quartiere di un residente straniero, contro la quota degli stranieri in tutta la città (isolamento).',yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)}},
+    h_tutte:{t:'Tutte le cittadinanze insieme (Italia, dieci comunità, altre): quanta parte della varietà di cittadinanze si spiega con il quartiere (entropia di Theil, 0&ndash;100%).',yf:function(v){return pc(v,1)},tf:function(v){return pc(v,2)}},
+    h_stranieri:{t:'Solo tra i residenti stranieri: quanto le comunità (dieci grandi e «altre») stanno in quartieri diversi tra loro (entropia di Theil, 0&ndash;100%).',yf:function(v){return pc(v,1)},tf:function(v){return pc(v,2)}}};
+  btns('#btn-c button',function(k){CUR=k;draw()});
+  function draw(){
+    var m=MET[CUR],ser=[],lg=[];setH('c-desc',m.t);
+    if(CUR==='iso'){ser.push({name:'Quota di stranieri nel quartiere di uno straniero',color:ACC,w:3,pts:pts(Z.iso_stranieri,Y)});ser.push({name:'Quota di stranieri in tutta la città',color:'#999',dash:true,w:2,pts:pts(Z.quota_stranieri,Y)});
+      lg=[{color:ACC,t:'nel quartiere di uno straniero (media)'},{color:'#999',dash:true,t:'in tutta la città'}]}
+    else{ser.push({name:'Misura',color:ACC,w:3,pts:pts(Z[CUR],Y),band:band(Z[CUR+'_lo'],Z[CUR+'_hi'],Y)});
+      ser.push({name:'A caso',color:'#999',dot:true,w:1.8,pts:pts(Z[CUR==='d'?'d_base':CUR+'_base'],Y)});
+      lg=[{color:ACC,t:'misura (fascia = intervallo al 95%)'},{color:'#999',dot:true,t:'valore a caso'}]}
+    lineChart(el('ch-c'),{series:ser,yf:m.yf,tf:m.tf,y0:0,xticks:[1999,2005,2010,2015,2020,2025],vlines:[{x:2003,t:'registro rivisto',dy:0},{x:2012,t:'registro rivisto',dy:0}],h:300});
+    setH('lg-c',lgdLine(lg));
+  }
+  reg(draw);
+  /* comunita */
+  var CM=Z.comunita,names=Object.keys(CM).sort(function(a,b){return CM[b].res[26]-CM[a].res[26]}),colr={'Egitto':'#c26a1b','Cina':'#b3261e','Filippine':'#1f6fb5','Perù':'#7b3f98','Sri Lanka':'#0a8f6a','Romania':'#8a6d00','Bangladesh':'#d1478d','Ucraina':'#3d7ac4','Ecuador':'#6d8f00','Marocco':'#555555'};
+  var sel={'Cina':1,'Egitto':1,'Filippine':1,'Bangladesh':1,'Perù':1},NC=D.numeri.comunita;
+  var cm=NC['Cina'],bd=NC['Bangladesh'],eg=NC['Egitto'],lo=Object.keys(NC).sort(function(a,b){return NC[a].d_2025-NC[b].d_2025});
+  setH('c-com-testo','<p>Per le dieci cittadinanze più numerose nel 2025 si può calcolare la stessa misura, comunità per comunità, contro tutti gli altri residenti. Nel 2025 le più concentrate sono '+lo[lo.length-1]+' ('+pc(NC[lo[lo.length-1]].d_2025,0)+') e '+lo[lo.length-2]+' ('+pc(NC[lo[lo.length-2]].d_2025,0)+'); le meno, '+lo[0]+' ('+pc(NC[lo[0]].d_2025,0)+') e '+lo[1]+' ('+pc(NC[lo[1]].d_2025,0)+'). La concentrazione dei residenti con cittadinanza cinese è salita fino al '+pc(cm.d_max,0)+' nel '+cm.anno_max+' ed è scesa al '+pc(cm.d_2025,0)+'; Bangladesh dal '+pc(bd.d_primo,0)+' ('+bd.anno_primo+') al '+pc(bd.d_2025,0)+'; Egitto è invece salito dal '+pc(eg.d_primo,0)+' ('+eg.anno_primo+') al '+pc(eg.d_2025,0)+'. Attenzione: la linea «a caso» è più alta per le comunità piccole, e una comunità che cresce (come Bangladesh) cambia anche per questo.</p>');
+  var cc=el('ctl-com'),h='<span class="sub">Comunità:</span>';
+  names.forEach(function(n){h+='<label class="ck"><input type="checkbox" data-n="'+esc(n)+'"'+(sel[n]?' checked':'')+'> '+esc(n)+'</label>'});
+  cc.innerHTML=h;
+  Array.prototype.forEach.call(cc.querySelectorAll('input'),function(i){i.addEventListener('change',function(){sel[i.getAttribute('data-n')]=i.checked?1:0;drawC()})});
+  function drawC(){
+    var ser=[],lg=[];
+    names.forEach(function(n){if(!sel[n])return;var C=CM[n],p=[];Y.forEach(function(y,i){if(C.res[i]>=300&&C.d[i]!=null)p.push([y,C.d[i]])});
+      ser.push({name:n,color:colr[n]||'#333',w:2.2,pts:p});lg.push({color:colr[n]||'#333',t:n})});
+    if(!ser.length){setH('ch-com','<p class="sub">Scegli almeno una comunità.</p>');setH('lg-com','');return}
+    lineChart(el('ch-com'),{series:ser,yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)},y0:0,xticks:[1999,2005,2010,2015,2020,2025],h:300});
+    setH('lg-com',lgdLine(lg));
+  }
+  reg(drawC);
+  var rows=names.map(function(n){var x=NC[n];return [esc(n),f0(x.res_2025),pc(x.d_2025,1),pc(x.d_base_2025,1),pc(x.d_max,1)+' ('+x.anno_max+')']});
+  setH('com-tab','<details><summary>Tabella delle dieci comunità</summary>'+table(['Cittadinanza','Residenti 2025','Concentrazione 2025 (D)','Valore a caso 2025','Massimo (anno)'],rows)+'<p class="src">Massimo calcolato sugli anni con almeno 300 residenti. Per Ecuador e Perù l&rsquo;aumento e il calo dei residenti riflettono anche le naturalizzazioni.</p></details>');
+  /* mappa */
+  var CA=MP.cittadinanza,layers=[{k:'stra',lab:'Tutti gli stranieri',t:'Quota dei residenti con cittadinanza non italiana.'}];
+  names.forEach(function(n){layers.push({k:n,lab:n,t:'Quota dei residenti con cittadinanza «'+n+'» (cittadinanza in anagrafe, non origine).'})});
+  var G=function(lay,yi,i){var res=CA.res[yi][i],n=lay==='stra'?CA.stra[yi][i]:CA.comm[lay][yi][i];if(res==null||res<=0)return null;return {v:n/res,n:n,res:res}};
+  mkMap({id:'map-c',ctl:'ctl-mc',desc:'map-desc-c',lg:'lg-mc',top:'top-mc',years:CA.anni,yearLabel:function(y){return 'Dati al 31 dicembre '+y},layers:layers,get:G,minRes:500,fmt:function(v){return pc(v,v<.01?2:1)},unit:'dei residenti',select:true});
+}
+
+/* ---------- 3. eta ---------- */
+function eta(){
+  var E=D.eta,N=D.numeri,Y=E.anni;
+  setH('e-testo','<p>Con gli stessi residenti per quartiere si guardano anche le età. I residenti con 65 anni e più erano il '+pc(N.eta_q65_1999)+' nel 1999 e sono il '+pc(N.eta_q65_2025)+' nel 2025: la quota quasi non è cambiata. Cambia, e di poco, dove stanno.</p>'
+   +'<p><b>La separazione tra over 65 e under 35 tra i quartieri era dell&rsquo;'+pc(N.eta_d_1999)+' nel 1999, ha toccato il '+pc(N.eta_d_picco)+' nel '+N.eta_anno_picco+' ed è oggi al '+pc(N.eta_d_2025)+', il valore più basso dal 1999.</b> Oggi, tra i residenti del quartiere di un over 65 gli over 65 sono il '+pc(N.eta_iso_65_2025)+' (in città il '+pc(N.eta_q65_2025)+'). Guardando tutte le età insieme, la parte delle differenze di età che si spiega col quartiere è minima (mai oltre lo '+pc(Math.ceil(N.eta_hr_picco*1000)/1000,1)+' in ogni anno): le età sono mescolate dentro ogni quartiere, e questa mescolanza oggi è tornata come nel 1999.</p>');
+  var CUR='d',MET={
+    d:{t:'Over 65 contro under 35: quanti dovrebbero cambiare quartiere perché i due gruppi siano distribuiti allo stesso modo (D, 0&ndash;100%).',yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)}},
+    d_75_2534:{t:'Variante: over 75 contro giovani adulti di 25&ndash;34 anni (D, 0&ndash;100%). Senza intervallo: serve a vedere se la tendenza cambia con altri gruppi.',yf:function(v){return pc(v,0)},tf:function(v){return pc(v,1)}},
+    hr:{t:'Tutte le età insieme, da 0 a 100 anni: quanta parte delle differenze di età si spiega con il quartiere (entropia a ordine di rango, 0&ndash;100%).',yf:function(v){return pc(v,2)},tf:function(v){return pc(v,2)}}};
+  btns('#btn-e button',function(k){CUR=k;draw()});
+  function draw(){
+    var m=MET[CUR],ser=[],lg=[];setH('e-desc',m.t);
+    if(CUR==='d_75_2534'){ser.push({name:'Over 75 contro 25–34',color:ACC,w:3,pts:pts(E.d_75_2534,Y)});lg=[{color:ACC,t:'over 75 contro 25–34 anni'}]}
+    else{ser.push({name:'Misura',color:ACC,w:3,pts:pts(E[CUR],Y),band:band(E[CUR+'_lo'],E[CUR+'_hi'],Y)});ser.push({name:'A caso',color:'#999',dot:true,w:1.8,pts:pts(E[CUR+'_base']||E.d_base,Y)});
+      lg=[{color:ACC,t:'misura (fascia = intervallo al 95%)'},{color:'#999',dot:true,t:'valore a caso'}]}
+    lineChart(el('ch-e'),{series:ser,yf:m.yf,tf:m.tf,y0:0,xticks:[1999,2005,2010,2015,2020,2025],vlines:[{x:2003,t:'registro rivisto',dy:0},{x:2012,t:'registro rivisto',dy:0}],h:300});
+    setH('lg-e',lgdLine(lg));
+  }
+  reg(draw);
+  var EN=MP.eta,layers=[{k:'a65',lab:'Over 65',t:'Quota dei residenti con 65 anni e più.'},{k:'u35',lab:'Under 35',t:'Quota dei residenti con meno di 35 anni.'},{k:'a2534',lab:'25–34 anni',t:'Quota dei residenti di 25–34 anni.'}];
+  var G=function(lay,yi,i){var res=EN.res[yi][i];if(res==null||res<=0)return null;return {v:EN[lay][yi][i]/res,n:EN[lay][yi][i],res:res}};
+  mkMap({id:'map-e',ctl:'ctl-me',desc:'map-desc-e',lg:'lg-me',top:'top-me',years:EN.anni,yearLabel:function(y){return 'Dati al 31 dicembre '+y},layers:layers,get:G,minRes:500,fmt:function(v){return pc(v,1)},unit:'dei residenti'});
+}
+
+/* ---------- mappe ---------- */
+function qbreaks(vals,k){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(s[Math.floor(i*s.length/k)]);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
+function colore(v,b,c){if(v==null)return '#bdbdbd';var i=0;while(i<b.length&&v>=b[i])i++;return c[i]}
+function mkMap(cfg){
+  var st={layer:cfg.layers[0].k,yi:cfg.years.length-1,sel:null},cache={};
+  var map=L.map(cfg.id,{preferCanvas:true,scrollWheelZoom:false}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  var pos={};MP.nil.forEach(function(id,i){pos[id]=i});
+  function g(i){var o=cfg.get(st.layer,st.yi,i);if(!o)return null;if(o.res!=null&&o.res<cfg.minRes)return {v:null,n:o.n,res:o.res};return o}
+  function brk(){var L_=st.layer;if(cache[L_])return cache[L_];var all=[];for(var yi=0;yi<cfg.years.length;yi++)for(var i=0;i<MP.nil.length;i++){var o=cfg.get(L_,yi,i);if(o&&(o.res==null||o.res>=cfg.minRes)&&o.v!=null)all.push(o.v)}
+    var b=qbreaks(all,6);b=b.map(function(x){var d=x<.01?1e4:1e3;return Math.round(x*d)/d}).filter(function(v,i,a){return i===0||v>a[i-1]});return cache[L_]={b:b,c:pick(b.length+1)}}
+  var lay=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){return tip(f.properties)},{sticky:true});
+    l.on('click',function(){st.sel=f.properties.i;lay.setStyle(sty)})}}).addTo(map);
+  map.fitBounds(lay.getBounds());
+  function tip(p){var o=g(pos[p.i]),nm='<b>'+esc(p.n)+'</b><br>';
+    if(!o)return nm+'nessun residente';
+    if(o.v==null)return nm+(o.res!=null?f0(o.res)+' residenti: troppo pochi per una quota':'nessun dato');
+    return nm+cfg.fmt(o.v)+' '+cfg.unit+(cfg.noN||o.n==null?'':'<br>'+f0(o.n)+' su '+f0(o.res))}
+  function sty(f){var o=g(pos[f.properties.i]),b=brk(),sel=st.sel===f.properties.i;return {fillColor:colore(o?o.v:null,b.b,b.c),fillOpacity:.82,color:sel?'#000':'#fff',weight:sel?3:1}}
+  function legend(){var b=brk(),h='';b.c.forEach(function(c,i){var t=i===0?'meno di '+cfg.fmt(b.b[0]):i===b.b.length?cfg.fmt(b.b[i-1])+' o più':cfg.fmt(b.b[i-1])+' – '+cfg.fmt(b.b[i]);h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+    h+='<span><i style="background:#bdbdbd"></i>meno di '+cfg.minRes+' residenti</span>';setH(cfg.lg,h)}
+  function lists(){var arr=[];MP.nil.forEach(function(id,i){var o=g(i);if(o&&o.v!=null)arr.push({n:MP.nomi[i],v:o.v,r:o.res})});arr.sort(function(a,b){return b.v-a.v});
+    var li=function(a){return '<ol style="margin:.2em 0;padding-left:1.4em">'+a.map(function(x){return '<li>'+esc(x.n)+' <span class="sub">'+cfg.fmt(x.v)+'</span></li>'}).join('')+'</ol>'};
+    setH(cfg.top,'<div><h3>Valori più alti</h3>'+li(arr.slice(0,5))+'</div><div><h3>Valori più bassi</h3>'+li(arr.slice(-5).reverse())+'</div>')}
+  function update(){lay.setStyle(sty);legend();lists();var l=cfg.layers.filter(function(x){return x.k===st.layer})[0];setH(cfg.desc,l.t+' '+cfg.yearLabel(cfg.years[st.yi])+'.')}
+  /* controlli */
+  var c=el(cfg.ctl),h='';
+  if(cfg.select){h+='<label class="sub" for="'+cfg.ctl+'-s">Cosa mostrare:</label><select id="'+cfg.ctl+'-s" aria-label="Scegli la cittadinanza">'+cfg.layers.map(function(x){return '<option value="'+esc(x.k)+'">'+esc(x.lab)+'</option>'}).join('')+'</select>'}
+  else{h+='<span class="sub">Mostra:</span>'+cfg.layers.map(function(x,i){return '<button type="button" data-l="'+esc(x.k)+'"'+(i===0?' class="on"':'')+'>'+x.lab+'</button>'}).join('')}
+  h+='<label class="sub" for="'+cfg.ctl+'-y">Anno:</label><input type="range" id="'+cfg.ctl+'-y" min="0" max="'+(cfg.years.length-1)+'" value="'+st.yi+'" aria-label="Scegli l’anno"><b id="'+cfg.ctl+'-yl">'+cfg.years[st.yi]+'</b>';
+  c.innerHTML=h;
+  var s=c.querySelector('select');if(s)s.addEventListener('change',function(){st.layer=s.value;update()});
+  Array.prototype.forEach.call(c.querySelectorAll('button'),function(b){b.addEventListener('click',function(){st.layer=b.getAttribute('data-l');Array.prototype.forEach.call(c.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});update()})});
+  var r=c.querySelector('input[type=range]');r.addEventListener('input',function(){st.yi=parseInt(r.value,10);el(cfg.ctl+'-yl').textContent=cfg.years[st.yi];update()});
+  update();
+  setTimeout(function(){map.invalidateSize();map.fitBounds(lay.getBounds())},500);
+  window.addEventListener('resize',function(){map.invalidateSize()});
+}
+
+/* ---------- limiti: numeri dentro il testo ---------- */
+function limiti(){
+  var R=D.reddito,N=D.numeri,V=R.varianti;
+  el('n-percap').textContent=f0(N.reddito_per_cap_2024);
+  el('n-v-tutti11').textContent=pc(V['tutti i 38 CAP'].hr[0],1);el('n-v-tutti24').textContent=pc(V['tutti i 38 CAP'].hr[7],1);
+  el('n-v-senza11').textContent=pc(V['senza 20121 e 20122'].hr[0],1);el('n-v-senza24').textContent=pc(V['senza 20121 e 20122'].hr[7],1);
+  el('n-imp').textContent=f0(R.log.imputati_per_differenza);
+  el('n-j02').textContent=pc(N.citt_d_2002,1);el('n-j03').textContent=pc(N.citt_d_2003,1);el('n-j11').textContent=pc(N.citt_d_2011,1);el('n-j12').textContent=pc(N.citt_d_2012,1);
+}
+})();
+</script>
+</body></html>

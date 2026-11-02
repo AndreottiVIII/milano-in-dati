@@ -2674,3 +2674,10 @@ python -I scripts\inventario.py <cartella censimenti>
 
 - 2026-11-01 notte — Pagina `docs/quartiere-ideale/` (programma `quartiere-ideale/scripts/pagina.py`), voluta da Davide; idea da Opportunity Atlas e Amsterdam. Legge solo `docs/quartiere/data/schede.json`.
 - 9 criteri a scelta (parchi, alberi, poco cemento, case a prezzo basso — stima OMI —, servizi a 15 minuti, metrò, tranquillità o vita in strada, residenti giovani), percentili tra 70 NIL ammessi (esclusi parchi e NIL sotto 3.000 residenti), punteggio medio pesato. La cittadinanza non è un criterio, per scelta. Un gioco con dati veri, non un consiglio: scritto in pagina.
+
+## 62. Quanto è divisa Milano
+
+- 2026-11-02 notte — Analisi e pagina (`divisa/`, `docs/divisa/`), pubblicata con l'autorizzazione notturna di Davide; idea da City Observatory. Dettagli in `divisa/NOTE.md`.
+- Misure: dissimilarità D, isolamento, H di Theil, entropia a ordine di rango (Reardon) per reddito ed età; intervalli da ricampionamento. Dati su disco: MEF per CAP (8 anni d'imposta, 22 città), ds27 per NIL 1999-2025, censimenti per i laureati.
+- Numeri: reddito, quota spiegata dal CAP 2,08% (2011) → 2,34% (2024), ferma dal 2015, Milano 8ª su 22 città (Napoli e Roma più separate); italiani/stranieri D 17,1% (1999) → 22,1% (2015) → 18,8% (2025); età D al minimo nel 2025; laureati D 31,4% → 19,8%. Sorpresa: Milano non si sta dividendo di più dal 2015 nonostante più stranieri e più redditi alti; Cina e Bangladesh si disperdono.
+- Limiti dei dati: la fascia "≤0 euro" svuotata dal MEF dal 2019 gonfiava l'indice (unita a "fino a 10.000"); celle oltre 120.000 nascoste nel 2023-24 ricostruite per differenza; CAP 20121/20122; registro anagrafico; CAP e NIL non confrontabili tra loro; cittadinanza non è origine.

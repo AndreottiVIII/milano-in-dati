@@ -72,7 +72,8 @@
     { path: 'speranza-vita/', label: 'Quanto si vive' },
     { path: 'case-vuote/', label: 'Le case vuote' },
     { path: 'fondi-quartieri/', label: 'Soldi per i quartieri popolari' },
-    { path: 'quartiere-ideale/', label: 'Il mio quartiere ideale' }
+    { path: 'quartiere-ideale/', label: 'Il mio quartiere ideale' },
+    { path: 'divisa/', label: 'Quanto è divisa Milano' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
