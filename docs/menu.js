@@ -79,7 +79,8 @@
     { path: 'rigenerazione/', label: 'Progetti di rigenerazione' },
     { path: 'rifiuti/', label: 'Rifiuti e differenziata' },
     { path: 'poverta-educativa/', label: 'Povertà educativa' },
-    { path: 'parcheggi/', label: 'Parcheggi' }
+    { path: 'parcheggi/', label: 'Parcheggi' },
+    { path: 'targhe/', label: 'Lapidi e targhe' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

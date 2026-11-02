@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Lapidi e targhe</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#a1402a;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#f8eeea;--warm:#8a4a10;--warmbg:#fbf0e2;--pink:#c2185b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:8px 12px;margin:.8em 0;font-size:.95rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.25em 0}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:.5em 0}
+.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 8px;border-radius:14px;max-width:100%}
+.ctl label.ck{font-size:.9rem;cursor:pointer;max-width:100%} .ctl label.ck i{display:inline-block;width:11px;height:11px;border-radius:50%;margin:0 4px 0 2px;vertical-align:-1px;border:1px solid #666}
+.scroll{overflow-x:auto}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 70px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal} .bars .tr{background:#f1f1f1;height:10px;position:relative}
+.bars .fill{display:block;height:10px;background:var(--acc)} .bars .fill.w{background:var(--pink)} .bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rule{margin:.5em 0} .rule .row{display:grid;grid-template-columns:minmax(110px,28%) 1fr 170px;gap:6px;align-items:center;font-size:.88rem;padding:5px 0}
+.rule .tr{background:#f1f1f1;height:16px;position:relative} .rule .iv{position:absolute;top:6px;height:4px;background:var(--acc);opacity:.55} .rule .dot{position:absolute;top:2px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--acc);border:2px solid #fff}
+.rule .mk{position:absolute;top:-4px;height:24px;border-left:3px dashed var(--pink)} .rule .row.vie .iv,.rule .row.vie .dot{background:var(--pink)}
+.rule .v{font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .rule .row{grid-template-columns:1fr}}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif} .leaflet-popup-content{font:13px/1.4 system-ui,Arial,sans-serif;overflow-wrap:anywhere} .big{font-size:2rem;font-weight:700;color:var(--acc);line-height:1.1}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:.8em 0} .kpi div{border:1px solid var(--line);padding:6px 10px} .kpi .big{font-size:1.6rem} .kpi span.sub{display:block}
+.fl li{margin:.25em 0}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Lapidi e targhe di Milano: quante ne vediamo?</h1>
+<p>Sui muri di Milano ci sono migliaia di lapidi e targhe: partigiani e vittime del fascismo, artisti, scienziati, fatti storici, case di persone famose. Chi le conta? <b>Nessun elenco aperto le raccoglie.</b> Con quello che si trova in fonti libere (OpenStreetMap, Wikidata e poche foto di Wikimedia Commons) ne abbiamo messe insieme <b id="n-tot"></b>. Qui guardiamo chi ricordano, dove stanno e quante riguardano donne, in confronto alle <a href="../vie/">vie</a> e alle <a href="../statue/">statue e ai monumenti</a>.</p>
+
+<div class="warm"><b>Prima di leggere: i limiti dei dati.</b><ul>
+<li><b>È una piccola parte del totale.</b> Una stima grezza dice che le targhe esistenti sono circa <span id="l-stima"></span>; noi ne vediamo circa <span id="l-quota"></span>.</li>
+<li><b>Chi è ricordato lo sappiamo solo per il <span id="l-pers"></span></b> delle targhe. Per le altre manca il nome, o il testo non si legge.</li>
+<li><b>L’anno in cui la targa è stata posata lo sappiamo solo per <span id="l-anno"></span></b> targhe: non si può disegnare una storia nel tempo.</li>
+<li>Dettagli in <a href="#limiti">metodo e limiti dei dati</a>.</li></ul></div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+
+<div class="kpi" id="kpi"></div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Ogni punto è una targa con una posizione (<span id="m-n"></span> su <span id="m-tot"></span>). Il colore dice di cosa parla. Le targhe che ricordano <b>una donna</b> hanno il bordo rosa. Passa sopra un punto (o toccalo) per leggere il nome.</p>
+<div class="ctl" id="ctl-cat"></div>
+<div class="ctl">
+<label class="sub" for="f-sogg">Chi è ricordato:</label><select id="f-sogg"><option value="">tutte le targhe</option><option value="p">solo con una persona riconosciuta</option><option value="d">solo donne</option></select>
+<label class="sub" for="f-anno">Anno di posa:</label><select id="f-anno"></select></div>
+<p class="sub" id="m-conta"></p>
+<div id="map" class="map" role="img" aria-label="Mappa delle lapidi e delle targhe di Milano"></div>
+<p class="src">Mappa © OpenStreetMap contributors. Posizioni da OpenStreetMap, Wikidata e (per <span id="m-com"></span> targhe) dalle coordinate di foto su Wikimedia Commons, che possono distare alcuni metri dalla targa. Il centro (Duomo e Brera) ha molti più punti anche perché le fonti lo descrivono meglio: <a href="#limiti">limiti dei dati</a>.</p>
+<div id="nil-top"></div>
+
+<h2 id="chi">Chi viene ricordato</h2>
+<p id="chi-testo"></p>
+<div class="grid2"><div><h3>Di che cosa parlano le targhe</h3><div class="bars" id="b-cat"></div><p class="sub">La categoria è scelta con regole semplici su parole del nome o del testo e sul mestiere in Wikidata (<a href="#limiti">vedi il metodo</a>). Può sbagliare.</p></div>
+<div><h3>Le persone più ricordate <span class="sub">(numero di targhe)</span></h3><div class="bars" id="b-top"></div>
+<h3>Mestiere delle persone</h3><div class="bars" id="b-prof"></div></div></div>
+<p class="src" id="chi-n"></p>
+
+<h2 id="donne">Le donne</h2>
+<p id="donne-testo"></p>
+<div class="rule" id="rule"></div>
+<p class="sub">Il pallino è la quota di donne tra le persone di sesso noto; la linea è l’intervallo di incertezza al 95% (Wilson). La linea rosa tratteggiata è la quota delle vie (<span id="q-vie"></span>%). Il sesso viene dal campo «sesso o genere» di Wikidata per la persona ricordata, mai dal nome.</p>
+<div class="warn" id="donne-lettura"></div>
+
+<h2 id="resistenza">Le targhe della Resistenza</h2>
+<p id="res-testo"></p>
+<div class="scroll"><table id="tab-res"></table></div>
+<p class="sub">Sono le targhe che le regole mettono nella categoria «Resistenza e vittime del nazifascismo». Le vittime delle persecuzioni hanno anche le <a href="../pietre-inciampo/">pietre d’inciampo</a>, che sono un’altra cosa: stanno nel pavimento, davanti all’ultima casa, e hanno un archivio pubblico a parte.</p>
+
+<h2 id="archivio">L’archivio che esiste, ma non si può riusare</h2>
+<p id="pdm-testo"></p>
+
+<h2 id="tempo">Quando sono state messe</h2>
+<p id="tempo-testo"></p>
+<div class="bars" id="b-dec"></div>
+
+<h2 id="invito">Un invito</h2>
+<div class="warn"><b>Aggiungere una targa è facile.</b> Se conosci una lapide o una targa che non c’è, puoi inserirla su <a href="https://www.openstreetmap.org/">OpenStreetMap</a> (tag <code>historic=memorial</code>, <code>memorial=plaque</code>, il testo intero in <code>inscription</code>, la persona in <code>subject:wikidata</code> se esiste) o su <a href="https://www.wikidata.org/">Wikidata</a> (istanza «targa commemorativa», con la posizione). Così l’elenco migliora per tutti e questa pagina si aggiorna. Con il testo in <code>inscription</code> anche i nomi in maiuscolo diventano leggibili.</div>
+
+<h2 id="limiti">Metodo e limiti dei dati</h2>
+<div id="limiti-testo"></div>
+
+<h2 id="file">I file</h2>
+<p>Tutti i file sono qui, scaricabili.</p>
+<ul class="fl" id="lista-file"></ul>
+
+<footer>
+<p><b>Fonti e licenze (dati scaricati il 1 e il 2 novembre 2026).</b></p>
+<ul class="m" id="fonti"></ul>
+<p>Pagine collegate: <a href="../statue/">statue, monumenti e lapidi</a> · <a href="../vie/">le vie intitolate a donne</a> · <a href="../pietre-inciampo/">le pietre d’inciampo</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,MP=null;
+var PINK='#c2185b';
+var COL=['#9e9e9e','#a1402a','#1f5f8b','#2e7d32','#4d4d4d','#7b4a9e','#e0a526','#00838f','#c26a1b','#8d6e63'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function pc(x,d){return nf(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function bars(id,rows,max){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm">'+r.nm+(r.sub?'<i>'+r.sub+'</i>':'')+'</span><span class="tr"><span class="fill'+(r.w?' w':'')+'" style="width:'+Math.max(0.5,r.v/max*100)+'%"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+Promise.all([J('data/pagina.json'),J('data/targhe_mappa.json')]).then(function(a){
+  D=a[0];MP=a[1];
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){intro();sorpresa();mappa();chi();donne();resistenza();archivio();tempo();limiti();file();fonti()}
+
+function intro(){
+  el('n-tot').textContent=f0(D.n)+' targhe';
+  el('l-stima').textContent=f0(D.stima.stima_grezza_totale);
+  el('l-quota').textContent=pc(D.quota_vista,0);
+  el('l-pers').textContent=pc(100*D.con_soggetto/D.n,0)+' ('+f0(D.con_soggetto)+' su '+f0(D.n)+')';
+  el('l-anno').textContent=f0(D.con_anno)+' su '+f0(D.n);
+  var h='';
+  h+='<div><span class="big">'+f0(D.n)+'</span><span class="sub">targhe in fonti libere</span></div>';
+  h+='<div><span class="big">'+pc(D.quota_vista,0)+'</span><span class="sub">di quante se ne stimano (circa '+f0(D.stima.stima_grezza_totale)+')</span></div>';
+  h+='<div><span class="big">'+f0(D.con_soggetto)+'</span><span class="sub">con la persona riconosciuta ('+f0(D.persone.uniche)+' persone)</span></div>';
+  h+='<div><span class="big">'+f0(D.resistenza.n)+'</span><span class="sub">targhe della Resistenza e delle vittime del nazifascismo</span></div>';
+  h+='<div><span class="big">'+f0(D.persone.donne)+' su '+f0(D.persone.sesso_noto)+'</span><span class="sub">persone ricordate che sono donne</span></div>';
+  setH('kpi',h);
+}
+
+function sorpresa(){
+  var h='';
+  h+='<p><b>I dati aperti vedono circa una targa su otto.</b> Ne troviamo '+f0(D.n)+'; una stima grezza dice che a Milano ce ne sono circa '+f0(D.stima.stima_grezza_totale)+' (la stima assume che le due fonti principali guardino in modo indipendente: è solo un indizio). Le due fonti principali, OpenStreetMap e Wikidata, hanno <b>solo '+D.fonte['osm+wikidata']+' targhe in comune</b>: ognuna vede una parte diversa.</p>';
+  h+='<p><b>L’unico vero archivio non si può riusare, e il Comune non pubblica niente.</b> Il sito Pietre della Memoria ha '+f0(D.pdm.voci)+' voci per Milano ('+f0(D.pdm.targhe)+' sono targhe), ma con tutti i diritti riservati; sul portale dati del Comune non c’è alcun elenco di lapidi.</p>';
+  h+='<p><b>Le targhe della Resistenza sono le meno visibili:</b> ne riconosciamo '+f0(D.resistenza.n)+', mentre la stampa ne contava circa '+f0(D.resistenza.press_2021)+' già nel 2021. Molti testi sono scritti tutti in maiuscolo e un programma non li legge.</p>';
+  h+='<p class="sub">Il campione è piccolo e sbilanciato verso il centro e verso ciò che i volontari di OpenStreetMap e Wikidata hanno notato: i numeri dicono cosa si vede nei dati aperti, non cosa c’è sui muri di Milano.</p>';
+  setH('sorpresa',h);
+}
+
+var MAP,LY=[],STATE={cat:{}};
+function mappa(){
+  var C=MP.colonne,ix={};C.forEach(function(c,i){ix[c]=i});
+  var cats=MP.categorie;
+  el('m-tot').textContent=f0(D.n);el('m-n').textContent=f0(MP.punti.length);el('m-com').textContent=f0(D.fonte.commons);
+  setH('ctl-cat',cats.map(function(c,i){STATE.cat[i]=1;return '<label class="ck"><input type="checkbox" data-k="'+i+'" checked><i style="background:'+COL[i%COL.length]+'"></i>'+esc(c)+'</label>'}).join(''));
+  var ops='<option value="">qualsiasi (anche senza anno)</option><option value="noto">solo con anno noto</option>';
+  D.decenni.forEach(function(r){ops+='<option value="'+r[0]+'">anni '+r[0]+' ('+r[1]+')</option>'});
+  setH('f-anno',ops);
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  var rd=L.canvas({padding:.5});
+  MP.punti.forEach(function(p){
+    var w=(p[ix.genere]||'').indexOf('donna')>=0,k=p[ix.cat];
+    var m=L.circleMarker([p[ix.lat],p[ix.lon]],{renderer:rd,radius:w?8:5,color:w?PINK:'#fff',weight:w?3:1,fillColor:COL[k%COL.length],fillOpacity:.9});
+    var t='<b>'+esc(p[ix.nome])+'</b><br>'+esc(cats[k])+(p[ix.anno]?', posata nel '+p[ix.anno]:', anno di posa non noto')+'<br>'+(p[ix.soggetto]?esc(p[ix.soggetto]):'<i>persona non riconosciuta</i>')+'<br><span class="sub">'+esc(p[ix.NIL])+' · fonte: '+esc(p[ix.fonte])+'</span>';
+    m.bindTooltip(t,{sticky:true});
+    m.bindPopup(t+(p[ix.url]?'<br><a href="'+esc(p[ix.url])+'" target="_blank" rel="noopener">scheda nella fonte</a>':''));
+    m._d={k:k,pers:!!p[ix.soggetto],don:w,anno:p[ix.anno]};
+    LY.push(m);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#ctl-cat input'),function(b){b.addEventListener('change',function(){STATE.cat[b.getAttribute('data-k')]=b.checked?1:0;filtra()})});
+  ['f-sogg','f-anno'].forEach(function(i){el(i).addEventListener('change',filtra)});
+  filtra();
+  setTimeout(function(){MAP.invalidateSize()},500);
+}
+function filtra(){
+  var fs=el('f-sogg').value,fa=el('f-anno').value,n=0;
+  LY.forEach(function(m){
+    var d=m._d,ok=!!STATE.cat[d.k];
+    if(ok&&fs==='p'&&!d.pers)ok=false;if(ok&&fs==='d'&&!d.don)ok=false;
+    if(ok&&fa==='noto'&&d.anno==null)ok=false;
+    if(ok&&fa!==''&&fa!=='noto'){var a=+fa;if(d.anno==null||d.anno<a||d.anno>a+9)ok=false}
+    if(ok){if(!MAP.hasLayer(m))m.addTo(MAP);n++}else if(MAP.hasLayer(m))MAP.removeLayer(m);
+  });
+  el('m-conta').textContent='Mostrate '+f0(n)+' targhe su '+f0(LY.length)+' con una posizione.';
+  nilTop();
+}
+function nilTop(){
+  var t=D.nil_top;
+  if(!t||el('nil-top').innerHTML)return;
+  var mx=t[0][1];
+  setH('nil-top','<h3>Dove sono: i quartieri (NIL) con più targhe</h3><div class="bars">'+t.map(function(r){return '<div class="row"><span class="nm">'+esc(r[0])+'</span><span class="tr"><span class="fill" style="width:'+(r[1]/mx*100)+'%"></span></span><span class="v">'+f0(r[1])+'</span></div>'}).join('')+'</div><p class="sub">Duomo e Brera da soli hanno '+f0(D.nil_duomo_brera)+' targhe. Solo '+D.nil_con+' quartieri su '+D.nil_tot+' hanno almeno una targa nei nostri dati: gli altri non sono «senza targhe», sono senza targhe <i>nei dati</i>.</p>');
+}
+
+function chi(){
+  var P=D.persone,T=D.top;
+  setH('chi-testo','In '+f0(D.con_soggetto)+' targhe su '+f0(D.n)+' riconosciamo una o più persone, '+f0(P.uniche)+' in tutto. <b>Nessuno domina:</b> il massimo è '+D.top_max+' targhe a testa ('+f0(D.n_persone_con_2)+' persone arrivano a 2). Le altre '+f0(D.n-D.con_soggetto)+' targhe non hanno una persona riconosciuta: possono ricordare un evento, un gruppo, o semplicemente il testo non è stato letto.');
+  var cm=D.categorie[0][1];
+  bars('b-cat',D.categorie.map(function(c,i){return {nm:'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;background:'+COL[i%COL.length]+'"></span>'+esc(c[0]),v:c[1],txt:f0(c[1])}}),cm);
+  bars('b-top',T.filter(function(r,i){return r[1]>=2||i<5}).map(function(r){return {nm:esc(r[0]),sub:esc(r[2]),v:r[1],txt:r[1]+(r[1]===1?' targa':' targhe'),w:r[3]==='donna'}}),T[0][1]);
+  var pr=D.professioni.filter(function(r){return r[0]!=='non indicata'&&r[0]!=='non indicato'&&r[0]!=='altro o non indicata'});
+  bars('b-prof',pr.map(function(r){return {nm:esc(r[0]),sub:r[2]?r[2]+(r[2]===1?' donna':' donne'):'',v:r[1],txt:f0(r[1])}}),pr[0][1]);
+  setH('chi-n','Persone riconosciute: '+f0(P.uniche)+'. Il gruppo di mestiere viene dalla prima professione scritta in Wikidata; può sbagliare. '+f0(D.casa)+' targhe segnano una casa («qui visse», «qui nacque», «qui morì»…).');
+}
+
+function donne(){
+  var P=D.persone,S=D.confronto.statue,V=D.confronto.vie;
+  el('q-vie').textContent=nf(D.confronto.quota_vie,1);
+  setH('donne-testo','Tra le persone ricordate dalle targhe, quelle di cui Wikidata dice che sono donne sono <b>'+P.donne+' su '+P.sesso_noto+'</b> ('+pc(P.quota)+'): '+P.donne_elenco.map(function(r){return esc(r[0])}).join(', ')+'. Per le statue, i monumenti e le sculture la stessa misura è '+pc(S.quota)+' ('+S.donne+' su '+S.persone+'); per le vie intitolate a persone '+pc(V.quota)+' ('+V.donne+' su '+f0(V.persone)+').');
+  var mx=22,G=[{nome:'Lapidi e targhe (questa pagina)',quota:P.quota,lo:P.lo,hi:P.hi,donne:P.donne,persone:P.sesso_noto},{nome:'Statue, monumenti, sculture',quota:S.quota,lo:S.lo,hi:S.hi,donne:S.donne,persone:S.persone},{nome:'Vie intitolate a persone',quota:V.quota,lo:V.lo,hi:V.hi,donne:V.donne,persone:V.persone}];
+  setH('rule',G.map(function(g,i){
+    var vi=i===G.length-1;
+    return '<div class="row'+(vi?' vie':'')+'"><span>'+esc(g.nome)+'</span><span class="tr"><span class="iv" style="left:'+g.lo/mx*100+'%;width:'+(g.hi-g.lo)/mx*100+'%"></span><span class="dot" style="left:'+g.quota/mx*100+'%"></span><span class="mk" style="left:'+D.confronto.quota_vie/mx*100+'%"></span></span><span class="v">'+pc(g.quota)+' ('+nf(g.lo,1)+'–'+nf(g.hi,1)+'%)<br><span class="sub">'+g.donne+' su '+f0(g.persone)+'</span></span></div>';
+  }).join(''));
+  setH('donne-lettura','<b>Come leggerlo.</b> Le donne sono poche, nello stesso ordine di grandezza delle vie: con <b>solo '+P.donne+' casi</b> non possiamo dire che le targhe siano più o meno «maschili» delle strade. <b>Attenzione:</b> il sesso viene solo da Wikidata, e molti nomi di partigiani non hanno una voce in Wikidata. Per esempio una targa che nel testo dice «partigiana» non viene contata, perché non si deduce mai il sesso dal nome o dal testo. Le donne reali sono quindi probabilmente di più di quelle contate, soprattutto tra le targhe della Resistenza.');
+}
+
+function resistenza(){
+  var R=D.resistenza;
+  setH('res-testo','Con le regole di questa pagina, <b>'+f0(R.n)+' targhe</b> su '+f0(D.n)+' ('+pc(100*R.n/D.n,0)+') parlano della Resistenza, dei partigiani caduti o delle persecuzioni nazifasciste. Per confronto, un articolo del 2021 contava «circa 500 le targhe dedicate ai fautori della Resistenza» a Milano (<a href="'+esc(R.press_fonte)+'" target="_blank" rel="noopener">Il Fatto Quotidiano</a>): nei dati aperti ne vediamo meno di una su venti. È la parte meno coperta.');
+  setH('tab-res','<thead><tr><th>Targa</th><th>Quartiere</th><th>Fonte</th></tr></thead><tbody>'+R.elenco.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td></tr>'}).join('')+'</tbody>');
+}
+
+function archivio(){
+  var p=D.pdm;
+  setH('pdm-testo','<a href="https://www.pietredellamemoria.it/comuni/milano/" target="_blank" rel="noopener">Pietre della Memoria</a> (ANMIG) è un archivio di monumenti e lapidi della guerra e della Resistenza, scritto da volontari. Per il Comune di Milano contava, il '+esc(p.data)+', <b>'+f0(p.voci)+' voci</b>: '+f0(p.lastre+p.lapidi+p.targa)+' targhe (lastre, lapidi), '+p.inciampo+' pietre d’inciampo, '+p.monumenti+' monumenti, '+p.cippi+' cippi e '+p.stele+' stele, più '+p.altro+' altre. Ogni scheda ha indirizzo, coordinate, data e testo. Ma il sito dice «tutti i diritti sono riservati» e non ha una licenza di riuso, quindi <b>non l’abbiamo usato</b>: ne citiamo solo il numero di voci, contate dagli elenchi pubblici, senza copiare le schede. Chi vuole sapere cosa c’è sui muri di Milano ha lì il punto di partenza; chi vuole un elenco aperto deve ancora costruirlo. Il Comune di Milano, da parte sua, non pubblica nessun elenco di lapidi sul portale dei dati aperti.');
+}
+
+function tempo(){
+  var dc=D.decenni;
+  setH('tempo-testo','L’anno in cui la targa è stata posata è noto per <b>'+D.con_anno+' targhe su '+f0(D.n)+'</b>. Con così pochi casi non si può dire se se ne mettono di più oggi o ieri: l’elenco qui sotto mostra solo quelle che hanno l’anno. (Gli anni scritti nelle lapidi, per esempio «1944», riguardano il fatto ricordato, non la data di posa, e non sono usati.)');
+  var mx=Math.max.apply(null,dc.map(function(r){return r[1]}));
+  bars('b-dec',dc.map(function(r){return {nm:'anni '+r[0],v:r[1],txt:r[1]+(r[1]===1?' targa':' targhe')}}),mx);
+}
+
+function limiti(){
+  var h='<details open><summary>I limiti dei dati, in breve</summary><ul class="m">';
+  h+='<li><b>Poche targhe, non un campione casuale.</b> '+f0(D.n)+' targhe contro circa '+f0(D.stima.stima_grezza_totale)+' stimate. La stima è «cattura-ricattura»: se OpenStreetMap vede '+D.stima.in_osm+' targhe, Wikidata '+D.stima.in_wikidata+' e ne hanno '+D.stima.in_entrambe+' in comune, il totale sarebbe circa '+f0(D.stima.stima_grezza_totale)+'; ma funziona solo se le fonti guardano in modo indipendente, quindi è un indizio.</li>';
+  h+='<li><b>Il testo non è letto.</b> Solo '+f0(D.osm_con_testo)+' targhe di OpenStreetMap su '+D.osm_targhe+' hanno il testo (<code>inscription</code>) e '+f0(D.osm_con_nome_o_testo)+' hanno un nome o un testo. '+f0(D.categorie[0][1])+' targhe ('+pc(100*D.categorie[0][1]/D.n,0)+') non hanno un nome né un testo utili e restano «non classificabili».</li>';
+  h+='<li><b>Il soggetto manca per '+pc(100*(1-D.con_soggetto/D.n),0)+' delle targhe</b>, e <b>il sesso</b> lo sappiamo solo se la persona ha una voce in Wikidata: tante persone comuni (partigiani, vittime) non ce l’hanno. I risultati sulle donne si basano su '+D.persone.sesso_noto+' persone.</li>';
+  h+='<li><b>Il centro è sovra-rappresentato</b> (Duomo e Brera: '+f0(D.nil_duomo_brera)+' targhe).</li>';
+  h+='<li><b>Anno di posa quasi sempre assente</b> ('+D.con_anno+' su '+f0(D.n)+').</li>';
+  h+='<li><b>Posizione delle foto di Commons:</b> '+D.fonte.commons+' targhe vengono solo dalle coordinate di una foto su Wikimedia Commons, che a volte sono quelle di chi scatta e non della targa.</li>';
+  h+='<li><b>Doppioni:</b> la stessa targa in due fonti è unita se ha lo stesso identificatore o è molto vicina (60 metri) con parole del nome in comune; può restare qualche doppione o essere unita male qualche coppia. Le targhe Commons sono tenute solo se non sono entro 30 metri da un’altra targa.</li></ul></details>';
+  h+='<details><summary>Come sono stati messi insieme i dati</summary><ul class="m">';
+  h+='<li><b>OpenStreetMap</b> (dati del '+esc(D.osm_timestamp.slice(0,10))+'): '+D.osm_targhe+' oggetti con <code>memorial=plaque</code> dentro il Comune ('+D.osm_con_nome+' con un nome). Le pietre d’inciampo sono escluse (hanno <a href="../pietre-inciampo/">la loro pagina</a>).</li>';
+  h+='<li><b>Wikidata:</b> elementi che sono «targa commemorativa» con posizione o luogo a Milano, già raccolti per la <a href="../statue/">pagina su statue e monumenti</a> (stesso metodo, stessa unione). Il soggetto (la persona) viene dal collegamento esplicito, da un titolo come «targa a X» cercato su Wikidata (solo corrispondenza esatta con <b>una</b> persona) o dal nome per esteso nel testo della targa; il sesso solo dal campo «sesso o genere» (P21) della persona, mai dal nome.</li>';
+  h+='<li><b>Wikimedia Commons</b> (categoria «Plaques in Milan» e sottocategorie): '+f0(D.commons_file)+' foto, '+f0(D.commons_con_coord)+' con coordinate. Teniamo solo le foto che per titolo e categoria sono chiaramente una targa commemorativa e hanno coordinate dentro il Comune, e una sola per gruppo vicino. Sono '+D.commons_usate+'. Di ognuna usiamo titolo e coordinate e mettiamo il link alla pagina del file; <b>nessuna immagine è copiata</b>. Le foto di targhe dentro chiese, con iscrizioni latine o nel Duomo sono state lasciate fuori.</li>';
+  h+='<li><b>Categorie</b>, in quest’ordine, sul nome, sul testo OpenStreetMap e sul soggetto: (1) parole come partigiano, resistenza, nazifascista, deportato, caduti per la libertà; (2) terrorismo, strage, attentato, assassinato, vittime del dovere; (3) caduti, guerra, combattenti, alpini; (4) il mestiere della persona in Wikidata (artista e scrittore = arte, musica e letteratura; scienziato e medico = scienza; politico, giurista, militare, sovrano = politica, diritto e Risorgimento; religioso e imprenditore = chiese, religione e benefattori); (5) parole come chiesa, consacrazione, benefattore, cinque giornate, insorti, compositore. Se niente corrisponde: «non classificabile». '+f0(D.categoria_come['parole nel nome o nel testo'])+' targhe sono classificate dalle parole e '+f0(D.categoria_come['mestiere in Wikidata'])+' dal mestiere. Lo schema è semplice e sbaglia: una persona può meritare più categorie, ne viene scelta una.</li>';
+  h+='<li><b>Il quartiere (NIL)</b> si ricava dalla posizione (punto in poligono sui confini del Comune).</li>';
+  h+='<li><b>Pietre della Memoria</b> non è stato usato (diritti riservati); ne conosciamo solo il conteggio pubblico delle voci.</li></ul></details>';
+  setH('limiti-testo',h);
+}
+
+function file(){
+  var F=[['targhe.csv','tutte le targhe: nome, categoria, persona, sesso (solo da Wikidata), mestiere, anno, testo OSM, posizione, quartiere, fonte e identificatori'],
+   ['persone.csv','una riga per ogni coppia targa-persona (la tabella dei conteggi sulle donne)'],
+   ['per_nil.csv','targhe, targhe con persona e targhe della Resistenza per quartiere (NIL)'],
+   ['targhe_mappa.json','le posizioni usate dalla mappa'],['pagina.json','tutti i numeri di questa pagina'],['LICENZE.txt','le licenze dei file']];
+  setH('lista-file',F.map(function(f){return '<li><a href="data/'+f[0]+'">'+f[0]+'</a> – '+f[1]+'</li>'}).join(''));
+}
+function fonti(){
+  var h='';
+  h+='<li><b>OpenStreetMap</b>, © OpenStreetMap contributors, licenza ODbL, dati del '+esc(D.osm_timestamp.slice(0,10))+' (scaricati il 2 novembre 2026, interrogazione Overpass): <a href="https://www.openstreetmap.org/copyright">openstreetmap.org/copyright</a>. <b>I file derivati da OpenStreetMap di questa pagina sono ripubblicati con la stessa licenza ODbL (share-alike): chi li riusa deve citare la fonte e usare la stessa licenza.</b></li>';
+  h+='<li><b>Wikidata</b>, licenza CC0 (pubblico dominio): <a href="https://www.wikidata.org/">wikidata.org</a>, interrogato il 1 novembre 2026.</li>';
+  h+='<li><b>Wikimedia Commons</b> (<a href="https://commons.wikimedia.org/wiki/Category:Plaques_in_Milan">Category:Plaques in Milan</a>), solo titoli e coordinate di '+D.commons_usate+' foto, scaricati il 2 novembre 2026; ogni foto ha la propria licenza, indicata nella sua pagina; nessuna immagine è copiata.</li>';
+  h+='<li><b>Comune di Milano</b> (dati.comune.milano.it): confini dei quartieri NIL (ds964, CC BY). Ricerca di dataset su lapidi e targhe (nove parole chiave, il 2 novembre 2026): nessun risultato utile.</li>';
+  h+='<li><b>Pietre della Memoria</b> (<a href="https://www.pietredellamemoria.it/" target="_blank" rel="noopener">pietredellamemoria.it</a>, ANMIG): non usato, tutti i diritti riservati; citato solo per il numero di voci (contate il 2 novembre 2026).</li>';
+  h+='<li><b>Il Fatto Quotidiano</b>, 16 aprile 2021, per il numero di targhe della Resistenza citato nel testo.</li>';
+  h+='<li>Confronti: <a href="../vie/">le vie intitolate a donne</a> (quota '+nf(D.confronto.quota_vie,1)+'%) e <a href="../statue/">statue e monumenti</a>.</li>';
+  setH('fonti',h);
+}
+})();
+</script>
+</body></html>

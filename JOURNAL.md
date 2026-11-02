@@ -2723,3 +2723,9 @@ python -I scripts\inventario.py <cartella censimenti>
 - Altre fonti: Comune (ds83 ambiti, ds342 e ds45 parcheggi in struttura e di interscambio, ds60 ciclabili, ds51 aree pedonali; CC BY), ACI Autoritratto 2024 (CC BY 4.0), tariffe ATM (solo valori).
 - Numeri (stime, 12 m² a stallo): circa 3,6 km² di sosta su strada, il 2% del comune, circa 500 campi da calcio; 0,42 stalli per auto. Sorpresa: lo spazio per le auto ferme è circa 10 volte quello delle ciclabili e 12 volte quello delle aree pedonali.
 - Limiti dei dati: posti per quartiere solo modellati (densità uniforme per km di strada); box privati assenti; larghezze delle ciclabili ipotizzate.
+
+## 69. Lapidi e targhe
+
+- 2026-11-02 — Fase 1 e pagina piccola (`targhe/`, `docs/targhe/`), scelta di Davide dopo il verdetto: non esiste un archivio aperto. L'unico archivio vero, Pietre della Memoria (ANMIG: 496 voci per Milano, 326 targhe), è "tutti i diritti riservati": citato con link, non usato; le sue pagine scaricate restano in `raw/pdm` e non vanno pubblicate. Il Comune non pubblica nulla.
+- Fonti usate: OSM (ODbL), Wikidata (CC0), 10 foto di Wikimedia Commons (solo titolo e coordinate), lapidi del filone statue: 228 targhe, una su otto delle circa 1.800 stimate. Sesso solo da Wikidata P21: 3 donne su 80 persone (3,8%).
+- Limiti dei dati: soggetto mancante nel 62%; anno di posa noto per 13 targhe; categorie da regole semplici; centro sovra-rappresentato.
