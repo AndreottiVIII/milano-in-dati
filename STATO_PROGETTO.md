@@ -95,6 +95,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 81 | Parchi e verde | Online (stima per quartiere) |
 | 82 | Impianti sportivi | Online |
 | 83 | Violenza contro le donne | Online |
+| 84 | Terzo settore | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 

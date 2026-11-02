@@ -94,7 +94,8 @@
     { path: 'consiglio/', label: 'Consiglio comunale' },
     { path: 'verde/', label: 'Parchi e verde' },
     { path: 'sport/', label: 'Impianti sportivi' },
-    { path: 'violenza-donne/', label: 'Violenza contro le donne' }
+    { path: 'violenza-donne/', label: 'Violenza contro le donne' },
+    { path: 'terzo-settore/', label: 'Associazioni e terzo settore' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

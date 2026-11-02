@@ -2828,3 +2828,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: ISTAT chiamate al 1522 (2013-2025, solo per regione), ISTAT centri antiviolenza 2024, Regione Lombardia (CC0: albo dei centri e case rifugio; parola chiave giusta "antiviolenza"), ISTAT omicidi 2024 (solo nazionale). Comune: nessun dato.
 - Numeri: chiamate valide al 1522 da 17.616 (2017) a 65.048 (2024); 2023→2024 +38,6% in Lombardia (Italia +25,8%); il 25 novembre 2024 684 chiamate contro una mediana di 173; centri antiviolenza 1,04 ogni 100.000 donne in Lombardia (Italia 1,21). Femminicidi per Lombardia o Milano non disponibili in forma aperta.
 - Limiti dei dati: le chiamate misurano chi chiede aiuto, non quanta violenza c'è; regione ignota per il 34-44% delle chiamate; serie spezzata nel 2023 e nel 2025; nessun caso singolo, nome o indirizzo (case rifugio segrete).
+
+## 84. Associazioni e terzo settore
+
+- 2026-11-02 — Fase 1 e pagina (`terzo-settore/`, `docs/terzo-settore/`). Dettagli in `terzo-settore/NOTE.md`.
+- Fonti: RUNTS, lista pubblica degli enti (registro pubblico per legge, licenza non indicata: pubblicati nome, sezione, anno e 5 per mille degli enti, mai i legali rappresentanti); Comune ds1332 (registro associazioni), ds562 (cooperative sociali), Regione ds606 (persone giuridiche); ISTAT censimento non profit 2011. Il RUNTS non ha indirizzo: niente quartieri dal RUNTS, la mappa usa gli elenchi minori, non sommabili.
+- Numeri: 3.986 enti RUNTS con sede a Milano, 29,2 ogni 10.000 abitanti (Italia 26,2), 9ª su 18 grandi città; prima per "altri enti", ultima per APS; il RUNTS copre il 37% delle istituzioni non profit ISTAT della provincia (spiega la differenza con il BES).
+- Limiti dei dati (trappole per il diario): la sigla provincia "NA" letta come dato mancante azzerava Napoli (corretto); la data RUNTS è l'iscrizione (36% nel 2022 per la trasmigrazione); ISTAT per comune solo 2011.

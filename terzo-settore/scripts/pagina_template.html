@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Associazioni e terzo settore</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:64vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select,.ctl input[type=search]{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;max-width:100%}
+.ctl button{cursor:pointer} .ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl input[type=search]{border-radius:6px;min-width:0;flex:1 1 220px}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .tabmax{max-height:380px;overflow:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 100px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)} .bars .row.hi .fill{background:#c26a1b} .bars .row.hi .nm{font-weight:700}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.2} .bars .v .sub{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .bars .row{grid-template-columns:minmax(90px,38%) 1fr 78px}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+#tab-citta{min-width:520px} #tab-fonti{min-width:560px} #tab-conti{min-width:480px} #tab-enti{min-width:420px} #tab-2011{min-width:480px} #tab-prov{min-width:420px}
+.more{margin:.5em 0}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Associazioni e terzo settore a Milano</h1>
+<p>Il &laquo;terzo settore&raquo; &egrave; l&rsquo;insieme delle associazioni di volontariato, delle associazioni di promozione sociale, delle cooperative sociali, delle fondazioni e delle imprese sociali che lavorano senza scopo di lucro. Dal 2021 gli enti che rispettano le regole si iscrivono al <b>RUNTS</b>, il Registro unico nazionale del Terzo settore del Ministero del Lavoro. Il 2 novembre 2026 ci risultano iscritti <b id="n-mi">3.986</b> enti con sede legale a Milano (su <span id="n-ita">154.244</span> in Italia). Qui li contiamo, li confrontiamo con le altre grandi citt&agrave; e vediamo dove stanno, con quello che i dati permettono. Non &egrave; l&rsquo;elenco di tutte le associazioni di Milano: <a href="#limiti">vedi i limiti</a>.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Contiamo gli enti iscritti a un registro, non le persone che ci lavorano o li frequentano e non quello che fanno davvero. La sede legale &egrave; l&rsquo;indirizzo scritto sulle carte, non sempre quello dove l&rsquo;ente lavora. Il registro nazionale non dice il quartiere: la mappa usa tre elenchi del Comune e della Regione, pi&ugrave; piccoli.</div>
+
+<h2 id="quanti">Quanti sono e di che tipo</h2>
+<div id="quanti-testo"></div>
+<div class="grid2"><div><h3>Per sezione del registro (Milano)</h3><div class="bars" id="b-sez"></div></div>
+<div><h3>Per tipo, ricavato dal nome</h3><div class="bars" id="b-tipo"></div></div></div>
+<p class="src">Fonte: Ministero del Lavoro e delle Politiche Sociali, RUNTS, &laquo;Lista enti&raquo; (enti iscritti), scaricata il 2 novembre 2026; enti con sede legale nel comune di Milano. La sezione &egrave; quella ufficiale; il &laquo;tipo&raquo; &egrave; scritto da noi leggendo il nome (cooperativa sociale, fondazione) e quindi &egrave; approssimato: la lista non dice la forma giuridica.</p>
+
+<h2 id="citta">Milano e le altre grandi citt&agrave;</h2>
+<div id="citta-testo"></div>
+<h3>Enti del Terzo settore ogni 10.000 abitanti</h3>
+<div class="bars" id="b-citta"></div>
+<div class="scroll"><table id="tab-citta"></table></div>
+<p class="src">Enti iscritti al RUNTS con sede legale nel comune (2 novembre 2026), diviso per i residenti al 1&deg; gennaio 2025 (ISTAT, POSAS). Le citt&agrave; sono i 18 comuni con almeno 197.000 residenti. Le colonne per sezione non sommano al totale perch&eacute; mancano gli enti filantropici e le societ&agrave; di mutuo soccorso. Elenco completo: <a href="data/citta.csv">citta.csv</a>.</p>
+
+<h2 id="conti">Citt&agrave;, hinterland e i numeri del Bes</h2>
+<div id="conti-testo"></div>
+<div class="scroll"><table id="tab-conti"></table></div>
+<p class="src">Fonti: Bes dei territori (ISTAT, edizione 2025, indicatore 05REL008, anno 2022, CC BY 4.0); ISTAT, Struttura e profili del settore non profit, anno 2023, tavola 22 (istituzioni per provincia); RUNTS 2 novembre 2026; residenti ISTAT 1/1/2025.</p>
+<details><summary>Le 14 citt&agrave; metropolitane: Bes contro RUNTS</summary>
+<div class="scroll"><table id="tab-prov"></table></div>
+<p class="src">Provincia (citt&agrave; metropolitana) per intero, non solo il comune capoluogo. Bes: tutte le istituzioni non profit, 2022, ogni 10.000 abitanti. RUNTS: solo enti del Terzo settore iscritti, 2026, ogni 10.000 abitanti (1/1/2025).</p></details>
+
+<h2 id="tempo">Quando si sono iscritti</h2>
+<div id="tempo-testo"></div>
+<div class="bars" id="b-anni"></div>
+<div class="warm"><b>Iscrizione non vuol dire nascita.</b> La data &egrave; quella dell&rsquo;iscrizione al RUNTS, non quella in cui l&rsquo;associazione &egrave; stata fondata. Nel 2022 sono entrate in blocco le organizzazioni che erano gi&agrave; nei vecchi registri (volontariato e promozione sociale), con il passaggio detto &laquo;trasmigrazione&raquo;: per questo il 2022 &egrave; enorme. Dal 2023 in poi le iscrizioni sono soprattutto nuove, ma non solo: anche enti vecchi che si iscrivono adesso.</div>
+
+<h2 id="mappa">Dove sono: la mappa per quartiere</h2>
+<p>Per il registro nazionale non c&rsquo;&egrave; l&rsquo;indirizzo, quindi qui usiamo tre elenchi pi&ugrave; piccoli, con indirizzo o con il quartiere gi&agrave; indicato. Ogni elenco ha le sue regole: non sommarli.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="ap" class="on">Associazioni del registro del Comune</button><button type="button" data-m="cp">Cooperative sociali (albo del Comune)</button><button type="button" data-m="gp">Persone giuridiche (Regione)</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select>
+<label class="sub"><input type="radio" name="mv" value="p" checked> ogni 10.000 abitanti</label> <label class="sub"><input type="radio" name="mv" value="n"> numero</label></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per numero di associazioni"></div>
+<div class="lgd" id="lg-map"></div>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<div id="mappa-testo"></div>
+<div class="grid2"><div><h3 id="h-top">Pi&ugrave; presenti</h3><div class="bars" id="b-top"></div></div>
+<div><h3 id="h-bot">Meno presenti</h3><div class="bars" id="b-bot"></div></div></div>
+<p class="src" id="map-src"></p>
+
+<h2 id="temi">Di che cosa si occupano</h2>
+<div id="temi-testo"></div>
+<div class="grid2"><div><h3>Associazioni del registro del Comune, per settore</h3><div class="bars" id="b-settori"></div></div>
+<div><h3>Milano nel 2011, per settore (ISTAT): istituzioni</h3><div class="bars" id="b-ist11"></div></div></div>
+<p class="src">A sinistra: 795 realt&agrave; nel Registro anagrafico delle associazioni del Comune (ds1332, CC BY, scaricato il 2/11/2026): l&rsquo;iscrizione &egrave; volontaria e il settore lo sceglie l&rsquo;associazione. A destra: Censimento ISTAT delle istituzioni non profit 2011 per il comune di Milano (ds273 del Comune, CC BY), 6.662 istituzioni, tutto il non profit e non solo il Terzo settore di oggi. Il registro nazionale RUNTS non d&agrave; il settore nell&rsquo;elenco pubblico.</p>
+<h3>Quanto sono &laquo;grandi&raquo;: Milano e le altre citt&agrave; nel 2011</h3>
+<div id="ist11-testo"></div>
+<div class="scroll"><table id="tab-2011"></table></div>
+<p class="src">Censimento ISTAT delle istituzioni non profit, 2011, dati comunali (file DICA_N01GCOM): istituzioni attive, volontari, dipendenti e lavoratori esterni. &Egrave; l&rsquo;ultimo dato ISTAT con il dettaglio per comune: per le edizioni dopo il 2011 non abbiamo trovato dati ISTAT per comune (solo per regione e provincia). Elenco: <a href="data/istat_2011_citta.csv">istat_2011_citta.csv</a>.</p>
+
+<h2 id="cerca">Cerca un ente</h2>
+<p>Gli enti del Terzo settore con sede legale a Milano iscritti al RUNTS il 2 novembre 2026. Sono nomi di organizzazioni, come nel registro pubblico: non ci sono i nomi dei legali rappresentanti n&eacute; altri dati di persone.</p>
+<div class="ctl"><input type="search" id="q" placeholder="Cerca per nome (es. sport, anziani, quartiere)" aria-label="Cerca per nome"><select id="f-sez" aria-label="Sezione"></select><select id="f-tipo" aria-label="Tipo"></select></div>
+<p class="sub" id="cerca-esito"></p>
+<div class="scroll"><table id="tab-enti"></table></div>
+<p class="more"><button type="button" id="piu" style="font:inherit;padding:4px 12px;border:1px solid var(--acc);color:var(--acc);background:#fff;border-radius:14px;cursor:pointer">Mostra altri</button></p>
+<p class="src">Elenco completo: <a href="data/enti_milano.csv">enti_milano.csv</a>. Fonte: RUNTS, Ministero del Lavoro e delle Politiche Sociali, lista enti iscritti del 2/11/2026.</p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/enti_milano.csv">enti_milano.csv</a> (gli enti RUNTS di Milano: nome, sezione, tipo dal nome, anno di iscrizione, 5 per mille), <a href="data/citta.csv">citta.csv</a>, <a href="data/nil.csv">nil.csv</a> (conteggi per quartiere dei tre elenchi del Comune e della Regione), <a href="data/nil.geojson">nil.geojson</a>, <a href="data/runts_per_anno_milano.csv">runts_per_anno_milano.csv</a>, <a href="data/registro_comune_settori.csv">registro_comune_settori.csv</a>, <a href="data/bes_nonprofit.csv">bes_nonprofit.csv</a>, <a href="data/istat_2011_milano_settori.csv">istat_2011_milano_settori.csv</a>, <a href="data/istat_2011_citta.csv">istat_2011_citta.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Gli indirizzi, le email e i telefoni dei registri del Comune non sono ripubblicati.</p>
+
+<p>Vedi anche: <a href="../benessere/">Il benessere di Milano</a> (dove c&rsquo;&egrave; lo stesso indicatore del non profit, per provincia) e <a href="../quartiere/">Il tuo quartiere</a>.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> RUNTS, Ministero del Lavoro e delle Politiche Sociali, <a href="https://servizi.lavoro.gov.it/runts/it-it/Lista-enti">servizi.lavoro.gov.it/runts</a>, &laquo;Lista enti&raquo;, enti iscritti (file Excel), scaricata il 2 novembre 2026: il sito non indica una licenza; il registro &egrave; pubblico per legge (art. 53 del Codice del Terzo settore) e le note legali chiedono di rispettare la normativa sui dati personali, per questo non usiamo n&eacute; mostriamo i nomi dei rappresentanti legali. Registro anagrafico delle associazioni (ds1332, CC BY), Albo cooperative sociali (ds562, CC0), persone giuridiche riconosciute dalla Regione Lombardia (ds606, CC0), Censimento 2011 istituzioni non profit (ds273, CC BY), confini dei NIL (ds964, CC BY), residenti per quartiere (ds205, 2024, CC BY), numeri civici (ds634, CC BY): Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, scaricati il 2 novembre 2026 (i civici ds634, aggiornati al 1/10/2026, e i residenti ds205 erano gi&agrave; stati scaricati dal Comune per altre pagine di questo sito). ISTAT: Bes dei territori 2025, Tavole &laquo;Struttura e profili del settore non profit&raquo; 2023 (scaricate il 2/11/2026), Censimento delle istituzioni non profit 2011 (dati comunali, scaricato il 2/11/2026), popolazione residente al 1/1/2025 (<a href="https://demo.istat.it/">demo.istat.it</a>, scaricata il 2/11/2026): licenza CC BY 4.0 indicata nelle note legali ISTAT. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,EN=null,NIL=[];
+var ACC='#00695c',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function bars(id,items,o){o=o||{};var mx=o.max||Math.max.apply(null,items.map(function(x){return x.v}));
+  setH(id,items.map(function(x){return '<div class="row'+(x.hi?' hi':'')+'"><span class="nm">'+esc(x.t)+'</span><span class="tr"><span class="fill" style="width:'+(mx>0?Math.max(0,100*x.v/mx):0)+'%"></span></span><span class="v">'+(x.l!=null?x.l:f0(x.v))+'</span></div>'}).join(''))}
+function lc(s){return s.charAt(0).toLowerCase()+s.slice(1)}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/enti_milano.json')]).then(function(a){
+  D=a[0];NF=a[1];EN=a[2];NIL=NF.features.map(function(f){return f.properties});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){sorpresa();quanti();citta();conti();tempo();mappa();temi();cerca();limiti();metodo()}
+
+function sorpresa(){
+  var R=D.runts,P=D.provincia,C=D.istat2011,K=D.riconciliazione,mi=R.per_10000_milano,it=R.per_10000_italia;var mm=D.citta.filter(function(c){return c.citta==='Milano'})[0],mil_alt=mm.alt,mil_aps=mm.aps,mil_odv=mm.odv;
+  el('n-mi').textContent=f0(R.milano);el('n-ita').textContent=f0(R.italia);
+  var fi=D.citta[0];
+  var h='<p><b>In citt&agrave; ce ne sono pi&ugrave; della media italiana, nell&rsquo;hinterland molti meno.</b> Gli enti del Terzo settore con sede nel comune di Milano sono '+f1(mi)+' ogni 10.000 abitanti, contro '+f1(it)+' in Italia. Nel resto della provincia sono '+f1(P.resto_p)+', la met&agrave; scarsa. Per questo il numero del Bes, che mostra Milano sotto la media (53,9 contro 61,0 istituzioni non profit ogni 10.000 abitanti nel 2022), riguarda tutta la provincia e non la citt&agrave;: <a href="#conti">i conti sono qui sotto</a>.</p>';
+  var K2=D.milano_rank,sc=D.citta[0];
+  h+='<p><b>Ma tra le grandi citt&agrave; Milano &egrave; solo '+D.milano_posizione.posto+'&ordf; su '+D.milano_posizione.su+'.</b> In testa ci sono '+D.citta[0].citta+' ('+f1(D.citta[0].p)+'), '+D.citta[1].citta+' ('+f1(D.citta[1].p)+') e '+D.citta[2].citta+' ('+f1(D.citta[2].p)+'). E il risultato di Milano si regge su un solo tipo di ente: gli <b>&laquo;altri enti del Terzo settore&raquo;</b> (fondazioni, enti nazionali) sono i pi&ugrave; frequenti d&rsquo;Italia tra le grandi citt&agrave; ('+f1(mil_alt)+' ogni 10.000, '+K2.alt+'&ordm; su '+K2.su+'), mentre le <b>associazioni di promozione sociale</b> sono le meno diffuse ('+f1(mil_aps)+', '+K2.aps+'&ordf; su '+K2.su+') e il <b>volontariato organizzato</b> &egrave; al '+K2.odv+'&ordm; posto ('+f1(mil_odv)+').</p>';
+  var mil11=C.citta.filter(function(c){return c.citta==='Milano'})[0],alt=C.citta.filter(function(c){return c.citta!=='Milano'});
+  var med=function(k){var v=alt.map(function(c){return c[k]}).sort(function(a,b){return a-b});return v[Math.floor(v.length/2)]};
+  h+='<p><b>Le organizzazioni milanesi sono le pi&ugrave; &laquo;grandi&raquo;.</b> Nel 2011 (ultimo anno ISTAT con il dettaglio per comune) ogni istituzione non profit di Milano aveva in media <b>'+f1(mil11.vol_per_ist)+' volontari</b> e <b>'+f1(mil11.dip_per_ist)+' tra dipendenti e lavoratori esterni</b>: i valori pi&ugrave; alti tra le '+C.citta.length+' grandi citt&agrave; (la mediana delle altre &egrave; '+f1(med('vol_per_ist'))+' e '+f1(med('dip_per_ist'))+'). Pochi enti per abitante, ma grandi: sanit&agrave; e istruzione, in citt&agrave;, avevano da sole il '+nf(100*(C.settori.filter(function(s){return s.t==='sanita\''})[0].dip+C.settori.filter(function(s){return s.t==='istruzione e ricerca'})[0].dip)/C.dipendenti_esterni,0)+'% dei dipendenti e dei lavoratori esterni.</p>';
+  h+='<p><b>Il 5 per mille.</b> Il '+f0(R.cinque_per_mille.milano_pct)+'% degli enti milanesi &egrave; segnato come iscritto al 5 per mille, contro il '+f0(R.cinque_per_mille.italia_pct)+'% in Italia.</p>';
+  h+='<p class="src">Fonti: RUNTS (2/11/2026), ISTAT (Bes 2025, censimento 2011, popolazione 1/1/2025). Sono confronti tra registri diversi: leggi i <a href="#limiti">limiti</a>.</p>';
+  setH('sorpresa',h);
+}
+
+function quanti(){
+  var R=D.runts;
+  setH('quanti-testo','<p>Su '+f0(R.milano)+' enti, '+f0(R.sezioni[0].n)+' sono associazioni di promozione sociale e '+f0(R.sezioni[1].n)+' organizzazioni di volontariato; '+f0(R.sezioni[2].n)+' sono imprese sociali (di cui circa '+f0(R.tipi.filter(function(t){return t.t==='cooperativa sociale'})[0].n)+' cooperative sociali, secondo il nome). La sezione pi&ugrave; grande &egrave; quella degli &laquo;altri enti del Terzo settore&raquo; ('+f0(R.sezioni[3].n)+'), dove stanno molte fondazioni e associazioni che non sono n&eacute; di volontariato n&eacute; di promozione sociale. Milano ha il '+nf(R.quota_milano_pct,1)+'% degli enti italiani e il '+nf(R.quota_residenti_milano_pct,1)+'% dei residenti: quasi in proporzione, ma gli &laquo;altri enti&raquo; pesano molto di pi&ugrave; ('+nf(R.sezioni[3].pct,0)+'% contro '+nf(R.sezioni[3].ita_pct,0)+'% in Italia) e le APS e gli ODV molto meno ('+nf(R.sezioni[0].pct,0)+'% e '+nf(R.sezioni[1].pct,0)+'% contro '+nf(R.sezioni[0].ita_pct,0)+'% e '+nf(R.sezioni[1].ita_pct,0)+'%).</p>');
+  bars('b-sez',R.sezioni.filter(function(s){return s.n>0}).map(function(s){return {t:s.t,v:s.pct,l:f0(s.n)+' · '+nf(s.pct,0)+'%<span class="sub">Italia '+nf(s.ita_pct,0)+'%</span>'}}));
+  bars('b-tipo',R.tipi.map(function(s){return {t:s.t,v:s.pct,l:f0(s.n)+' · '+nf(s.pct,0)+'%'}}));
+}
+
+function citta(){
+  var R=D.citta,it=D.runts.per_10000_italia,mi=R.filter(function(c){return c.citta==='Milano'})[0];
+  var K2=D.milano_rank,bs=R.slice(-3).map(function(c){return c.citta}).reverse();
+  setH('citta-testo','<p>Milano ha il secondo numero assoluto di enti dopo Roma, ma per abitante &egrave; '+D.milano_posizione.posto+'&ordf; su '+D.milano_posizione.su+' ('+f1(mi.p)+' ogni 10.000 abitanti; media italiana '+f1(it)+'). '+R[0].citta+', '+R[1].citta+' e '+R[2].citta+' hanno una densit&agrave; molto pi&ugrave; alta; in fondo ci sono '+bs[0]+', '+bs[1]+' e '+bs[2]+'. Guardando le colonne per sezione, Milano &egrave; ultima per associazioni di promozione sociale ('+f1(mi.aps)+' ogni 10.000, contro '+f1(R[0].aps)+' di '+R[0].citta+') e '+K2.odv+'&ordf; per organizzazioni di volontariato, ma prima per &laquo;altri enti&raquo; ('+f1(mi.alt)+').</p>');
+  var items=R.map(function(c){return {t:c.citta,v:c.p,l:f1(c.p),hi:c.citta==='Milano'}});
+  items.push({t:'Italia (tutti i comuni)',v:it,l:f1(it)});
+  bars('b-citta',items);
+  table('tab-citta',['Citt&agrave;','Enti','Abitanti','Ogni 10.000','di cui ODV','di cui APS','imprese sociali','altri enti'],R.map(function(c){var b=c.citta==='Milano';var w=function(x){return b?'<b>'+x+'</b>':x};return [w(c.citta),f0(c.enti),f0(c.ab),w(f1(c.p)),f1(c.odv),f1(c.aps),f1(c.imp),f1(c.alt)]}));
+}
+
+function conti(){
+  var K=D.riconciliazione,P=D.provincia,R=D.runts;
+  setH('conti-testo','<p>Il Bes dice che Milano ha <b>'+f1(K.bes_milano_2022)+'</b> organizzazioni non profit ogni 10.000 abitanti, l&rsquo;Italia <b>'+f1(K.bes_italia_2022)+'</b>. Nel catalogo del Bes &laquo;Milano&raquo; &egrave; la provincia (la Citt&agrave; metropolitana, 133 comuni), e <b>conta tutto il non profit</b>: anche societ&agrave; sportive, sindacati, partiti, enti religiosi, comitati. Il RUNTS conta invece solo gli enti del Terzo settore iscritti. Messi in fila, i due registri raccontano la stessa cosa: la provincia &egrave; sotto la media; il solo comune di Milano, contando i soli enti RUNTS, &egrave; sopra.</p>'+
+   '<p>Gli enti iscritti al RUNTS nella provincia sono il '+nf(K.runts_su_istat_milano_pct,0)+'% delle istituzioni non profit contate dall&rsquo;ISTAT (in Italia il '+nf(K.runts_su_istat_italia_pct,0)+'%; sono date diverse, 2026 e 2023): il resto &egrave; non profit fuori dal registro del Terzo settore.</p>');
+  var rows=[
+   ['Bes / ISTAT, tutto il non profit, <b>provincia di Milano</b>, 2022',f1(K.bes_milano_2022),f1(K.bes_italia_2022),'Bes, 05REL008'],
+   ['ISTAT, tutto il non profit, provincia di Milano, 2023: '+f0(K.istat_milano_2023)+' istituzioni',f1(K.istat_milano_p10000),f1(K.istat_italia_p10000),'ISTAT tavola 22, 2023; residenti 1/1/2025'],
+   ['RUNTS, solo Terzo settore, provincia di Milano: '+f0(P.enti)+' enti',f1(P.p),f1(it(D)),'RUNTS 2026; residenti 1/1/2025'],
+   ['RUNTS, <b>comune di Milano</b>: '+f0(R.milano)+' enti',f1(R.per_10000_milano),f1(R.per_10000_italia),'RUNTS 2026'],
+   ['RUNTS, <b>resto della provincia</b> (132 comuni): '+f0(P.resto_enti)+' enti',f1(P.resto_p),f1(R.per_10000_italia),'RUNTS 2026']];
+  table('tab-conti',['Che cosa si conta','Milano','Italia','Fonte'],rows);
+  function it(d){return d.runts.per_10000_italia}
+  var pv=D.confronto_province;
+  table('tab-prov',['Citt&agrave; metropolitana','Bes 2022 (tutto il non profit)','Posto','RUNTS 2026 (Terzo settore)','Posto'],pv.map(function(c){var b=c.t==='Milano';var w=function(x){return b?'<b>'+x+'</b>':x};return [w(c.t),f1(c.bes),c.rk_bes,w(f1(c.runts)),c.rk_runts]}));
+}
+
+function tempo(){
+  var A=D.runts.anni,m2022=A.filter(function(a){return a.a===2022})[0],ult=A.filter(function(a){return a.a>=2023});
+  var n23=ult.reduce(function(s,a){return s+a.milano},0);
+  setH('tempo-testo','<p>Degli enti milanesi di oggi, <b>'+f0(m2022.milano)+'</b> ('+nf(100*m2022.milano/D.runts.milano,0)+'%) hanno l&rsquo;iscrizione del 2022, l&rsquo;anno della trasmigrazione. Dal 2023 al 2026 si sono iscritti altri <b>'+f0(n23)+'</b> enti ('+nf(100*n23/D.runts.milano,0)+'%). Gli iscritti del 2026 sono quelli di gennaio&ndash;ottobre: '+f0(A.filter(function(a){return a.a===2026})[0].milano)+', pi&ugrave; che nel 2024 e nel 2025.</p>');
+  bars('b-anni',A.map(function(a){return {t:String(a.a),v:a.milano,l:f0(a.milano)+'<span class="sub">Italia '+f0(a.italia)+'</span>'}}));
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,CUR='ap',VAL='p',BR={};
+var MET={ap:{n:'a',p:'ap',t:'Associazioni',desc:'Associazioni e enti del Terzo settore nel Registro anagrafico delle associazioni del Comune (795, di cui 677 con sede legale a Milano e indirizzo riconosciuto). L’iscrizione è volontaria: è una parte piccola e non scelta a caso. Quartiere dedotto dall’indirizzo della sede legale.'},
+         cp:{n:'c',p:'cp',t:'Cooperative sociali',desc:'Cooperative sociali dell’Albo del Comune (277, di cui 274 con il quartiere indicato dal Comune). Sono le cooperative sociali iscritte all’albo, non tutte quelle del RUNTS.'},
+         gp:{n:'g',p:'gp',t:'Persone giuridiche',desc:'Associazioni, fondazioni e altri enti con personalità giuridica riconosciuta dalla Regione Lombardia, con sede a Milano (338 nell’elenco, 305 con il quartiere dedotto dall’indirizzo). Ha poche voci e molte sono fondazioni.'}};
+function key(){return MET[CUR][VAL]}
+function brk(){var k=key(),v=NIL.filter(function(p){return (VAL==='n'||p.cl===1)&&p[k]>0}).map(function(p){return p[k]}).sort(function(a,b){return a-b});var b=[];for(var i=1;i<5;i++){var x=v[Math.floor(i*v.length/5)];b.push(VAL==='p'?Math.round(x*10)/10:Math.round(x))}return b.filter(function(x,i,a){return i===0||x>a[i-1]})}
+function cls(v){var i=0;while(i<BR.b.length&&v>BR.b[i])i++;return i}
+function col(p){var k=key();if(VAL==='p'&&p.cl!==1)return '#bdbdbd';var v=p[k];if(!v)return '#f2f2f2';return SEQ[1+cls(v)]}
+function fmtv(v){return VAL==='p'?nf(v,1):f0(v)}
+function mappa(){
+  BR.b=brk();
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:function(f){return {fillColor:col(f.properties),fillOpacity:.8,color:'#555',weight:1}},onEachFeature:function(f,l){
+    l.bindTooltip(function(){return tip(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  Array.prototype.forEach.call(document.querySelectorAll('input[name=mv]'),function(r){r.addEventListener('change',function(){VAL=r.value;ricolora()})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize()},300);
+  RD=function(){MAP.invalidateSize()};window.addEventListener('resize',function(){RD()});
+}
+var RD=function(){};
+function tip(p){var m=MET[CUR],h='<b>'+esc(p.n)+'</b><br>'+esc(m.t)+': '+f0(p[m.n]);if(p.cl===1&&p[m.p]!=null)h+='<br>'+nf(p[m.p],1)+' ogni 10.000 abitanti';else h+='<br><span class="sub">meno di 5.000 residenti</span>';return h}
+function ricolora(){
+  BR.b=brk();
+  LAY.setStyle(function(f){return {fillColor:col(f.properties),fillOpacity:.8,color:'#555',weight:1}});
+  var m=MET[CUR];
+  el('map-desc').innerHTML=esc(m.desc)+' '+(VAL==='p'?'Ogni 10.000 residenti (ds205, 2024); in grigio i quartieri con meno di 5.000 residenti.':'Numero di enti nel quartiere; i quartieri più grandi ne hanno di più anche solo per questo.');
+  var lg='<span><i style="background:#f2f2f2"></i>0</span>',b=BR.b,fm=VAL==='p'?function(x){return nf(x,1)}:f0;
+  for(var i=0;i<=b.length;i++){lg+='<span><i style="background:'+SEQ[1+i]+'"></i>'+(i===0?'fino a '+fm(b[0]):i===b.length?'oltre '+fm(b[i-1]):fm(b[i-1])+'–'+fm(b[i]))+'</span>'}
+  if(VAL==='p')lg+='<span><i style="background:#bdbdbd"></i>meno di 5.000 residenti</span>';
+  setH('lg-map',lg);
+  classifica();
+  if(SEL)scheda(SEL);
+}
+function scegli(i,zoom){SEL=i;scheda(i);el('sel-nil').value=i;if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}}
+var SEL=null;
+function scheda(i){var p=NIL.filter(function(x){return x.i===i})[0];if(!p)return;
+  var h='<b>'+esc(p.n)+'</b> <span class="sub">'+f0(p.ab)+' residenti (2024)</span><table><tr><th>Elenco</th><th class="r">Enti</th><th class="r">Ogni 10.000 ab.</th></tr>';
+  [['ap','Associazioni, registro del Comune'],['cp','Cooperative sociali, albo del Comune'],['gp','Persone giuridiche, Regione']].forEach(function(r){var m=MET[r[0]];h+='<tr><td>'+r[1]+'</td><td class="r">'+f0(p[m.n])+'</td><td class="r">'+(p.cl===1?nf(p[m.p],1):'–')+'</td></tr>'});
+  h+='<tr><td>ONG (Regione)</td><td class="r">'+f0(p.o)+'</td><td class="r">–</td></tr></table>';
+  setH('scheda',h)}
+function classifica(){
+  var m=MET[CUR],k=key(),arr=NIL.filter(function(p){return VAL==='n'||p.cl===1}).slice();
+  var top=arr.slice().sort(function(a,b){return b[k]-a[k]}).slice(0,8),bot=arr.slice().sort(function(a,b){return a[k]-b[k]}).slice(0,8);
+  var mx=top[0][k];
+  var u=VAL==='p'?' ogni 10.000':'';
+  setH('h-top','Pi&ugrave; presenti ('+esc(lc(m.t))+')');setH('h-bot','Meno presenti');
+  bars('b-top',top.map(function(p){return {t:p.n,v:p[k],l:fmtv(p[k])}}),{max:mx});
+  bars('b-bot',bot.map(function(p){return {t:p.n,v:p[k],l:fmtv(p[k])}}),{max:mx});
+  var C=D.concentrazione,Dm=D.duomo,t='';
+  if(CUR==='gp')t='Il centro pesa moltissimo: Duomo ha il '+nf(Dm.ab_pct,1)+'% dei residenti ma il '+nf(Dm.pg_pct,0)+'% delle persone giuridiche ('+Dm.pg+' su '+C.persone_giuridiche_regione.totale+'); i primi 3 quartieri ne hanno il '+nf(C.persone_giuridiche_regione.top3_pct,0)+'%. Sono sedi legali (fondazioni, enti storici), non necessariamente luoghi dove si fa attivit&agrave;.';
+  else if(CUR==='cp')t='Anche per le cooperative sociali Duomo spicca ('+Dm.coop+' su '+C.cooperative_sociali_albo_comune.totale+', il '+nf(Dm.coop_pct,0)+'%, con l&rsquo;'+nf(Dm.ab_pct,1)+'% dei residenti): molte cooperative hanno la sede legale in uffici del centro e lavorano altrove. I primi 3 quartieri ne hanno il '+nf(C.cooperative_sociali_albo_comune.top3_pct,0)+'%.';
+  else t='Le associazioni del registro comunale sono pi&ugrave; sparse: i primi 3 quartieri hanno il '+nf(C.associazioni_registro_comune.top3_pct,0)+'% e i primi 10 il '+nf(C.associazioni_registro_comune.top10_pct,0)+'% dei '+C.associazioni_registro_comune.totale+'. In testa per abitante ci sono quartieri come Isola, Guastalla e Gorla&ndash;Precotto; nessuna in Portello e in Maggiore&ndash;Musocco&ndash;Certosa.';
+  setH('mappa-testo','<p>'+t+'</p>');
+  setH('map-src',esc(m.t)+': '+(CUR==='ap'?'Comune di Milano, Registro anagrafico delle associazioni (ds1332, CC BY), quartiere dedotto dall’indirizzo con i numeri civici del Comune (ds634) – nessun altro servizio di geolocalizzazione.':CUR==='cp'?'Comune di Milano, Albo cooperative sociali (ds562, CC0), quartiere indicato nel file.':'Regione Lombardia tramite il Comune di Milano, elenco persone giuridiche riconosciute (ds606, CC0), quartiere dedotto dall’indirizzo con i civici del Comune (ds634).')+' Residenti: ds205 (2024). Confini: ds964. Mappa © OpenStreetMap contributors.');
+}
+
+function temi(){
+  var S=D.registro_comune.settori,I=D.istat2011;
+  setH('temi-testo','<p>Tra le '+f0(D.registro_comune.n)+' realt&agrave; del registro del Comune, la cultura (che da sola vale il '+nf(S[0].pct,0)+'%) e le attivit&agrave; ricreative e di aggregazione ('+nf(S[1].pct,0)+'%) pesano pi&ugrave; dello sport ('+nf(S.filter(function(s){return s.t==='sport'})[0].pct,0)+'%), dell&rsquo;istruzione, della salute e dell&rsquo;inclusione sociale. Nel censimento ISTAT 2011 cultura, sport e ricreazione erano il '+nf(100*I.settori[0].ist/I.istituzioni,0)+'% delle istituzioni non profit, ma sanit&agrave; e istruzione pesavano di pi&ugrave; per il personale: la sanit&agrave; aveva '+f0(I.settori.filter(function(s){return s.t==='sanita\''})[0].dip)+' dipendenti e lavoratori esterni in '+f0(I.settori.filter(function(s){return s.t==='sanita\''})[0].ist)+' istituzioni.</p>');
+  bars('b-settori',S.map(function(s){return {t:s.t,v:s.n,l:f0(s.n)+' · '+nf(s.pct,0)+'%'}}));
+  bars('b-ist11',I.settori.map(function(s){return {t:s.t.replace(/'/g,'’'),v:s.ist,l:f0(s.ist)}}));
+}
+(function(){})();
+function ist11(){
+  var C=D.istat2011.citta,mil=C.filter(function(c){return c.citta==='Milano'})[0];
+  setH('ist11-testo','<p>A Milano nel 2011 ogni istituzione non profit aveva in media '+f1(mil.vol_per_ist)+' volontari e '+f1(mil.dip_per_ist)+' tra dipendenti e lavoratori esterni: il massimo tra le '+C.length+' citt&agrave;. Roma &egrave; vicina ('+f1(C[1].vol_per_ist)+' e '+f1(C[1].dip_per_ist)+'); a Palermo e Messina i volontari per istituzione sono meno della met&agrave; di Milano (circa 10). Se un solo grande ente conta molto, la media sale: non dice quanto siano &laquo;buone&raquo; le istituzioni.</p>');
+  table('tab-2011',['Citt&agrave;','Istituzioni','Volontari','Dipendenti e esterni','Volontari per istituzione','Dipendenti e esterni per istituzione'],C.map(function(c){var b=c.citta==='Milano';var w=function(x){return b?'<b>'+x+'</b>':x};return [w(c.citta),f0(c.ist),f0(c.vol),f0(c.dip),w(f1(c.vol_per_ist)),w(f1(c.dip_per_ist))]}));
+}
+
+/* ---------- ricerca ---------- */
+var VIS=100,FIL=[];
+function cerca(){
+  ist11();
+  var R=EN.righe,S=EN.sezioni,T=EN.tipi;
+  var nomS={APS:'Associazione di promozione sociale',ODV:'Organizzazione di volontariato',IS:'Impresa sociale',AL:'Altro ente del Terzo settore',EF:'Ente filantropico',SMS:'Società di mutuo soccorso',nd:'Non indicata'};
+  var sh='<option value="">Tutte le sezioni</option>';Object.keys(nomS).forEach(function(k){sh+='<option value="'+k+'">'+nomS[k]+'</option>'});el('f-sez').innerHTML=sh;
+  var th='<option value="">Tutti i tipi</option>';Object.keys(T).forEach(function(k){th+='<option value="'+k+'">'+esc(T[k])+'</option>'});el('f-tipo').innerHTML=th;
+  var lowers=R.map(function(r){return r[0].toLowerCase()});
+  function filtra(){var q=el('q').value.trim().toLowerCase(),s=el('f-sez').value,t=el('f-tipo').value;FIL=[];
+    for(var i=0;i<R.length;i++){var r=R[i];if(s&&r[1]!==s)continue;if(t!==''&&String(r[2])!==t)continue;if(q&&lowers[i].indexOf(q)<0)continue;FIL.push(r)}
+    VIS=100;disegna()}
+  function disegna(){
+    el('cerca-esito').textContent=f0(FIL.length)+' enti'+(FIL.length>VIS?' (ne mostro '+VIS+')':'');
+    table('tab-enti',['Nome','Sezione','Anno di iscrizione'],FIL.slice(0,VIS).map(function(r){return [esc(r[0]),esc(nomS[r[1]]||r[1])+(r[2]===2?' <span class="sub">· coop. sociale</span>':r[2]===4?' <span class="sub">· fondazione</span>':''),r[3]]}));
+    Array.prototype.forEach.call(el('tab-enti').querySelectorAll('td:first-child,th:first-child'),function(c){c.className=''});
+    el('piu').style.display=FIL.length>VIS?'':'none'}
+  el('q').addEventListener('input',filtra);el('f-sez').addEventListener('change',filtra);el('f-tipo').addEventListener('change',filtra);
+  el('piu').addEventListener('click',function(){VIS+=200;disegna()});
+  filtra();
+}
+
+function limiti(){
+  var R=D.runts,G=D.registro_comune;
+  var L=['<b>Solo gli enti iscritti al RUNTS.</b> Le associazioni non iscritte (circoli, comitati, gruppi informali, molte societ&agrave; sportive, parrocchie, sindacati) non ci sono. L&rsquo;ISTAT, che conta tutto il non profit, per la provincia di Milano trova '+f0(D.riconciliazione.istat_milano_2023)+' istituzioni (2023): gli enti RUNTS sono il '+nf(D.riconciliazione.runts_su_istat_milano_pct,0)+'%.',
+   '<b>Iscrizione non &egrave; nascita.</b> L&rsquo;anno &egrave; quello dell&rsquo;iscrizione al registro (con il blocco della trasmigrazione nel 2022). Non ci dice quando l&rsquo;ente &egrave; nato, n&eacute; se &egrave; ancora attivo: gli enti cancellati stanno in un&rsquo;altra lista, che qui non usiamo.',
+   '<b>La sede legale non &egrave; la sede operativa.</b> Associazioni nazionali, cooperative e fondazioni possono avere la sede legale a Milano e lavorare altrove (o l&rsquo;indirizzo di uno studio professionale). Il contrario vale per chi lavora in citt&agrave; con sede in un altro comune: non lo contiamo.',
+   '<b>Il registro nazionale non ha indirizzo, settore, bilancio o numero di soci</b> nell&rsquo;elenco pubblico. Per questo la mappa e i settori si basano su altri elenchi pi&ugrave; piccoli e volontari (795 associazioni nel registro del Comune, 277 cooperative sociali dell&rsquo;albo, 338 persone giuridiche della Regione), che si sovrappongono tra loro e col RUNTS: non vanno sommati e non rappresentano tutta la citt&agrave;.',
+   '<b>Il quartiere delle associazioni del Comune &egrave; dedotto dall&rsquo;indirizzo</b> con i numeri civici del Comune (nessun servizio esterno): su '+G.n+' voci '+G.con_nil+' hanno un quartiere, '+G.fuori_milano+' hanno la sede in un altro comune e '+G.non_localizzate+' non sono state riconosciute (via non trovata, civico mancante). Controllo: il Municipio del quartiere trovato coincide con il Municipio che l&rsquo;associazione ha indicato nell&rsquo;81% dei casi (ma i due Municipi possono differire senza che ci sia un errore).',
+   '<b>Il tipo &ldquo;dal nome&rdquo; &egrave; approssimato.</b> Cooperativa sociale e fondazione sono riconosciute dalla parola nel nome (e, per le cooperative, dalla sezione &laquo;imprese sociali&raquo;): la lista del RUNTS non ha la forma giuridica. Le sezioni sono ufficiali.',
+   '<b>Le densit&agrave; dipendono dai residenti.</b> Gli enti per 10.000 abitanti cambiano se si usano i residenti ISTAT 2025 ('+f0(D.citta.filter(function(c){return c.citta==='Milano'})[0].ab)+' a Milano) o quelli dell&rsquo;anagrafe del Comune per i quartieri (1.407.044 nel 2024): sono due fonti diverse. Le citt&agrave; col maggior numero di sedi di enti nazionali (Roma, Milano) salgono; i comuni piccoli hanno valori instabili.',
+   '<b>Per i quartieri le percentuali sono su numeri piccoli</b>: con 1&ndash;30 enti per quartiere, una sola associazione sposta la classifica.',
+   '<b>Il 5 per mille.</b> La colonna dell&rsquo;elenco si chiama &laquo;5x1000&raquo; e la leggiamo come ente presente nell&rsquo;elenco del 5 per mille; non abbiamo trovato una spiegazione scritta nel file, quindi &egrave; una lettura nostra.',
+   '<b>Il confronto 2011</b> &egrave; l&rsquo;ultimo con il dettaglio per comune: 15 anni fa, nel censimento ISTAT con definizioni diverse (tutto il non profit, anche gli enti pubblici privatizzati e le grandi istituzioni sanitarie e scolastiche). Non &egrave; confrontabile con il RUNTS di oggi.',
+   '<b>Nessun dato sulle persone.</b> Il file del RUNTS ha anche il nome del legale rappresentante di ogni ente: non l&rsquo;abbiamo copiato, usato n&eacute; pubblicato. I nomi delle organizzazioni sono quelli del registro pubblico.'];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function metodo(){
+  var M=['<b>RUNTS</b>: la pagina pubblica &laquo;Lista enti&raquo; del Ministero ha un pulsante &laquo;Scarica&raquo; per l&rsquo;elenco degli enti iscritti (Excel, 154.244 righe, aggiornato al 2 novembre 2026). Abbiamo fatto la stessa richiesta del pulsante, una volta sola, con un programma. Abbiamo tolto subito la colonna del legale rappresentante. Il portale <a href="https://dati.lavoro.gov.it/">dati.lavoro.gov.it</a> non ha un elenco del RUNTS che abbiamo trovato.',
+   '<b>Per 10.000 abitanti</b>: enti con sede legale nel comune (nome del comune e sigla della provincia) diviso per i residenti al 1&deg; gennaio 2025 (ISTAT), moltiplicato per 10.000. Per la provincia di Milano, somma dei 133 comuni. Attenzione tecnica: la sigla &laquo;NA&raquo; (Napoli) non va letta come dato mancante.',
+   '<b>Confronto con il Bes e l&rsquo;ISTAT</b>: i valori del Bes sono quelli gi&agrave; scaricati per la pagina <a href="../benessere/">Il benessere di Milano</a>; il totale delle istituzioni non profit della provincia viene dalla tavola 22 dell&rsquo;ISTAT (2023), diviso per i residenti 2025.',
+   '<b>Quartieri</b>: ogni voce del registro del Comune e delle persone giuridiche ha l&rsquo;indirizzo trasformato in quartiere (NIL) con il registro dei numeri civici del Comune (ds634), cercando via e numero civico; nessun geocodificatore esterno. L&rsquo;albo delle cooperative sociali ha gi&agrave; il quartiere. Il quartiere &egrave; quello della sede legale.',
+   '<b>ISTAT 2011</b>: il file dei dati comunali del censimento delle istituzioni non profit; i totali di Milano coincidono con quelli pubblicati dal Comune (ds273): 6.662 istituzioni, 142.539 volontari.',
+   '<b>Controlli</b>: ogni numero di questa pagina &egrave; ricalcolato dal programma <code>pagina.py</code> e confrontato con i valori attesi (nel file <code>riepilogo.json</code>, campo &laquo;avvisi&raquo; vuoto).',
+   '<b>Il codice</b> e le note sono nella cartella <code>terzo-settore/</code> del progetto.'];
+  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script></body></html>
