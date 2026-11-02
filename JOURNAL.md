@@ -2702,3 +2702,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - L'Atlante della rigenerazione del Comune non è riusabile ("Copyright Comune di Milano. Solo consultazione autorizzata"): dati non scaricati; la pagina del Comune risponde 403 e non è stata aggirata. Usato il PGT Milano 2030, Tavola R02 (CC BY 4.0, 2020): 277 ambiti in trasformazione, 978 ha (5,4% della città). Senza Atlante: niente alloggi, volumi, quota sociale, verde, date, operatori.
 - Numeri: i più grandi Montecito Rogoredo 111 ha, Cascina Merlata 92, MIND 87, Farini 62. Sorpresa: gli ambiti sono il 5,4% della città ma contengono il 41% del suolo diventato consumato nel 2012-25 (più della metà in MIND e Cascina Merlata); i prezzi OMI non seguono gli ambiti (+27,3% contro +27,2%).
 - Limiti dei dati: stato al 2020; perimetri di piano, non cantieri; prezzi e case per NIL interi; confronti, non cause.
+
+## 66. Rifiuti e raccolta differenziata
+
+- 2026-11-02 notte — Fase 1 e pagina (`rifiuti/`, `docs/rifiuti/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `rifiuti/NOTE.md`.
+- Fonti: ISPRA Catasto rifiuti, rifiuti per comune 2010-2024 e costi pro capite 2011-2024 (CC BY 4.0 dalle note legali ISPRA); Comune (ds857-860) per controllo; TARI dal filone bilancio; turisti; BES. Una volta ISPRA ha risposto con una verifica JavaScript: non eseguita né aggirata, la stessa richiesta ripetuta dopo 20 secondi è passata.
+- Numeri: raccolta differenziata 33,8% (2010) → 63,3% (2024), Italia 67,7%, hinterland 73,4%; indifferenziato da 356 a 177 kg a testa; rifiuti per abitante fermi dal 2013; costo 219 € per abitante nel 2024, il più basso delle sette grandi città. Sorpresa: Milano ha dimezzato l'indifferenziato senza fare meno rifiuti (il salto è l'umido 2012-2014); intorno a Milano si ricicla di più (123 comuni su 132).
+- Limiti dei dati: abitanti 2011-12 censuari (buco nei grafici); dal 2016 la differenziata conta anche macerie e spazzamento (serie "vecchio calcolo" tratteggiata); costi dichiarati dai comuni con voci cambiate dal 2020; differenziata non vuol dire riciclata.

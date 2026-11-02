@@ -76,7 +76,8 @@
     { path: 'divisa/', label: 'Quanto è divisa Milano' },
     { path: 'sfratti/', label: 'Gli sfratti' },
     { path: 'lavoro/', label: 'Il lavoro per quartiere' },
-    { path: 'rigenerazione/', label: 'Progetti di rigenerazione' }
+    { path: 'rigenerazione/', label: 'Progetti di rigenerazione' },
+    { path: 'rifiuti/', label: 'Rifiuti e differenziata' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
