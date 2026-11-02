@@ -96,6 +96,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 83 | Violenza contro le donne | Online |
 | 84 | Terzo settore | Online |
 | 85 | Imprese | Online |
+| 86 | Fonti e metodo | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Online: tessere per tema (bozza 21), con ricerca |
 

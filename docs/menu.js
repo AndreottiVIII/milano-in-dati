@@ -97,7 +97,8 @@
     { path: 'violenza-donne/', label: 'Violenza contro le donne' },
     { path: 'terzo-settore/', label: 'Associazioni e terzo settore' },
     { path: 'imprese/', label: 'Imprese che nascono e muoiono' },
-    { path: 'elenco/', label: 'Elenco di tutte le pagine' }
+    { path: 'elenco/', label: 'Elenco di tutte le pagine' },
+    { path: 'fonti/', label: 'Fonti e metodo' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
