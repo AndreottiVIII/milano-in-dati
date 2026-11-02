@@ -34,3 +34,6 @@ Union massima delle fonti con termini chiari, con luogo: OSM 165 + Wikidata ~56 
 
 ## 6. AGGIORNAMENTO: pagina costruita con le sole fonti libere
 Vedi STATO.md. Pagina `docs/targhe/index.html`: 228 targhe (OSM ODbL, Wikidata CC0, 10 foto Commons come metadati). Categorie con regole di parole (in `scripts/pagina.py`, lista `RULES`/`GR`/`KW2`), sesso solo da Wikidata P21 (3 donne su 80 persone, 3,8%), NIL per punto in poligono.
+
+## 7. AGGIORNAMENTO fase 2: Pietre della Memoria usato (autorizzazione ANMIG dichiarata da Davide, 2/11/2026)
+519 targhe (334 PdM: 294 solo PdM + 40 anche in OSM; 56 solo Wikidata; 117 solo OSM; 5 OSM+Wikidata; 7 Commons). Resistenza e vittime del nazifascismo: 159 (regole di parole, sezione "Metodo" della pagina). Persone 116 (34 dai titoli PdM + Wikidata), donne 4 su 114 con sesso noto (3,5%). I dati aperti (OSM+Wikidata) restano 218 targhe, circa il 12% della stima ~1.782. Nel sito si pubblicano solo i campi di fatto (niente foto, niente biografie).

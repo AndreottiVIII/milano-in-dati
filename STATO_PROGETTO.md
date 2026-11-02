@@ -80,7 +80,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 66 | Rifiuti | Online |
 | 67 | Povertà educativa | Online |
 | 68 | Parcheggi | Online (totale dalla stampa, con avviso) |
-| 69 | Lapidi e targhe | Online (solo dati liberi, una su otto) |
+| 69 | Lapidi e targhe | Online, 519 targhe con Pietre della Memoria (ANMIG) |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
