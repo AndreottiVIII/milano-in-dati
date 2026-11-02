@@ -2746,3 +2746,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Verdetto: nessun dato aperto sui reati sotto il livello del comune (Comune, Regione, Polizia Locale, ATM cercati). Pagina fatta con tre serie ufficiali aperte non presenti in `reati/`: ISTAT "altri delitti" mensili per provincia (maltrattamenti in famiglia, stalking, diffusione di immagini intime), ISTAT sicurezza percepita nei 27 grandi comuni 2022-2024, Comune ds516 interventi per aggressioni 2004-2015 (serie chiusa). Tutto CC BY.
 - Numeri: maltrattamenti in famiglia 2024 47,5 ogni 100.000 abitanti (Italia 49,0), dal 2018 +25% (Italia +68%); stalking 30,4 (Italia 36,1). Milano 1ª su 27 grandi comuni per chi si sente insicuro a camminare da solo al buio (43,2% nel 2024).
 - Limiti dei dati: provincia, non città; reati denunciati, non commessi; la percezione non è un conteggio dei reati.
+
+## 72. Nascite e mamme
+
+- 2026-11-02 — Fase 1 e pagina (`nascite/`, `docs/nascite/`). Dettagli in `nascite/NOTE.md`.
+- Fonti: Comune ds141 (2003-2020) e ds1943 (2021-2024), nati da madri residenti per NIL e cittadinanza della madre (somme uguali a ds1495 in tutti gli anni); ds27 per le donne 15-49; ds1944 età della madre solo per la città; ISTAT (CC BY 4.0) fecondità ed età media solo per la provincia. Fecondità del comune stimata da noi (0,98 nel 2024; ISTAT provincia 1,13), dichiarata come stima.
+- Numeri: donne 15-49 quasi uguali (288.000 nel 2008, 300.000 nel 2024) ma nati da 12.467 a 9.147 (−26,6%), da 43,3 a 30,5 ogni 1.000 donne; calo in 66 quartieri su 70; due terzi del calo 2014-2024 da madri con cittadinanza straniera.
+- Limiti dei dati: niente età della madre per quartiere; la convergenza dei tassi italiane/straniere non vuol dire uguale fecondità (ISTAT 1,55 contro 1,06); Maggiore-Musocco-Certosa fuori scala (causa non verificata).

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Nascite e mamme</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#7b2d6e;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#f6edf4;--warm:#8a4a10;--warmbg:#fbf0e2;--ita:#3b5b92;--str:#c26a1b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.ctl input[type=range]{flex:1 1 200px;min-width:140px;max-width:100%;accent-color:var(--acc)}
+.ctl .yv{font-weight:700;min-width:5.5em}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed} .lgd i.dt{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid;vertical-align:-1px}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,42%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} .bars .nm i{display:block;font-size:.78rem;color:var(--mut);font-style:normal}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+.see{display:flex;flex-wrap:wrap;gap:6px 18px;margin:.4em 0}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Nascite e mamme, quartiere per quartiere</h1>
+<p>Quanti bambini nascono a Milano, in quali quartieri, da che mamme? Qui guardiamo i <b>nati da madri residenti a Milano</b> dal 2003 al 2024: per quartiere (gli 88 NIL, Nuclei di Identità Locale), in rapporto alle donne di 15-49 anni che ci abitano; poi l&rsquo;età delle madri (solo per tutta la città, 2021-2024), la cittadinanza della madre (nella categoria ufficiale &laquo;italiana&raquo; o &laquo;straniera&raquo;) e il confronto con la fecondità dell&rsquo;Italia (ISTAT).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Il numero di nati usato qui è quello del <b>registro dei residenti</b> del Comune: bambini nati da madri iscritte all&rsquo;anagrafe di Milano, ovunque siano nati. Non è il numero dei nati negli ospedali milanesi (altro dato del Comune, vicino ma diverso: <span id="avv"></span>). La cittadinanza è quella scritta in anagrafe: non dice l&rsquo;origine. Tutti i dettagli sono nei <a href="#limiti">limiti dei dati</a>.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Scegli che cosa mostrare e l&rsquo;anno. Di default è la <b>media degli ultimi tre anni</b>, perché in un quartiere piccolo i nati di un solo anno sono pochi e il numero ballerebbe. Clic su un quartiere (o sceglilo dall&rsquo;elenco) per la sua scheda.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="r" class="on">Nati ogni 1.000 donne di 15-49 anni</button><button type="button" data-m="rp">Nati ogni 1.000 abitanti</button><button type="button" data-m="qs">Madre di cittadinanza straniera (%)</button><button type="button" data-m="n">Numero di nati</button></div>
+<div class="ctl"><label class="sub" for="yr">Anno:</label><input type="range" id="yr" min="2003" max="2024" value="2024" step="1"><span class="yv" id="yv">2022-2024</span>
+<label class="ck"><input type="checkbox" id="ck3" checked> media di 3 anni</label></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per nati ogni 1.000 donne di 15-49 anni"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Nati vivi da madri residenti (Comune di Milano, ds141 per il 2003-2020 e ds1943 per il 2021-2024, CC BY) e residenti per quartiere, età e genere (ds27, CC BY). Mappa © OpenStreetMap contributors. In grigio i quartieri con meno di 3.000 residenti nel 2024 (parchi e aree quasi senza abitanti): dividere per poche persone non ha senso.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="citta">La città, anno per anno</h2>
+<div id="citta-testo"></div>
+<h3>Nati da madri residenti, per cittadinanza della madre</h3>
+<div class="lgd" id="lg-nati"></div>
+<div class="ch" id="ch-nati" role="img" aria-label="Grafico a barre: nati ogni anno a Milano dal 2003 al 2024, per cittadinanza della madre"></div>
+<p class="src">Nati vivi da madri residenti a Milano, per anno di nascita (Comune di Milano, ds141 e ds1943; il totale coincide con la serie storica ds1495). «Non indicata» = cittadinanza della madre non registrata (7-10 nati l&rsquo;anno dal 2021).</p>
+<h3>Nati ogni 1.000 donne di 15-49 anni</h3>
+<div class="lgd" id="lg-tasso"></div>
+<div class="ch" id="ch-tasso" role="img" aria-label="Grafico: nati ogni 1.000 donne di 15-49 anni a Milano, 2003-2024, per cittadinanza della madre"></div>
+<p class="src">Nati dell&rsquo;anno diviso per la media delle donne di 15-49 anni residenti al 31/12 dell&rsquo;anno prima e dell&rsquo;anno (ds27). Le linee «madre italiana» e «madre straniera» dividono i nati per le donne di 15-49 anni con la stessa cittadinanza in anagrafe.</p>
+<div class="warn" id="tasso-avviso"></div>
+
+<h2 id="quartieri">I quartieri a confronto</h2>
+<div id="quartieri-testo"></div>
+<div class="grid2"><div><h3>Più nati ogni 1.000 donne di 15-49 anni</h3><div class="bars" id="b-top"></div></div>
+<div><h3>Meno nati ogni 1.000 donne di 15-49 anni</h3><div class="bars" id="b-bot"></div></div></div>
+<p class="src">Media 2022-2024, solo i quartieri con almeno 3.000 residenti nel 2024 (70 su 88). Sotto ogni nome: nati in tre anni. Tutti i quartieri: <a href="data/nil_2022_2024.csv">nil_2022_2024.csv</a>.</p>
+<div id="fuoriscala" class="warn"></div>
+<h3>Chi è cambiato di più dal 2003-2005 al 2022-2024</h3>
+<div id="cambi-testo"></div>
+<details><summary>Tutti i quartieri in classifica (tabella)</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
+
+<h2 id="cittadinanza">La cittadinanza della madre</h2>
+<div id="citt-testo"></div>
+<div class="grid2"><div><h3>Quota più alta di nati con madre straniera</h3><div class="bars" id="b-str-top"></div></div>
+<div><h3>Quota più bassa</h3><div class="bars" id="b-str-bot"></div></div></div>
+<p class="src">Percentuale dei nati 2022-2024 con madre di cittadinanza straniera (tra le madri con cittadinanza nota), quartieri con almeno 3.000 residenti. «Straniera» = cittadinanza non italiana scritta in anagrafe al momento della nascita; non si sa da quale paese e non si sa dov&rsquo;è nata la madre.</p>
+
+<h2 id="mamme">Le mamme: quanti anni hanno</h2>
+<div id="mamme-testo"></div>
+<div class="scroll"><table id="tab-eta"></table></div>
+<p class="src">Nati da madri residenti per classe d&rsquo;età della madre (Comune di Milano, ds1944, CC BY, 2021-2024), tutta la città. Per quartiere e per gli anni prima del 2021 il dato non è aperto: i file del Comune per quartiere (ds141, ds1943) non hanno l&rsquo;età della madre.</p>
+<h3>Età media delle madri al parto</h3>
+<div class="lgd" id="lg-eta"></div>
+<div class="ch" id="ch-eta" role="img" aria-label="Grafico: età media delle madri al parto, Italia, Lombardia, provincia di Milano, 2000-2025"></div>
+<p class="src" id="eta-src"></p>
+
+<h2 id="italia">Milano e l&rsquo;Italia</h2>
+<div id="italia-testo"></div>
+<div class="lgd" id="lg-tfr"></div>
+<div class="ch" id="ch-tfr" role="img" aria-label="Grafico: tasso di fecondità totale, Italia, Lombardia, provincia di Milano, 2000-2025"></div>
+<p class="src" id="tfr-src"></p>
+<h3>Provincia di Milano: madri italiane e madri straniere (ISTAT)</h3>
+<div class="lgd" id="lg-tfr2"></div>
+<div class="ch" id="ch-tfr2" role="img" aria-label="Grafico: tasso di fecondità totale in provincia di Milano per cittadinanza della madre"></div>
+<p class="src">ISTAT, «Indicatori di fecondità» (demo.istat.it / IstatData, CC BY 4.0), provincia di Milano (la Città metropolitana, non il solo comune), tasso di fecondità totale per cittadinanza della madre. Il 2025 è una stima ISTAT.</p>
+<div id="italia-testo2"></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come è fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="vedi">Vedi anche</h2>
+<div class="see"><a href="../eta/">Età e centenari, quartiere per quartiere</a><a href="../scuole-domani/">Quali scuole si svuoteranno</a><a href="../scuole/">Le scuole di Milano</a></div>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil_anno.csv">nil_anno.csv</a> (per quartiere e per anno: nati, donne di 15-49 anni, residenti, nati per cittadinanza della madre, tassi), <a href="data/nil_2022_2024.csv">nil_2022_2024.csv</a> (riepilogo per quartiere 2022-2024 e 2003-2005), <a href="data/nil.geojson">nil.geojson</a> (confini dei quartieri, semplificati, con le serie), <a href="data/citta_anno.csv">citta_anno.csv</a> (la città, anno per anno), <a href="data/eta_madre_citta_2021_2024.csv">eta_madre_citta_2021_2024.csv</a>, <a href="data/tfr_citta_2021_2024.csv">tfr_citta_2021_2024.csv</a> (nostro calcolo), <a href="data/tfr_eta_madre_istat.csv">tfr_eta_madre_istat.csv</a> (ISTAT: fecondità ed età media delle madri), <a href="data/riepilogo.json">riepilogo.json</a>. Separatore dei CSV: punto e virgola, tranne i file dell&rsquo;età e del TFR (virgola).</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Nati per quartiere: Comune di Milano, «Popolazione: nascite per quartiere» (ds141, 2003-2020) e «nascite dei residenti per quartiere» (ds1943, 2021-2024); età della madre: ds1944; nati avvenuti a Milano: ds289, ds1945, ds1946; serie storica dei nati ds1495; residenti per quartiere, età, genere e cittadinanza: ds27; confini dei NIL: ds964. Tutti dal portale <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 2 novembre 2026. ISTAT: indicatori di fecondità (tasso di fecondità totale, età media delle madri; <a href="https://esploradati.istat.it/">IstatData</a>), nati del bilancio demografico; contenuti sotto CC BY 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>), scaricati il 2 novembre 2026. Mappa di sfondo: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var R=null,NF=null,NIL=[],ANNI=[],RD=[];
+var ACC='#7b2d6e',ITA='#3b5b92',STR='#c26a1b',GRY='#8a8a8a',INK='#111';
+var SEQ=['#f3e6f1','#e0c0da','#c997c0','#ad6ca2','#8b4380','#66295c','#431a3b'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function f2(x){return nf(x,2)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function lgdLine(items){return items.map(function(it){return '<span><i class="'+(it.dot?'dt':'ln'+(it.dash?' d':''))+'" style="'+(it.dot?'border-color:':'border-top-color:')+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function lgdBox(items){return items.map(function(it){return '<span><i style="background:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function bars(id,rows,fmt,opt){opt=opt||{};var mx=Math.max.apply(null,rows.map(function(r){return r.v}));
+  setH(id,rows.map(function(r){return '<div class="row"><div class="nm">'+esc(r.n)+(r.sub?'<i>'+esc(r.sub)+'</i>':'')+'</div><div class="tr"><span class="fill" style="width:'+(100*r.v/mx).toFixed(1)+'%'+(r.c?';background:'+r.c:'')+'"></span></div><div class="v">'+fmt(r.v)+'</div></div>'}).join(''))}
+function sum(a,i0,i1){var s=0;for(var i=i0;i<=i1;i++)s+=(a[i]||0);return s}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
+  R=a[0];NF=a[1];ANNI=R.anni;
+  NIL=NF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mappa();citta();quartieri();cittadinanza();mamme();italia();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- grafici SVG ---------- */
+function attachTip(box,xs,html){
+  var old=box.querySelector('.tip');if(old)box.removeChild(old);
+  var tip=document.createElement('div');tip.className='tip';tip.style.display='none';box.appendChild(tip);
+  function move(e){var r=box.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,best=0,bd=1e9;
+    xs.forEach(function(x,i){var d=Math.abs(x-cx);if(d<bd){bd=d;best=i}});
+    tip.innerHTML=html(best);tip.style.display='block';var tw=tip.offsetWidth;tip.style.left=Math.max(0,Math.min(xs[best]-tw/2,r.width-tw))+'px';tip.style.top='2px'}
+  box.addEventListener('mousemove',move);box.addEventListener('touchstart',move,{passive:true});
+  box.addEventListener('mouseleave',function(){tip.style.display='none'});
+}
+/* cfg: xs (anni), series [{name,color,vals,dash,dots,noline}], ymin,ymax, fmt, h ; oppure cfg.stack=[{name,color,vals}] per barre impilate */
+function chart(id,cfg){
+  var box=el(id);if(!box)return;
+  function draw(){
+    var W=Math.max(280,box.clientWidth),H=cfg.h||(W<500?230:280),ml=W<500?36:44,mr=16,mt=10,mb=24,pw=W-ml-mr,ph=H-mt-mb;
+    var xs=cfg.xs,x0=xs[0],x1=xs[xs.length-1];
+    var step=niceStep((cfg.ymax-cfg.ymin)/5);
+    function sy(v){return mt+ph*(1-(v-cfg.ymin)/(cfg.ymax-cfg.ymin))}
+    var bw=cfg.stack?pw/xs.length:0;
+    function sx(x){return cfg.stack?ml+bw*(x-x0)+bw/2:ml+pw*(x-x0)/(x1-x0)}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+    for(var v=Math.ceil(cfg.ymin/step)*step;v<=cfg.ymax+1e-9;v+=step){s+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+sy(v)+'" y2="'+sy(v)+'" stroke="#e6e6e6"/><text class="mu" x="'+(ml-4)+'" y="'+(sy(v)+4)+'" text-anchor="end">'+cfg.fmt(v)+'</text>'}
+    var every=W<500?5:2;
+    xs.forEach(function(x,i){if((x-x0)%every===0){s+='<text class="mu" x="'+sx(x)+'" y="'+(H-6)+'" text-anchor="middle">'+x+'</text>'}});
+    if(cfg.stack){
+      xs.forEach(function(x,i){var acc=0;cfg.stack.forEach(function(b){var v=b.vals[i]||0;var y1=sy(acc+v),y0=sy(acc);s+='<rect x="'+(sx(x)-bw*0.38)+'" y="'+y1+'" width="'+(bw*0.76)+'" height="'+Math.max(0,y0-y1)+'" fill="'+b.color+'"/>';acc+=v})});
+    }else{
+      cfg.series.forEach(function(se){
+        var d='',pen=false;
+        se.vals.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+sx(xs[i]).toFixed(1)+' '+sy(v).toFixed(1)+' ';pen=true});
+        if(!se.noline)s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2)+'"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
+        if(se.dots)se.vals.forEach(function(v,i){if(v!=null)s+='<circle cx="'+sx(xs[i]).toFixed(1)+'" cy="'+sy(v).toFixed(1)+'" r="4" fill="#fff" stroke="'+se.color+'" stroke-width="2"/>'});
+      });
+    }
+    s+='</svg>';box.innerHTML=s;
+    var px=xs.map(sx);
+    attachTip(box,px,function(i){
+      var h='<b>'+xs[i]+'</b>';
+      if(cfg.stack){var t=0;cfg.stack.forEach(function(b){var v=b.vals[i]||0;t+=v;h+='<br><span style="color:'+b.color+'">■</span> '+b.name+': '+cfg.fmt(v)});h+='<br>Totale: '+cfg.fmt(t)}
+      else cfg.series.forEach(function(se){if(se.vals[i]!=null)h+='<br><span style="color:'+se.color+'">'+(se.dots?'○':'■')+'</span> '+se.name+': '+(cfg.fmt2||cfg.fmt)(se.vals[i])});
+      return h});
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var F=R.fatti,N=R.nil;
+  var h='<p><b>Le donne in età fertile sono quasi le stesse, i nati no.</b> Nel 2008 sono nati '+f0(F.nati_2008)+' bambini da madri residenti a Milano, nel 2024 '+f0(F.nati_2024)+' ('+sg(F.calo_2008_2024_pct,1)+'%). Le donne di 15-49 anni residenti sono '+f0(F.donne_2008)+' nel 2008 e '+f0(F.donne_2024)+' nel 2024: ogni 1.000 donne nascono <b>'+f1(F.tasso_2024)+' bambini invece di '+f1(F.tasso_2008)+'</b>.</p>';
+  h+='<p><b>Non è un solo quartiere.</b> In '+N.n_calo_dal_2003_05+' dei '+N.n_classifica+' quartieri con almeno 3.000 residenti, i nati ogni 1.000 donne di 15-49 anni sono scesi dal 2003-2005 al 2022-2024: in mediana del '+f0(Math.abs(N.mediana_var_pct))+'%.</p>';
+  h+='<p>Dal 2014 al 2024 i nati sono <b>'+f0(Math.abs(F.calo_2014_2024))+' in meno</b>: '+f0(Math.abs(F.calo_2014_2024_madri_straniere))+' ('+f0(F.quota_straniere_su_calo_pct)+'%) con madre di cittadinanza straniera, '+f0(Math.abs(F.calo_2014_2024_madri_italiane))+' con madre italiana. Attenzione: chi prende la cittadinanza italiana passa da una colonna all&rsquo;altra, quindi una parte di questo spostamento è un cambio di etichetta (<a href="#limiti">limiti</a>).</p>';
+  h+='<p class="src">Nati vivi da madri residenti: Comune di Milano, ds141 e ds1943 (CC BY); donne di 15-49 anni: ds27 (media al 31/12 dell&rsquo;anno prima e dell&rsquo;anno).</p>';
+  setH('sorpresa',h);
+  var c=R.citta,i24=ANNI.indexOf(2024);
+  el('avv').textContent='nel 2024 '+f0(c.nati_residenti[i24])+' nati da residenti contro '+f0(c.nati_avvenuti_a_milano[i24])+' nati avvenuti a Milano, e solo '+f0(c.nati_in_citta_da_genitori_residenti[i24])+' di questi ultimi con genitori residenti a Milano';
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,CUR='r',SEL=null,MET={};
+function win(){var y=+el('yr').value,k=el('ck3').checked?3:1,a=Math.max(ANNI[0],y-k+1);return [a,y]}
+function wlabel(w){return w[0]===w[1]?String(w[1]):w[0]+'-'+w[1]}
+function calc(p,w){
+  var i0=w[0]-ANNI[0],i1=w[1]-ANNI[0],b=sum(p.b,i0,i1),W=sum(p.w,i0,i1),P=sum(p.p,i0,i1),s=sum(p.s,i0,i1),t=sum(p.t,i0,i1);
+  return {b:b,w:W,p:P,s:s,t:t,r:W>0?1000*b/W:null,rp:P>0?1000*b/P:null,qs:(s+t)>0?100*s/(s+t):null,n:b,k:i1-i0+1,wa:W/(i1-i0+1)};
+}
+function citycalc(w){var c=R.citta,i0=w[0]-ANNI[0],i1=w[1]-ANNI[0];
+  return {b:sum(c.nati_residenti,i0,i1),r:1000*sum(c.nati_residenti,i0,i1)/sum(c.donne_15_49_medie,i0,i1),rp:1000*sum(c.nati_residenti,i0,i1)/sum(c.residenti_medi,i0,i1),
+    qs:100*sum(c.madre_straniera,i0,i1)/(sum(c.madre_straniera,i0,i1)+sum(c.madre_italiana,i0,i1))}}
+function colore(v,m,k){if(v==null)return '#cfcfcf';var i=0,b=m.b;while(i<b.length&&v>=b[i]*(m.scale?k:1))i++;return SEQ[i]}
+function sty(f){var p=f.properties,m=MET[CUR],c=calc(p,win()),sel=SEL===p.i;
+  var grey=(!p.cl&&CUR!=='n');
+  return {fillColor:grey?'#cfcfcf':colore(c[CUR],m,c.k),fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:.8}}
+function valtxt(c,m){return c[CUR]==null?'n.d.':m.f(c[CUR])+m.u}
+function tipNil(p){var w=win(),c=calc(p,w),m=MET[CUR];
+  var h='<b>'+esc(p.n)+'</b> ('+wlabel(w)+')<br>';
+  if(!p.cl&&CUR!=='n')h+='Meno di 3.000 residenti: valore non confrontabile<br>';
+  h+=m.lab+': <b>'+valtxt(c,m)+'</b><br>Nati: '+f0(c.b)+(c.k>1?' in '+c.k+' anni':'');
+  if(CUR==='r'||CUR==='rp')h+='<br>Donne 15-49 anni: circa '+f0(c.wa);
+  return h}
+function legenda(){var m=MET[CUR],k=calc(NIL[0],win()).k,b=m.b.map(function(v){return m.scale?v*k:v}),h='';
+  for(var i=0;i<=b.length;i++){var t=i===0?'meno di '+m.f(b[0]):(i===b.length?m.f(b[i-1])+' o più':m.f(b[i-1])+' – '+m.f(b[i]));h+='<span><i style="background:'+SEQ[i]+'"></i>'+t+'</span>'}
+  if(CUR!=='n')h+='<span><i style="background:#cfcfcf"></i>meno di 3.000 residenti</span>';
+  setH('lg-map',h)}
+function mappa(){
+  var f1x=function(v){return f1(v)},f0x=function(v){return f0(v)};
+  MET={r:{lab:'Nati ogni 1.000 donne di 15-49 anni',b:[25,30,35,40,45,50],f:f0x,u:'',desc:'Nati dell&rsquo;anno ogni 1.000 donne di 15-49 anni residenti nel quartiere. '},
+       rp:{lab:'Nati ogni 1.000 abitanti',b:[5,6,7,8,9,10],f:f1x,u:'',desc:'Nati dell&rsquo;anno ogni 1.000 residenti (il «tasso di natalità»). Un quartiere con tante donne giovani ha un valore più alto anche a parità di figli per donna. '},
+       qs:{lab:'Nati con madre di cittadinanza straniera',b:[10,20,30,40,50,60],f:f0x,u:'%',desc:'Su 100 nati con cittadinanza della madre nota, quanti hanno la madre con cittadinanza straniera (categoria ufficiale del Comune; non dice il paese né l&rsquo;origine). '},
+       n:{lab:'Nati',b:[50,100,200,300,400,600],f:f0x,u:'',scale:true,desc:'Numero di nati da madri residenti nel quartiere (nel periodo scelto). Quartieri più grandi hanno più nati: per confrontare usa le altre mappe. '}};
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  var sel=el('sel-nil');sel.innerHTML='<option value="">— scegli —</option>'+NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(p){return '<option value="'+p.i+'">'+esc(p.n)+'</option>'}).join('');
+  sel.addEventListener('change',function(){if(sel.value)scegli(+sel.value,true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});CUR=b.getAttribute('data-m');aggiorna()})});
+  el('yr').addEventListener('input',aggiorna);el('ck3').addEventListener('change',aggiorna);
+  aggiorna();
+}
+function aggiorna(){
+  var w=win(),m=MET[CUR],cc=citycalc(w);
+  el('yv').textContent=wlabel(w);
+  setH('map-desc',m.desc+'Periodo: <b>'+wlabel(w)+'</b>.'+(CUR==='n'?'':' Media della città: <b>'+(CUR==='r'||CUR==='rp'?f1(cc[CUR]):m.f(cc[CUR]))+m.u+'</b>.'));
+  el('map').setAttribute('aria-label','Mappa dei quartieri di Milano: '+m.lab+', '+wlabel(w));
+  LAY.setStyle(sty);legenda();if(SEL)scheda(SEL);
+}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);scheda(i);
+  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}}
+function movavg(p,key,den){var o=[];for(var i=0;i<ANNI.length;i++){var a=Math.max(0,i-2),b=sum(p[key],a,i),d=sum(p[den],a,i);o.push(d>0?1000*b/d:null)}return o}
+function scheda(i){
+  var p=NIL.filter(function(q){return q.i===i})[0],w=win(),c=calc(p,w),cc=citycalc(w),a=calc(p,[2003,2005]),z=calc(p,[2022,2024]);
+  var h='<h3>'+esc(p.n)+'</h3><p class="sub">'+f0(p.ab)+' residenti nel 2024. '+(p.cl?'':'<b>Meno di 3.000 residenti: i numeri oscillano molto.</b> ')+'Periodo scelto sulla mappa: '+wlabel(w)+'.</p>';
+  h+='<div class="scroll"><table><thead><tr><th></th><th class="r">Questo quartiere</th><th class="r">Tutta Milano</th></tr></thead><tbody>';
+  h+='<tr><td>Nati ('+wlabel(w)+')</td><td class="r">'+f0(c.b)+'</td><td class="r">'+f0(cc.b)+'</td></tr>';
+  h+='<tr><td>Nati ogni 1.000 donne di 15-49 anni</td><td class="r">'+(c.r==null?'n.d.':f1(c.r))+'</td><td class="r">'+f1(cc.r)+'</td></tr>';
+  h+='<tr><td>Nati ogni 1.000 abitanti</td><td class="r">'+(c.rp==null?'n.d.':f1(c.rp))+'</td><td class="r">'+f1(cc.rp)+'</td></tr>';
+  h+='<tr><td>Madre di cittadinanza straniera</td><td class="r">'+(c.qs==null?'n.d.':f0(c.qs)+'%')+'</td><td class="r">'+f0(cc.qs)+'%</td></tr>';
+  h+='<tr><td>Nati ogni 1.000 donne, 2003-2005 → 2022-2024</td><td class="r">'+(a.r==null||z.r==null?'n.d.':f0(a.r)+' → '+f0(z.r))+'</td><td class="r">'+f0(citycalc([2003,2005]).r)+' → '+f0(citycalc([2022,2024]).r)+'</td></tr>';
+  h+='</tbody></table></div><h3>Nati ogni 1.000 donne di 15-49 anni (media mobile di 3 anni)</h3><div class="lgd">'+lgdLine([{color:ACC,t:esc(p.n)},{color:INK,t:'Tutta Milano',dash:true}])+'</div><div class="ch" id="ch-nil"></div>';
+  setH('scheda',h);
+  var cv=[];for(var k=0;k<ANNI.length;k++){var a0=Math.max(0,k-2);cv.push(1000*sum(R.citta.nati_residenti,a0,k)/sum(R.citta.donne_15_49_medie,a0,k))}
+  var nv=movavg(p,'b','w');
+  var mx=Math.max.apply(null,nv.concat(cv).filter(function(x){return x!=null})),ymax=Math.ceil((mx+2)/10)*10;
+  RD=RD.filter(function(f){return !f.nil});
+  var before=RD.length;chart('ch-nil',{xs:ANNI,series:[{name:esc(p.n),color:ACC,vals:nv},{name:'Tutta Milano',color:INK,vals:cv,dash:true,w:1.5}],ymin:0,ymax:ymax,fmt:function(v){return f0(v)},fmt2:f1,h:200});
+  RD[RD.length-1].nil=true;
+}
+
+/* ---------- la citta' ---------- */
+function citta(){
+  var c=R.citta,F=R.fatti;
+  var h='<p>Il massimo è del <b>'+F.anno_max+'</b> ('+f0(F.nati_max)+' nati); il minimo è l&rsquo;ultimo anno (<b>'+f0(F.nati_2024)+'</b> nel 2024). Nel frattempo le donne di 15-49 anni sono rimaste intorno alle 290-300 mila ('+f0(F.donne_2008)+' nel 2008, '+f0(F.donne_2024)+' nel 2024): il calo dei nati è un calo di nati <i>per donna</i>, non di donne. Ogni 1.000 abitanti nascono '+f1(F.tasso_ab_2024)+' bambini nel 2024 contro '+f1(F.tasso_ab_2008)+' nel 2008.</p>';
+  h+='<p>La quota di nati con madre di cittadinanza straniera è salita dal '+f1(F.quota_str_2003)+'% (2003) al '+f1(F.quota_str_2013)+'% (2013) ed è scesa al '+f1(F.quota_str_2024)+'% (2024).</p>';
+  setH('citta-testo',h);
+  setH('lg-nati',lgdBox([{color:ITA,t:'madre di cittadinanza italiana'},{color:STR,t:'madre di cittadinanza straniera'},{color:GRY,t:'non indicata'}]));
+  chart('ch-nati',{xs:ANNI,stack:[{name:'madre italiana',color:ITA,vals:c.madre_italiana},{name:'madre straniera',color:STR,vals:c.madre_straniera},{name:'non indicata',color:GRY,vals:c.madre_nd}],ymin:0,ymax:14000,fmt:f0});
+  setH('lg-tasso',lgdLine([{color:INK,t:'tutte le madri'},{color:ITA,t:'madre italiana (per 1.000 donne italiane)'},{color:STR,t:'madre straniera (per 1.000 donne straniere)'}]));
+  chart('ch-tasso',{xs:ANNI,series:[{name:'tutte',color:INK,vals:c.nati_per_1000_donne_15_49},{name:'madre italiana',color:ITA,vals:c.nati_per_1000_donne_italiane},{name:'madre straniera',color:STR,vals:c.nati_per_1000_donne_straniere}],ymin:20,ymax:80,fmt:f0,fmt2:f1});
+  setH('tasso-avviso','<b>Come leggere le due linee.</b> Nel 2003 ogni 1.000 donne straniere di 15-49 anni nascevano '+f0(F.tasso_str_2003)+' bambini, ogni 1.000 italiane '+f0(F.tasso_ita_2003)+'. Nel 2024 i due valori sono quasi uguali ('+f0(F.tasso_str_2024)+' e '+f0(F.tasso_ita_2024)+'). <b>Non vuol dire che oggi le madri straniere abbiano gli stessi figli delle italiane</b>: le donne straniere residenti sono molte di più (da 42 mila a 82 mila), tante sono arrivate da poco e in giovane età, il registro del Comune conta più stranieri di ISTAT (+10% nel 2025) e chi prende la cittadinanza italiana passa nel gruppo delle italiane. L&rsquo;ISTAT, con un metodo diverso e per la provincia di Milano, trova ancora un divario (vedi <a href="#italia">Milano e l&rsquo;Italia</a>).');
+}
+
+/* ---------- quartieri ---------- */
+function quartieri(){
+  var N=R.nil;
+  setH('quartieri-testo','<p>Tra i '+N.n_classifica+' quartieri con almeno 3.000 residenti, nel 2022-2024 la mediana è di <b>'+f1(N.mediana_r)+'</b> nati ogni 1.000 donne di 15-49 anni; i valori vanno da '+f1(N.min_r)+' a '+f1(N.max_r)+'. Tutta la città è passata da '+f1(R.fatti.tasso_2003)+' (2003) a '+f1(R.fatti.tasso_2024)+' (2024).</p>');
+  var fmt=function(v){return f1(v)};
+  bars('b-top',N.top_r.map(function(r){return {n:r.n,v:r.v,sub:f0(r.nati)+' nati in 3 anni'}}),fmt);
+  bars('b-bot',N.bot_r.map(function(r){return {n:r.n,v:r.v,sub:f0(r.nati)+' nati in 3 anni'}}),fmt);
+  var F=R.fatti;
+  setH('fuoriscala','<b>Un valore fuori scala.</b> Maggiore - Musocco - Certosa è in cima ('+f1(N.top_r[0].v)+') e anche nel 2003-2005 era tra i più alti. È un quartiere i cui residenti sono raddoppiati: '+f0(F.mmc_residenti_2011)+' nel 2011, '+f0(F.mmc_residenti_2024)+' nel 2024 (ds27). Il dato non dice perché (ipotesi non verificata: nuove case o residenze collettive, che hanno una composizione per età diversa); trattalo con prudenza.');
+  var cm=N.max_calo.map(function(r){return '<b>'+esc(r.n)+'</b> ('+f0(r.a)+' → '+f0(r.b)+')'}).join(', ');
+  var au=N.aumenti.map(function(r){return '<b>'+esc(r.n)+'</b> ('+f0(r.a)+' → '+f0(r.b)+')'}).join(', ');
+  setH('cambi-testo','<p>Nati ogni 1.000 donne di 15-49 anni, media 2003-2005 → media 2022-2024. In '+N.n_calo_dal_2003_05+' quartieri su '+N.n_classifica+' il valore è sceso (mediana: '+sg(N.mediana_var_pct,0)+'%). Cali più forti: '+cm+'. Solo '+(N.n_classifica-N.n_calo_dal_2003_05)+' sono saliti: '+au+'.</p><p class="sub">Dal 2003 al 2012 il dataset non dice come i residenti siano stati assegnati agli 88 NIL (nati solo nel 2012): il confronto di periodi lontani è meno solido di quello tra anni vicini (<a href="#limiti">limiti</a>).</p>');
+  // tabella
+  var w1=[2022,2024],w0=[2003,2005],rows=NIL.filter(function(p){return p.cl}).map(function(p){var a=calc(p,w0),z=calc(p,w1);return {p:p,a:a,z:z}}).sort(function(x,y){return y.z.r-x.z.r});
+  table('tab-nil',['Quartiere','Residenti 2024','Nati 2022-24','Per 1.000 donne 2022-24','Per 1.000 donne 2003-05','Madre straniera %'],rows.map(function(o){return [esc(o.p.n),f0(o.p.ab),f0(o.z.b),f1(o.z.r),o.a.r==null?'n.d.':f1(o.a.r),o.z.qs==null?'n.d.':f0(o.z.qs)]}));
+}
+
+/* ---------- cittadinanza ---------- */
+function cittadinanza(){
+  var N=R.nil;
+  setH('citt-testo','<p>Il Comune registra, per ogni nato, la cittadinanza della madre e del padre in due sole categorie: <b>italiana</b> o <b>straniera</b> (dal 2021 anche «non indicata», 7-10 casi l&rsquo;anno). Qui si usa solo questa categoria ufficiale e solo quella della <b>madre</b>. Non ci sono i paesi, non c&rsquo;è il luogo di nascita, e un bambino nato in Italia da genitori stranieri non diventa italiano nei dati. Nel 2022-2024 la quota mediana dei quartieri è del '+f0(N.mediana_qs)+'%; in tutta la città del '+f0(R.fatti.quota_str_2024)+'% (2024).</p>');
+  var fmt=function(v){return f0(v)+'%'};
+  bars('b-str-top',N.top_straniera.map(function(r){return {n:r.n,v:r.v,sub:f0(r.nati)+' nati in 3 anni',c:STR}}),fmt);
+  bars('b-str-bot',N.bot_straniera.map(function(r){return {n:r.n,v:r.v,sub:f0(r.nati)+' nati in 3 anni',c:ITA}}),fmt);
+}
+
+/* ---------- mamme: eta' ---------- */
+function mamme(){
+  var E=R.eta,F=R.fatti,T=E.tfr_citta,t24=T[T.length-1],t21=T[0],IT=R.istat['Provincia di Milano'].tutte.eta[2024-2000],IIT=R.istat['Italia'].tutte.eta[2024-2000];
+  setH('mamme-testo','<p>I dati aperti del Comune danno l&rsquo;età della madre solo per tutta la città e solo dal 2021. Nel 2024 il <b>'+f1(t24.quota_madre_35_piu_pct)+'%</b> dei nati ha una madre di 35 anni o più (era il '+f1(t21.quota_madre_35_piu_pct)+'% nel 2021); il '+f1(t24.quota_madre_40_piu_pct)+'% ha una madre di 40 anni o più ('+f1(t21.quota_madre_40_piu_pct)+'% nel 2021); il '+f1(t24.quota_madre_sotto_25_pct)+'% una madre sotto i 25.</p><p>L&rsquo;età media delle madri al parto, stimata da queste classi di 5 anni (centro di ogni classe), è di circa <b>'+f1(t24.eta_media_madre_approx)+'</b> anni nel 2024. Per confronto, l&rsquo;ISTAT dà <b>'+f1(IT)+'</b> per la provincia di Milano e <b>'+f1(IIT)+'</b> per l&rsquo;Italia: la città sembra più avanti, ma il confronto non è esatto (il nostro è un calcolo approssimato, l&rsquo;ISTAT usa l&rsquo;età di ogni madre; la provincia comprende anche i comuni intorno a Milano).</p>');
+  var years=['2021','2022','2023','2024'],tot={};years.forEach(function(y){tot[y]=E.classi.reduce(function(s,c){return s+(E.conteggi[y][c]||0)},0)});
+  table('tab-eta',['Età della madre'].concat(years.map(function(y){return 'Nati '+y})).concat(['% 2021','% 2024']),
+    E.classi.map(function(c){var lab=c+'–'+(c+4);return [lab].concat(years.map(function(y){return f0(E.conteggi[y][c]||0)})).concat([f1(100*(E.conteggi['2021'][c]||0)/tot['2021']),f1(100*(E.conteggi['2024'][c]||0)/tot['2024'])])}).concat([['Totale con età nota'].concat(years.map(function(y){return f0(tot[y])})).concat(['100','100'])]));
+  var I=R.istat,x=[];for(var y=2000;y<=2025;y++)x.push(y);
+  var city=x.map(function(y){var r=T.filter(function(q){return q.anno===y})[0];return r?r.eta_media_madre_approx:null});
+  setH('lg-eta',lgdLine([{color:INK,t:'Italia'},{color:'#2f8f6a',t:'Lombardia'},{color:ACC,t:'provincia di Milano'},{color:STR,t:'comune di Milano (nostra stima, 2021-2024)',dot:true}]));
+  chart('ch-eta',{xs:x,series:[{name:'Italia',color:INK,vals:I['Italia'].tutte.eta},{name:'Lombardia',color:'#2f8f6a',vals:I['Lombardia'].tutte.eta},{name:'provincia di Milano',color:ACC,vals:I['Provincia di Milano'].tutte.eta},{name:'comune di Milano (stima)',color:STR,vals:city,dots:true,noline:true}],ymin:29,ymax:36,fmt:f0,fmt2:f1});
+  setH('eta-src','ISTAT, «Indicatori di fecondità», età media delle madri al parto (CC BY 4.0), 2000-2025 (2025 stima). Punti arancioni: nostro calcolo per il comune di Milano da ds1944 (classi di 5 anni, non è un dato ufficiale).');
+}
+
+/* ---------- italia ---------- */
+function italia(){
+  var I=R.istat,T=R.eta.tfr_citta,M=I['Provincia di Milano'].tutte.tfr,IT=I['Italia'].tutte.tfr,x=[];for(var y=2000;y<=2025;y++)x.push(y);
+  var ultimoSopra=null;for(var i=0;i<x.length;i++){if(M[i]!=null&&IT[i]!=null&&M[i]>IT[i])ultimoSopra=x[i]}
+  var i24=24,i08=8,i25=25;
+  var h='<p>Il <b>tasso di fecondità totale</b> (TFR) è il numero medio di figli per donna che si avrebbe se per tutta la vita valessero i tassi dell&rsquo;anno. L&rsquo;ISTAT lo pubblica per Italia, regioni e province, <b>non per il solo comune di Milano</b>. Nel 2024 è <b>'+f2(IT[i24])+'</b> in Italia e <b>'+f2(M[i24])+'</b> nella provincia di Milano (2025, stima: '+f2(IT[i25])+' e '+f2(M[i25])+'). Nel 2008 era '+f2(IT[i08])+' e '+f2(M[i08])+'.</p>';
+  h+='<p>La provincia di Milano ha avuto un TFR più alto di quello italiano fino al '+ultimoSopra+' (ultimo anno con Milano sopra l&rsquo;Italia); dopo è uguale o più basso. Per il solo comune, con i dati del Comune e un calcolo nostro (nati per età della madre ÷ donne per età), il TFR 2021-2024 è '+T.map(function(q){return f2(q.tfr_mio_calcolo)}).join(', ')+': più basso della provincia. È una stima, non un dato ufficiale: i denominatori sono quelli del registro del Comune (<a href="#limiti">limiti</a>).</p>';
+  setH('italia-testo',h);
+  var city=x.map(function(y){var r=T.filter(function(q){return q.anno===y})[0];return r?r.tfr_mio_calcolo:null});
+  setH('lg-tfr',lgdLine([{color:INK,t:'Italia'},{color:'#2f8f6a',t:'Lombardia'},{color:ACC,t:'provincia di Milano'},{color:STR,t:'comune di Milano (nostra stima)',dot:true}]));
+  chart('ch-tfr',{xs:x,series:[{name:'Italia',color:INK,vals:IT},{name:'Lombardia',color:'#2f8f6a',vals:I['Lombardia'].tutte.tfr},{name:'provincia di Milano',color:ACC,vals:M},{name:'comune di Milano (stima)',color:STR,vals:city,dots:true,noline:true}],ymin:0.8,ymax:1.6,fmt:f1,fmt2:f2});
+  setH('tfr-src','ISTAT, «Indicatori di fecondità», tasso di fecondità totale (CC BY 4.0), 2000-2025 (2025 stima). Punti arancioni: nostro calcolo per il comune di Milano (nati per classe d&rsquo;età della madre, ds1944, divisi per le donne della stessa classe, ds27), non ufficiale.');
+  var P=I['Provincia di Milano'];
+  setH('lg-tfr2',lgdLine([{color:INK,t:'tutte'},{color:ITA,t:'madre italiana'},{color:STR,t:'madre straniera'}]));
+  chart('ch-tfr2',{xs:x,series:[{name:'tutte',color:INK,vals:P.tutte.tfr},{name:'madre italiana',color:ITA,vals:P.italiana.tfr},{name:'madre straniera',color:STR,vals:P.straniera.tfr}],ymin:0.8,ymax:2.6,fmt:f1,fmt2:f2});
+  var s0=P.straniera.tfr.filter(function(v){return v!=null})[0];
+  setH('italia-testo2','<p>Per la provincia di Milano il TFR delle madri straniere è '+f2(P.straniera.tfr[24])+' nel 2024 contro '+f2(P.italiana.tfr[24])+' delle italiane; ma era '+f2(P.straniera.tfr[8])+' nel 2008 e il divario si è ridotto. Sono tassi per età ripuliti dalla struttura della popolazione, quindi più confrontabili dei nostri nati per 1.000 donne di 15-49 anni.</p>');
+}
+
+/* ---------- limiti e metodo ---------- */
+function limiti(){
+  var F=R.fatti,C=R.controlli,ib=C.nati_istat_bilancio;
+  var L=[
+   '<b>Nati da residenti, non nati in città.</b> Il dato principale conta i bambini nati da madri iscritte all&rsquo;anagrafe di Milano, anche se nati altrove. I nati avvenuti a Milano (ds289, ds1945) sono un altro numero: '+f0(F.avvenuti_vs_residenti_2024[0])+' contro '+f0(F.avvenuti_vs_residenti_2024[1])+' nel 2024, e per circa il '+f0(100-F.residenti_in_citta_pct_2024)+'% (nel 2019 il '+f0(100-F.residenti_in_citta_pct_2019)+'%) sono figli di genitori residenti altrove. Sono due gruppi di persone diversi con dimensioni quasi uguali.',
+   '<b>L&rsquo;ISTAT conta in un altro modo.</b> Nel bilancio demografico ISTAT i nati del comune di Milano sono '+f0(ib['2024'])+' nel 2024 (Comune: '+f0(F.nati_2024)+'), '+f0(ib['2010'])+' nel 2010 (Comune: '+f0(R.citta.nati_residenti[7])+'), '+f0(ib['2019'])+' nel 2019. Le definizioni non sono le stesse (data di registrazione contro data dell&rsquo;evento); qui si usa sempre il Comune.',
+   '<b>Il registro conta più persone dell&rsquo;ISTAT dal 2020.</b> Al 31/12/2025 il registro del Comune ha il 2,7% di residenti e il 10,4% di stranieri in più delle stime ISTAT corrette con il censimento permanente (filone «popolazione» di questo sito). Le donne di 15-49 anni al denominatore potrebbero quindi essere sovrastimate, e i tassi sottostimati. Per questo il nostro TFR del comune (0,98 nel 2024) è sotto quello ISTAT della provincia (1,13) e non va letto come fecondità «vera».',
+   '<b>Salti nel registro.</b> I residenti passano da 1.324.821 (2002) a 1.270.964 (2003) e crescono di 24.579 tra 2011 e 2012, per revisioni anagrafiche: i tassi attorno a quegli anni sono meno affidabili. I tassi usano la media tra i residenti al 31/12 dell&rsquo;anno prima e dell&rsquo;anno.',
+   '<b>Quartieri.</b> «Quartiere» = NIL (88, nati col PGT del 2012); il dataset non dice come i residenti 2003-2011 siano stati assegnati ai NIL. Dei nati, '+f0(F.nati_senza_quartiere_totale)+' (2004-2012; '+f0(F.nati_senza_quartiere_2011)+' nel 2011 e '+f0(F.nati_senza_quartiere_2012)+' nel 2012) non hanno il quartiere: sono nei totali della città, non nelle mappe. I 18 quartieri con meno di 3.000 residenti (parchi, aree di cantiere) sono in grigio. Parco Sempione non ha residenti in ds27. In un anno solo, i quartieri piccoli ballano: meglio la media di 3 anni.',
+   '<b>Cittadinanza non è origine.</b> La madre «straniera» è una persona con cittadinanza non italiana in anagrafe alla nascita del figlio; chi ha preso la cittadinanza italiana conta come italiana (le acquisizioni sono 7.660-9.021 l&rsquo;anno nel 2022-2024, per tutte le età). I tassi per cittadinanza usano le donne di 15-49 anni per cittadinanza al 31/12: sono approssimati e non coincidono con il TFR per cittadinanza dell&rsquo;ISTAT. Non ci sono paesi, luogo di nascita della madre o cittadinanza del bambino.',
+   '<b>Età della madre: solo la città e solo dal 2021.</b> Per quartiere, e per gli anni prima, i dati aperti del Comune non l&rsquo;hanno (i file ds141 e ds1943 non contengono l&rsquo;età). Le classi sono di 5 anni; l&rsquo;età media da classi è approssimata. L&rsquo;età media ISTAT e il TFR ISTAT sono per provincia, non per comune; il 2025 è una stima. Il Comune ha 7-10 nati l&rsquo;anno senza età della madre (2021-2024), non contati nelle quote.',
+   '<b>Donne di 15-49 anni al denominatore.</b> Le madri di 50 anni e più (15-23 nati l&rsquo;anno, ds1944) sono nei nati ma non tra le donne al denominatore: pesano meno dello 0,3%. Il tasso per 1.000 donne di 15-49 anni è più semplice del TFR e dipende dall&rsquo;età delle donne: un quartiere con molte venticinquenni ha un valore diverso da uno con molte quarantenni anche con gli stessi figli per donna.',
+   '<b>Quartieri fuori scala.</b> Maggiore - Musocco - Certosa (residenti raddoppiati dal 2011, '+f0(F.mmc_residenti_2011)+' → '+f0(F.mmc_residenti_2024)+') ha il valore più alto; Triulzo Superiore (grigio sulla mappa: 53 nati in tre anni, quasi tutti con madre straniera) e Monluè - Ponte Lambro hanno quote di madri straniere molto alte con pochi nati. Le cause non sono nei dati.'
+  ];
+  setH('limiti-lista',L.map(function(t){return '<li>'+t+'</li>'}).join(''));
+}
+function metodo(){
+  var M=[
+   '<b>Nati:</b> somma di «Numerosità» per anno e quartiere dei file ds141 (2003-2020) e ds1943 (2021-2024); la somma dei quartieri più i nati senza quartiere coincide con la serie ds1495 del Comune in tutti i 22 anni (controllo nel programma). Il nome del quartiere è agganciato all&rsquo;id del NIL (maiuscole, apostrofi e accenti ignorati; due nomi troncati in ds1943 sono completati).',
+   '<b>Donne di 15-49 anni e residenti:</b> dal dataset ds27 (residenti al 31/12 per NIL, età singola, genere e cittadinanza, 1999-2025). Per l&rsquo;anno X si usa la media dei valori al 31/12 dell&rsquo;anno X-1 e dell&rsquo;anno X. «Italiane» = cittadinanza «Italia», «straniere» = tutte le altre voci (comprese quelle con cittadinanza non determinata).',
+   '<b>Tassi:</b> nati ÷ donne di 15-49 anni × 1.000; nati ÷ residenti × 1.000. Con più anni (media di 3 anni) si sommano i nati e le esposizioni dei tre anni, non si fa la media dei tassi.',
+   '<b>TFR del comune (stima nostra):</b> somma, per le classi di età della madre da 15 a 59 anni, di 5 × nati della classe ÷ donne della classe (ds1944 e ds27, media 31/12 anno prima e anno). Non è un dato ufficiale.',
+   '<b>ISTAT:</b> dataflow «Indicatori di fecondità» (IT1,25_326_DF_DCIS_FECONDITA1_5 e _6) dall&rsquo;interfaccia pubblica IstatData, province: Milano = codice ITC45. Nati del bilancio demografico dal filone «popolazione» di questo sito.',
+   '<b>Programmi:</b> <code>scarica.py</code>, <code>01_pulisci.py</code>, <code>pagina.py</code> nella cartella <code>nascite/scripts</code> del progetto; si possono rilanciare e ricontrollano i numeri citati nella pagina.'
+  ];
+  setH('metodo-lista',M.map(function(t){return '<li>'+t+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

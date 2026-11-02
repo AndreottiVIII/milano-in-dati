@@ -83,6 +83,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 69 | Lapidi e targhe | Online, 519 targhe con Pietre della Memoria (ANMIG) |
 | 70 | Età dei palazzi | Online |
 | 71 | Reati e sicurezza in città | Online |
+| 72 | Nascite e mamme | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
