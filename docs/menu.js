@@ -91,7 +91,8 @@
     { path: 'aeroporti/', label: 'Aeroporti' },
     { path: 'bici/', label: 'BikeMi e bici' },
     { path: 'medici-farmacie/', label: 'Medici e farmacie' },
-    { path: 'consiglio/', label: 'Consiglio comunale' }
+    { path: 'consiglio/', label: 'Consiglio comunale' },
+    { path: 'verde/', label: 'Parchi e verde' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

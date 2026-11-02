@@ -2807,3 +2807,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Comune ds743, ds1643 (fino a maggio 2026), ds1914 (CC BY). I dati aperti non hanno il voto dei singoli consiglieri né i titoli delle delibere: niente analisi di chi vota con chi (detto in pagina).
 - Numeri: presenze alle sedute 86% ma partecipazione alle votazioni 63% nel 2021-26 (89% e 66% nel 2016-21); il divario va da 15 punti (PD) a 41 (FdI e Forza Italia); minimo a metà mandato. Donne e uomini: differenza piccola, scritta con cautela (congedi non distinguibili).
 - Limiti dei dati: ds1914 incompleto (4 righe contro 10 ingressi e 10 uscite visti); cumulati che scendono; refusi nei nomi corretti; il sindaco escluso dai confronti; presenza non vuol dire lavoro.
+
+## 81. Parchi e verde, quartiere per quartiere
+
+- 2026-11-02 — Fase 1 e pagina (`verde/`, `docs/verde/`). Dettagli in `verde/NOTE.md`.
+- Fonti: Comune ds89 (74 parchi come poligoni), ds339 (2.917 aree, 2014, senza mappa), ds1323 (verde in città 2011-2024), ds2926/2927 (copie ISTAT); OSM solo controllo. Nessuna mappa completa del verde: stima per NIL con i poligoni più le aree ds339 collocate tramite il censimento degli alberi (95% dell'area nel NIL giusto sui 71 parchi controllabili).
+- Numeri: 10,7 m² di verde pubblico per residente (7,3 senza i 4 parchi oltre 40 ha); 44 NIL su 64 sotto i 9 m², il 73,5% dei residenti; mediana 8,7 minuti a piedi dal parco più vicino. Lo standard dei 9 m² (DI 1444/1968 art. 3, testo letto) vale per i nuovi insediamenti, non per i quartieri esistenti: detto in pagina.
+- Limiti dei dati: stima per NIL ferma al 2014; Bosco in città non collocato; legame con gli alberi in parte costruito dal metodo.

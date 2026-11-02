@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Parchi e verde</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.35em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars.s9 .tr:after{content:"";position:absolute;left:30%;top:-3px;height:16px;border-left:2px solid #c26a1b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.stack{display:flex;height:22px;border:1px solid #888;margin:.4em 0} .stack span{display:block;height:100%}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+#tab-9,#tab-conf{min-width:520px} #tab-sch{min-width:420px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.links a{margin-right:12px;white-space:nowrap}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Parchi e verde, quartiere per quartiere</h1>
+<p>Quanto verde pubblico c&rsquo;&egrave; per ogni abitante di Milano? Qui guardiamo parchi, giardini e verde attrezzato nei 88 quartieri (i NIL, Nuclei di Identit&agrave; Locale): metri quadri per residente, quota della superficie del quartiere e quanto &egrave; lontano il parco pi&ugrave; vicino. Li confrontiamo con i <b>9 metri quadri per abitante</b> che la legge del 1968 indica per i parchi, e con alberi, suolo consumato e caldo. <b>Non esiste una mappa completa e aggiornata del verde pubblico</b>: i numeri qui sono una stima costruita da pezzi (vedi <a href="#limiti">i limiti</a>).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Il Comune pubblica due elenchi, nessuno dei due completo: i disegni dei parchi (74 parchi e giardini, senza anno) e un elenco del 2014 (quasi 3.000 aree con la superficie, ma senza mappa). Li abbiamo uniti: i parchi disegnati valgono come sono, le altre aree del 2014 sono state collocate nei quartieri con gli alberi del censimento. Il risultato &egrave; una <b>stima</b>, non un dato ufficiale, e non tiene conto dei parchi nati dopo il 2014. Il metodo e i controlli sono nelle sezioni <a href="#limiti">Limiti dei dati</a> e <a href="#metodo">Come &egrave; fatto</a>.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Scegli che cosa mostrare. Clic su un quartiere per la scheda, o scegli dall&rsquo;elenco.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="mB" class="on">Metri quadri per abitante</button><button type="button" data-m="pB">Quota della superficie</button><button type="button" data-m="mBs">Senza i 4 parchi grandi</button><button type="button" data-m="min">Minuti a piedi dal parco</button><button type="button" data-m="mA">Solo parchi disegnati dal Comune</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select>
+<label class="ck"><input type="checkbox" id="ck-parchi"> mostra i parchi disegnati dal Comune</label></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per metri quadri di verde pubblico per abitante"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors; parchi, aree verdi, quartieri e residenti: Comune di Milano (CC BY). In grigio i quartieri con meno di 5.000 residenti (parchi e aree quasi senza abitanti): dividere per pochi abitanti non ha senso, e il loro verde serve tutta la citt&agrave;.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="nove">I 9 metri quadri</h2>
+<div id="nove-testo"></div>
+<div class="grid2"><div><h3>Meno verde per abitante</h3><div class="bars s9" id="b-bot"></div></div>
+<div><h3>Pi&ugrave; verde per abitante</h3><div class="bars s9" id="b-top"></div></div></div>
+<p class="src">Metri quadri di parchi, giardini e verde attrezzato (stima, vedi sopra) per residente (ds205, anno 2024). Solo i quartieri con almeno 5.000 residenti. La linea arancione &egrave; a 9 m&sup2;; le barre sono tagliate a 30 m&sup2; (i valori veri sono scritti a destra).</p>
+<details><summary>Tutti i 64 quartieri con almeno 5.000 residenti</summary><div class="scroll tabmax"><table id="tab-9"></table></div></details>
+<div id="grandi-testo"></div>
+
+<h2 id="distanza">Quanto &egrave; lontano il parco pi&ugrave; vicino</h2>
+<div id="dist-testo"></div>
+<div id="dist-stack"></div>
+<div class="grid2"><div><h3>I quartieri pi&ugrave; lontani dal parco</h3><div class="bars" id="b-lont"></div></div>
+<div><h3>I pi&ugrave; vicini</h3><div class="bars" id="b-vic"></div></div></div>
+<p class="src">Minuti a piedi (4,5 km/h, lungo la rete pedonale di OpenStreetMap) dal civico al bordo del parco pi&ugrave; vicino tra gli 81 parchi di almeno 5.000 m&sup2; disegnati dal Comune; mediana per quartiere, solo quartieri con almeno 5.000 residenti. Calcolo del filone <a href="../citta-15-minuti/">La citt&agrave; dei 15 minuti</a>, riusato qui.</p>
+<div class="warm" id="dist-limite"></div>
+
+<h2 id="tempo">Parchi nuovi nel tempo</h2>
+<div id="tempo-testo"></div>
+<h3>Parchi e verde attrezzato in citt&agrave;, 2011&ndash;2024</h3>
+<div class="ch" id="ch-serie" role="img" aria-label="Grafico: chilometri quadrati di parchi e verde attrezzato a Milano dal 2011 al 2024"></div>
+<p class="src">Somma di &laquo;Parchi (giardini e ville) urbani&raquo;, &laquo;Ville, giardini e parchi&raquo;, &laquo;Verde attrezzato&raquo;, &laquo;Aree naturali protette&raquo; e &laquo;Forestazione urbana&raquo;, gestione comunale e di altri enti pubblici. Fonte: Comune di Milano, ds1323 (CC BY). Nel 2018 una riga ha un campo in pi&ugrave; (letto il primo valore); nel 2024 mancano le aree naturali protette (0,04 km&sup2; nel 2023).</p>
+<h3>Aree gioco, aree cani, orti e giardini condivisi: schede per anno</h3>
+<div class="ch" id="ch-schede" role="img" aria-label="Grafico: schede nuove per anno di aree gioco, aree cani, orti e giardini condivisi"></div>
+<p class="src" id="src-schede"></p>
+<div class="scroll"><table id="tab-sch"></table></div>
+
+<h2 id="confronti">Verde, alberi, suolo e caldo</h2>
+<div id="conf-testo"></div>
+<div class="scroll"><table id="tab-conf"></table></div>
+<p class="src">Correlazione di Spearman tra i quartieri (64 con almeno 5.000 residenti per i valori &laquo;per abitante&raquo;, 88 per quelli &laquo;sulla superficie&raquo;); tra parentesi l&rsquo;intervallo di confidenza al 95% (5.000 ricampionamenti dei quartieri). Una correlazione descrive un legame fra numeri, non dice che una cosa ne causi un&rsquo;altra.</p>
+<div class="grid2"><div><h3>Verde e suolo consumato</h3><div class="ch" id="ch-suolo" role="img" aria-label="Grafico: suolo consumato e metri quadri di verde per abitante, per quartiere"></div></div>
+<div><h3>Verde e calore</h3><div class="ch" id="ch-calore" role="img" aria-label="Grafico: indice di esposizione al calore e metri quadri di verde per abitante, per quartiere"></div></div></div>
+<p class="src">Ogni punto &egrave; un quartiere con almeno 5.000 residenti. Suolo consumato 2025: filone <a href="../suolo/">Suolo</a>. Esposizione al calore: indice da satellite del Comune, luglio 2024 (progetto SPOTTED, ds2811), da 0 a 1; non &egrave; una temperatura misurata. Linea tratteggiata: 9 m&sup2;.</p>
+<p class="links">Pagine collegate: <a href="../alberi/">Alberi della citt&agrave;</a> <a href="../caldo/">Il quartiere pi&ugrave; caldo</a> <a href="../suolo/">Suolo consumato</a> <a href="../quartiere/">Il tuo quartiere</a> <a href="../citta-15-minuti/">La citt&agrave; dei 15 minuti</a></p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil_verde.csv">nil_verde.csv</a> (una riga per quartiere: verde in tre versioni, metri quadri per abitante, quota della superficie, minuti dal parco, confronti), <a href="data/nil.geojson">nil.geojson</a> (confini dei quartieri semplificati con gli stessi valori), <a href="data/parchi.geojson">parchi.geojson</a> (i parchi disegnati dal Comune, uniti per parco e semplificati), <a href="data/parchi_ds89.csv">parchi_ds89.csv</a> (74 parchi con superficie e quartiere), <a href="data/aree_ds339_localizzate.csv">aree_ds339_localizzate.csv</a> (le 885 aree dell&rsquo;elenco 2014 non disegnate, con il quartiere assegnato e il metodo; le 39 non collocate sono segnate), <a href="data/ds1323_pulito.csv">ds1323_pulito.csv</a> e <a href="data/serie_citta.csv">serie_citta.csv</a> (serie della citt&agrave;), <a href="data/schede_per_anno.csv">schede_per_anno.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno). Programmi: <code>verde/scripts/</code> (<code>build.py</code>, <code>pagina.py</code>).</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Tutti i dati del Comune di Milano sono pubblicati con licenza Creative Commons Attribution (CC BY; la versione non &egrave; indicata dal portale) su <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Parchi e giardini (poligoni): &laquo;Territorio: localizzazione dei parchi e giardini&raquo; (ds89), scaricato il 2 novembre 2026 (file GeoJSON caricato il 6/5/2024, anno dei dati non dichiarato). Aree verdi per zona e superficie (ds339, dato 2014), verde urbano 2011&ndash;2024 (ds1323), mq di verde per abitante e incidenza sulla superficie (ds2926 e ds2927, che riprendono le tavole 12.1 e 11.1 di ISTAT; non scaricate da ISTAT), alberi (ds2484, edizione 31/3/2025), indice di verde (ds2813): scaricati il 1 novembre 2026. Aree gioco (ds724), aree cani (ds52), giardini condivisi (ds2187), orti urbani (ds2186), esposizione al calore dei NIL (ds2811): 2 novembre 2026. Confini dei NIL (ds964), residenti (ds205, anno 2024). Suolo consumato: filone <a href="../suolo/">Suolo</a>. Tempi a piedi: filone <a href="../citta-15-minuti/">La citt&agrave; dei 15 minuti</a>. Controllo: poligoni <code>leisure=park</code> di OpenStreetMap (Overpass, 2 novembre 2026), &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL, usati solo per un confronto e non ripubblicati. Standard: decreto interministeriale 2 aprile 1968, n. 1444, art. 3 (testo letto su <a href="https://www.bosettiegatti.eu/info/norme/statali/1968_1444.htm">bosettiegatti.eu</a>, il 2/11/2026).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,PF=null,NIL=[],RD=[];
+var ACC='#00695c',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var SEQW=['#fbe9d5','#f3cb9d','#e5a15f','#c26a1b','#8a4a10','#4d2807'];
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function sg2(x){return sg(x,2)}
+function ic(a){return '('+sg2(a[0])+' / '+sg2(a[1])+')'}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/parchi.geojson')]).then(function(a){
+  D=a[0];NF=a[1];PF=a[2];
+  NIL=NF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mappa();nove();distanza();tempo();confronti();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function cl(){return NIL.filter(function(p){return p.cl===1})}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var C=D.citta,B=C.B,A=C.A,dd=C.distanza,r=cl();
+  var sotto2=r.filter(function(p){return p.mB<2}).sort(function(a,b){return a.mB-b.mB});
+  var h='<p><b>In media la citt&agrave; supera i 9 metri quadri, ma due quartieri su tre no.</b> Su tutta Milano i parchi e il verde attrezzato valgono circa <b>'+f1(B.citta_m2_ab)+' m&sup2; per abitante</b>, sopra i 9 della legge. Ma <b>'+B.sotto_9+' dei '+B.nil_classifica+' quartieri</b> con almeno 5.000 residenti stanno sotto i 9, e ci vive il <b>'+nf(B.quota_residenti_in_nil_sotto_9_pct,0)+'%</b> dei milanesi. La mediana dei quartieri &egrave; '+f1(B.mediana_nil)+' m&sup2;.</p>';
+  h+='<p><b>La media la fanno pochi parchi enormi.</b> Togliendo i quattro parchi sopra i 40 ettari ('+C.ds89.oltre_40ha.map(function(x){return esc(x.replace('Parco Delle ','Parco delle ').replace('Parco Di ','Parco di ').replace('Parco Enrico ','Parco Enrico '))}).join(', ')+') la citt&agrave; scende a <b>'+f1(B.citta_senza_grandi_m2_ab)+' m&sup2;</b>, sotto i 9, e i quartieri sotto la soglia diventano '+B.nil_sotto_9_senza_grandi+'.</p>';
+  h+='<p><b>'+sotto2.length+' quartieri hanno meno di 2 m&sup2; a testa</b>: tra loro '+sotto2.slice(0,3).map(function(p){return esc(p.n)+' ('+f1(p.mB)+', '+f0(p.ab)+' residenti)'}).join(', ')+'.</p>';
+  h+='<p><b>Il parco &egrave; per lo pi&ugrave; vicino, ma vicinanza e quantit&agrave; non vanno insieme.</b> Arriva a piedi a un parco grande in 15 minuti o meno una quota di residenti pari a '+nf(dd.entro15_pct,0)+'% (mediana: '+f1(dd.minuti_mediana_residenti)+' minuti); in 5 minuti, '+nf(dd.entro5_pct,0)+'%. Esempi: San Siro ha il parco a circa venti minuti e 1,1 m&sup2; a testa; Gratosoglio ha 18 m&sup2; a testa ma il parco disegnato dal Comune a quasi mezz&rsquo;ora.</p>';
+  h+='<p class="src">Verde = stima: parchi disegnati dal Comune (ds89) pi&ugrave; aree dell&rsquo;elenco 2014 (ds339) collocate con gli alberi; residenti 2024 (ds205). Soglia: decreto 1444/1968 art. 3 lett. c (<a href="#nove">testo sotto</a>). Minuti: rete pedonale, 4,5 km/h.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,PARL=null,CUR='mB',SEL=null,MET={};
+function colore(v,m){if(v==null)return '#bdbdbd';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function mappa(){
+  var B9=[2,4,6,9,15];
+  MET={
+   mB:{k:'mB',b:B9,c:SEQ,u:' m² per abitante',grey:true,f:f1,t:'Metri quadri di parchi, giardini e verde attrezzato per residente (stima). Il colore cambia alla soglia dei 9 m²: dal quarto colore in poi il quartiere è sopra lo standard. La media della città è '+f1(D.citta.B.citta_m2_ab)+'. I quartieri con grandi parchi ai margini (Parco Nord, Forlanini, Bosco in città) sono grigi perché hanno pochissimi residenti.'},
+   pB:{k:'pB',b:[2,5,8,12,20],c:SEQ,u:'% della superficie',f:function(v){return nf(v,1)+'%'},t:'Quota della superficie del quartiere occupata da parchi, giardini e verde attrezzato (stima). Qui contano anche i quartieri senza residenti. La media della città è '+nf(D.citta.B.citta_pct_area,1)+'%.'},
+   mBs:{k:'mBs',b:B9,c:SEQ,u:' m² per abitante',grey:true,f:f1,t:'Come la prima mappa, ma senza i quattro parchi sopra i 40 ettari (Cave, Trenno, Forlanini, Lambro), che servono tutta la città e gonfiano i quartieri accanto. Quanti quartieri passano sopra i 9 m² cambia molto.'},
+   min:{k:'min',b:[5,8,10,15,20],c:SEQW,u:' minuti',f:f1,t:'Minuti a piedi, mediana dei residenti del quartiere, dal parco più vicino tra gli 81 parchi di almeno 5.000 m² disegnati dal Comune. Più scuro = più lontano. Il Parco Agricolo Sud non è nei dati: le zone a sud risultano lontane anche se hanno la campagna accanto.'},
+   mA:{k:'mA',b:[1,2,3,6,9],c:SEQ,u:' m² per abitante',grey:true,f:f1,t:'Solo i parchi e giardini disegnati dal Comune (74 parchi, 7,4 km², senza anno): è la misura precisa ma incompleta. Mancano per esempio i giardini più piccoli dell’elenco 2014.'}
+  };
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
+    l.bindTooltip(function(){return tip(f.properties)},{sticky:true});
+    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.createPane('parchi').style.zIndex=450;
+  PARL=L.geoJSON(PF,{pane:'parchi',interactive:true,style:function(){return {color:'#052e29',weight:1,fillColor:'#2b8a7d',fillOpacity:.55}},onEachFeature:function(f,l){l.bindTooltip(esc(f.properties.n),{sticky:true})}});
+  MAP.fitBounds(LAY.getBounds());
+  el('ck-parchi').addEventListener('change',function(){if(this.checked)PARL.addTo(MAP);else MAP.removeLayer(PARL)});
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function valore(p){var m=MET[CUR];if(m.grey&&p.cl!==1)return null;return p[m.k]}
+function tip(p){var m=MET[CUR],v=p[m.k];
+  if(m.grey&&p.cl!==1)return '<b>'+esc(p.n)+'</b><br>'+f0(p.ab)+' residenti: meno di 5.000, non confrontabile<br>verde: '+f0(p.vB)+' m²';
+  return '<b>'+esc(p.n)+'</b><br>'+(v==null?'n.d.':m.f(v)+(CUR==='pB'?'':m.u))}
+function sty(f){var p=f.properties,m=MET[CUR],s=SEL===p.i;return {fillColor:colore(valore(p),m),fillOpacity:.82,color:s?'#000':'#fff',weight:s?3:1}}
+function ricolora(){
+  var m=MET[CUR];LAY.setStyle(sty);if(SEL)bringSel();
+  var h='';
+  m.c.forEach(function(c,i){var t,b=m.b,u=(CUR==='pB'?'%':'');
+    t=i===0?'meno di '+nf(b[0],0)+u:i===b.length?nf(b[i-1],0)+u+' o più':nf(b[i-1],0)+u+' – '+nf(b[i],0)+u;
+    h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+  if(m.grey)h+='<span><i style="background:#bdbdbd"></i>meno di 5.000 residenti</span>';
+  setH('lg-map',h);setH('map-desc',m.t);
+}
+function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);bringSel();
+  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}
+  scheda(i)}
+function tag9(v){return v>=9?'<span class="pill">sopra i 9</span>':''}
+function scheda(i){
+  var p=nilById(i);if(!p)return;var C=D.citta;
+  var h='<h3>'+esc(p.n)+'</h3><div class="scroll"><table><tbody>';
+  h+='<tr><td>Residenti (2024)</td><td class="r">'+f0(p.ab)+'</td></tr>';
+  h+='<tr><td>Verde pubblico (stima)</td><td class="r"><b>'+f0(p.vB)+'</b> m² <span class="sub">('+nf(p.pB,1)+'% del quartiere; città '+nf(C.B.citta_pct_area,1)+'%)</span></td></tr>';
+  h+='<tr><td>Metri quadri per abitante</td><td class="r">'+(p.cl===1?'<b>'+f1(p.mB)+'</b> '+tag9(p.mB)+' <span class="sub">(città '+f1(C.B.citta_m2_ab)+'; soglia 9)</span>':'<span class="sub">non confrontabile: meno di 5.000 residenti'+(p.mB!=null?' ('+f0(p.mB)+')':'')+'</span>')+'</td></tr>';
+  h+='<tr><td>Senza i 4 parchi sopra i 40 ettari</td><td class="r">'+(p.cl===1?f1(p.mBs)+' m² per abitante':'<span class="sub">–</span>')+'</td></tr>';
+  h+='<tr><td>Solo parchi disegnati dal Comune</td><td class="r">'+f0(p.vA)+' m²'+(p.cl===1?' ('+f1(p.mA)+' per abitante)':'')+'</td></tr>';
+  h+='<tr><td>Parco disegnato più grande</td><td class="r">'+(p.pk?esc(p.pk)+' <span class="sub">('+f0(p.pkq)+'% del verde disegnato)</span>':'<span class="sub">nessuno</span>')+'</td></tr>';
+  h+='<tr><td>Parco più vicino (mediana)</td><td class="r">'+(p.min!=null?'<b>'+f1(p.min)+'</b> minuti a piedi <span class="sub">(circa '+f0(p.mt)+' m)</span>':'')+'</td></tr>';
+  h+='<tr><td>Residenti entro 5 / 10 / 15 minuti</td><td class="r">'+f0(p.q5)+'% / '+f0(p.q10)+'% / '+f0(p.q15)+'%</td></tr>';
+  h+='<tr><td>Alberi del Comune ogni 1.000 residenti</td><td class="r">'+f0(p.alb)+' <span class="sub">(<a href="../alberi/">alberi</a>)</span></td></tr>';
+  h+='<tr><td>Suolo consumato (2025)</td><td class="r">'+nf(p.suolo,1)+'% <span class="sub">(<a href="../suolo/">suolo</a>)</span></td></tr>';
+  h+='<tr><td>Esposizione al calore (luglio 2024, 0–1)</td><td class="r">'+nf(p.cal,2)+' <span class="sub">(<a href="../caldo/">caldo</a>)</span></td></tr>';
+  h+='<tr><td>Aree gioco / cani / orti / giardini condivisi</td><td class="r">'+p.gi+' / '+p.ca+' / '+p.or+' / '+p.co+' <span class="sub">(schede)</span></td></tr>';
+  h+='</tbody></table></div><p class="sub">Verde = parchi disegnati dal Comune più aree dell&rsquo;elenco 2014 collocate con gli alberi (stima, vedi limiti). Le schede di aree gioco, cani, orti e giardini condivisi non sono sommate al verde: stanno spesso dentro i parchi.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- barre ---------- */
+function bars(id,rows,max,col){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+Math.min(100,r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+
+/* ---------- 9 mq ---------- */
+function nove(){
+  var C=D.citta,B=C.B,A=C.A,dec=D.decreto,r=cl().slice().sort(function(a,b){return a.mB-b.mB});
+  var h='<p>Il decreto interministeriale del 2 aprile 1968, n. 1444 (articolo 3) chiede, per i nuovi insediamenti residenziali, almeno <b>18 m&sup2; per abitante</b> di spazi pubblici. Di questi, <b>9 m&sup2;</b> sono per &laquo;spazi pubblici attrezzati a parco e per il gioco e lo sport, effettivamente utilizzabili per tali impianti con esclusione di fasce verdi lungo le strade&raquo; (lettera c). Gli altri sono scuole, servizi e parcheggi. Nei centri storici e nelle zone gi&agrave; costruite (zone A e B) le aree contano il doppio (art. 4).</p>';
+  h+='<p>Il decreto serve a fare i piani urbanistici: non &egrave; un voto ai quartieri. Lo usiamo come regola del pollice, e il confronto resta indicativo: la nostra stima conta anche piccoli giardini di quartiere che la classificazione ISTAT chiama &laquo;verde attrezzato&raquo;, e non possiamo separare i campi sportivi. Con questi avvertimenti:</p>';
+  h+='<ul class="m"><li>Su tutta la citt&agrave;: <b>'+f1(B.citta_m2_ab)+' m&sup2;</b> per abitante ('+nf(B.citta_km2,1)+' km&sup2; di verde per '+f0(C.residenti)+' residenti).</li>';
+  h+='<li>Quartieri con almeno 5.000 residenti sopra i 9 m&sup2;: <b>'+B.sopra_9+' su '+B.nil_classifica+'</b>; sotto i 3 m&sup2;: <b>'+B.sotto_3+'</b>. Il rapporto fra il quartiere con pi&ugrave; verde e quello con meno &egrave; di <b>'+nf(B.rapporto_max_min_classifica,0)+' volte</b>.</li>';
+  h+='<li>Con i soli parchi disegnati dal Comune la citt&agrave; ha '+f1(A.citta_m2_ab)+' m&sup2; per abitante e solo '+A.sopra_9+' quartieri su '+A.nil_classifica+' superano i 9: &egrave; una misura troppo incompleta per giudicare, e infatti la usiamo solo come confronto.</li>';
+  h+='<li>Il dato ufficiale pi&ugrave; citato, <b>'+nf(D.serie.istat_mq_ab_2023,1)+' m&sup2; per abitante</b> (ISTAT, 2023), conta tutto: anche aiuole e verde stradale, giardini delle scuole, cimiteri e il verde di altri enti. Non &egrave; confrontabile con i 9 m&sup2; dei parchi.</li></ul>';
+  setH('nove-testo',h);
+  var lo=r.slice(0,10),hi=r.slice(-10).reverse();
+  bars('b-bot',lo.map(function(p){return {nm:p.n,v:p.mB,txt:f1(p.mB)}}),30,WARM);
+  bars('b-top',hi.map(function(p){return {nm:p.n,v:p.mB,txt:f1(p.mB)}}),30);
+  table('tab-9',['Quartiere','Residenti','m² per abitante','Senza i 4 parchi grandi','Quota superficie'],r.slice().sort(function(a,b){return a.mB-b.mB}).map(function(p){return [esc(p.n),f0(p.ab),'<b>'+f1(p.mB)+'</b>'+tag9(p.mB),f1(p.mBs),nf(p.pB,1)+'%']}));
+  var big=r.filter(function(p){return p.mB>=9&&p.mBs<9}).sort(function(a,b){return b.mB-a.mB});
+  var g='<p><b>I parchi grandi gonfiano i quartieri accanto.</b> Cimiano&ndash;Rottole&ndash;Feltre ha il Parco Lambro: '+f1(nilByName('Cimiano - Rottole - Q.re Feltre').mB)+' m&sup2; per abitante, ma senza i parchi sopra i 40 ettari '+f1(nilByName('Cimiano - Rottole - Q.re Feltre').mBs)+'. In tutto, '+big.length+' dei '+B.sopra_9+' quartieri sopra i 9 m&sup2; scendono sotto la soglia se si tolgono i quattro parchi grandi. Anche i quartieri con meno di 5.000 residenti tengono da soli il '+nf(C.nil_sotto_5000.quota_verde_B_pct,0)+'% del verde della citt&agrave; ('+nf(C.nil_sotto_5000.verde_B_km2,1)+' km&sup2; su '+nf(B.citta_km2,1)+'): sono '+C.nil_sotto_5000.n+' quartieri, per lo pi&ugrave; parchi e zone agricole, con '+f0(C.nil_sotto_5000.residenti)+' residenti in tutto (per esempio Parco Nord, Parco delle Abbazie, Parco Forlanini), e per questo sono fuori classifica.</p>';
+  setH('grandi-testo',g);
+}
+function nilByName(n){for(var k=0;k<NIL.length;k++)if(NIL[k].n===n)return NIL[k];return {mB:0,mBs:0}}
+
+/* ---------- distanza ---------- */
+function distanza(){
+  var dd=D.citta.distanza,r=cl().filter(function(p){return p.min!=null});
+  var h='<p>Per ogni civico residenziale di Milano abbiamo il tempo a piedi fino al bordo del parco pi&ugrave; vicino (parchi disegnati dal Comune, almeno 5.000 m&sup2;). Sulla citt&agrave; intera la <b>mediana dei residenti &egrave; '+f1(dd.minuti_mediana_residenti)+' minuti</b> (circa '+f0(dd.minuti_mediana_residenti*75)+' metri). Arrivano in 5 minuti: '+nf(dd.entro5_pct,0)+'%; in 10: '+nf(dd.entro10_pct,0)+'%; in 15: '+nf(dd.entro15_pct,0)+'%. <b>'+f0(dd.oltre15_residenti)+' residenti</b> ('+nf(100-dd.entro15_pct,0)+'%) hanno il parco a pi&ugrave; di un quarto d&rsquo;ora.</p>';
+  setH('dist-testo',h);
+  var a=dd.entro5_pct,b=dd.entro10_pct-dd.entro5_pct,c=dd.entro15_pct-dd.entro10_pct,d=100-dd.entro15_pct;
+  setH('dist-stack','<div class="stack" role="img" aria-label="Quota di residenti per tempo a piedi dal parco"><span style="width:'+a+'%;background:#052e29"></span><span style="width:'+b+'%;background:#2b8a7d"></span><span style="width:'+c+'%;background:#a6d3ca"></span><span style="width:'+d+'%;background:'+WARM+'"></span></div><div class="lgd"><span><i style="background:#052e29"></i>fino a 5 minuti: '+nf(a,0)+'%</span><span><i style="background:#2b8a7d"></i>5&ndash;10: '+nf(b,0)+'%</span><span><i style="background:#a6d3ca"></i>10&ndash;15: '+nf(c,0)+'%</span><span><i style="background:'+WARM+'"></i>oltre 15: '+nf(d,0)+'%</span></div>');
+  var s=r.slice().sort(function(a,b){return b.min-a.min}),mx=s[0].min;
+  bars('b-lont',s.slice(0,8).map(function(p){return {nm:p.n,v:p.min,txt:f1(p.min)+' min'}}),mx,WARM);
+  bars('b-vic',s.slice(-8).reverse().map(function(p){return {nm:p.n,v:p.min,txt:f1(p.min)+' min'}}),mx);
+  var g=nilByName('Gratosoglio - Q.re Missaglia - Q.re Terrazze'),ss=nilByName('San Siro');
+  setH('dist-limite','<b>Attenzione.</b> Gli 81 parchi sono quelli disegnati dal Comune: mancano il Parco Agricolo Sud, il Bosco in citt&agrave; e il Parco Nord. Per questo Gratosoglio, con '+f1(g.mB)+' m&sup2; a testa, risulta a '+f1(g.min)+' minuti da un parco: ha la campagna e le aree verdi dell&rsquo;elenco 2014, non un parco &laquo;disegnato&raquo;. I tempi sono lungo la rete pedonale di OpenStreetMap, senza penalit&agrave; per attraversamenti e salite; i residenti sono distribuiti in parti uguali sui civici residenziali ('+f0(D.civici.senza_tempo_parco)+' civici su '+f0(D.civici.residenziali)+' non hanno un tempo calcolato e contano come &laquo;oltre il limite&raquo;).');
+}
+
+/* ---------- nel tempo ---------- */
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||260,m={l:46,r:14,t:16,b:30};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=o.y0,y1=Math.max.apply(null,ys);
+  var sy=niceStep((y1-y0)/4);y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+nf(v,1)+'</text>';
+  var lastx=-99;
+  o.pts.forEach(function(p){var xx=X(p.x);if(xx-lastx>34){lastx=xx;s+='<text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+p.x+'</text>'}});
+  s+='<polyline fill="none" stroke="'+ACC+'" stroke-width="2.5" points="'+o.pts.map(function(p){return X(p.x).toFixed(1)+','+Y(p.y).toFixed(1)}).join(' ')+'"/>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3.6" fill="'+ACC+'" stroke="#fff" stroke-width="1"/>'});
+  s+='<text class="mu" x="'+m.l+'" y="'+(m.t-4)+'">'+o.yl+'</text><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent"/></svg><div class="tip" style="display:none"></div>';
+  box.innerHTML=s;
+  var svg=box.firstChild,tp=box.lastChild,rect=svg.querySelector('rect');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bi=0,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.abs(X(p.x)-px);if(d<bd){bd=d;bi=i}});
+    var p=o.pts[bi];tp.innerHTML=p.t;tp.style.display='';var tw=tp.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tp.style.left=left+'px';tp.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tp.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});
+}
+function barChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||240,m={l:40,r:10,t:16,b:30};
+  var n=o.cols.length,ymax=Math.max.apply(null,o.cols.map(function(c){return c.tot}));
+  var sy=niceStep(ymax/4);ymax=Math.ceil(ymax/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,bw=pw/n;
+  function Y(v){return m.t+ph-v/ymax*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=ymax+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  o.cols.forEach(function(c,i){var x=m.l+i*bw,acc=0;
+    c.parts.forEach(function(p){if(!p.v)return;var y=Y(acc+p.v),h=Y(acc)-y;s+='<rect x="'+(x+bw*.12).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+(bw*.76).toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+p.c+'"/>';acc+=p.v});
+    if(i%2===0||n<10)s+='<text class="mu" x="'+(x+bw/2)+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+c.x+'</text>'});
+  s+='<rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent"/></svg><div class="tip" style="display:none"></div>';
+  box.innerHTML=s;
+  var svg=box.firstChild,tp=box.lastChild,rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,i=Math.max(0,Math.min(n-1,Math.floor((px-m.l)/bw))),c=o.cols[i];
+    tp.innerHTML=c.t;tp.style.display='';var tw=tp.offsetWidth,left=(m.l+i*bw+bw/2)/k+10;if(left+tw>r.width)left=(m.l+i*bw)/k-tw-10;if(left<0)left=0;tp.style.left=left+'px';tp.style.top='6px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tp.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});
+}
+var TIPI={gioco:['aree gioco','#00695c'],cani:['aree cani','#c26a1b'],orti:['orti urbani','#8a8a2a'],condivisi:['giardini condivisi','#111']};
+function tempo(){
+  var S=D.serie,sc=D.schede;
+  var h='<p><b>I dati non dicono dove siano nati i parchi nuovi.</b> Il file dei parchi disegnati non ha un anno di apertura, e l&rsquo;elenco delle aree verdi &egrave; del 2014. Quello che si pu&ograve; dire &egrave; sulla citt&agrave; intera: secondo il Comune, parchi e verde attrezzato sono passati da <b>'+nf(S.parchi_attrezzato_km2_2014,1)+' km&sup2; nel 2014 a '+nf(S.parchi_attrezzato_km2_2024,1)+' nel 2024</b> ('+sg(S.crescita_2014_2024_km2,1)+' km&sup2;, '+sg(S.crescita_2014_2024_pct,0)+'%). Quel +'+nf(S.crescita_2014_2024_km2,1)+' km&sup2; non &egrave; nella nostra stima dei quartieri, che si ferma al 2014: i quartieri dove sono nati parchi dopo il 2014 sono sottostimati. La misura ISTAT, pi&ugrave; larga, sale da '+nf(S.istat_mq_ab_2011,1)+' a '+nf(S.istat_mq_ab_2023,1)+' m&sup2; per abitante tra 2011 e 2023, e dal '+nf(S.istat_pct_2011,1)+'% al '+nf(S.istat_pct_2023,1)+'% della superficie comunale.</p>';
+  setH('tempo-testo',h);
+  var pts=S.ds1323_2011_2024.map(function(r){return {x:r.anno,y:r.ds1323_parchi_attrezzato_mq/1e6,t:'<b>'+r.anno+'</b><br>'+nf(r.ds1323_parchi_attrezzato_mq/1e6,2)+' km² di parchi e verde attrezzato'+(r.istat_mq_per_abitante!=null?'<br>ISTAT, tutto il verde: '+nf(r.istat_mq_per_abitante,1)+' m² per abitante':'')}});
+  var an=Object.keys(sc.per_anno_tipo).map(Number).filter(function(a){return a>=2006}).sort(function(a,b){return a-b});
+  var cols=an.map(function(a){var pt=sc.per_anno_tipo[a],parts=Object.keys(TIPI).map(function(k){return {v:pt[k]||0,c:TIPI[k][1]}});
+    var tot=parts.reduce(function(s,p){return s+p.v},0);
+    return {x:a,tot:tot,parts:parts,t:'<b>'+a+'</b>: '+tot+' schede<br>'+Object.keys(TIPI).map(function(k){return TIPI[k][0]+': '+(pt[k]||0)}).join('<br>')}});
+  function draw(){lineChart(el('ch-serie'),{pts:pts,y0:14,yl:'km² di parchi e verde attrezzato',h:250});barChart(el('ch-schede'),{cols:cols,h:250})}
+  draw();RD.push(draw);
+  setH('src-schede','<span class="lgd" style="display:inline-flex">'+Object.keys(TIPI).map(function(k){return '<span><i style="background:'+TIPI[k][1]+'"></i>'+TIPI[k][0]+'</span>'}).join('')+'</span><br>Schede (poligoni) del Comune con la data di inizio (<code>data_ini</code>): aree gioco '+sc.totali.gioco.schede+', aree cani '+sc.totali.cani.schede+', orti urbani '+sc.totali.orti.schede+', giardini condivisi '+sc.totali.condivisi.schede+'. Qui sono mostrati gli anni dal 2006: nel 2003 ci sono '+(sc.per_anno_tipo['2003'].gioco+sc.per_anno_tipo['2003'].cani+(sc.per_anno_tipo['2003'].orti||0))+' schede (il '+nf(sc.totali.gioco.anno_2003_pct,0)+'% delle aree gioco e il '+nf(sc.totali.cani.anno_2003_pct,0)+'% delle aree cani), probabilmente l&rsquo;inizio dell&rsquo;archivio e non la data di apertura. Fonte: Comune di Milano, ds724, ds52, ds2186, ds2187 (CC BY).');
+  var r=NIL.slice().sort(function(a,b){return b.s16-a.s16}).slice(0,8);
+  table('tab-sch',['Quartieri con più schede dal 2016','Dal 2016','2006–2015','Fino al 2005'],r.map(function(p){return [esc(p.n),'<b>'+p.s16+'</b>',p.s06,p.s05]}));
+}
+
+/* ---------- confronti ---------- */
+function scatter(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||280,m={l:42,r:10,t:14,b:40};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=o.x0!=null?o.x0:Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=0,y1=o.ymax||Math.max.apply(null,ys.concat([o.hline||0]));
+  var sx=niceStep((x1-x0)/4),sy=niceStep((y1-y0)/4);x0=Math.floor(x0/sx)*sx;x1=Math.ceil(x1/sx)*sx;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(Math.min(v,y1)-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(v)+'</text>'}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.hline!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.hline)+'" y2="'+Y(o.hline)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(W-m.r-2)+'" y="'+(Y(o.hline)-4)+'" text-anchor="end" style="fill:#8a4a10">'+o.hl+'</text>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-3)+'">'+o.yl+'</text>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4" fill="'+ACC+'" fill-opacity=".72" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg><div class="tip" style="display:none"></div>';
+  box.innerHTML=s;
+  var svg=box.firstChild,tp=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tp.style.display='none';ring.style.display='none';return}
+    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tp.innerHTML=p.t;tp.style.display='';var tw=tp.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tp.style.left=left+'px';tp.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  function hide(){tp.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function confronti(){
+  var X=D.confronti,A=X.A,B=X.B,O=D.osm;
+  var h='<p>Quartieri con pi&ugrave; verde pubblico per abitante hanno anche pi&ugrave; alberi del Comune, meno suolo consumato e un indice di calore da satellite pi&ugrave; basso. La tabella mostra quanto &egrave; forte il legame, con la stima completa (B) e con i soli parchi disegnati (A).</p>';
+  h+='<ul class="m"><li><b>Suolo consumato:</b> il legame &egrave; forte ('+sg2(B.m2_ab_vs_suolo_consumato_2025.rho)+'). Dove la citt&agrave; &egrave; pi&ugrave; costruita c&rsquo;&egrave; meno verde a testa: sono due modi di guardare la stessa cosa.</li>';
+  h+='<li><b>Calore:</b> '+sg2(B.m2_ab_vs_calore_esposizione.rho)+'. L&rsquo;indice del Comune (luglio 2024, da satellite) non &egrave; una temperatura misurata, e non conosciamo il metodo (sta su un portale che chiede la registrazione): se usa anche la vegetazione, il legame col verde &egrave; in parte scontato. Le temperature vere sono in <a href="../caldo/">Il quartiere pi&ugrave; caldo</a>, ma ci sono sei stazioni in citt&agrave;: troppo poche per dirlo quartiere per quartiere.</li>';
+  h+='<li><b>Alberi:</b> '+sg2(B.m2_ab_vs_alberi_per_1000ab.rho)+' con la stima completa, ma attenzione: le aree dell&rsquo;elenco 2014 sono collocate proprio con gli alberi, quindi una parte del legame &egrave; costruita. Con i soli parchi disegnati, che non dipendono dagli alberi, il legame &egrave; pi&ugrave; debole ma c&rsquo;&egrave;: '+sg2(A.m2_ab_vs_alberi_per_1000ab.rho)+' (<a href="../alberi/">Alberi della citt&agrave;</a>).</li>';
+  h+='<li><b>Densit&agrave;:</b> dove vivono pi&ugrave; persone per km&sup2; c&rsquo;&egrave; meno verde a testa ('+sg2(B.m2_ab_vs_densita_abitanti.rho)+'), come per gli alberi.</li></ul>';
+  setH('conf-testo',h);
+  function row(nm,k,extra){return [nm,sg2(B[k].rho)+' <span class="sub">'+ic(B[k].ic95)+'</span>',sg2(A[k].rho)+' <span class="sub">'+ic(A[k].ic95)+'</span>']}
+  var rows=[
+   row('Residenti per km² (m² per abitante)','m2_ab_vs_densita_abitanti'),
+   row('Alberi ogni 1.000 residenti (m² per abitante)','m2_ab_vs_alberi_per_1000ab'),
+   row('Alberi per km² (quota superficie)','pct_area_vs_alberi_per_km2'),
+   row('Suolo consumato 2025 (m² per abitante)','m2_ab_vs_suolo_consumato_2025'),
+   row('Suolo consumato 2025 (quota superficie)','pct_area_vs_suolo_consumato_2025'),
+   row('Esposizione al calore, luglio 2024 (m² per abitante)','m2_ab_vs_calore_esposizione'),
+   row('Esposizione al calore, luglio 2024 (quota superficie)','pct_area_vs_calore_esposizione'),
+   row('Indice di verde da satellite (quota superficie)','pct_area_vs_indice_verde_spotted'),
+   [ 'Parchi di OpenStreetMap, m² per abitante (controllo)',sg2(O.spearman_m2_ab_B_vs_osm_park.rho)+' <span class="sub">'+ic(O.spearman_m2_ab_B_vs_osm_park.ic95)+'</span>',sg2(O.spearman_m2_ab_A_vs_osm_park.rho)+' <span class="sub">'+ic(O.spearman_m2_ab_A_vs_osm_park.ic95)+'</span>']
+  ];
+  table('tab-conf',['Confronto','Stima completa (B)','Solo parchi disegnati (A)'],rows);
+  var r=cl();
+  var ps=r.map(function(p){return {x:p.suolo,y:p.mB,t:'<b>'+esc(p.n)+'</b><br>suolo consumato '+nf(p.suolo,1)+'%<br>'+f1(p.mB)+' m² di verde per abitante'}});
+  var pc=r.map(function(p){return {x:p.cal,y:p.mB,t:'<b>'+esc(p.n)+'</b><br>esposizione al calore '+nf(p.cal,2)+'<br>'+f1(p.mB)+' m² di verde per abitante'}});
+  function draw(){
+    scatter(el('ch-suolo'),{pts:ps,h:290,x0:0,ymax:30,xl:'suolo consumato 2025 (% del quartiere)',yl:'m² di verde per abitante (tagliato a 30)',xf:function(v){return f0(v)},hline:9,hl:'9 m²'});
+    scatter(el('ch-calore'),{pts:pc,h:290,ymax:30,xl:'esposizione al calore (0–1)',yl:'m² di verde per abitante (tagliato a 30)',xf:function(v){return nf(v,1)},hline:9,hl:'9 m²'});
+  }
+  draw();RD.push(draw);
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var C=D.citta,d=C.ds339,o=D.osm,cv=d.convalida_alberi,bic=o.bosco_in_citta_osm;
+  var L=[
+   '<b>Non esiste una mappa completa e aggiornata del verde pubblico.</b> I parchi disegnati dal Comune (ds89) sono '+C.ds89.parchi+' parchi e giardini con nome, in '+C.ds89.pezzi+' pezzi, che coprono '+nf(C.ds89.unione_km2,1)+' km&sup2; (le sovrapposizioni contano una volta: la somma dei pezzi sarebbe '+nf(C.ds89.somma_pezzi_km2,1)+'). Non hanno un anno di apertura e il file dice solo quando &egrave; stato caricato (6/5/2024). Tutti e '+C.ds89.parchi+' compaiono anche nell&rsquo;elenco del 2014: il disegno non &egrave; pi&ugrave; recente di quell&rsquo;elenco.',
+   '<b>L&rsquo;elenco delle aree verdi &egrave; del 2014 e non ha la mappa.</b> Sono '+f0(d.aree)+' aree per '+nf(d.km2,1)+' km&sup2;, di cui teniamo solo le tre classi ISTAT &laquo;verde attrezzato&raquo;, &laquo;parchi urbani&raquo; e &laquo;verde storico&raquo; ('+d.classi123_aree+' aree, '+nf(d.classi123_km2,1)+' km&sup2;). Scartiamo aiuole e filari stradali ('+nf(d.per_classe_km2['4 - Aree di arredo urbano'],1)+' km&sup2;), giardini delle scuole, cimiteri, centri sportivi ed edifici pubblici. Dal 2014 al 2024 il Comune conta +'+nf(D.serie.crescita_2014_2024_km2,1)+' km&sup2; di parchi e verde attrezzato che qui non sono collocati. Un controllo: per il 2014 il Comune stesso, nella serie ds1323, d&agrave; '+nf(D.serie.parchi_attrezzato_km2_2014,1)+' km&sup2; per le stesse categorie, contro i nostri '+nf(d.classi123_km2,1)+'.',
+   '<b>Le aree senza disegno sono collocate con gli alberi, e questa &egrave; un&rsquo;ipotesi.</b> Ogni area del 2014 ha un codice (zona e numero) che ritroviamo negli alberi del censimento 2025. Per '+d.localizzate_alberi_aree+' aree ('+nf(d.localizzate_alberi_km2,1)+' km&sup2;) abbiamo diviso la superficie del 2014 tra i quartieri in proporzione agli alberi; '+d.localizzate_poligono_aree+' aree con un poligono di gioco, cani o orti; '+d.su_piu_nil+' aree finiscono in pi&ugrave; di un quartiere. Prova del metodo: sui '+cv.aree+' parchi che hanno sia il disegno sia gli alberi, il '+nf(cv.superficie_nel_nil_giusto_pct,0)+'% della superficie finisce nel quartiere giusto. Resta il rischio di errori sulle aree piccole.',
+   '<b>'+d.non_localizzate_aree+' aree ('+nf(d.non_localizzate_km2,1)+' km&sup2;) non hanno una posizione</b> e sono fuori dai conti. La pi&ugrave; grande &egrave; il Bosco in citt&agrave; (Italia Nostra, '+nf(d.non_localizzate_top[0].mq_2014/1e4,0)+' ettari nel 2014): OpenStreetMap lo disegna quasi tutto nel quartiere &laquo;Parco Bosco in citt&agrave;&raquo; (666 residenti). Un&rsquo;area (viale Sarca&ndash;Silvestri) non ha la superficie nel file e conta zero.',
+   '<b>Che cosa conta come &laquo;verde&raquo;.</b> La classe ISTAT &laquo;verde attrezzato&raquo; comprende anche piccoli giardini di quartiere; il decreto del 1968 chiede aree &laquo;effettivamente utilizzabili&raquo; per parco, gioco e sport, senza le fasce verdi lungo le strade. Non possiamo separare le due cose, n&eacute; i campi sportivi: il confronto con i 9 m&sup2; &egrave; quindi indicativo. Il decreto riguarda i piani per i nuovi insediamenti, non il giudizio su un quartiere gi&agrave; costruito (nelle zone A e B le aree contano il doppio: qui non applicato).',
+   '<b>I parchi grandi ai margini gonfiano i quartieri periferici.</b> I quartieri sono 88 e i confini sono arbitrari: un parco di 140 ettari serve mezza citt&agrave; ma conta tutto per il quartiere dove cade. Per questo la classifica usa solo i 64 quartieri con almeno 5.000 residenti (ds205, anno 2024), c&rsquo;&egrave; la mappa &laquo;senza i 4 parchi grandi&raquo; e i residenti di Parco Nord o Sempione (100 e zero) non hanno senso come divisore.',
+   '<b>I tempi a piedi</b> riguardano solo gli 81 parchi di almeno 5.000 m&sup2; disegnati dal Comune (niente Parco Agricolo Sud, Bosco in citt&agrave; o Parco Nord) e suppongono i residenti distribuiti in parti uguali sui civici residenziali; '+f0(D.civici.senza_tempo_parco)+' civici su '+f0(D.civici.residenziali)+' non hanno un tempo e contano come lontani.',
+   '<b>Le date delle schede non sono date di apertura.</b> Il 22% delle aree gioco e il 18% delle aree cani ha l&rsquo;anno 2003, probabilmente l&rsquo;inizio dell&rsquo;archivio. Le schede per anno mostrano quando una scheda &egrave; stata aperta, non quando &egrave; nato il parco.',
+   '<b>Le serie del Comune hanno qualche difetto.</b> Nel file ds1323 la riga 2018 &laquo;Verde attrezzato&raquo; ha un campo in pi&ugrave; (6.534.108;972): abbiamo letto il primo numero. Nel 2024 mancano i valori di aree naturali protette, orti urbani e altre tipologie. Nel ds205 le superfici di tre quartieri sono scambiate: per i km&sup2; dei quartieri usiamo i poligoni (somma '+nf(C.km2,2)+' km&sup2;).',
+   '<b>OpenStreetMap &egrave; solo un controllo.</b> I poligoni <code>leisure=park</code> dentro Milano sommano '+nf(o.km2_dentro_comune.park,1)+' km&sup2; ('+nf(o.osm_park_m2_ab_citta,1)+' m&sup2; per abitante), contro i nostri '+nf(C.B.citta_km2,1)+' ('+nf(C.B.citta_m2_ab,1)+'): i totali sono vicini e per quartiere le due stime vanno nella stessa direzione (Spearman '+sg2(o.spearman_m2_ab_B_vs_osm_park.rho)+'). OpenStreetMap comprende per&ograve; anche aree non comunali e private, quindi non &egrave; una verifica indipendente del verde pubblico.',
+   '<b>Gli indici da satellite</b> (calore, verde) sono calcolati dal progetto SPOTTED per luglio 2024; il metodo sta su un portale che chiede la registrazione, che non abbiamo fatto. Non sono temperature misurate.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var C=D.citta;
+  var M=[
+   '<b>Quartieri e residenti.</b> 88 NIL vigenti (Comune, ds964); residenti del 2024 (ds205); superficie dai poligoni (somma '+nf(C.km2,2)+' km&sup2;).',
+   '<b>Misura A, solo poligoni.</b> I '+C.ds89.pezzi+' pezzi di ds89 sono uniti (le sovrapposizioni contano una volta) e tagliati sui confini dei quartieri; l&rsquo;area &egrave; calcolata in metri (UTM 32N). Risultato: '+nf(C.A.citta_km2,2)+' km&sup2; dentro il Comune.',
+   '<b>Misura B, stima completa (quella che mostriamo di pi&ugrave;).</b> A pi&ugrave; le aree dell&rsquo;elenco 2014 (ds339) delle classi ISTAT 1, 2 e 3 che non sono in ds89: '+d0(C.ds339.non_in_ds89_aree)+' aree, '+nf(C.ds339.non_in_ds89_km2,1)+' km&sup2;. Per ognuna, la superficie del 2014 &egrave; divisa tra i quartieri in proporzione agli alberi del censimento 2025 con lo stesso codice area; se non ci sono alberi, si usa un poligono di gioco, cani, orti o giardini condivisi con lo stesso codice; altrimenti l&rsquo;area &egrave; lasciata fuori. Totale: '+nf(C.B.citta_km2,1)+' km&sup2;.',
+   '<b>Senza i grandi parchi.</b> Si tolgono i parchi con almeno 40 ettari: '+C.ds89.oltre_40ha.join(', ')+' (disegnati) e, per le aree solo nell&rsquo;elenco 2014, quelle con almeno 40 ettari.',
+   '<b>Metri quadri per abitante</b> = verde del quartiere / residenti 2024; <b>quota della superficie</b> = verde / superficie del quartiere. La soglia di 9 m&sup2; &egrave; quella dell&rsquo;articolo 3, lettera c, del decreto 1444/1968.',
+   '<b>Distanza.</b> Minuti a piedi dai civici residenziali (46.895 civici residenziali, rete pedonale di OpenStreetMap, 4,5 km/h) al bordo degli 81 parchi disegnati dal Comune di almeno 5.000 m&sup2;; mediana e quote per quartiere. Riuso dei calcoli del filone <a href="../citta-15-minuti/">La citt&agrave; dei 15 minuti</a>, non rifatti.',
+   '<b>Confronti.</b> Alberi: censimento 2025 (ds2484, filone <a href="../alberi/">Alberi</a>). Suolo consumato 2025: filone <a href="../suolo/">Suolo</a>. Esposizione al calore: ds2811, luglio 2024. Correlazione di Spearman con intervallo di confidenza al 95% (5.000 ricampionamenti dei quartieri).',
+   '<b>Serie della citt&agrave;.</b> ds1323 (2011&ndash;2024) sommando le categorie di parchi e verde attrezzato; ds2926 e ds2927 per la misura ISTAT.',
+   '<b>Controlli.</b> I totali dei quartieri tornano con quelli della citt&agrave; (<code>pagina.py</code> ferma i conti se non tornano); il metodo con gli alberi &egrave; provato sui parchi disegnati; confronto con OpenStreetMap (<code>leisure=park</code>).'
+  ];
+  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function d0(x){return f0(x)}
+})();
+</script>
+</body></html>
