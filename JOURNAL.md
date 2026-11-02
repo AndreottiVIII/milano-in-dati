@@ -2753,3 +2753,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Comune ds141 (2003-2020) e ds1943 (2021-2024), nati da madri residenti per NIL e cittadinanza della madre (somme uguali a ds1495 in tutti gli anni); ds27 per le donne 15-49; ds1944 età della madre solo per la città; ISTAT (CC BY 4.0) fecondità ed età media solo per la provincia. Fecondità del comune stimata da noi (0,98 nel 2024; ISTAT provincia 1,13), dichiarata come stima.
 - Numeri: donne 15-49 quasi uguali (288.000 nel 2008, 300.000 nel 2024) ma nati da 12.467 a 9.147 (−26,6%), da 43,3 a 30,5 ogni 1.000 donne; calo in 66 quartieri su 70; due terzi del calo 2014-2024 da madri con cittadinanza straniera.
 - Limiti dei dati: niente età della madre per quartiere; la convergenza dei tassi italiane/straniere non vuol dire uguale fecondità (ISTAT 1,55 contro 1,06); Maggiore-Musocco-Certosa fuori scala (causa non verificata).
+
+## 73. Il tribunale di Milano
+
+- 2026-11-02 — Fase 1 e pagina (`tribunale/`, `docs/tribunale/`). Dettagli in `tribunale/NOTE.md`.
+- Fonte: Ministero della Giustizia, file xlsx su datiestatistiche.giustizia.it (12 file); nessuna licenza aperta, le note legali ammettono il riuso non commerciale con citazione: pubblicate solo tabelle ricalcolate. webstat.giustizia.it blocca i programmi: non usato. 54 controlli superati (tempo di smaltimento ricalcolato uguale a quello del Ministero in 2.366 confronti).
+- Numeri: civile, solo il 6,9% delle cause aperte ha più di 3 anni (Italia 15,1%), ma il tempo di smaltimento sale da 417 a 435 giorni mentre l'Italia scende da 556 a 435; il 35% delle cause civili è protezione internazionale (senza: 317 giorni, calcolo nostro); Corte d'appello 2ª su 29 nel civile. Obiettivi PNRR nazionali, non per tribunale.
+- Limiti dei dati: flussi civili diversi dal monitoraggio distrettuale dello 0,5-2,7%; ipotesi su Venezia (cittadinanza) non verificata; obiettivo PNRR 2024 non ricostruibile, citato solo come dichiarazione del Ministero.

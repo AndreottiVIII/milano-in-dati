@@ -84,6 +84,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 70 | Età dei palazzi | Online |
 | 71 | Reati e sicurezza in città | Online |
 | 72 | Nascite e mamme | Online |
+| 73 | Tribunale | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 

@@ -83,7 +83,8 @@
     { path: 'targhe/', label: 'Lapidi e targhe' },
     { path: 'palazzi/', label: 'Età dei palazzi' },
     { path: 'reati-citta/', label: 'Reati e sicurezza in città' },
-    { path: 'nascite/', label: 'Nascite e mamme' }
+    { path: 'nascite/', label: 'Nascite e mamme' },
+    { path: 'tribunale/', label: 'Il tribunale di Milano' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
