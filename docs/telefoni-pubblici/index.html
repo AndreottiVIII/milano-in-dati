@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Telefoni pubblici</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#1f5f8b;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eaf1f6;--warm:#8a4a10;--warmbg:#fbf0e2;--grey:#9aa5ad;--amb:#e0a526}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:8px 12px;margin:.8em 0;font-size:.95rem} .warm p{margin:.3em 0}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.map{height:62vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(70px,26%) 1fr 74px;gap:6px;align-items:center;font-size:.9rem;padding:3px 0}
+.bars .tr{background:#f1f1f1;height:12px;position:relative} .bars .fill{display:block;height:12px;background:var(--grey)} .bars .fill.m{background:var(--acc)}
+.bars .row.m .nm{font-weight:700} .bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stack{display:flex;height:22px;margin:.2em 0 .1em;border:1px solid #fff} .stack span{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.88rem;margin:.4em 0} .leg i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1px solid #666}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:.8em 0} .kpi div{border:1px solid var(--line);padding:6px 10px} .kpi .big{display:block;font-size:1.7rem;font-weight:700;color:var(--acc);line-height:1.15} .kpi span.sub{display:block}
+.big1{font-size:2.6rem;font-weight:700;color:var(--acc);line-height:1.1;display:block}
+.tl{list-style:none;margin:.5em 0;padding:0 0 0 14px;border-left:3px solid var(--acc)} .tl li{margin:0 0 .9em;padding-left:10px;position:relative} .tl li:before{content:"";position:absolute;left:-23px;top:.5em;width:11px;height:11px;border-radius:50%;background:var(--acc);border:2px solid #fff}
+.tl b.d{display:block;font-size:.85rem;color:var(--mut);font-weight:600}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif} .leaflet-popup-content{font:13px/1.4 system-ui,Arial,sans-serif;overflow-wrap:anywhere}
+@media(max-width:560px){h1{font-size:1.45rem} .bars .row{grid-template-columns:minmax(64px,28%) 1fr 66px;font-size:.85rem} th,td{padding:5px 4px;font-size:.88rem}}
+</style><script src="../menu.js" defer></script><link rel="icon" href="data:,">
+</head><body><main>
+<h1>I telefoni pubblici di Milano</h1>
+<p>Le cabine telefoniche non sono sparite. Quante ce ne sono a Milano? E come siamo messi rispetto alle altre grandi città?</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+<div class="kpi" id="kpi"></div>
+
+<div class="warm"><p><b>Prima di leggere.</b> I numeri vengono dall’elenco che TIM pubblica sul suo sito, aggiornato al 1° luglio 2026. «Attivo» è lo stato scritto da TIM: non vuol dire che il telefono funzioni. Non abbiamo dati sulle chiamate fatte a Milano. Dettagli in <a href="#limiti">limiti dei dati</a>.</p></div>
+
+<h2 id="confronto">Milano e le altre grandi città</h2>
+<p id="confronto-testo"></p>
+<h3>Telefoni nell’elenco TIM</h3>
+<div class="bars" id="b-ass"></div>
+<h3>Telefoni ogni 10.000 abitanti</h3>
+<div class="bars" id="b-pro"></div>
+<p class="src" id="confronto-nota"></p>
+
+<h2 id="dove">Dove sono</h2>
+<p id="dove-testo"></p>
+<div id="dove-graf"></div>
+<div class="leg" id="dove-leg"></div>
+<p class="sub" id="dove-nota"></p>
+
+<h2 id="mappa">La mappa dei volontari</h2>
+<div class="warm"><p><b>Attenzione: questa non è la mappa dell’elenco TIM.</b> Sono solo i telefoni che i volontari di OpenStreetMap hanno segnato (<span id="m-n"></span>). Possono mancarne, o essere segnati telefoni che non ci sono più. L’elenco TIM non può essere ripubblicato, quindi qui non ci sono i suoi indirizzi.</p></div>
+<div class="leg" id="m-leg"></div>
+<div id="map" class="map" role="img" aria-label="Mappa dei telefoni pubblici di Milano segnati su OpenStreetMap"></div>
+<p class="src">Mappa e punti © OpenStreetMap contributors (licenza ODbL), dati del <span id="m-data"></span>. Tocca un punto per vedere cosa dice OpenStreetMap.</p>
+<p id="m-testo"></p>
+
+<h2 id="storia">Una storia breve</h2>
+<ul class="tl">
+<li><b class="d">3 febbraio 2019</b>Il Post scrive che in Italia ci sono poco meno di 18mila cabine, e che tra Roma e Milano sono circa 2mila. <a href="https://www.ilpost.it/2019/02/03/cabine-telefoniche/" target="_blank" rel="noopener">Il Post</a></li>
+<li><b class="d">23 maggio 2023</b>L’autorità per le comunicazioni (AGCOM) pubblica la delibera 98/23/CONS: TIM non è più obbligata a tenere le cabine in strada, e può cominciare a toglierle. Restano obbligatorie in ospedali e strutture sanitarie con almeno 10 posti letto, in carceri e caserme con almeno 50 persone. Lo stesso articolo riporta il dato di AGCOM: in Italia ogni postazione è passata da una media di 277 chiamate l’anno nel 2019 a 118 nel 2021, meno di una ogni tre giorni. <a href="https://www.ilpost.it/2023/05/26/cabine-telefoniche-dismissione/" target="_blank" rel="noopener">Il Post, 26 maggio 2023</a></li>
+<li><b class="d">30 settembre 2023</b>Si annuncia che a Milano 450 cabine diventeranno postazioni digitali con schermo touch (informazioni, ricarica del telefono, chiamate gratuite verso numeri nazionali), entro il 2024. <a href="https://www.ilgiorno.it/milano/cronaca/milano-cabine-telefoniche-digitali-pcs6iyfk" target="_blank" rel="noopener">Il Giorno</a></li>
+<li><b class="d">22 dicembre 2023</b>La Giunta del Comune approva le linee d’indirizzo per la collaborazione con TIM. <a href="https://www.ilgiorno.it/milano/cronaca/cabine-telefoniche-tim-udyz1di7" target="_blank" rel="noopener">Il Giorno, 25 luglio 2026</a></li>
+<li><b class="d">2025</b>Tre aziende che si occupano di pubblicità (Digital Vox, Igpdecaux, Vox Communication) fanno ricorso al TAR contro l’accordo. Il TAR lo respinge. <a href="https://www.ilgiorno.it/milano/cronaca/cabine-telefoniche-tim-udyz1di7" target="_blank" rel="noopener">Il Giorno</a></li>
+<li><b class="d">Luglio 2026</b>Il Consiglio di Stato dà ragione alle aziende: annulla l’accordo e la delibera della Giunta, perché il partner andava scelto con una gara. Il progetto è da rifare. Secondo il giornale le 468 cabine interessate restano dove sono. <a href="https://www.ilgiorno.it/milano/cronaca/cabine-telefoniche-tim-udyz1di7" target="_blank" rel="noopener">Il Giorno, 25 luglio 2026</a></li>
+</ul>
+<p class="sub">Il riassunto è nostro, scritto leggendo gli articoli. Per i dettagli vale quello che dicono le fonti.</p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div id="limiti-testo"></div>
+
+<h2 id="fonti">Fonti</h2>
+<ul class="m" id="fonti"></ul>
+
+<footer>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>. I punti OpenStreetMap di questa pagina sono scaricabili con la loro licenza: <a href="data/osm_telefoni_mappa.json">osm_telefoni_mappa.json</a> · <a href="data/LICENZE.txt">LICENZE.txt</a> · <a href="data/pagina.json">pagina.json</a> (solo conteggi).</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,MP=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function dataIt(iso){var m=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'],p=iso.slice(0,10).split('-');return (+p[2]===1?'1°':+p[2])+' '+m[+p[1]-1]+' '+p[0]}
+function bars(id,rows,max){
+  setH(id,rows.map(function(r){return '<div class="row'+(r.m?' m':'')+'"><span class="nm">'+esc(r.nm)+'</span><span class="tr"><span class="fill'+(r.m?' m':'')+'" style="width:'+Math.max(0.5,r.v/max*100)+'%"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+Promise.all([J('data/pagina.json'),J('data/osm_telefoni_mappa.json')]).then(function(a){
+  D=a[0];MP=a[1];
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){intro();confronto();dove();mappa();limiti();fonti()}
+
+function intro(){
+  var M=D.milano,I=D.italia,dt=dataIt(D.data_elenco_tim);
+  setH('sorpresa','<span class="big1">'+f0(M.telefoni)+'</span><p><b>telefoni pubblici a Milano</b>, secondo l’elenco di TIM aggiornato al '+dt+'. Sono il '+nf(M.quota_su_italia,1)+'% dei '+f0(I.telefoni)+' dell’elenco in tutta Italia.</p><p class="sub">Per l’elenco '+f0(M.attivi)+' sono «attivi» e '+f0(M.in_rimozione)+' «in rimozione».</p>');
+  setH('kpi','<div><span class="big">'+nf(M.per_10000,1)+'</span><span class="sub">telefoni ogni 10.000 abitanti</span></div>'
+   +'<div><span class="big">'+nf(M.quota_stradali,0)+'%</span><span class="sub">sono in strada (in Italia il '+nf(M.quota_italia_stradali,0)+'%)</span></div>'
+   +'<div><span class="big">'+f0(D.osm.n)+'</span><span class="sub">quelli segnati dai volontari di OpenStreetMap</span></div>');
+}
+
+function confronto(){
+  var C=D.citta,M=D.milano;
+  var ia=C.slice().sort(function(a,b){return b.telefoni-a.telefoni}),ip=C.slice().sort(function(a,b){return b.per_10000-a.per_10000});
+  var ra=ia.findIndex(function(c){return c.codice_istat===M.codice_istat})+1,rp=ip.findIndex(function(c){return c.codice_istat===M.codice_istat})+1;
+  var mx=D.citta.length;
+  setH('confronto-testo','Abbiamo messo a confronto i '+mx+' comuni più popolosi d’Italia. <b>In numero assoluto Milano è al posto numero '+ra+'</b>'+(ra>1?', dopo '+esc(ia[0].nome):'')+'. <b>In rapporto agli abitanti è al posto numero '+rp+'</b>'+(rp>1?': davanti c’è '+ip.slice(0,rp-1).map(function(c){return esc(c.nome)}).join(', '):'')+'. L’elenco non spiega perché le città siano così diverse.');
+  bars('b-ass',ia.map(function(c){return {nm:c.nome,v:c.telefoni,txt:f0(c.telefoni),m:c.codice_istat===M.codice_istat}}),ia[0].telefoni);
+  bars('b-pro',ip.map(function(c){return {nm:c.nome,v:c.per_10000,txt:nf(c.per_10000,1),m:c.codice_istat===M.codice_istat}}),ip[0].per_10000);
+  setH('confronto-nota','Telefoni: tutte le righe dell’elenco TIM del comune, anche quelle «in rimozione». Abitanti: residenti al 1° gennaio 2026, <b>stima ISTAT</b> (Milano: '+f0(M.abitanti)+'). Il rapporto conta solo i residenti, non chi in città lavora, studia o passa.');
+}
+
+function dove(){
+  var M=D.milano,I=D.italia,A=M.accesso,B=I.accesso;
+  var K=[['Impianto Stradale','in strada','#1f5f8b'],['Esercizio Commerciale','in un locale o negozio','#e0a526'],['ALTRO','altro','#9aa5ad']];
+  function riga(tit,o,tot){return '<p style="margin:.7em 0 .1em"><b>'+tit+'</b> <span class="sub">('+f0(tot)+' telefoni)</span></p><div class="stack">'+K.map(function(k){var v=o[k[0]]||0;return '<span style="width:'+(100*v/tot)+'%;background:'+k[2]+'" title="'+k[1]+': '+f0(v)+'"></span>'}).join('')+'</div><div class="sub">'+K.map(function(k){var v=o[k[0]]||0;return k[1]+' '+f0(v)+' ('+nf(100*v/tot,0)+'%)'}).join(' · ')+'</div>'}
+  setH('dove-testo','Nell’elenco TIM ogni telefono ha un campo «accesso». Lo leggiamo così: <b>in strada</b> (impianto stradale), <b>in un locale o negozio</b> (esercizio commerciale), <b>altro</b>. A Milano la maggior parte è in strada, mentre nel resto d’Italia la maggior parte è in un locale o in un negozio.');
+  setH('dove-graf',riga('Milano',A,M.telefoni)+riga('Italia',B,I.telefoni));
+  setH('dove-leg',K.map(function(k){return '<span><i style="background:'+k[2]+'"></i>'+k[1]+'</span>'}).join(''));
+  setH('dove-nota','Il file non spiega cosa significhino le tre voci: la lettura è nostra. «Altro» non è descritto.');
+}
+
+function mappa(){
+  var P=MP.punti,n=P.length;
+  el('m-n').textContent=f0(n)+' punti';el('m-data').textContent=dataIt(MP.osm_timestamp);
+  var cls=[['Verificato nel 2025 o 2026','#1f5f8b',0],['Verificato prima del 2025','#e0a526',0],['Senza data di verifica','#9aa5ad',0]];
+  function k(p){var y=p[4]?+p[4].slice(0,4):null;return y==null?2:(y>=2025?0:1)}
+  P.forEach(function(p){cls[k(p)][2]++});
+  setH('m-leg',cls.map(function(c){return '<span><i style="background:'+c[1]+'"></i>'+c[0]+' ('+c[2]+')</span>'}).join(''));
+  var map=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  var rd=L.canvas({padding:.5});
+  P.forEach(function(p){
+    var m=L.circleMarker([p[1],p[2]],{renderer:rd,radius:6,color:'#fff',weight:1,fillColor:cls[k(p)][1],fillOpacity:.9}).addTo(map);
+    var t='<b>Telefono pubblico</b><br>Operatore: '+(p[3]?esc(p[3]):'non indicato')+'<br>Verificato il: '+(p[4]?esc(p[4]):'data non indicata')+(p[5]?'<br>Copertura: '+esc(p[5]):'')+'<br><a href="https://www.openstreetmap.org/'+(p[0].charAt(0)==='n'?'node':p[0].charAt(0)==='w'?'way':'relation')+'/'+esc(p[0].slice(1))+'" target="_blank" rel="noopener">scheda su OpenStreetMap</a>';
+    m.bindPopup(t);
+  });
+  setTimeout(function(){map.invalidateSize()},500);
+  var o=D.osm;
+  setH('m-testo','Su OpenStreetMap '+f0(o.n)+' punti sono segnati come telefono pubblico dentro il Comune; '+f0(o.con_data_verifica)+' hanno una data di controllo, e '+f0(o.verificati_2025_2026)+' sono stati controllati nel 2025 o nel 2026. Solo '+f0(o.operatori['TIM o Telecom Italia']||0)+' dicono che l’operatore è TIM; quasi tutti gli altri non lo indicano. Sono meno della metà dei '+f0(D.milano.telefoni)+' dell’elenco TIM, ma non sappiamo quanti dei punti coincidano con l’elenco: questo confronto non l’abbiamo fatto.');
+}
+
+function limiti(){
+  var M=D.milano,dt=dataIt(D.data_elenco_tim);
+  var h='<ul class="m">';
+  h+='<li><b>«Attivo» è la parola di TIM.</b> Nell’elenco ogni telefono ha uno stato: «attivo» o «in rimozione». Non vuol dire che funzioni, che sia pulito o che qualcuno lo usi. Sulle chiamate abbiamo solo medie nazionali riportate dalla stampa, fino al 2021: niente per Milano e niente per singolo telefono.</li>';
+  h+='<li><b>468 e '+f0(M.telefoni)+' non tornano insieme.</b> Il giornale parla di 468 cabine del progetto con gli schermi (e nel 2023 di 450); l’elenco TIM ne ha '+f0(M.telefoni)+' a Milano, di cui solo '+f0(M.accesso['Impianto Stradale']||0)+' «in strada». Non sappiamo quali telefoni siano contati nel progetto e quali no: i numeri non si riescono a spiegare insieme.</li>';
+  h+='<li><b>Indirizzi che si ripetono.</b> Nell’elenco di Milano '+f0(M.righe_con_indirizzo_ripetuto)+' righe ripetono una via e un CAP già presenti (gli indirizzi distinti sono '+f0(M.indirizzi_distinti)+'). Forse sono cabine doppie, ma <b>non l’abbiamo verificato</b>. Il confronto con altre città: '+D.citta.filter(function(c){return c.codice_istat!==M.codice_istat}).slice(0,8).map(function(c){return esc(c.nome)+' '+f0(c.righe_con_indirizzo_ripetuto)+' su '+f0(c.telefoni)}).join(', ')+'. Abbiamo confrontato il testo della via, quindi scritture diverse dello stesso indirizzo non vengono riconosciute.</li>';
+  h+='<li><b>Una sola data.</b> L’elenco è del '+dt+'. Non abbiamo l’elenco di anni precedenti, quindi non possiamo dire quanti telefoni siano stati tolti.</li>';
+  h+='<li><b>Il confronto con il 2019 viene da un articolo.</b> Il Post parlava di poco meno di 18mila cabine in Italia, e di circa 2mila tra Roma e Milano; nel 2023 la stampa riportava circa 18mila postazioni, di cui 16.073 in strada. L’elenco TIM di oggi ha '+f0(D.italia.telefoni)+' righe. Non sappiamo se queste fonti contino le stesse cose, quindi non ne ricaviamo un calo preciso.</li>';
+  h+='<li><b>OpenStreetMap è incompleto.</b> Lo scrivono i volontari: possono mancare telefoni, e alcuni punti possono segnare telefoni già tolti. Le date di controllo sono messe solo per una parte dei punti.</li>';
+  h+='<li><b>Abitanti.</b> I dati ISTAT sono una stima dei residenti al 1° gennaio 2026. Il nome del comune nell’elenco TIM è stato abbinato al nome del comune ISTAT; per ogni città abbiamo controllato che nell’elenco ci sia una sola provincia.</li>';
+  h+='<li><b>L’elenco TIM non si può ripubblicare.</b> Le <a href="https://www.tim.it/note-legali" target="_blank" rel="noopener">note legali di TIM</a> chiedono un consenso scritto. Per questo qui ci sono solo i totali e nessun indirizzo.</li>';
+  h+='<li><b>Correlazione non è causa.</b> Che una città abbia più o meno telefoni per abitante non dice perché. Questa pagina non prova alcuna spiegazione.</li></ul>';
+  setH('limiti-testo',h);
+}
+
+function fonti(){
+  var dt=dataIt(D.data_elenco_tim),sc=dataIt(D.data_scarico);
+  var h='';
+  h+='<li><b>TIM</b>, elenco dei telefoni pubblici dalla pagina <a href="https://www.tim.it/assistenza/trova-telefono" target="_blank" rel="noopener">tim.it/assistenza/trova-telefono</a>, dati al '+dt+', scaricato il '+sc+'. Usati solo per contare: non ripubblicato (<a href="https://www.tim.it/note-legali" target="_blank" rel="noopener">note legali</a>).</li>';
+  h+='<li><b>OpenStreetMap</b>, © OpenStreetMap contributors, licenza ODbL: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">openstreetmap.org/copyright</a>. Etichetta <code>amenity=telephone</code> dentro il Comune di Milano, dati del '+dataIt(D.osm_timestamp)+' (interrogazione Overpass del '+sc+'). I punti di questa pagina sono ripubblicati con la stessa licenza: chi li riusa deve citare la fonte e usare la stessa licenza.</li>';
+  h+='<li><b>ISTAT</b>, popolazione residente al 1° gennaio 2026 (stima), <a href="https://demo.istat.it/" target="_blank" rel="noopener">demo.istat.it</a>.</li>';
+  h+='<li><b>Il Giorno</b>, 25 luglio 2026, <a href="https://www.ilgiorno.it/milano/cronaca/cabine-telefoniche-tim-udyz1di7" target="_blank" rel="noopener">cabine telefoniche TIM</a>; 30 settembre 2023, <a href="https://www.ilgiorno.it/milano/cronaca/milano-cabine-telefoniche-digitali-pcs6iyfk" target="_blank" rel="noopener">cabine telefoniche digitali</a>.</li>';
+  h+='<li><b>Il Post</b>, 3 febbraio 2019, <a href="https://www.ilpost.it/2019/02/03/cabine-telefoniche/" target="_blank" rel="noopener">le cabine telefoniche</a>; 26 maggio 2023, <a href="https://www.ilpost.it/2023/05/26/cabine-telefoniche-dismissione/" target="_blank" rel="noopener">la dismissione</a> (delibera AGCOM 98/23/CONS).</li>';
+  setH('fonti',h);
+}
+})();
+</script>
+</body></html>

@@ -2875,3 +2875,12 @@ python -I scripts\inventario.py <cartella censimenti>
 - Metropolitana: 12 comuni con fermata; crescita sopra il confronto in 8 casi su 12, con San Donato 7 su 13: nessuna differenza chiara, scritto sulla pagina.
 - Scelte del coordinatore dopo il ricontrollo: PCI riportato in Sinistra (l'agente lo aveva messo in Centrosinistra, contro la scelta di Davide); età allungata al 2002 con la ricostruzione ISTAT già in `redditi/raw/istat_pop/`; fermate ricontrollate sui confini ISTAT più precisi; tolte dalla pagina le scritte interne.
 - Limiti dei dati: ricalcolo ISTAT 2020-2021 (Milano -27.193 e -23.365 persone), che coincide con il primo anno del sorpasso sull'età; pendolari 2021 da modello; matrice ISTAT dei trasferimenti tra comuni non ottenuta (nessuna risposta in 90 s); nazionalità per comune non disponibili come file; licenza Eligendo non indicata, online solo percentuali per famiglia.
+
+## 90. Telefoni pubblici
+
+- 2026-11-02 — Pagina `docs/telefoni-pubblici/` (programmi in `telefoni-pubblici/scripts/`, dettagli in `telefoni-pubblici/NOTE.md`), chiesta da Davide come pagina piccola.
+- Numeri: elenco TIM al 1/7/2026, Milano 627 telefoni (624 attivi, 3 in rimozione; 444 in strada, 68 in locali o negozi, 115 altro), Italia 10.002. Tra i 12 comuni più popolosi Milano è seconda in assoluto (Roma 772) e per abitante (4,6 ogni 10.000; Firenze 5,3). OpenStreetMap: 273 punti, 142 con data di controllo.
+- Fonti: TIM `cabine01072026.json`, il file pubblico caricato dalla pagina Trova Telefono; OpenStreetMap (ODbL); ISTAT stima 1/1/2026; Il Giorno e Il Post per la storia.
+- Licenza: le note legali TIM vietano di ripubblicare senza consenso scritto, quindi online solo conteggi e nessun indirizzo. Il programma si ferma se trova una via TIM nei file pubblicati; ricontrollo separato del coordinatore con esito zero.
+- Ricontrollo del coordinatore dai file originali: conteggi TIM, abitanti e rapporti tornano. Corretto il testo dell'agente, che diceva che non esistono dati sulle chiamate: Il Post riporta il dato nazionale AGCOM, 277 chiamate l'anno per postazione nel 2019 e 118 nel 2021. Corretta anche la frase sul confronto OSM-TIM: non è vietato, semplicemente non è stato fatto.
+- Limiti dei dati: "attivo" è lo stato dichiarato da TIM; niente chiamate per Milano; 468 cabine del progetto e 627 dell'elenco non si spiegano insieme; 78 righe con indirizzo ripetuto non verificate; una sola data; il campo ACCESSO non è spiegato nel file, la lettura è nostra.
