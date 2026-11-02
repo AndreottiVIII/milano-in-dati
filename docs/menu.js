@@ -204,4 +204,74 @@
   });
 
   document.body.insertBefore(nav, document.body.firstChild);
+
+  // ---- "Pagine vicine": in fondo a ogni pagina (non sulla home né sulle bozze), 3-5 link a pagine dello stesso tema.
+  // L'elenco dei temi sta in docs/temi.json (letto una volta); se manca o qualcosa va storto, la pagina resta com'è.
+  try {
+    if (!isHome && current && here.indexOf(rootPath + 'prova-home/') !== 0 && window.fetch) {
+      fetch(new URL('temi.json', rootUrl).href, { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (T) {
+          try {
+            if (!T || !T.pagine || document.getElementById('mid-vicine')) return;
+            var mia = null, i2;
+            for (i2 = 0; i2 < T.pagine.length; i2++) { if (T.pagine[i2].path === current) { mia = T.pagine[i2]; break; } }
+            if (!mia) return;
+            var stesse = T.pagine.filter(function (p) { return p.tema === mia.tema; });
+            var pos = stesse.indexOf(mia);
+            var vicine = [];
+            for (var k = 1; k < stesse.length && vicine.length < 4; k++) vicine.push(stesse[(pos + k) % stesse.length]);
+            if (!vicine.length) return;
+            var nomeTema = '';
+            (T.temi || []).forEach(function (t) { if (t.id === mia.tema) nomeTema = t.nome; });
+
+            var st = document.createElement('style');
+            st.id = 'mid-vicine-style';
+            st.textContent =
+              '#mid-vicine{font:15px/1.4 system-ui,"Segoe UI",Arial,sans-serif;color:#000;background:#fff;' +
+              'border-top:1px solid #000;margin:32px 0 0;padding:0;box-sizing:border-box;text-align:left;clear:both}' +
+              '#mid-vicine *{box-sizing:border-box}' +
+              '#mid-vicine .mv-in{max-width:1100px;margin:0 auto;padding:12px 16px 24px}' +
+              '#mid-vicine h2{font:700 15px/1.3 system-ui,"Segoe UI",Arial,sans-serif;margin:0 0 6px;padding:0;color:#000}' +
+              '#mid-vicine ul{list-style:none;margin:0;padding:0}' +
+              '#mid-vicine li{margin:0;padding:0}' +
+              '#mid-vicine li a{display:block;padding:8px 0;border-top:1px solid #ddd;color:#000;text-decoration:none}' +
+              '#mid-vicine li a:hover b{text-decoration:underline}' +
+              '#mid-vicine li span{display:block;color:#555;font-size:13px}' +
+              '#mid-vicine a:focus-visible{outline:2px solid #000;outline-offset:2px}' +
+              '@media print{#mid-vicine{display:none}}';
+            document.head.appendChild(st);
+
+            var box = document.createElement('aside');
+            box.id = 'mid-vicine';
+            box.setAttribute('aria-label', 'Pagine vicine');
+            var inner = document.createElement('div');
+            inner.className = 'mv-in';
+            var h = document.createElement('h2');
+            h.textContent = 'Pagine vicine' + (nomeTema ? ' · ' + nomeTema : '');
+            var ul2 = document.createElement('ul');
+            vicine.forEach(function (p) {
+              var li = document.createElement('li');
+              var a = document.createElement('a');
+              a.href = new URL(p.path, rootUrl).href;
+              var b = document.createElement('b');
+              b.textContent = p.label;
+              a.appendChild(b);
+              if (p.descrizione) {
+                var sp = document.createElement('span');
+                sp.textContent = p.descrizione;
+                a.appendChild(sp);
+              }
+              li.appendChild(a);
+              ul2.appendChild(li);
+            });
+            inner.appendChild(h);
+            inner.appendChild(ul2);
+            box.appendChild(inner);
+            document.body.appendChild(box);
+          } catch (e2) { /* niente blocco, pagina intatta */ }
+        })
+        .catch(function () { /* niente blocco, pagina intatta */ });
+    }
+  } catch (e1) { /* niente blocco, pagina intatta */ }
 })();
