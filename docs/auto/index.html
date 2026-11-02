@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Le auto dei milanesi</title>
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.tabmax{max-height:380px;overflow:auto}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+.big{font-size:1.5rem;font-weight:700;color:var(--acc);line-height:1.2} .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:.6em 0} .kpis div{border:1px solid var(--line);padding:6px 10px}
+tr.mi td{background:var(--soft);font-weight:600} #tab-citta{min-width:640px} #tab-serie{min-width:520px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Le auto dei milanesi</h1>
+<p>Quante auto e moto sono intestate a chi vive a Milano, anno dopo anno? Con quale carburante vanno, quanto sono vecchie e potenti? E come stanno le altre grandi citt&agrave;? I numeri vengono dal registro delle auto (il PRA), che il Comune di Milano e l&rsquo;ACI pubblicano come dati aperti. <b>Contano le auto intestate a milanesi, non quelle che girano per Milano</b> (vedi <a href="#limiti">i limiti</a>).</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Il registro non dice se un&rsquo;auto circola, dove sta parcheggiata o chi la usa. Le auto aziendali in leasing sono intestate alla societ&agrave; di leasing, che pu&ograve; stare in un&rsquo;altra citt&agrave;: per questo il confronto tra citt&agrave; va letto con attenzione (<a href="#citta">spiegato qui</a>).</div>
+
+<h2 id="serie">Auto e moto, anno per anno</h2>
+<div id="serie-testo"></div>
+<div class="grid2"><div><h3>Auto ogni 1.000 abitanti</h3><div class="ch" id="ch-serie" role="img" aria-label="Grafico: auto ogni 1.000 abitanti a Milano dal 2007 al 2025"></div></div>
+<div><h3>Moto ogni 1.000 abitanti</h3><div class="ch" id="ch-moto" role="img" aria-label="Grafico: moto ogni 1.000 abitanti a Milano dal 2007 al 2025"></div></div></div>
+<p class="src">Autovetture e motocicli iscritti al PRA con proprietario residente a Milano al 31 dicembre (Comune di Milano, ds529, CC-BY). Residenti: ISTAT (bilancio demografico ricostruito fino al 2018, poi popolazione al 1&deg; gennaio dell&rsquo;anno dopo). La linea tratteggiata verticale segna il 2020, quando ISTAT corregge i residenti con il censimento permanente. Il grafico delle auto parte da 450, quello delle moto da zero.</p>
+<details><summary>La tabella anno per anno</summary><div class="scroll tabmax"><table id="tab-serie"></table></div>
+<p class="src">Immatricolazioni = prime iscrizioni di veicoli nuovi; radiazioni = veicoli cancellati dal registro. Il saldo del parco non &egrave; la differenza tra le due: arrivano e partono anche veicoli che cambiano comune.</p></details>
+
+<h2 id="citta">Milano e le altre grandi citt&agrave;</h2>
+<div id="citta-testo"></div>
+<div class="lgd" id="lg-citta"></div>
+<div class="ch" id="ch-citta" role="img" aria-label="Grafico: auto ogni 1.000 abitanti nei dieci comuni pi&ugrave; grandi, 2019-2025"></div>
+<p class="src">Autovetture iscritte al PRA ogni 1.000 residenti, comune per comune, 31 dicembre 2019-2025 (ACI Autoritratto, CC BY 4.0; residenti ISTAT al 1&deg; gennaio successivo). Italia = tutte le province.</p>
+<div class="scroll"><table id="tab-citta"></table></div>
+<p class="src">Provincia = per Milano la Citt&agrave; metropolitana. &laquo;Uso privato&raquo; esclude noleggio, taxi e simili (ACI, tabella per provincia e uso). Ordinate dal comune con meno auto ogni 1.000 abitanti.</p>
+<div class="warn" id="citta-warn"></div>
+
+<h2 id="carburante">Con che cosa vanno</h2>
+<div id="carb-testo"></div>
+<div class="lgd" id="lg-carb"></div>
+<div class="ch" id="ch-carb" role="img" aria-label="Grafico: carburante delle auto nella provincia di Milano, 2019-2025"></div>
+<p class="src">Autovetture della provincia di Milano per alimentazione, 31 dicembre (ACI Autoritratto, circolante Copert). Il dato per carburante c&rsquo;&egrave; solo per provincia, non per il comune. &laquo;Ibride&raquo; = tutte le ibride (anche leggere e plug-in, il registro non le separa); &laquo;elettriche&raquo; = solo a batteria.</p>
+<div class="scroll"><table id="tab-carb"></table></div>
+<div id="carb-2017"></div>
+
+<h2 id="euro">Classi Euro e Area B</h2>
+<div id="euro-testo"></div>
+<div class="lgd" id="lg-euro"></div>
+<div class="ch" id="ch-euro" role="img" aria-label="Grafico: classi Euro delle auto intestate a milanesi, 2007-2025"></div>
+<p class="src">Autovetture del comune di Milano per classe Euro, quota sul totale, 31 dicembre. Fino al 2018 Comune di Milano (ds1081), dal 2019 ACI Autoritratto; il totale coincide con ds529 in tutti gli anni. La linea tratteggiata segna l&rsquo;inizio di Area B (25 febbraio 2019).</p>
+<h3>Le auto che Area B ha vietato dal primo giorno</h3>
+<div id="areab-testo"></div>
+<div class="scroll"><table id="tab-areab"></table></div>
+<p class="src">Provincia di Milano (ACI): benzina Euro 0 e gasolio Euro 0, 1, 2, 3, le classi vietate all&rsquo;avvio di Area B (25/2/2019; Confcommercio Milano). Il registro non dice se queste auto circolino o se i proprietari abbiano un permesso o una deroga.</p>
+<h3>Chi entra in Area C &egrave; pi&ugrave; &laquo;pulito&raquo; di chi ha l&rsquo;auto?</h3>
+<div id="areac-testo"></div>
+<div class="scroll"><table id="tab-areac"></table></div>
+<p class="src">Passaggi in Area C: giorni feriali normali, % su tutti i passaggi, compresi moto, furgoni, bus e veicoli non classificati (<a href="../area-c/">filone Area C</a>; Comune di Milano / AMAT, CC-BY). Parco: autovetture della provincia di Milano (ACI). Non sono due misure della stessa cosa: serve per vedere l&rsquo;ordine di grandezza, non per misurare lo scarto.</p>
+
+<h2 id="eta">Vecchie, potenti, grandi?</h2>
+<div id="eta-testo"></div>
+<div class="scroll"><table id="tab-eta"></table></div>
+<p class="src">Autovetture per provincia (ACI Autoritratto). &laquo;Almeno 16 anni&raquo; = immatricolate fino a 16 anni prima (fascia &laquo;fino al 2009&raquo; nel 2025); &laquo;ultimi 2 anni&raquo; = immatricolate nell&rsquo;ultima fascia biennale. Le percentuali escludono i casi non definiti.</p>
+<h3 id="moto">E le moto</h3>
+<div id="moto-testo"></div>
+
+<h2 id="foto2017">Milano nel 2017, auto per auto</h2>
+<div id="foto-testo"></div>
+
+<h2 id="collegamenti">Collegamenti con gli altri temi</h2>
+<ul class="m">
+<li><a href="../area-c/">Area C</a>: gli ingressi nel centro, giorno per giorno, per classe Euro e carburante.</li>
+<li><a href="../parcheggi/">Parcheggi</a>: quanto spazio occupano le auto (le stesse 706.764 autovetture, divise per i residenti dell&rsquo;anagrafe del Comune danno 502 ogni 1.000; qui, con i residenti ISTAT, 519).</li>
+<li><a href="../aria/">Aria</a>: che cosa respiriamo.</li>
+<li><a href="../bici-auto-mezzi/">Bici, auto e mezzi pubblici</a>: quanto ci si mette ad andare da un posto all&rsquo;altro.</li>
+</ul>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/serie_milano_comune.csv">serie_milano_comune.csv</a> (auto, moto, residenti, immatricolazioni e radiazioni, 2007-2025), <a href="data/confronto_citta.csv">confronto_citta.csv</a> (dieci comuni e relative province, 2019-2025), <a href="data/carburante_province.csv">carburante_province.csv</a>, <a href="data/euro_milano_comune_2007_2025.csv">euro_milano_comune_2007_2025.csv</a>, <a href="data/euro_comuni.csv">euro_comuni.csv</a>, <a href="data/euro_province.csv">euro_province.csv</a>, <a href="data/euro_milano_provincia_per_carburante.csv">euro_milano_provincia_per_carburante.csv</a>, <a href="data/euro_moto_comuni.csv">euro_moto_comuni.csv</a>, <a href="data/eta_potenza_province.csv">eta_potenza_province.csv</a>, <a href="data/bande_uso_soggetto.csv">bande_uso_soggetto.csv</a> (anno di immatricolazione, kW, uso e tipo di proprietario), <a href="data/areac_composizione_pct.csv">areac_composizione_pct.csv</a>, <a href="data/milano_2017_aggregati.json">milano_2017_aggregati.json</a> (conteggi della fotografia 2017) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno). Sono tutti valori aggregati: i veicoli uno per uno non sono ripubblicati.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Parco veicolare, immatricolazioni e radiazioni di Milano: Comune di Milano, ds529 (CC-BY) e ds1081 (CC-BY); fotografia 2017: ds545, dati della Motorizzazione civile del Ministero delle infrastrutture e dei trasporti nel portale del Comune (CC-BY); scaricati da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1-2 novembre 2026. Confronti tra citt&agrave;, carburante, classi Euro, et&agrave; e potenza: ACI, <a href="https://aci.gov.it/attivita-e-progetti/studi-e-ricerche/open-data/">Autoritratto, open data</a> 2019-2025 (CC BY 4.0), scaricati il 2 novembre 2026. Residenti: ISTAT, <a href="https://demo.istat.it/">demo.istat.it</a> (POSAS al 1&deg; gennaio 2020-2026; bilancio demografico ricostruito 2002-2018), CC BY 4.0. Passaggi in Area C: Comune di Milano / AMAT (CC-BY), via il filone <a href="../area-c/">Area C</a>. Regole di Area B all&rsquo;avvio: <a href="https://www.confcommerciomilano.it/it/associazioni/categoria/albergatori/istituzionale/news/Area-B-a-Milano-la-nuova-zona-a-traffico-limitato-con-lo-stop-ai-veicoli-piu-inquinanti/">Confcommercio Milano</a>.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var D=null,RD=[];
+var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function pc(x,d){return nf(x,d==null?1:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function table(id,head,rows,cls){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r,ri){var c=cls&&cls[ri]?' class="'+cls[ri]+'"':'';return '<tr'+c+'>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function idx(a,v){return a.indexOf(v)}
+
+J('data/riepilogo.json').then(function(d){
+  D=d;
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();serie();citta();carburante();euro();eta();foto();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- grafici ---------- */
+function lgd(id,items){setH(id,items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.c+'"></i>'+it.t+'</span>'}).join(''))}
+function lgdBox(id,items){setH(id,items.map(function(it){return '<span><i style="background:'+it.c+'"></i>'+it.t+'</span>'}).join(''))}
+/* linee: o={xs,series:[{n,c,v,w,dash}],y0,y1,yf,h,marks:[{x,t}],lab:true} */
+function lineChart(id,o){
+  var box=el(id);box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,narrow=W<520,rl=o.lab?(narrow?66:84):10,m={l:42,r:rl,t:16,b:26};
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,xs=o.xs,n=xs.length;
+  var all=[];o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});
+  var y0=o.y0!=null?o.y0:Math.min.apply(null,all),y1=Math.max.apply(null,all);
+  var sy=niceStep((y1-y0)/5);y0=o.y0!=null?o.y0:Math.floor(y0/sy)*sy;y1=Math.ceil(y1/sy)*sy;
+  function X(i){return m.l+(n===1?pw/2:i/(n-1)*pw)} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>';
+  var step=n>12?(narrow?4:2):1;
+  for(var i=0;i<n;i++){if((n-1-i)%step===0)s+='<text class="mu" x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+xs[i]+'</text>'}
+  (o.marks||[]).forEach(function(mk){var k=xs.indexOf(mk.x);if(k<0)return;s+='<line x1="'+X(k).toFixed(1)+'" x2="'+X(k).toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="4 3"/><text x="'+(X(k)+4).toFixed(1)+'" y="'+(m.t+10)+'" style="fill:#8a4a10">'+mk.t+'</text>'});
+  var ends=[];
+  o.series.forEach(function(se){
+    var d='',first=true;
+    se.v.forEach(function(val,i){if(val==null)return;d+=(first?'M':'L')+X(i).toFixed(1)+' '+Y(val).toFixed(1);first=false});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.c+'" stroke-width="'+(se.w||2)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+' stroke-linejoin="round"/>';
+    var last=se.v.length-1;while(last>0&&se.v[last]==null)last--;
+    ends.push({y:Y(se.v[last]),t:se.n,c:se.c,b:se.w>2});
+  });
+  if(o.lab){ends.sort(function(a,b){return a.y-b.y});for(var k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<11)ends[k].y=ends[k-1].y+11;
+    ends.forEach(function(e){s+='<text x="'+(W-m.r+5)+'" y="'+(e.y+4).toFixed(1)+'" style="fill:'+e.c+(e.b?';font-weight:700':'')+'">'+esc(e.t)+'</text>'})}
+  s+='<line id="gd" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-opacity=".5" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,gd=svg.querySelector('#gd'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k;
+    var i=Math.round((px-m.l)/pw*(n-1));if(i<0)i=0;if(i>n-1)i=n-1;
+    var rows=o.series.filter(function(se){return se.v[i]!=null}).sort(function(a,b){return b.v[i]-a.v[i]});
+    gd.setAttribute('x1',X(i));gd.setAttribute('x2',X(i));gd.style.display='';
+    tip.innerHTML='<b>'+xs[i]+'</b><br>'+rows.map(function(se){return '<span style="color:'+se.c+'">&#9632;</span> '+esc(se.n)+': '+(o.tf?o.tf(se.v[i]):f1(se.v[i]))}).join('<br>');
+    tip.style.display='';var tw=tip.offsetWidth,left=X(i)/k+10;if(left+tw>r.width)left=X(i)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,m.t/k)+'px'}
+  function hide(){tip.style.display='none';gd.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+/* colonne impilate al 100%: o={xs,layers:[{n,c,v}],marks:[{x,t}],h} */
+function stackChart(id,o){
+  var box=el(id);box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||280,m={l:38,r:8,t:16,b:26},pw=W-m.l-m.r,ph=H-m.t-m.b,xs=o.xs,n=xs.length,bw=pw/n;
+  function X(i){return m.l+i*bw} function Y(v){return m.t+ph-v/100*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=0;v<=100;v+=25)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end">'+v+'%</text>';
+  var step=n>12?(W<520?4:2):1;
+  for(var i=0;i<n;i++){
+    var acc=0;
+    o.layers.forEach(function(L){var h=L.v[i];if(!(h>0))return;s+='<rect x="'+(X(i)+1).toFixed(1)+'" y="'+Y(acc+h).toFixed(1)+'" width="'+(bw-2).toFixed(1)+'" height="'+Math.max(0,h/100*ph).toFixed(1)+'" fill="'+L.c+'"/>';acc+=h});
+    if((n-1-i)%step===0)s+='<text class="mu" x="'+(X(i)+bw/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+xs[i]+'</text>';
+  }
+  (o.marks||[]).forEach(function(mk){var k=xs.indexOf(mk.x);if(k<0)return;s+='<line x1="'+X(k).toFixed(1)+'" x2="'+X(k).toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1.5" stroke-dasharray="4 3"/><text x="'+(X(k)+4).toFixed(1)+'" y="'+(m.t+10)+'" style="fill:#111;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:3px">'+mk.t+'</text>'});
+  s+='<rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k;
+    var i=Math.floor((px-m.l)/bw);if(i<0)i=0;if(i>n-1)i=n-1;
+    tip.innerHTML='<b>'+xs[i]+'</b>'+(o.extra?' <span class="sub">'+o.extra(i)+'</span>':'')+'<br>'+o.layers.slice().reverse().filter(function(L){return L.v[i]>0}).map(function(L){return '<span style="color:'+L.c+'">&#9632;</span> '+esc(L.n)+': '+pc(L.v[i],1)}).join('<br>');
+    tip.style.display='';var tw=tip.offsetWidth,left=(X(i)+bw/2)/k+10;if(left+tw>r.width)left=(X(i)+bw/2)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,m.t/k)+'px'}
+  function hide(){tip.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var S=D.serie,a=S[0],b=S[S.length-1],C=D.citta,CB=D.carburante,E=D.euro,T=C.tab2025;
+  var mi=T.filter(function(r){return r.n==='Milano'})[0];
+  var gen=T.filter(function(r){return r.n==='Genova'})[0],rom=T.filter(function(r){return r.n==='Roma'})[0],tor=T.filter(function(r){return r.n==='Torino'})[0];
+  var n19=CB.pct.Milano.gasolio[0],n25=CB.pct.Milano.gasolio[CB.pct.Milano.gasolio.length-1];
+  var h='<p><b>Milano ha meno auto per abitante di diciotto anni fa.</b> Nel '+a.a+' ogni 1.000 milanesi avevano '+f0(a.p1000)+' auto intestate, oggi ('+b.a+') '+f0(b.p1000)+'. Le auto sono quasi le stesse ('+f0(a.auto)+' allora, '+f0(b.auto)+' oggi, '+sg((b.auto/a.auto-1)*100,1)+'%); sono aumentati i residenti ('+f0(a.pop)+' contro '+f0(b.pop)+', '+sg((b.pop/a.pop-1)*100,1)+'%). Il punto pi&ugrave; basso &egrave; il '+D.minimo_p1000.a+' ('+f0(D.minimo_p1000.v)+'): da allora le auto per abitante sono risalite.</p>';
+  h+='<p><b>Tra i dieci comuni pi&ugrave; grandi, solo Genova ha meno auto per abitante di Milano</b> ('+f0(gen.p1000_c)+' contro '+f0(mi.p1000_c)+' ogni 1.000). Roma ne ha '+f0(rom.p1000_c)+'. Torino ne risulta '+f0(tor.p1000_c)+', ma in quel numero pesano le auto in noleggio intestate a societ&agrave; con sede l&igrave; (<a href="#citta">vedi sotto</a>).</p>';
+  h+='<p><b>Le moto crescono, le auto no.</b> I motocicli intestati a milanesi sono passati da '+f0(a.moto)+' a '+f0(b.moto)+' ('+sg((b.moto/a.moto-1)*100,0)+'%): ogni 1.000 abitanti da '+f0(a.m1000)+' a '+f0(b.m1000)+'. Oggi ci sono '+f0(b.moto/b.auto*100)+' moto ogni 100 auto, nel '+a.a+' erano '+f0(a.moto/a.auto*100)+'.</p>';
+  h+='<p><b>In sei anni il diesel &egrave; passato da '+f0(n19)+' a '+f0(n25)+' auto ogni 100</b> (provincia di Milano), le ibride da '+f1(CB.pct.Milano.ibrido[0])+' a '+f1(CB.pct.Milano.ibrido[CB.anni.length-1])+' e le elettriche sono '+f0(CB.n.Milano.elettrico[CB.anni.length-1])+' ('+pc(CB.pct.Milano.elettrico[CB.anni.length-1],1)+'). Le auto Euro 6 sono pi&ugrave; della met&agrave; di quelle del comune ('+pc(E.pct.euro6[E.anni.length-1],0)+').</p>';
+  h+='<p><b>E ci sono ancora '+f0(E.n.euro0[E.anni.length-1])+' auto Euro 0</b> ('+pc(E.pct.euro0[E.anni.length-1],1)+' del totale) intestate a milanesi. Sono quelle immatricolate prima del 1993: ne erano '+f0(E.n.euro0[0])+' nel 2007, in diciotto anni il numero &egrave; sceso del '+f0(-(E.n.euro0[E.anni.length-1]/E.n.euro0[0]-1)*100)+'%, mentre le auto diventavano tutte pi&ugrave; vecchie di diciotto anni. Il registro non dice se circolino (<a href="#euro">vedi sotto</a>).</p>';
+  h+='<p class="src">Fonti: Comune di Milano (ds529, ds1081), ACI Autoritratto, ISTAT. Ogni numero ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a>.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- serie ---------- */
+function serie(){
+  var S=D.serie,a=S[0],b=S[S.length-1],mx=S.reduce(function(m,x){return x.p1000>m.p1000?x:m},S[0]);
+  var imm0=a.imm,imm1=b.imm;
+  var h='<p>Nel '+b.a+' risultano iscritte a milanesi <b>'+f0(b.auto)+' autovetture</b> e <b>'+f0(b.moto)+' motocicli</b>. Le auto sono '+f0(b.p1000)+' ogni 1.000 abitanti. Il massimo della serie &egrave; del '+mx.a+' ('+f0(mx.p1000)+'); poi un calo lungo, fino al minimo del '+D.minimo_p1000.a+' ('+f0(D.minimo_p1000.v)+'). Dopo il 2019 le auto sono rimaste tra '+f0(Math.min.apply(null,S.filter(function(x){return x.a>=2019}).map(function(x){return x.auto})))+' e '+f0(Math.max.apply(null,S.filter(function(x){return x.a>=2019}).map(function(x){return x.auto})))+'; gli abitanti, secondo ISTAT, sono diminuiti dopo il 2019 (anche per la correzione col censimento), e cos&igrave; il rapporto &egrave; salito.</p>';
+  h+='<p>Una cosa che stupisce: <b>le auto nuove intestate a milanesi sono pi&ugrave; che dimezzate</b>. Le immatricolazioni (prime iscrizioni) erano '+f0(imm0)+' nel '+a.a+' e sono '+f0(imm1)+' nel '+b.a+' ('+sg((imm1/imm0-1)*100,0)+'%). Non sappiamo se vuol dire che i milanesi comprano meno auto nuove o che le comprano con intestatari fuori Milano (societ&agrave; di noleggio, leasing): il registro non lo dice.</p>';
+  setH('serie-testo',h);
+  var draw=function(){var xs=S.map(function(x){return x.a});
+    lineChart('ch-serie',{xs:xs,series:[{n:'Auto',c:ACC,v:S.map(function(x){return x.p1000}),w:3}],y0:450,h:260,marks:[{x:2020,t:'residenti rivisti'}],tf:function(v){return f1(v)+' ogni 1.000'}});
+    lineChart('ch-moto',{xs:xs,series:[{n:'Moto',c:WARM,v:S.map(function(x){return x.m1000}),w:3}],y0:0,h:260,marks:[{x:2020,t:'residenti rivisti'}],tf:function(v){return f1(v)+' ogni 1.000'}})};
+  draw();RD.push(draw);
+  table('tab-serie',['Anno','Auto','Moto','Residenti (ISTAT)','Auto / 1.000','Moto / 1.000','Immatricolazioni (auto)','Radiazioni (auto)'],
+    S.slice().reverse().map(function(x){return [x.a,f0(x.auto),f0(x.moto),f0(x.pop),f1(x.p1000),f1(x.m1000),f0(x.imm),f0(x.rad)]}));
+}
+
+/* ---------- citta ---------- */
+var COL={Milano:ACC,Roma:'#1f5fa8',Torino:'#a8382f',Napoli:'#7a5aa6',Bologna:'#b08a00',Firenze:'#2e7d32',Genova:'#00838f',Verona:'#8d6e63',Bari:'#6d4c41',Palermo:'#ad1457'};
+function citta(){
+  var C=D.citta,T=C.tab2025,mi=T.filter(function(r){return r.n==='Milano'})[0],tor=T.filter(function(r){return r.n==='Torino'})[0],fir=T.filter(function(r){return r.n==='Firenze'})[0],it=T.filter(function(r){return r.n==='Italia'})[0],rom=T.filter(function(r){return r.n==='Roma'})[0];
+  var ordine=T.filter(function(r){return r.n!=='Italia'}).sort(function(a,b){return a.p1000_c-b.p1000_c});
+  var h='<p>Per confrontare le citt&agrave; ci sono i dati ACI dal 2019. Nel '+D.meta.anni_aci[D.meta.anni_aci.length-1]+' Milano ha <b>'+f0(mi.p1000_c)+' auto ogni 1.000 abitanti</b> (il comune), contro '+f0(it.p1000_prov)+' dell&rsquo;Italia. '+(function(){var m=ordine.filter(function(r){return r.p1000_c<mi.p1000_c}).map(function(r){return r.n});return m.length===1?'Ne ha meno solo '+m[0]:'Ne hanno meno solo '+m.join(' e ')})()+'. Se si guarda tutta la Citt&agrave; metropolitana il numero sale a '+f0(mi.p1000_prov)+': fuori dal comune, nel resto della provincia, sono '+f0(C.resto_prov_milano[C.resto_prov_milano.length-1])+'.</p>';
+  setH('citta-testo',h);
+  lgd('lg-citta',[].concat(C.nomi.map(function(n){return {c:COL[n],t:n}}),[{c:'#111',t:'Italia',dash:true}]));
+  var draw=function(){
+    var ser=C.nomi.map(function(n){return {n:n,c:COL[n],v:C.p1000[n],w:n==='Milano'?4:1.8}});
+    ser.push({n:'Italia',c:'#111',v:C.italia,w:2,dash:true});
+    lineChart('ch-citta',{xs:C.anni,series:ser,y0:400,h:340,lab:true,tf:function(v){return f0(v)}});
+  };
+  draw();RD.push(draw);
+  var rows=ordine.map(function(r){return [r.n,f0(r.p1000_c),f0(r.p1000_prov),f0(r.priv1000_prov),pc(r.nlt_pct,1),f0(r.m1000_c),pc(r.euro6,0)]});
+  rows.push(['Italia','&ndash;',f0(it.p1000_prov),f0(it.priv1000_prov),pc(it.nlt_pct,1),f0(it.m1000_c),'&ndash;']);
+  var cls=rows.map(function(r){return r[0]==='Milano'?'mi':''});
+  table('tab-citta',['Citt&agrave;','Auto / 1.000 ab.<br>(comune)','Auto / 1.000 ab.<br>(provincia)','di cui uso privato<br>/ 1.000 (provincia)','Noleggio senza conducente<br>(provincia)','Moto / 1.000 ab.<br>(comune)','Auto Euro 6<br>(comune)'],rows,cls);
+  setH('citta-warn','<b>Perch&eacute; Torino, Firenze e Roma sembrano avere tante auto.</b> Il registro intesta l&rsquo;auto a chi la possiede: per le auto in noleggio a lungo termine &egrave; la societ&agrave; di noleggio, nel comune dove ha sede. Nella provincia di Torino il '+pc(tor.nlt_pct,1)+' delle auto &egrave; in noleggio senza conducente, in quella di Firenze il '+pc(fir.nlt_pct,1)+', a Roma il '+pc(rom.nlt_pct,1)+', a Milano solo il '+pc(mi.nlt_pct,1)+' (Italia '+pc(it.nlt_pct,1)+'). Se le togliamo (colonna &laquo;uso privato&raquo;) la provincia di Torino scende da '+f0(tor.p1000_prov)+' a '+f0(tor.priv1000_prov)+' auto ogni 1.000 abitanti e Firenze da '+f0(fir.p1000_prov)+' a '+f0(fir.priv1000_prov)+'; Milano da '+f0(mi.p1000_prov)+' a '+f0(mi.priv1000_prov)+'. Per questo il confronto pi&ugrave; pulito &egrave; la colonna &laquo;uso privato&raquo;: in quella Milano &egrave; tra le citt&agrave; con meno auto, dopo Genova. Vale anche il contrario: le auto aziendali in leasing usate da milanesi sono spesso intestate a societ&agrave; di altre citt&agrave; e qui non si vedono.');
+}
+
+/* ---------- carburante ---------- */
+var CC={benzina:'#c26a1b',gasolio:'#555555',ibrido:'#62b0a4',elettrico:'#1f5fa8',gpl:'#c9b458',metano:'#8d6e63',altro:'#bbbbbb'};
+var CN={benzina:'Benzina',gasolio:'Gasolio',ibrido:'Ibride',elettrico:'Elettriche',gpl:'GPL (benzina+gas)',metano:'Metano',altro:'Altro'};
+function carburante(){
+  var CB=D.carburante,L=CB.anni.length-1,P=CB.pct,N=CB.n;
+  var h='<p>Nel '+CB.anni[L]+' le auto della provincia di Milano sono '+f0(N.Milano.totale[L])+': <b>'+pc(P.Milano.benzina[L],0)+' a benzina, '+pc(P.Milano.gasolio[L],0)+' a gasolio, '+pc(P.Milano.ibrido[L],0)+' ibride, '+pc(P.Milano.elettrico[L],1)+' elettriche</b> ('+f0(N.Milano.elettrico[L])+'), il resto GPL e metano. Nel '+CB.anni[0]+' il gasolio era il '+pc(P.Milano.gasolio[0],0)+' e le ibride il '+pc(P.Milano.ibrido[0],1)+'. A Milano il diesel pesa molto meno che nel resto d&rsquo;Italia ('+pc(P.Italia.gasolio[L],0)+') e le ibride di pi&ugrave; ('+pc(P.Italia.ibrido[L],1)+' in Italia).</p>';
+  h+='<p>Le auto del comune sono circa il '+pc(D.quota_citta_su_provincia*100,0)+' di quelle della provincia. Per il solo comune il carburante non &egrave; pubblicato anno per anno: c&rsquo;&egrave; solo la fotografia del 2017 (<a href="#foto2017">in fondo</a>), che dice gi&agrave; che in citt&agrave; il gasolio pesava il '+pc(D.snap2017.gasolio,0)+', un po&rsquo; pi&ugrave; che nella provincia nel 2019.</p>';
+  setH('carb-testo',h);
+  var gs=['benzina','gasolio','ibrido','elettrico','gpl','metano','altro'];
+  lgdBox('lg-carb',gs.map(function(g){return {c:CC[g],t:CN[g]}}));
+  var draw=function(){stackChart('ch-carb',{xs:CB.anni,layers:gs.map(function(g){return {n:CN[g],c:CC[g],v:P.Milano[g]}}),h:270,extra:function(i){return '('+f0(N.Milano.totale[i])+' auto)'}})};
+  draw();RD.push(draw);
+  var rows=gs.map(function(g){return [CN[g],pc(P.Milano[g][0],1),pc(P.Milano[g][L],1),pc(P.Roma[g][L],1),pc(P.Torino[g][L],1),pc(P.Italia[g][L],1)]});
+  table('tab-carb',['Quota delle auto','Milano '+CB.anni[0],'Milano '+CB.anni[L],'Roma '+CB.anni[L],'Torino '+CB.anni[L],'Italia '+CB.anni[L]],rows);
+}
+
+/* ---------- euro ---------- */
+var EC={euro0:'#3a2a1a',euro1:'#7a4a1a',euro2:'#c26a1b',euro3:'#e6a85c',euro4:'#d8d3a0',euro5:'#9ccfc4',euro6:'#136459',altro:'#cccccc'};
+var EN={euro0:'Euro 0',euro1:'Euro 1',euro2:'Euro 2',euro3:'Euro 3',euro4:'Euro 4',euro5:'Euro 5',euro6:'Euro 6',altro:'Altro/non indicato'};
+function euro(){
+  var E=D.euro,L=E.anni.length-1,AB=D.areab,P=E.pct,i19=AB.anni.indexOf(2019),i25=AB.anni.length-1;
+  var h='<p>La classe Euro dice quanto inquina un&rsquo;auto al momento della vendita: Euro 0 &egrave; prima del 1993, Euro 6 &egrave; dal 2014 circa. A Milano le auto <b>Euro 0-3 erano il '+pc(E.euro0_3_pct_2007,0)+' nel '+E.anni[0]+' e sono il '+pc(E.euro0_3_pct_2025,0)+' nel '+E.anni[L]+'</b>; le Euro 6 sono passate da zero al '+pc(P.euro6[L],0)+'. Il calo delle Euro 0-3 viene da prima di Area B e dopo il 2019 non accelera: '+nf((E.euro0_3_pct_2007-E.euro0_3_pct_2018)/11,1)+' punti percentuali in meno all&rsquo;anno fino al 2018, '+nf((E.euro0_3_pct_2018-E.euro0_3_pct_2025)/7,1)+' dopo.</p>';
+  h+='<p>La parte che si muove poco &egrave; l&rsquo;Euro 0: '+f0(E.n.euro0[0])+' auto nel '+E.anni[0]+', '+f0(E.n.euro0[L])+' nel '+E.anni[L]+' ('+sg((E.n.euro0[L]/E.n.euro0[0]-1)*100,0)+'% in diciotto anni). Un&rsquo;auto Euro 0 ha oggi almeno 32 anni (nel '+E.anni[0]+' ne aveva almeno 14): se il registro seguisse le auto che escono dall&rsquo;uso, il numero sarebbe sceso molto di pi&ugrave;. Le spiegazioni possibili sono tre: auto d&rsquo;epoca tenute in box, auto ferme ma mai radiate, errori o ritardi nel registro. I dati non permettono di scegliere.</p>';
+  setH('euro-testo',h);
+  var cs=['euro0','euro1','euro2','euro3','euro4','euro5','euro6','altro'];
+  lgdBox('lg-euro',cs.map(function(c){return {c:EC[c],t:EN[c]}}));
+  var draw=function(){stackChart('ch-euro',{xs:E.anni,layers:cs.map(function(c){return {n:EN[c],c:EC[c],v:P[c]}}),h:300,marks:[{x:2019,t:'Area B'}],extra:function(i){return '('+f0(E.tot[i])+' auto)'}})};
+  draw();RD.push(draw);
+  var ha='<p>Dal 25 febbraio 2019 Area B (zona a traffico limitato, dal luned&igrave; al venerd&igrave;, 7.30-19.30) vieta l&rsquo;ingresso alle auto a benzina Euro 0 e a quelle a gasolio Euro 0, 1, 2 e 3. Nella provincia di Milano queste auto erano <b>'+f0(AB.tot_vietate[i19])+' a fine 2019 e sono '+f0(AB.tot_vietate[i25])+' a fine 2025</b> ('+sg((AB.tot_vietate[i25]/AB.tot_vietate[i19]-1)*100,0)+'%): il calo c&rsquo;&egrave;, ma quasi tutto &egrave; sul gasolio ('+sg((AB.gasolio03[i25]/AB.gasolio03[i19]-1)*100,0)+'% contro '+sg((AB.benzina0[i25]/AB.benzina0[i19]-1)*100,0)+'% della benzina Euro 0). Non si pu&ograve; dire quanto sia merito di Area B: i dati non separano il ricambio normale dall&rsquo;effetto del divieto, e non c&rsquo;&egrave; un confronto con una citt&agrave; senza divieto che parta dallo stesso punto.</p>';
+  ha+='<p class="sub">Le regole successive (altri scaglioni per Euro 4 e Euro 5, benzina Euro 3 e oltre) sono state cambiate e rinviate pi&ugrave; volte e le fonti che ho trovato non concordano sulle date; il sito del Comune risponde &laquo;403&raquo; ai programmi e non l&rsquo;ho potuto leggere. Per questo qui non le uso: vanno controllate su <a href="https://www.comune.milano.it/en/argomenti/mobilita/area-b-calendario-dei-divieti">comune.milano.it</a>.</p>';
+  setH('areab-testo',ha);
+  table('tab-areab',['Fine anno','Gasolio Euro 0-3','Benzina Euro 0','Totale vietate','Quota delle auto (provincia)'],AB.anni.map(function(a,i){return [a,f0(AB.gasolio03[i]),f0(AB.benzina0[i]),f0(AB.tot_vietate[i]),pc(100*AB.tot_vietate[i]/D.carburante.n.Milano.totale[i],1)]}));
+  var A=D.areac,CB=D.carburante,j19=A.anni.indexOf(2019),j24=A.anni.indexOf(2024),k19=CB.anni.indexOf(2019),k24=CB.anni.indexOf(2024);
+  var hc='<p>Per la parte di auto che entra davvero in Area C si pu&ograve; guardare la composizione dei passaggi. Nel 2024 il <b>'+pc(A.elettrico[j24],1)+'</b> dei passaggi &egrave; di veicoli elettrici e il '+pc(A.ibrido[j24],0)+' di ibridi, mentre nel parco delle auto di Milano le elettriche sono il '+pc(CB.pct.Milano.elettrico[k24],1)+' e le ibride l&rsquo;'+pc(CB.pct.Milano.ibrido[k24],0)+'. Il diesel, al contrario, pesa il '+pc(A.diesel[j24],0)+' dei passaggi contro il '+pc(CB.pct.Milano.gasolio[k24],0)+' del parco. Una possibilit&agrave; &egrave; che le elettriche non paghino il ticket (regola da verificare sul sito del Comune); i dati qui non lo dicono.</p>';
+  setH('areac-testo',hc);
+  table('tab-areac',['Carburante','Parco '+CB.anni[k19],'Passaggi '+A.anni[j19],'Parco '+CB.anni[k24],'Passaggi '+A.anni[j24]],[
+    ['Benzina',pc(CB.pct.Milano.benzina[k19],1),pc(A.benzina[j19],1),pc(CB.pct.Milano.benzina[k24],1),pc(A.benzina[j24],1)],
+    ['Gasolio',pc(CB.pct.Milano.gasolio[k19],1),pc(A.diesel[j19],1),pc(CB.pct.Milano.gasolio[k24],1),pc(A.diesel[j24],1)],
+    ['Ibrido',pc(CB.pct.Milano.ibrido[k19],1),pc(A.ibrido[j19],1),pc(CB.pct.Milano.ibrido[k24],1),pc(A.ibrido[j24],1)],
+    ['Elettrico',pc(CB.pct.Milano.elettrico[k19],1),pc(A.elettrico[j19],1),pc(CB.pct.Milano.elettrico[k24],1),pc(A.elettrico[j24],1)],
+    ['Non classificato / moto','&ndash;',pc(A.nc[j19],1)+' / '+pc(A.moto[j19],1),'&ndash;',pc(A.nc[j24],1)+' / '+pc(A.moto[j24],1)]]);
+}
+
+/* ---------- eta' e potenza ---------- */
+function eta(){
+  var X=D.eta_potenza,M19=X.Milano['2019'],M25=X.Milano['2025'],R25=X.Roma['2025'],T25=X.Torino['2025'],I25=X.Italia['2025'];
+  var h='<p>Le auto di Milano sono <b>pi&ugrave; giovani e pi&ugrave; potenti</b> della media italiana. Nella provincia di Milano il '+pc(M25.kw_oltre130_pct,1)+' delle auto ha pi&ugrave; di 130 kW (circa 177 cavalli) contro il '+pc(I25.kw_oltre130_pct,1)+' dell&rsquo;Italia; nel '+M19.anno+' erano il '+pc(M19.kw_oltre130_pct,1)+'. Le auto con almeno 16 anni sono il '+pc(M25.vecchie16_pct,0)+' (Italia '+pc(I25.vecchie16_pct,0)+'), ma la quota cresce: erano il '+pc(M19.vecchie16_pct,0)+' nel '+M19.anno+'. Il parco invecchia.</p>';
+  h+='<p><b>I SUV non si possono contare.</b> Nei dati aperti non c&rsquo;&egrave; il tipo di carrozzeria (berlina, SUV, station wagon): ci sono solo kW, cilindrata e marca/modello a livello nazionale. La potenza &egrave; un indizio, non una misura: un&rsquo;auto da 130 kW pu&ograve; essere una berlina sportiva come un SUV. Nella fotografia del 2017 (<a href="#foto2017">in fondo</a>) la massa complessiva dell&rsquo;auto &egrave; un altro indizio: '+pc(D.snap2017.massa_oltre2000,0)+' delle auto dei milanesi pesava 2.000 kg o pi&ugrave; a pieno carico.</p>';
+  setH('eta-testo',h);
+  var row=function(n,k,fm){return [n,pc(M19[k],1),pc(M25[k],1),pc(R25[k],1),pc(T25[k],1),pc(I25[k],1)]};
+  table('tab-eta',['Autovetture','Milano '+M19.anno,'Milano 2025','Roma 2025','Torino 2025','Italia 2025'],[
+    row('Almeno 16 anni','vecchie16_pct'),row('Immatricolate negli ultimi 2 anni','ultimi2_pct'),row('Fino a 70 kW (95 cavalli)','kw_fino70_pct'),row('Pi&ugrave; di 100 kW (136 cavalli)','kw_oltre100_pct'),row('Pi&ugrave; di 130 kW (177 cavalli)','kw_oltre130_pct'),row('Cilindrata oltre 2.000 cc','cil_oltre2000_pct')]);
+  var Mo=D.moto,m19=Mo['2019'],m25=Mo['2025'],S=D.serie,b=S[S.length-1];
+  var hm='<p>I motocicli intestati a milanesi sono <b>'+f0(b.moto)+'</b> ('+f0(b.m1000)+' ogni 1.000 abitanti; a Roma '+f0(D.citta.tab2025.filter(function(r){return r.n==='Roma'})[0].m1000_c)+', a Genova '+f0(D.citta.tab2025.filter(function(r){return r.n==='Genova'})[0].m1000_c)+'). Crescono ogni anno dal 2007, anche negli anni del Covid. Sono anche vecchie: nel 2025 il '+pc(m25.euro01,0)+' &egrave; Euro 0 o 1 (nel 2019 il '+pc(m19.euro01,0)+') e solo il '+pc(m25.euro56,0)+' Euro 5 o 6. I ciclomotori (i 50 cc) non sono nel registro e quindi non sono contati.</p>';
+  setH('moto-testo',hm);
+}
+
+/* ---------- fotografia 2017 ---------- */
+function foto(){
+  var F=D.snap2017;
+  var h='<p>Il Comune pubblica anche un elenco di <b>tutti i veicoli dei residenti, uno per uno</b> (ds545, dalla Motorizzazione civile) con alimentazione, potenza, classe Euro, massa ed et&agrave; dell&rsquo;intestatario. L&rsquo;ultimo &egrave; quello di fine 2017. Qui sono stati usati solo per fare conti: i veicoli uno per uno non sono ripubblicati. Autovetture: <b>'+f0(F.auto)+'</b>; moto: '+f0(F.moto)+'.</p>';
+  h+='<div class="kpis"><div><span class="big">'+pc(F.benzina,0)+'</span><br>benzina</div><div><span class="big">'+pc(F.gasolio,0)+'</span><br>gasolio</div><div><span class="big">'+pc(F.gpl,1)+'</span><br>GPL</div><div><span class="big">'+pc(F.ibrido+F.elettrico,1)+'</span><br>ibride o elettriche</div></div>';
+  h+='<ul class="m"><li>Et&agrave; media delle auto: <b>'+nf(F.eta_media,1)+' anni</b> (anno di immatricolazione contro il 2017); il '+pc(F.fino2001,0)+' era del 2001 o precedente.</li>';
+  h+='<li>Emissioni di CO&#8322; dichiarate (dove indicate): <b>'+f0(F.co2_media)+' g/km</b> in media.</li>';
+  h+='<li>Potenza: il '+pc(F.kw_fino70,0)+' fino a 70 kW, il '+pc(F.kw_oltre100,0)+' oltre 100 kW, l&rsquo;'+pc(F.kw_oltre130,1)+' oltre 130 kW. Massa a pieno carico di 2.000 kg o pi&ugrave;: '+pc(F.massa_oltre2000,0)+'.</li>';
+  h+='<li>Chi le possiede (persone, non societ&agrave;): <b>il '+pc(F.donne,0)+' donne</b>, il '+pc(F.over65,0)+' ha 65 anni o pi&ugrave;, il '+pc(F.under35,0)+' meno di 35. Il '+pc(F.senza_eta,0)+' delle auto ha un intestatario senza et&agrave; (di solito societ&agrave; o enti) e il '+pc(F.locazione,1)+' &egrave; dichiarato &laquo;da locare senza conducente&raquo;.</li></ul>';
+  h+='<p class="src">Comune di Milano, ds545 &laquo;Parco circolante dei veicoli&raquo; (Motorizzazione, CC-BY), ultimo veicolo immatricolato nel file: 27/10/2017. Il file contiene '+f0(F.auto)+' autovetture, mentre il Comune dice che a fine 2017 erano '+f0(F.ds1094_2017)+' (ds1094, PRA): sette su cento in pi&ugrave;. Non so spiegarlo (archivio della Motorizzazione e archivio del PRA non coincidono), perci&ograve; trattare queste quote come una fotografia, non come un conteggio.</p>';
+  setH('foto-testo',h);
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var T=D.citta.tab2025;
+  var L=[
+   '<b>Auto intestate, non auto che circolano.</b> Il registro (PRA) elenca i veicoli iscritti e li lascia finch&eacute; il proprietario non chiede la radiazione. Un&rsquo;auto ferma in un box o mai radiata conta come un&rsquo;auto che si usa ogni giorno. Non conta chi viene a Milano da fuori (pendolari, turisti, furgoni): per quello ci sono i <a href="../area-c/">passaggi in Area C</a>.',
+   '<b>Leasing, noleggio e auto aziendali.</b> L&rsquo;auto &egrave; intestata al proprietario: per il noleggio a lungo termine e il leasing &egrave; la societ&agrave; di noleggio, nel comune dove ha sede (Torino, Firenze, Roma ne hanno molte). Chi a Milano usa un&rsquo;auto aziendale in leasing spesso non risulta tra le auto di Milano. Il confronto tra citt&agrave; pi&ugrave; pulito &egrave; quello &laquo;uso privato&raquo;, ma esiste solo per provincia, non per comune.',
+   '<b>I residenti sono quelli ISTAT, non quelli dell&rsquo;anagrafe del Comune.</b> L&rsquo;anagrafe di Milano ha dal 2020 fino al 3% di residenti in pi&ugrave; di ISTAT (vedi il filone Popolazione); con quei numeri le auto ogni 1.000 abitanti sono un po&rsquo; meno (502 invece di 519 nel 2025, come nella pagina <a href="../parcheggi/">Parcheggi</a>). Ho scelto ISTAT per confrontare le citt&agrave; con la stessa misura. In pi&ugrave;, dal 2020 ISTAT corregge i residenti col censimento permanente: parte della salita delle auto per abitante dopo il 2019 viene da l&igrave;, non da nuove auto.',
+   '<b>Il carburante c&rsquo;&egrave; solo per provincia.</b> Per il comune di Milano non ci sono tabelle per alimentazione negli anni 2019-2025: la provincia (Citt&agrave; metropolitana, circa tre auto su cinque fuori dal comune) ha una composizione diversa, per esempio pi&ugrave; diesel. Le &laquo;ibride&raquo; sono tutte insieme, anche le leggere; le elettriche sono solo quelle a batteria.',
+   '<b>Classi Euro: un buco nel dataset del Comune.</b> Nel dataset ds530 (classi Euro, 2007-2025) mancano le auto Euro 0 fino al 2023 e il totale non coincide con il parco di ds529 (ad esempio 615.529 contro 690.914 nel 2019). Ho usato ds1081 (2007-2018) e ACI (2019-2025), con totali che coincidono con ds529 in tutti gli anni, e ho verificato che le altre classi siano uguali nelle tre fonti.',
+   '<b>Et&agrave; e potenza hanno fasce che cambiano.</b> Le fasce di anno di immatricolazione sono biennali e si spostano di un anno ogni anno: si possono confrontare solo &laquo;almeno 16 anni&raquo; e &laquo;ultimi due anni&raquo;. Non c&rsquo;&egrave; l&rsquo;et&agrave; media n&eacute; la carrozzeria (quindi nessun conteggio dei SUV).',
+   '<b>Area B e Area C.</b> Le regole di Area B dopo il primo giorno sono cambiate pi&ugrave; volte e le fonti consultate discordano: non le ho usate. I passaggi in Area C comprendono tutti i veicoli (moto e furgoni compresi) e una quota non classificata (12-22% negli anni del confronto), quindi si confrontano per ordine di grandezza con il parco auto.',
+   '<b>Milano contro le altre citt&agrave;: solo dal 2019.</b> Le tabelle ACI in formato aperto che ho trovato partono dal 2019; per gli anni prima non ho cercato altre fonti. Le serie di Milano 2007-2018 vengono dal Comune.',
+   '<b>Fotografia 2017.</b> L&rsquo;elenco per veicolo ha il 7% di auto in pi&ugrave; rispetto alla serie del PRA dello stesso anno e non &egrave; stato aggiornato dopo. Contiene dati personali (et&agrave; e sesso dell&rsquo;intestatario): qui compaiono solo conteggi.',
+   '<b>Immatricolazioni e radiazioni.</b> Le radiazioni sono passate da '+f0(D.ritmi.rad_2022)+' nel 2022 a '+f0(D.ritmi.rad_2024)+' nel 2024 e '+f0(D.ritmi.rad_2025)+' nel 2025 senza che il parco cali: non so spiegarlo (pulizie del registro? passaggi tra comuni?). Per questo non le uso per ricostruire il parco.',
+   '<b>Moto.</b> Sono i &laquo;motocicli&raquo; del registro; i ciclomotori (50 cc) e le biciclette elettriche non ci sono.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+function metodo(){
+  var L=[
+   '<b>Che cosa si conta.</b> Le autovetture (e i motocicli) iscritte al PRA il cui proprietario risiede nel comune, al 31 dicembre di ogni anno. I totali di Milano coincidono tra Comune (ds529) e ACI per tutti gli anni 2019-2025 (controllo fatto dal programma).',
+   '<b>Auto ogni 1.000 abitanti</b> = autovetture al 31 dicembre / residenti ISTAT al 1&deg; gennaio dell&rsquo;anno dopo &times; 1.000. Fino al 2018 i residenti sono quelli al 31 dicembre del bilancio demografico ricostruito di ISTAT (uguale al 1&deg; gennaio dopo). Per le citt&agrave; i residenti sono presi dai file POSAS di ogni provincia; Italia = somma delle regioni.',
+   '<b>Province e comuni.</b> Capoluogo = comune con lo stesso nome della provincia. Italia = somma delle province (esclusi i totali di regione e area che compaiono nelle tabelle). Le percentuali di carburante e di Euro sommano al totale in ogni anno e per ogni territorio (controllo del programma).',
+   '<b>Auto vietate da Area B.</b> Dalla tabella ACI &laquo;autovetture per provincia, alimentazione ed Euro&raquo;: benzina Euro 0 + gasolio Euro 0, 1, 2, 3 per la provincia di Milano. Non comprende le auto a doppia alimentazione.',
+   '<b>Uso privato</b> = voce &laquo;privato&raquo; della tabella ACI per provincia e uso (esclude noleggio con e senza conducente e uso pubblico).',
+   '<b>Pagina costruita da un programma</b> (<code>auto/scripts/build.py</code> per le tabelle pulite, <code>auto/scripts/pagina.py</code> per questa pagina): si rilancia e riscrive tutto. I numeri in questa pagina sono in <a href="data/riepilogo.json">riepilogo.json</a> con la loro origine.'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

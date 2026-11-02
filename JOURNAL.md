@@ -2760,3 +2760,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonte: Ministero della Giustizia, file xlsx su datiestatistiche.giustizia.it (12 file); nessuna licenza aperta, le note legali ammettono il riuso non commerciale con citazione: pubblicate solo tabelle ricalcolate. webstat.giustizia.it blocca i programmi: non usato. 54 controlli superati (tempo di smaltimento ricalcolato uguale a quello del Ministero in 2.366 confronti).
 - Numeri: civile, solo il 6,9% delle cause aperte ha più di 3 anni (Italia 15,1%), ma il tempo di smaltimento sale da 417 a 435 giorni mentre l'Italia scende da 556 a 435; il 35% delle cause civili è protezione internazionale (senza: 317 giorni, calcolo nostro); Corte d'appello 2ª su 29 nel civile. Obiettivi PNRR nazionali, non per tribunale.
 - Limiti dei dati: flussi civili diversi dal monitoraggio distrettuale dello 0,5-2,7%; ipotesi su Venezia (cittadinanza) non verificata; obiettivo PNRR 2024 non ricostruibile, citato solo come dichiarazione del Ministero.
+
+## 74. Le auto dei milanesi
+
+- 2026-11-02 — Fase 1 e pagina (`auto/`, `docs/auto/`). Dettagli in `auto/NOTE.md`.
+- Fonti: ACI Autoritratto 2019-2025 (CC BY 4.0), Comune ds529, ds1081, ds530, ds545 (CC BY), ISTAT. Totali ACI uguali al Comune 2019-2025.
+- Trappole del dato (per il JOURNAL): **ds530 del Comune non ha le righe Euro 0 nel 2007-2023** e il totale non coincide con ds529 (usati ds1081 + ACI; da segnalare al Comune); **ds545 è un elenco di veicoli uno per uno con dati personali**: usato solo per conteggi aggregati, mai pubblicato; picco di radiazioni 2024-25 (60.765 contro 28.487 nel 2022) non spiegato.
+- Numeri: 519 auto ogni 1.000 abitanti (584 nel 2007, minimo 491 nel 2019); tra i 10 grandi comuni solo Genova ne ha meno (Torino e Firenze gonfiate dal noleggio a lungo termine); moto +47%; in provincia diesel dal 33% al 21%, ibride dal 2,1% al 13,8%; 68.968 auto Euro 0 rimaste; il calo delle Euro 0-3 non accelera dopo Area B. SUV non misurabili.
