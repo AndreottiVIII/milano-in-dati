@@ -1,4 +1,4 @@
-# Milano in dati: stato del progetto (1 novembre 2026)
+# Milano in dati: stato del progetto (2 novembre 2026, mattina)
 
 Sito: https://andreottiviii.github.io/milano-in-dati/ (Ctrl+F5 se una pagina sembra vecchia)
 
@@ -7,6 +7,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 ## Decisioni aperte per Davide
 
 1. **Grafica della home**: 24 bozze in `bozze-home/`. Davide vuole una copertina di tutte le ricerche; "forse la 21 (tessere), ma per ora non scegliamo".
+2. **Parcheggi**: pagina pronta ma non pubblicata; il totale di circa 297.000 posti in strada viene solo dalla stampa (documento del Comune che blocca i programmi).
 
 ## Filone per filone
 
@@ -79,7 +80,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 65 | Rigenerazione | Online (dal PGT, Atlante non riusabile) |
 | 66 | Rifiuti | Online |
 | 67 | Povertà educativa | Online |
-| — | In corso | Pagine di scuole di domani, popolazione (3 pagine), quartieri che cambiano, pollini; fase 1 di pendolari, chi governa Milano, parcheggi, incroci pericolosi, statue, botteghe storiche, antenne, pollini, voto e reddito, quartieri che cambiano, scuole di domani, suolo, reati, benessere ISTAT, popolazione (arrivi, stranieri, età), case popolari, dove si costruisce, beni confiscati |
+| — | In pausa | Nomi dei bambini (Milano non pubblica i nomi); Parcheggi (pagina pronta, in attesa di decisione) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.
