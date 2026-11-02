@@ -75,7 +75,8 @@
     { path: 'quartiere-ideale/', label: 'Il mio quartiere ideale' },
     { path: 'divisa/', label: 'Quanto è divisa Milano' },
     { path: 'sfratti/', label: 'Gli sfratti' },
-    { path: 'lavoro/', label: 'Il lavoro per quartiere' }
+    { path: 'lavoro/', label: 'Il lavoro per quartiere' },
+    { path: 'rigenerazione/', label: 'Progetti di rigenerazione' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

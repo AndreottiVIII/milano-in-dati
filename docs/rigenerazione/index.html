@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · I progetti di rigenerazione</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto}
+#tab-top{min-width:560px} #tab-nil{min-width:520px}
+.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>I progetti di rigenerazione di Milano</h1>
+<p>Dove sono, quanto sono grandi e a che punto erano gli <b>ambiti di trasformazione</b> di Milano: ex scali ferroviari, ex Expo, programmi integrati, accordi di programma, piani attuativi. Li mettiamo accanto al suolo consumato dal 2012, ai prezzi delle case e alle nuove costruzioni, quartiere per quartiere. Sono dati aperti del Comune (PGT Milano 2030): <b id="n-prog">277</b> ambiti per circa <b id="n-ha">978</b> ettari.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="warm"><b>Prima di leggere.</b> Questa non &egrave; la lista dei circa 145 progetti dell&rsquo;&laquo;Atlante della rigenerazione urbana&raquo; del Comune. Quella mappa ha case, volumi e quote di edilizia sociale, ma &egrave; pubblicata con la dicitura &laquo;solo consultazione autorizzata&raquo;, senza licenza di riuso, e quindi non la copiamo. Qui c&rsquo;&egrave; l&rsquo;altro strato del Comune, aperto (CC BY 4.0): gli ambiti dei piani approvati o adottati con il PGT, <b>fotografati nel 2020</b>. Dice dove sono, di che tipo, quanto sono grandi e se allora erano attuati. <b>Non dice quante case, quanto verde o quanta edilizia sociale.</b> Lo stato &egrave; di oltre cinque anni fa: alcuni ambiti &laquo;non attuati&raquo; oggi possono essere cantieri o quartieri finiti.</div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Ogni forma &egrave; un ambito (o un gruppo di ambiti con lo stesso nome). Clic per la scheda.</p>
+<div class="ctl"><span class="sub">Colora:</span>
+<button type="button" data-m="stato" class="on">Stato nel 2020</button><button type="button" data-m="tipo">Tipo di piano</button><button type="button" data-m="quota">Quartieri: quota coperta</button><button type="button" data-m="nuovo">Quartieri: suolo nuovo 2012&ndash;25</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa degli ambiti di trasformazione del PGT di Milano"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors; ambiti e quartieri: Comune di Milano, PGT Milano 2030, Tavola R02 (CC BY 4.0); suolo: ISPRA (CC BY 4.0 IT). Le forme sono semplificate.</p>
+<div id="scheda" class="card"><span class="sub">Scegli un ambito sulla mappa o un quartiere dall&rsquo;elenco.</span></div>
+
+<h2 id="quanti">Quanti sono e quanto sono grandi</h2>
+<div id="quanti-testo"></div>
+<div class="scroll"><table id="tab-gruppi"></table></div>
+<p class="src">Ettari = area dell&rsquo;unione dei poligoni di ogni gruppo (le righe non si sommano, perch&eacute; alcuni ambiti ne contengono altri). Un &laquo;progetto&raquo; qui &egrave; un nome di ambito per tipo di piano, non un cantiere. Fonte: Comune di Milano, PGT Milano 2030, Tavola R02, livello &laquo;Ambiti interessati da provvedimenti in itinere approvati e adottati&raquo;.</p>
+<h3>A che punto erano (PGT 2020)</h3>
+<div id="stato-testo"></div>
+<div class="bars" id="b-stato"></div>
+
+<h2 id="grandi">I pi&ugrave; grandi</h2>
+<div id="grandi-testo"></div>
+<div class="scroll"><table id="tab-top"></table></div>
+<p class="src">&laquo;Suolo nuovo&raquo; = ettari che nel 2012 non erano suolo consumato e nel 2025 s&igrave;, dentro l&rsquo;ambito (carte ISPRA a 10 m). Include i cantieri. Gli ambiti si sovrappongono in parte: non sommare le righe. Il nome del quartiere &egrave; quello con pi&ugrave; area dell&rsquo;ambito (&laquo;Cascina Merlata&raquo; &egrave; sia un ambito sia un quartiere, diversi tra loro).</p>
+
+<h2 id="quartieri">Quartiere per quartiere</h2>
+<div id="quartieri-testo"></div>
+<div class="bars" id="b-nil"></div>
+<details><summary>Tutti i quartieri</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
+
+<h2 id="suolo">Rigenerare o consumare suolo?</h2>
+<div id="suolo-testo"></div>
+<div class="grid2"><div><h3>Suolo nuovo 2012&ndash;25, per tipo</h3><div class="bars" id="b-suolo-g"></div></div>
+<div><h3>Dove &egrave; finito il suolo nuovo</h3><div class="bars" id="b-suolo-n"></div></div></div>
+<p class="src">Ettari in cui il suolo da libero &egrave; diventato consumato tra la carta ISPRA 2012 e quella 2025. Fonte: ISPRA/SNPA, carta nazionale del consumo di suolo, edizione 2026, CC BY 4.0 IT; ambiti: Comune di Milano. Vedi la pagina <a href="../suolo/">Quanto suolo si consuma</a>.</p>
+
+<h2 id="prezzi">Prezzi, case nuove e case popolari</h2>
+<div id="prezzi-testo"></div>
+<div class="ch" id="ch-prezzo" role="img" aria-label="Grafico: quota di quartiere coperta da ambiti e variazione dei prezzi delle case"></div>
+<p class="src">Ogni punto &egrave; un quartiere con almeno 5.000 residenti. Orizzontale: quota del quartiere coperta da ambiti. Verticale: variazione reale del prezzo di vendita OMI, secondo semestre 2014 &ndash; primo 2026 (filone <a href="../quartieri-che-cambiano/">Quartieri che cambiano</a>, da <a href="../prezzi-case/">Prezzi delle case</a>).</p>
+<div class="ch" id="ch-abit" role="img" aria-label="Grafico: quota di quartiere coperta da ambiti e abitazioni in nuovi fabbricati ogni mille residenti"></div>
+<p class="src">Verticale: abitazioni in nuovi fabbricati (permessi 2014&ndash;2024) ogni 1.000 residenti (pagina <a href="../costruzioni/">Quanto si costruisce</a>). Sono permessi, non cantieri finiti.</p>
+<div id="popolari-testo"></div>
+<div class="warn"><b>Un confronto, non una prova.</b> Quartieri con molti ambiti e quartieri con prezzi che salgono possono coincidere o no, ma i dati non dicono che uno causi l&rsquo;altro: pesano la posizione, il metr&ograve;, il punto di partenza dei prezzi, la grandezza del quartiere.</div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/progetti.csv">progetti.csv</a> (un ambito per riga: tipo, stato 2020, ettari, quartiere, suolo nuovo e consumato), <a href="data/nil.csv">nil.csv</a> (per quartiere: ettari di ambiti, quota, suolo nuovo, prezzi, nuove abitazioni), <a href="data/tipi.csv">tipi.csv</a>, <a href="data/ambiti.geojson">ambiti.geojson</a> e <a href="data/nil.geojson">nil.geojson</a> (forme semplificate), <a href="data/riepilogo.json">riepilogo.json</a>. I confini del PGT sono CC BY 4.0: citare &laquo;Comune di Milano &ndash; PGT Milano 2030&raquo;.</p>
+<p class="sub">Altre pagine: <a href="../costruzioni/">Costruzioni</a> &middot; <a href="../suolo/">Suolo</a> &middot; <a href="../prezzi-case/">Prezzi delle case</a> &middot; <a href="../case-popolari/">Case popolari</a> &middot; <a href="../quartieri-che-cambiano/">Quartieri che cambiano</a></p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Ambiti: Comune di Milano &ndash; Direzione Rigenerazione urbana, PGT Milano 2030 vigente, Tavola R02 &laquo;Indicazioni urbanistiche&raquo; (servizio del Geoportale), licenza Creative Commons Attribuzione CC BY 4.0 dichiarata nella descrizione del servizio; dati approvati il 5/2/2020; scaricati il 1/11/2026. Quartieri (NIL): Comune di Milano, ds964 (CC BY). Suolo consumato: ISPRA / SNPA (CC BY 4.0 IT). Prezzi: Agenzia delle Entrate &ndash; OMI, elaborati nella pagina Prezzi delle case. Nuove abitazioni: Comune di Milano, permessi di costruire (CC BY). Mappa: &copy; OpenStreetMap contributors. Non usata: la &laquo;Mappa dei progetti di Rigenerazione urbana&raquo; del Comune (copyright, solo consultazione).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,AF=null,NF=null,NIL=[],AMB=[],RD=[];
+var ACC='#00695c',WARM='#c26a1b';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+var STC={'attuato':'#136459','attuato in parte':'#62b0a4','non attuato':'#c26a1b','area non attuata':'#e0a96d'};
+var STL={'attuato':'Attuato','attuato in parte':'Attuato in parte','non attuato':'Non attuato','area non attuata':'Area non attuata'};
+var GRL=['Accordi di programma e intese','Programmi integrati e di recupero (PII, PRU, PIR, Zona C)','Piani attuativi (PA)','Opere esterne di PII e PA','Piccoli lotti: convenzioni, istanze, bandi','Lotti dei fondi del Comune'];
+var GRC=['#136459','#c26a1b','#5b4a9a','#2b78b0','#8a8a8a','#b0447a'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function barsPlain(id,rows,max,col){
+  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+Math.max(0,r.v/max*100)+'%;background:'+(r.col||col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function tipoIt(t){return t.replace('Accordi di Programma/PII','Accordo di programma / PII').replace('Accordi di Programma','Accordo di programma').replace('Accordo di Programma Scali','Accordo di programma Scali ferroviari')}
+
+Promise.all([J('data/riepilogo.json'),J('data/ambiti.geojson'),J('data/nil.geojson')]).then(function(a){
+  D=a[0];AF=a[1];NF=a[2];
+  NIL=NF.features.map(function(f){return f.properties});AMB=AF.features.map(function(f){return f.properties});
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mappa();quanti();grandi();quartieri();suolo();prezzi();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var S=D.suolo,T=D.top_nuovo_suolo,C=D.confronto_gruppi_nil,cr=D.correlazioni;
+  el('n-prog').textContent=f0(D.n_progetti);el('n-ha').textContent=f0(D.unione_ha);
+  var tre=T[0].nuovo+T[1].nuovo+T[2].nuovo;
+  var h='<p><b>Gli ambiti sono il '+nf(S.quota_ambiti_su_citta_pct,1)+'% del territorio di Milano, ma dentro ci sono '+f0(S.ambiti.nuovo)+' dei '+f0(S.citta.nuovo)+' ettari di suolo diventato consumato dal 2012 al 2025: il '+f0(S.quota_nuovo_in_ambiti_pct)+'%.</b> E quasi tutto in pochi posti: '+esc(T[0].nome)+' (l&rsquo;ex area Expo), '+esc(T[1].nome)+' e '+esc(T[2].nome)+' (Lorenteggio) da soli fanno circa '+f0(tre)+' ettari.</p>';
+  h+='<p>Le trasformazioni pi&ugrave; famose (Porta Nuova, CityLife, Portello, Scalo Romana, Farini) quasi non compaiono: stavano su aree gi&agrave; consumate, ex scali e ex Fiera. In media il '+f0(S.ambiti_gia_consumati_2012_pct)+'% degli ambiti era gi&agrave; suolo consumato nel 2012, contro il '+f0(S.citta_consumata_2012_pct)+'% dell&rsquo;intera citt&agrave;: pi&ugrave; &laquo;gi&agrave; costruito&raquo; della media, ma non di molto.</p>';
+  h+='<p>I prezzi delle case, invece, non seguono gli ambiti: nei '+C[0].n+' quartieri dove gli ambiti coprono almeno il 10% del territorio i prezzi reali sono saliti in mediana del <b>'+f1(C[0].prezzo_var_med)+'%</b> dal 2014; negli altri '+C[1].n+' del <b>'+f1(C[1].prezzo_var_med)+'%</b>.</p>';
+  h+='<p class="src">Ambiti: Comune di Milano, PGT 2020 (CC BY 4.0); suolo: ISPRA 2012 e 2025 (CC BY 4.0 IT); prezzi: OMI. Confronti per quartiere o per area, non cause.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,AL=null,NL=null,CUR='stato',SELN=null,MET={};
+function qb(vals,k,step){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]/step)*step);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
+function colore(v,m){if(v==null)return '#bdbdbd';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function mappa(){
+  var b1=[2,5,10,20,35],b2=[0.1,1,5,10,20];
+  MET={quota:{k:'ap',b:b1,c:pick(b1.length+1),t:'Quota del territorio di ogni quartiere che sta dentro un ambito. 40 quartieri su 88 ne hanno meno dell&rsquo;1%.',f:function(v){return nf(v,1)+'%'}},
+       nuovo:{k:'nu',b:b2,c:pick(b2.length+1),t:'Ettari di suolo diventato consumato tra il 2012 e il 2025 in ogni quartiere (tutto il quartiere, non solo gli ambiti, che restano tracciati in nero).',f:function(v){return nf(v,1)+' ha'}}};
+  MAP=L.map('map',{preferCanvas:false}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  NL=L.geoJSON(NF,{style:function(){return {fillOpacity:0,color:'#777',weight:1}},onEachFeature:function(f,l){
+    l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});l.on('click',function(){scegliNil(f.properties.i,false)})}}).addTo(MAP);
+  AL=L.geoJSON(AF,{style:asty,onEachFeature:function(f,l){
+    l.bindTooltip('<b>'+esc(f.properties.n)+'</b><br>'+esc(tipoIt(f.properties.t))+' &middot; '+f1(f.properties.ha)+' ha',{sticky:true});
+    l.on('click',function(e){L.DomEvent.stopPropagation(e);schedaAmb(f.properties)})}}).addTo(MAP);
+  MAP.fitBounds(NL.getBounds());
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegliNil(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(NL.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function asty(f){var p=f.properties;
+  if(CUR==='stato')return {fillColor:STC[p.s],fillOpacity:.78,color:'#222',weight:.6};
+  if(CUR==='tipo')return {fillColor:GRC[GRL.indexOf(p.g)],fillOpacity:.78,color:'#222',weight:.6};
+  return {fillColor:'#000',fillOpacity:.05,color:'#000',weight:1.4}}
+function nsty(f){var p=f.properties;
+  if(CUR==='quota'||CUR==='nuovo'){var m=MET[CUR];return {fillColor:colore(p[m.k],m),fillOpacity:.82,color:SELN===p.i?'#000':'#fff',weight:SELN===p.i?3:1}}
+  return {fillOpacity:0,color:SELN===p.i?'#000':'#777',weight:SELN===p.i?3:1}}
+function tipNil(p){
+  if(CUR==='nuovo')return '<b>'+esc(p.n)+'</b><br>'+nf(p.nu,1)+' ha di suolo nuovo 2012–25 ('+nf(p.nua,1)+' dentro gli ambiti)';
+  return '<b>'+esc(p.n)+'</b><br>'+nf(p.ap,1)+'% in ambiti ('+f0(p.am)+' ha, '+p.np+' ambiti)'}
+function ricolora(){
+  NL.setStyle(nsty);AL.setStyle(asty);
+  if(CUR==='quota'||CUR==='nuovo'){NL.bringToBack();AL.bringToFront()}else{NL.bringToBack();AL.bringToFront()}
+  var h='',m;
+  if(CUR==='stato'){Object.keys(STC).forEach(function(k){h+='<span><i style="background:'+STC[k]+'"></i>'+STL[k]+'</span>'});setH('map-desc','Stato di attuazione degli ambiti nel PGT del 2020 (non oggi). &laquo;Area non attuata&raquo; &egrave; la parte ancora da realizzare di un ambito pi&ugrave; grande.')}
+  else if(CUR==='tipo'){GRL.forEach(function(k,i){h+='<span><i style="background:'+GRC[i]+'"></i>'+esc(k)+'</span>'});setH('map-desc','Tipo di piano o accordo, raggruppato da noi. I piccoli lotti dei fondi del Comune e delle convenzioni si vedono appena.')}
+  else{m=MET[CUR];var u=CUR==='quota'?'%':' ha';m.c.forEach(function(c,i){var t=i===0?'meno di '+nf(m.b[0],m.b[0]<1?1:0)+u:i===m.b.length?nf(m.b[i-1],0)+u+' o più':nf(m.b[i-1],m.b[i-1]<1?1:0)+' – '+nf(m.b[i],0)+u;h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});setH('map-desc',m.t)}
+  setH('lg-map',h);
+}
+function scegliNil(i,zoom){SELN=i;el('sel-nil').value=String(i);NL.setStyle(nsty);
+  if(zoom)NL.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})});
+  schedaNil(i)}
+function schedaAmb(p){
+  setH('scheda','<h3>'+esc(p.n)+'</h3><table><tbody><tr><td>Tipo di piano nel file</td><td class="r">'+esc(tipoIt(p.t))+'</td></tr><tr><td>Stato nel PGT 2020</td><td class="r">'+STL[p.s]+'</td></tr><tr><td>Ettari</td><td class="r">'+f1(p.ha)+'</td></tr><tr><td>Quartiere con pi&ugrave; area</td><td class="r">'+esc(p.q)+'</td></tr><tr><td>Suolo nuovo 2012&ndash;25 dentro l&rsquo;ambito</td><td class="r">'+nf(p.nu,1)+' ha</td></tr><tr><td>Suolo gi&agrave; consumato nel 2012</td><td class="r">'+(p.c12==null?'':f0(p.c12)+'%')+'</td></tr></tbody></table><p class="sub">Case, volumi e verde previsti non sono nei dati aperti.</p>')}
+function schedaNil(i){var p=nilById(i);if(!p)return;
+  var vs=AMB.filter(function(a){return a.q===p.n}).sort(function(a,b){return b.ha-a.ha}).slice(0,6);
+  setH('scheda','<h3>'+esc(p.n)+'</h3><table><tbody><tr><td>Territorio in ambiti</td><td class="r">'+f0(p.am)+' ha su '+f0(p.ha)+' ('+nf(p.ap,1)+'%)</td></tr><tr><td>Ambiti (per nome e tipo)</td><td class="r">'+p.np+'</td></tr><tr><td>Suolo nuovo 2012&ndash;25 (quartiere)</td><td class="r">'+nf(p.nu,1)+' ha, di cui '+nf(p.nua,1)+' negli ambiti</td></tr><tr><td>Prezzi delle case 2014&ndash;2026</td><td class="r">'+(p.pv==null?'n.d.':sg(p.pv,1)+'%')+'</td></tr><tr><td>Nuove abitazioni ogni 1.000 residenti</td><td class="r">'+(p.ab==null?'n.d.':f1(p.ab))+'</td></tr></tbody></table>'+(vs.length?'<p class="sub">Ambiti principali: '+vs.map(function(a){return esc(a.n)+' ('+f1(a.ha)+' ha, '+STL[a.s].toLowerCase()+')'}).join('; ')+'.</p>':''))}
+
+/* ---------- quanti ---------- */
+function quanti(){
+  var G=D.gruppi,sp=D.stati_progetti;
+  var h='<p>Il file ha '+D.n_record_file+' poligoni (uno senza geometria, scartato); raggruppati per tipo di piano e nome diventano <b>'+D.n_progetti+'</b> ambiti. Insieme coprono <b>'+f0(D.unione_ha)+' ettari</b>, il '+nf(D.ambiti_pct_citta,1)+'% dei '+f0(D.nil_ha_totali)+' ettari dei quartieri di Milano (la somma dei poligoni sarebbe '+f0(D.somma_ha)+': il '+f0(D.quota_sovrapposta_pct)+'% &egrave; sovrapposto, per esempio programmi integrati dentro un accordo di programma, e qui lo contiamo una volta sola).</p>';
+  var a=G[GRL[0]],b=G[GRL[1]];
+  h+='<p>Contano soprattutto due famiglie: gli <b>accordi di programma e le intese</b> ('+a.progetti+' ambiti, '+f0(a.unione_ha)+' ettari, il '+f0(100*a.unione_ha/D.unione_ha)+'% del totale: ex scali ferroviari, ex Expo, Montecity-Santa Giulia, Portello, Fiera) e i <b>programmi integrati</b> ('+b.progetti+' ambiti, '+f0(b.unione_ha)+' ettari). Il resto sono tanti lotti piccoli: '+(G[GRL[4]].progetti+G[GRL[5]].progetti)+' ambiti che messi insieme fanno '+f0(G[GRL[4]].unione_ha+G[GRL[5]].unione_ha)+' ettari.</p>';
+  setH('quanti-testo',h);
+  table('tab-gruppi',['Gruppo','Ambiti','Ettari','% della citt&agrave;'],GRL.map(function(k){var g=G[k];return [esc(k),f0(g.progetti),f0(g.unione_ha),nf(100*g.unione_ha/D.nil_ha_totali,2)+'%']}));
+  var n=0,ha=0;sp.forEach(function(s){n+=s.n;ha+=s.ha});
+  var order=['attuato','attuato in parte','non attuato','area non attuata'];
+  var m={};sp.forEach(function(s){m[s.stato]=s});
+  setH('stato-testo','<p>Nel PGT approvato il 5 febbraio 2020 ogni ambito aveva uno stato. <b>'+m['non attuato'].n+'</b> ambiti su '+n+' risultavano non attuati, ma erano soprattutto piccoli (in tutto '+f0(m['non attuato'].ha)+' ettari); <b>'+m['attuato in parte'].n+'</b> erano attuati in parte e pesavano '+f0(m['attuato in parte'].ha)+' ettari, oltre la met&agrave; del totale; '+m['attuato'].n+' erano completati ('+f0(m['attuato'].ha)+' ettari). Un ambito con parti in stato diverso &egrave; stato contato &laquo;attuato in parte&raquo;.</p><p class="sub">Ettari = somma delle aree dei singoli ambiti.</p>');
+  barsPlain('b-stato',order.filter(function(k){return m[k]}).map(function(k){return {nm:STL[k]+' ('+m[k].n+' ambiti)',v:m[k].ha,txt:f0(m[k].ha)+' ha',col:STC[k]}}),Math.max.apply(null,sp.map(function(s){return s.ha})));
+}
+
+/* ---------- grandi ---------- */
+function grandi(){
+  var T=D.top_progetti.slice(0,15),F=D.grandi_funzioni,P=D.pa_obbligatori;
+  var h='<p>I 15 pi&ugrave; grandi ambiti sommano circa '+f0(T.reduce(function(s,x){return s+x.ha},0))+' ettari. In testa <b>'+esc(T[0].nome)+'</b> ('+f0(T[0].ha)+' ettari), <b>'+esc(T[1].nome)+'</b> ('+f0(T[1].ha)+'), <b>'+esc(T[2].nome)+'</b> ('+f0(T[2].ha)+') e, primo degli ex scali ferroviari, <b>'+esc(T.filter(function(x){return /Scali/.test(x.tipo)})[0].nome)+'</b> ('+f0(T.filter(function(x){return /Scali/.test(x.tipo)})[0].ha)+'). Gli ex scali ferroviari sono sette ambiti (Farini, Romana, Lambrate, Greco-Breda, San Cristoforo, Genova, Rogoredo), circa 125 ettari in tutto, tutti &laquo;non attuati&raquo; nel 2020.</p>';
+  h+='<p>Il PGT elenca anche <b>'+F.length+'</b> aree di &laquo;grandi funzioni urbane&raquo; (come Piazza d&rsquo;Armi, Porto di Mare, San Siro, Bovisa-Goccia, Rubattino, Ronchetto: '+f0(F.reduce(function(s,x){return s+x.ha},0))+' ettari) e <b>'+P.length+'</b> piani attuativi obbligatori (in tutto '+f0(P.reduce(function(s,x){return s+x.ha},0))+' ettari, ai margini della citt&agrave;: Vaiano Valle, Bruzzano, Basmetto, via Natta, viale Molise). Il file non dice che cosa vi verr&agrave; costruito.</p>';
+  setH('grandi-testo',h);
+  table('tab-top',['Ambito','Tipo','Stato 2020','Ettari','Suolo nuovo ha'],T.map(function(x){return [esc(x.nome)+'<br><span class="sub">'+esc(x.nil||'')+'</span>',esc(tipoIt(x.tipo)),STL[x.stato],f0(x.ha),nf(x.nuovo,1)]}));
+}
+
+/* ---------- quartieri ---------- */
+function quartieri(){
+  var T=D.nil_top,n10=D.n_nil_oltre10;
+  setH('quartieri-testo','<p>Per ogni quartiere (NIL) abbiamo misurato quanto territorio sta dentro un ambito. Gli ambiti toccano '+D.n_nil_con_ambiti+' quartieri su 88. In '+T.filter(function(x){return x.pct>=25}).length+' quartieri coprono un quarto o pi&ugrave; del territorio, a partire da <b>'+esc(T[0].nil)+'</b> ('+f0(T[0].pct)+'%), '+esc(T[1].nil)+' ('+f0(T[1].pct)+'%) e '+esc(T[2].nil)+' ('+f0(T[2].pct)+'%). Molti sono piccoli: Tre Torri ha 2.490 abitanti, Farini 3.861, Cascina Merlata 1.130.</p>');
+  barsPlain('b-nil',T.map(function(x){return {nm:x.nil,v:x.pct,txt:nf(x.pct,1)+'%'}}),T[0].pct);
+  var rows=NIL.slice().sort(function(a,b){return b.ap-a.ap}).map(function(p){return [esc(p.n),f1(p.ap)+'%',f0(p.am),p.np,nf(p.nu,1),p.pv==null?'':sg(p.pv,1)+'%']});
+  table('tab-nil',['Quartiere','Quota in ambiti','Ettari','Ambiti','Suolo nuovo ha','Prezzi 2014–26'],rows);
+}
+
+/* ---------- suolo ---------- */
+function suolo(){
+  var S=D.suolo,G=D.gruppi,N=D.nil_nuovo_in_ambiti;
+  var fuori=S.citta.nuovo-S.ambiti.nuovo;
+  setH('suolo-testo','<p>Tra il 2012 e il 2025 la carta ISPRA registra <b>'+f0(S.citta.nuovo)+' ettari lordi</b> di suolo diventato consumato a Milano (e '+f0(S.citta.ripristino)+' tornati liberi). Dentro gli ambiti ne cadono <b>'+f0(S.ambiti.nuovo)+'</b>, fuori <b>'+f0(fuori)+'</b>. Gli ambiti sono pi&ugrave; &laquo;gi&agrave; costruiti&raquo; della media (il '+f0(S.ambiti_gia_consumati_2012_pct)+'% era consumato nel 2012, la citt&agrave; il '+f0(S.citta_consumata_2012_pct)+'%) e pi&ugrave; della met&agrave; del loro suolo nuovo sta in <b>due soli ambiti</b>, MIND-ex Expo e Cascina Merlata. Fuori dagli ambiti spicca Stadio-Ippodromi (20 ettari, nessuno dentro un ambito del file).</p><p>&laquo;Consumato&raquo; non vuol dire &laquo;costruito&raquo;: nella carta contano anche cantieri, piazzali e strade, e cantieri e terra battuta sono la voce pi&ugrave; grande del suolo nuovo (circa il 36% a Milano).</p>');
+  barsPlain('b-suolo-g',GRL.filter(function(k){return G[k].nuovo>0.05}).map(function(k,i){return {nm:k,v:G[k].nuovo,txt:nf(G[k].nuovo,1)+' ha',col:GRC[GRL.indexOf(k)]}}),G[GRL[0]].nuovo);
+  barsPlain('b-suolo-n',N.map(function(x){return {nm:x.nil,v:x.nuovo,txt:nf(x.dentro,1)+' / '+nf(x.nuovo,1)}}),N[0].nuovo);
+  el('b-suolo-n').insertAdjacentHTML('beforeend','<p class="sub">Ettari di suolo nuovo negli ambiti / in tutto il quartiere (i 8 quartieri con pi&ugrave; suolo nuovo).</p>');
+}
+
+/* ---------- scatter ---------- */
+function scatter(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:48,r:12,t:12,b:42};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=0,x1=Math.max.apply(null,xs),y0=Math.min(0,Math.min.apply(null,ys)),y1=Math.max.apply(null,ys);
+  var sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);x0=Math.floor(x0/sx)*sx;x1=Math.ceil(x1/sx)*sx;y0=Math.floor(y0/sy)*sy;y1=Math.ceil(y1/sy)*sy;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  var lastx=-99;
+  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);if(xx-lastx>40){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+f0(v)+'</text>'}}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  if(o.hline!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.hline)+'" y2="'+Y(o.hline)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(W-m.r-2)+'" y="'+(Y(o.hline)-4)+'" text-anchor="end" style="fill:#8a4a10">'+o.hl+'</text>';
+  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-1)+'" text-anchor="start">'+o.yl+'</text>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.2" fill="'+(p.hi?WARM:ACC)+'" fill-opacity=".72" stroke="#fff" stroke-width="1"/>'});
+  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
+    if(bi<0||bd>900){tip.style.display='none';ring.style.display='none';return}
+    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
+    tip.innerHTML=p.t;tip.style.display='';var tw=tip.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
+  function hide(){tip.style.display='none';ring.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+/* ---------- prezzi ---------- */
+function prezzi(){
+  var cr=D.correlazioni,C=D.confronto_gruppi_nil,a=cr.ambiti_pct_vs_prezzo_var,b=cr.ambiti_pct_vs_nuove_abitazioni_1000;
+  var ok=NIL.filter(function(p){return p.cl===1&&p.pv!=null});
+  var cm=NIL.filter(function(p){return p.n==='Cascina Merlata'})[0];
+  setH('prezzi-testo','<p><b>Prezzi.</b> Mettendo i '+a.n+' quartieri con almeno 5.000 residenti in fila per quota coperta da ambiti e per aumento dei prezzi reali delle case (2014&ndash;2026), il legame &egrave; debole: correlazione di Spearman <b>'+sg(a.rho,2)+'</b> (intervallo al 95%: da '+sg(a.ic[0],2)+' a '+sg(a.ic[1],2)+', compreso lo zero). I '+C[0].n+' quartieri con almeno il 10% di ambiti hanno una mediana di aumento del '+f1(C[0].prezzo_var_med)+'%, gli altri '+C[1].n+' del '+f1(C[1].prezzo_var_med)+'%: praticamente uguale. Cascina Merlata, dove met&agrave; del territorio &egrave; in ambiti, ha avuto l&rsquo;aumento pi&ugrave; alto di tutti i quartieri con il dato ('+sg(cm.pv,1)+'%), ma ha 1.130 residenti: &egrave; un solo caso.</p><p><b>Case nuove.</b> Qui il legame c&rsquo;&egrave; ma &egrave; modesto: Spearman <b>'+sg(b.rho,2)+'</b> (da '+sg(b.ic[0],2)+' a '+sg(b.ic[1],2)+'). Dove ci sono pi&ugrave; ambiti si sono autorizzate un po&rsquo; pi&ugrave; abitazioni nuove per abitante (mediana '+f1(C[0].abit_1000_med)+' ogni 1.000 residenti nei quartieri con almeno il 10% di ambiti, '+f1(C[1].abit_1000_med)+' negli altri), e il risultato dipende molto da pochi quartieri: Maggiore-Musocco-Certosa (dove sta l&rsquo;ambito di Cascina Merlata) ha 197 abitazioni nuove ogni 1.000 residenti.</p>');
+  var hi=function(p){return p.ap>=10};
+  function draw(){
+    scatter(el('ch-prezzo'),{pts:ok.map(function(p){return {x:p.ap,y:p.pv,hi:hi(p),t:'<b>'+esc(p.n)+'</b><br>'+nf(p.ap,1)+'% in ambiti<br>prezzi '+sg(p.pv,1)+'%'}}),h:300,xl:'quota del quartiere in ambiti (%)',yl:'variazione prezzi reali 2014–2026 (%)'});
+    var ok2=NIL.filter(function(p){return p.cl===1&&p.ab!=null});
+    scatter(el('ch-abit'),{pts:ok2.map(function(p){return {x:p.ap,y:p.ab,hi:hi(p),t:'<b>'+esc(p.n)+'</b><br>'+nf(p.ap,1)+'% in ambiti<br>'+f1(p.ab)+' abitazioni nuove ogni 1.000 residenti'}}),h:300,xl:'quota del quartiere in ambiti (%)',yl:'abitazioni nuove ogni 1.000 residenti'});
+  }
+  draw();RD.push(draw);
+  var E=D.ers,al=D.aler;
+  setH('popolari-testo','<p class="sub">I punti arancioni sono i quartieri con almeno il 10% di territorio in ambiti.</p><p><b>Case popolari e sociali.</b> Dai dati aperti si vede poco. Il PGT riserva <b>'+E.aree+' aree</b> all&rsquo;edilizia residenziale sociale di nuova previsione (via Rizzoli, via Pitagora, via Notaris e altre: '+nf(E.ha,1)+' ettari in tutto), e tra gli ambiti c&rsquo;&egrave; un accordo quadro per le &laquo;7 aree PRERP&raquo; (il programma regionale di edilizia pubblica) di via Merezzate e via Rizzoli (8,9 ettari). La quota di edilizia sociale promessa dentro ogni progetto, invece, non &egrave; nel file. Per le case popolari esistenti vedi <a href="../case-popolari/">Case popolari</a>.</p>');
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var L=[
+   '<b>Non &egrave; l&rsquo;Atlante.</b> Il Comune pubblica anche una &laquo;Mappa dei progetti di Rigenerazione urbana&raquo; (aggiornata a febbraio 2026), con circa 145 progetti, ma con la dicitura &laquo;Copyright Comune di Milano. Solo consultazione autorizzata&raquo;: nessuna licenza di riuso. Non l&rsquo;abbiamo scaricata. La pagina ufficiale dell&rsquo;Atlante rispondeva con un errore ai programmi e non abbiamo cercato di aggirarlo. Per questo mancano case, volumi, quota di edilizia sociale, verde previsto, date e soggetti attuatori.',
+   '<b>Lo stato &egrave; del 2020.</b> I dati del PGT sono stati approvati il 5 febbraio 2020. Gli ambiti &laquo;non attuati&raquo; (per esempio gli ex scali, MIND) da allora hanno avuto piani e cantieri (le cronache parlano di MIND e di Porta Romana), ma questo file non lo registra. Non abbiamo trovato una versione pi&ugrave; recente con licenza aperta.',
+   '<b>Ambiti, non cantieri.</b> Un ambito &egrave; un perimetro di piano o di accordo, non un edificio. Alcuni perimetri comprendono anche strade, parchi e aree gi&agrave; finite. Il tipo di piano &egrave; quello scritto nel file; il significato dei lotti chiamati &laquo;Fondo Comune Milano 1 e 2&raquo; (piccole aree, tutte non attuate) non &egrave; spiegato.',
+   '<b>I nomi non sono univoci.</b> Lo stesso progetto compare con tipi di piano diversi (per esempio un accordo di programma e il programma integrato dentro di esso) e conta pi&ugrave; volte nel numero di ambiti ('+D.n_progetti+' voci per '+D.n_nomi+' nomi diversi); gli ettari totali sono calcolati sull&rsquo;unione.',
+   '<b>Il suolo &egrave; di una carta a 10 metri.</b> Il suolo &laquo;nuovo&raquo; conta anche cantieri e terra battuta, e un ambito pu&ograve; risultare &laquo;consumato&raquo; perch&eacute; ci sono binari, piazzali o un cantiere. Il confronto con gli ambiti usa i loro perimetri del 2020 su carte del 2012 e 2025.',
+   '<b>Quartieri e confronti.</b> Prezzi, nuove abitazioni e residenti sono dei quartieri interi, non degli ambiti. I quartieri molto coperti sono pochi (13 con almeno 5.000 residenti e il 10% di ambiti) e spesso piccoli: le correlazioni hanno intervalli ampi. Sono confronti, non cause.',
+   '<b>Soggetti attuatori.</b> Il file non li indica; non ne citiamo.',
+   '<b>Altri strati del PGT non usati.</b> La Tavola R10 mostra circa 3.680 ettari di &laquo;ambiti di rigenerazione&raquo; (concetto della legge regionale: 1.601 poligoni, in gran parte aree dismesse o degradate, che coincidono con gli ambiti di questa pagina solo per 72 ettari) e la R02 667 ettari di &laquo;ambiti di rigenerazione ambientale&raquo;: sono altre cose e non sono nei conti.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var S=D.suolo;
+  var L=[
+   '<b>Ambiti.</b> Livello &laquo;Ambiti interessati da provvedimenti in itinere approvati e adottati&raquo; della Tavola R02 del PGT Milano 2030 vigente (servizio ArcGIS pubblico del Geoportale del Comune, scaricato il 1/11/2026): '+D.n_record_file+' record, '+D.n_poligoni+' con forma. Campi usati: tipo di piano, nome, stato di attuazione, tipo di area. Le aree sono ricalcolate in UTM 32N e coincidono con quelle scritte nel file.',
+   '<b>Ambito.</b> Poligoni con lo stesso tipo di piano e lo stesso nome, uniti. Stato dell&rsquo;ambito: quello dei suoi poligoni se tutti uguali; altrimenti &laquo;attuato in parte&raquo;, salvo quando l&rsquo;unico stato &egrave; &laquo;non attuato&raquo; o &laquo;area non attuata&raquo;. Gruppi di tipo scelti da noi.',
+   '<b>Quartieri.</b> I 88 NIL vigenti (ds964). L&rsquo;area in ambiti di ogni quartiere &egrave; l&rsquo;intersezione con l&rsquo;unione di tutti gli ambiti; l&rsquo;ambito &egrave; assegnato al quartiere con pi&ugrave; area in comune.',
+   '<b>Suolo.</b> Carte ISPRA del consumo di suolo 2012 e 2025 a 10 m (stesse classi della pagina Suolo: consumato = 1, 11, 12, 111&ndash;126). Suolo nuovo = pixel non consumato nel 2012 e consumato nel 2025, dentro il perimetro. Controllo: la somma sui quartieri d&agrave; '+nf(S.citta.nuovo,2)+' ettari, come la pagina Suolo.',
+   '<b>Prezzi e case.</b> Variazione reale del prezzo OMI e abitazioni nuove ogni 1.000 residenti, per quartiere, dai filoni gi&agrave; pubblicati (<a href="../quartieri-che-cambiano/">Quartieri che cambiano</a>, <a href="../costruzioni/">Costruzioni</a>); solo i quartieri con almeno 5.000 residenti. Correlazione di Spearman con intervallo al 95% (bootstrap, 2.000 estrazioni).',
+   '<b>Pagina costruita da un programma</b> (<code>rigenerazione/scripts/pagina.py</code>, con <code>download.py</code> e <code>build.py</code>) che confronta i totali con i controlli interni e scrive i file di <code>data/</code>.'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>

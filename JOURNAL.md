@@ -2695,3 +2695,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti (già su disco): censimenti ISTAT per sezione 1991, 2001, 2011 e censimento permanente 2021, 2023 (CC BY 4.0, dal filone censimenti); record individuali del Comune 1991 e 2001 solo per controllo; reddito per CAP→NIL.
 - Numeri: occupati ogni 100 residenti di 15-64 anni 56,6 (1991) → 71,2 (2011) → 71,1 (2023); donne 44,4 → 66,3, divario uomini-donne da 25,2 a 9,3 punti; casalinghe e casalinghi da 227.501 a 81.743. Sorpresa: occupati quasi uguali nel 1991 e nel 2011 con 127.108 residenti in meno, ma è uno scambio (−38.795 uomini, +35.763 donne).
 - Limiti dei dati: rottura 2011→2021 (serie a parte, nessun confronto quartiere per quartiere; definizione 2021 non trovata nei documenti ISTAT); 2021-23 solo occupati 15-64 per sesso; fino al 2011 occupati con 65+; 22 NIL non robusti in grigio.
+
+## 65. I progetti di rigenerazione
+
+- 2026-11-02 notte — Fase 1 e pagina (`rigenerazione/`, `docs/rigenerazione/`), pubblicata con l'autorizzazione notturna di Davide. Dettagli in `rigenerazione/NOTE.md`.
+- L'Atlante della rigenerazione del Comune non è riusabile ("Copyright Comune di Milano. Solo consultazione autorizzata"): dati non scaricati; la pagina del Comune risponde 403 e non è stata aggirata. Usato il PGT Milano 2030, Tavola R02 (CC BY 4.0, 2020): 277 ambiti in trasformazione, 978 ha (5,4% della città). Senza Atlante: niente alloggi, volumi, quota sociale, verde, date, operatori.
+- Numeri: i più grandi Montecito Rogoredo 111 ha, Cascina Merlata 92, MIND 87, Farini 62. Sorpresa: gli ambiti sono il 5,4% della città ma contengono il 41% del suolo diventato consumato nel 2012-25 (più della metà in MIND e Cascina Merlata); i prezzi OMI non seguono gli ambiti (+27,3% contro +27,2%).
+- Limiti dei dati: stato al 2020; perimetri di piano, non cantieri; prezzi e case per NIL interi; confronti, non cause.

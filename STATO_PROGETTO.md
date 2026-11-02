@@ -76,6 +76,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 62 | Quanto è divisa Milano | Online |
 | 63 | Sfratti | Online |
 | 64 | Lavoro per quartiere | Online |
+| 65 | Rigenerazione | Online (dal PGT, Atlante non riusabile) |
 | — | In corso | Pagine di scuole di domani, popolazione (3 pagine), quartieri che cambiano, pollini; fase 1 di pendolari, chi governa Milano, parcheggi, incroci pericolosi, statue, botteghe storiche, antenne, pollini, voto e reddito, quartieri che cambiano, scuole di domani, suolo, reati, benessere ISTAT, popolazione (arrivi, stranieri, età), case popolari, dove si costruisce, beni confiscati |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 
