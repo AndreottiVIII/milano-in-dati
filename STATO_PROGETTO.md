@@ -87,6 +87,8 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 73 | Tribunale | Online |
 | 74 | Auto | Online |
 | 75 | Carceri | Online |
+| 76 | Musei | Online |
+| 77 | Aeroporti | Online |
 | — | In pausa | Nomi dei bambini (Milano non pubblica i nomi) |
 | — | Home | Bozze grafiche pronte, scelta in attesa |
 

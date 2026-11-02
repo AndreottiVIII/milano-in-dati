@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Gli aeroporti di Milano</title>
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.4em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.5em 0;font-size:1.02rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:14px;height:12px;vertical-align:-1px;margin-right:4px}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .tabmax{max-height:380px;overflow:auto}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.tip i{display:inline-block;width:10px;height:10px;margin-right:4px}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0} dl.def dt{font-weight:700;margin-top:.5em} dl.def dd{margin:0 0 0 1em}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.tw{min-width:560px}
+
+.grid2>div{min-width:0}</style><script src="../menu.js" defer></script><link rel="icon" href="data:,">
+</head><body><main>
+<h1>Gli aeroporti di Milano: quanti passeggeri, anno per anno</h1>
+<p>Milano ha tre aeroporti: Linate, a pochi chilometri dal centro, Malpensa, vicino a Varese, e Orio al Serio, vicino a Bergamo. Qui guardiamo i passeggeri dei tre scali dal 1994 al 2025 (con i mesi fino a maggio 2026): quanti sono, quanti viaggiano in Italia e quanti all&rsquo;estero, quante merci passano, quanti voli, che cosa hanno fatto il Covid e la chiusura di Linate del 2019, e come stanno rispetto al resto d&rsquo;Italia. Sono solo numeri, senza giudizi.</p>
+
+<div class="warn"><b>Poche parole da sapere.</b>
+<dl class="def">
+<dt>Passeggeri</dt><dd>Quelli del traffico commerciale: si contano all&rsquo;arrivo e alla partenza. Una persona che parte da Linate e torna conta due volte a Linate; un volo Milano&ndash;Roma conta una volta a Milano e una volta a Roma.</dd>
+<dt>Nazionali e internazionali</dt><dd>Voli dentro l&rsquo;Italia e voli da o per l&rsquo;estero (con la parte verso paesi dell&rsquo;Unione europea e quella verso il resto del mondo).</dd>
+<dt>Cargo (merci)</dt><dd>Merci e posta caricate e scaricate, in tonnellate.</dd>
+<dt>Voli</dt><dd>Voli commerciali con passeggeri (decolli e atterraggi); sono &laquo;movimenti&raquo; che non comprendono i voli di sola merce e l&rsquo;aviazione privata (vedi i limiti).</dd>
+</dl></div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+
+<h2 id="totali">Quanti passeggeri</h2>
+<div id="totali-testo"></div>
+<div class="ctl" id="ctl-totali"><span class="sub">Mostra:</span>
+<button type="button" data-u="pax" class="on">Passeggeri (milioni)</button><button type="button" data-u="nat">Nazionali (milioni)</button><button type="button" data-u="intl">Internazionali (milioni)</button><button type="button" data-u="cargo">Merci (migliaia di tonnellate)</button><button type="button" data-u="voli">Voli (migliaia)</button></div>
+<div class="ch" id="ch-totali" role="img" aria-label="Grafico: passeggeri, merci e voli dei tre aeroporti di Milano per anno"></div>
+<div class="lgd" id="lg-totali"></div>
+<p class="src" id="src-totali"></p>
+<details><summary>La tabella con i numeri (passeggeri)</summary><div class="scroll tabmax"><table id="tab-totali" class="tw"></table></div></details>
+
+<h2 id="internaz">Italia o estero</h2>
+<div id="internaz-testo"></div>
+<div class="ctl" id="ctl-internaz"><span class="sub">Aeroporto:</span>
+<button type="button" data-u="Linate" class="on">Linate</button><button type="button" data-u="Malpensa">Malpensa</button><button type="button" data-u="Bergamo">Bergamo-Orio al Serio</button></div>
+<div class="ch" id="ch-internaz" role="img" aria-label="Grafico a barre: passeggeri nazionali, dell'Unione europea e del resto del mondo"></div>
+<div class="lgd" id="lg-internaz"></div>
+<p class="src">Passeggeri del traffico commerciale per anno. &laquo;Unione europea&raquo; e &laquo;resto del mondo&raquo; si riferiscono ai 27 paesi dell&rsquo;Unione di oggi. Fonte: Eurostat, tabella avia_paoa (CC BY 4.0), dal 2004; prima del 2004 la divisione non &egrave; nei dati che usiamo.</p>
+
+<h2 id="merci">Le merci</h2>
+<div id="merci-testo"></div>
+<div class="scroll"><table id="tab-merci" class="tw"></table></div>
+<p class="src">Merci e posta caricate e scaricate, tonnellate. Fonti: ENAC, Annuario statistico 2003 (anni 1998-2003) e Eurostat, tabella avia_gooa, CC BY 4.0 (dal 2004). Per l&rsquo;Italia: somma degli aeroporti italiani in Eurostat.</p>
+
+<h2 id="voli">Quanti voli, quanti passeggeri per volo</h2>
+<div id="voli-testo"></div>
+<div class="scroll"><table id="tab-voli" class="tw"></table></div>
+<p class="src">Voli commerciali con passeggeri (decolli e atterraggi), Eurostat, tabella avia_paoa, dal 2004. Passeggeri per volo = passeggeri / voli, calcolo nostro. I voli di sola merce e l&rsquo;aviazione privata non ci sono.</p>
+
+<h2 id="mensile">Mese per mese, dal 2018</h2>
+<div id="mensile-testo"></div>
+<div class="ch" id="ch-mensile" role="img" aria-label="Grafico: passeggeri al mese dei tre aeroporti di Milano dal 2018"></div>
+<div class="lgd" id="lg-mensile"></div>
+<p class="src" id="src-mensile"></p>
+<h3>La chiusura di Linate nel 2019</h3>
+<div id="chiusura-testo"></div>
+<div class="scroll"><table id="tab-chiusura" class="tw"></table></div>
+<p class="src">Passeggeri del mese. Fonte: Eurostat, tabella avia_paoa, dati mensili (CC BY 4.0). Le date della chiusura (dal 27 luglio al 27 ottobre 2019, per lavori) sono quelle riportate dalla stampa: <a href="https://www.ilpost.it/2019/07/09/aeroporto-linate-chiusura-date/">Il Post, 9 luglio 2019</a> e <a href="https://www.teleborsa.it/AMP/News/2019/07/27/milano-tutti-i-voli-a-malpensa-fino-al-27-ottobre-1.html">Teleborsa, 27 luglio 2019</a>.</p>
+
+<h2 id="covid">Il Covid</h2>
+<div id="covid-testo"></div>
+<div class="scroll"><table id="tab-covid" class="tw"></table></div>
+<p class="src">Indice con il 2019 uguale a 100. Il 2019 &egrave; l&rsquo;anno della chiusura di Linate: per Linate il confronto giusto &egrave; anche con il 2018. Fonte: Eurostat, avia_paoa (CC BY 4.0). Italia = somma degli aeroporti italiani.</p>
+
+<h2 id="italia">Milano e il resto d&rsquo;Italia</h2>
+<div id="italia-testo"></div>
+<div class="grid2"><div><h3>I primi aeroporti italiani, 2025</h3><div class="scroll"><table id="tab-class"></table></div></div>
+<div><h3>Quota dei tre aeroporti di Milano</h3><div class="scroll"><table id="tab-quota"></table></div></div></div>
+<p class="src">Passeggeri 2025: Eurostat, avia_paoa (CC BY 4.0); la classifica coincide con quella di ENAC, <i>Dati di traffico 2025</i>, pagina 82 (tavola RANK 2): Fiumicino, Malpensa, Bergamo, Napoli, Catania, &hellip;, Linate all&rsquo;ottavo posto. Quote: tre aeroporti sul totale dei passeggeri degli aeroporti italiani (somma degli aeroporti in Eurostat dal 2004, totale ENAC prima).</p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+<p class="sub">Per i turisti che arrivano a Milano e da dove vengono: <a href="../turisti/">Turisti per nazionalit&agrave;</a>. Per i luoghi di Milano che il mondo cerca su Google: <a href="../luoghi-cercati/">I luoghi pi&ugrave; cercati</a>.</p>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+<details><summary>Il controllo tra Eurostat e ENAC, numero per numero</summary><div class="scroll tabmax"><table id="tab-controllo" class="tw"></table></div></details>
+
+<h2 id="download">File</h2>
+<p>Con punto e virgola come separatore e punto decimale: <a href="data/annuale_tre_aeroporti.csv">annuale_tre_aeroporti.csv</a> (Linate, Malpensa e Bergamo, anno per anno), <a href="data/mensile_tre_aeroporti.csv">mensile_tre_aeroporti.csv</a> (mese per mese dal 2004), <a href="data/italia_annuale.csv">italia_annuale.csv</a> (totale dei passeggeri degli aeroporti italiani), <a href="data/controllo_eurostat_enac.csv">controllo_eurostat_enac.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Non pubblichiamo le tabelle di Assaeroporti: le loro condizioni d&rsquo;uso non lo permettono (vedi i limiti).</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Dal 2004: Eurostat, tabelle <i>avia_paoa</i> (passeggeri e voli per aeroporto, annuali e mensili), <i>avia_gooa</i> (merci per aeroporto) e <i>avia_paoc</i> (totale per paese, solo per un controllo), <a href="https://ec.europa.eu/eurostat/databrowser/view/avia_paoa/default/table">ec.europa.eu/eurostat</a>, licenza CC BY 4.0, scaricate il 2 novembre 2026 (aggiornamento Eurostat del 30 ottobre 2026). Fino al 2003 e per i controlli: ENAC (Ente Nazionale per l&rsquo;Aviazione Civile), <i>Annuario statistico 2003</i> (serie 1994-2003, pagine 150, 152, 153 e 156 del PDF) e <i>Dati di traffico</i> 2007 (p. 9), 2010 (p. 13), 2024 (p. 76) e 2025 (p. 74), pubblicati su <a href="https://www.enac.gov.it/aeroporti/statistiche/dati-di-traffico-sul-trasporto-aereo/documento-annuale-dati-di-traffico/">enac.gov.it</a>, scaricati il 2 novembre 2026: sulle pagine non c&rsquo;&egrave; una licenza scritta; sono statistiche ufficiali pubblicate da un ente pubblico e riportiamo solo i totali dei tre aeroporti e dell&rsquo;Italia, con la pagina. Non usati: le statistiche mensili e annuali di Assaeroporti (<a href="https://assaeroporti.com/statistiche/">assaeroporti.com/statistiche</a>), le cui note legali vietano di riprodurre i materiali del sito senza consenso scritto: le segnaliamo come fonte da consultare per i dati pi&ugrave; recenti.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script>
+(function(){
+var D=null,RD=[];
+var C_ACC='#00695c',C_WARM='#c26a1b',C_BLU='#3a6ea5',C_PUR='#8e5ea2',C_GREY='#7a7a7a';
+var CAP={Linate:'#3a6ea5',Malpensa:'#c26a1b',Bergamo:'#00695c'};
+var NOMEAP={Linate:'Linate',Malpensa:'Malpensa',Bergamo:'Bergamo-Orio al Serio'};
+var AP=['Linate','Malpensa','Bergamo'];
+var U={totali:'pax',internaz:'Linate'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function ps(x,d){if(x==null)return '';var v=Math.round(Math.abs(x)*Math.pow(10,d||0))/Math.pow(10,d||0);return (x<0&&v>0?'−':'+')+nf(v,d||0)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function last(a){return a[a.length-1]}
+function yi(y){return D.meta.anni.indexOf(y)}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function labels(o){return o.labels.map(function(l){return String(l)})}
+function xlabel(s,x,txt,H){return s+'<text class="mu" x="'+x+'" y="'+(H-6)+'" text-anchor="middle">'+txt+'</text>'}
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||260,m={l:o.ml||46,r:14,t:14,b:24},n=o.labels.length,lb=labels(o);
+  var all=[];o.series.forEach(function(s){s.vals.forEach(function(v){if(v!=null)all.push(v)})});
+  if(!all.length){box.innerHTML='<p class="sub">Dati non disponibili.</p>';return}
+  var lo=o.ymin!=null?o.ymin:Math.min.apply(null,all),hi=Math.max.apply(null,all);
+  if(hi===lo){hi=lo+1}
+  var st=niceStep((hi-lo)/4);lo=Math.floor(lo/st+1e-9)*st;hi=Math.ceil(hi/st-1e-9)*st;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(i){return m.l+(n>1?i*pw/(n-1):pw/2)} function Y(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=lo;v<=hi+st/2;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>'}
+  var step=pw/(n-1)>=40?1:2;
+  lb.forEach(function(l,i){if(i%step===0||i===n-1&&step===1){s=xlabel(s,X(i),l,H);s+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  (o.bands||[]).forEach(function(b){s+='<rect x="'+(X(b[0])-6)+'" y="'+m.t+'" width="'+(X(b[1])-X(b[0])+12)+'" height="'+ph+'" fill="#f3f3f3"/>'});
+  o.series.forEach(function(se){var d='',pen=false;
+    se.vals.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.4)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+' stroke-linejoin="round"/>';
+    se.vals.forEach(function(v,i){if(v!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="'+((se.w||2.4)>3?2.8:2.2)+'" fill="'+se.color+'"/>'})});
+  s+='<g id="hv" style="display:none"><line y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#444" stroke-width="1"/></g><rect class="hit" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  if(!o.tip)return;
+  var svg=box.firstChild,g=svg.querySelector('#hv'),ln=g.firstChild,tip=box.lastChild,rect=svg.querySelector('.hit');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width);
+    var i=Math.max(0,Math.min(n-1,Math.round((px-m.l)/pw*(n-1))));
+    g.style.display='';ln.setAttribute('x1',X(i));ln.setAttribute('x2',X(i));
+    tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=X(i)*(r.width/W)+10;if(left+tw>r.width)left=X(i)*(r.width/W)-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){g.style.display='none';tip.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function stackChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:o.ml||50,r:8,t:12,b:24},n=o.labels.length,pw=W-m.l-m.r,ph=H-m.t-m.b,lb=labels(o),tot=[],i;
+  for(i=0;i<n;i++){var t=0;o.series.forEach(function(se){t+=se.vals[i]||0});tot.push(t)}
+  var hi=Math.max.apply(null,tot),st=niceStep(hi/4);hi=Math.ceil(hi/st-1e-9)*st;
+  function Y(v){return m.t+ph-v/hi*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">',bw=pw/n;
+  for(var v=0;v<=hi+st/2;v+=st)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>';
+  var step=bw>=34?1:2;
+  for(i=0;i<n;i++){var cum=0,x=m.l+i*bw;
+    o.series.forEach(function(se){var vv=se.vals[i]||0;if(vv>0){s+='<rect x="'+(x+bw*0.12).toFixed(1)+'" y="'+Y(cum+vv).toFixed(1)+'" width="'+(bw*0.76).toFixed(2)+'" height="'+Math.max(0.5,Y(cum)-Y(cum+vv)).toFixed(1)+'" fill="'+se.color+'" stroke="#fff" stroke-width=".6"/>'}cum+=vv});
+    if(i%step===0)s=xlabel(s,x+bw/2,lb[i],H)}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/><rect class="hit" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('.hit');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width);
+    var i=Math.max(0,Math.min(n-1,Math.floor((px-m.l)/bw)));tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=(m.l+i*bw+bw/2)*(r.width/W)+10;if(left+tw>r.width)left-=tw+20;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function lgdBox(items){return items.map(function(it){return '<span><i style="background:'+it.color+'"></i>'+esc(it.name)+'</span>'}).join('')}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function bindCtl(id,key,cb){
+  var box=el(id);
+  box.addEventListener('click',function(e){var b=e.target;if(!b||b.tagName!=='BUTTON')return;U[key]=b.getAttribute('data-u');
+    Array.prototype.forEach.call(box.querySelectorAll('button'),function(x){x.className=x===b?'on':''});cb()});
+}
+function draw(fn){fn();RD.push(fn)}
+
+J('data/riepilogo.json').then(function(d){
+  D=d;
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();totali();internaz();merci();voli();mensile();covid();italia();limiti();metodo();controllo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+var AN=function(){return D.meta.anni};
+function ix(a){return AN().indexOf(a)}
+function mil(v,d){return v==null?'':nf(v/1e6,d==null?1:d)}
+var CB=function(){return [[ix(2020),ix(2021)]]};
+
+/* ---------- sorprese ---------- */
+function sorpresa(){
+  var S=D.sorprese,A=D.aeroporti,c=D.chiusura_linate_2019_ago_ott,h='';
+  h+='<p><b>1. Quando chiude un aeroporto, i passeggeri non spariscono: si spostano.</b> Il 5 ottobre 1998 &egrave; stato aperto Malpensa 2000 (lo dice ENAC) e Linate ha perso met&agrave; dei passeggeri in un anno: da '+mil(S.linate_1998)+' milioni nel 1998 a '+mil(S.linate_1999)+' nel 1999, mentre Malpensa passava da '+mil(S.malpensa_1998)+' a '+mil(S.malpensa_1999)+'. Nel 2019 Linate &egrave; stato chiuso tre mesi per lavori: '+ps(S.linate_var_2019,0)+' sul 2018 ('+mil(S.linate_2019)+' milioni), ma Malpensa '+ps(S.malpensa_var_2019,0)+' e Bergamo '+ps(S.bergamo_var_2019,0)+': i tre aeroporti insieme sono cresciuti del '+f0(S.sistema_var_2019)+'%. Tra agosto e ottobre 2019 Linate ha avuto '+f0(c['2019'].Linate)+' passeggeri (contro '+mil(c['2018'].Linate,2)+' milioni nello stesso periodo del 2018) e i tre aeroporti insieme '+mil(c.sistema_2019,2)+' milioni (contro '+mil(c.sistema_2018,2)+').</p>';
+  h+='<p><b>2. Orio al Serio, l&rsquo;aeroporto di Bergamo, &egrave; passato da 1 a 17 milioni.</b> Nel 2000 aveva '+mil(S.bergamo_2000,2)+' milioni di passeggeri, nel 2024 '+mil(S.bergamo_2024)+' ('+f0(S.bergamo_2024/S.bergamo_2000)+' volte), nel 2025 '+mil(S.bergamo_2025)+'. Dal '+S.bergamo_supera_linate+' ha pi&ugrave; passeggeri di Linate; nel 2025 &egrave; il terzo aeroporto d&rsquo;Italia dopo Fiumicino e Malpensa, Linate l&rsquo;ottavo.</p>';
+  h+='<p><b>3. Linate &egrave; diventato un aeroporto pi&ugrave; internazionale che nazionale.</b> I passeggeri dei voli per l&rsquo;estero erano il '+f0(S.linate_quota_intl_2004)+'% nel 2004 ('+mil(S.linate_intl_2004)+' milioni contro '+mil(S.linate_nat_2004)+' dei voli nazionali) e sono il '+f0(S.linate_quota_intl_2025)+'% nel 2025 ('+mil(S.linate_intl_2025)+' contro '+mil(S.linate_nat_2025)+'). I passeggeri sui voli nazionali sono calati di un quarto, quelli internazionali sono pi&ugrave; che raddoppiati.</p>';
+  h+='<p><b>4. Dopo il Covid:</b> nel 2020 i tre aeroporti insieme perdono il '+f0(Math.abs(S.sistema_var_2020))+'% dei passeggeri (Italia '+f0(Math.abs(S.italia_var_2020))+'%). Nel 2025 siamo a '+mil(S.sistema_2025)+' milioni, contro '+mil(S.sistema_2019)+' del 2019: Malpensa '+ps((S.malpensa_2025/S.malpensa_2019-1)*100,0)+', Bergamo '+ps((S.bergamo_2025/S.bergamo_2019-1)*100,0)+', Linate '+ps((S.linate_2025/S.linate_2019-1)*100,0)+' (ma solo '+ps((S.linate_2025/S.linate_2018-1)*100,0)+' sul 2018, prima della chiusura).</p>';
+  h+='<p class="src">Fonti: Eurostat (dal 2004), ENAC (fino al 2003). Tutti i numeri sono nei file <a href="data/annuale_tre_aeroporti.csv">annuale_tre_aeroporti.csv</a> e <a href="data/mensile_tre_aeroporti.csv">mensile_tre_aeroporti.csv</a>. Quando apre un aeroporto nuovo o ne chiude uno, i dati non dicono perch&eacute; i passeggeri scelgono: sono solo i numeri.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- totali ---------- */
+function totali(){
+  var A=D.aeroporti,S=D.sorprese,Y=AN();
+  setH('totali-testo','<p><b>Malpensa</b> &egrave; il pi&ugrave; grande: '+mil(S.malpensa_2000)+' milioni di passeggeri nel 2000, '+mil(S.malpensa_2007)+' nel 2007, '+mil(S.malpensa_2009)+' nel 2009, '+mil(S.malpensa_2019)+' nel 2019, '+mil(S.malpensa_2025)+' nel 2025. <b>Linate</b> scende da '+mil(S.linate_1998)+' milioni nel 1998 a '+mil(S.linate_2000)+' nel 2000, sta tra 8 e 10 milioni dal 2004 al 2018, cade a '+mil(S.linate_2019)+' nel 2019 (chiusura) e arriva a '+mil(S.linate_2025)+' nel 2025. <b>Bergamo</b> cresce quasi sempre: '+mil(S.bergamo_2000,2)+' milioni nel 2000, '+mil(A.Bergamo.pax[ix(2010)])+' nel 2010, '+mil(S.bergamo_2019)+' nel 2019, '+mil(S.bergamo_2024)+' nel 2024 e '+mil(S.bergamo_2025)+' nel 2025. I tre aeroporti insieme hanno '+mil(S.sistema_2025)+' milioni di passeggeri nel 2025.</p>');
+  draw(function(){
+    var u=U.totali,ser=[],f,yf,tip,first=0;
+    function get(n){var s=A[n][u];
+      if(u==='cargo')return s.map(function(v){return v==null?null:v/1000});
+      if(u==='voli')return s.map(function(v,k){return v==null?null:v/1000});
+      return s.map(function(v){return v==null?null:v/1e6})}
+    AP.forEach(function(n){ser.push({color:CAP[n],w:2.8,vals:get(n),name:NOMEAP[n]})});
+    var fmt=u==='cargo'?function(v){return nf(v,1)+' mila t'}:u==='voli'?function(v){return nf(v,1)+' mila voli'}:function(v){return nf(v,2)+' milioni'};
+    lineChart(el('ch-totali'),{labels:Y,series:ser,ymin:0,h:300,bands:CB(),yf:function(v){return nf(v,u==='cargo'||u==='voli'?0:0)},
+      tip:function(i){var h='<b>'+Y[i]+'</b>';ser.forEach(function(s){h+='<br><i style="background:'+s.color+'"></i>'+s.name+': <b>'+(s.vals[i]==null?'n.d.':fmt(s.vals[i]))+'</b>'});return h}});
+    setH('lg-totali',lgdLine(AP.map(function(n){return {color:CAP[n],t:NOMEAP[n]}})));
+    var SRC={pax:'Passeggeri del traffico commerciale (arrivi + partenze). Fino al 2003: ENAC, Annuario statistico 2003 (pagine 152, 153, 156 del PDF). Dal 2004: Eurostat, tabella avia_paoa (CC BY 4.0). I due insiemi di dati differiscono di meno dell&rsquo;1% negli anni in cui si possono confrontare. La zona grigia &egrave; il 2020-2021 (Covid).',
+      nat:'Passeggeri su voli nazionali, dal 2004. Fonte: Eurostat, avia_paoa (CC BY 4.0).',
+      intl:'Passeggeri su voli da e per l&rsquo;estero, dal 2004. Fonte: Eurostat, avia_paoa (CC BY 4.0).',
+      cargo:'Merci e posta caricate e scaricate, migliaia di tonnellate. Fino al 2003: ENAC (Annuario 2003); dal 2004: Eurostat, avia_gooa (CC BY 4.0).',
+      voli:'Fino al 2003: movimenti commerciali di ENAC (comprendono anche i voli di merci). Dal 2004: voli commerciali con passeggeri di Eurostat (non comprendono i voli di sola merce). Le due definizioni non sono uguali: la linea ha un salto di metodo tra 2003 e 2004, vedi i limiti.'};
+    setH('src-totali',SRC[u]);
+  });
+  var kt=RD.length-1;bindCtl('ctl-totali','totali',function(){RD[kt]()});
+  table('tab-totali',['Anno','Linate','Malpensa','Bergamo','Tre aeroporti','Italia'],
+    Y.map(function(a,k){return [a,f0(A.Linate.pax[k]),f0(A.Malpensa.pax[k]),f0(A.Bergamo.pax[k]),f0(D.sistema.pax[k]),f0(D.italia.pax[k])]}));
+}
+
+/* ---------- internaz ---------- */
+function internaz(){
+  var A=D.aeroporti,S=D.sorprese,Y=AN().filter(function(a){return a>=2004});
+  setH('internaz-testo','<p>Al <b>Linate</b> la quota di passeggeri sui voli per l&rsquo;estero va dal '+f0(S.linate_quota_intl_2004)+'% del 2004 al '+f0(S.linate_quota_intl_2025)+'% del 2025: i passeggeri nazionali scendono da '+mil(S.linate_nat_2004)+' a '+mil(S.linate_nat_2025)+' milioni, quelli internazionali salgono da '+mil(S.linate_intl_2004)+' a '+mil(S.linate_intl_2025)+'. A <b>Malpensa</b> la quota internazionale &egrave; del '+f0(A.Malpensa.quota_intl[ix(2004)])+'% nel 2004 e dell&rsquo;'+f0(A.Malpensa.quota_intl[ix(2025)])+'% nel 2025; a <b>Bergamo</b> del '+f0(A.Bergamo.quota_intl[ix(2004)])+'% e del '+f0(A.Bergamo.quota_intl[ix(2025)])+'%. Al Linate, tra gli stranieri, in '+(A.Linate.ue[ix(2025)]>A.Linate.extra[ix(2025)]?'maggioranza':'minoranza')+' sono voli verso l&rsquo;Unione europea ('+mil(A.Linate.ue[ix(2025)])+' milioni su '+mil(A.Linate.intl[ix(2025)])+').</p>');
+  draw(function(){
+    var n=U.internaz,s=A[n],ser=[
+      {name:'Resto del mondo',color:'#b5483a',vals:Y.map(function(a){return s.extra[ix(a)]/1e6})},
+      {name:'Unione europea',color:C_BLU,vals:Y.map(function(a){return s.ue[ix(a)]/1e6})},
+      {name:'Nazionali',color:C_ACC,vals:Y.map(function(a){return s.nat[ix(a)]/1e6})}];
+    setH('lg-internaz',lgdBox(ser.slice().reverse().map(function(x){return {name:x.name,color:x.color}})));
+    stackChart(el('ch-internaz'),{labels:Y,series:ser,h:290,ml:40,yf:function(v){return nf(v,0)},
+      tip:function(i){var h='<b>'+Y[i]+'</b> <span class="sub">'+NOMEAP[n]+'</span>',t=0;
+        ser.slice().reverse().forEach(function(x){t+=x.vals[i];h+='<br><i style="background:'+x.color+'"></i>'+x.name+': <b>'+nf(x.vals[i],2)+' milioni</b>'});
+        return h+'<br>Totale: <b>'+nf(t,2)+' milioni</b> ('+f0(A[n].quota_intl[ix(Y[i])])+'% internazionali)'}});
+  });
+  var ki=RD.length-1;bindCtl('ctl-internaz','internaz',function(){RD[ki]()});
+}
+
+/* ---------- merci ---------- */
+function merci(){
+  var A=D.aeroporti,S=D.sorprese,I=D.italia;
+  setH('merci-testo','<p>Le merci passano quasi tutte da <b>Malpensa</b>: '+f0(S.cargo_malpensa_2025)+' tonnellate nel 2025, il '+f0(S.cargo_malpensa_2025/S.cargo_italia_2025*100)+'% del totale italiano (quasi '+nf(S.cargo_italia_2025/1e6,2)+' milioni di tonnellate sommando tutti gli aeroporti). Nel 2004 erano '+f0(S.cargo_malpensa_2004)+', cio&egrave; la met&agrave; di oggi. <b>Linate</b> aveva '+f0(S.cargo_linate_1998)+' tonnellate nel 1998 e ne ha '+f0(S.cargo_linate_2025)+' nel 2025, praticamente nulla. A <b>Bergamo</b> le tonnellate sono '+f0(S.cargo_bergamo_2003)+' nel 2003 e '+f0(S.cargo_bergamo_2025)+' nel 2025: una parte cargo pi&ugrave; piccola, in calo.</p>');
+  var yy=[1998,2000,2003,2004,2007,2010,2015,2019,2020,2024,2025];
+  table('tab-merci',['Anno','Linate','Malpensa','Bergamo','Italia (somma aeroporti)','Malpensa su Italia (%)'],
+    yy.map(function(a){var k=ix(a);return [a,f0(A.Linate.cargo[k]),f0(A.Malpensa.cargo[k]),f0(A.Bergamo.cargo[k]),I.cargo[k]==null?'':f0(I.cargo[k]),(I.cargo[k]&&a>=2004)?f1(A.Malpensa.cargo[k]/I.cargo[k]*100):'']}));
+}
+
+/* ---------- voli ---------- */
+function voli(){
+  var A=D.aeroporti,S=D.sorprese;
+  setH('voli-testo','<p>Nel 2025 il <b>Linate</b> ha avuto '+f0(A.Linate.voli[ix(2025)])+' voli con passeggeri, <b>Malpensa</b> '+f0(A.Malpensa.voli[ix(2025)])+' e <b>Bergamo</b> '+f0(A.Bergamo.voli[ix(2025)])+'. In media su ogni volo viaggiano '+f0(S.pax_volo_bergamo_2025)+' persone a Bergamo, '+f0(S.pax_volo_malpensa_2025)+' a Malpensa e '+f0(S.pax_volo_linate_2025)+' a Linate (nel 2004: '+f0(S.pax_volo_bergamo_2004)+', '+f0(S.pax_volo_malpensa_2004)+' e '+f0(S.pax_volo_linate_2004)+'): gli aerei sono pi&ugrave; grandi o pi&ugrave; pieni a Malpensa e a Bergamo, quasi uguali a Linate. I dati non dicono se siano pi&ugrave; grandi o pi&ugrave; pieni. Nel 2019, anno della chiusura, il Linate ha avuto '+f0(A.Linate.voli[ix(2019)])+' voli.</p>');
+  var yy=[2004,2007,2010,2015,2018,2019,2020,2024,2025];
+  var rows=yy.map(function(a){var k=ix(a);return [a].concat(AP.map(function(n){return f0(A[n].voli[k])+' <span class="sub">('+f0(A[n].pax_per_volo[k])+')</span>'}))});
+  table('tab-voli',['Anno','Linate: voli (passeggeri per volo)','Malpensa: voli (passeggeri per volo)','Bergamo: voli (passeggeri per volo)'],rows);
+}
+
+/* ---------- mensile ---------- */
+function mensile(){
+  var Mn=D.mensile,lab=Mn.etichette,n=lab.length;
+  var labels=lab.map(function(l,i){return l.slice(5)==='01'?l.slice(0,4):''});
+  setH('mensile-testo','<p>Il grafico mostra i passeggeri di ogni mese dal gennaio 2018 al '+Mn.ultimo.replace('-','/')+'. Si vedono la chiusura di Linate (agosto-ottobre 2019), il crollo del Covid (marzo-maggio 2020, con una ripresa lenta fino al 2022), e le estati con pi&ugrave; passeggeri di ogni inverno. Il dato mensile di Eurostat arriva con qualche mese di ritardo (ultimo mese: '+Mn.ultimo.replace('-','/')+').</p>');
+  var ser=AP.map(function(a){return {color:CAP[a],w:2.2,vals:Mn[a.toLowerCase()].map(function(v){return v==null?null:v/1e6}),name:NOMEAP[a]}});
+  setH('lg-mensile',lgdLine(AP.map(function(a){return {color:CAP[a],t:NOMEAP[a]}})));
+  setH('src-mensile','Passeggeri al mese (milioni). Fonte: Eurostat, avia_paoa, dati mensili (CC BY 4.0).');
+  draw(function(){lineChart(el('ch-mensile'),{labels:labels,series:ser,ymin:0,h:280,yf:function(v){return nf(v,0)},
+    tip:function(i){var h='<b>'+lab[i].slice(5)+'/'+lab[i].slice(0,4)+'</b>';ser.forEach(function(s){h+='<br><i style="background:'+s.color+'"></i>'+s.name+': <b>'+(s.vals[i]==null?'n.d.':nf(s.vals[i],2)+' milioni')+'</b>'});return h}})});
+  var C=D.chiusura_linate_2019,M=['giu','lug','ago','set','ott','nov'],c=D.chiusura_linate_2019_ago_ott;
+  setH('chiusura-testo','<p>Il Linate ha chiuso la sera del 27 luglio 2019 e ha riaperto il 27 ottobre: i voli sono stati spostati su Malpensa e Orio al Serio. Nei dati: a luglio '+f0(C.Linate[7][1])+' passeggeri a Linate (contro '+f0(C.Linate[7][0])+' nel luglio 2018), ad agosto '+f0(C.Linate[8][1])+', a settembre '+f0(C.Linate[9][1])+', a ottobre '+f0(C.Linate[10][1])+'. Nello stesso periodo Malpensa passa da '+mil(c['2018'].Malpensa,2)+' a '+mil(c['2019'].Malpensa,2)+' milioni nei tre mesi agosto-ottobre ('+ps((c['2019'].Malpensa/c['2018'].Malpensa-1)*100,0)+') e Bergamo da '+mil(c['2018'].Bergamo,2)+' a '+mil(c['2019'].Bergamo,2)+' ('+ps((c['2019'].Bergamo/c['2018'].Bergamo-1)*100,0)+'). I tre insieme, in quei tre mesi, '+ps((c.sistema_2019/c.sistema_2018-1)*100,1)+'. Il conto dice dove sono finiti i passeggeri, non quanti avrebbero viaggiato senza la chiusura.</p>');
+  var rows=[6,7,8,9,10,11].map(function(m,k){var tot=AP.reduce(function(s,n){return [s[0]+C[n][m][0],s[1]+C[n][m][1]]},[0,0]);
+    return [M[k]].concat(AP.map(function(n){return f0(C[n][m][0])+' &rarr; '+f0(C[n][m][1])})).concat([f0(tot[0])+' &rarr; '+f0(tot[1])])});
+  table('tab-chiusura',['Mese (2018 &rarr; 2019)','Linate','Malpensa','Bergamo','Tre aeroporti'],rows);
+}
+
+/* ---------- covid ---------- */
+function covid(){
+  var V=D.covid,S=D.sorprese,Y=V.anni;
+  setH('covid-testo','<p>Nel 2020 i passeggeri crollano ovunque: Malpensa '+ps(S.malpensa_var_2020,0)+', Bergamo '+ps(S.bergamo_var_2020,0)+', Linate '+ps(S.linate_var_2020,0)+' (su un 2019 gi&agrave; basso per la chiusura), i tre aeroporti insieme '+ps(S.sistema_var_2020,0)+' e tutti gli aeroporti italiani '+ps(S.italia_var_2020,0)+'. Nel 2021 si recupera appena. Il 2022 &egrave; ancora sotto il 2019 ovunque tranne al Linate (che per&ograve; nel 2019 era chiuso tre mesi); Bergamo supera il 2019 nel 2023, Malpensa solo nel 2024, per un soffio.</p>');
+  table('tab-covid',['Anno','Linate','Malpensa','Bergamo','Tre aeroporti','Italia'],
+    Y.map(function(a,k){return [a,f0(V.linate[k]),f0(V.malpensa[k]),f0(V.bergamo[k]),f0(V.sistema[k]),f0(V.italia[k])]}));
+}
+
+/* ---------- italia ---------- */
+function italia(){
+  var C=D.classifica['2025'],Q=D.sistema,S=D.sorprese;
+  setH('italia-testo','<p>I tre aeroporti di Milano insieme hanno '+mil(S.sistema_2025)+' milioni di passeggeri nel 2025, il <b>'+f0(S.quota_sistema_2025)+'%</b> dei passeggeri degli aeroporti italiani ('+f0(S.quota_sistema_2004)+'% nel 2004, '+f0(S.quota_sistema_2019)+'% nel 2019). Tra i primi dieci aeroporti d&rsquo;Italia ce ne sono tre di Milano: Malpensa al secondo posto, Bergamo al terzo, Linate all&rsquo;ottavo. Il primo resta Fiumicino, a Roma, con '+mil(C[0].pax)+' milioni, pi&ugrave; di Malpensa e Linate messi insieme. Sulle merci i tre aeroporti pesano per il '+f0(Q.quota_cargo_italia_pct[ix(2025)])+'% dell&rsquo;Italia, quasi tutto Malpensa.</p>');
+  table('tab-class',['Posto','Aeroporto','Passeggeri (milioni)'],C.slice(0,10).map(function(x){var mi=/Milano|Bergamo/.test(x.aeroporto);return [x.posto,mi?'<b>'+esc(x.aeroporto)+'</b>':esc(x.aeroporto),mi?'<b>'+mil(x.pax,2)+'</b>':mil(x.pax,2)]}));
+  var yy=[2004,2010,2015,2019,2020,2025];
+  table('tab-quota',['Anno','Tre aeroporti (milioni)','Quota sull&rsquo;Italia (%)'],yy.map(function(a){var k=ix(a);return [a,mil(Q.pax[k],1),f1(Q.quota_italia_pct[k])]}));
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var L=[];
+  L.push('<b>Due fonti, un punto di raccordo nel 2004.</b> Fino al 2003 i numeri sono quelli dell&rsquo;ENAC (Annuario statistico 2003, traffico commerciale); dal 2004 quelli di Eurostat. Eurostat ha buchi e dati segnati come poco affidabili prima del 2004 (per i tre aeroporti mancano i dati del 1999 e del 2000), quindi non li usiamo. Dove le due fonti si sovrappongono (2001-2003, 2007, 2010, 2024, 2025) i passeggeri coincidono entro lo 0,5%, con una sola eccezione: Bergamo nel 2002, dove Eurostat ha il 4% in meno di ENAC (usiamo ENAC). Dettaglio nella tabella di controllo, sotto.');
+  L.push('<b>La divisione tra nazionali e internazionali c&rsquo;&egrave; solo dal 2004.</b> Prima, nei dati che abbiamo, non c&rsquo;&egrave;; i dati di Eurostat 2001-2003 la contengono ma sono segnati come poco affidabili e per Bergamo mancano.');
+  L.push('<b>I &laquo;voli&raquo; non sono tutti i movimenti.</b> Fino al 2003 sono i movimenti commerciali di ENAC (anche voli di sola merce); dal 2004 sono i voli commerciali con passeggeri di Eurostat. Per lo stesso anno i due numeri differiscono: nel 2025 Malpensa ha 216.430 movimenti per ENAC e 195.407 voli per Eurostat (diff. &minus;10%), Linate 92.823 e 106.069 (+14%), Bergamo 100.263 e 99.518 (&minus;1%). Le differenze probabilmente dipendono da che cosa si conta (voli di sola merce, taxi aerei, aviazione generale), ma non abbiamo la definizione precisa di ENAC; per questo i voli non sono una serie unica e vanno letti per dimensione, non per l&rsquo;ultima cifra. Non ci sono i dati dell&rsquo;aviazione generale (privata), che a Linate &egrave; consistente.');
+  L.push('<b>I passeggeri si contano due volte.</b> Si contano all&rsquo;arrivo e alla partenza. Per questo il totale dell&rsquo;Italia (somma degli aeroporti) &egrave; pi&ugrave; alto del numero di viaggi: un volo Milano-Roma vale una volta a Milano e una a Roma. Il totale per paese di Eurostat &egrave; pi&ugrave; basso (160,7 milioni nel 2019 contro 192,6 della somma degli aeroporti), probabilmente perch&eacute; conta una volta sola i passeggeri dei voli nazionali: usiamo la somma degli aeroporti, che coincide con ENAC (193 milioni nel 2019).');
+  L.push('<b>Le merci di Eurostat sono merci e posta caricate e scaricate.</b> Per i tre aeroporti coincidono con ENAC entro l&rsquo;1% negli anni controllati (fino al 3,2% per Linate nel 2007, dove il numero &egrave; piccolo); il totale Italia in Eurostat &egrave; entro l&rsquo;1,6% di quello di ENAC.');
+  L.push('<b>La chiusura di Linate: date dalla stampa.</b> Le date (27 luglio - 27 ottobre 2019) sono quelle riportate da Il Post e Teleborsa, non da un documento del gestore; i dati mensili le confermano. La spiegazione &laquo;lavori sulla pista&raquo; viene dagli stessi articoli. Il confronto con il 2018 non dice quanti avrebbero volato con Linate aperto.');
+  L.push('<b>Il 2026 &egrave; incompleto.</b> I dati mensili di Eurostat arrivano fino a maggio 2026 e non entrano nei totali annuali. Per i mesi successivi si pu&ograve; consultare Assaeroporti.');
+  L.push('<b>Non c&rsquo;&egrave; Assaeroporti.</b> L&rsquo;associazione dei gestori pubblica statistiche mensili e annuali (con anche l&rsquo;aviazione generale) ma le sue condizioni d&rsquo;uso vietano di riprodurre i materiali senza consenso scritto, quindi non li riportiamo; i numeri differiscono leggermente da quelli di ENAC e Eurostat (per esempio contano anche l&rsquo;aviazione generale nei movimenti).');
+  L.push('<b>Il luogo.</b> Malpensa &egrave; in provincia di Varese e Orio al Serio in provincia di Bergamo: sono aeroporti &laquo;di Milano&raquo; per chi li usa, non per confini. Non sappiamo da dove arrivano i passeggeri (da Milano, dal resto della Lombardia o da pi&ugrave; lontano), n&eacute; quanti sono turisti o pendolari: per questo il confronto con le persone che vivono a Milano non si pu&ograve; fare con questi dati.');
+  L.push('<b>Passeggeri non sono persone.</b> Un passeggero &egrave; un biglietto per un volo, non una persona diversa: chi viaggia dieci volte conta dieci volte.');
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var M=[];
+  M.push('<b>Passeggeri, voli, merci dal 2004.</b> Dalle tabelle Eurostat avia_paoa (passeggeri trasportati; voli commerciali con passeggeri) e avia_gooa (merci e posta caricate e scaricate), file JSON annuali e mensili. Per ogni aeroporto e anno nazionali + internazionali = totale, e UE + resto del mondo = internazionali (controllato: nessuna eccezione); la somma dei 12 mesi coincide con il totale annuo.');
+  M.push('<b>Dal 1994 al 2003.</b> Dall&rsquo;Annuario statistico 2003 dell&rsquo;ENAC (tabelle degli aeroporti): movimenti, passeggeri e tonnellate di merci del traffico commerciale. Per Bergamo (pagina 156 del PDF, il cui titolo non &egrave; nel testo) abbiamo controllato che i valori del 2001 e del 2002 siano quelli della Tavola APT 1 degli annuari 2001 e 2002.');
+  M.push('<b>Italia.</b> Somma di tutti gli aeroporti italiani di Eurostat (34-36 per anno dal 2004) fino al 2025; per gli anni prima del 2004 il totale ENAC (pagina 150 del PDF dell&rsquo;Annuario 2003).');
+  M.push('<b>Calcoli nostri.</b> Quote (tre aeroporti sul totale Italia, internazionali sul totale), passeggeri per volo, indici con 2019 = 100, somme dei tre aeroporti.');
+  M.push('<b>Scaricamento.</b> Nessuna registrazione. Una richiesta per volta con pausa di 3-5 secondi e un User-Agent che dice chi siamo; l&rsquo;API di diffusione pubblica di Eurostat e le pagine dei rapporti ENAC. Tutto si ripete con i programmi in <code>aeroporti/scripts</code> (<code>01_scarica_eurostat.py</code>, <code>02_scarica_enac.py</code>, <code>03_estrai_enac.py</code>, <code>04_pulisci.py</code>, <code>pagina.py</code>).');
+  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+function controllo(){
+  var C=D.controllo.filter(function(x){return x.misura!=='cargo t'||true});
+  var rows=C.map(function(x){return [x.aeroporto,x.anno,x.misura.replace('movimenti ENAC / voli Eurostat','movimenti ENAC / voli Eurostat'),f0(x.enac),f0(x.eurostat),x.diff==null?'':nf(x.diff,2).replace(/^(?=\d)/,'+')+'%',esc(x.fonte)]});
+  table('tab-controllo',['Aeroporto','Anno','Misura','ENAC','Eurostat','Differenza','Pagina ENAC'],rows);
+}
+})();
+</script></body></html>

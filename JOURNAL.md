@@ -2774,3 +2774,16 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonte: Ministero della Giustizia (giustizia.it), tabelle mensili per istituto gen 2019-set 2026, schede dei 3 istituti, PDF del minorile Beccaria; termini: uso non commerciale con citazione, nessuna licenza aperta. Antigone e Garante non usati per i numeri.
 - Numeri (30/9/2026): San Vittore 1.219 detenuti per 748 posti, 163 ogni 100 (massimo della serie; circa 229 sui posti davvero disponibili); Bollate da 101 a 127; Opera stabile a 148; Italia 129. Beccaria da 33 presenze medie (2020) a 72 (2025). Nessuna eccezione milanese: 131 carceri italiane su 172 sopra il 100%.
 - Limiti dei dati: posizione giuridica solo per regione; morti e suicidi solo nazionali; capienza del Ministero senza togliere i posti non disponibili; salto di dicembre 2025 (San Vittore −285, Bollate +178) senza causa nei dati (frase resa neutra dal coordinatore).
+
+## 76. Musei
+
+- 2026-11-02 — Fase 1 e pagina (`musei/`, `docs/musei/`). Dettagli in `musei/NOTE.md`.
+- Fonti: Comune ds575 (musei civici mensili 2007-2017, CC BY), ds513 (Brera, Cenacolo, Anfiteatro 1996-2024, CC BY), MiC tavole 2024 (senza licenza scritta: solo cifre con fonte), Regione Lombardia (tutti i diritti riservati: solo totali e i primi 10 musei 2024 citati con fonte). ds160 inaffidabile (Brera e Cenacolo scambiati nel 2009), usato solo per controllo.
+- Numeri: Brera +31% e Cenacolo +19% sul 2019 (nel 2020 −73% e −70%); Cenacolo +57% visitatori ma +272% introiti dal 2010; musei civici +100% 2007-2017, il 44% dalla crescita di Novecento e Mudec.
+
+## 77. Aeroporti
+
+- 2026-11-02 — Fase 1 e pagina (`aeroporti/`, `docs/aeroporti/`). Dettagli in `aeroporti/NOTE.md`.
+- Fonti: Eurostat avia_paoa/avia_gooa (CC BY 4.0, dal 2004), ENAC Annuario 2003 per il 1994-2003 (pagine citate). Assaeroporti non usato: le sue note legali vietano la riproduzione senza consenso scritto. Eurostat e ENAC coincidono entro lo 0,5%.
+- Numeri: Bergamo da 1,17 a 17,4 milioni di passeggeri (2000-2024), davanti a Linate dal 2015; Malpensa il 62% delle merci aeree italiane; Linate dal 27% al 57% di passeggeri internazionali. Sorpresa: con Linate chiuso tra agosto e ottobre 2019 i tre aeroporti insieme crescono del 2,7%.
+- Limiti dei dati: "voli" Eurostat diversi dai movimenti ENAC; date della chiusura di Linate dalla stampa; aviazione generale assente.

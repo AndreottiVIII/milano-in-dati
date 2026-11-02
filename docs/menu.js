@@ -86,7 +86,9 @@
     { path: 'nascite/', label: 'Nascite e mamme' },
     { path: 'tribunale/', label: 'Il tribunale di Milano' },
     { path: 'auto/', label: 'Le auto dei milanesi' },
-    { path: 'carceri/', label: 'Le carceri di Milano' }
+    { path: 'carceri/', label: 'Le carceri di Milano' },
+    { path: 'musei/', label: 'Musei' },
+    { path: 'aeroporti/', label: 'Aeroporti' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
