@@ -2794,3 +2794,9 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-02 — Fase 1 e pagina (`bici/`, `docs/bici/`). Dettagli in `bici/NOTE.md`.
 - Fonti: Comune ds574 (bike sharing 2011-2025), ds65 (stazioni), ds60 (tratti ciclabili con anno di fine lavori), CC BY; archivio Zenodo BikeMi 2011-2013 (Trentini, CC BY 4.0) per ore e stagioni (indice, ordine di grandezza); feed GBFS di BikeMi letto una volta con l'identificativo richiesto, solo totali. Contatori di bici: nessun dato aperto.
 - Numeri: noleggi BikeMi 11.740 al giorno nel 2017, 8.321 nel 2025 (−29%) con più stazioni e bici; e-bike 21% della flotta e 42% dei noleggi; 2020 noleggi −41,5% mentre le piste fanno il record (32 km). 62 km su 213 con norma "ordinanza lavori stradali" (lettura come provvedimento temporaneo non verificata).
+
+## 79. Medici e farmacie
+
+- 2026-11-02 — Fase 1 e pagina (`medici-farmacie/`, `docs/medici-farmacie/`). Dettagli in `medici-farmacie/NOTE.md`.
+- Fonti: Comune ds234/ds235 medici e pediatri (CC BY-NC: sito non commerciale, in pagina solo conteggi aggregati e fasce d'età con fonte, mai nomi, date di nascita o codici), Ministero della Salute elenco farmacie con date dal 2005, tempi a piedi dal filone 15 minuti, PDF ATS 2022 degli ambiti carenti (con data). Nessun dato aperto sui pazienti per medico.
+- Numeri: 677 medici di famiglia titolari, il 27% ha 65 anni o più (190 avranno 70 anni entro il 2031); 322 incaricati provvisori, 291 a tre indirizzi di servizio (esclusi dai conteggi per quartiere); "sulla carta" 708 medici × 1.500 coprono l'85% dei residenti di 14+ anni; pediatri forse incompleti (118); farmacie 423 (2005) → 427, residenti per farmacia da 3.091 a 3.277; mediana 3,9 minuti a piedi da una farmacia.

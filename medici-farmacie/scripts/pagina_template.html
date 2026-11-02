@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Medici e farmacie</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
+.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.ctl label.ck{font-size:.9rem;cursor:pointer}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
+.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
+.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
+.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
+.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+.tabmax{max-height:340px;overflow:auto} .tabw{min-width:560px}
+.links{display:flex;flex-wrap:wrap;gap:6px 16px;margin:.6em 0;font-size:.95rem}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Medici di famiglia, pediatri e farmacie, quartiere per quartiere</h1>
+<p>Quanti medici di famiglia e pediatri ci sono in ogni quartiere di Milano (gli 88 NIL, Nuclei di Identit&agrave; Locale), quanti sono vicini alla pensione, quante farmacie ci sono e quanto si cammina per arrivare alla pi&ugrave; vicina. I medici sono quelli dell&rsquo;elenco del Comune al 29 ottobre 2026: <b>una fotografia</b>, non una storia. Solo per le farmacie c&rsquo;&egrave; una serie di anni (dal 2005). Qui ci sono <b>solo conteggi</b>: nessun medico &egrave; indicato per nome.</p>
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="warm"><b>Prima di leggere.</b> Il dato che servirebbe di pi&ugrave;, <b>quanti pazienti ha ogni medico</b> (e quindi chi ha raggiunto il tetto di 1.500), <b>non &egrave; pubblico</b> in nessun elenco aperto che abbiamo trovato. Quello che si pu&ograve; fare &egrave; contare i medici, guardare l&rsquo;et&agrave; e confrontarli con i residenti: &egrave; una stima sulla carta, non il numero di persone senza medico. Vedi <a href="#limiti">i limiti dei dati</a>.</div>
+<div class="links"><a href="../citta-15-minuti/">&rarr; La citt&agrave; dei 15 minuti</a><a href="../speranza-vita/">&rarr; Quanto si vive</a><a href="../quartiere/">&rarr; Il tuo quartiere</a></div>
+
+<h2 id="mappa">La mappa</h2>
+<p>Scegli che cosa mostrare. Clic su un quartiere per la scheda, oppure scegli dall&rsquo;elenco. In grigio i quartieri con meno di 5.000 residenti (parchi, aree quasi senza abitanti), dove i rapporti non sono confrontabili.</p>
+<div class="ctl"><span class="sub">Mostra:</span>
+<button type="button" data-m="m1000" class="on">Medici di famiglia</button><button type="button" data-m="p1000">Pediatri</button><button type="button" data-m="f10k">Farmacie</button><button type="button" data-m="fmin">A piedi alla farmacia</button><button type="button" data-m="dmin">A piedi al medico</button></div>
+<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select>
+<label class="ck"><input type="checkbox" id="ck-farm"> punti delle farmacie</label></div>
+<p class="sub" id="map-desc"></p>
+<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per medici, pediatri e farmacie"></div>
+<div class="lgd" id="lg-map"></div>
+<p class="src">Mappa &copy; OpenStreetMap contributors. Medici e pediatri: Comune di Milano (ds234, ds235, 29/10/2026, CC BY-NC); farmacie: Comune di Milano (ds501, CC0); residenti: Comune di Milano (ds27, 31/12/2025, CC BY); minuti a piedi: stima su rete pedonale OpenStreetMap (<a href="../citta-15-minuti/">citt&agrave; dei 15 minuti</a>).</p>
+<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+
+<h2 id="medici">Medici di famiglia</h2>
+<div id="medici-testo"></div>
+<div class="grid2"><div><h3>Pi&ugrave; medici ogni 1.000 residenti</h3><div class="bars" id="b-mtop"></div></div>
+<div><h3>Meno medici ogni 1.000 residenti</h3><div class="bars" id="b-mbot"></div></div></div>
+<p class="src">Medici di famiglia (titolari e incaricati provvisori con ambulatorio in un quartiere) ogni 1.000 residenti di 14 anni e pi&ugrave;. Solo quartieri con almeno 5.000 residenti. Fonti: ds234 (29/10/2026), ds27 (31/12/2025).</p>
+<details><summary>Tutti i quartieri</summary><div class="scroll tabmax"><table id="tab-med" class="tabw"></table></div></details>
+<div id="provvisori"></div>
+
+<h2 id="pensione">Chi va in pensione</h2>
+<div id="pens-testo"></div>
+<div class="grid2"><div><h3>Medici titolari per et&agrave;</h3><div class="bars" id="b-eta"></div></div>
+<div><h3>Quanti hanno 70 anni, anno per anno</h3><div class="bars" id="b-uscite"></div></div></div>
+<p class="src">Medici di famiglia titolari (677), et&agrave; calcolata il 29/10/2026 dalla data di nascita del file del Comune (ds234; le date di nascita non sono ripubblicate). A destra: quanti titolari avranno compiuto 70 anni entro la fine di ogni anno (somma di chi li ha gi&agrave; compiuti pi&ugrave; chi li compie).</p>
+<div id="pens-nil"></div>
+<div class="warn" id="box-carenti"></div>
+<div class="scroll"><table id="tab-mun" class="tabw"></table></div>
+<p class="src" id="src-mun"></p>
+
+<h2 id="pediatri">Pediatri</h2>
+<div id="ped-testo"></div>
+<div class="grid2"><div><h3>Pediatri per et&agrave;</h3><div class="bars" id="b-peta"></div></div><div><h3>Quartieri senza pediatra</h3><div id="ped-zero"></div></div></div>
+<p class="src">Pediatri di libera scelta e incaricati provvisori attivi (ds235, 29/10/2026), bambini da 0 a 13 anni (ds27, 31/12/2025).</p>
+
+<h2 id="farmacie">Farmacie</h2>
+<div id="farm-testo"></div>
+<div class="ch" id="ch-farm" role="img" aria-label="Grafico: residenti per farmacia a Milano dal 2005 al 2025"></div>
+<p class="src">Residenti per farmacia a Milano al 31 dicembre di ogni anno. L&rsquo;asse verticale non parte da zero. Farmacie: Ministero della Salute (elenco con date di inizio e fine, IODL v2.0, scaricato il 2/11/2026); residenti: Comune di Milano ds27.</p>
+<div class="grid2"><div><h3>Pi&ugrave; farmacie ogni 10.000 residenti</h3><div class="bars" id="b-ftop"></div></div>
+<div><h3>Meno farmacie ogni 10.000 residenti</h3><div class="bars" id="b-fbot"></div></div></div>
+<p class="src">Farmacie ogni 10.000 residenti (elenco regionale, ds501, 15/10/2026). Solo quartieri con almeno 5.000 residenti.</p>
+<h3>Dove ci sono pi&ugrave; residenti per ogni farmacia rispetto al 2005</h3>
+<div id="farm-cambi"></div>
+<details><summary>Tutti i quartieri</summary><div class="scroll tabmax"><table id="tab-farm" class="tabw"></table></div></details>
+
+<h2 id="cammino">Quanto si cammina</h2>
+<div id="cam-testo"></div>
+<div class="grid2"><div><h3>Alla farmacia pi&ugrave; vicina</h3><div class="bars" id="b-cf"></div></div><div><h3>All&rsquo;ambulatorio di un medico di famiglia pi&ugrave; vicino</h3><div class="bars" id="b-cd"></div></div></div>
+<p class="src">Quota di residenti che, partendo da casa, ci mettono pi&ugrave; di 5, 10 e 15 minuti a piedi. Stima su rete pedonale di OpenStreetMap, 4,5 km/h (75 metri al minuto), 46.885 civici residenziali con i residenti 2025 distribuiti in parti uguali tra i civici del quartiere. Calcolo del filone <a href="../citta-15-minuti/">citt&agrave; dei 15 minuti</a>.</p>
+<h3>I quartieri dove si cammina di pi&ugrave; per la farmacia</h3>
+<div id="cam-nil"></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<div class="warm"><ul id="limiti-lista"></ul></div>
+
+<h2 id="metodo">Come &egrave; fatto</h2>
+<ul class="m" id="metodo-lista"></ul>
+
+<h2 id="download">File</h2>
+<p><a href="data/nil.csv">nil.csv</a> (tutti i numeri per quartiere), <a href="data/nil.geojson">nil.geojson</a> (confini semplificati con gli stessi valori), <a href="data/municipi.csv">municipi.csv</a>, <a href="data/farmacie_serie_citta.csv">farmacie_serie_citta.csv</a> (farmacie aperte e residenti 2005&ndash;2026), <a href="data/farmacie.json">farmacie.json</a> (punti dell&rsquo;elenco regionale, CC0), <a href="data/medici_eta_citta.csv">medici_eta_citta.csv</a> e <a href="data/medici_uscite_per_anno.csv">medici_uscite_per_anno.csv</a> (et&agrave; dei medici in fasce, solo per tutta la citt&agrave;), <a href="data/ambiti_carenti_municipi_2022.csv">ambiti_carenti_municipi_2022.csv</a> e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno). Sono tutti valori aggregati: l&rsquo;elenco dei medici del Comune, con nomi e date di nascita, non &egrave; ripubblicato.</p>
+
+<footer>
+<p><b>Fonti e licenze.</b> Medici di medicina generale e pediatri di libera scelta: Comune di Milano, &laquo;Sanit&agrave;: medici di medicina generale&raquo; (ds234) e &laquo;Sanit&agrave;: pediatri di libera scelta&raquo; (ds235), licenza Creative Commons Attribution Non Commercial (CC BY-NC): qui sono ripubblicati solo conteggi per quartiere, con la fonte, a scopo non commerciale; file del 29/10/2026 (ds234 scaricato il 29/10/2026, ds235 il 2/11/2026) da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Farmacie con date di inizio e fine: Ministero della Salute, &laquo;Farmacie&raquo;, Italian Open Data License v2.0 (IODL), file del 31/10/2026 scaricato il 2/11/2026 da <a href="https://www.dati.salute.gov.it/">dati.salute.gov.it</a>. Farmacie con coordinate: Comune di Milano, &laquo;Farmacie nel Comune di Milano&raquo; (ds501, CC0, elenco regionale aggiornato il 15/10/2026, scaricato il 29/10/2026). Residenti: Comune di Milano, ds27 (CC BY, scaricato il 1/11/2026). Confini dei NIL: ds964 (CC BY). Minuti a piedi: filone citt&agrave; dei 15 minuti, rete di &copy; OpenStreetMap contributors (ODbL), civici ds634 (CC BY). Posti carenti 2022: ATS Milano / Regione Lombardia, elenco degli ambiti territoriali carenti di assistenza primaria (PDF su bandi.regione.lombardia.it, scaricato il 2/11/2026). Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var D=null,NF=null,FA=null,NIL=[],RD=[];
+var ACC='#00695c',WARM='#c26a1b',ZERO='#f0d2a8';
+var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function pc(x,d){return nf(100*x,d==null?0:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
+function nilByName(n){for(var k=0;k<NIL.length;k++)if(NIL[k].n===n)return NIL[k];return null}
+function bars(id,rows,max,col){setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+Math.max(0,r.v/max*100)+'%;background:'+(r.col||col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
+
+Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/farmacie.json')]).then(function(a){
+  D=a[0];NF=a[1];FA=a[2];NIL=NF.features.map(function(f){return f.properties});
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();mappa();medici();pensione();pediatri();farmacie();cammino();limiti();metodo();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+function cum(anno){var u=D.uscite_mmg_titolari,v=0;u.forEach(function(r){if(r.anno===anno)v=r.cumulato});return v}
+
+/* ---------- cosa sorprende ---------- */
+function sorpresa(){
+  var R=D,t=R.mmg_titolari,eta=R.mmg_eta_titolari,over65=eta['65_69']+eta['70_piu'],sr=R.farmacie_serie;
+  var s05=sr[0],s15=sr[10],s25=sr[20];
+  var h='<p><b>Un medico di famiglia su tre, nell&rsquo;elenco, &egrave; un incaricato provvisorio.</b> Sono '+f0(R.mmg_provvisori)+' su '+f0(R.mmg_attivi)+' ('+pc(R.mmg_provvisori/R.mmg_attivi)+'), con et&agrave; mediana di '+f0(R.mmg_eta_provvisori.eta_mediana)+' anni (i titolari: '+f0(eta.eta_mediana)+'). Ma '+f0(R.mmg_provvisori_in_sedi_di_servizio)+' di loro hanno come sede solo tre indirizzi, uno dei quali (via Grassi 74, '+f0(R.mmg_sedi_di_servizio_indirizzi[1][2])+' medici) &egrave; quello dell&rsquo;ospedale Sacco: non sono ambulatori di quartiere, e per questo non sono nei conti per quartiere.</p>';
+  h+='<p><b>Sulla carta, i posti non bastano.</b> I '+f0(R.mmg_localizzati)+' medici con un ambulatorio in un quartiere, a 1.500 pazienti ciascuno (il tetto dell&rsquo;accordo nazionale), potrebbero seguire il <b>'+pc(R.posti_1500_tutti_su_14piu)+'</b> dei '+f0(R.residenti_14piu_2025)+' residenti di 14 anni e pi&ugrave;. Due esempi: Tibaldi ha '+nilByName('Tibaldi').mm+' medici per '+f0(nilByName('Tibaldi').ab)+' residenti, Scalo Romana nessuno per '+f0(nilByName('Scalo Romana').ab)+'. In tutto '+R.nil_con_zero_mmg.length+' quartieri su 88 non hanno nemmeno un ambulatorio (quasi tutti parchi o aree con pochi abitanti).</p>';
+  h+='<p><b>Un titolare su quattro ha almeno 65 anni:</b> '+f0(over65)+' su '+f0(t)+' ('+pc(over65/t)+'), di cui '+f0(eta['70_piu'])+' ne hanno gi&agrave; 70 o pi&ugrave;. Entro la fine del 2031 saranno '+f0(cum(2031))+' i titolari che avranno compiuto 70 anni.</p>';
+  h+='<p><b>Le farmacie sono ferme, i residenti no.</b> Le farmacie aperte erano '+s05.farmacie_aperte+' nel 2005 e sono '+sr[21].farmacie_aperte+' oggi; i residenti per farmacia sono passati da '+f0(s05.residenti_per_farmacia)+' a '+f0(s25.residenti_per_farmacia)+' (2025). Nel quartiere Duomo ce ne sono 25 ogni 15.892 residenti, a Scalo Romana una ogni 12.030. Per il '+pc(1-R.cammino_farmacia_citta.oltre10,0)+' dei residenti la farmacia pi&ugrave; vicina &egrave; entro 10 minuti a piedi.</p>';
+  h+='<p class="src">Fonti: Comune di Milano ds234, ds235 (29/10/2026), ds501, ds27; Ministero della Salute, elenco farmacie (31/10/2026). Il tetto di 1.500 pazienti &egrave; quello dell&rsquo;accordo nazionale dei medici di famiglia (art. 38 dell&rsquo;ACN); non sappiamo quanti pazienti abbia ciascun medico (<a href="#limiti">limiti</a>).</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- mappa ---------- */
+var MAP=null,LAY=null,FL=null,CUR='m1000',SEL=null,MET={};
+function qbreaks(vals,k,step){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]/step)*step);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
+function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
+function colore(v,m){if(v==null)return '#bdbdbd';if(v===0&&m.zero)return ZERO;var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
+function mappa(){
+  var ok=NIL.filter(function(p){return p.cl===1});
+  var b1=qbreaks(ok.map(function(p){return p.m1000}),6,0.1),b2=[0.4,0.8,1.2,1.6],b3=qbreaks(ok.map(function(p){return p.f10k}),6,0.5);
+  var b4=[3,4,5,6,8],b5=[3,4,5,6,8];
+  MET={
+   m1000:{k:'m1000',b:b1,c:pick(b1.length+1),f:function(v){return nf(v,2)},u:' medici ogni 1.000 residenti di 14 anni e più',grey:true,zero:true,t:'Medici di famiglia con ambulatorio nel quartiere ogni 1.000 residenti di 14 anni e più. Per la città è '+nf(D.mmg_per_1000_14piu_citta,2)+'. Colore arancio = nessun medico. Non è il numero di persone senza medico: i pazienti si scelgono anche fuori dal quartiere.'},
+   p1000:{k:'p1000',b:b2,c:pick(b2.length+1),f:function(v){return nf(v,2)},u:' pediatri ogni 1.000 bambini (0–13 anni)',grey:true,zero:true,t:'Pediatri di libera scelta con ambulatorio nel quartiere ogni 1.000 bambini da 0 a 13 anni. Per la città è '+nf(D.pls_per_1000_bambini_citta,2)+', ma l’elenco sembra incompleto (vedi i limiti). Arancio = nessun pediatra.'},
+   f10k:{k:'f10k',b:b3,c:pick(b3.length+1),f:function(v){return nf(v,1)},u:' farmacie ogni 10.000 residenti',grey:true,zero:true,t:'Farmacie ogni 10.000 residenti. Per la città è '+nf(D.farmacie_ogni_10000_residenti_citta,1)+'. Arancio = nessuna farmacia nel quartiere. Il quartiere Duomo è un caso a parte (molti negozi, pochi residenti).'},
+   fmin:{k:'fmin',b:b4,c:pick(b4.length+1),f:function(v){return nf(v,1)},u:' minuti a piedi (mediana)',grey:false,t:'Minuti a piedi dalla casa alla farmacia più vicina: la mediana dei residenti del quartiere. Per la città è '+nf(D.cammino_farmacia_citta.mediana_min,1)+' minuti (circa '+f0(D.cammino_farmacia_citta.mediana_m)+' metri). Grigio = quartiere senza residenti, o nessuna farmacia raggiungibile.'},
+   dmin:{k:'dmin',b:b5,c:pick(b5.length+1),f:function(v){return nf(v,1)},u:' minuti a piedi (mediana)',grey:false,t:'Minuti a piedi dalla casa all’ambulatorio di un medico di famiglia più vicino: la mediana dei residenti del quartiere. Per la città è '+nf(D.cammino_medico_citta.mediana_min,1)+' minuti (circa '+f0(D.cammino_medico_citta.mediana_m)+' metri). Grigio = quartiere senza residenti, o nessun ambulatorio raggiungibile.'}
+  };
+  MAP=L.map('map',{preferCanvas:true}).setView([45.4655,9.19],11);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
+  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
+  MAP.fitBounds(LAY.getBounds());
+  MAP.createPane('farm').style.zIndex=650;
+  var rr=L.svg({pane:'farm'});FL=L.layerGroup();
+  FA.farmacie.forEach(function(f){var mk=L.circleMarker([f[1],f[0]],{pane:'farm',renderer:rr,radius:4,color:'#fff',weight:1,fillColor:'#111',fillOpacity:.9});mk.bindTooltip('<b>'+esc(f[2])+'</b><br>'+esc(f[3]),{sticky:true});FL.addLayer(mk)});
+  el('ck-farm').addEventListener('change',function(){if(this.checked)FL.addTo(MAP);else MAP.removeLayer(FL)});
+  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
+  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
+  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
+  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
+    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
+  ricolora();
+  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
+  window.addEventListener('resize',function(){MAP.invalidateSize()});
+}
+function val(p){var m=MET[CUR],v=p[m.k];if(m.grey&&p.cl!==1)return null;if(p.ab===0)return null;return v}
+function tipNil(p){var m=MET[CUR],v=p[m.k];
+  if(p.ab===0)return '<b>'+esc(p.n)+'</b><br>nessun residente';
+  if(m.grey&&p.cl!==1)return '<b>'+esc(p.n)+'</b><br>'+f0(p.ab)+' residenti: meno di 5.000, rapporto non confrontabile';
+  if(v==null)return '<b>'+esc(p.n)+'</b><br>nessun servizio raggiungibile a piedi (oltre 43 minuti)';
+  var extra=CUR==='m1000'?'<br>'+p.mm+' medici, '+f0(p.a14)+' residenti di 14+':CUR==='p1000'?'<br>'+p.pl+' pediatri, '+f0(p.b13)+' bambini 0–13':CUR==='f10k'?'<br>'+p.fa+' farmacie, '+f0(p.ab)+' residenti':'';
+  return '<b>'+esc(p.n)+'</b><br>'+m.f(v)+m.u+extra}
+function sty(f){var p=f.properties,m=MET[CUR],sel=SEL===p.i;return {fillColor:colore(val(p),m),fillOpacity:.82,color:sel?'#000':'#fff',weight:sel?3:1}}
+function ricolora(){
+  var m=MET[CUR];LAY.setStyle(sty);if(SEL)bringSel();
+  var h='';
+  if(m.zero)h+='<span><i style="background:'+ZERO+'"></i>nessuno</span>';
+  m.c.forEach(function(c,i){var t;
+    if(i===0)t='meno di '+m.f(m.b[0]);else if(i===m.b.length)t=m.f(m.b[i-1])+' o più';else t=m.f(m.b[i-1])+' – '+m.f(m.b[i]);
+    h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
+  h+='<span><i style="background:#bdbdbd"></i>'+(m.grey?'meno di 5.000 residenti':'non calcolabile')+'</span>';
+  setH('lg-map',h);setH('map-desc',m.t);
+}
+function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
+function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);bringSel();
+  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}
+  scheda(i)}
+function minTxt(v,q10){return v==null?'<span class="sub">nessuno raggiungibile</span>':'<b>'+f1(v)+'</b> min <span class="sub">(oltre 10 min: '+pc(q10,0)+' dei residenti)</span>'}
+function scheda(i){
+  var p=nilById(i),C=D,h='<h3>'+esc(p.n)+' <span class="sub">(Municipio '+p.mu+')</span></h3><div class="scroll"><table><tbody>';
+  h+='<tr><td>Residenti (31/12/2025)</td><td class="r">'+f0(p.ab)+' <span class="sub">(14 e più: '+f0(p.a14)+'; 0–13: '+f0(p.b13)+')</span></td></tr>';
+  h+='<tr><td>Medici di famiglia con ambulatorio qui</td><td class="r"><b>'+p.mm+'</b> <span class="sub">('+p.mt+' titolari, '+p.mp+' provvisori)</span></td></tr>';
+  h+='<tr><td>Medici ogni 1.000 residenti di 14+</td><td class="r">'+(p.cl===1?'<b>'+nf(p.m1000,2)+'</b> <span class="sub">(città: '+nf(C.mmg_per_1000_14piu_citta,2)+')</span>':'<span class="sub">non confrontabile (meno di 5.000 residenti)</span>')+'</td></tr>';
+  h+='<tr><td>Titolari con 65 anni o più</td><td class="r">'+(p.m65==null?'<span class="sub">non indicato (meno di 10 medici)</span>':'<b>'+p.m65+'</b> su '+p.mt+' <span class="sub">(70 o più: '+p.m70+')</span>')+'</td></tr>';
+  h+='<tr><td>Pediatri con ambulatorio qui</td><td class="r"><b>'+p.pl+'</b>'+(p.cl===1&&p.b13>0?' <span class="sub">('+nf(p.p1000,2)+' ogni 1.000 bambini 0–13; città: '+nf(C.pls_per_1000_bambini_citta,2)+')</span>':'')+'</td></tr>';
+  h+='<tr><td>Farmacie</td><td class="r"><b>'+p.fa+'</b>'+(p.ab>0?' <span class="sub">('+nf(p.f10k,1)+' ogni 10.000 residenti; città: '+nf(C.farmacie_ogni_10000_residenti_citta,1)+')</span>':'')+'</td></tr>';
+  if(p.rpf25!=null)h+='<tr><td>Residenti per farmacia</td><td class="r"><span class="sub">2005:</span> '+f0(p.rpf05)+' <span class="sub">2015:</span> '+f0(p.rpf15)+' <span class="sub">2025:</span> <b>'+f0(p.rpf25)+'</b></td></tr>';
+  h+='<tr><td>A piedi alla farmacia più vicina</td><td class="r">'+minTxt(p.fmin,p.f10)+'</td></tr>';
+  h+='<tr><td>A piedi a un ambulatorio di medico</td><td class="r">'+minTxt(p.dmin,p.d10)+'</td></tr>';
+  h+='</tbody></table></div><p class="sub">Medici: elenco del Comune al 29/10/2026 (senza gli incaricati provvisori con sede in indirizzi di servizio). Farmacie: elenco regionale del 15/10/2026. Minuti: mediana dei residenti, 4,5 km/h.</p>';
+  setH('scheda',h);
+}
+
+/* ---------- medici ---------- */
+function medici(){
+  var R=D,cl=NIL.filter(function(p){return p.cl===1}).sort(function(a,b){return b.m1000-a.m1000});
+  var top=cl.slice(0,8),bot=cl.slice(-8).reverse(),mx=top[0].m1000;
+  var h='<p>Il Comune pubblica l&rsquo;elenco dei medici di medicina generale (i medici di famiglia) con l&rsquo;indirizzo dell&rsquo;ambulatorio. Nel file ci sono '+f0(R.mmg_medici_distinti_file)+' medici; '+f0(R.mmg_non_attivi)+' sono segnati come non attivi, restano <b>'+f0(R.mmg_attivi)+'</b>. Di questi '+f0(R.mmg_titolari)+' sono titolari e '+f0(R.mmg_provvisori)+' incaricati provvisori (spesso giovani, in attesa di un posto fisso). '+f0(R.mmg_con_piu_ambulatori)+' medici lavorano in pi&ugrave; ambulatori: sono contati una volta sola, nel principale.</p>';
+  h+='<p>Contando i '+f0(R.mmg_localizzati)+' medici con un ambulatorio in un quartiere (titolari e provvisori fuori dalle sedi di servizio) si arriva a <b>'+nf(R.mmg_per_1000_14piu_citta,2)+' medici ogni 1.000 residenti di 14 anni e pi&ugrave;</b>, cio&egrave; un medico ogni '+f0(R.residenti_14piu_per_mmg)+' residenti. Il tetto per ogni medico &egrave; 1.500 pazienti: a questo ritmo, anche con tutti i posti pieni, mancherebbero i posti per circa '+f0(R.residenti_14piu_2025-R.mmg_localizzati*1500)+' persone di 14 anni e pi&ugrave;. Con i soli titolari il rapporto &egrave; di un medico ogni '+f0(R.residenti_14piu_per_mmg_titolare)+' residenti. &Egrave; un conto sulla carta: molti milanesi hanno il medico fuori citt&agrave; e molti pazienti di Milano vengono da fuori.</p>';
+  h+='<p>Tra i '+cl.length+' quartieri con almeno 5.000 residenti il rapporto va da '+nf(bot[0].m1000,2)+' ('+esc(bot[0].n)+') a '+nf(top[0].m1000,2)+' ('+esc(top[0].n)+'). I pi&ugrave; scarsi sono in gran parte quartieri di periferia a ovest e a sud ('+bot.slice(1,6).map(function(p){return esc(p.n)}).join(', ')+'), dove i medici con ambulatorio sono da 1 a 4.</p>';
+  setH('medici-testo',h);
+  bars('b-mtop',top.map(function(p){return {nm:p.n,v:p.m1000,txt:nf(p.m1000,2)+' <span class="sub">('+p.mm+')</span>'}}),mx);
+  bars('b-mbot',bot.map(function(p){return {nm:p.n,v:p.m1000,txt:nf(p.m1000,2)+' <span class="sub">('+p.mm+')</span>'}}),mx,WARM);
+  table('tab-med',['Quartiere','Residenti 14+','Medici','di cui titolari','Ogni 1.000 residenti 14+'],NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(p){return [esc(p.n),f0(p.a14),p.mm,p.mt,p.cl===1?nf(p.m1000,2):'<span class="sub">n.c.</span>']}));
+  var s=R.mmg_sedi_di_servizio_indirizzi;
+  setH('provvisori','<div class="warm"><b>I provvisori non stanno tutti in un quartiere.</b> Dei '+f0(R.mmg_provvisori)+' incaricati provvisori, '+f0(R.mmg_provvisori_in_sedi_di_servizio)+' hanno come ambulatorio uno di tre indirizzi che ne ospitano 5 o pi&ugrave;: '+s.map(function(x){return esc(x[0])+' '+esc(x[1])+' ('+x[2]+')'}).join(', ')+'. Sono sedi di servizio (via Grassi 74 &egrave; l&rsquo;ospedale Sacco), non ambulatori dove si va a farsi visitare, quindi non sono assegnati a un quartiere: contarli nel quartiere Roserio (257 residenti) darebbe un risultato assurdo. Restano nei totali della citt&agrave; ('+f0(R.mmg_attivi)+' medici) e nell&rsquo;et&agrave; mediana.</div>');
+}
+
+/* ---------- pensione ---------- */
+function pensione(){
+  var R=D,e=R.mmg_eta_titolari,t=R.mmg_titolari;
+  var h='<p>Nel file del Comune c&rsquo;&egrave; la data di nascita di ogni medico (non ripubblicata qui). La regola generale &egrave; che i medici di famiglia lasciano l&rsquo;incarico a 70 anni, con una possibile proroga di un anno secondo alcune fonti sindacali (non abbiamo trovato il testo dell&rsquo;accordo per verificarlo). Per i '+f0(t)+' titolari l&rsquo;et&agrave; mediana &egrave; '+f0(e.eta_mediana)+' anni: <b>'+f0(e['65_69'])+' hanno tra 65 e 69 anni</b> e <b>'+f0(e['70_piu'])+' ne hanno gi&agrave; 70 o pi&ugrave;</b>. In tutto '+f0(e['65_69']+e['70_piu'])+' ('+pc((e['65_69']+e['70_piu'])/t)+') hanno almeno 65 anni. Chi ha 70 anni e lavora ancora &egrave; presumibilmente in proroga o in deroga: non sappiamo quando smetter&agrave;.</p>';
+  setH('pens-testo',h);
+  var rows=[['Meno di 50 anni',e.meno_di_50],['50–59',e['50_59']],['60–64',e['60_64']],['65–69',e['65_69']],['70 o più',e['70_piu']]];
+  var mx=Math.max.apply(null,rows.map(function(r){return r[1]}));
+  bars('b-eta',rows.map(function(r,i){return {nm:r[0],v:r[1],txt:'<b>'+r[1]+'</b> <span class="sub">('+pc(r[1]/t)+')</span>',col:i>=3?WARM:ACC}}),mx);
+  var U=R.uscite_mmg_titolari.filter(function(r){return r.anno<=2031});
+  var mu=Math.max.apply(null,U.map(function(r){return r.cumulato}));
+  bars('b-uscite',U.map(function(r){return {nm:r.anno===2026?'Entro il 2026':'Entro il '+r.anno,v:r.cumulato,txt:'<b>'+r.cumulato+'</b>'+(r.anno===2026?'':' <span class="sub">(+'+r.compiono_70+')</span>')}}),mu,WARM);
+  var big=NIL.filter(function(p){return p.m65!=null}).sort(function(a,b){return b.m65/b.mt-a.m65/a.mt});
+  var n10=NIL.filter(function(p){return p.mm>=10}).length;
+  var tx='<p><b>Per quartiere.</b> Le fasce di et&agrave; per quartiere sono mostrate solo dove ci sono almeno 10 medici ('+n10+' quartieri): con pochi medici un numero dice troppo su una persona. Nei quartieri con almeno 10 medici la quota di titolari con almeno 65 anni va da '+pc(big[big.length-1].m65/big[big.length-1].mt)+' ('+esc(big[big.length-1].n)+') a '+pc(big[0].m65/big[0].mt)+' ('+esc(big[0].n)+').</p>';
+  tx+='<div class="scroll tabmax"><table class="tabw" id="tab-pnil"></table></div>';
+  setH('pens-nil',tx);
+  table('tab-pnil',['Quartiere','Titolari','65 anni o più','Quota','70 o più'],big.map(function(p){return [esc(p.n),p.mt,p.m65,pc(p.m65/p.mt),p.m70]}));
+  /* ambiti carenti */
+  var tot=R.posti_carenti_2022_totale_municipi;
+  setH('box-carenti','<b>E i posti vacanti?</b> L&rsquo;ATS di Milano e la Regione pubblicano gli &laquo;ambiti carenti&raquo;, cio&egrave; dove servono medici (per Milano gli ambiti sono i nove Municipi). L&rsquo;elenco che abbiamo trovato &egrave; un PDF senza data nel testo, creato il 9 settembre 2022 secondo i suoi metadati, quindi <b>vecchio di quattro anni</b>: elenca '+tot+' posti di assistenza primaria in sette Municipi (nessuno nei Municipi 1 e 3). Gli elenchi pi&ugrave; recenti che abbiamo visto citati (2023) sono scansioni in PDF; nessun elenco 2025 o 2026 &egrave; stato trovato. La tabella lo mette accanto ai medici di oggi, ma i due dati non sono dello stesso anno.');
+  table('tab-mun',['Municipio','Residenti 14+','Medici','Ogni 1.000 residenti 14+','Posti vacanti (PDF 2022)'],R.municipi.map(function(m){return [m.municipio,f0(m.residenti_14piu_2025),m.mmg_attivi,nf(m.mmg_per_1000_14piu,2),m.posti_carenti_ats_2022||'<span class="sub">nessuno</span>']}));
+  setH('src-mun','Medici: ds234 (29/10/2026), assegnati al Municipio prevalente del quartiere; residenti: ds27. Posti vacanti: ATS Milano, &laquo;Ambiti Territoriali carenti di Assistenza Primaria&raquo; (PDF, bandi.regione.lombardia.it, scaricato il 2/11/2026). Un Municipio ha pi&ugrave; quartieri, e alcuni quartieri stanno in due Municipi: il conteggio &egrave; approssimato.');
+}
+
+/* ---------- pediatri ---------- */
+function pediatri(){
+  var R=D,e=R.pls_eta_titolari;
+  var h='<p>Il Comune pubblica anche l&rsquo;elenco dei pediatri di libera scelta: '+f0(R.pls_medici_distinti_file)+' nel file, '+f0(R.pls_attivi)+' attivi ('+f0(R.pls_titolari)+' titolari e '+R.pls_provvisori+' provvisori), con '+f0(R.pls_ambulatori_distinti)+' ambulatori. I bambini da 0 a 13 anni residenti sono '+f0(R.residenti_0_13_2025)+': <b>'+f0(R.bambini_0_13_per_pls)+' bambini per ogni pediatra</b>, '+nf(R.pls_per_1000_bambini_citta,2)+' pediatri ogni 1.000 bambini. &Egrave; un numero molto alto: un pediatra non pu&ograve; seguire cos&igrave; tanti bambini (il tetto, secondo una fonte sindacale che abbiamo trovato, &egrave; di circa 1.000 assistiti). Pi&ugrave; probabilmente l&rsquo;elenco &egrave; incompleto, o molti bambini sono seguiti da pediatri fuori Milano o da medici di famiglia: non possiamo dirlo. Per questo qui non c&rsquo;&egrave; un conto dei &laquo;posti&raquo; per i pediatri.</p>';
+  h+='<p>Il pediatra titolare ha in mediana '+f0(e.eta_mediana)+' anni; '+f0(e['65_69']+e['70_piu'])+' su '+f0(e.totale)+' ('+pc((e['65_69']+e['70_piu'])/e.totale)+') hanno almeno 65 anni, '+e['70_piu']+' ne ha 70 o pi&ugrave;. Sono numeri piccoli, e per quartiere non li mostriamo.</p>';
+  setH('ped-testo',h);
+  var rows=[['Meno di 50 anni',e.meno_di_50],['50–59',e['50_59']],['60–64',e['60_64']],['65–69',e['65_69']],['70 o più',e['70_piu']]];
+  var mx=Math.max.apply(null,rows.map(function(r){return r[1]}));
+  bars('b-peta',rows.map(function(r,i){return {nm:r[0],v:r[1],txt:'<b>'+r[1]+'</b> <span class="sub">('+pc(r[1]/e.totale)+')</span>',col:i>=3?WARM:ACC}}),mx);
+  var z=NIL.filter(function(p){return p.pl===0&&p.b13>=500}).sort(function(a,b){return b.b13-a.b13});
+  setH('ped-zero','<p class="sub">Quartieri con almeno 500 bambini da 0 a 13 anni e nessun pediatra con ambulatorio ('+z.length+' su '+NIL.filter(function(p){return p.b13>=500}).length+'). I bambini non vanno per forza dal pediatra del quartiere.</p><p>'+z.slice(0,14).map(function(p){return esc(p.n)+' <span class="sub">('+f0(p.b13)+')</span>'}).join('; ')+(z.length>14?'; &hellip;':'')+'.</p>');
+}
+
+/* ---------- farmacie ---------- */
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||260,m={l:50,r:14,t:16,b:30};
+  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=o.y0,y1=o.y1,pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=y0;v<=y1+1;v+=o.sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
+  for(v=x0;v<=x1;v+=5)s+='<line x1="'+X(v)+'" x2="'+X(v)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(v)+'" y="'+(m.t+ph+17)+'" text-anchor="middle">'+v+'</text>';
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  s+='<polyline fill="none" stroke="'+ACC+'" stroke-width="2.5" points="'+o.pts.map(function(p){return X(p.x).toFixed(1)+','+Y(p.y).toFixed(1)}).join(' ')+'"/>';
+  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3.2" fill="'+ACC+'"/>'});
+  s+='<text class="mu" x="'+m.l+'" y="'+(m.t-4)+'">'+o.yl+'</text><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('rect:last-of-type');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bi=0,bd=1e9;
+    o.pts.forEach(function(p,i){var d=Math.abs(X(p.x)-px);if(d<bd){bd=d;bi=i}});var p=o.pts[bi];
+    tip.innerHTML=p.t;tip.style.display='';var tw=tip.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.y)/k-44)+'px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function farmacie(){
+  var R=D,sr=R.farmacie_serie,s05=sr[0],s25=sr[20];
+  var cl=NIL.filter(function(p){return p.cl===1}).sort(function(a,b){return b.f10k-a.f10k});
+  var top=cl.slice(0,8),bot=cl.slice(-8).reverse(),mx=top[0].f10k;
+  var mxr=sr.filter(function(r){return r.residenti_per_farmacia}).sort(function(a,b){return b.residenti_per_farmacia-a.residenti_per_farmacia})[0];
+  var h='<p>Il Ministero della Salute pubblica l&rsquo;elenco delle farmacie con le date in cui ciascuna &egrave; in vigore. Per Milano ci sono '+f0(R.farmacie_codici_totali)+' codici di farmacia dal 2005 a oggi, '+R.farmacie_codici_aperti_oggi+' aperti. <b>Il numero &egrave; quasi fermo</b>: '+s05.farmacie_aperte+' a fine 2005, 427 dal 2015, nessuna chiusura dal 2012. I residenti per&ograve; sono cresciuti: <b>da '+f0(s05.residenti_per_farmacia)+' residenti per farmacia nel 2005 a '+f0(s25.residenti_per_farmacia)+' nel 2025</b>, con un massimo di '+f0(mxr.residenti_per_farmacia)+' nel '+mxr.anno+'. Il codice resta anche quando cambia il titolare: in '+R.farmacie_codici_con_cambio_partita_iva+' codici su '+R.farmacie_codici_totali+' la partita IVA &egrave; cambiata almeno una volta (cambio di gestione o di forma societaria, il file non lo dice).</p>';
+  h+='<p>Oggi, secondo l&rsquo;elenco regionale con le coordinate, a Milano ci sono <b>'+R.farmacie_elenco_regionale+' farmacie</b>, '+nf(R.farmacie_ogni_10000_residenti_citta,1)+' ogni 10.000 residenti (una ogni '+f0(R.residenti_per_farmacia_citta)+'). Sono distribuite in modo molto diverso: il quartiere Duomo ne ha 25 per 15.892 residenti ('+nf(nilByName('Duomo').f10k,1)+' ogni 10.000), Scalo Romana una per '+f0(nilByName('Scalo Romana').ab)+' ('+nf(nilByName('Scalo Romana').f10k,1)+'). '+R.nil_con_zero_farmacie.length+' quartieri su 88 non ne hanno nessuna, quasi tutti parchi o aree con pochi residenti, ma anche Tre Torri (2.536 residenti) e Farini (3.780).</p>';
+  setH('farm-testo',h);
+  var pts=sr.filter(function(r){return r.residenti_per_farmacia}).map(function(r){return {x:r.anno,y:r.residenti_per_farmacia,t:'<b>'+r.anno+'</b><br>'+r.farmacie_aperte+' farmacie<br>'+f0(r.residenti_31_12)+' residenti<br>'+f0(r.residenti_per_farmacia)+' residenti per farmacia'}});
+  function draw(){lineChart(el('ch-farm'),{pts:pts,h:260,y0:2900,y1:3400,sy:100,yl:'residenti per farmacia'})}
+  draw();RD.push(draw);
+  bars('b-ftop',top.map(function(p){return {nm:p.n,v:p.f10k,txt:nf(p.f10k,1)+' <span class="sub">('+p.fa+')</span>'}}),mx);
+  bars('b-fbot',bot.map(function(p){return {nm:p.n,v:p.f10k,txt:nf(p.f10k,1)+' <span class="sub">('+p.fa+')</span>'}}),mx,WARM);
+  var ch=NIL.filter(function(p){return p.cl===1&&p.rpf05!=null}).map(function(p){return {p:p,v:p.rpf25/p.rpf05-1}}).sort(function(a,b){return b.v-a.v});
+  setH('farm-cambi','<p>Per i quartieri non c&rsquo;&egrave; una serie delle farmacie: si usa l&rsquo;elenco di oggi (stessa posizione) e cambiano solo i residenti. &Egrave; una stima ragionevole perch&eacute; in tutta la citt&agrave; il numero di farmacie &egrave; rimasto quasi lo stesso, ma non vede le farmacie che si sono spostate da un quartiere all&rsquo;altro. Dove i residenti sono cresciuti di pi&ugrave;, le farmacie sono rimaste le stesse: '+ch.slice(0,5).map(function(r){return esc(r.p.n)+' (da '+f0(r.p.rpf05)+' a '+f0(r.p.rpf25)+' residenti per farmacia, '+(r.v>0?'+':'')+pc(r.v,0)+')'}).join('; ')+'. All&rsquo;opposto, dove i residenti sono diminuiti, come in '+esc(ch[ch.length-1].p.n)+' ('+pc(ch[ch.length-1].v,0)+'), ogni farmacia ne serve meno.</p>');
+  table('tab-farm',['Quartiere','Farmacie','Ogni 10.000 residenti','Residenti per farmacia 2005','2015','2025'],NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(p){return [esc(p.n),p.fa,p.ab>0?nf(p.f10k,1):'',p.rpf05==null?'<span class="sub">nessuna</span>':f0(p.rpf05),p.rpf15==null?'':f0(p.rpf15),p.rpf25==null?'':f0(p.rpf25)]}));
+}
+
+/* ---------- cammino ---------- */
+function cammino(){
+  var F=D.cammino_farmacia_citta,M=D.cammino_medico_citta;
+  var h='<p>Quanto si cammina da casa? Il filone <a href="../citta-15-minuti/">citt&agrave; dei 15 minuti</a> ha calcolato, per ogni numero civico residenziale, i minuti a piedi lungo la rete pedonale fino al servizio pi&ugrave; vicino. Per la <b>farmacia</b> la mediana dei milanesi &egrave; di <b>'+nf(F.mediana_min,1)+' minuti (circa '+f0(F.mediana_m)+' metri)</b>; per il <b>pi&ugrave; vicino ambulatorio di medico di famiglia</b> '+nf(M.mediana_min,1)+' minuti (circa '+f0(M.mediana_m)+' metri). '+pc(F.oltre10,1)+' dei residenti (circa '+f0(F.oltre10*D.residenti_2025/1000)+' mila) hanno la farmacia a pi&ugrave; di 10 minuti, '+pc(F.oltre15,1)+' a pi&ugrave; di 15; per l&rsquo;ambulatorio sono il '+pc(M.oltre10,1)+' e il '+pc(M.oltre15,1)+'. Un ambulatorio vicino non vuol dire che accetti nuovi pazienti: sono solo la distanza.</p>';
+  setH('cam-testo',h);
+  function rows(S){return [['Più di 5 minuti',S.oltre5],['Più di 10 minuti',S.oltre10],['Più di 15 minuti',S.oltre15]].map(function(r){return {nm:r[0],v:r[1],txt:'<b>'+pc(r[1],1)+'</b>'}})}
+  bars('b-cf',rows(F),1);bars('b-cd',rows(M),1,WARM);
+  var w=NIL.filter(function(p){return p.ab>=1000&&p.f10!=null}).sort(function(a,b){return b.f10-a.f10}).slice(0,10);
+  setH('cam-nil','<p class="sub">Quartieri con almeno 1.000 residenti, in ordine di quota di residenti con la farmacia a pi&ugrave; di 10 minuti a piedi.</p><div class="scroll"><table class="tabw" id="tab-cam"></table></div>');
+  table('tab-cam',['Quartiere','Residenti','Minuti alla farmacia (mediana)','Oltre 10 minuti','Farmacie nel quartiere','Minuti al medico (mediana)'],w.map(function(p){return [esc(p.n),f0(p.ab),p.fmin==null?'oltre 43':f1(p.fmin),pc(p.f10,0),p.fa,p.dmin==null?'oltre 43':f1(p.dmin)]}));
+}
+
+/* ---------- limiti ---------- */
+function limiti(){
+  var R=D;
+  var L=[
+   '<b>Per i medici c’è solo una fotografia.</b> Gli elenchi del Comune sono del 29 ottobre 2026 e non c’è una serie di anni: non possiamo dire se i medici sono aumentati o diminuiti. Solo le farmacie hanno date di inizio e fine.',
+   '<b>Non c’è il numero di pazienti per medico.</b> Gli elenchi del Comune, quelli del Ministero e i dati aperti della Regione Lombardia che abbiamo cercato (portale dati.lombardia.it) non contengono assistiti, massimale o “scèlte disponibili”. Quindi non sappiamo quanti medici hanno raggiunto il tetto. Il confronto “posti a 1.500 pazienti” è teorico: tutti i medici con il massimo dei pazienti, tutti i pazienti residenti nel quartiere. Il tetto di 1.500 è quello dell’accordo nazionale (art. 38), con deroghe fino a 1.800 e oltre secondo le fonti trovate.',
+   '<b>L’elenco dei posti vacanti è del 2022.</b> L’unico elenco di ambiti carenti per Milano che abbiamo potuto leggere è un PDF creato il 9/9/2022; non è stato trovato un elenco 2025 o 2026, e per i pediatri non ne abbiamo uno leggibile. Non è un dato attuale.',
+   '<b>I provvisori.</b> '+f0(R.mmg_provvisori)+' dei '+f0(R.mmg_attivi)+' medici sono incaricati provvisori; per '+f0(R.mmg_provvisori_in_sedi_di_servizio)+' di loro l’indirizzo è una sede di servizio (ospedale Sacco, via Stromboli 19, via Gola 22). Li abbiamo esclusi dai conti per quartiere. Non sappiamo se e dove ricevano pazienti. Se invece fossero tutti ambulatori di quartiere, i numeri della città sarebbero molto più alti ('+nf(1000*R.mmg_attivi/R.residenti_14piu_2025,2)+' medici ogni 1.000 residenti di 14+).',
+   '<b>I pediatri sembrano pochi.</b> '+f0(R.pls_attivi)+' pediatri attivi per '+f0(R.residenti_0_13_2025)+' bambini sono troppo pochi per essere reali, rispetto a un tetto di circa 1.000 assistiti: o l’elenco del Comune è incompleto, o molti bambini hanno il pediatra fuori Milano. Non l’abbiamo potuto verificare con un secondo elenco. Prendi i numeri sui pediatri come confronto tra quartieri più che come conteggio vero.',
+   '<b>Medici e residenti non coincidono.</b> L’ambulatorio è dove lavora il medico, non dove abitano i suoi pazienti: ognuno può scegliere un medico di tutto l’ambito. I residenti sono quelli dell’anagrafe del Comune (31/12/2025, ds27), che sono il 2,7% in più di quelli stimati dall’ISTAT. Il rapporto “medici ogni 1.000 residenti” dice dove i medici sono pochi, non quanti pazienti non hanno un medico.',
+   '<b>L’età e la pensione.</b> Il limite dei 70 anni, con una possibile proroga, è quello riportato dalle fonti consultate; non abbiamo il testo dell’accordo. Chi ha 70 anni o più ed è ancora attivo ('+f0(R.mmg_eta_titolari['70_piu'])+' titolari) è in una situazione che il file non spiega. Le fasce di età per quartiere sono mostrate solo con almeno 10 medici, per non rendere riconoscibile una persona.',
+   '<b>Farmacie: due elenchi che non coincidono del tutto.</b> Il Ministero ne conta '+R.farmacie_codici_aperti_oggi+' aperte, l’elenco regionale '+R.farmacie_elenco_regionale+'; le coordinate del Ministero per '+R.farmacie_ministero_aperte_senza_coordinate_dentro_milano+' farmacie aperte cadono fuori dal territorio di Milano (probabilmente geocodificate male), e per questo la posizione viene dall’elenco regionale. Il Ministero serve per le date; la serie parte dal 2005 e i dati prima non ci sono.',
+   '<b>Farmacie nel tempo, per quartiere.</b> Si usa l’elenco di oggi e si cambiano solo i residenti: non si vedono le farmacie spostate da un quartiere a un altro.',
+   '<b>I minuti a piedi sono una stima</b> (rete pedonale di OpenStreetMap, 4,5 km/h, nessuna pendenza, nessun attraversamento, residenti distribuiti in parti uguali tra i civici del quartiere). I servizi fuori dal confine del comune non sono contati: includere le farmacie di OpenStreetMap appena oltre il confine abbassa la media di soli '+nf(R.cammino_farmacia_senza_bordo_media_min-R.cammino_farmacia_con_bordo_media_min,2)+' minuti. I medici hanno ambulatori sparsi: l’ambulatorio più vicino può non accettare nuovi pazienti.',
+   '<b>Quartieri molto piccoli.</b> Con meno di 5.000 residenti i rapporti sono in grigio sulla mappa: 24 quartieri su 88 sono parchi o aree quasi senza abitanti (Parco Sempione ne ha zero).',
+   '<b>Licenza.</b> Gli elenchi dei medici del Comune sono CC BY-NC (uso non commerciale): ripubblichiamo solo conteggi e fasce di età, citando la fonte, a scopo non commerciale. Nomi, date di nascita e codici dei medici non sono ripubblicati.'
+  ];
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+
+/* ---------- metodo ---------- */
+function metodo(){
+  var R=D;
+  var L=[
+   '<b>Quali medici contano.</b> Dal file del Comune (ds234 per i medici di famiglia, ds235 per i pediatri) si tengono i medici con il campo <code>attivo</code>=1 ('+f0(R.mmg_attivi)+' e '+f0(R.pls_attivi)+'). Un medico è una persona: se lavora in più ambulatori si conta nell’ambulatorio principale (o nel primo). Il quartiere è quello dato dal file; per 6 medici di famiglia con coordinate sbagliate (fuori Milano) è stato trovato cercando l’indirizzo tra i civici del Comune. I pediatri non hanno problemi di questo tipo.',
+   '<b>Titolari e provvisori.</b> Titolari = tipo “MMG” o “PLS”; provvisori = “Incaricato provvisorio”. I provvisori con sede in un indirizzo che ne ospita 5 o più sono sedi di servizio e non sono assegnati a un quartiere.',
+   '<b>Residenti.</b> Residenti al 31/12/2025 del Comune (ds27), per quartiere e per età singola: 14 anni e più per i medici di famiglia (il passaggio dal pediatra al medico avviene di norma a 14 anni, ma può slittare), da 0 a 13 anni per i pediatri. Per gli anni 2005 e 2015 sono i residenti del 31/12 degli stessi anni.',
+   '<b>Posti sulla carta.</b> Medici × 1.500 diviso residenti di 14 anni e più. Il tetto è quello nazionale; la Regione può fissarne altri.',
+   '<b>Età.</b> Calcolata al 29/10/2026 dalla data di nascita del file (convertita in ora italiana). “Entro il X” = nati nel X − 70 o prima. Non è una previsione di chi andrà in pensione.',
+   '<b>Farmacie.</b> Un codice di farmacia del Ministero = una farmacia; le righe dello stesso codice (cambio di titolare) si uniscono, senza buchi (controllato). Una farmacia è “aperta” a una data se il codice è in vigore. Per i quartieri si usa l’elenco regionale (ds501): il quartiere dichiarato nel file coincide con quello calcolato dalle coordinate per tutte e 422.',
+   '<b>Minuti a piedi.</b> Dal filone città dei 15 minuti: civici residenziali del Comune (ds634), rete pedonale di OpenStreetMap, 4,5 km/h. Mediana pesata con i residenti 2025 del quartiere, ripartiti in parti uguali sui civici residenziali. Minuti × 75 = metri circa. “Oltre 43” = nessun servizio raggiungibile entro il limite di calcolo.',
+   '<b>Pagina costruita da un programma</b> (<code>medici-farmacie/scripts/analizza.py</code> e <code>pagina.py</code>) che legge i file scaricati e scrive i file di <code>data/</code>. Ogni numero ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a> (campo <code>origine</code>).'
+  ];
+  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+})();
+</script>
+</body></html>
