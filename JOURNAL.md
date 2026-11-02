@@ -2835,3 +2835,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: RUNTS, lista pubblica degli enti (registro pubblico per legge, licenza non indicata: pubblicati nome, sezione, anno e 5 per mille degli enti, mai i legali rappresentanti); Comune ds1332 (registro associazioni), ds562 (cooperative sociali), Regione ds606 (persone giuridiche); ISTAT censimento non profit 2011. Il RUNTS non ha indirizzo: niente quartieri dal RUNTS, la mappa usa gli elenchi minori, non sommabili.
 - Numeri: 3.986 enti RUNTS con sede a Milano, 29,2 ogni 10.000 abitanti (Italia 26,2), 9ª su 18 grandi città; prima per "altri enti", ultima per APS; il RUNTS copre il 37% delle istituzioni non profit ISTAT della provincia (spiega la differenza con il BES).
 - Limiti dei dati (trappole per il diario): la sigla provincia "NA" letta come dato mancante azzerava Napoli (corretto); la data RUNTS è l'iscrizione (36% nel 2022 per la trasmigrazione); ISTAT per comune solo 2011.
+
+## 85. Imprese che nascono e muoiono
+
+- 2026-11-02 — Fase 1 e pagina (`imprese/`, `docs/imprese/`). Dettagli in `imprese/NOTE.md`.
+- Fonti: Movimprese (InfoCamere/Unioncamere) file annuali 2000-2025, archivio pubblico con citazione (il modulo "Scarica CSV" ha un reCAPTCHA: non usato); Camera di commercio Milano Monza Brianza Lodi, rapporti "Milano Produttiva" 2019-2026 (solo cifre citate); Comune ds691/ds1481 (CC BY). ISTAT ASIA per comune non ottenuto (esploradati ha smesso di rispondere).
+- Numeri 2025 (provincia): 26.262 iscrizioni, 17.083 cessazioni senza le cancellazioni d'ufficio, saldo +9.179; 2ª provincia per crescita dopo Roma; società di capitali 57% delle nuove imprese (36% nel 2009).
+- Limiti dei dati: iscrizione non vuol dire attività; le cancellazioni d'ufficio gonfiano le chiusure; 40% delle nuove senza settore; dal 2007 Monza e Brianza separata (grafico dal 2000 sommato).

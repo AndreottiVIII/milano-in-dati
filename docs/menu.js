@@ -95,7 +95,8 @@
     { path: 'verde/', label: 'Parchi e verde' },
     { path: 'sport/', label: 'Impianti sportivi' },
     { path: 'violenza-donne/', label: 'Violenza contro le donne' },
-    { path: 'terzo-settore/', label: 'Associazioni e terzo settore' }
+    { path: 'terzo-settore/', label: 'Associazioni e terzo settore' },
+    { path: 'imprese/', label: 'Imprese che nascono e muoiono' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
