@@ -93,7 +93,8 @@
     { path: 'medici-farmacie/', label: 'Medici e farmacie' },
     { path: 'consiglio/', label: 'Consiglio comunale' },
     { path: 'verde/', label: 'Parchi e verde' },
-    { path: 'sport/', label: 'Impianti sportivi' }
+    { path: 'sport/', label: 'Impianti sportivi' },
+    { path: 'violenza-donne/', label: 'Violenza contro le donne' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

@@ -2821,3 +2821,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - Fonti: Comune ds34 (base dichiarata 2011), ds2941 (concessioni, febbraio 2025), ds32, ds1640, ds1867 (CC BY); Regione qkfs-wmmh (CC0, 2016); OSM (ODbL: i file con dati OSM sono share-alike, detto in pagina). Censimento CONI/Sport e Salute non aperto.
 - Numeri: 851 impianti (6,1 ogni 10.000 abitanti) più 593 campi sparsi; solo 124 comunali; il 99,2% dei residenti ha un impianto entro 15 minuti a piedi, solo il 62,2% una piscina (36,6% una piscina Milanosport). Duomo 21 impianti, nessuno comunale.
 - Limiti dei dati: 411 impianti in una sola fonte; classifiche per quartiere poco stabili tra fonti; il totale dipende dal raggio di unione dei punti; la classe "Milanosport" dal campo concessionario, non verificata sul sito.
+
+## 83. Violenza contro le donne
+
+- 2026-11-02 — Fase 1 e pagina (`violenza-donne/`, `docs/violenza-donne/`). Dettagli in `violenza-donne/NOTE.md`.
+- Fonti: ISTAT chiamate al 1522 (2013-2025, solo per regione), ISTAT centri antiviolenza 2024, Regione Lombardia (CC0: albo dei centri e case rifugio; parola chiave giusta "antiviolenza"), ISTAT omicidi 2024 (solo nazionale). Comune: nessun dato.
+- Numeri: chiamate valide al 1522 da 17.616 (2017) a 65.048 (2024); 2023→2024 +38,6% in Lombardia (Italia +25,8%); il 25 novembre 2024 684 chiamate contro una mediana di 173; centri antiviolenza 1,04 ogni 100.000 donne in Lombardia (Italia 1,21). Femminicidi per Lombardia o Milano non disponibili in forma aperta.
+- Limiti dei dati: le chiamate misurano chi chiede aiuto, non quanta violenza c'è; regione ignota per il 34-44% delle chiamate; serie spezzata nel 2023 e nel 2025; nessun caso singolo, nome o indirizzo (case rifugio segrete).
