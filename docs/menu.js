@@ -101,7 +101,8 @@
     { path: 'fonti/', label: 'Fonti e metodo' },
     { path: 'oltre-il-reddito/', label: 'Oltre il reddito' },
     { path: 'hinterland/', label: 'Hinterland' },
-    { path: 'telefoni-pubblici/', label: 'Telefoni pubblici' }
+    { path: 'telefoni-pubblici/', label: 'Telefoni pubblici' },
+    { path: 'tasse/', label: 'Tasse' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

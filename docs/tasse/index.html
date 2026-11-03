@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Le tasse</title>
+<style>
+:root{--acc:#5b3f8c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#f1edf7;--warm:#8a4a10;--warmbg:#fbf0e2;--grey:#9aa5ad}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.4em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.5em 0;font-size:1.02rem} .surp b{color:var(--acc)}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
+.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} @media (max-width:600px){.lgd span{white-space:normal}} .lgd i{display:inline-block;width:14px;height:12px;vertical-align:-1px;margin-right:4px}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
+.scroll{overflow-x:auto} .tabmax{max-height:380px;overflow:auto}
+.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(80px,30%) 1fr 74px;gap:6px;align-items:center;font-size:.88rem;padding:3px 0}
+.bars .nm{overflow-wrap:anywhere;line-height:1.2} .bars .tr{background:#f1f1f1;height:12px;position:relative;display:flex} .bars .fill{display:block;height:12px;background:var(--grey)} .bars .fill.m{background:var(--acc)}
+.bars .row.m .nm{font-weight:700} .bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.tip i{display:inline-block;width:10px;height:10px;margin-right:4px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:.8em 0} .kpi div{border:1px solid var(--line);padding:6px 10px} .kpi .big{display:block;font-size:1.6rem;font-weight:700;color:var(--acc);line-height:1.15}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:.8em 0} .card{border:1px solid var(--line);padding:8px 12px} .card h4{margin:.1em 0 .3em;font-size:1rem} .card .tot{font-size:1.3rem;font-weight:700;color:var(--acc)} .card table td,.card table th{padding:4px 4px;font-size:.88rem}
+.stk{display:flex;height:16px;background:#f1f1f1;margin:2px 0} .stk span{display:block;height:100%}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0} dl.def dt{font-weight:700;margin-top:.5em} dl.def dd{margin:0 0 0 1em}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.est{font-size:.78rem;color:var(--warm);font-weight:600}
+.tw{min-width:560px}
+@media(max-width:560px){h1{font-size:1.45rem} .bars .row{grid-template-columns:minmax(88px,34%) 1fr 58px;font-size:.84rem} th,td{padding:5px 4px;font-size:.86rem}}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Le tasse a Milano</h1>
+<p>Quanto incassa il Comune di Milano dalle tasse locali? Quanto paga una famiglia milanese? Quanta IRPEF va allo Stato? E quanto resta da incassare? Qui guardiamo solo Milano. Le altre grandi città compaiono soltanto come confronto. Sono numeri, senza giudizi: se una tassa è &laquo;alta&raquo; o &laquo;bassa&raquo; lo decide chi legge.</p>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="warn"><b>Poche parole da sapere.</b>
+<dl class="def">
+<dt>Le quattro tasse locali</dt><dd><b>IMU</b>: l&rsquo;imposta sulle case che non sono la prima casa (seconde case, uffici, negozi). <b>TARI</b>: la tassa sui rifiuti. <b>Addizionale comunale IRPEF</b>: una piccola quota del reddito che va al Comune. <b>Imposta di soggiorno</b>: la paga chi dorme a Milano in albergo o in una casa vacanza, non chi ci abita.</dd>
+<dt>Accertato e incassato</dt><dd><b>Accertato</b> è quanto il Comune ha messo a bilancio come dovuto per quell&rsquo;anno. <b>Incassato</b> (o <b>riscosso</b>) è quanto è davvero entrato. Non sono la stessa cosa.</dd>
+<dt>Competenza e cassa</dt><dd>&laquo;Di competenza&raquo; vuol dire riferito a quell&rsquo;anno. &laquo;Di cassa&raquo; vuol dire tutto ciò che è entrato in quell&rsquo;anno, anche se riguardava anni prima.</dd>
+<dt>Residuo</dt><dd>Quanto è stato accertato e non è ancora entrato: un credito del Comune. <b>Non vuol dire evasione</b>: può essere un pagamento in ritardo, una rata, una cartella notificata da poco.</dd>
+<dt>Euro 2025 e abitanti</dt><dd>&laquo;Euro 2025&raquo; vuol dire corretti per l&rsquo;inflazione (indice nazionale FOI dell&rsquo;ISTAT), così anni diversi si confrontano. &laquo;Per abitante&raquo; vuol dire diviso per i residenti secondo l&rsquo;ISTAT al 1° gennaio, la stessa definizione per tutte le città.</dd>
+</dl></div>
+
+
+<h2 id="incassi">1. Quanto incassa il Comune</h2>
+<div id="incassi-testo"></div>
+<div class="ctl" id="ctl-inc"><span class="sub">Mostra:</span>
+<button type="button" data-u="real" class="on">Milioni di euro 2025</button><button type="button" data-u="pc">Euro 2025 per abitante</button><button type="button" data-u="nom">Milioni di euro di ogni anno</button></div>
+<div class="lgd" id="lg-inc"></div>
+<div class="ch" id="ch-inc" role="img" aria-label="Quattro tributi del Comune di Milano (IMU, TASI, TARI, addizionale IRPEF, imposta di soggiorno) dal 2015 al 2025, barre impilate"></div>
+<p class="src" id="src-inc"></p>
+<div class="scroll"><table id="tab-inc" class="tw"></table></div>
+<p class="src">Importi accertati, in milioni di euro di ogni anno (non corretti per l&rsquo;inflazione). Il recupero dell&rsquo;evasione non è in questa tabella: è nella parte 4.</p>
+<div class="warm" id="annate-inc"></div>
+
+<h3>Quanto pesano sul bilancio</h3>
+<div id="peso-testo"></div>
+<div class="lgd" id="lg-peso"></div>
+<div class="ch" id="ch-peso" role="img" aria-label="Quota dei quattro tributi sulle entrate correnti e sui tributi totali del Comune di Milano, dal 2015 al 2025"></div>
+<p class="src">Entrate correnti: tributi, trasferimenti, servizi, multe, dividendi e rimborsi accertati (titoli 1-3 del bilancio, come nella pagina sul bilancio del Comune). Tributi: tutte le entrate tributarie (titolo 1).</p>
+
+<h3>Milano e le altre grandi città: quanto entra in cassa per abitante</h3>
+<div id="cfr-testo"></div>
+<div class="bars" id="cfr-bars"></div>
+<div class="scroll"><table id="tab-cfr" class="tw"></table></div>
+<div class="warm" id="cfr-avviso"></div>
+
+<h2 id="paga">2. Quanto paga un milanese</h2>
+<div class="warm"><b>Non è un calcolo personale né una consulenza fiscale.</b> Gli esempi sono costruiti da noi, con ipotesi scritte in chiaro, per far capire gli ordini di grandezza. Per il proprio caso valgono le delibere del Comune e i consulenti.</div>
+<h3>IMU: le aliquote del 2026</h3>
+<p id="imu-testo"></p>
+<div class="scroll"><table id="tab-imu" class="tw"></table></div>
+<p class="src">Fonte: prospetto delle aliquote IMU 2026 del Comune di Milano, approvato con delibera del Consiglio comunale n. 110 del 18/12/2025, pubblicato dal Dipartimento delle Finanze (prospetto n. 13159) e nell&rsquo;informativa IMU 2026 del Comune. Lette il 3/11/2026. Per le case affittate a canone concordato vale lo sconto di legge del 25% sull&rsquo;aliquota.</p>
+
+<h3>Addizionale comunale IRPEF</h3>
+<div id="add-testo"></div>
+<h3>TARI, la tassa sui rifiuti</h3>
+<div id="tari-testo"></div>
+<h3>Imposta di soggiorno (la pagano i visitatori)</h3>
+<div id="sogg-testo"></div>
+<div class="scroll"><table id="tab-sogg" class="tw"></table></div>
+
+<h3>Tre esempi</h3>
+<div id="es-testo"></div>
+<div class="cards" id="es-cards"></div>
+<div id="es-imu"></div>
+
+<h2 id="irpef">3. L&rsquo;IRPEF dei milanesi allo Stato</h2>
+<div id="irpef-testo"></div>
+<div class="kpi" id="irpef-kpi"></div>
+<div class="ctl" id="ctl-irpef"><span class="sub">Confronto, anno d&rsquo;imposta 2024:</span>
+<button type="button" data-u="ctr" class="on">IRPEF per contribuente</button><button type="button" data-u="ab">IRPEF per abitante</button><button type="button" data-u="add">Addizionale come % dell&rsquo;IRPEF</button></div>
+<div class="bars" id="irpef-bars"></div>
+<p class="src" id="irpef-nota"></p>
+
+<h3>Nel tempo</h3>
+<div id="irpef-serie-testo"></div>
+<div class="ch" id="ch-irpef" role="img" aria-label="IRPEF netta dovuta dai contribuenti di Milano, in euro 2025, dal 2000 al 2024"></div>
+
+<h3>Come si distribuisce il reddito</h3>
+<div id="classi-testo"></div>
+<div class="lgd" id="lg-classi"></div>
+<div class="bars" id="classi-bars"></div>
+<div class="warm">I dati del Dipartimento delle Finanze per Milano non danno l&rsquo;<b>imposta</b> per fascia di reddito, solo il numero di contribuenti e il reddito dichiarato. Quindi non possiamo dire quanta IRPEF paga ciascuna fascia e non proviamo a stimarla.</div>
+
+<h2 id="nonpaga">4. Chi non paga</h2>
+<div class="warm"><b>Attenzione.</b> &laquo;Non ancora incassato&raquo; <b>non è evasione</b>: dentro ci sono pagamenti in ritardo, rate e cartelle appena notificate. L&rsquo;evasione vera di un Comune non è misurata da nessun dato pubblico: qui non la stimiamo e non scriviamo percentuali di evasione. Le multe non sono tasse e non sono qui.</div>
+
+<h3>Quanto entra nell&rsquo;anno stesso</h3>
+<div id="np1-testo"></div>
+<div class="ctl" id="ctl-np"><span class="sub">Anno:</span><button type="button" data-u="2025" class="on">2025</button><button type="button" data-u="2024">2024</button></div>
+<div class="lgd" id="lg-np"></div>
+<div id="np1-bars"></div>
+<p class="src" id="np1-nota"></p>
+
+<h3>Gli arretrati: cosa resta da incassare</h3>
+<div id="np2-testo"></div>
+<div class="ctl" id="ctl-arr"><span class="sub">Fine anno:</span><button type="button" data-u="2025" class="on">2025</button><button type="button" data-u="2024">2024</button></div>
+<div class="bars" id="np2-bars"></div>
+<div class="scroll"><table id="tab-arr" class="tw"></table></div>
+<p class="src" id="np2-nota"></p>
+
+<h3>Il recupero dell&rsquo;evasione</h3>
+<div id="np3-testo"></div>
+<div class="lgd" id="lg-ev"></div>
+<div class="ch" id="ch-ev" role="img" aria-label="Recupero dell'evasione del Comune di Milano: accertato dal 2015 al 2025 e incassato per verifica e controllo dal 2018"></div>
+<div class="scroll"><table id="tab-ev" class="tw"></table></div>
+<p class="src" id="np3-nota"></p>
+
+<h3>Le altre città (dati del 2016-2018)</h3>
+<div id="np4-testo"></div>
+<div class="ctl" id="ctl-np4"><span class="sub">Mostra:</span><button type="button" data-u="inc" class="on">Incassato nell&rsquo;anno (% dell&rsquo;accertato)</button><button type="button" data-u="res">Ancora da incassare a fine 2018 (euro per abitante)</button></div>
+<div class="bars" id="np4-bars"></div>
+<div class="warm" id="np4-avviso"></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<ul class="m" id="limiti-lista"></ul>
+
+<h2 id="fonti">Fonti</h2>
+<ul class="m" id="fonti-lista"></ul>
+
+<h2 id="download">File</h2>
+<p id="download-lista"></p>
+
+<footer>
+<p>Tutti i numeri hanno la fonte indicata nella sezione &laquo;Fonti&raquo; (file, tabella e campo, data di scarico). Le fonti senza licenza aperta (Ministero dell&rsquo;Interno, pareri dei revisori) sono usate solo come numeri aggregati citati, senza ripubblicare i file originali.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var D=null,RD=[];
+var C_ACC='#5b3f8c',C_GR='#9aa5ad',C_WARM='#c26a1b';
+var COL={imu:'#5b3f8c',tasi:'#a995cf',tari:'#2e7d6b',addizionale:'#c9822b',soggiorno:'#3a6ea5'};
+var NOMI={imu:'IMU',tasi:'TASI',tari:'TARI (rifiuti)',addizionale:'Addizionale IRPEF',soggiorno:'Imposta di soggiorno'};
+var U={inc:'real',irpef:'ctr',np:'2025',arr:'2025',np4:'inc'};
+
+/* ---------- formati ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f1(x){return nf(x,1)}
+function fm(x){return x==null?'':(Math.abs(x)>=100?f0(x):f1(x))}
+function mil(x){return x==null?'':fm(x/1e6)}
+function pct(x,d){return x==null?'':nf(x,d==null?0:d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function last(a){return a[a.length-1]}
+function pz(x){return nf(Math.abs(x)<0.05?0:x,1)}
+
+J('data/riepilogo.json').then(function(d){
+  D=d;
+  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){
+  sorpresa();incassi();peso();confronto();paga();irpef();nonpaga();limiti();fonti();
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+}
+
+/* ---------- grafici (SVG a mano) ---------- */
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function xlabel(s,x,txt,H){return s+'<text class="mu" x="'+x+'" y="'+(H-6)+'" text-anchor="middle">'+txt+'</text>'}
+function lineChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||240,m={l:o.ml||46,r:14,t:14,b:24},n=o.labels.length,lb=o.labels.map(String);
+  var all=[];o.series.forEach(function(s){s.vals.forEach(function(v){if(v!=null)all.push(v)})});
+  if(!all.length){box.innerHTML='<p class="sub">Dati non disponibili.</p>';return}
+  var lo=o.ymin!=null?o.ymin:Math.min.apply(null,all),hi=Math.max.apply(null,all);
+  if(hi===lo){hi=lo+1}
+  var st=niceStep((hi-lo)/4);lo=Math.floor(lo/st+1e-9)*st;hi=Math.ceil(hi/st-1e-9)*st;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(i){return m.l+(n>1?i*pw/(n-1):pw/2)} function Y(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  for(var v=lo;v<=hi+st/2;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>'}
+  var step=pw/(n-1)>=40?1:(pw/(n-1)>=20?2:5);
+  lb.forEach(function(l,i){if(i%step===0){s=xlabel(s,X(i),l,H);s+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/>'}});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  o.series.forEach(function(se){var d='',pen=false;
+    se.vals.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.4)+'"'+(se.dash?' stroke-dasharray="6 4"':'')+' stroke-linejoin="round"/>';
+    if(n<=30)se.vals.forEach(function(v,i){if(v!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="2.4" fill="'+se.color+'"/>'})});
+  s+='<g id="hv" style="display:none"><line y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#444" stroke-width="1"/></g><rect class="hit" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  if(!o.tip)return;
+  var svg=box.firstChild,g=svg.querySelector('#hv'),ln=g.firstChild,tip=box.lastChild,rect=svg.querySelector('.hit');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width);
+    var i=Math.max(0,Math.min(n-1,Math.round((px-m.l)/pw*(n-1))));
+    g.style.display='';ln.setAttribute('x1',X(i));ln.setAttribute('x2',X(i));
+    tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=X(i)*(r.width/W)+10;if(left+tw>r.width)left=X(i)*(r.width/W)-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  function hide(){g.style.display='none';tip.style.display='none'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function stackChart(box,o){
+  box.innerHTML='';
+  var W=box.clientWidth||320,H=o.h||300,m={l:o.ml||50,r:8,t:12,b:24},n=o.labels.length,pw=W-m.l-m.r,ph=H-m.t-m.b,lb=o.labels.map(String),tot=[],i;
+  for(i=0;i<n;i++){var t=0;o.series.forEach(function(se){t+=se.vals[i]||0});tot.push(t)}
+  var hi=Math.max.apply(null,tot),st=niceStep(hi/4);hi=Math.ceil(hi/st-1e-9)*st;
+  function Y(v){return m.t+ph-v/hi*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">',bw=pw/n;
+  for(var v=0;v<=hi+st/2;v+=st)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>';
+  var step=bw>=34?1:2;
+  for(i=0;i<n;i++){var cum=0,x=m.l+i*bw;
+    o.series.forEach(function(se){var vv=se.vals[i]||0;if(vv>0){s+='<rect x="'+(x+bw*0.12).toFixed(1)+'" y="'+Y(cum+vv).toFixed(1)+'" width="'+(bw*0.76).toFixed(2)+'" height="'+Math.max(0.5,Y(cum)-Y(cum+vv)).toFixed(1)+'" fill="'+se.color+'" stroke="#fff" stroke-width=".6"/>'}cum+=vv});
+    if(i%step===0)s=xlabel(s,x+bw/2,lb[i],H)}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/><rect class="hit" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,tip=box.lastChild,rect=svg.querySelector('.hit');
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width);
+    var i=Math.max(0,Math.min(n-1,Math.floor((px-m.l)/bw)));tip.innerHTML=o.tip(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=(m.l+i*bw+bw/2)*(r.width/W)+10;if(left+tw>r.width)left-=tw+20;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+function lgdBox(items){return items.map(function(it){return '<span><i style="background:'+it.color+'"></i>'+esc(it.name)+'</span>'}).join('')}
+function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function bars(id,rows,max,fmt){
+  var mx=max||Math.max.apply(null,rows.map(function(r){return r.v}));
+  setH(id,rows.map(function(r){return '<div class="row'+(r.m?' m':'')+'"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill'+(r.m?' m':'')+'" style="width:'+(100*r.v/mx).toFixed(1)+'%"></span></span><span class="v">'+(r.txt!=null?r.txt:(fmt?fmt(r.v):f0(r.v)))+'</span></div>'}).join(''));
+}
+function bindCtl(id,key,cb){
+  var box=el(id);
+  box.addEventListener('click',function(e){var b=e.target;if(!b||b.tagName!=='BUTTON')return;U[key]=b.getAttribute('data-u');
+    Array.prototype.forEach.call(box.querySelectorAll('button'),function(x){x.className=x===b?'on':''});cb()});
+}
+function ix(y){return D.milano.anni.indexOf(y)}
+
+/* ---------- la cosa piu' sorprendente ---------- */
+function sorpresa(){
+  var R=D.riscossione,r25=R.rendiconti['2025'],an=R.anzianita['2025'],ser=R.residui_serie,I=D.irpef.citta_2024[0];
+  var t1=r25.titolo1[0],res=an.totale,pregr=res-an.valori[5];
+  var r18=ser.filter(function(x){return x.anno===2018})[0];
+  var h='';
+  h+='<p><b>1. A fine 2025 il Comune di Milano aveva ancora da incassare '+f0(res/1e6)+' milioni di euro di entrate tributarie.</b> '+f0(an.valori[5]/1e6)+' milioni sono dell&rsquo;anno 2025 e '+f0(pregr/1e6)+' milioni vengono da anni prima. Sono il '+pct(100*res/t1)+' di quanto il Comune ha messo a bilancio in tutto il 2025 per queste entrate ('+f0(t1/1e6)+' milioni). A fine 2018 erano '+f0(r18.residui_fine/1e6)+' milioni ('+f0(r18.residui_fine/1e6*100/D.milano.foi[ix(2018)])+' in euro 2025): in euro di ogni anno la cifra è quasi ferma, in euro 2025 è scesa. Nel frattempo il Comune ha eliminato dai conti crediti vecchi difficili da incassare, ma i revisori non dicono quanti riguardino le tasse (vedi la parte 4). Non vuol dire evasione: è denaro chiesto e non ancora entrato. Per esempio '+f0(r25.addizionale[1]/1e6)+' milioni sono l&rsquo;addizionale IRPEF del 2025, che negli anni in cui possiamo controllarlo è arrivata in gran parte l&rsquo;anno dopo.</p>';
+  var e=function(k){var x=r25[k];return 100*(x[0]-x[1])/x[0]};
+  h+='<p><b>2. Le tasse non arrivano tutte allo stesso modo.</b> Nel 2025 l&rsquo;IMU è entrata quasi tutta nello stesso anno ('+pct(e('imu'),1)+'), l&rsquo;imposta di soggiorno per l&rsquo;'+pct(e('soggiorno'))+', la TARI per il '+pct(e('tari'))+', l&rsquo;addizionale IRPEF per il '+pct(e('addizionale'))+' e il recupero dell&rsquo;evasione per il '+pct(e('recupero_evasione'))+'.</p>';
+  h+='<p><b>3. Allo Stato va molto più di quanto arriva al Comune.</b> Per il 2024 i contribuenti di Milano hanno dovuto '+nf(I.irpef_netta_euro/1e9,1)+' miliardi di euro di IRPEF allo Stato ('+f0(I.irpef_per_contribuente)+' euro a contribuente). L&rsquo;addizionale che va al Comune, una tassa a parte, è di '+f0(I.addizionale_comunale_euro/1e6)+' milioni: '+nf(I.addizionale_su_irpef_perc,1)+' euro ogni 100 di IRPEF ('+f0(I.addizionale_per_contribuente)+' euro a contribuente).</p>';
+  h+='<p class="src">Fonti: pareri dell&rsquo;organo di revisione sui rendiconti 2024 e 2025 del Comune di Milano (residui del titolo 1, tabella delle entrate principali); Ministero dell&rsquo;Interno, certificato al rendiconto 2018; MEF, Dipartimento delle Finanze, redditi e principali variabili IRPEF per comune, anno d&rsquo;imposta 2024. Dettagli e limiti più sotto.</p>';
+  setH('sorpresa',h);
+}
+
+/* ---------- 1. incassi ---------- */
+function valori(t,u){
+  var M=D.milano;
+  return M.anni.map(function(a,i){var v=t.nom_euro[i];if(u==='nom')return v/1e6;var r=v*100/M.foi[i];return u==='pc'?r/M.abitanti[i]:r/1e6});
+}
+function incassi(){
+  var M=D.milano,a25=M.anni.length-1;
+  function q(k){return M.tributi.filter(function(t){return t.id===k})[0].nom_euro}
+  var t25=0;M.tributi.forEach(function(t){t25+=t.nom_euro[a25]});
+  var imu25=q('imu')[a25],tari25=q('tari')[a25],ad25=q('addizionale')[a25],so25=q('soggiorno')[a25];
+  var h='<p>Ogni anno il Comune mette a bilancio quanto deve incassare da queste tasse. Qui sono gli importi <b>accertati</b> dal 2015 al 2025: non quelli entrati in cassa. Nel 2025 i quattro tributi valgono <b>'+f0(t25/1e6)+' milioni di euro</b>: '+f0(imu25/1e6)+' di IMU, '+f0(tari25/1e6)+' di TARI, '+f0(ad25/1e6)+' di addizionale IRPEF e '+f0(so25/1e6)+' di imposta di soggiorno. Sono <b>'+f0(t25/M.abitanti[a25])+' euro per ogni abitante</b> e il <b>'+pct(100*M.quota_su_entrate_correnti[a25],1)+'</b> delle entrate correnti del Comune. La TASI (una vecchia imposta sulla casa) c&rsquo;è fino al 2019: dal 2020 è stata unita all&rsquo;IMU.</p>';
+  setH('incassi-testo',h);
+  setH('lg-inc',lgdBox(M.tributi.map(function(t){return {name:NOMI[t.id],color:COL[t.id]}})));
+  var UL={real:'milioni di euro 2025',pc:'euro 2025 per abitante',nom:'milioni di euro di ogni anno'};
+  function draw(){
+    var u=U.inc;
+    var ser=M.tributi.filter(function(t){return t.id!=='tasi'||t.nom_euro.some(function(x){return x>0})}).map(function(t){return {name:NOMI[t.id],color:COL[t.id],vals:valori(t,u)}});
+    stackChart(el('ch-inc'),{labels:M.anni,series:ser,h:300,ml:u==='pc'?44:50,tip:function(i){var s='<b>'+M.anni[i]+'</b>',tt=0;ser.slice().reverse().forEach(function(x){var v=x.vals[i]||0;tt+=v;s+='<br><i style="background:'+x.color+'"></i>'+esc(x.name)+': <b>'+(u==='pc'?f0(v):fm(v))+'</b>'});return s+'<br>Totale: <b>'+(u==='pc'?f0(tt)+' €':fm(tt)+' M')+'</b>'}});
+    setH('src-inc','Unità: '+UL[u]+'. Passa il dito o il mouse sulle barre per i valori. Fonte: Comune di Milano, consuntivi 2015-2025 (<a href="data/milano_accertato_tributi.csv">milano_accertato_tributi.csv</a>); abitanti ISTAT al 1° gennaio; inflazione: indice FOI nazionale dell&rsquo;ISTAT (non di Milano).');
+  }
+  draw();RD.push(draw);bindCtl('ctl-inc','inc',draw);
+  var head=['Milioni di euro'].concat(M.anni.map(String)),rows=[],tot=M.anni.map(function(){return 0});
+  M.tributi.forEach(function(t){if(!t.nom_euro.some(function(x){return x>0}))return;rows.push([NOMI[t.id]].concat(t.nom_euro.map(function(v,i){tot[i]+=v;return v>0?fm(v/1e6):'&ndash;'})))});
+  rows.push(['<b>Totale</b>'].concat(tot.map(function(v){return '<b>'+fm(v/1e6)+'</b>'})));
+  table('tab-inc',head,rows);
+  var so=q('soggiorno');
+  setH('annate-inc','<b>Anni da leggere con cautela.</b> Nel 2020 e nel 2021 il Covid ferma i viaggi: l&rsquo;imposta di soggiorno scende da '+f0(so[ix(2019)]/1e6)+' milioni (2019) a '+f0(so[ix(2020)]/1e6)+' (2020) e '+f0(so[ix(2021)]/1e6)+' (2021). Poi risale fino a '+f0(so[a25]/1e6)+' milioni nel 2025: quasi il doppio del 2019. I conti non dicono perché (più turisti, tariffe diverse, altro): non lo possiamo stabilire da qui. Le tariffe del 2026 (anno delle Olimpiadi invernali) non sono ancora nei conti. Nel 2020 la TASI sparisce perché unita all&rsquo;IMU. I numeri dell&rsquo;addizionale IRPEF sono molto tondi (per esempio 195 o 250 milioni): sembrano stime di bilancio più che importi calcolati, e non coincidono con l&rsquo;addizionale dovuta dai contribuenti secondo il Dipartimento delle Finanze (276 milioni per l&rsquo;anno d&rsquo;imposta 2024, contro 240 accertati nel 2024 e 250 nel 2025). Dai dati non sappiamo spiegare la differenza.');
+}
+
+/* ---------- peso sul bilancio ---------- */
+function peso(){
+  var M=D.milano,n=M.anni.length-1;
+  var q1=M.quota_su_entrate_correnti.map(function(x){return 100*x}),q2=M.quota_su_tributi.map(function(x){return 100*x});
+  setH('peso-testo','<p>Nel 2025 i quattro tributi (IMU, TARI, addizionale, imposta di soggiorno) valgono il <b>'+pct(q1[n],1)+'</b> delle entrate correnti del Comune ('+pct(q1[0],1)+' nel 2015) e il <b>'+pct(q2[n],1)+'</b> delle entrate tributarie. Il resto delle entrate correnti sono trasferimenti da altri enti, tariffe dei servizi, multe, dividendi e rimborsi (vedi la pagina sul bilancio del Comune).</p>');
+  var ser=[{color:C_ACC,vals:q1},{color:C_WARM,vals:q2,dash:true}];
+  setH('lg-peso',lgdLine([{color:C_ACC,t:'sulle entrate correnti'},{color:C_WARM,dash:true,t:'sulle entrate tributarie'}]));
+  function draw(){lineChart(el('ch-peso'),{labels:M.anni,series:ser,h:230,ymin:0,yf:function(v){return f0(v)+'%'},ml:44,tip:function(i){return '<b>'+M.anni[i]+'</b><br>sulle entrate correnti: <b>'+pct(q1[i],1)+'</b><br>sulle entrate tributarie: <b>'+pct(q2[i],1)+'</b>'}})}
+  draw();RD.push(draw);
+}
+
+/* ---------- confronto cassa ---------- */
+function confronto(){
+  var C=D.confronto_cassa.slice();
+  if(!C.length){setH('cfr-testo','<p class="sub">Confronto non disponibile.</p>');return}
+  C.sort(function(a,b){return b.totale_euro_per_abitante_anno-a.totale_euro_per_abitante_anno});
+  var mi=C.filter(function(c){return c.citta==='Milano'})[0],pos=C.indexOf(mi)+1;
+  setH('cfr-testo','<p>Per confrontare le città servono dati fatti allo stesso modo. Quelli dei conti di cassa (SIOPE) lo sono: sono i soldi entrati davvero dal 2019 al 2025, divisi per i residenti. Qui sotto la media di sette anni, in euro correnti per abitante all&rsquo;anno, con IMU, TASI, rifiuti, addizionale, imposta di soggiorno e altre piccole tasse (pubblicità, occupazione di suolo). Milano è al <b>posto '+pos+' su '+C.length+'</b>, con <b>'+f0(mi.totale_euro_per_abitante_anno)+' euro</b> a testa all&rsquo;anno.</p>');
+  bars('cfr-bars',C.map(function(c){return {nm:c.citta,v:c.totale_euro_per_abitante_anno,m:c.citta==='Milano'}}),null,function(v){return f0(v)+' €'});
+  var rows=C.map(function(c){return [c.citta==='Milano'?'<b>Milano</b>':c.citta,f0(c.casa_euro_per_abitante_anno),f0(c.addizionale_euro_per_abitante_anno),f0(c.rifiuti_soggiorno_altre_euro_per_abitante_anno),f0(c.totale_euro_per_abitante_anno)]});
+  table('tab-cfr',['Euro per abitante, media annua '+C[0].anni,'IMU e TASI','Addizionale IRPEF','Rifiuti, soggiorno e altre','Totale'],rows);
+  setH('cfr-avviso','<b>Come leggerlo.</b> Non contiamo i soldi del Fondo di solidarietà e le compartecipazioni, perché non sono tasse pagate in città. Se li contassimo la classifica cambierebbe: Milano arriverebbe a 977 euro, dietro Firenze (1.024), Genova (1.004) e Roma (993). Rifiuti, soggiorno e altre sono sommate insieme perché le città le registrano in righe diverse (per esempio Roma registra la tassa rifiuti con il vecchio nome TARES e non ha una riga di imposta di soggiorno, ma cifre molto alte nelle «altre imposte», dove probabilmente c&rsquo;è il suo contributo di soggiorno: non lo abbiamo verificato). Sono incassi di cassa, in euro di ogni anno, non accertamenti. Un anno singolo può ingannare (l&rsquo;IMU di dicembre può entrare a gennaio), per questo c&rsquo;è la media di sette anni. L&rsquo;IMU è quella che arriva al Comune, <b>dopo</b> la quota trattenuta per il Fondo di solidarietà tra Comuni: città diverse possono trattarla in modo diverso, quindi la colonna &laquo;IMU e TASI&raquo; non si può confrontare con certezza. Le tariffe e le regole delle singole città sono diverse: il confronto dice quanto entra, non se una città sia più o meno cara. Abitanti: ISTAT al 1° gennaio di ogni anno. Fonte: BDAP (Ragioneria generale dello Stato), SIOPE, movimenti cumulati di entrata, dicembre di ogni anno, licenza CC BY.');
+}
+
+/* ---------- 2. quanto paga ---------- */
+function paga(){
+  var A=D.aliquote_imu_2026;
+  setH('imu-testo','Per l&rsquo;IMU la <b>prima casa non di lusso non paga niente</b>. Si paga sulle seconde case, sugli uffici e sui negozi, e sulle prime case di lusso (categorie catastali A/1, A/8, A/9). L&rsquo;imposta è la rendita catastale della casa, per 1,05, per 160, per l&rsquo;aliquota. Non è il valore di mercato: la rendita è scritta nella visura catastale.');
+  table('tab-imu',['Tipo di immobile','Aliquota 2026'],A.map(function(x){return [esc(x.voce),x.aliquota==null?esc(x.nota):nf(x.aliquota,2)+'%'+(x.nota?' <span class="sub">('+esc(x.nota)+')</span>':'')]}));
+  setH('add-testo','<p>L&rsquo;aliquota dell&rsquo;addizionale comunale IRPEF è <b>0,8%</b> del reddito imponibile, uguale per tutti i redditi. Chi ha un reddito imponibile <b>fino a 23.000 euro</b> è esente; chi supera la soglia paga lo 0,8% su <b>tutto</b> il reddito, non solo sulla parte sopra la soglia. Per questo l&rsquo;aliquota media che il Comune incassa davvero è più bassa: '+nf(D.irpef.citta_2024[0].aliquota_media_effettiva_perc,2)+'% sul reddito imponibile di tutti i contribuenti nel 2024.</p><p class="src">Fonte: pagine di assistenza del Comune di Milano su aliquota ed esenzioni dell&rsquo;addizionale comunale IRPEF. <span class="est">Fonte indiretta:</span> queste due pagine le abbiamo lette solo attraverso un motore di ricerca, non direttamente, e la delibera non l&rsquo;abbiamo vista. L&rsquo;aliquota media del 2024 è invece calcolata da noi sui dati del Dipartimento delle Finanze. Una richiesta della maggioranza di alzare soglia e aliquota massima (0,9%) è stata riportata dalla <a href="https://www.liberoquotidiano.it/news/milano/41100339/milano-pd-aumentare-irpef-richiesta-governo/" target="_blank" rel="noopener">stampa</a>: non abbiamo trovato conferma che sia in vigore.</p>');
+  setH('tari-testo','<p>La TARI per le case si calcola in due parti: una dipende dai metri quadrati, l&rsquo;altra da quante persone vivono nella casa. Il Comune ha annunciato per il 2026 una nuova riduzione (&minus;3%, dopo &minus;9,5% nel 2025 e &minus;4% nel 2022), per un costo complessivo del servizio di 308 milioni di euro. Ha anche confermato lo sconto del 25% sulla parte variabile per chi ha meno di 30 anni e vive in case fino a 100 metri quadrati. Alla TARI si aggiunge un tributo provinciale del 5% (TEFA).</p><p class="src"><span class="est">Fonte indiretta:</span> la tabella ufficiale delle tariffe non l&rsquo;abbiamo letta. Le cifre e gli esempi vengono dal comunicato del Comune riportato da <a href="https://www.ecodallecitta.it/milano-tari-2026/" target="_blank" rel="noopener">Ecodallecittà</a> (letto il 3/11/2026) e da <a href="https://www.milanofree.it/milano/cronaca/tari-milano-2026-quando-si-paga-scadenze-e-dichiarazione.html" target="_blank" rel="noopener">MilanoFree</a> per la TEFA. Secondo lo stesso articolo gli importi degli esempi comprendono già il tributo provinciale. Non calcoliamo altri esempi di TARI: non stimiamo una tariffa che non abbiamo letto.</p>');
+  setH('sogg-testo','<p>Non la pagano i milanesi ma chi dorme a Milano. Le tariffe sono in euro a persona e a notte. Nel 2026 sono più alte, per un decreto che per quest&rsquo;anno ha permesso ai Comuni vicini alle gare olimpiche di aumentarle: la metà del maggior gettito va allo Stato. Le tariffe sono state cambiate di nuovo da aprile 2026.</p>');
+  table('tab-sogg',['Euro a persona a notte','Gennaio-marzo 2026','Da aprile 2026'],D.soggiorno_2026.map(function(x){return [esc(x.cat),nf(x.gen_mar,2),nf(x.da_apr,2)]}));
+  setH('sogg-testo',el('sogg-testo').innerHTML+'<p class="src">Fonti: tariffe da gennaio 2026 (delibera di Giunta n. 1418 del 13/11/2025) dall&rsquo;<a href="https://www.assolombarda.it/governance/gruppi/turistico/informazioni/imposta-di-soggiorno-comune-di-milano-2" target="_blank" rel="noopener">elenco di Assolombarda</a> e da <a href="https://www.agi.it/economia/news/2025-11-13/milano-tassa-soggiorno-olimpiadi-2026-tariffe-34169290/" target="_blank" rel="noopener">AGI</a>; tariffe da aprile 2026 (delibera n. 144 del 12/2/2026) da <a href="https://www.greenme.it/viaggi/italia/a-milano-aumenta-la-tassa-di-soggiorno-da-aprile-si-paghera-12-euro-a-notte-in-questi-hotel/" target="_blank" rel="noopener">Greenme</a>, <span class="est">una sola fonte</span> non confermata dal testo della delibera. Il testo del Comune non l&rsquo;abbiamo letto.</p>');
+  var E=D.esempi;
+  setH('es-testo','<p>Ipotesi comuni: tutti i redditi sono redditi imponibili IRPEF del 2026, la rendita catastale della seconda casa è di <b>'+f0(E.rendita_ipotesi)+' euro</b> (ipotesi nostra, per una casa di categoria A non di lusso). Ogni cifra è per un anno.</p>');
+  var cards='';
+  E.profili.forEach(function(p){
+    var rows=p.voci.map(function(v){return '<tr><td>'+esc(v.v)+'<br><span class="sub">'+esc(v.nota)+'</span></td><td class="r">'+f0(v.euro)+' €</td></tr>'}).join('');
+    cards+='<div class="card"><h4>'+esc(p.nome)+'</h4><p class="sub">'+esc(p.ipotesi)+'</p><table>'+rows+'</table>'+(p.totale!=null?'<p>Totale: <span class="tot">'+f0(p.totale)+' €</span> all&rsquo;anno</p>':'')+'</div>';
+  });
+  setH('es-cards',cards);
+  setH('es-imu','<p class="src">Fonti degli esempi: aliquote IMU 2026 (sopra); addizionale 0,8% con soglia 23.000 euro (pagine del Comune, fonte indiretta); TARI: esempi del Comune per il 2026 (tre persone in 106 metri quadrati: 293 euro, contro 336 nel 2021; persona sola con meno di 30 anni in 52 metri quadrati: 113 euro). Sul reddito di 24.000 euro si paga lo 0,8% perché supera la soglia di 23.000. Chi dichiara 23.000 euro non paga nulla, chi ne dichiara 23.001 paga 184 euro: la soglia fa saltare l&rsquo;importo. Per le seconde case la base è '+f0(E.base_imponibile)+' euro (1.000 &times; 1,05 &times; 160) e il calcolo è quello previsto dalla legge. Sulla seconda casa si pagherebbe anche la TARI: non l&rsquo;abbiamo calcolata (vedi sopra).</p>');
+}
+
+/* ---------- 3. IRPEF ---------- */
+function irpef(){
+  var C=D.irpef.citta_2024,Mi=C[0],S=D.irpef.serie_milano;
+  setH('irpef-testo','<p>L&rsquo;IRPEF è l&rsquo;imposta sul reddito delle persone: la incassa lo Stato, non il Comune. Qui usiamo i dati del Dipartimento delle Finanze del Ministero dell&rsquo;Economia, che li raccoglie dalle dichiarazioni dei redditi. Contano i <b>contribuenti</b> (chi risulta nelle dichiarazioni, comprese quelle fatte dal datore di lavoro) con domicilio fiscale a Milano, non i residenti e non chi a Milano lavora. L&rsquo;ultimo anno disponibile è l&rsquo;<b>anno d&rsquo;imposta 2024</b> (redditi del 2024, dichiarati nel 2025). &laquo;IRPEF netta&raquo; è l&rsquo;imposta dovuta dopo le detrazioni.</p>');
+  setH('irpef-kpi','<div><span class="big">'+nf(Mi.irpef_netta_euro/1e9,2)+' miliardi</span><span class="sub">di euro di IRPEF netta, anno d&rsquo;imposta 2024</span></div><div><span class="big">'+f0(Mi.contribuenti)+'</span><span class="sub">contribuenti con domicilio fiscale a Milano</span></div><div><span class="big">'+f0(Mi.irpef_per_contribuente)+' €</span><span class="sub">IRPEF netta per contribuente</span></div><div><span class="big">'+f0(Mi.irpef_per_abitante)+' €</span><span class="sub">IRPEF netta per abitante (residenti ISTAT al 1/1/2025)</span></div>');
+  function draw(){
+    var u=U.irpef,rows=C.slice();
+    var key=u==='ctr'?'irpef_per_contribuente':u==='ab'?'irpef_per_abitante':'addizionale_su_irpef_perc';
+    rows.sort(function(a,b){return b[key]-a[key]});
+    bars('irpef-bars',rows.map(function(c){return {nm:c.citta,v:c[key],m:c.citta==='Milano',txt:u==='add'?nf(c[key],1)+'%':f0(c[key])+' €'}}));
+    setH('irpef-nota',u==='ctr'?'Euro di IRPEF netta divisi per i contribuenti della città. Un contribuente ha un domicilio fiscale lì, non per forza vive in città.':u==='ab'?'Euro di IRPEF netta divisi per i residenti ISTAT al 1° gennaio 2025: i residenti includono chi non fa dichiarazione (per esempio i minorenni), quindi il rapporto dipende anche da quanti contribuenti ci sono ogni 100 abitanti.':'Quanto vale l&rsquo;addizionale comunale rispetto all&rsquo;IRPEF netta della stessa città. Dipende dall&rsquo;aliquota e dalle esenzioni di ciascun Comune (Firenze, per esempio, applica un&rsquo;aliquota molto più bassa): non dice chi paga di più in assoluto.');
+  }
+  draw();bindCtl('ctl-irpef','irpef',draw);
+  var vals=S.map(function(x){return x.irpef_netta_euro_2025/1e9});
+  var an=S.map(function(x){return x.anno_imposta});
+  var a2=S.filter(function(x){return x.anno_imposta===2004})[0],a0=S[0],a24=last(S);
+  setH('irpef-serie-testo','<p>In miliardi di euro 2025 (corretti con l&rsquo;indice FOI nazionale), l&rsquo;IRPEF netta dei contribuenti di Milano passa da '+nf(a0.irpef_netta_euro_2025/1e9,1)+' (2000) a '+nf(a24.irpef_netta_euro_2025/1e9,1)+' (2024). Nello stesso periodo i contribuenti passano da '+f0(a0.contribuenti)+' a '+f0(a24.contribuenti)+'. Diverse riforme hanno cambiato le regole dell&rsquo;imposta (per esempio la cedolare secca sugli affitti dal 2011 e il regime forfettario degli autonomi dal 2019): non tutti i salti sono reali.</p>');
+  function drawS(){lineChart(el('ch-irpef'),{labels:an,series:[{color:C_ACC,vals:vals}],h:240,ymin:0,yf:function(v){return nf(v,0)},ml:36,tip:function(i){return '<b>Anno d&rsquo;imposta '+an[i]+'</b><br>IRPEF netta: <b>'+nf(vals[i],2)+' miliardi</b> (euro 2025)<br>Contribuenti: <b>'+f0(S[i].contribuenti)+'</b>'}})}
+  drawS();RD.push(drawS);
+  var K=D.irpef.classi_2024;
+  setH('classi-testo','<p>Come si distribuiscono i redditi dei contribuenti di Milano nel 2024. Il &laquo;reddito complessivo&raquo; è quello dichiarato prima delle imposte. Ogni coppia di barre è una fascia: la prima barra è la quota di contribuenti, la seconda la quota del reddito totale.</p>');
+  setH('lg-classi',lgdBox([{name:'quota dei contribuenti',color:C_GR},{name:'quota del reddito dichiarato',color:C_ACC}]));
+  var rows='';
+  K.forEach(function(k){rows+='<div class="row"><span class="nm" title="'+esc(k.classe)+'">'+esc(k.classe)+'</span><span><span class="tr"><span class="fill" style="width:'+(100*k.quota_contribuenti/0.4).toFixed(1)+'%"></span></span><span class="tr" style="margin-top:2px"><span class="fill m" style="width:'+Math.max(0,100*k.quota_reddito/0.4).toFixed(1)+'%"></span></span></span><span class="v">'+pz(100*k.quota_contribuenti)+'%<br>'+pz(100*k.quota_reddito)+'%</span></div>'});
+  setH('classi-bars',rows);
+  var top=K[K.length-1];
+  var p=el('classi-testo');p.innerHTML+='<p>I contribuenti con oltre 120.000 euro di reddito sono il <b>'+nf(100*top.quota_contribuenti,1)+'%</b> di chi dichiara un reddito e dichiarano il <b>'+nf(100*top.quota_reddito,1)+'%</b> del reddito. Le fasce sono in euro del 2024, non corrette per l&rsquo;inflazione.</p>';
+}
+
+/* ---------- 4. chi non paga ---------- */
+function nonpaga(){
+  var R=D.riscossione,K=['imu','soggiorno','tari','addizionale','recupero_evasione'],NM={imu:'IMU',soggiorno:'Imposta di soggiorno',tari:'TARI (rifiuti)',addizionale:'Addizionale IRPEF',recupero_evasione:'Recupero dell\'evasione'};
+  setH('np1-testo','<p>Per ogni tributo, dei soldi messi a bilancio per un anno, quanti sono entrati entro la fine di quell&rsquo;anno e quanti no. Sono dati del Comune, dai pareri dei revisori sui rendiconti. Il non incassato dell&rsquo;anno non è perso: in parte entra l&rsquo;anno dopo.</p>');
+  setH('lg-np',lgdBox([{name:'entrato nell\'anno',color:C_ACC},{name:'non ancora entrato a fine anno',color:'#d9c9a6'}]));
+  function draw1(){
+    var a=U.np,r=R.rendiconti[a],h='';
+    K.forEach(function(k){var x=r[k],inc=x[0]-x[1],p=100*inc/x[0];
+      h+='<div class="bars"><div class="row"><span class="nm" title="'+NM[k]+'"><b>'+NM[k]+'</b></span><span class="tr stk" style="background:none"><span style="width:'+p.toFixed(1)+'%;background:'+C_ACC+'"></span><span style="width:'+(100-p).toFixed(1)+'%;background:#d9c9a6"></span></span><span class="v">'+nf(p,p>=99?1:0)+'%</span></div><div class="sub" style="margin:-2px 0 6px 0">accertato '+fm(x[0]/1e6)+' milioni, non ancora entrato '+fm(x[1]/1e6)+'</div></div>'});
+    var t=r.titolo1;h+='<div class="bars"><div class="row"><span class="nm"><b>Tutto il titolo 1</b></span><span class="tr stk" style="background:none"><span style="width:'+(100*r.titolo1_incassi_competenza/t[0]).toFixed(1)+'%;background:'+C_ACC+'"></span><span style="width:'+(100*t[1]/t[0]).toFixed(1)+'%;background:#d9c9a6"></span></span><span class="v">'+nf(100*r.titolo1_incassi_competenza/t[0],0)+'%</span></div><div class="sub">accertato '+f0(t[0]/1e6)+' milioni, non ancora entrato '+f0(t[1]/1e6)+' (tutte le entrate tributarie, compresi i fondi dallo Stato)</div></div>';
+    setH('np1-bars',h);
+    setH('np1-nota','Percentuale = (accertato &minus; non ancora entrato) / accertato. Fonte: Comune di Milano, parere dell&rsquo;organo di revisione sul rendiconto '+a+', tabella &laquo;principali entrate correnti&raquo;, colonne accertamenti e residuo di gestione di competenza. L&rsquo;addizionale IRPEF entra in buona parte l&rsquo;anno dopo: nei conti 2016-2018 la parte versata nell&rsquo;anno è tra il 33% e il 40%, il resto arriva dai residui.');
+  }
+  draw1();bindCtl('ctl-np','np',draw1);
+
+  var an=R.anzianita,s25=R.residui_serie;
+  setH('np2-testo','<p>I <b>residui attivi</b> sono i soldi accertati negli anni e non ancora incassati. Per le entrate tributarie (titolo 1) a fine 2025 sono <b>'+f0(an['2025'].totale/1e6)+' milioni</b>. Li suddividiamo per anno in cui sono stati messi a bilancio. Il Comune ne accantona una parte come &laquo;fondo crediti di dubbia esigibilità&raquo;, per il caso in cui non arrivino. Nei conti 2024 sono stati eliminati crediti di dubbia e difficile esazione per '+f0(an['2024'].stralci/1e6)+' milioni relativi ai residui del 2017 e 2018, e in quelli del 2025 per '+f0(an['2025'].stralci/1e6)+' milioni relativi al 2019 (il testo dei revisori non dice di quali entrate).</p>');
+  function draw2(){
+    var a=U.arr,d=an[a],mx=Math.max.apply(null,d.valori);
+    bars('np2-bars',d.valori.map(function(v,i){return {nm:'messi a bilancio nel '+d.etichette[i],v:v,m:i===5,txt:fm(v/1e6)+' M'}}),mx);
+    setH('np2-nota','Residui del titolo 1 al 31 dicembre '+a+', per anno di origine: '+f0(d.totale/1e6)+' milioni in tutto. Dei residui che c&rsquo;erano a inizio anno, nel '+a+' è stato incassato il '+nf(d.riscosso_su_residui_perc,1)+'% (riscossioni in conto residui su residui attivi iniziali, tutti i titoli di entrata). Fonte: pareri dell&rsquo;organo di revisione sui rendiconti 2024 e 2025, tabella &laquo;anzianità dei residui attivi&raquo;. Nella tabella: 2016-2018 dal Ministero dell&rsquo;Interno (imposte, tasse e proventi assimilati, quadro 2), 2024-2025 dai revisori (titolo 1); euro di ogni anno; per gli anni 2019-2023 non abbiamo questo dato.');
+  }
+  draw2();bindCtl('ctl-arr','arr',draw2);
+  var rows=s25.map(function(x){return [String(x.anno),f0(x.residui_fine/1e6),f0(x.di_cui_anni_precedenti/1e6),f0(x.di_cui_anno/1e6),f0(x.accertato_anno/1e6),nf(100*x.residui_fine/x.accertato_anno,0)+'%']});
+  table('tab-arr',['Fine anno','Ancora da incassare (M)','di cui da anni prima','di cui dell\'anno','Accertato nell\'anno (M)','Residui / accertato'],rows);
+
+  var E=R.evasione,ev=D.milano.recupero_evasione,cm=D.cassa_milano,A=D.milano.anni;
+  var cashv=A.map(function(a){var r=cm.filter(function(x){return x.anno===a})[0];return r&&a>=2018?r.di_cui_verifica_controllo/1e6:null});
+  var accv=ev.totale.map(function(v){return v/1e6});
+  setH('np3-testo','<p>Il Comune manda avvisi ai contribuenti che non hanno pagato o hanno pagato meno di quanto dovevano (IMU, TARI e altri tributi) e li mette a bilancio come &laquo;recupero evasione&raquo;. Nel 2025 sono <b>'+fm(E['2025'].totale[0]/1e6)+' milioni accertati</b>, di cui <b>'+fm(E['2025'].totale[1]/1e6)+' milioni entrati</b> nello stesso anno ('+nf(100*E['2025'].totale[1]/E['2025'].totale[0],0)+'%). Nel 2024: '+fm(E['2024'].totale[0]/1e6)+' accertati, '+fm(E['2024'].totale[1]/1e6)+' entrati ('+nf(100*E['2024'].totale[1]/E['2024'].totale[0],0)+'%). A fine 2025 restano da incassare '+fm(E['2025'].residui_totali/1e6)+' milioni di crediti di questo tipo, e il Comune ne ha accantonati '+nf(E['2025'].fcde_perc,0)+'% come fondo per i casi che non arriveranno. Questo è il solo dato che si avvicina a &laquo;chi non paga&raquo;, ma resta la somma chiesta, non l&rsquo;evasione reale.</p>');
+  setH('lg-ev',lgdLine([{color:C_ACC,t:'accertato per recupero evasione (M€ di ogni anno)'},{color:C_WARM,dash:true,t:'incassato nell\'anno con verifiche e controlli (cassa, M€)'}]));
+  function drawEv(){lineChart(el('ch-ev'),{labels:A,series:[{color:C_ACC,vals:accv},{color:C_WARM,dash:true,vals:cashv}],h:240,ymin:0,yf:function(v){return f0(v)},ml:40,tip:function(i){return '<b>'+A[i]+'</b><br>accertato: <b>'+fm(accv[i])+' M</b>'+(cashv[i]!=null?'<br>incassato (cassa): <b>'+fm(cashv[i])+' M</b>':'')}})}
+  drawEv();RD.push(drawEv);
+  var er=[['IMU e ICI','imu_ici'],['TASI','tasi'],['Rifiuti (TARI, TARES, TARSU)','rifiuti'],['Imposta di soggiorno','soggiorno'],['Pubblicità','pubblicita']].map(function(p){var a=E['2025'][p[1]],b=E['2024'][p[1]];return [p[0],fm(b[0]/1e6),fm(b[1]/1e6),fm(a[0]/1e6),fm(a[1]/1e6)]});
+  er.push(['<b>Totale</b>','<b>'+fm(E['2024'].totale[0]/1e6)+'</b>','<b>'+fm(E['2024'].totale[1]/1e6)+'</b>','<b>'+fm(E['2025'].totale[0]/1e6)+'</b>','<b>'+fm(E['2025'].totale[1]/1e6)+'</b>']);
+  table('tab-ev',['Milioni di euro','2024 accertato','2024 incassato','2025 accertato','2025 incassato'],er);
+  setH('np3-nota','Accertato: serie dal bilancio gi&agrave; pubblicato (capitoli &laquo;recupero evasione&raquo; di IMU, ICI, TASI, TARI, TARES, TARSU, imposta di soggiorno, pubblicit&agrave;; abbinamento dal nome del capitolo, <span class="est">stima</span> per gli anni con nomi diversi). Incassato nella tabella: pareri dei revisori sui rendiconti 2024 e 2025. Incassato nel grafico (linea tratteggiata): somme entrate in cassa registrate come &laquo;riscosse a seguito di attivit&agrave; di verifica e controllo&raquo; (SIOPE, BDAP), che includono anche avvisi di anni precedenti: non sono confrontabili punto per punto con l&rsquo;accertato dello stesso anno e non esistono in questa forma prima del 2018. Il 2020-2021 &egrave; un periodo con regole speciali per il Covid. Il Comune partecipa anche al recupero delle imposte dello Stato (segnala casi all&rsquo;Agenzia delle Entrate e ne riceve una quota): le cifre che abbiamo trovato sono molto piccole (centinaia di migliaia di euro l&rsquo;anno, riportate dalla stampa da uno studio che non abbiamo letto) e non sono comprese in questa parte.');
+
+  var S=R.sintesi_citta_2016_2018;
+  setH('np4-testo','<p>Il Ministero dell&rsquo;Interno pubblica i conti delle grandi città per gli anni 2016, 2017 e 2018 con lo stesso schema. Gli anni dopo non sono pubblicati in questa forma. Prendiamo il totale &laquo;imposte, tasse e proventi assimilati&raquo; (IMU, TASI, TARI, addizionale, soggiorno e altre) e guardiamo la media dei tre anni.</p>');
+  function draw4(){
+    var u=U.np4,rows=S.slice();
+    var key=u==='inc'?'riscosso_competenza_perc':'residuo_ab';
+    rows.forEach(function(r){r.residuo_ab=r.residui_fine_per_abitante_2018});
+    rows.sort(function(a,b){return u==='inc'?b[key]-a[key]:a[key]-b[key]});
+    bars('np4-bars',rows.map(function(c){return {nm:c.citta,v:c[key],m:c.citta==='Milano',txt:u==='inc'?nf(c[key],0)+'%':f0(c[key])+' €'}}),u==='inc'?100:null);
+  }
+  draw4();bindCtl('ctl-np4','np4',draw4);
+  setH('np4-avviso','<b>Confronto da leggere con molta cautela.</b> Alcuni Comuni mettono a bilancio certi tributi &laquo;per cassa&raquo; (cioè solo quando sono incassati: lo ricorda anche il Ministero nelle note ai certificati), e allora per loro non possono esistere arretrati; le voci dei conti cambiano nome da un anno all&rsquo;altro. Le differenze fra città possono dipendere dal modo di fare i conti più che da quanto i cittadini pagano. Per questo si usa solo il totale delle imposte e tasse, e non diciamo quale città &laquo;paga di più&raquo;. Fonte: Ministero dell&rsquo;Interno, Finanza locale, certificati al rendiconto (contabilit&agrave; armonizzata), quadro 2, 2016-2018, scaricati il 3/11/2026; abitanti dal quadro 1 dello stesso certificato.');
+}
+
+/* ---------- limiti e fonti ---------- */
+function limiti(){
+  var L=[];
+  L.push('<b>Accertato non è incassato.</b> Gli importi della parte 1 sono quelli messi a bilancio come dovuti. Gli incassi veri sono nelle parti 1 (confronto in cassa) e 4. Non mischiamo i due tipi di dato e, quando un numero è di cassa o di competenza, lo scriviamo.');
+  L.push('<b>Competenza non è cassa, consuntivo non è previsione.</b> Usiamo solo conti di fine anno (consuntivi), mai previsioni. Il denaro che entra a gennaio per un pagamento di dicembre conta nell&rsquo;anno dopo: un singolo anno di cassa può essere molto diverso da un altro (l&rsquo;IMU incassata dal Comune è di 565 milioni nel 2024 e di 821 nel 2025). Per questo il confronto tra città usa la media 2019-2025.');
+  L.push('<b>&laquo;Non incassato&raquo; non è &laquo;evasione&raquo;.</b> I residui contengono pagamenti in ritardo, rate, avvisi notificati da poco. L&rsquo;evasione vera di un Comune non è misurata: non la stimiamo e non scriviamo percentuali di evasione.');
+  L.push('<b>Le multe non sono tasse</b> e non sono nei conti di questa pagina. Il titolo 1 dei revisori (tutte le entrate tributarie) non le contiene. Il Ministero e il Comune ne danno i residui nel titolo 3: non li abbiamo usati.');
+  L.push('<b>IMU: lorda e netta.</b> Una parte dell&rsquo;IMU finisce nel Fondo di solidarietà comunale. Per Milano i conti del Ministero dicono che l&rsquo;IMU è <i>al netto</i> di quella quota, e le cifre tornano con quelle del bilancio; per le altre città non abbiamo verificato come la quota venga trattata negli incassi. Il confronto tra città sull&rsquo;IMU è quindi incerto.');
+  L.push('<b>Ministero dell&rsquo;Interno: solo 2016-2018.</b> Il sito pubblica i certificati al rendiconto con questo schema solo per quei tre anni; per gli anni dopo la pagina dice &laquo;dati assenti&raquo;. Per il 2024 e il 2025 usiamo i pareri dei revisori del Comune di Milano; per il 2019-2023 non abbiamo gli arretrati per tributo. Nelle voci del Ministero i nomi cambiano: nel 2016 la TARI è nella riga &laquo;altre imposte&raquo; e la TASI si chiama &laquo;tassa sui servizi comunali&raquo;; abbiamo controllato che i totali tornino con il bilancio.');
+  L.push('<b>Il confronto sugli arretrati tra città non è alla pari.</b> Certi tributi sono messi a bilancio per cassa in alcune città e per competenza in altre; anche l&rsquo;accantonamento al fondo crediti ha valori molto diversi (da zero a oltre l&rsquo;80%) per motivi di metodo. Per questo non confrontiamo il fondo e diciamo solo cosa mostrano i conti, non chi paga di più.');
+  L.push('<b>Annate speciali.</b> 2020 e 2021 (Covid: esenzioni, trasferimenti, imposta di soggiorno crollata); 2020 la TASI è unita all&rsquo;IMU; 2026 Olimpiadi, con tariffe di soggiorno straordinarie (non ancora nei conti).');
+  L.push('<b>Euro nominali e reali.</b> I grafici della parte 1 mostrano di default euro 2025, con l&rsquo;indice dei prezzi FOI nazionale dell&rsquo;ISTAT (non di Milano). Le tabelle e la parte 4 sono in euro di ogni anno.');
+  L.push('<b>Abitanti.</b> Il Comune e l&rsquo;ISTAT danno abitanti diversi (circa 100 mila di differenza in alcuni anni). Qui usiamo sempre i residenti ISTAT al 1° gennaio dell&rsquo;anno dei conti (per l&rsquo;IRPEF, al 1° gennaio dell&rsquo;anno dopo), uguali per tutte le città. Per questo i numeri per abitante non coincidono con quelli della pagina sul bilancio del Comune, che usa le stime del Comune.');
+  L.push('<b>IRPEF.</b> I contribuenti non sono i residenti: il dato è per domicilio fiscale, non per il luogo di lavoro. Il dato è per anno d&rsquo;imposta (2024 = redditi del 2024). Per Milano non c&rsquo;è l&rsquo;imposta per fascia di reddito, solo i redditi. Dal 2023 il Dipartimento nasconde la fascia oltre 120.000 euro in molti comuni: Milano, Roma, Torino, Napoli e Bologna non sono toccate, Firenze e Genova non abbiamo controllato (usiamo solo i totali). Il reddito complessivo non è reddito disponibile né patrimonio.');
+  L.push('<b>Esempi.</b> Sono costruiti da noi e non sono un calcolo personale né una consulenza fiscale. Per l&rsquo;addizionale e per la TARI le informazioni vengono da pagine del Comune lette tramite un motore di ricerca e da articoli che riportano i comunicati. La delibera TARI con la tabella ufficiale non l&rsquo;abbiamo letta e perciò c&rsquo;è un solo esempio di TARI per ogni profilo. Le tariffe dell&rsquo;imposta di soggiorno da aprile 2026 sono confermate da una sola fonte.');
+  L.push('<b>Correlazione non è causa.</b> Se un numero sale o scende, i dati qui non spiegano perché. Le ipotesi (per esempio sul perché l&rsquo;imposta di soggiorno sia quasi raddoppiata) sono solo ipotesi e non le facciamo.');
+  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+}
+function fonti(){
+  var F=[];
+  F.push('<b>Bilancio del Comune di Milano</b>, consuntivi 2015-2025 a livello di capitolo: dati.comune.milano.it, licenza CC BY 4.0. Riusato dalla pagina sul bilancio (tabelle <code>tributi_principali</code>, <code>capitoli_usati</code>, <code>entrate_per_tipo</code>, scaricate il 29-30/10/2026).');
+  F.push('<b>Pareri dell&rsquo;organo di revisione sui rendiconti 2024 e 2025</b> del Comune di Milano (pubblicati dal Comune; il primo con la delibera sul rendiconto 2024, il secondo dell&rsquo;aprile 2026): tabelle sulle principali entrate correnti, sull&rsquo;anzianità dei residui attivi, sul recupero evasione. Letti il 3/11/2026. Solo numeri citati.');
+  F.push('<b>Ministero dell&rsquo;Interno, Finanza locale</b>, certificati al rendiconto (contabilità armonizzata), quadri 1, 2, 9, 18, 20, per Milano, Roma, Torino, Napoli, Bologna, Firenze e Genova, anni 2016-2018, scaricati il 3/11/2026 (<a href="https://finanzalocale.interno.gov.it/" target="_blank" rel="noopener">finanzalocale.interno.gov.it</a>). Licenza non dichiarata: solo numeri aggregati citati.');
+  F.push('<b>BDAP, Ragioneria generale dello Stato, SIOPE</b>: movimenti cumulati mensili di entrata dei Comuni, per regione, valore di dicembre, anni 2015-2025 (<a href="https://bdap-opendata.rgs.mef.gov.it/" target="_blank" rel="noopener">bdap-opendata.rgs.mef.gov.it</a>), licenza CC BY. Scaricati il 3/11/2026, filtrati per le sette città. Il totale di Milano 2016 e 2018 coincide con le riscossioni del Ministero.');
+  F.push('<b>MEF, Dipartimento delle Finanze</b>, redditi e principali variabili IRPEF su base comunale, anni d&rsquo;imposta 2000-2024: campi imposta netta, addizionale comunale, redditi per classe; licenza CC BY 3.0; scaricati il 1/11/2026. Il dato di Milano coincide con il dataset del Comune ds312.');
+  F.push('<b>ISTAT</b>, popolazione residente al 1° gennaio (ricostruzione 2002-2019 e POSAS 2020-2026), demo.istat.it, licenza CC BY 4.0. <b>ISTAT</b>, indice dei prezzi FOI (nazionale), già in uso nelle altre pagine.');
+  F.push('<b>Aliquote IMU 2026</b>: Dipartimento delle Finanze, prospetto aliquote n. 13159 del Comune di Milano; informativa IMU 2026 del Comune di Milano. Letti il 3/11/2026.');
+  F.push('<b>Addizionale, TARI, imposta di soggiorno</b>: pagine di assistenza del Comune di Milano (lette tramite ricerca), Ecodallecittà, MilanoFree, Assolombarda, AGI, Greenme, indicate sopra con il link. Fonti indirette, vedi i limiti.');
+  setH('fonti-lista',F.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  setH('download-lista','<a href="data/milano_accertato_tributi.csv">milano_accertato_tributi.csv</a> (tributi accertati 2015-2025, abitanti, euro), <a href="data/milano_incassi_cassa.csv">milano_incassi_cassa.csv</a> (incassi di cassa), <a href="data/citta_incassi_per_abitante.csv">citta_incassi_per_abitante.csv</a>, <a href="data/citta_riscossione_2016_2018.csv">citta_riscossione_2016_2018.csv</a>, <a href="data/citta_riscossione_sintesi.csv">citta_riscossione_sintesi.csv</a>, <a href="data/milano_tributi_riscossione_2016_2018.csv">milano_tributi_riscossione_2016_2018.csv</a>, <a href="data/milano_residui_tributi.csv">milano_residui_tributi.csv</a>, <a href="data/irpef_citta_2024.csv">irpef_citta_2024.csv</a>, <a href="data/irpef_milano_serie.csv">irpef_milano_serie.csv</a>, <a href="data/milano_classi_reddito_2024.csv">milano_classi_reddito_2024.csv</a>, <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina). Separatore <code>;</code>, punto decimale.');
+}
+})();
+</script>
+</body></html>
