@@ -102,7 +102,8 @@
     { path: 'oltre-il-reddito/', label: 'Oltre il reddito' },
     { path: 'hinterland/', label: 'Hinterland' },
     { path: 'telefoni-pubblici/', label: 'Telefoni pubblici' },
-    { path: 'tasse/', label: 'Tasse' }
+    { path: 'tasse/', label: 'Tasse' },
+    { path: 'vibrazioni/', label: 'Il respiro di Milano' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
