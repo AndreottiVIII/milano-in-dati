@@ -103,7 +103,8 @@
     { path: 'hinterland/', label: 'Hinterland' },
     { path: 'telefoni-pubblici/', label: 'Telefoni pubblici' },
     { path: 'tasse/', label: 'Tasse' },
-    { path: 'vibrazioni/', label: 'Il respiro di Milano' }
+    { path: 'vibrazioni/', label: 'Il respiro di Milano' },
+    { path: 'consumi/', label: 'Quanta corrente, quanta acqua' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

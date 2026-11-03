@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quanta corrente, quanta acqua</title>
+<style>
+:root{--acc:#1f5f8b;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eaf1f6;--warm:#8a4a10;--warmbg:#fbf0e2;--grey:#9aa5ad;--amb:#c26a1b}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.4em 0 .3em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums} td.n,th.n{white-space:nowrap}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem}
+.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:8px 12px;margin:.8em 0;font-size:.95rem} .warm p{margin:.3em 0}
+.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.95rem}
+.big1{font-size:2.6rem;font-weight:700;color:var(--acc);line-height:1.1;display:block}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.88rem;margin:.5em 0} .lgd span{white-space:nowrap} @media (max-width:600px){.lgd span{white-space:normal}} .lgd i{display:inline-block;width:14px;height:12px;vertical-align:-1px;margin-right:4px}
+.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed} .lgd i.dot{width:12px;border-radius:50%} .lgd i.ring{width:12px;border-radius:50%;border:2px solid var(--grey);background:#fff}
+.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:12.5px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#555}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.85rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.tip i{display:inline-block;width:10px;height:10px;margin-right:4px}
+details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+@media(max-width:560px){h1{font-size:1.45rem} th,td{padding:5px 4px;font-size:.88rem}}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quanta corrente, quanta acqua</h1>
+<p>Quanta elettricità consuma Milano, quanta acqua entra nelle sue condutture, e che cosa cambia quando fa caldo. Il Comune pubblica il dato giorno per giorno della corrente solo per il 2019 e il 2020.</p>
+
+<div class="warn"><b>Come leggere i numeri.</b> <span id="unita"></span></div>
+
+<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+
+<h2 id="corrente">La corrente, giorno per giorno</h2>
+<p id="corrente-testo"></p>
+<div class="lgd" id="g1-leg"></div>
+<div class="ch" id="g1a"></div>
+<div class="ch" id="g1b"></div>
+<p class="src" id="g1-nota"></p>
+<div id="corrente-punti"></div>
+
+<h2 id="caldo">Il caldo</h2>
+<p id="caldo-testo"></p>
+<div class="lgd" id="g2-leg"></div>
+<div class="ch" id="g2"></div>
+<p class="src" id="g2-nota"></p>
+<div id="caldo-punti"></div>
+<table id="tab-fasce"></table>
+<p class="src" id="fasce-nota"></p>
+<div class="warm" id="caldo-cautela"></div>
+<details><summary>Quanto è stabile questo numero?</summary><p id="stab-testo"></p><table id="tab-stab"></table><p class="src" id="stab-nota"></p></details>
+
+<h2 id="lockdown">Lockdown e Ferragosto</h2>
+<p id="lock-testo"></p>
+<table id="tab-lock"></table>
+<p class="src" id="lock-nota"></p>
+<h3>Ferragosto</h3>
+<p id="ferr-testo"></p>
+<div class="lgd" id="g3-leg"></div>
+<div class="ch" id="g3"></div>
+<p class="src" id="g3-nota"></p>
+<div id="ferr-punti"></div>
+<h3>Due misure diverse, nella stessa direzione</h3>
+<p id="vib-testo"></p>
+<table id="tab-vib"></table>
+<p class="src" id="vib-nota"></p>
+
+<h2 id="anni">Negli anni</h2>
+<p id="anni-testo"></p>
+<div class="lgd" id="g4-leg"></div>
+<div class="ch" id="g4"></div>
+<p class="src" id="g4-nota"></p>
+<table id="tab-anni"></table>
+<p class="src" id="anni-nota"></p>
+<div id="anni-punti"></div>
+<h3>Milano e le altre grandi città</h3>
+<p id="citta-testo"></p>
+<div class="ch" id="g5"></div>
+<p class="src" id="g5-nota"></p>
+<details><summary>Tutte le città, con la variazione dal 2015</summary><table id="tab-citta-e"></table><p class="src" id="citta-e-nota"></p></details>
+
+<h2 id="acqua">L’acqua</h2>
+<p id="acqua-testo"></p>
+<table id="tab-acqua"></table>
+<p class="src" id="acqua-nota"></p>
+<div id="acqua-punti"></div>
+<h3>Milano e le altre grandi città, 2018 e 2024</h3>
+<p id="acqua-citta-testo"></p>
+<div class="lgd" id="g6-leg"></div>
+<h3 style="font-size:.95rem">Acqua erogata, litri per abitante al giorno</h3>
+<div class="ch" id="g6"></div>
+<h3 style="font-size:.95rem">Perdite nella rete, percentuale dell’acqua immessa</h3>
+<div class="ch" id="g7"></div>
+<p class="src" id="g7-nota"></p>
+<details><summary>Tutte le cifre per città</summary><table id="tab-citta-a"></table><p class="src" id="citta-a-nota"></p></details>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<ul class="m" id="limiti-testo"></ul>
+
+<h2 id="fonti">Fonti e metodo</h2>
+<ul class="m" id="fonti-lista"></ul>
+<p id="metodo"></p>
+
+<footer>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>. Dati di questa pagina: <a href="data/consumi_giornalieri.csv" id="csv-link">consumi_giornalieri.csv</a> (un giorno per riga) · <a href="data/pagina.json">pagina.json</a> (tutti i numeri usati nel testo). Altre pagine collegate: <a href="../vibrazioni/">Il respiro di Milano</a> · <a href="../temperature/">Temperature</a>.</p>
+</footer>
+</main>
+<script>
+(function(){
+'use strict';
+var D=null,REDRAW=[];
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+var MESI3=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+var GS={lun:'lunedì',mar:'martedì',mer:'mercoledì',gio:'giovedì',ven:'venerdì',sab:'sabato',dom:'domenica'};
+var GIORNI=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+var BLU='#1f5f8b',AMB='#c26a1b',GRI='#9aa5ad';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function pt(s){var p=s.split('.');return p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.')+(p.length>1?','+p[1]:'')}
+function f0(x){return x==null?'':pt(String(Math.round(x)))}
+function nf(x,d){return x==null?'':pt(Math.abs(x).toFixed(d)).replace(/^/,x<0?'−':'')}
+function sg(x,d){d=d||0;return (x>0?'+':x<0?'−':'')+nf(Math.abs(x),d)+'%'}
+function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function el(id){return document.getElementById(id)}
+function setH(id,h){el(id).innerHTML=h}
+function dataIt(iso){var p=iso.slice(0,10).split('-');return (+p[2]===1?'1°':+p[2])+' '+MESI[+p[1]-1]+' '+p[0]}
+function dataBr(iso){var p=iso.slice(0,10).split('-');return (+p[2]===1?'1°':+p[2])+' '+MESI[+p[1]-1]}
+function dataNum(iso){var p=iso.slice(0,10).split('-');return +p[2]+'/'+(+p[1])+'/'+p[0]}
+function giornoDi(iso){var p=iso.split('-');return GIORNI[new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()]}
+function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function med(a){var b=a.slice().sort(function(x,y){return x-y}),n=b.length;return n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2}
+function idxDi(iso){var a=D.giornaliero.inizio.split('-'),p=iso.split('-');return Math.round((Date.UTC(+p[0],+p[1]-1,+p[2])-Date.UTC(+a[0],+a[1]-1,+a[2]))/864e5)}
+function isoDi(i){var a=D.giornaliero.inizio.split('-'),d=new Date(Date.UTC(+a[0],+a[1]-1,+a[2])+i*864e5);return d.getUTCFullYear()+'-'+('0'+(d.getUTCMonth()+1)).slice(-2)+'-'+('0'+d.getUTCDate()).slice(-2)}
+
+Promise.all([J('data/pagina.json')]).then(function(a){
+  D=a[0];
+  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
+}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+
+function tutto(){intro();corrente();caldo();lockdown();anni();acqua();limiti();fonti();ridisegna();
+  var t=null;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(ridisegna,150)});
+}
+function ridisegna(){REDRAW.forEach(function(f){f()})}
+function Y(a,anno){return a.filter(function(x){return x.anno===anno})[0]}
+
+/* ---------- testi ---------- */
+function intro(){
+  var A=D.annuale.serie,u=Y(A,2024),c=D.caldo,t=c.tmax,g=D.giornaliero;
+  var perGiorno=u.gwh/366,kwhg=u.kwh_ab/366;
+  setH('unita','Un kilowattora (kWh) è l’energia di un forno da 1.000 watt acceso per un’ora. Un gigawattora (GWh) sono un milione di kWh. Nel 2024 Milano ha usato '+f0(u.gwh)+' GWh di elettricità: in media '+nf(perGiorno,1)+' GWh al giorno. Per abitante sono '+f0(u.kwh_ab)+' kWh all’anno, '+nf(kwhg,1)+' kWh al giorno: un forno da 1.000 watt acceso per quasi '+f0(kwhg)+' ore (calcolo su 366 giorni). Per l’acqua: 1.000 litri sono un metro cubo.');
+  setH('sorpresa','<span class="big1">+'+nf(t.per_grado_caldo,1)+' GWh</span><p><b>di corrente in più al giorno per ogni grado di temperatura massima sopra i '+f0(t.soglia_caldo)+' °C</b>, nei giorni feriali del 2019 e del 2020 (intervallo di incertezza: da '+nf(t.boot_caldo[0],1)+' a '+nf(t.boot_caldo[1],1)+'). Un giorno feriale mite (massima tra '+f0(c.fasce[4].da)+' e '+f0(c.fasce[4].a)+' °C) ne usa circa '+nf(c.fasce[4].mediana,1)+' in tutto.</p><p class="sub">È un legame misurato in due anni a una sola stazione di temperatura: non dimostra che la causa siano i condizionatori.</p>');
+}
+
+function corrente(){
+  var g=D.giornaliero,S=g.somma,mx=g.massimo,mn=g.minimo,i19=g.gwh.slice(0,365),T=D.annuale;
+  setH('corrente-testo','Il Comune di Milano pubblica, per ogni giorno del 2019 e del 2020, l’elettricità erogata da A2A nel territorio comunale ('+f0(g.n_giorni)+' giorni, '+nf(S['2019'],1)+' GWh nel 2019 e '+nf(S['2020'],1)+' GWh nel 2020). Qui sotto, un anno per riquadro: ogni punto blu è un giorno feriale, ogni punto grigio un sabato, una domenica o una festa.');
+  setH('g1-leg','<span><i class="dot" style="background:'+BLU+'"></i>giorno feriale</span><span><i class="dot" style="background:'+GRI+'"></i>sabato, domenica, festa</span><span><i style="background:#f3d9bd"></i>lockdown e riaperture (dal 24 febbraio al 30 giugno 2020)</span><span><i style="background:#e3e6e8"></i>pausa di agosto (dal 5 al 25)</span>');
+  setH('g1-nota','Valori in GWh al giorno. Passa il dito o il mouse sul grafico per vedere ogni giorno, con la temperatura massima a Brera.');
+  setH('corrente-punti','<ul class="m">'
+   +'<li><b>Nel 2019 luglio consuma più di gennaio.</b> La mediana dei giorni feriali è '+nf(g.feriali_lug2019,1)+' GWh a luglio e '+nf(g.feriali_gen2019,1)+' GWh a gennaio (dal 7 gennaio, dopo le feste): '+sg(Math.round(100*(g.feriali_lug2019/g.feriali_gen2019-1)))+'. Nel 2020, anno particolare, i due mesi quasi si pareggiano: '+nf(g.feriali_lug2020,1)+' e '+nf(g.feriali_gen2020,1)+' GWh.</li>'
+   +'<li><b>Il giorno di massimo consumo è il '+dataIt(mx.data)+':</b> '+nf(mx.gwh,1)+' GWh. Quel giorno la massima a Brera è stata di '+nf(mx.tmax,1)+' °C, il '+(g.posto_tmax_massimo===2?'secondo':g.posto_tmax_massimo+'°')+' giorno più caldo di tutti i '+f0(g.n_giorni)+' giorni. Quindi sì: cade in un giorno caldissimo.</li>'
+   +'<li><b>Il giorno più basso è il '+dataIt(mn.data)+':</b> '+nf(mn.gwh,1)+' GWh, in pieno lockdown. È però un giorno isolato: il giorno prima e il giorno dopo si è stati a '+nf(mn.vicini[0],1)+' e '+nf(mn.vicini[1],1)+' GWh. Non sappiamo da cosa dipenda e non lo usiamo come punto di riferimento.</li>'
+   +'<li><b>Il lockdown si vede a occhio</b>: è la buca più larga del grafico. Quella di agosto è più piccola: le guardiamo da vicino più sotto.</li></ul>');
+  REDRAW.push(function(){chartAnno('g1a',0,365,2019);chartAnno('g1b',365,g.n_giorni,2020)});
+}
+
+function caldo(){
+  var C=D.caldo,t=C.tmax,m=C.tmean,F=C.fasce,g=D.giornaliero,E=C.esclusi,mite=F[4],alto=F[7],freddo=F[0];
+  setH('caldo-testo','Domanda: quanto pesa il caldo sui consumi di Milano? Confrontiamo la corrente di ogni giorno con la temperatura massima misurata a Brera (stazione ARPA Lombardia). Contano solo i giorni feriali che non sono festa, perché il sabato, la domenica e le feste si consuma in modo diverso. Sono '+f0(C.n_feriali)+' giorni; ne togliamo '+f0(E['lockdown e riaperture 2020'])+' del lockdown e delle riaperture del 2020 (dal 24 febbraio al 30 giugno), '+f0(E['pausa di agosto'])+' della pausa di agosto (la corrente cala per le ferie anche se fa caldo) e '+f0(E['feste di fine anno'])+' delle feste di fine anno (dal 24 dicembre al 6 gennaio). Ne restano <b>'+f0(C.n_base)+'</b> ('+f0(C.n_2019)+' del 2019 e '+f0(C.n_2020)+' del 2020).');
+  setH('g2-leg','<span><i class="dot" style="background:'+BLU+'"></i>2019</span><span><i class="dot" style="background:'+AMB+'"></i>2020</span><span><i class="ring"></i>giorni esclusi (lockdown, agosto, feste di fine anno)</span><span><i class="ln" style="border-top-color:#111"></i>andamento stimato</span>');
+  setH('g2-nota','Un punto per ogni giorno feriale. Asse orizzontale: temperatura massima del giorno. Asse verticale: GWh di quel giorno. La linea nera è l’andamento stimato di un giorno feriale del 2019: piatta nella fascia mite, in salita sopra circa '+f0(t.soglia_caldo)+' °C e, meno, sotto circa '+f0(t.soglia_freddo)+' °C. Passa sopra un punto per i dettagli.');
+  setH('caldo-punti','<ul class="m">'
+   +'<li><b>Da quanto sale la corrente.</b> La curva è piatta tra circa '+f0(t.soglia_freddo)+' e '+f0(t.soglia_caldo)+' °C di massima e sale sopra i '+f0(t.soglia_caldo)+' °C (tra '+f0(t.boot_soglia_caldo[0])+' e '+f0(t.boot_soglia_caldo[1])+' °C se si ripete il calcolo su campioni diversi dei giorni).</li>'
+   +'<li><b>Quanto sale.</b> Circa <b>'+nf(t.per_grado_caldo,1)+' GWh in più al giorno per ogni grado sopra la soglia</b> (da '+nf(t.boot_caldo[0],1)+' a '+nf(t.boot_caldo[1],1)+'), cioè circa il '+f0(100*t.per_grado_caldo/mite.mediana)+'% della corrente di un giorno mite. Con la temperatura media del giorno invece della massima il risultato è simile: '+nf(m.per_grado_caldo,1)+' GWh per grado sopra i '+f0(m.soglia_caldo)+' °C di media (da '+nf(m.boot_caldo[0],1)+' a '+nf(m.boot_caldo[1],1)+').</li>'
+   +'<li><b>I giorni più caldi.</b> Con la massima di '+f0(alto.da)+' °C o più la mediana è '+nf(alto.mediana,1)+' GWh ('+f0(alto.n)+' giorni), contro '+nf(mite.mediana,1)+' GWh dei giorni tra '+f0(mite.da)+' e '+f0(mite.a)+' °C: '+sg(Math.round(100*(alto.mediana/mite.mediana-1)))+'. I dieci giorni di maggior consumo sono tutti feriali, tra giugno e luglio 2019, con massime da '+nf(Math.min.apply(null,g.top10.map(function(x){return x.tmax})),1)+' a '+nf(Math.max.apply(null,g.top10.map(function(x){return x.tmax})),1)+' °C.</li>'
+   +'<li><b>Il lato del freddo è più debole.</b> Sotto circa '+f0(t.soglia_freddo)+' °C la corrente sale di circa '+nf(t.per_grado_freddo,1)+' GWh per ogni grado in meno (da '+nf(t.boot_freddo[0],2)+' a '+nf(t.boot_freddo[1],2)+'): con meno di '+f0(freddo.a)+' °C la mediana è '+nf(freddo.mediana,1)+' GWh ('+f0(freddo.n)+' giorni). In inverno ci sono anche meno ore di luce: i dati non separano il freddo dal buio.</li>'
+   +'<li><b>Quanto spiega la temperatura.</b> Il coefficiente di correlazione tra massima e corrente, nei soli giorni sopra i '+f0(t.soglia_caldo)+' °C, è '+nf(C.corr_sopra_soglia,2)+' (tra tutti i giorni è '+nf(C.corr,2)+', perché il lato del freddo è più debole). Un modello con temperatura, giorno della settimana e anno spiega il '+f0(100*t.r2)+'% delle differenze tra un giorno feriale e l’altro; senza la temperatura solo il '+f0(100*C.r2_senza_temperatura)+'%.</li></ul>');
+  var rows=F.map(function(f){var nome=f.da==null?'meno di '+f0(f.a)+' °C':(f.a==null?f0(f.da)+' °C e oltre':'da '+f0(f.da)+' a meno di '+f0(f.a)+' °C');return '<tr><td>'+nome+'</td><td class="r">'+f0(f.n)+'</td><td class="r">'+nf(f.mediana,1)+'</td><td class="r n">'+nf(f.minimo,1)+' – '+nf(f.massimo,1)+'</td></tr>'}).join('');
+  setH('tab-fasce','<thead><tr><th>Temperatura massima</th><th class="r">Giorni</th><th class="r">GWh (mediana)</th><th class="r">Da – a</th></tr></thead><tbody>'+rows+'</tbody>');
+  var d=C.domeniche.fasce;
+  setH('fasce-nota','Giorni feriali usati nel confronto. Mediana dei GWh nella fascia, e valore più basso e più alto. Le domeniche (senza feste, lockdown, agosto e feste di fine anno; '+f0(C.domeniche.n)+' giorni) vanno meno su: '+nf(d[0].mediana,1)+' GWh sotto i '+f0(d[0].a)+' °C ('+f0(d[0].n)+' domeniche), '+nf(d[1].mediana,1)+' tra '+f0(d[1].da)+' e '+f0(d[1].a)+' °C ('+f0(d[1].n)+'), '+nf(d[2].mediana,1)+' da '+f0(d[2].da)+' °C in su ('+f0(d[2].n)+'): poche domeniche e poca differenza.');
+  setH('caldo-cautela','<p><b>Che cosa non sappiamo.</b></p><p>1) Il legame tra caldo e corrente è misurato; <b>la causa no</b>. I condizionatori sono una spiegazione plausibile, ma questi dati non la dimostrano: non dicono dove né come si usa l’elettricità. Anche altri usi legati al caldo potrebbero pesare, e i dati non li separano.</p><p>2) Sono due anni soli, uno e mezzo quelli utili: '+f0(C.n_base)+' giorni, di cui '+f0(C.n_2019)+' del 2019. I giorni con 35 °C o più sono '+f0(F[7].n)+', e '+f0(F[7].n2019)+' sono del 2019.</p><p>3) Il 2020 consuma meno del 2019 a parità di temperatura (circa '+nf(-C.anno2020,1)+' GWh in meno): ne teniamo conto nel calcolo, ma non sappiamo se per l’economia, per il lavoro da casa o per altro.</p><p>4) '+f0(C.n_vicine)+' dei '+f0(C.n_base)+' giorni usati hanno la temperatura ricostruita dalle stazioni ARPA vicine, perché a Brera mancavano le letture.</p>');
+  // stabilita'
+  var S=C.sensibilita,nomi=[],mp={};
+  S.forEach(function(x){if(nomi.indexOf(x.nome)<0)nomi.push(x.nome);mp[x.nome+'|'+x.col]=x});
+  var mn=Math.min.apply(null,S.filter(function(x){return x.col==='tmax'}).map(function(x){return x.per_grado})),mxx=Math.max.apply(null,S.filter(function(x){return x.col==='tmax'}).map(function(x){return x.per_grado}));
+  setH('stab-testo','Abbiamo ripetuto il calcolo cambiando le regole: più o meno giorni esclusi, solo il 2019, la media al posto della massima. Con la massima il risultato va da '+nf(mn,2)+' a '+nf(mxx,2)+' GWh per grado: sempre dello stesso ordine, ma non fisso.');
+  setH('tab-stab','<thead><tr><th>Scelta</th><th class="r">Giorni</th><th class="r">GWh per grado (massima)</th><th class="r">GWh per grado (media)</th></tr></thead><tbody>'+nomi.map(function(n){var a=mp[n+'|tmax'],b=mp[n+'|tmean'];return '<tr><td>'+esc(n)+(n==='Scelta principale'?' <span class="sub">(la usiamo nel testo)</span>':'')+'</td><td class="r">'+f0(a.n)+'</td><td class="r">'+nf(a.per_grado,2)+' <span class="sub">(da '+nf(a.soglia,1)+' °C)</span></td><td class="r">'+nf(b.per_grado,2)+' <span class="sub">(da '+nf(b.soglia,1)+' °C)</span></td></tr>'}).join('')+'</tbody>');
+  setH('stab-nota','Soglia = temperatura da cui il modello fa partire la salita. Con la pausa di agosto dentro, la soglia sale a '+nf(mp['Con la pausa di agosto|tmax'].soglia,0)+' °C e la pendenza a '+nf(mp['Con la pausa di agosto|tmax'].per_grado,2)+': il risultato dipende da come si trattano le ferie, e per questo le togliamo.');
+  REDRAW.push(chartCaldo);
+}
+
+function lockdown(){
+  var L=D.lockdown,F=D.ferragosto,G=F.giorni;
+  setH('lock-testo','A Milano le prime chiusure arrivano a fine febbraio 2020, il blocco di tutta Italia a marzo. Confrontiamo il valore tipico (la mediana) dei giorni feriali in tre periodi, e le domeniche.');
+  setH('tab-lock','<thead><tr><th>Periodo</th><th class="r">Feriali, GWh</th><th class="r">Domenica, GWh</th></tr></thead><tbody>'
+   +'<tr><td>Marzo 2019 <span class="sub">('+f0(L.n_marzo2019)+' giorni feriali, 5 domeniche)</span></td><td class="r">'+nf(L.feriali_marzo2019,1)+'</td><td class="r">'+nf(L.dom_marzo2019,1)+'</td></tr>'
+   +'<tr><td>1-21 febbraio 2020, prima del lockdown <span class="sub">('+f0(L.n_feb2020)+' giorni)</span></td><td class="r">'+nf(L.feriali_feb2020,1)+'</td><td class="r">–</td></tr>'
+   +'<tr><td>Lockdown: 23-27 marzo 2020 <span class="sub">(domenica: 29 marzo)</span></td><td class="r"><b>'+nf(L.feriali_lock,1)+'</b></td><td class="r"><b>'+nf(L.dom_lock,1)+'</b></td></tr></tbody>');
+  setH('lock-nota','Nella settimana di lockdown i giorni feriali consumano il '+Math.abs(L.var_marzo2019)+'% in meno di marzo 2019 e il '+Math.abs(L.var_feb2020)+'% in meno di febbraio 2020; la domenica il '+Math.abs(L.var_dom)+'% in meno rispetto alle domeniche di marzo 2019 (una sola domenica di lockdown).');
+  var g12=G[4];
+  setH('ferr-testo','Il 15 agosto è festa. Qui sotto, giorno per giorno, dall’11 al 19 agosto 2019, con la temperatura massima di ciascun giorno. In quei giorni a Brera la massima media è stata di '+nf(F.tmax_media,1)+' °C: caldo, e sopra la soglia dei '+f0(D.caldo.tmax.soglia_caldo)+' °C.');
+  setH('g3-leg','<span><i style="background:'+BLU+'"></i>Ferragosto</span><span><i style="background:'+GRI+'"></i>giorni feriali</span><span><i style="background:#cfd6db"></i>sabato e domenica</span><span><i class="ln d" style="border-top-color:#111"></i>giorni feriali di marzo 2019 ('+nf(F.feriali_marzo2019,1)+')</span>');
+  setH('g3-nota','GWh al giorno, 11-19 agosto 2019. Sotto ogni barra: giorno della settimana, data e temperatura massima.');
+  var P=F.previsto;
+  setH('ferr-punti','<ul class="m">'
+   +'<li><b>Ferragosto consuma quanto una domenica di marzo.</b> Il 15 agosto sono '+nf(g12.gwh,1)+' GWh, il valore più basso della settimana; le domeniche di marzo 2019 stanno a '+nf(F.dom_marzo2019,1)+'. In agosto però faceva molto più caldo.</li>'
+   +'<li><b>Il caldo non basta a riempire la buca.</b> Nei giorni di lavoro del 12-16 agosto (12, 13, 14 e 16) il modello del caldo, con le loro temperature, prevedeva circa '+nf(F.previsto_mediana,1)+' GWh; ne sono stati misurati '+nf(F.misurato_mediana,1)+', il '+Math.abs(F.differenza)+'% in meno. È la stima della pausa estiva, ma resta una stima: il modello non è stato adattato su agosto e non separa le ferie da altro.</li>'
+   +'<li><b>Un solo anno.</b> I numeri sono del 2019: non sappiamo se ogni agosto va così.</li></ul>');
+  setH('vib-testo','La pagina <a href="../vibrazioni/">Il respiro di Milano</a> misura un’altra cosa: quanto vibra il suolo, con un sismografo dell’INGV. Nelle stesse settimane (lockdown, Ferragosto) anche quella misura scende. Le due percentuali non sono la stessa cosa e non vanno confrontate come se lo fossero: una è corrente consumata, l’altra è vibrazione del suolo.');
+  setH('tab-vib','<thead><tr><th>Misura</th><th class="r">Lockdown, giorni feriali</th><th class="r">Ferragosto, 12-16 agosto</th></tr></thead><tbody>'
+   +'<tr><td>Corrente consumata (GWh)</td><td class="r">'+sg(L.var_marzo2019)+'</td><td class="r">'+sg(F.sett_var)+'</td></tr>'
+   +'<tr><td>Vibrazioni del suolo (nanometri al secondo)</td><td class="r">'+sg(L.vibrazioni_giorno)+'</td><td class="r">'+sg(L.vibrazioni_ferragosto)+'</td></tr></tbody>');
+  setH('vib-nota','Variazione rispetto ai giorni feriali di marzo 2019, mediana. Corrente: dati del Comune di Milano su A2A (questa pagina). Vibrazioni: INGV, stazione di Milano, fascia 2-20 Hz, ore 8-19 (pagina “Il respiro di Milano”). Entrambe scendono nello stesso senso; la dimensione del calo dipende da che cosa si misura.');
+  REDRAW.push(chartFerr);
+}
+
+function anni(){
+  var A=D.annuale,S=A.serie,u=Y(S,2024),v=Y(S,2020),p=Y(S,2019),a15=Y(S,2015),J=A.salto_2009_2010;
+  setH('anni-testo','Negli anni la fonte è ISTAT (con dati dei distributori raccolti da Arera): i consumi di elettricità prelevata dalle reti di distribuzione nel comune di Milano. Non comprendono le utenze collegate direttamente alla rete nazionale di trasporto né la rete ferroviaria. ISTAT usa i tep (tonnellate equivalenti di petrolio): qui li abbiamo convertiti in GWh con il fattore che ISTAT dichiara, 1 GWh = '+f0(D.tep_per_gwh)+' tep. <b>La serie parte dal 2015</b>, per due motivi spiegati nei limiti dei dati.');
+  setH('g4-leg','<span><i style="background:'+BLU+'"></i>GWh all’anno</span><span><i style="background:'+AMB+'"></i>2020, anno del lockdown</span>');
+  setH('g4-nota','GWh di elettricità all’anno a Milano, 2015-2024. Fonte: ISTAT.');
+  setH('tab-anni','<thead><tr><th>Anno</th><th class="r">GWh</th><th class="r">kWh per abitante</th><th class="r">di cui nelle case, kWh per abitante</th><th class="r">Gas, milioni di m³</th></tr></thead><tbody>'+S.map(function(x){return '<tr><td>'+x.anno+'</td><td class="r">'+nf(x.gwh,1)+'</td><td class="r">'+f0(x.kwh_ab)+'</td><td class="r">'+f0(x.dom_kwh_ab)+'</td><td class="r">'+nf(x.gas_mm3,0)+'</td></tr>'}).join('')+'</tbody>');
+  setH('anni-nota','kWh per abitante: GWh diviso per i residenti usati da ISTAT. Quota delle case: ISTAT stima gli usi domestici del 2023 e del 2024. Il gas è quello prelevato dalle reti di distribuzione (esclusi industria e centrali), in milioni di metri cubi: dai tep di ISTAT con il fattore 0,819 tep ogni 1.000 m³.');
+  setH('anni-punti','<ul class="m">'
+   +'<li><b>Nel 2024 Milano ha usato '+f0(u.gwh)+' GWh di elettricità</b>, '+f0(u.kwh_ab)+' kWh per abitante. Nel 2015 erano '+f0(a15.gwh)+' GWh e '+f0(a15.kwh_ab)+' kWh: '+sg(Math.round(10*(100*(u.kwh_ab/a15.kwh_ab-1)))/10,1)+' per abitante.</li>'
+   +'<li><b>Il 2020 si vede.</b> Dal 2019 al 2020 il consumo scende da '+f0(p.gwh)+' a '+f0(v.gwh)+' GWh ('+sg(A.var_2020_istat,1)+'). Quasi tutto il calo sta negli usi che non sono le case: gli usi domestici passano da '+f0(p.dom_gwh)+' a '+f0(v.dom_gwh)+' GWh.</li>'
+   +'<li><b>La maggior parte non va nelle case.</b> Nel 2022 il '+f0(A.quota_non_domestico_2022)+'% dell’elettricità consumata a Milano è per usi diversi dal domestico (uffici, negozi, servizi, industria). Per questo i kWh per abitante di Milano non sono i consumi di una famiglia.</li>'
+   +'<li><b>Gas.</b> Il gas passa da '+f0(Y(S,2018).gas_mm3)+' milioni di m³ nel 2018 a '+f0(u.gas_mm3)+' nel 2024. Il gas serve soprattutto per il riscaldamento e dipende dall’inverno: non abbiamo corretto per il clima.</li></ul>');
+  setH('citta-testo','Tra i 14 capoluoghi di città metropolitana, nel 2024 Milano è '+(D.annuale.citta.slice().sort(function(a,b){return b.kwh_ab_2024-a.kwh_ab_2024}).map(function(c){return c.nome}).indexOf('Milano')+1)+'ª per elettricità per abitante: '+f0(D.annuale.citta.filter(function(c){return c.nome==='Milano'})[0].kwh_ab_2024)+' kWh. Sono i residenti il denominatore, ma l’elettricità la usa anche chi a Milano lavora o studia senza abitarci: più una città è un polo di lavoro e di servizi, più il numero per abitante sale.');
+  setH('g5-nota','kWh di elettricità per abitante, 2024. Fonte: ISTAT. Passa sopra una barra per i valori.');
+  setH('citta-e-nota','kWh per abitante da ISTAT (tep per 100 abitanti × 1.000.000 / 86 / 100). La variazione dal 2015 al 2024 per abitante dipende anche dai residenti che ISTAT conta in ciascun anno.');
+  setH('tab-citta-e','<thead><tr><th>Città</th><th class="r">2015</th><th class="r">2019</th><th class="r">2024</th><th class="r">2015-2024</th></tr></thead><tbody>'+D.annuale.citta.slice().sort(function(a,b){return b.kwh_ab_2024-a.kwh_ab_2024}).map(function(c){var m=c.nome==='Milano';return '<tr'+(m?' style="background:#eaf1f6"':'')+'><td>'+(m?'<b>':'')+esc(c.nome)+(m?'</b>':'')+'</td><td class="r">'+f0(c.kwh_ab_2015)+'</td><td class="r">'+f0(c.kwh_ab_2019)+'</td><td class="r">'+f0(c.kwh_ab_2024)+'</td><td class="r">'+sg(c.var,1)+'</td></tr>'}).join('')+'</tbody>');
+  REDRAW.push(chartAnnuale,chartCittaE);
+}
+
+function acqua(){
+  var M=D.acqua.milano,m24=M[3],m18=M[0],m20=M[1],m22=M[2],C=D.acqua.citta,mil=C.filter(function(c){return c.nome==='Milano'})[0];
+  var altre=C.filter(function(c){return c.nome!=='Milano'});
+  function medv(k){return med(altre.map(function(c){return c[k]}))}
+  setH('acqua-testo','Quanta acqua entra nella rete, quanta arriva a chi la usa e quanta si perde, a Milano. Fonte: ISTAT, Censimento delle acque per uso civile (e, per il 2018, lo stesso dato ripubblicato dal Comune). I dati del 2024 sono provvisori. <b>I litri per abitante al giorno non sono quanto usa o beve un residente in casa</b>: comprendono anche uffici, negozi, servizi pubblici e chi arriva a Milano da fuori, e sono divisi per i soli residenti. Distinguiamo l’acqua <i>immessa</i> in rete, l’acqua <i>erogata</i> (consegnata per tutti gli usi autorizzati) e quella <i>fatturata per uso domestico</i> (le case).');
+  setH('tab-acqua','<thead><tr><th>Anno</th><th class="r">Immessa</th><th class="r">Erogata</th><th class="r">Perdite</th><th class="r">Case</th></tr></thead><tbody>'+M.map(function(x){return '<tr><td>'+x.anno+(x.anno===2024?' <span class="sub">(provvisorio)</span>':'')+'</td><td class="r">'+f0(x.immessa_pc)+'</td><td class="r">'+f0(x.erogata_pc)+'</td><td class="r">'+nf(x.perdite_pct,1)+'%</td><td class="r">'+(x.domestica_pc==null?'–':f0(x.domestica_pc))+'</td></tr>'}).join('')+'</tbody>');
+  setH('acqua-nota','Litri per abitante al giorno. Case = acqua fatturata per uso domestico. Le perdite sono la differenza tra acqua immessa e acqua erogata, in percentuale dell’immessa. Per il 2018 ISTAT non pubblica la quota domestica nello stesso dato. Volumi del 2024: '+f0(m24.immessa_vol/1000)+' milioni di m³ immessi, '+f0(m24.erogata_vol/1000)+' erogati, '+f0(m24.domestica_vol/1000)+' fatturati per uso domestico.');
+  setH('acqua-punti','<ul class="m">'
+   +'<li><b>Nel 2024 sono entrati in rete '+f0(m24.immessa_vol/1000)+' milioni di m³ d’acqua</b> ('+f0(m24.immessa_pc)+' litri per abitante al giorno): '+f0(m24.erogata_vol/1000)+' milioni sono arrivati a chi li usa ('+f0(m24.erogata_pc)+' litri) e le perdite lungo la rete sono state '+nf(m24.perdite_pct,1)+'% dell’acqua immessa.</li>'
+   +'<li><b>Dal 2018 al 2024</b> l’acqua immessa scende da '+f0(m18.immessa_vol/1000)+' a '+f0(m24.immessa_vol/1000)+' milioni di m³ ('+sg(Math.round(100*(m24.immessa_vol/m18.immessa_vol-1)))+'), l’erogata da '+f0(m18.erogata_vol/1000)+' a '+f0(m24.erogata_vol/1000)+' ('+sg(Math.round(10*100*(m24.erogata_vol/m18.erogata_vol-1))/10,1)+'), le perdite dal '+nf(m18.perdite_pct,1)+'% all’'+nf(m24.perdite_pct,1)+'%. Per abitante, l’erogata resta quasi uguale: '+f0(m18.erogata_pc)+' e '+f0(m24.erogata_pc)+' litri.</li>'
+   +'<li><b>Le case.</b> Dei '+f0(m24.erogata_pc)+' litri erogati, '+f0(m24.domestica_pc)+' sono fatturati per uso domestico (il '+f0(100*m24.domestica_pc/m24.erogata_pc)+'%). Gli altri '+f0(m24.erogata_pc-m24.domestica_pc)+' sono per altri usi (uffici, negozi, servizi). Anche i '+f0(m24.domestica_pc)+' litri domestici sono divisi per i soli residenti.</li></ul>');
+  setH('acqua-citta-testo','Stessa fonte e stesse definizioni per i 14 capoluoghi di città metropolitana. Nel 2024 le perdite di Milano sono '+nf(mil.perdite_2024,1)+'% dell’acqua immessa; per le altre 13 città la mediana è '+nf(medv('perdite_2024'),1)+'%. Milano ha la perdita più bassa del gruppo, nel 2018 e nel 2024. Nell’erogata per abitante Milano è la prima ('+f0(mil.erogata_2024)+' litri, mediana delle altre '+f0(medv('erogata_2024'))+'), e nella parte domestica anche ('+f0(mil.domestica_2024)+' litri, mediana delle altre '+f0(medv('domestica_2024'))+'). Sull’erogata pesa anche chi a Milano lavora senza abitarci, ma i dati non dicono quanto. Perché anche la parte domestica sia così alta, i dati non lo spiegano. In '+C.filter(function(c){return c.perdite_2024<c.perdite_2018}).length+' città su 14 la perdita percentuale è più bassa nel 2024 che nel 2018.');
+  setH('g6-leg','<span><i class="ring" style="border-color:'+GRI+'"></i>2018</span><span><i class="dot" style="background:#6b7780"></i>2024 (provvisorio)</span>');
+  setH('g7-nota','Per ogni città un cerchio vuoto (2018) e uno pieno (2024), unito da una linea. I litri per abitante del 2018 non tengono conto della revisione dei residenti ISTAT del 2021, quelli del 2024 sì: tra i due anni piccole differenze non sono significative. Milano in blu. Passa sopra una riga per i valori.');
+  setH('tab-citta-a','<thead><tr><th>Città</th><th class="r">Erogata 2018</th><th class="r">Erogata 2024</th><th class="r">Perdite 2018</th><th class="r">Perdite 2024</th><th class="r">Domestica 2024</th></tr></thead><tbody>'+C.slice().sort(function(a,b){return b.erogata_2024-a.erogata_2024}).map(function(c){var m=c.nome==='Milano';return '<tr'+(m?' style="background:#eaf1f6"':'')+'><td>'+(m?'<b>':'')+esc(c.nome)+(m?'</b>':'')+'</td><td class="r">'+f0(c.erogata_2018)+'</td><td class="r">'+f0(c.erogata_2024)+'</td><td class="r">'+nf(c.perdite_2018,1)+'%</td><td class="r">'+nf(c.perdite_2024,1)+'%</td><td class="r">'+f0(c.domestica_2024)+'</td></tr>'}).join('')+'</tbody>');
+  setH('citta-a-nota','Litri per abitante al giorno e percentuali, ISTAT. Ordinate per acqua erogata nel 2024. “Domestica” = acqua fatturata per uso civile domestico.');
+  REDRAW.push(chartAcqua);
+}
+
+
+function limiti(){
+  var A=D.annuale,J=A.salto_2009_2010,C=D.caldo,g=D.giornaliero,S=A.serie;
+  var h='';
+  h+='<li><b>Non abbiamo trovato un dato per ora di Milano.</b> Terna pubblica i consumi per grandi zone di mercato, non per Milano, e per scaricarli in automatico sembra servire un’iscrizione: non l’abbiamo fatta. Il dato giornaliero di A2A c’è solo per il 2019 e il 2020.</li>';
+  h+='<li><b>Non abbiamo trovato consumi reali per quartiere</b> né <b>un dato giornaliero per l’acqua</b>: per l’acqua usiamo un valore all’anno, per il 2018, il 2020, il 2022 e il 2024.</li>';
+  h+='<li><b>Due anni, uno e mezzo utile.</b> Il confronto con il caldo usa '+f0(C.n_base)+' giorni feriali. Il 2020 è un anno anomalo anche fuori dal lockdown. Il risultato può cambiare con altri anni.</li>';
+  h+='<li><b>Correlazione non è causa.</b> Il caldo e la corrente salgono insieme; i condizionatori sono una spiegazione plausibile, che questi dati non dimostrano.</li>';
+  h+='<li><b>La temperatura è di una sola stazione</b> (ARPA Brera), calcolata dalle letture orarie: la massima vera del giorno è un po’ più alta di quella usata qui. Per '+f0(C.n_vicine)+' dei '+f0(C.n_base)+' giorni usati è ricostruita dalle stazioni ARPA vicine.</li>';
+  h+='<li><b>Due fonti per la corrente, che non coincidono.</b> Sommando i giorni A2A si ottengono '+nf(g.somma['2019'],1)+' GWh nel 2019 e '+nf(g.somma['2020'],1)+' GWh nel 2020; ISTAT dà '+nf(Y(S,2019).gwh,1)+' e '+nf(Y(S,2020).gwh,1)+' (A2A '+sg(A.a2a_su_istat['2019'],1)+' e '+sg(A.a2a_su_istat['2020'],1)+'). Il Comune descrive il suo dato come l’elettricità «erogata da A2A» nel Comune; ISTAT conta l’elettricità prelevata dalle reti di distribuzione, senza le utenze collegate alla rete nazionale e senza la rete ferroviaria. Le due definizioni sono diverse, ma le note delle fonti non dicono quale differenza spieghi lo scarto: non lo sappiamo. Anche il calo del 2020 non è lo stesso ('+sg(A.var_2020_a2a,1)+' contro '+sg(A.var_2020_istat,1)+'). Per questo i due dati non sono mai mescolati in uno stesso grafico.</li>';
+  h+='<li><b>La serie ISTAT parte dal 2015, non prima.</b> (a) Fino al 2014 ISTAT conta i consumi fatturati; dal 2015 i consumi effettivi dagli archivi Arera. (b) Tra il 2009 e il 2010 la serie di Milano fa un salto che non sappiamo spiegare: l’elettricità scende del '+Math.abs(J.elettricita)+'% e il gas sale del '+J.gas+'%, mentre gli usi domestici non cambiano ('+sg(J.domestico)+'), cioè tutto avviene negli altri usi. Nelle note delle tavole e nel comunicato ISTAT non c’è una spiegazione e non c’è un cambio di metodo dichiarato per quell’anno; tra gli altri '+f0(J.n_comuni_confrontati-1)+' capoluoghi confrontabili nessuno ha insieme un calo dell’elettricità di almeno il 10% e un aumento del gas di almeno il 20%. Per questo non mostriamo mai una tendenza che attraversa il 2009-2010 o il 2014-2015. Il 2014 stesso è stato rivisto: '+nf(A.gwh_2014_comune,1)+' GWh nel dataset del Comune, '+nf(A.gwh_2014_istat,1)+' nella serie ISTAT attuale.</li>';
+  h+='<li><b>Dati stimati e provvisori.</b> ISTAT segna come stimata la quota domestica del 2023 e del 2024, e come provvisori i dati sull’acqua del 2024. L’acqua del 2018 è calcolata sui residenti prima della revisione ISTAT del 2021. Per l’acqua diamo per uguali le definizioni dei quattro anni: stesso censimento e stesse voci, ma non lo abbiamo controllato riga per riga nelle note.</li>';
+  h+='<li><b>Gli abitanti non sono tutti quelli che consumano.</b> Tutti i valori “per abitante” dividono per i residenti: ma a Milano consumano anche pendolari, studenti e turisti, e le imprese. Il numero non dice quanto consuma un residente in casa.</li>';
+  h+='<li><b>Serie non cucite.</b> Il Comune pubblica anche i consumi pro capite del 2000-2011 (nel 2011: '+f0(A.ds523.kwh_domestico)+' kWh di elettricità per uso domestico e '+nf(A.ds523.acqua_m3,1)+' m³ di acqua, cioè '+f0(A.ds523.acqua_litri_giorno)+' litri al giorno, per abitante). Le teniamo fuori dai grafici: è un’altra fonte, con metodi diversi da quelli dei dati ISTAT dal 2015, e non possiamo dire se il confronto regge.</li>';
+  h+='<li><b>Un giorno isolato.</b> Il '+dataNum(g.minimo.data)+' ha il valore più basso dei due anni ('+nf(g.minimo.gwh,1)+' GWh) ma i giorni attorno stanno a oltre 14: non sappiamo se sia un fatto vero o un errore nel dato.</li>';
+  setH('limiti-testo',h);
+}
+
+function fonti(){
+  var h='';
+  var L=function(u,t){return '<a href="'+u+'" target="_blank" rel="noopener">'+t+'</a>'};
+  var sc=dataIt(D.data_scarico);
+  h+='<li><b>Comune di Milano</b>, dati.comune.milano.it, licenza CC BY (Creative Commons Attribuzione). Scaricati il '+sc+'. '+L('https://dati.comune.milano.it/dataset/bdfc8120-109e-4461-bb53-114d27c859a8','Energia elettrica erogata da A2A, totale giornaliero (ds1574, 2019-2020)')+' · '+L('https://dati.comune.milano.it/dataset/ccf1f52e-a07a-4dc5-b8bf-81d820cbad2a','Consumi di energia elettrica, serie storica (ds1537, usato solo come controllo del 2014-2018)')+' · '+L('https://dati.comune.milano.it/dataset/be9028dd-0ead-42e6-966d-cb5e34b97ce4','Consumo di acqua ed energia pro capite 2000-2011 (ds523, solo citato)')+' · '+L('https://dati.comune.milano.it/dataset/6f2c8cc0-b038-4768-b248-519b87e467c4','Acqua immessa, erogata e perdite 2018 (ds1571, controllo del dato ISTAT)')+'.</li>';
+  h+='<li><b>ISTAT</b>, licenza CC BY 4.0. Scaricati il '+sc+'. Elettricità e gas: '+L('https://www.istat.it/wp-content/uploads/2026/07/ENERGIA_serie_storiche-1.xlsx','serie storiche Energia, 2003-2024')+' (comunicato '+L('https://www.istat.it/comunicato-stampa/trasformazioni-e-innovazioni-nei-consumi-elettrici-delle-citta-capoluogo-anno-2024/','Trasformazioni e innovazioni nei consumi elettrici delle città capoluogo, anno 2024')+', con '+L('https://www.istat.it/wp-content/uploads/2026/07/Trasformazioni-e-innovazioni-nei-consumi-elettrici-delle-citta-capoluogo_Anno-2024.pdf','testo e nota metodologica')+') e '+L('https://www.istat.it/wp-content/uploads/2026/09/TAVOLE_AMBURB_2024.zip','le tavole Ambiente urbano 2024')+' (file ENERGIA_2024 e ACQUA_2024; comunicato '+L('https://www.istat.it/comunicato-stampa/ambiente-urbano-anno-2024/','Ambiente urbano, anno 2024')+'). Acqua, anni precedenti: '+L('https://www.istat.it/wp-content/uploads/2021/03/Tavole_GMA2021.xlsx','tavole del 2021 (dati 2018)')+', '+L('https://www.istat.it/tavole-di-dati/censimento-delle-acque-per-uso-civile-anno-2020/','Censimento delle acque per uso civile, anno 2020')+' e '+L('https://www.istat.it/wp-content/uploads/2024/03/Istat-GMA2024-Tavole.xlsx','tavole del 2024 (dati 2022)')+'.</li>';
+  h+='<li><b>ARPA Lombardia</b>, temperatura della stazione Milano v.Brera (sensore 5897), dati.lombardia.it, licenza CC0. È la serie descritta nella pagina <a href="../temperature/">Temperature</a>; qui servono i giorni 2019-2020.</li>';
+  h+='<li><b>INGV</b> (vibrazioni del suolo, solo per il confronto con la pagina <a href="../vibrazioni/">Il respiro di Milano</a>).</li>';
+  setH('fonti-lista',h);
+  var C=D.caldo;
+  setH('metodo','<b>Metodo.</b> Il confronto con la temperatura usa i giorni feriali non festivi (le feste nazionali e il 7 dicembre, Sant’Ambrogio), senza il lockdown e le riaperture (24 febbraio-30 giugno 2020), la pausa di agosto (5-25 agosto) e le feste di fine anno (24 dicembre-6 gennaio). Si cerca la coppia di soglie (una per il caldo, una per il freddo) che spiega meglio la corrente, tenendo conto del giorno della settimana e dell’anno 2020; la pendenza sopra la soglia è i GWh in più per grado. L’intervallo viene da '+f0(1000)+' ripetizioni del calcolo su campioni di settimane intere estratte a caso dagli stessi giorni (con ripetizione). Le mediane sono mediane dei giorni. Il file <a href="data/consumi_giornalieri.csv">consumi_giornalieri.csv</a> ha '+f0(D.csv.righe)+' righe, una per giorno, con GWh, temperature, se il giorno è stato usato nel confronto e perché no; non contiene i file originali di ISTAT.');
+}
+
+/* ---------- grafici (SVG a mano) ---------- */
+function griglia(m,W,Yf,lo,hi,st,ytit,fmt){
+  var s='';fmt=fmt||f0;
+  for(var v=lo;v<=hi+st/2;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Yf(v).toFixed(1)+'" y2="'+Yf(v).toFixed(1)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Yf(v)+4).toFixed(1)+'" text-anchor="end">'+fmt(v)+'</text>'}
+  if(ytit)s+='<text class="mu" x="'+m.l+'" y="14">'+ytit+'</text>';
+  return s;
+}
+function tipOn(box,svg,rect,W,idxAt,xAt,html){
+  var tip=box.lastChild;
+  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),px=(t.clientX-r.left)*(W/r.width),py=(t.clientY-r.top)*(W/r.width),i=idxAt(px,py);
+    if(i==null||i<0){tip.style.display='none';return}
+    tip.innerHTML=html(i);tip.style.display='';
+    var tw=tip.offsetWidth,left=xAt(i)*(r.width/W)+10;if(left+tw>r.width)left=xAt(i)*(r.width/W)-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
+  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+}
+
+function chartAnno(id,i0,i1,anno){
+  var box=el(id),g=D.giornaliero,n=i1-i0,W=box.clientWidth||320,H=W<500?190:210,m={l:40,r:10,t:22,b:26},pw=W-m.l-m.r,ph=H-m.t-m.b,lo=10,hi=32,st=5;
+  function X(i){return m.l+(i-i0)/(n-1)*pw} function Yf(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità erogata a Milano, giorno per giorno, nel '+anno+'">';
+  // fasce
+  function fascia(a,b,col){var x0=X(Math.max(i0,idxDi(a))),x1=X(Math.min(i1-1,idxDi(b)));if(x1>x0)s+='<rect x="'+x0.toFixed(1)+'" y="'+m.t+'" width="'+(x1-x0).toFixed(1)+'" height="'+ph+'" fill="'+col+'"/>'}
+  if(anno===2020)fascia(g.lockdown[0],g.lockdown[1],'#f3d9bd');
+  fascia(anno===2019?g.agosto[0]:g.agosto[2],anno===2019?g.agosto[1]:g.agosto[3],'#e3e6e8');
+  s+=griglia(m,W,Yf,lo,hi,st,anno+' · GWh al giorno');
+  var ev=W<460;
+  for(var k=0;k<12;k++){var ii=idxDi(anno+'-'+('0'+(k+1)).slice(-2)+'-01'),x=X(ii);s+='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/>';
+    var nx=k<11?X(idxDi(anno+'-'+('0'+(k+2)).slice(-2)+'-01')):X(i1-1);s+='<text class="mu" x="'+((x+nx)/2).toFixed(1)+'" y="'+(m.t+ph+18)+'" text-anchor="middle">'+(ev?MESI3[k].charAt(0):MESI3[k])+'</text>'}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  var d='';for(var i=i0;i<i1;i++){d+=(i>i0?'L':'M')+X(i).toFixed(1)+' '+Yf(g.gwh[i]).toFixed(1)}
+  s+='<path d="'+d+'" fill="none" stroke="#b9c2c9" stroke-width="1"/>';
+  for(i=i0;i<i1;i++){var f=g.tipo.charAt(i)==='f';s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Yf(g.gwh[i]).toFixed(1)+'" r="'+(f?1.9:1.7)+'" fill="'+(f?BLU:GRI)+'"/>'}
+  function nota(iso,txt,dx,dy,anc){var i=idxDi(iso);s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Yf(g.gwh[i]).toFixed(1)+'" r="4.5" fill="none" stroke="#111" stroke-width="1.4"/><text x="'+(X(i)+dx).toFixed(1)+'" y="'+(Yf(g.gwh[i])+dy).toFixed(1)+'" text-anchor="'+anc+'">'+txt+'</text>'}
+  if(anno===2019){nota(g.massimo.data,nf(g.massimo.gwh,1)+' · '+dataBr(g.massimo.data),-8,4,'end');nota('2019-08-15','Ferragosto '+nf(g.gwh[idxDi('2019-08-15')],1),0,18,'middle')}
+  else{nota(g.minimo.data,nf(g.minimo.gwh,1)+' · '+dataBr(g.minimo.data),0,16,'middle');
+    var xl=(X(idxDi(g.lockdown[0]))+X(idxDi(g.lockdown[1])))/2;s+='<text class="mu" x="'+xl.toFixed(1)+'" y="'+(m.t+12)+'" text-anchor="middle">lockdown</text>'}
+  s+='<line id="hv'+id+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#444" stroke-width="1" style="display:none"/><rect class="hit" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,rect=svg.querySelector('.hit'),ln=svg.querySelector('#hv'+id);
+  tipOn(box,svg,rect,W,function(px){return Math.max(i0,Math.min(i1-1,Math.round(i0+(px-m.l)/pw*(n-1))))},X,function(i){ln.style.display='';ln.setAttribute('x1',X(i));ln.setAttribute('x2',X(i));
+    var iso=isoDi(i),tp=g.tipo.charAt(i);
+    return '<b>'+giornoDi(iso)+' '+dataIt(iso)+'</b>'+(tp==='h'?' <span class="sub">(festa)</span>':'')+'<br>'+nf(g.gwh[i],1)+' GWh · massima '+nf(g.tmax[i],1)+' °C'});
+  rect.addEventListener('mouseleave',function(){ln.style.display='none'});
+}
+
+function chartCaldo(){
+  var box=el('g2'),C=D.caldo,g=D.giornaliero,W=box.clientWidth||320,H=W<500?340:380,m={l:42,r:10,t:26,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b,x0=0,x1=40,lo=10,hi=32;
+  function X(t){return m.l+(t-x0)/(x1-x0)*pw} function Yf(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità giornaliera a Milano contro la temperatura massima, giorni feriali 2019 e 2020">'+griglia(m,W,Yf,lo,hi,5,'GWh al giorno');
+  for(var t=0;t<=40;t+=5){s+='<line x1="'+X(t).toFixed(1)+'" x2="'+X(t).toFixed(1)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(t).toFixed(1)+'" y="'+(m.t+ph+18)+'" text-anchor="middle">'+t+'</text>'}
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/><text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">temperatura massima del giorno (°C)</text>';
+  var sx=X(C.tmax.soglia_caldo);s+='<line x1="'+sx.toFixed(1)+'" x2="'+sx.toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#555" stroke-dasharray="4 4"/><text class="mu" x="'+(sx-4).toFixed(1)+'" y="'+(m.t+12)+'" text-anchor="end">≈'+f0(C.tmax.soglia_caldo)+' °C</text>';
+  var P=C.scatter;
+  P.filter(function(p){return p[1]>=2}).forEach(function(p){s+='<circle cx="'+X(g.tmax[p[0]]).toFixed(1)+'" cy="'+Yf(g.gwh[p[0]]).toFixed(1)+'" r="3.2" fill="#fff" stroke="'+GRI+'" stroke-width="1.3"/>'});
+  P.filter(function(p){return p[1]<2}).forEach(function(p){s+='<circle cx="'+X(g.tmax[p[0]]).toFixed(1)+'" cy="'+Yf(g.gwh[p[0]]).toFixed(1)+'" r="3.4" fill="'+(p[1]===0?BLU:AMB)+'" fill-opacity=".8"/>'});
+  s+='<path d="'+C.curva.filter(function(c){return c[0]<=38}).map(function(c,i){return (i?'L':'M')+X(c[0]).toFixed(1)+' '+Yf(c[1]).toFixed(1)}).join('')+'" fill="none" stroke="#111" stroke-width="2.4"/>';
+  s+='<rect class="hit" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
+  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
+  var svg=box.firstChild,rect=svg.querySelector('.hit');
+  var px=P.map(function(p){return X(g.tmax[p[0]])}),py=P.map(function(p){return Yf(g.gwh[p[0]])});
+  var NOM=['','','pausa di agosto, escluso','lockdown e riaperture, escluso','feste di fine anno, escluso'];
+  tipOn(box,svg,rect,W,function(x,y){var b=-1,bd=1e9;px.forEach(function(q,i){var d=(q-x)*(q-x)+(py[i]-y)*(py[i]-y);if(d<bd){bd=d;b=i}});return bd<22*22?b:-1},function(i){return px[i]},function(i){var k=P[i][0],iso=isoDi(k);
+    return '<b>'+giornoDi(iso)+' '+dataIt(iso)+'</b><br>'+nf(g.gwh[k],1)+' GWh · massima '+nf(g.tmax[k],1)+' °C'+(P[i][1]>=2?'<br><span class="sub">'+NOM[P[i][1]]+'</span>':'')});
+}
+
+function chartFerr(){
+  var box=el('g3'),F=D.ferragosto,G=F.giorni,n=G.length,W=box.clientWidth||320,H=W<500?320:350,m={l:42,r:10,t:30,b:62},pw=W-m.l-m.r,ph=H-m.t-m.b,mx=F.feriali_marzo2019;
+  G.forEach(function(g){if(g.gwh>mx)mx=g.gwh});
+  var st=niceStep(mx/4),hi=Math.ceil(mx/st-1e-9)*st,bw=pw/n;
+  function Yf(v){return m.t+ph-v/hi*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità giornaliera a Milano dall’11 al 19 agosto 2019">'+griglia(m,W,Yf,0,hi,st,'GWh al giorno');
+  G.forEach(function(g,i){
+    var fe=g.data==='2019-08-15',we=g.sett==='sab'||g.sett==='dom',x=m.l+i*bw,col=fe?BLU:(we?'#cfd6db':GRI);
+    s+='<rect x="'+(x+bw*0.14).toFixed(1)+'" y="'+Yf(g.gwh).toFixed(1)+'" width="'+(bw*0.72).toFixed(1)+'" height="'+(Yf(0)-Yf(g.gwh)).toFixed(1)+'" fill="'+col+'"/>';
+    s+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(Yf(g.gwh)-5).toFixed(1)+'" text-anchor="middle"'+(fe?' font-weight="700"':'')+'>'+nf(g.gwh,1)+'</text>';
+    s+='<text class="mu" x="'+(x+bw/2).toFixed(1)+'" y="'+(m.t+ph+16)+'" text-anchor="middle"'+(fe?' font-weight="700" style="fill:#1f5f8b"':'')+'>'+g.sett+'</text>';
+    s+='<text class="mu" x="'+(x+bw/2).toFixed(1)+'" y="'+(m.t+ph+31)+'" text-anchor="middle"'+(fe?' font-weight="700" style="fill:#1f5f8b"':'')+'>'+(+g.data.slice(8))+'</text>';
+    s+='<text class="mu" x="'+(x+bw/2).toFixed(1)+'" y="'+(m.t+ph+47)+'" text-anchor="middle">'+nf(g.tmax,0)+'°</text>';
+  });
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Yf(F.feriali_marzo2019).toFixed(1)+'" y2="'+Yf(F.feriali_marzo2019).toFixed(1)+'" stroke="#111" stroke-width="1.6" stroke-dasharray="6 4"/>';
+  s+='</svg>';
+  box.innerHTML=s;
+}
+
+function chartAnnuale(){
+  var box=el('g4'),S=D.annuale.serie,n=S.length,W=box.clientWidth||320,H=W<500?280:310,m={l:44,r:10,t:26,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,hi=8000,bw=pw/n;
+  function Yf(v){return m.t+ph-v/hi*ph}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità consumata a Milano per anno, 2015-2024">'+griglia(m,W,Yf,0,hi,2000,'GWh all’anno');
+  S.forEach(function(x,i){var xx=m.l+i*bw,col=x.anno===2020?AMB:BLU;
+    s+='<rect x="'+(xx+bw*0.12).toFixed(1)+'" y="'+Yf(x.gwh).toFixed(1)+'" width="'+(bw*0.76).toFixed(1)+'" height="'+(Yf(0)-Yf(x.gwh)).toFixed(1)+'" fill="'+col+'"/>';
+    s+='<text x="'+(xx+bw/2).toFixed(1)+'" y="'+(Yf(x.gwh)-5).toFixed(1)+'" text-anchor="middle"'+(bw<42?' font-size="10.5"':'')+'>'+f0(x.gwh)+'</text>';
+    s+='<text class="mu" x="'+(xx+bw/2).toFixed(1)+'" y="'+(m.t+ph+18)+'" text-anchor="middle">'+(bw<40?String(x.anno).slice(2):x.anno)+'</text>'});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/></svg>';
+  box.innerHTML=s;
+}
+
+function chartCittaE(){
+  var box=el('g5'),C=D.annuale.citta.slice().sort(function(a,b){return b.kwh_ab_2024-a.kwh_ab_2024}),n=C.length,W=box.clientWidth||320,rh=24,m={l:W<500?96:128,r:46,t:6,b:24},H=m.t+m.b+n*rh,pw=W-m.l-m.r,hi=7000;
+  function X(v){return m.l+v/hi*pw}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità per abitante nel 2024, 14 capoluoghi di città metropolitana">';
+  for(var v=0;v<=hi;v+=1000){s+='<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+n*rh)+'" stroke="#e3e3e3"/><text class="mu" x="'+X(v).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+f0(v)+'</text>'}
+  C.forEach(function(c,i){var y=m.t+i*rh,mi=c.nome==='Milano';
+    s+='<text x="'+(m.l-6)+'" y="'+(y+rh/2+4)+'" text-anchor="end"'+(mi?' font-weight="700"':'')+'>'+esc(c.nome==='Reggio di Calabria'?'Reggio C.':c.nome)+'</text>';
+    s+='<rect x="'+m.l+'" y="'+(y+3)+'" width="'+(X(c.kwh_ab_2024)-m.l).toFixed(1)+'" height="'+(rh-6)+'" fill="'+(mi?BLU:GRI)+'"/>';
+    s+='<text x="'+(X(c.kwh_ab_2024)+4).toFixed(1)+'" y="'+(y+rh/2+4)+'"'+(mi?' font-weight="700"':'')+'>'+f0(c.kwh_ab_2024)+'</text>';
+    s+='<rect class="hit" data-i="'+i+'" x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"/>'});
+  box.innerHTML=s+'</svg><div class="tip" style="display:none"></div>';
+  var svg=box.firstChild;
+  tipOn(box,svg,svg,W,function(x,y){var i=Math.floor((y-m.t)/rh);return i>=0&&i<n?i:-1},function(i){return X(C[i].kwh_ab_2024)},function(i){var c=C[i];return '<b>'+esc(c.nome)+'</b><br>2024: '+f0(c.kwh_ab_2024)+' kWh per abitante<br>2015: '+f0(c.kwh_ab_2015)+' · totale 2024: '+f0(c.gwh_2024)+' GWh'});
+}
+
+function chartAcqua(){
+  function dumb(id,k18,k24,hi,st,fmt,unit){
+    var box=el(id),C=D.acqua.citta.slice().sort(function(a,b){return b[k24]-a[k24]}),n=C.length,W=box.clientWidth||320,rh=24,m={l:W<500?96:128,r:14,t:6,b:24},H=m.t+m.b+n*rh,pw=W-m.l-m.r;
+    function X(v){return m.l+v/hi*pw}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+esc(unit)+', 2018 e 2024, 14 capoluoghi di città metropolitana">';
+    for(var v=0;v<=hi;v+=st){s+='<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+n*rh)+'" stroke="#e3e3e3"/><text class="mu" x="'+X(v).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+fmt(v)+'</text>'}
+    C.forEach(function(c,i){var y=m.t+i*rh+rh/2,mi=c.nome==='Milano',col=mi?BLU:GRI;
+      s+='<text x="'+(m.l-6)+'" y="'+(y+4)+'" text-anchor="end"'+(mi?' font-weight="700"':'')+'>'+esc(c.nome==='Reggio di Calabria'?'Reggio C.':c.nome)+'</text>';
+      s+='<line x1="'+X(c[k18]).toFixed(1)+'" x2="'+X(c[k24]).toFixed(1)+'" y1="'+y+'" y2="'+y+'" stroke="'+col+'" stroke-width="2"/>';
+      s+='<circle cx="'+X(c[k18]).toFixed(1)+'" cy="'+y+'" r="5" fill="#fff" stroke="'+col+'" stroke-width="2"/><circle cx="'+X(c[k24]).toFixed(1)+'" cy="'+y+'" r="5" fill="'+(mi?BLU:'#6b7780')+'"/>'});
+    box.innerHTML=s+'</svg><div class="tip" style="display:none"></div>';
+    var svg=box.firstChild;
+    tipOn(box,svg,svg,W,function(x,y){var i=Math.floor((y-m.t)/rh);return i>=0&&i<n?i:-1},function(i){return X(C[i][k24])},function(i){var c=C[i];return '<b>'+esc(c.nome)+'</b><br>2018: '+fmt(c[k18],1)+'<br>2024: '+fmt(c[k24],1)});
+  }
+  dumb('g6','erogata_2018','erogata_2024',400,100,function(v){return f0(v)},'Acqua erogata');
+  dumb('g7','perdite_2018','perdite_2024',70,10,function(v,d){return d?nf(v,1)+'%':f0(v)+'%'},'Perdite nella rete');
+}
+})();
+</script>
+</body></html>
