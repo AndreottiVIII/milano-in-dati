@@ -56,19 +56,25 @@ def giornaliero(radice):
     with open(os.path.join(raw, 'comune', 'ds1574.csv'), encoding='utf-8-sig') as f:
         for r in csv.DictReader(f, delimiter=';'):
             E[r['Data']] = (r['Giorno'], float(r['Totale (GWh)']))
+    GAS = {}
+    with open(os.path.join(raw, 'comune', 'ds1573.csv'), encoding='utf-8-sig') as f:
+        for r in csv.DictReader(f, delimiter=';'):
+            assert r['Data'] not in GAS and r['Anno'] == r['Data'][:4], r
+            GAS[r['Data']] = (r['Giorno'], float(r['Totale (Smc)']))      # standard metri cubi (qualche riga ha .5)
     T = {}
     with open(os.path.join(radice, 'temperature', 'serie', 'serie_unica.csv'), encoding='utf-8') as f:
         for r in csv.DictReader(f):
             if '2019-01-01' <= r['date'] <= '2020-12-31':
                 T[r['date']] = r
-    assert len(E) == 731 and len(T) == 731 and set(E) == set(T), 'date non allineate'
+    assert len(E) == 731 and len(T) == 731 and set(E) == set(T) == set(GAS), 'date non allineate'
+    assert all(GAS[d][0] == E[d][0] for d in E), 'nomi dei giorni del gas diversi da quelli della corrente'
     out = os.path.join(radice, 'consumi', 'out')
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, 'giornaliero.csv'), 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
-        w.writerow(['data', 'giorno', 'gwh', 'tmin', 'tmax', 'tmean', 'fonte_temperatura'])
+        w.writerow(['data', 'giorno', 'gwh', 'tmin', 'tmax', 'tmean', 'fonte_temperatura', 'gas_smc'])
         for d in sorted(E):
-            w.writerow([d, E[d][0], E[d][1], T[d]['tmin'], T[d]['tmax'], T[d]['tmean'], T[d]['fonte']])
+            w.writerow([d, E[d][0], E[d][1], T[d]['tmin'], T[d]['tmax'], T[d]['tmean'], T[d]['fonte'], GAS[d][1]])
 
 
 def energia(radice):
@@ -171,14 +177,34 @@ def acqua(radice):
     return out, ds1571
 
 
+def terna_led_provincia(radice):
+    raw = os.path.join(radice, 'consumi', 'raw')
+    # Terna, centro download, "Energia elettrica per settore": somme annue gia' fatte da scarica_terna.py (licenza non indicata)
+    terna = {}
+    with open(os.path.join(raw, 'terna', 'settori_aggregati.csv'), encoding='utf-8') as f:
+        for r in csv.DictReader(f):
+            terna.setdefault(r['anno'], {}).setdefault(r['provincia'], {})[r['settore']] = float(r['gwh'])
+    # Istat, Ambiente urbano 2024, Tav 9.1: consumo totale per provincia, GWh, 2017-2024
+    R = foglio(os.path.join(raw, 'istat_ambiente', 'tavole', 'ENERGIA_2024.xlsx'), 'Tav.9.1-energia')
+    anni = [int(x) for x in next(r for r in R if r and r[0] and 'PROVINCE' in str(r[0]))[1:] if isinstance(x, (int, float))]
+    istat91 = dict(zip([str(a) for a in anni], nn(trova(R, 'Milano'), len(anni))))
+    # Comune di Milano, ds1576: lampade di illuminazione pubblica, tradizionali e LED
+    led = {}
+    with open(os.path.join(raw, 'comune', 'ds1576.csv'), encoding='utf-8-sig') as f:
+        for r in csv.DictReader(f, delimiter=';'):
+            led[r['ANNO']] = [int(r['TRADIZIONALI']), int(r['LED'])]
+    return terna, istat91, led
+
+
 def main(radice):
     giornaliero(radice)
     en, gwh_diretti, gas_diretto, ds1537, ds523 = energia(radice)
     aq, ds1571 = acqua(radice)
     out = os.path.join(radice, 'consumi', 'out')
+    terna, istat91, led = terna_led_provincia(radice)
     with open(os.path.join(out, 'citta.json'), 'w', encoding='utf-8') as f:
         json.dump(dict(energia=en, gwh_diretti_milano=gwh_diretti, gas_milioni_m3_milano=gas_diretto, ds1537=ds1537,
-                       ds523=ds523, acqua=aq, ds1571=ds1571, salto_2009_2010_comuni=salto_2009_2010(radice)), f, ensure_ascii=False, indent=1)
+                       ds523=ds523, acqua=aq, ds1571=ds1571, salto_2009_2010_comuni=salto_2009_2010(radice), terna=terna, istat_tav91_provincia_milano=istat91, led=led), f, ensure_ascii=False, indent=1)
     print('Scritti giornaliero.csv e citta.json in', out)
 
 

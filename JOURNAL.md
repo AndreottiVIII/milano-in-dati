@@ -2911,3 +2911,15 @@ python -I scripts\inventario.py <cartella censimenti>
 - Limiti dei dati: corrente giornaliera solo 2019-2020; legame col caldo misurato, causa no (condizionatori solo ipotesi); A2A supera ISTAT del 6,6% e del 4,8% senza spiegazione nelle note; salto ISTAT 2009-2010 di Milano (elettricità -13%, gas +41%) non spiegato, serie mostrata dal 2015; definizioni dell'acqua nei quattro anni date per uguali, non verificate riga per riga; 16/4/2020 isolato e non spiegato; niente ore e niente quartieri.
 - Non fatto: Terna non provata fino in fondo (centro download non scaricato, l'accesso automatico sembra chiedere un'iscrizione); vecchie edizioni ISTAT 2010-2011 non lette; certificati energetici ds604 non aperti, ds623 senza indirizzo.
 - Le organizzazioni di volontariato, chieste da Davide nella stessa conversazione, sono già nella pagina del terzo settore (RUNTS, 560 a Milano): nessuna modifica.
+- 2026-11-04 — Pulizia della pagina, chiesta da Davide: testo visibile da 20.730 a 7.288 caratteri (-65%), tabelle, metodo e dettagli dei limiti in sezioni chiuse. Aggiunte chieste con un click: gas e freddo, settori dal 2000, lampade a LED.
+- Gas (Comune ds1573, CC BY): sotto circa 19 °C di media la corrente di gas sale di circa 443.000 Smc per grado in meno (da 407.000 a 474.000), 507 feriali. A2A supera ISTAT del 14,2% e del 15,0% senza spiegazione.
+- Settori (Terna, centro download, licenza non indicata: solo somme annue con citazione, file in `consumi/raw/terna/` non pubblicato): Milano più Monza e Brianza, perché Terna le separa dal 2010. Totale 19.448 GWh nel 2000, massimo 21.977 nel 2008, 20.182 nel 2024. Le categorie cambiano tra 2018 e 2019: rottura dedotta dai dati, il comunicato di Terna del 5/1/2021 non indica l'anno.
+- Lampade (Comune ds1576, CC BY): LED da 0 nel 2013 a 151.409 nel 2020, il 99% di 152.966. Nessuna frase sull'energia risparmiata.
+- Correzione: la pagina diceva che per Terna sembrava servire un'iscrizione. Il centro download è aperto, verificato il 4/11/2026: ogni 15 minuti per zone, non per Milano. Il limite è stato riscritto.
+- Ricontrollo del coordinatore: rifatti dai file originali somme del gas, soglia e pendenza, settori e lampade, tutto coincide; pagina riletta intera.
+- Ricerca senza esito: l'acqua di Milano non è nei due file ISTAT più recenti (GMA 2025 e 2026); dei rapporti di MM, A2A e Unareti visti solo estratti di ricerca, cifre sparse. Non letti per intero.
+- Terzo settore: nessuna modifica, scelta di Davide.
+
+## 94. Impianti sportivi: prova sulle palestre private
+
+- 2026-11-04 — Chiesta da Davide. `sport/scripts/prova_catene.py`: 41 sedi di 5 catene dai loro siti contro OpenStreetMap e la pagina: 31 trovate (76%). Vale solo per le catene; nessun elenco per le indipendenti. Aggiunta una riga nei limiti di `docs/sport/`; numeri della pagina non toccati. Dettagli in `sport/NOTE.md`.

@@ -45,6 +45,14 @@ Identico a `citta-15-minuti/scripts/f4_tempi.py`: 57.405 civici, rete pedonale O
 ## Limiti (elenco completo nella pagina)
 Anni diversi (ds34 è del 2011); poche fonti per luogo; "non risulta comunale" non vuol dire privato; palestre di scuole non aperte a tutti; nessun orario né prezzo; niente impianti fuori dal Comune; ds1867 solo statali 2020/21; la regola degli 80 m cambia il totale (673-948); quartieri piccoli (sotto i 1.000 residenti) fuori classifica; 39 coordinate Regione sbagliate; 8 luoghi "da verificare"; non ho letto il sito di Milanosport; OSM può mancare di impianti o avere campi in cortili privati senza il tag access.
 
+## Palestre private: prova sulle catene (4 novembre 2026)
+Programma `scripts/prova_catene.py`: sedi nel Comune copiate dai siti di 5 catene (Virgin Active, McFit, Urban Fitness, GetFit, FitActive) contro OpenStreetMap del 2/11/2026 e contro `pulito/siti.csv`. Trovata = punto con il nome della catena entro 300 m dal civico, o dalla via se il sito non dà il numero (GetFit, FitActive, tre sedi di altre catene).
+- 31 sedi su 41 trovate (76%), uguale su mappa e pagina: Virgin Active 11/12, McFit 2/3, Urban Fitness 8/14, GetFit 8/8, FitActive 2/4. Con una palestra qualsiasi entro 100 m: 34 su 41.
+- Mancano: Virgin Active via Cena; McFit Fulvio Testi; Urban Fitness Carlo Erba, Coni Zugna, Piranesi, Rubens, Sabotino, Cinque Giornate; FitActive Ripamonti, Sismondi.
+- Il contrario esiste: Urban Fitness in via Circo è sulla mappa ma non sul sito della catena. La mappa può conservare sedi chiuse.
+- Limiti della prova: le catene sono le più facili da mappare, quindi il 76% non vale per le palestre indipendenti, che non hanno un elenco con cui confrontarle. Solo 5 catene scelte da me; il raggio sulla via è largo per le vie lunghe.
+- Riferimento ufficiale ma vecchio: sedi di impresa con codice 93130 "Gestione di palestre", Comune ds170 e ds201: 134 nel 2007, 118 nel 2010, per quartiere nel 2010 (Magenta-San Vittore 10, Brera 9, Guastalla 7). Non comprendono le associazioni sportive (ds274: almeno 1.200 sedi non profit di attività sportive, anno non verificato). Nessun numero ufficiale attuale trovato.
+
 ## Licenze e ripubblicazione
 Il file dei luoghi (`docs/sport/data/siti.csv|json`) contiene dati OSM: va ripubblicato con ODbL; dati Comune CC BY (ds1867 attribuzione); Regione CC0. Telefoni, email e persone non sono ripresi (il nome del luogo è il campo `Nome` di ds34, cioè società o centro).
 

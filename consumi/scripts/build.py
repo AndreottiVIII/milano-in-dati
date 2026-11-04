@@ -3,10 +3,12 @@
 # se anche uno solo non coincide, il programma si ferma senza scrivere nulla.
 # Uso: python -I -X utf8 build.py <radice del progetto>        (il bootstrap, qualche secondo, e' sempre rifatto: seme fisso)
 # Scrive: docs/consumi/data/pagina.json e docs/consumi/data/consumi_giornalieri.csv
+# Da novembre 2026: anche gas (ds1573), settori Terna dal 2000 (solo somme annue, licenza non indicata) e lampade LED (ds1576).
 import csv, datetime as dt, json, math, os, statistics as st, sys
 import numpy as np
 
 DATA_SCARICO = '2026-11-03'
+DATA_SCARICO_NUOVI = '2026-11-04'     # gas (ds1573), lampade (ds1576), Terna per settore
 TEP_PER_GWH = 86.0            # Istat, glossario del report sui consumi elettrici delle citta' capoluogo (anno 2024)
 TEP_PER_KM3 = 0.819           # tep per 1.000 m3 di gas naturale (stesso glossario)
 KWH_PER_TEP = 1e6 / TEP_PER_GWH
@@ -15,6 +17,9 @@ GRANDI = ['Torino', 'Genova', 'Milano', 'Venezia', 'Bologna', 'Firenze', 'Roma',
 D = dt.date.fromisoformat
 SEME = 20261103
 N_BOOT = 1000
+SEME_GAS = 20261104
+N_BOOT_GAS = 1000
+GAS_GRIGLIA = np.arange(8.0, 26.5, 0.5)       # soglie provate per il gas (temperatura sotto la quale sale)
 
 # Festivita' nazionali + 7 dicembre (Sant'Ambrogio, patrono di Milano). Pasqua 21/4/2019 e 12/4/2020.
 FESTE = {
@@ -50,7 +55,7 @@ def carica_giornaliero(out):
         for r in csv.DictReader(f):
             d = D(r['data'])
             R.append(dict(data=r['data'], d=d, wd=d.weekday(), gwh=float(r['gwh']), tmin=float(r['tmin']), tmax=float(r['tmax']),
-                          tmean=float(r['tmean']), fonte=r['fonte_temperatura']))
+                          tmean=float(r['tmean']), fonte=r['fonte_temperatura'], gas=float(r['gas_smc']) / 1e6))
     # media di oggi e ieri (il primo giorno non ha "ieri")
     for i, r in enumerate(R):
         r['tmax2'] = (r['tmax'] + R[i - 1]['tmax']) / 2 if i else r['tmax']
@@ -304,6 +309,98 @@ def calcola_acqua(C):
     return mil, citta
 
 
+# ---------------------------------------------------------------- gas e freddo (ds1573, milioni di Smc al giorno)
+def gas_fit(rows, col, T1, tipi=False):
+    t = np.array([r[col] for r in rows])
+    y = np.array([r['gas'] for r in rows])
+    cols = [np.ones(len(rows)), np.maximum(0.0, T1 - t)]
+    if tipi:
+        cols += [np.array([1.0 if r['tipo'] == 'sabato' else 0.0 for r in rows]), np.array([1.0 if r['tipo'] in ('domenica', 'festivo') else 0.0 for r in rows])]
+    X = np.column_stack(cols)
+    b = np.linalg.lstsq(X, y, rcond=None)[0]
+    return b, float(((y - X @ b) ** 2).sum())
+
+
+def gas_migliore(rows, col='tmean', tipi=False):
+    best = None
+    for T1 in GAS_GRIGLIA:
+        b, sse = gas_fit(rows, col, float(T1), tipi)
+        if best is None or sse < best[2]:
+            best = (float(T1), b, sse)
+    y = np.array([r['gas'] for r in rows])
+    return dict(T1=best[0], base=float(best[1][0]), per_grado=float(best[1][1]), sse=best[2], r2=1 - best[2] / float(((y - y.mean()) ** 2).sum()), n=len(rows), b=best[1])
+
+
+def calcola_gas(R):
+    fer = [r for r in R if r['tipo'] == 'feriale']
+    lock = lambda r: LOCK_DAL <= r['data'] <= LOCK_AL
+    out = dict(n_feriali=len(fer))
+    m = gas_migliore(fer)
+    # bootstrap per settimane intere (stesso metodo del caldo), seme proprio
+    rng = np.random.default_rng(SEME_GAS)
+    sett = {}
+    for r in fer:
+        sett.setdefault(r['sett'], []).append(r)
+    chiavi = list(sett)
+    ris = []
+    for _ in range(N_BOOT_GAS):
+        camp = []
+        for k in rng.integers(0, len(chiavi), len(chiavi)):
+            camp.extend(sett[chiavi[k]])
+        bb = gas_migliore(camp)
+        ris.append((bb['T1'], bb['per_grado']))
+    ris = np.array(ris)
+    m['boot_per_grado'] = [float(np.percentile(ris[:, 1], 2.5)), float(np.percentile(ris[:, 1], 97.5))]
+    m['boot_soglia'] = [float(np.percentile(ris[:, 0], 2.5)), float(np.percentile(ris[:, 0], 97.5))]
+    out['principale'] = m
+    def scen(nome, rows, col='tmean', tipi=False):
+        b = gas_migliore(rows, col, tipi)
+        return dict(nome=nome, n=len(rows), col=col, T1=b['T1'], base=b['base'], per_grado=b['per_grado'])
+    out['sensibilita'] = [
+        scen('Scelta principale: giorni feriali', fer),
+        scen('Solo i feriali del 2019', [r for r in fer if r['anno'] == 2019]),
+        scen('Solo i feriali del 2020', [r for r in fer if r['anno'] == 2020]),
+        scen('Feriali senza lockdown e riaperture', [r for r in fer if not lock(r)]),
+        scen('Feriali senza i giorni con temperatura da stazioni vicine', [r for r in fer if r['fonte'] == 'BRERA_H']),
+        scen('Feriali, con la temperatura massima invece della media', fer, 'tmax'),
+        scen('Solo i sabati', [r for r in R if r['tipo'] == 'sabato']),
+        scen('Solo domeniche e feste', [r for r in R if r['tipo'] in ('domenica', 'festivo')]),
+        scen('Tutti i 731 giorni, con una base diversa per tipo di giorno', R, 'tmean', True)]
+    # fasce di temperatura media (feriali)
+    tab = []
+    for a, b in ((-99, 5), (5, 10), (10, 15), (15, 20), (20, 99)):
+        v = [r['gas'] for r in fer if a <= r['tmean'] < b]
+        tab.append(dict(da=None if a < -90 else a, a=None if b > 90 else b, n=len(v), mediana=round(st.median(v), 2), minimo=round(min(v), 2), massimo=round(max(v), 2)))
+    out['fasce'] = tab
+    # confronto tra tipi di giorno alla stessa soglia: base estiva (>= soglia) e mediane nel freddo (temperatura media sotto 8 gradi)
+    out['mediane_freddo'] = {n: round(st.median([r['gas'] for r in R if r['tipo'] in t and r['tmean'] < 8]), 2) for n, t in (('feriale', ('feriale',)), ('sabato', ('sabato',)), ('domenica', ('domenica', 'festivo')))}
+    out['curva'] = [[float(t), round(m['base'] + m['per_grado'] * max(0.0, m['T1'] - t), 3)] for t in np.arange(-4.0, 30.5, 0.5)]
+    out['somma'] = {str(a): round(sum(r['gas'] for r in R if r['anno'] == a), 1) for a in (2019, 2020)}
+    out['minimo'] = min(R, key=lambda r: r['gas'])['data']
+    out['massimo'] = max(R, key=lambda r: r['gas'])['data']
+    out['n_mezzi'] = sum(1 for r in R if abs(r['gas'] * 1e6 - round(r['gas'] * 1e6)) > 0.01)
+    return out
+
+
+# ---------------------------------------------------------------- settori Terna dal 2000 (provincia di Milano + Monza e Brianza)
+def calcola_settori(C):
+    T = C['terna']
+    serie = []
+    for a in sorted(int(x) for x in T):
+        t = T[str(a)]
+        def s(sett, prov=('Milano', 'Monza e della Brianza')):
+            return sum(t.get(p, {}).get(sett, 0.0) for p in prov)
+        tot = sum(sum(t.get(p, {}).values()) for p in ('Milano', 'Monza e della Brianza'))
+        serie.append(dict(anno=a, totale=round(tot, 1), industria=round(s('Industria'), 1), servizi=round(s('Servizi'), 1), domestico=round(s('Domestico'), 1), agricoltura=round(s('Agricoltura'), 1),
+                          milano=round(sum(t.get('Milano', {}).values()), 1), monza=round(sum(t.get('Monza e della Brianza', {}).values()), 1)))
+    return serie
+
+
+def calcola_led(C):
+    L = C['led']
+    return [dict(anno=int(a), tradizionali=v[0], led=v[1], totale=v[0] + v[1]) for a, v in sorted(L.items())]
+
+
 # ---------------------------------------------------------------- cache del bootstrap (seme fisso: il risultato non cambia)
 def bootstrap_cache(out, base):
     p = os.path.join(out, 'bootstrap.json')
@@ -349,14 +446,15 @@ def main(radice):
     caldo['curva'] = curva_modello(caldo, base)
     ago_righe, ago_mis, ago_prev, ago_diff = previsto_agosto(caldo, R)
     vib = json.load(open(os.path.join(radice, 'docs', 'vibrazioni', 'data', 'pagina.json'), encoding='utf-8'))
-    stampa_e_verifica(R, C, caldo, giorni, ann, citta_e, mil, citta_a, (ago_righe, ago_mis, ago_prev, ago_diff), vib)
+    nuovi = dict(gas=calcola_gas(R), settori=calcola_settori(C), led=calcola_led(C))
+    stampa_e_verifica(R, C, caldo, giorni, ann, citta_e, mil, citta_a, (ago_righe, ago_mis, ago_prev, ago_diff), vib, nuovi)
     if ERRORI:
         print('FALLITO: %d controlli non tornano (%s). Non scrivo nulla.' % (len(ERRORI), ', '.join(ERRORI)))
         sys.exit(1)
-    scrivi(dest, R, C, caldo, giorni, ann, citta_e, mil, citta_a, (ago_righe, ago_mis, ago_prev, ago_diff), vib)
+    scrivi(dest, R, C, caldo, giorni, ann, citta_e, mil, citta_a, (ago_righe, ago_mis, ago_prev, ago_diff), vib, nuovi)
 
 
-def valori_da_controllare(R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib):
+def valori_da_controllare(R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib, nuovi):
     """Elenco (nome, valore calcolato) dei numeri scritti in NOTE.md."""
     m = caldo['modelli']['tmax']
     mm = caldo['modelli']['tmean']
@@ -438,12 +536,50 @@ def valori_da_controllare(R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, 
     add('acqua: citta (su 14) con perdite in calo 2018-2024', sum(c['perdite_2024'] < c['perdite_2018'] for c in citta_a))
     # --- altre pagine
     add('vibrazioni: lockdown giorno su marzo 2019 e Ferragosto feriali su marzo 2019 (%)', (vib['giornata']['rispetto_marzo2019']['giorno'], vib['ferragosto']['rispetto_marzo2019']['feriali']))
+    # --- gas (ds1573)
+    G = nuovi['gas']
+    gm = G['principale']
+    add('gas: feriali usati, soglia (C), base estiva (Mmc/giorno), Mmc per grado (3 decimali)', (G['n_feriali'], gm['T1'], round(gm['base'], 2), round(gm['per_grado'], 3)))
+    add('gas: R2 (2 decimali)', round(gm['r2'], 2))
+    add('gas: intervallo bootstrap Mmc per grado (3 decimali) e soglia', (tuple(round(x, 3) for x in gm['boot_per_grado']), tuple(gm['boot_soglia'])))
+    add('gas: stabilita, soglia e Mmc per grado di ogni scelta', [(x['n'], x['T1'], round(x['per_grado'], 3)) for x in G['sensibilita']])
+    add('gas: basi (Mmc) feriali, sabati, domeniche e feste', tuple(round(x['base'], 2) for x in G['sensibilita'] if x['nome'] in ('Scelta principale: giorni feriali', 'Solo i sabati', 'Solo domeniche e feste')))
+    add('gas: fasce di temperatura media dei feriali, n e mediana (Mmc)', [(f['n'], f['mediana']) for f in G['fasce']])
+    add('gas: mediane con temperatura media sotto 8 gradi: feriali, sabati, domeniche e feste', (G['mediane_freddo']['feriale'], G['mediane_freddo']['sabato'], G['mediane_freddo']['domenica']))
+    add('gas: somme annue A2A (milioni di Smc)', (G['somma']['2019'], G['somma']['2020']))
+    add('gas: A2A su ISTAT (%), 2019 e 2020', (round(100 * (G['somma']['2019'] / A[2019]['gas_mm3'] - 1), 1), round(100 * (G['somma']['2020'] / A[2020]['gas_mm3'] - 1), 1)))
+    add('gas: 2020 su 2019 (%), A2A e ISTAT', (round(100 * (G['somma']['2020'] / G['somma']['2019'] - 1), 1), round(100 * (A[2020]['gas_mm3'] / A[2019]['gas_mm3'] - 1), 1)))
+    add('gas: giorno piu basso e piu alto', (G['minimo'], G['massimo']))
+    add('gas: righe con mezzi Smc (16-19 aprile 2020)', G['n_mezzi'])
+    # --- settori Terna, provincia di Milano + Monza e Brianza
+    SE = {x['anno']: x for x in nuovi['settori']}
+    add('Terna: anni 2000-2024 senza buchi', [x['anno'] for x in nuovi['settori']] == list(range(2000, 2025)))
+    add('Terna: totale Milano+Monza 2000, 2008, 2024 (GWh)', (round(SE[2000]['totale']), round(SE[2008]['totale']), round(SE[2024]['totale'])))
+    add('Terna: anno del massimo', max(SE, key=lambda a: SE[a]['totale']))
+    add('Terna: 2009 Milano (che comprende Monza); 2010 Milano e Monza', (round(SE[2009]['milano']), round(SE[2010]['milano']), round(SE[2010]['monza'])))
+    add('Terna: 2000 industria, servizi, case', (round(SE[2000]['industria']), round(SE[2000]['servizi']), round(SE[2000]['domestico'])))
+    add('Terna: 2018 industria, servizi, case', (round(SE[2018]['industria']), round(SE[2018]['servizi']), round(SE[2018]['domestico'])))
+    add('Terna: 2019 industria, servizi, case', (round(SE[2019]['industria']), round(SE[2019]['servizi']), round(SE[2019]['domestico'])))
+    add('Terna: variazione 2018-2019 servizi, industria, case, totale (%)', (pct(SE[2019]['servizi'], SE[2018]['servizi']), pct(SE[2019]['industria'], SE[2018]['industria']), pct(SE[2019]['domestico'], SE[2018]['domestico']), pct(SE[2019]['totale'], SE[2018]['totale'])))
+    add('Terna: 2020 e 2024 totale (GWh)', (round(SE[2020]['totale']), round(SE[2024]['totale'])))
+    I91 = C['istat_tav91_provincia_milano']
+    dif = {int(a): SE[int(a)]['milano'] - v for a, v in I91.items()}
+    add('Terna provincia di Milano uguale a ISTAT Tav 9.1: 2017-2024 entro 0,5 GWh, 2018-2024 entro 0,05', (all(abs(d) < 0.5 for d in dif.values()), all(abs(d) < 0.05 for a, d in dif.items() if a >= 2018)))
+    add('Terna contro ISTAT Tav 9.1: 2017 e 2024 (GWh)', (round(SE[2017]['milano'], 1), I91['2017'], round(SE[2024]['milano'], 1), I91['2024']))
+    # --- lampade (ds1576)
+    LE = {x['anno']: x for x in nuovi['led']}
+    add('LED: anni 2002-2020 senza buchi', [x['anno'] for x in nuovi['led']] == list(range(2002, 2021)))
+    add('LED: 2002, 2013, 2014, 2020 (tradizionali, LED)', [(LE[a]['tradizionali'], LE[a]['led']) for a in (2002, 2013, 2014, 2020)])
+    add('LED: totale lampade 2002, 2013, 2014, 2020', [LE[a]['totale'] for a in (2002, 2013, 2014, 2020)])
+    add('LED: il totale non scende mai, i LED non scendono mai', (all(LE[a]['totale'] >= LE[a - 1]['totale'] for a in range(2003, 2021)), all(LE[a]['led'] >= LE[a - 1]['led'] for a in range(2003, 2021))))
+    add('LED: quota LED 2014 e 2020 (%)', (round(100 * LE[2014]['led'] / LE[2014]['totale'], 1), round(100 * LE[2020]['led'] / LE[2020]['totale'], 1)))
+    add('LED: variazione annua massima del totale (lampade) e anno', max((LE[a]['totale'] - LE[a - 1]['totale'], a) for a in range(2003, 2021)))
     return V
 
 
-def stampa_e_verifica(R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib):
+def stampa_e_verifica(R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib, nuovi):
     print('--- controlli contro NOTE.md')
-    for nome, v in valori_da_controllare(R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib):
+    for nome, v in valori_da_controllare(R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib, nuovi):
         if nome in ATTESI:
             verifica(nome, v, ATTESI[nome])
         else:
@@ -516,10 +652,40 @@ ATTESI = {
     'acqua: citta con la perdita piu bassa nel 2018 e nel 2024': ('Milano', 'Milano'),
     'acqua: citta (su 14) con perdite in calo 2018-2024': 11,
     'vibrazioni: lockdown giorno su marzo 2019 e Ferragosto feriali su marzo 2019 (%)': (-27, -19),
+    # --- novembre 2026: gas, settori Terna, lampade
+    'gas: feriali usati, soglia (C), base estiva (Mmc/giorno), Mmc per grado (3 decimali)': (507, 19.0, 0.8, 0.443),
+    'gas: R2 (2 decimali)': 0.92,
+    'gas: intervallo bootstrap Mmc per grado (3 decimali) e soglia': ((0.407, 0.474), (18.5, 20.0)),
+    'gas: stabilita, soglia e Mmc per grado di ogni scelta': [(507, 19.0, 0.443), (253, 19.0, 0.448), (254, 19.0, 0.439), (418, 19.5, 0.432), (490, 19.0, 0.443), (507, 25.5, 0.341), (100, 19.0, 0.433), (124, 19.0, 0.41), (731, 19.0, 0.436)],
+    'gas: basi (Mmc) feriali, sabati, domeniche e feste': (0.8, 0.76, 0.7),
+    'gas: fasce di temperatura media dei feriali, n e mediana (Mmc)': [(46, 7.47), (98, 6.07), (117, 3.99), (88, 1.12), (158, 0.77)],
+    'gas: mediane con temperatura media sotto 8 gradi: feriali, sabati, domeniche e feste': (6.71, 6.32, 6.3),
+    'gas: somme annue A2A (milioni di Smc)': (1150.4, 1146.7),
+    'gas: A2A su ISTAT (%), 2019 e 2020': (14.2, 15.0),
+    'gas: 2020 su 2019 (%), A2A e ISTAT': (-0.3, -1.1),
+    'gas: giorno piu basso e piu alto': ('2020-08-15', '2019-02-01'),
+    'gas: righe con mezzi Smc (16-19 aprile 2020)': 4,
+    'Terna: anni 2000-2024 senza buchi': True,
+    'Terna: totale Milano+Monza 2000, 2008, 2024 (GWh)': (19448, 21977, 20182),
+    'Terna: anno del massimo': 2008,
+    'Terna: 2009 Milano (che comprende Monza); 2010 Milano e Monza': (21132, 17257, 4259),
+    'Terna: 2000 industria, servizi, case': (8782, 6202, 4414),
+    'Terna: 2018 industria, servizi, case': (6478, 9818, 4786),
+    'Terna: 2019 industria, servizi, case': (6961, 9091, 4848),
+    'Terna: variazione 2018-2019 servizi, industria, case, totale (%)': (-7, 7, 1, -1),
+    'Terna: 2020 e 2024 totale (GWh)': (19644, 20182),
+    'Terna provincia di Milano uguale a ISTAT Tav 9.1: 2017-2024 entro 0,5 GWh, 2018-2024 entro 0,05': (True, True),
+    'Terna contro ISTAT Tav 9.1: 2017 e 2024 (GWh)': (16686.8, 16687.2, 15971.3, 15971.3),
+    'LED: anni 2002-2020 senza buchi': True,
+    'LED: 2002, 2013, 2014, 2020 (tradizionali, LED)': [(113277, 0), (141963, 0), (65503, 77774), (1557, 151409)],
+    'LED: totale lampade 2002, 2013, 2014, 2020': [113277, 141963, 143277, 152966],
+    'LED: il totale non scende mai, i LED non scendono mai': (True, True),
+    'LED: quota LED 2014 e 2020 (%)': (54.3, 99.0),
+    'LED: variazione annua massima del totale (lampade) e anno': (4460, 2003),
 }
 
 
-def scrivi(dest, R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib):
+def scrivi(dest, R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib, nuovi):
     scatter = []
     for i, r in enumerate(R):
         if not r['feriale']:
@@ -539,9 +705,10 @@ def scrivi(dest, R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib):
     mm = caldo['modelli']['tmean']
     pagina = dict(
         data_scarico=DATA_SCARICO,
+        data_scarico_nuovi=DATA_SCARICO_NUOVI,
         tep_per_gwh=TEP_PER_GWH,
         giornaliero=dict(
-            inizio=R[0]['data'], gwh=[r['gwh'] for r in R], tmax=[r1(r['tmax']) for r in R], tmean=[r1(r['tmean']) for r in R],
+            inizio=R[0]['data'], gwh=[r['gwh'] for r in R], gas=[round(r['gas'], 3) for r in R], tmax=[r1(r['tmax']) for r in R], tmean=[r1(r['tmean']) for r in R],
             tipo=''.join({'feriale': 'f', 'sabato': 's', 'domenica': 'd', 'festivo': 'h'}[r['tipo']] for r in R),
             somma=giorni['somma'], massimo=giorni['massimo'], minimo=giorni['minimo'], posto_tmax_massimo=giorni['posto_tmax_massimo'], n_giorni=len(R),
             lockdown=[LOCK_DAL, LOCK_AL], agosto=['2019-' + AGO_DAL, '2019-' + AGO_AL, '2020-' + AGO_DAL, '2020-' + AGO_AL],
@@ -574,15 +741,25 @@ def scrivi(dest, R, C, caldo, giorni, ann, citta_e, mil, citta_a, ago, vib):
                                 acqua_litri_giorno=round(C['ds523']['2011']['Acqua fatturata per uso domestico'] * 1000 / 365)),
                      quota_non_domestico_2022=round(100 * A[2022]['nondom_gwh'] / A[2022]['gwh'])),
         acqua=dict(milano=mil, citta=citta_a),
+        gas=dict(n_feriali=nuovi['gas']['n_feriali'], soglia=nuovi['gas']['principale']['T1'], base=round(nuovi['gas']['principale']['base'], 3),
+                 per_grado=round(nuovi['gas']['principale']['per_grado'], 3), boot_per_grado=[round(x, 3) for x in nuovi['gas']['principale']['boot_per_grado']],
+                 boot_soglia=nuovi['gas']['principale']['boot_soglia'], r2=round(nuovi['gas']['principale']['r2'], 2), curva=nuovi['gas']['curva'],
+                 sensibilita=[dict(nome=x['nome'], n=x['n'], col=x['col'], soglia=x['T1'], base=round(x['base'], 3), per_grado=round(x['per_grado'], 3)) for x in nuovi['gas']['sensibilita']],
+                 fasce=nuovi['gas']['fasce'], mediane_freddo=nuovi['gas']['mediane_freddo'], somma=nuovi['gas']['somma'],
+                 istat={'2019': A[2019]['gas_mm3'], '2020': A[2020]['gas_mm3']},
+                 a2a_su_istat={a: round(100 * (nuovi['gas']['somma'][a] / A[int(a)]['gas_mm3'] - 1), 1) for a in ('2019', '2020')},
+                 var_2020_a2a=round(100 * (nuovi['gas']['somma']['2020'] / nuovi['gas']['somma']['2019'] - 1), 1), var_2020_istat=round(100 * (A[2020]['gas_mm3'] / A[2019]['gas_mm3'] - 1), 1)),
+        settori=dict(serie=nuovi['settori'], rottura=[2018, 2019]),
+        led=nuovi['led'],
         csv=dict(nome='consumi_giornalieri.csv', righe=len(R)))
     os.makedirs(dest, exist_ok=True)
     tmp = os.path.join(dest, 'consumi_giornalieri.csv.tmp')
     with open(tmp, 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
-        w.writerow(['data', 'giorno', 'gwh_a2a', 'tmin_c', 'tmax_c', 'tmedia_c', 'fonte_temperatura', 'tipo_giorno', 'usato_per_il_caldo', 'motivo_esclusione'])
+        w.writerow(['data', 'giorno', 'gwh_a2a', 'tmin_c', 'tmax_c', 'tmedia_c', 'fonte_temperatura', 'tipo_giorno', 'usato_per_il_caldo', 'motivo_esclusione', 'gas_smc_a2a'])
         for r in R:
             w.writerow([r['data'], ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'][r['wd']], r['gwh'], r['tmin'], r['tmax'], r['tmean'], r['fonte'],
-                        r['tipo'], 1 if r['escl'] == '' else 0, r['escl']])
+                        r['tipo'], 1 if r['escl'] == '' else 0, r['escl'], (lambda v: int(v) if v == int(v) else v)(round(r['gas'] * 1e6, 1))])
     os.replace(tmp, os.path.join(dest, 'consumi_giornalieri.csv'))
     tmp = os.path.join(dest, 'pagina.json.tmp')
     with open(tmp, 'w', encoding='utf-8') as f:

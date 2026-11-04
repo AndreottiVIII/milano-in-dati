@@ -4,8 +4,10 @@ Pagina "Quanta corrente, quanta acqua" (`docs/consumi/index.html`), costruita il
 
 ## Programmi
 
-- `scripts/prepara.py <radice>` legge `raw/` e scrive `out/giornaliero.csv` e `out/citta.json`. Avvio: `python -I -X utf8 <percorso assoluto>/prepara.py <radice>`.
-- `scripts/build.py <radice>` ricalcola tutti i numeri da `out/`, li confronta con quelli di questa nota (64 controlli: se uno non torna, si ferma senza scrivere) e scrive `docs/consumi/data/pagina.json` e `docs/consumi/data/consumi_giornalieri.csv` (731 righe). Il bootstrap (1.000 ripetizioni, seme 20261103) richiede circa 1 minuto 40 la prima volta; poi il risultato sta in `out/bootstrap.json` (se i dati cambiano si rifà da solo).
+- `scripts/prepara.py <radice>` legge `raw/` e scrive `out/giornaliero.csv` e `out/citta.json` (da novembre anche gas, Terna per settore, lampade LED, Tav 9.1). Avvio: `python -I -X utf8 <percorso assoluto>/prepara.py <radice>`.
+- `scripts/build.py <radice>` ricalcola tutti i numeri da `out/`, li confronta con quelli di questa nota (93 controlli: se uno non torna, si ferma senza scrivere) e scrive `docs/consumi/data/pagina.json` e `docs/consumi/data/consumi_giornalieri.csv` (731 righe). Il bootstrap (1.000 ripetizioni, seme 20261103) richiede circa 1 minuto 40 la prima volta; poi il risultato sta in `out/bootstrap.json` (se i dati cambiano si rifà da solo).
+- `scripts/scarica_terna.py` ha prodotto `raw/terna/settori_aggregati.csv` (non rilanciato).
+- 4/11/2026: pagina ripulita. Testo visibile a dettagli chiusi (`main.innerText.length`): 20.730 caratteri prima, 7.288 dopo (-65%). Tabelle, stabilita', fasce, cifre per citta', metodo e limiti lunghi stanno in `<details>` chiusi; i grafici dentro i `<details>` si ridisegnano all'apertura.
 - `docs/consumi/index.html` legge solo `pagina.json`. JS puro, grafici in SVG a mano. Controllato nel Browser pane a 800 e a 375 px: nessuno scorrimento orizzontale (anche con le sezioni a scomparsa aperte), nessun errore in console. I tooltip di quattro grafici (giorni, caldo, città elettricità, acqua) sono stati provati con eventi mouse simulati: funzionano; non provati con il dito.
 
 ## Fonti, licenze, date di scarico (tutte scaricate il 3/11/2026, senza iscrizione)
@@ -26,6 +28,12 @@ ISTAT, licenza CC BY 4.0 (come registrato nel progetto):
 - Acqua degli anni intermedi, trovata senza iscrizione: `Tavole_GMA2021.xlsx` (Tav. 17, dati 2018), `Istat_Tavole_Censimento_acque_2020-21122022.xlsx` (Tav. 15 e 16, dati 2020; pubblicata il 29/12/2022; con la nota metodologica) e `Istat-GMA2024-Tavole.xlsx` (Tav. 5 e 6, dati 2022). Scaricato anche `Tavole_GMA2023.xlsx` (dati 2020-2021): non contiene volumi per città, non usato.
 
 Temperature: `temperature/serie/serie_unica.csv` (stazione ARPA Lombardia Milano v.Brera, sensore 5897, CC0). Per il 2019-2020 la fonte è `BRERA_H` per 708 giorni e `VICINE_ARPA` (media delle stazioni ARPA vicine, per i giorni con meno di 20 ore valide) per 23 giorni. Le fonti ECA&D/Maugeri (licenza non commerciale) non entrano: servono solo giorni dal 2019. Massima e minima sono calcolate dalle letture orarie (la massima vera è un po' più alta). Nessun altro dato di temperatura usato.
+
+Nuove fonti scaricate il 4/11/2026, senza iscrizione:
+
+- Comune di Milano, `cc-by` nei metadati CKAN: ds1573 (376d8b11-434d-4d21-adcd-25aaab08f331), gas erogato da A2A al giorno, Smc, 2019-2020, 731 righe, ultima modifica del file 14/4/2021 (`raw/comune/ds1573.csv`, `meta_ds1573.json`); ds1576 (e07b64f8-5bb8-46e4-8b2a-ab87050a1238), "Transizione illuminazione: da tradizionale a led", numero di lampade (non lampioni) per anno 2002-2020 (`raw/comune/ds1576.csv`, `meta_ds1576.json`).
+- Terna, centro download (https://dati.terna.it/download-center), Consumi, "Energia elettrica per settore", 2000-2024. **Licenza non indicata: nella pagina e in `docs/consumi/data/` solo somme annue per settore, con citazione; il file grezzo `raw/terna/` non si pubblica.** Comunicato del 5/1/2021 sulla riclassificazione, letto su MarketScreener (https://in.marketscreener.com/quote/stock/TERNA-S-P-A-135034/news/Terna-italian-electricity-consumption-data-increasingly-accurate-up-to-date-and-detailed-32122049/): "necessary interruption in the historical data"; il confronto con gli anni prima e' possibile solo per i macrosettori (Agricoltura, Industria, Servizi, Domestico) e "not completely"; non dice da che anno.
+- ISTAT, `ENERGIA_2024.xlsx`, Tav 9.1 (consumo totale per provincia, 2017-2024), gia' nel pacchetto scaricato.
 
 ## Fattori di conversione (dal glossario del testo ISTAT 2024)
 
@@ -57,6 +65,29 @@ Risultati con la temperatura massima (tmax):
 - Stabilità (tmax, GWh per grado): 0,78 (principale), 0,86 solo 2019, 0,85 2019 più 2020 prima del 24/2, 0,83 2019 più 2020 da settembre, 0,83 lockdown fino al 31/5, 0,89 lockdown fino al 31/7, 0,78 con le feste di fine anno, 0,81 senza tutto agosto, 0,71 senza i giorni con temperatura dalle stazioni vicine, **1,06 con la pausa di agosto dentro (e soglia 29 °C)**. Intervallo 0,71-1,06. Con la tmean: 0,79-0,96.
 - Ferragosto contro il modello (adattato fuori da agosto): nei giorni di lavoro 12, 13, 14, 16/8/2019 il modello, con le loro temperature, prevede in mediana 21,6 GWh; misurati 17,3 (-20%). È una stima, non una misura dell'effetto delle ferie.
 - Ipotesi di lavoro (non provata): i condizionatori. La pagina scrive che il legame è misurato, la causa no, e che i dati non dicono dove si usa l'elettricità. Non sono stati usati articoli per i numeri.
+
+## Risultati: gas e freddo (ds1573, 4/11/2026)
+
+Dati: 731 giorni, nessun buco, nomi dei giorni coerenti con le date, anno coerente con la data. Quattro righe (16-19 aprile 2020) hanno ".5" di Smc, le altre sono intere: non spiegato (il 16/4/2020 e' anche il minimo della corrente, pure non spiegato). Giorno piu' basso 15/8/2020, piu' alto 1/2/2019. Gas in milioni di Smc al giorno; mediane mensili da circa 7,3 (gennaio 2019) a 0,58 (agosto 2019).
+
+Metodo: giorni feriali non festivi (507, lockdown compreso: il gas non ha l'esclusione del caldo), temperatura media del giorno (tmean) di Brera, gas = base + pendenza x max(0, T1 - T), T1 cercata su griglia 8-26 °C ogni 0,5, intervallo bootstrap per settimane intere (1.000 ripetizioni, seme 20261104, griglia 0,5). Non e' usato nessun periodo di accensione dei riscaldamenti.
+
+- Soglia T1 = 19,0 °C (bootstrap 18,5-20,0); **+0,443 milioni di Smc per grado in meno** (bootstrap 0,407-0,474); base estiva 0,80 milioni di Smc; R2 0,92. Con la massima invece della media: soglia 25,5, 0,341 (altra grandezza, non confrontabile).
+- Stabilita' (Smc per grado, tmean): solo feriali 2019 0,448; solo feriali 2020 0,439; senza lockdown e riaperture (24/2-30/6/2020; soglia 19,5) 0,432; senza i 17 giorni con temperatura da stazioni vicine 0,443 (490 giorni); sabati 0,433 (100); domeniche e feste 0,410 (124); tutti i 731 giorni con base per tipo di giorno 0,436. Il livello cambia con il tipo di giorno (base 0,80 feriali, 0,76 sabati, 0,70 domeniche e feste), la pendenza poco: per questo la tabella li tiene separati.
+- Fasce di tmean (feriali, n, mediana milioni di Smc): <5 46, 7,47; 5-10 98, 6,07; 10-15 117, 3,99; 15-20 88, 1,12; >=20 158, 0,77. Con tmean <8 le mediane: feriali 6,71, sabati 6,32, domeniche e feste 6,30.
+- Somme annue A2A: 1.150,4 (2019) e 1.146,7 (2020) milioni di Smc. ISTAT (Tav 6.4): 1.007,5 e 996,9 milioni di m3. Scarto +14,2% e +15,0%. Calo 2020: -0,3% (A2A), -1,1% (ISTAT). La causa dello scarto non e' stata cercata e non e' scritta.
+- Ipotesi non provata: il gas serve in gran parte al riscaldamento; la pagina scrive solo "legame misurato, non spiegazione".
+
+## Risultati: settori Terna dal 2000 (provincia di Milano + Monza e Brianza)
+
+- Si somma sempre Milano + Monza: Terna separa Monza dal 2010 (2009 Milano 21.132; 2010 Milano 17.257 + Monza 4.259). Totale: 19.448 GWh (2000), massimo 21.977 (2008), 19.644 (2020), 20.182 (2024). Il totale (con agricoltura, 50-87 GWh) non dipende dalle categorie.
+- La sola provincia di Milano coincide con ISTAT Tav 9.1 per 2017-2024: entro 0,05 GWh dal 2018, 0,4 nel 2017 (16.686,8 contro 16.687,2). 2024: 15.971,3 (controllo in build.py).
+- Rottura delle categorie tra 2018 e 2019, dedotta dai dati (Terna non dice l'anno): servizi 9.818 -> 9.091 (-7%), industria 6.478 -> 6.961 (+7%), case 4.786 -> 4.848 (+1%), totale -1%. Controllo mio sul numero di voci per anno nel file (4/11/2026): 2017 11.849, 2018 11.899, 2019 100.468, 2020 105.774, 2021 428, 2024 428. Il grafico interrompe industria e servizi tra 2018 e 2019; confronti di lungo periodo solo fino al 2018: industria 8.782 -> 6.478, servizi 6.202 -> 9.818, case 4.414 -> 4.786. Nessuna causa data.
+- Coincidenza osservata, non spiegazione: la nascita di Monza nei dati Terna cade nel 2010, lo stesso anno del salto ISTAT non spiegato del comune di Milano (vedi sotto). Gli usi domestici ISTAT non cambiano e il comune non perde territorio, quindi non e' una spiegazione. Non nella pagina.
+
+## Risultati: lampade (ds1576)
+
+2002-2020 senza buchi (19 anni). Tradizionali + LED: 2002 113.277 + 0; 2013 141.963 + 0; 2014 65.503 + 77.774; 2020 1.557 + 151.409. Totale 113.277 -> 143.277 (2014) -> 152.966 (2020), non scende mai; i LED non scendono mai; salto maggiore del totale +4.460 (2003). Quota LED 54,3% (2014), 99,0% (2020). Cosa strana: i LED passano da 0 a 77.774 in un solo anno (2013-2014): potrebbe essere l'anno in cui il Comune comincia a contarli. Il dato conta lampade, non energia: non si dice quanta se ne e' risparmiata.
 
 ## Risultati: negli anni (ISTAT)
 
@@ -102,11 +133,13 @@ Milano, l/ab/giorno (immessa, erogata), perdite, fatturata domestica:
 
 ## Limiti, cosa non torna, cosa non ho fatto
 
-- Terna: non usata. Pubblica dati orari per grandi zone di mercato (non Milano); l'accesso automatico sembra richiedere un'iscrizione: non fatta. Non ho verificato io la pagina di Terna: il dato è quello indicato nel mandato.
+- Terna, dati a 15 minuti: non usati. Verificato il 4/11/2026 (dal proprietario) su https://dati.terna.it/download-center: Fabbisogno Italia ogni 15 minuti per zona di offerta (Nord, Centro-Nord ecc.), anni 2021-2026, senza iscrizione. Un dato per ora di Milano non e' stato trovato; la zona Nord e' molto piu' grande di Milano. (Corretto l'errore precedente sull'iscrizione.) Solo i settori annui 2000-2024 sono usati (vedi sopra).
 - Niente consumi per quartiere, niente dato giornaliero dell'acqua, giornaliero della corrente solo 2019-2020.
 - Il salto 2009-2010 resta senza spiegazione (vedi sopra).
 - La differenza A2A-ISTAT resta senza spiegazione.
-- Il 16/4/2020 resta senza spiegazione.
+- Il 16/4/2020 resta senza spiegazione (corrente minima; stesse date delle 4 righe del gas con mezzi Smc).
+- Gas: A2A contro ISTAT +14,2% e +15,0%, senza spiegazione; soglia 19 °C cercata dai dati (non e' un calendario di accensione).
+- Terna per settore: momento della rottura dedotto, non dichiarato; non ho cercato il comunicato su altre fonti oltre MarketScreener; non ho verificato altre serie provinciali.
 - Sono due anni; il 2020 è atipico anche fuori dal lockdown (l'effetto 2020 nel modello è -1,2 GWh). Non c'è un controllo sul clima degli anni (nessun confronto con altri anni).
 - Il modello a due soglie ha soglie scelte dai dati: l'intervallo bootstrap le include, ma non è una verifica esterna. La soglia del freddo è molto incerta (13-19 °C).
 - La pausa di agosto (5-25) è stata scelta guardando le mediane settimanali; non c'è un calendario ufficiale delle ferie.
