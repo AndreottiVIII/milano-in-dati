@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Il tuo giorno a Milano</title>
+<style>
+:root{--acc:#0072BC;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--rosso:#E30613;--verde:#00A651;--giallo:#FFD500;--viola:#8E4FB3}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:760px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2.s{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+.sub{font-size:.85rem;color:var(--mut)} a{color:#0b4f8a}
+.cerca{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;align-items:center}
+input[type=date]{font:inherit;font-size:1.1rem;padding:8px;border:3px solid var(--ink);border-radius:0;background:#fff;color:var(--ink);min-width:190px}
+button{font:inherit;border:2px solid var(--ink);background:#fff;color:var(--ink);padding:8px 14px;border-radius:0;cursor:pointer}
+button.pieno{background:var(--ink);color:#fff;font-weight:700}
+.data{font-size:1.8rem;font-weight:700;margin:20px 0 2px;line-height:1.15} .data small{display:block;font-size:1rem;font-weight:400;color:#333}
+.blocco{border-left:8px solid var(--acc);padding:6px 0 6px 14px;margin:18px 0}
+.blocco h2{font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px;color:#333}
+.blocco .g{font-size:1.3rem;font-weight:700;line-height:1.25} .blocco .g b{background:var(--giallo);padding:0 3px}
+.blocco .d{font-size:.95rem;color:#333;margin-top:4px}
+.blocco.scala{border-color:var(--rosso)}.blocco.derby{border-color:var(--ink)}.blocco.citta{border-color:var(--verde)}.blocco.morti{border-color:var(--viola)}.blocco.areac{border-color:var(--giallo)}
+.blocco.vuoto{border-color:var(--line)}.blocco.vuoto .g{font-size:1rem;font-weight:400;color:#333}
+.blocco svg{display:block;width:100%;height:auto;margin-top:8px}
+ul.lista{margin:4px 0;padding-left:0;list-style:none} ul.lista li{padding:3px 0;border-bottom:1px solid var(--line)}
+.condividi{margin:26px 0;padding:14px;border:3px solid var(--ink)}
+.condividi textarea{width:100%;font:inherit;font-size:.9rem;border:1px solid var(--line);padding:8px;min-height:130px;margin:8px 0}
+ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.85rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em} footer li{margin:.4em 0}
+@media(max-width:420px){.data{font-size:1.5rem}.blocco .g{font-size:1.15rem}}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Il tuo giorno a Milano</h1>
+<p>Scrivi una data: il giorno in cui sei nato, il matrimonio, un derby che ricordi. La pagina mette insieme quello che il sito sa di quel giorno: che tempo faceva a Brera (dal 1763), cosa c&rsquo;era alla Scala quella sera (dal 1943), chi era sindaco, se si votava, se si giocava il derby. In fondo trovi un testo già pronto da mandare a un amico.</p>
+
+<div class="cerca">
+  <input type="date" id="data" min="1763-01-01" aria-label="Scegli una data">
+  <button type="button" class="pieno" id="vai">Guarda</button>
+  <button type="button" id="oggi">Oggi</button>
+  <button type="button" id="caso">Un giorno a caso</button>
+</div>
+
+<div id="esito" aria-live="polite"><p class="sub">Caricamento&hellip;</p></div>
+
+<div class="condividi" id="cond" style="display:none">
+  <b>Da mandare a qualcuno</b>
+  <textarea id="testo" readonly aria-label="Testo da copiare"></textarea>
+  <button type="button" id="copia">Copia il testo</button> <span id="copiato" class="sub"></span>
+</div>
+
+<h2 class="s" id="limiti">Limiti dei dati</h2>
+<ul class="m">
+<li>La temperatura è quella di Brera, in centro: in periferia di notte fa più freddo, d&rsquo;estate meno. Il &laquo;normale&raquo; è la media 1991-2020 di quel giorno del calendario; i record e le classifiche contano solo gli anni in cui il dato c&rsquo;è. Prima del 1763 non ci sono misure giornaliere.</li>
+<li>Le serate della Scala vengono dalle locandine: le recite senza locandina non ci sono (circa il 7% delle date controllate), e dal 2024 mancano i concerti. &laquo;Nessuna locandina&raquo; non vuol dire per forza teatro chiuso.</li>
+<li>Morti e Area C coprono solo gli anni recenti (i morti dal 2014, l&rsquo;Area C dal settembre 2016 al novembre 2024); fuori da queste date il blocco non compare. Per alcuni giorni dell&rsquo;Area C il conteggio non è affidabile e il blocco manca.</li>
+<li>Il derby comprende solo le partite ufficiali (247 fino al 31 ottobre 2026). Il sindaco è quello in carica secondo le date di inizio e fine mandato, dal 1946.</li>
+<li>La pagina descrive il giorno, non spiega perché: se un giorno ha più morti del solito o più caldo del solito, qui non si dice il motivo.</li>
+</ul>
+
+<h2 class="s" id="scarica">File scaricabili</h2>
+<ul class="m">
+<li><a href="data/temperature_brera_giornaliere.csv" download>Temperature di Brera, giorno per giorno dal 1763</a> (CSV: minima e massima)</li>
+<li><a href="../derby/data/derby.csv" download>Tutti i derby ufficiali dal 1909</a> (CSV)</li>
+<li><a href="../amministratori/data/sindaci_milano.csv" download>I sindaci di Milano dal 1946</a> (CSV)</li>
+<li><a href="../morti/data/milano_giorno.csv" download>Morti al giorno a Milano dal 2014, con i morti attesi</a> (CSV)</li>
+<li><a href="../area-c/data/ingressi_giornalieri.csv" download>Ingressi giornalieri in Area C</a> (CSV)</li>
+<li><a href="data/elezioni.json" download>Date delle elezioni</a> (JSON). Le serate della Scala sono nella <a href="../scala/">pagina della Scala</a>.</li>
+</ul>
+
+<footer id="fonti"><p><b>Fonti e licenze.</b> I dati sono quelli già pubblicati nelle altre pagine del sito, dove si trovano date di scaricamento e dettagli.</p>
+<ul>
+<li>Temperature: serie unica di Brera dal 1763 costruita dal sito, con dati Maugeri e altri per il passato (uso non commerciale con citazione) e ARPA Lombardia (CC0) per gli anni recenti; vedi la pagina <a href="../temperature/">Temperature</a>.</li>
+<li>Scala: locandine dell&rsquo;archivio storico del Teatro alla Scala dal 26 dicembre 1943; dal 2024 il sito del teatro. Le immagini non sono ripubblicate. Vedi la pagina <a href="../scala/">La Scala</a>.</li>
+<li>Derby: ricostruzione del sito da fonti pubbliche, dal 1909; vedi <a href="../derby/">Il derby</a>.</li>
+<li>Morti: ISTAT, decessi giornalieri dei residenti a Milano dal 2014 (CC BY 4.0), con l&rsquo;atteso calcolato dal sito; vedi <a href="../morti/">Morti</a>.</li>
+<li>Area C: Comune di Milano, ingressi giornalieri (CC BY 4.0); vedi <a href="../area-c/">Area C</a>.</li>
+<li>Sindaci: Comune di Milano e Wikipedia (CC BY-SA 4.0); vedi <a href="../amministratori/">Amministratori</a>.</li>
+<li>Elezioni: Ministero dell&rsquo;Interno e Comune di Milano; vedi <a href="../elezioni/">Elezioni</a>.</li>
+</ul></footer>
+</main>
+<script>
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+var GG=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+var TIPI={O:'opera',B:'balletto',C:'concerto',R:'recital',M:'manifestazione',D:'spettacolo',A:'altro'};
+var BASE='https://andreottiviii.github.io/milano-in-dati/il-tuo-giorno/';
+var ALF='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+function f1(x){return x.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1});}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function dmy(iso){return iso.split('-').reverse().join('/');}
+function csv(t){ // lettore CSV con virgolette; separatore , o ;
+  var sep=t.slice(0,t.indexOf('\n')).split(';').length>t.slice(0,t.indexOf('\n')).split(',').length?';':',';
+  var rows=[],row=[],f='',q=false,i=0;
+  if(t.charCodeAt(0)===0xFEFF)i=1;
+  for(;i<t.length;i++){var c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+    else if(c==='"')q=true; else if(c===sep){row.push(f);f='';}
+    else if(c==='\n'){row.push(f);rows.push(row);row=[];f='';} else if(c!=='\r')f+=c;}
+  if(f!==''||row.length){row.push(f);rows.push(row);}
+  var h=rows.shift();return rows.filter(function(r){return r.length>1;}).map(function(r){var o={};h.forEach(function(k,j){o[k]=r[j];});return o;});
+}
+var cache={};
+function carica(url,tipo){ // ogni file si scarica una volta sola, e solo quando serve
+  if(!cache[url])cache[url]=fetch(url).then(function(r){if(!r.ok)throw new Error(url);return tipo==='json'?r.json():r.text();});
+  return cache[url];
+}
+var T=null,REC=null,ELE=null,SIND=null,DERBY=null;
+function base(){
+  return Promise.all([carica('data/temperature.json','json'),carica('../temperature/data/giorni.json','json'),carica('data/elezioni.json','json'),
+    carica('../amministratori/data/sindaci_milano.csv','txt'),carica('../derby/data/derby.csv','txt')]).then(function(v){
+    T=v[0];
+    var g=v[1],c={};g.campi.forEach(function(k,i){c[k]=i;});REC={};
+    g.righe.forEach(function(r){REC[('0'+r[c.m]).slice(-2)+'-'+('0'+r[c.d]).slice(-2)]={tx:r[c.tx_rec],tx_anno:r[c.tx_rec_anno],tn:r[c.tn_rec],tn_anno:r[c.tn_rec_anno],tx_norm:r[c.tx_9120]};});
+    ELE=v[2];
+    SIND=csv(v[3]);
+    DERBY={};csv(v[4]).forEach(function(r){(DERBY[r.date]=DERBY[r.date]||[]).push(r);});
+  });
+}
+function doy(d){var s=new Date(Date.UTC(d.getUTCFullYear(),0,1)),i=Math.round((d-s)/86400000),y=d.getUTCFullYear();
+  var bis=(y%4===0&&y%100!==0)||y%400===0;if(!bis&&i>=59)i+=1;return i;}
+function dec(s,p){if(s.substr(p,2)==='__')return null;return (ALF.indexOf(s[p])*64+ALF.indexOf(s[p+1])-600)/10;}
+function temp(anno,i){var a=T.temps[String(anno)];if(!a)return null;var tn=dec(a,i*4),tx=dec(a,i*4+2);return tn==null||tx==null?null:[tn,tx];}
+function scala(iso){
+  var dec10=Math.floor(+iso.slice(0,4)/10)*10;
+  if(dec10<1940||dec10>2020)return Promise.resolve(null);
+  return carica('../scala/data/serate/'+dec10+'.json','json').then(function(a){
+    var k=iso.replace(/-/g,'');var r=a.filter(function(x){return x[0]===k;});return r;});
+}
+function morti(iso){
+  if(iso<'2014-01-01')return Promise.resolve(null);
+  return carica('../morti/data/milano_giorno.csv','txt').then(function(t){
+    if(!cache.mm){cache.mm={};csv(t).forEach(function(r){if(r.morti)cache.mm[r.data]=[Math.round(+r.morti),+r.attesi];});}
+    return cache.mm[iso]||null;});
+}
+function areac(iso){
+  if(iso<'2016-09-01')return Promise.resolve(null);
+  return carica('../area-c/data/giorni.json','json').then(function(g){
+    var i=Math.round((new Date(iso+'T00:00:00Z')-new Date(g.d0+'T00:00:00Z'))/86400000);
+    if(i<0||i>=g.n.length||g.n[i]==null||g.flag[i]>=2)return null;return g.n[i];});
+}
+var corrente=null,giro=0;
+function guarda(iso){
+  var d=new Date(iso+'T00:00:00Z');if(isNaN(d)||iso<'1000-01-01')return;
+  corrente=iso;var mio=++giro;
+  var anno=d.getUTCFullYear(),mese=d.getUTCMonth()+1,giorno=d.getUTCDate();
+  var chiave=('0'+mese).slice(-2)+'-'+('0'+giorno).slice(-2);
+  Promise.all([scala(iso),morti(iso),areac(iso)]).then(function(r){
+    if(mio!==giro)return;
+    var sc=r[0],mo=r[1],ac=r[2];
+    var i=doy(d),t=temp(anno,i),rec=REC[chiave];
+    var nome=giorno+' '+MESI[mese-1];
+    var html='<div class="data">'+GG[d.getUTCDay()]+' '+nome+' '+anno+'<small>'+(anno<T.anno_min?'Prima del '+T.anno_min+' il sito non ha dati giornalieri sul tempo.':'')+'</small></div>';
+    var righe=[nome+' '+anno+' a Milano'];
+    if(t){
+      var tutti=[];for(var a in T.temps){var x=temp(+a,i);if(x)tutti.push([+a,x[1],x[0]]);}
+      var piu=tutti.filter(function(x){return x[1]>t[1];}).length,n=tutti.length;
+      var diff=rec&&rec.tx_norm!=null?t[1]-rec.tx_norm:null;
+      html+='<div class="blocco"><h2>Che tempo faceva a Brera</h2><div class="g">Minima <b>'+f1(t[0])+'°</b>, massima <b>'+f1(t[1])+'°</b></div><div class="d">'+
+        (diff!=null?(diff>=0?'+':'')+f1(diff)+'° rispetto a un '+nome+' normale (massima media 1991-2020: '+f1(rec.tx_norm)+'°). ':'')+
+        'Fu il <b>'+(piu+1)+'°</b> '+nome+' più caldo su '+n+' anni con il dato.'+
+        (rec?' Il più caldo di tutti: '+rec.tx_anno+' ('+f1(rec.tx)+'°); il più freddo: '+rec.tn_anno+' ('+f1(rec.tn)+'°).':'')+'</div>'+grafico(tutti,anno,nome)+'</div>';
+      righe.push('Brera: minima '+f1(t[0])+'°, massima '+f1(t[1])+'° ('+(piu+1)+'° più caldo su '+n+')');
+    } else if(anno>=T.anno_min){
+      html+='<div class="blocco vuoto"><h2>Che tempo faceva a Brera</h2><div class="g">Per questo giorno manca la misura.</div></div>';
+    }
+    if(sc&&sc.length){
+      html+='<div class="blocco scala"><h2>Quella sera alla Scala</h2><ul class="lista">'+sc.map(function(x){
+        var o=x[1]||'';return '<li>'+(o?'ore '+o.slice(0,2)+(o.slice(2)!=='00'?':'+o.slice(2):'')+' · ':'')+'<b>'+esc(x[3]||'titolo non leggibile')+'</b>'+(x[4]?', '+esc(x[4]):'')+' <span class="sub">('+(TIPI[x[2]]||'altro')+')</span></li>';}).join('')+'</ul></div>';
+      righe.push('Scala: '+sc.map(function(x){return (x[3]||'titolo non leggibile')+(x[4]?' ('+x[4]+')':'');}).join('; '));
+    } else if(sc&&iso>'2026-07-17'){
+      html+='<div class="blocco vuoto"><h2>Quella sera alla Scala</h2><div class="g">L&rsquo;archivio delle serate arriva al 17 luglio 2026.</div></div>';
+    } else if(sc&&(anno>=1944||(anno===1943&&mese===12))){
+      html+='<div class="blocco vuoto"><h2>Quella sera alla Scala</h2><div class="g">Nessuna locandina per questa data: teatro chiuso, oppure recita non in archivio.</div></div>';
+    }
+    var dy=DERBY[iso];
+    if(dy){html+='<div class="blocco derby"><h2>Il derby</h2>'+dy.map(function(m){return '<div class="g">'+esc(m.home)+' '+esc(m.home_goals)+' – '+esc(m.away_goals)+' '+esc(m.away)+'</div><div class="d">'+esc(m.competition_detail)+(m.venue?' · '+esc(m.venue):'')+'</div>';}).join('')+'</div>';
+      righe.push('Derby: '+dy.map(function(m){return m.home+' '+m.home_goals+'-'+m.away_goals+' '+m.away;}).join('; '));}
+    var s=null;SIND.forEach(function(x){if(x.inizio<=iso&&(!x.fine||x.fine>=iso))s=x;});
+    var el=ELE[iso];
+    if(s||el){
+      html+='<div class="blocco citta"><h2>La città</h2>'+(s?'<div class="g">Sindaco: <b>'+esc(s.sindaco)+'</b></div><div class="d">'+esc(s.partito)+', in carica dal '+dmy(s.inizio)+(s.fine?' al '+dmy(s.fine):'')+'</div>':'')+
+        (el?'<div class="g" style="margin-top:6px">Si votava: '+el.map(esc).join(', ')+'</div>':'')+'</div>';
+      if(s)righe.push('Sindaco: '+s.sindaco);if(el)righe.push('Si votava: '+el.join(', '));
+    }
+    if(mo){var sc2=(mo[0]/mo[1]-1)*100;
+      html+='<div class="blocco morti"><h2>I morti del giorno</h2><div class="g"><b>'+mo[0]+'</b> residenti morti, '+Math.round(mo[1])+' attesi</div><div class="d">'+(Math.abs(sc2)<15?'Un giorno come gli altri.':(sc2>0?'+':'')+Math.round(sc2)+'% rispetto al normale di quel periodo.')+'</div></div>';
+      righe.push('Morti: '+mo[0]+' (attesi '+Math.round(mo[1])+')');}
+    if(ac){html+='<div class="blocco areac"><h2>Auto entrate in Area C</h2><div class="g"><b>'+ac.toLocaleString('it-IT')+'</b> ingressi</div></div>';righe.push('Area C: '+ac.toLocaleString('it-IT')+' ingressi');}
+    document.getElementById('esito').innerHTML=html;
+    document.getElementById('cond').style.display='block';
+    document.getElementById('testo').value=righe.join('\n')+'\n'+BASE+'#'+iso;
+    document.getElementById('copiato').textContent='';
+    try{history.replaceState(null,'','#'+iso);}catch(e){}
+  }).catch(function(){document.getElementById('esito').innerHTML='<p class="sub">Non riesco a caricare i dati di questo giorno. Riprova più tardi.</p>';});
+}
+function larg(){return Math.max(280,document.getElementById('esito').clientWidth-24);}
+function grafico(tutti,anno,nome){
+  var W=larg(),H=150,L=40,R=8,T0=10,B=28,a0=tutti[0][0],a1=tutti[tutti.length-1][0];
+  var vs=tutti.map(function(x){return x[1];}),vmax=Math.max.apply(null,vs),vmin=Math.min.apply(null,vs);
+  function x(a){return L+(a-a0)/(a1-a0||1)*(W-L-R);} function y(v){return T0+(vmax-v)/(vmax-vmin||1)*(H-T0-B);}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Massima del '+nome+', anno per anno">';
+  [vmin,vmax].forEach(function(v){s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#eee"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" font-size="11" text-anchor="end" fill="#333">'+f1(v)+'°</text>';});
+  for(var a=Math.ceil(a0/50)*50;a<=a1;a+=(W<560?100:50))s+='<text x="'+x(a)+'" y="'+(H-B+18)+'" font-size="11" text-anchor="middle" fill="#333">'+a+'</text>';
+  tutti.forEach(function(p){s+='<circle cx="'+x(p[0]).toFixed(1)+'" cy="'+y(p[1]).toFixed(1)+'" r="2.2" fill="'+(p[0]===anno?'#E30613':'#bbb')+'"/>';});
+  var me=tutti.filter(function(p){return p[0]===anno;})[0];
+  if(me)s+='<circle cx="'+x(anno).toFixed(1)+'" cy="'+y(me[1]).toFixed(1)+'" r="7" fill="none" stroke="#E30613" stroke-width="2"/><text x="'+Math.min(W-30,Math.max(L+20,x(anno)))+'" y="'+(T0+10)+'" font-size="12" text-anchor="middle" fill="#E30613" font-weight="700">'+anno+'</text>';
+  return '<div class="sub" style="margin-top:8px">La massima di questo giorno del calendario, un punto per anno dal '+a0+'; in rosso l&rsquo;anno scelto.</div>'+s+'</svg>';
+}
+var inp=document.getElementById('data'),isoOggi=new Date().toISOString().slice(0,10);
+inp.max=isoOggi;
+function vai(iso){if(iso)guarda(iso);}
+document.getElementById('vai').addEventListener('click',function(){vai(inp.value);});
+inp.addEventListener('change',function(){vai(inp.value);});
+document.getElementById('oggi').addEventListener('click',function(){inp.value=isoOggi;vai(isoOggi);});
+document.getElementById('caso').addEventListener('click',function(){
+  var a=new Date(Date.UTC(1944,0,1)).getTime(),b=new Date(isoOggi+'T00:00:00Z').getTime();
+  var k=new Date(a+Math.floor(Math.random()*(b-a))).toISOString().slice(0,10);inp.value=k;vai(k);});
+document.getElementById('copia').addEventListener('click',function(){
+  var ta=document.getElementById('testo'),ok=function(){document.getElementById('copiato').textContent='Copiato.';},no=function(){ta.select();document.getElementById('copiato').textContent='Seleziona e copia.';};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(ta.value).then(ok,no);else no();});
+window.addEventListener('resize',function(){if(corrente&&T)guarda(corrente);});
+window.addEventListener('hashchange',function(){var h=location.hash.replace('#','');if(/^\d{4}-\d{2}-\d{2}$/.test(h)&&h!==corrente){inp.value=h;guarda(h);}});
+base().then(function(){var h=location.hash.replace('#',''),p=/^\d{4}-\d{2}-\d{2}$/.test(h)?h:'1990-07-08';inp.value=p;guarda(p);})
+ .catch(function(){document.getElementById('esito').innerHTML='<p class="sub">Non riesco a caricare i dati. Riprova più tardi.</p>';});
+</script>
+</body></html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quante volte Milano ha tremato</title>
+<style>
+:root{--acc:#FFD500;--accd:#7a6200;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#fff9d6;--grey:#bbb;--rosso:#E30613}
+*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
+table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
+td.r,th.r{text-align:right}
+.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:#0b4f8a}
+.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0}
+.box{border:2px solid var(--ink);padding:8px 12px;margin:1em 0} .box h3{margin:.2em 0;font-size:1rem}
+.numeri{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:1.2em 0 .6em}
+.numero{border-top:4px solid var(--ink);padding-top:6px}
+.numero b{display:block;font-size:2.2rem;line-height:1.05} .numero span{font-size:.88rem;color:#333}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
+.ctl button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:5px 12px;border-radius:14px;cursor:pointer}
+.ctl button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd i{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:5px;border-radius:50%}
+.ch svg{display:block;width:100%;height:auto;font:11px system-ui,Arial,sans-serif}
+.scheda{border-left:8px solid var(--acc);padding:6px 0 6px 14px;margin:14px 0;min-height:64px}
+.scheda b{font-size:1.1rem} .k{color:#444}
+.scroll{overflow-x:auto} details{margin:.6em 0} summary{cursor:pointer;color:#0b4f8a} ul.m li{margin:.35em 0}
+footer{margin:2.5em 0 1em;font-size:.85rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em} footer li{margin:.4em 0}
+@media(max-width:560px){.numeri{grid-template-columns:1fr 1fr}.numero b{font-size:1.9rem}th,td{padding:5px 4px;font-size:.88rem}}
+</style><script src="../menu.js" defer></script></head><body><main>
+<h1>Quante volte Milano ha tremato</h1>
+<p>Milano non è una città dei terremoti. Eppure gli studiosi hanno trovato <b id="n-tot">&hellip;</b> volte in cui un terremoto con l&rsquo;epicentro altrove è stato sentito in città, dal 1065 al 2016. Qui ci sono tutti, uno per uno.</p>
+
+<div class="numeri">
+  <div class="numero"><b id="n-sentiti">&hellip;</b><span>sentiti bene a Milano (grado 4 o più)</span></div>
+  <div class="numero"><b id="n-danni">&hellip;</b><span>con danni a Milano (grado 6 o più); l&rsquo;ultimo nel <span id="n-ultimo-danni">&hellip;</span></span></div>
+  <div class="numero"><b id="n-ultimo">&hellip;</b><span>l&rsquo;ultimo della lista (il database si ferma al 2020)</span></div>
+</div>
+
+<div class="box"><h3>Che cos&rsquo;è il &laquo;grado&raquo;</h3>
+<p>Il grado dice <b>quanto si è sentito il terremoto in un posto</b>, non quanto era forte alla partenza. Si usa la scala Mercalli: <b>2</b> appena avvertito da pochi, <b>3</b> lieve, <b>4</b> moderato (lo sentono bene tutti in casa), <b>5</b> forte, <b>6</b> danni leggeri, <b>7</b> danni. Un valore come 5-6 vuol dire &laquo;tra il 5 e il 6&raquo;. Quando le fonti antiche dicono solo &laquo;ci furono danni&raquo; senza dare un numero, qui lo scriviamo a parole.</p></div>
+
+<h2 id="tempo">Mille anni in una riga</h2>
+<p>Ogni pallino è un terremoto: a sinistra l&rsquo;anno, in alto quanto si è sentito a Milano. Tocca un pallino per leggere da dove veniva.</p>
+<div class="ctl" id="filtri">
+  <button type="button" data-min="0" aria-pressed="true">Tutti</button>
+  <button type="button" data-min="4" aria-pressed="false">Sentiti bene (grado 4 o più)</button>
+  <button type="button" data-min="5" aria-pressed="false">Forti (5 o più)</button>
+  <button type="button" data-min="6" aria-pressed="false">Con danni (6 o più)</button>
+</div>
+<div class="ch" id="grafico" role="img" aria-label="Terremoti sentiti a Milano, per anno e per grado"></div>
+<div class="lgd"><span><i style="background:#bbb"></i>1-3: non sentito o appena avvertito</span><span><i style="background:#FFD500;border:1px solid #999"></i>4: moderato</span><span><i style="background:#E30613"></i>5: forte</span><span><i style="background:#111"></i>6-7: danni</span></div>
+<div class="scheda" id="scheda" aria-live="polite"><span class="k">Nessun pallino scelto.</span> Il più forte: <b id="piu-forte"></b></div>
+
+<h2 id="secoli-t">Per secolo: la terra trema di più, o si scrive di più?</h2>
+<p>Nel Novecento i terremoti sentiti a Milano sono <b id="n-900"></b>; in tutti i secoli prima del 1700, <b id="n-pre"></b>. Il confronto non dice che prima la terra tremasse meno: nei secoli passati restano nelle fonti solo i terremoti grandi, e solo se qualcuno a Milano li ha scritti. Il grafico va letto con questa cautela.</p>
+<div class="ch" id="secoli"></div>
+
+<h2 id="top">I dieci che a Milano si sono sentiti di più</h2>
+<table id="top10"><thead><tr><th>Quando</th><th>Area di origine</th><th>A Milano</th><th>All&rsquo;epicentro</th></tr></thead><tbody></tbody></table>
+<details><summary>Tutti i terremoti in tabella</summary><div class="scroll"><table id="tutti"><thead><tr><th>Quando</th><th>Area di origine</th><th>A Milano</th><th>All&rsquo;epicentro</th></tr></thead><tbody></tbody></table></div></details>
+<p class="src">Fonte: INGV, DBMI15 v4.0. L&rsquo;&laquo;epicentro&raquo; è il punto da cui il terremoto è partito; &laquo;grado non indicato&raquo; vuol dire che la fonte dà solo una descrizione.</p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<ul class="m">
+<li>Il grado dice quanto si è sentito in un posto, non quanto era forte il terremoto: un grado 4 a Milano può venire da un terremoto grande e lontano o da uno piccolo e vicino.</li>
+<li>Milano è trattata come un punto solo, il centro. Nei secoli passati la città era molto più piccola di oggi.</li>
+<li>Prima del 1800 i terremoti sentiti sono pochi perché pochi sono stati scritti: la riga dei secoli misura anche le fonti, non solo la terra.</li>
+<li>Quattro righe dicono &laquo;non sentito&raquo; e una &laquo;non classificato&raquo;: sono terremoti studiati per Milano e risultati impercettibili o dubbi. Sono nel conteggio di &laquo;Tutti&raquo; e nel grafico stanno in basso.</li>
+<li>Il database comprende i terremoti con intensità massima di almeno 5 all&rsquo;epicentro, dal 1000 al 2020. I terremoti più deboli, e quelli dopo il 2020, non ci sono. L&rsquo;ultimo della lista è del 2016.</li>
+<li>Per i terremoti antichi data e luogo sono ricostruiti da cronache: alcuni giorni o mesi non sono noti (nella tabella si legge solo l&rsquo;anno).</li>
+</ul>
+
+<h2 id="scarica">File scaricabili</h2>
+<ul class="m">
+<li><a href="data/terremoti.csv" download>I 110 terremoti sentiti a Milano</a> (CSV, con i gradi scritti anche a parole)</li>
+<li><a href="data/terremoti.json" download>Gli stessi dati in formato JSON</a>, con i riepiloghi per secolo</li>
+<li><a href="data/dbmi15_v4_milano.csv" download>Le righe originali INGV per Milano</a> (CSV, senza modifiche)</li>
+</ul>
+
+<footer id="fonti"><p><b>Fonti e licenze.</b></p>
+<ul>
+<li>INGV, <a href="https://emidius.mi.ingv.it/CPTI15-DBMI15/">DBMI15 v4.0, Database Macrosismico Italiano</a> (Locati e altri, 2022), licenza Creative Commons Attribuzione 4.0 (CC BY 4.0). Scaricato il 5 novembre 2026. Dal file intero (123.981 osservazioni in tutta Italia) sono state tenute le righe della località &laquo;Milano&raquo;; le sigle sono state tradotte in parole.</li>
+</ul></footer>
+</main>
+<script>
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+var D,E,minimo=0;
+function quando(e){return (e.giorno?e.giorno+' ':'')+(e.mese?MESI[e.mese-1]+' ':'')+e.anno;}
+function colore(v){if(v==null)return '#bbb';if(v>=6)return '#111';if(v>=5)return '#E30613';if(v>=4)return '#FFD500';return '#bbb';}
+function larg(){return Math.max(300,document.getElementById('grafico').clientWidth||300);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function disegna(){
+  var W=larg(),H=300,L=34,Rr=10,T=16,B=40,stretto=W<560;
+  function x(a){return L+(a-1000)/(2020-1000)*(W-L-Rr);}
+  function y(v){return T+(1-((v==null?1:Math.max(1,Math.min(v,7.5)))-1)/6.5)*(H-T-B);}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">';
+  for(var g=1;g<=7;g++)s+='<line x1="'+L+'" x2="'+(W-Rr)+'" y1="'+y(g)+'" y2="'+y(g)+'" stroke="#eee"/><text x="'+(L-8)+'" y="'+(y(g)+4)+'" font-size="12" text-anchor="end" fill="#333">'+g+'</text>';
+  for(var a=1000;a<=2000;a+=(stretto?250:100))s+='<line x1="'+x(a)+'" x2="'+x(a)+'" y1="'+(H-B)+'" y2="'+(H-B+6)+'" stroke="#111"/><text x="'+x(a)+'" y="'+(H-B+22)+'" font-size="12" text-anchor="middle">'+a+'</text>';
+  s+='<line x1="'+L+'" x2="'+(W-Rr)+'" y1="'+(H-B)+'" y2="'+(H-B)+'" stroke="#111" stroke-width="2"/><text x="'+(L-8)+'" y="'+(T-4)+'" font-size="11" text-anchor="end" fill="#333">grado</text>';
+  E.forEach(function(e,i){
+    var v=e.milano_num; if(minimo>0&&!(v!=null&&v>=minimo))return;
+    var r=(v==null?3:3+(v-1)*1.4)*(stretto?0.85:1);
+    s+='<circle class="p" tabindex="0" data-i="'+i+'" cx="'+x(e.anno).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+colore(v)+'" stroke="#fff" stroke-width="1" style="cursor:pointer"><title>'+quando(e)+' · '+esc(e.zona)+' · a Milano: '+esc(e.milano_parole)+'</title></circle>';
+  });
+  document.getElementById('grafico').innerHTML=s+'</svg>';
+  Array.prototype.forEach.call(document.querySelectorAll('#grafico .p'),function(c){
+    c.addEventListener('click',function(){mostra(E[+c.dataset.i]);});
+    c.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();mostra(E[+c.dataset.i]);}});
+  });
+}
+function mostra(e){
+  document.getElementById('scheda').innerHTML='<b>'+quando(e)+'</b>'+(e.ora!=null?', ore '+String(e.ora).padStart(2,'0')+':'+String(e.min==null?0:e.min).padStart(2,'0'):'')+
+   '<br><span class="k">Area di origine:</span> '+esc(e.zona)+'<br><span class="k">A Milano:</span> '+esc(e.milano_parole)+
+   '<br><span class="k">All&rsquo;epicentro:</span> '+esc(e.epic_parole)+(e.n_localita?' · osservato in '+e.n_localita+' località':'');
+}
+var ROMANI={11:'XI',12:'XII',13:'XIII',14:'XIV',15:'XV',16:'XVI',17:'XVII',18:'XVIII',19:'XIX',20:'XX',21:'XXI'};
+function secoli(){
+  var S=D.secoli,W=larg(),H=210,L=6,T=10,B=36,bw=(W-L-6)/S.length,max=Math.max.apply(null,S.map(function(c){return c.n;}));
+  var s='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">';
+  S.forEach(function(c,i){
+    var h=c.n/max*(H-T-B-20),h4=c.sentiti_4piu/max*(H-T-B-20),x0=L+i*bw+3,w=bw-6;
+    s+='<rect x="'+x0+'" y="'+(H-B-h)+'" width="'+w+'" height="'+h+'" fill="#ddd"/><rect x="'+x0+'" y="'+(H-B-h4)+'" width="'+w+'" height="'+h4+'" fill="#FFD500"/>'+
+       '<text x="'+(x0+w/2)+'" y="'+(H-B-h-6)+'" font-size="13" text-anchor="middle" font-weight="700">'+c.n+'</text><text x="'+(x0+w/2)+'" y="'+(H-B+18)+'" font-size="12" text-anchor="middle">'+(ROMANI[c.secolo]||c.secolo)+'</text>';
+  });
+  s+='<line x1="'+L+'" x2="'+(W-6)+'" y1="'+(H-B)+'" y2="'+(H-B)+'" stroke="#111" stroke-width="2"/></svg>';
+  s+='<div class="lgd"><span><i style="background:#ddd;border-radius:0"></i>tutti i terremoti sentiti, per secolo</span><span><i style="background:#FFD500;border-radius:0"></i>di cui grado 4 o più</span></div>';
+  document.getElementById('secoli').innerHTML=s;
+}
+function righe(tb,lista){
+  tb.innerHTML=lista.map(function(e){return '<tr><td>'+quando(e)+'</td><td>'+esc(e.zona)+'</td><td><b>'+esc(e.milano_parole)+'</b></td><td>'+esc(e.epic_parole)+'</td></tr>';}).join('');
+}
+fetch('data/terremoti.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+  D=d;E=d.eventi;
+  var q=function(id,t){document.getElementById(id).textContent=t;};
+  var dan=E.filter(function(e){return e.milano_num!=null&&e.milano_num>=6;});
+  q('n-tot',D.n);
+  q('n-sentiti',E.filter(function(e){return e.milano_num!=null&&e.milano_num>=4;}).length);
+  q('n-danni',dan.length);
+  q('n-ultimo-danni',Math.max.apply(null,dan.map(function(e){return e.anno;})));
+  q('n-ultimo',D.ultimo);
+  q('n-900',E.filter(function(e){return e.anno>=1901&&e.anno<=2000;}).length);
+  q('n-pre',E.filter(function(e){return e.anno<1700;}).length);
+  var pf=D.piu_forti[0];
+  q('piu-forte',quando(pf)+', da '+pf.zona+': a Milano '+pf.milano_parole+', all’epicentro '+pf.epic_parole+'.');
+  righe(document.querySelector('#top10 tbody'),D.piu_forti);
+  righe(document.querySelector('#tutti tbody'),E);
+  Array.prototype.forEach.call(document.querySelectorAll('#filtri button'),function(b){b.addEventListener('click',function(){
+    Array.prototype.forEach.call(document.querySelectorAll('#filtri button'),function(x){x.setAttribute('aria-pressed','false');});
+    b.setAttribute('aria-pressed','true');minimo=+b.dataset.min;disegna();});});
+  disegna();secoli();
+  window.addEventListener('resize',function(){disegna();secoli();});
+}).catch(function(){document.getElementById('grafico').innerHTML='<p class="sub">Non riesco a caricare i dati. Riprova più tardi.</p>';});
+</script>
+</body></html>

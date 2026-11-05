@@ -84,6 +84,8 @@
     { path: 'palazzi/', label: 'Età dei palazzi' },
     { path: 'reati-citta/', label: 'Reati e sicurezza in città' },
     { path: 'omicidi/', label: 'Gli omicidi' },
+    { path: 'il-tuo-giorno/', label: 'Il tuo giorno a Milano' },
+    { path: 'milano-trema/', label: 'Quante volte Milano ha tremato' },
     { path: 'nascite/', label: 'Nascite e mamme' },
     { path: 'tribunale/', label: 'Il tribunale di Milano' },
     { path: 'auto/', label: 'Le auto dei milanesi' },
