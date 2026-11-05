@@ -4,8 +4,9 @@
    USO
      <script src="../strisce.js"></script>
      Strisce.disegna(document.getElementById('x'), {
-       a: {id: 23, nome: 'Isola'},            // luogo scelto (punto pieno)
-       b: {id: 5,  nome: 'Corvetto'},         // luogo di confronto (punto vuoto), facoltativo
+       a: {id: 23, nome: 'Isola'},            // luogo scelto
+       b: {id: 5,  nome: 'Corvetto'},         // luogo di confronto, facoltativo
+       colA: '#00695c', colB: '#c26a1b',      // i due colori dei punti (facoltativi): meglio gli stessi della mappa
        luoghi: 'quartieri',                   // come si chiamano i luoghi nel testo (predefinito: 'luoghi')
        cittaEtichetta: 'la città',            // legenda del trattino, facoltativo
        gruppi: [ {titolo: 'Chi ci abita', colore: '#00A651', righe: [riga, riga, ...]} ]
@@ -41,7 +42,7 @@
     '.sz-riga{padding:14px 0 12px;border-bottom:1px solid #ddd}' +
     '.sz-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}' +
     '.sz-lab{font-weight:700;font-size:16px;min-width:0;overflow-wrap:anywhere}' +
-    '.sz-val{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--c,#000);text-align:right;flex:none;max-width:55%;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}' +
+    '.sz-val{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--ca,#000);text-align:right;flex:none;max-width:55%;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}' +
     '.sz-val.no{font-size:14px;font-weight:700;letter-spacing:0;color:#444}' +
     '.sz-sub{font-size:13px;color:#333;margin:2px 0 12px}' +
     '.sz-strip{position:relative;height:14px;background:#eee;margin:0 14px}' +
@@ -49,9 +50,9 @@
     '.sz-tk{position:absolute;top:-6px;bottom:-6px;width:3px;margin-left:-1.5px;background:#000}' +
     '.sz-st{position:absolute;top:2px;bottom:2px;width:4px;margin-left:-2px;background:#666}' +
     '.sz-dA,.sz-dB{position:absolute;top:50%;border-radius:50%}' +
-    '.sz-dA{width:20px;height:20px;margin:-10px 0 0 -10px;background:var(--c,#000);z-index:2}' +
-    '.sz-dB{width:30px;height:30px;margin:-15px 0 0 -15px;background:transparent;border:4px solid var(--c,#000);z-index:1}' +
-    '.sz-dB.s{position:static;display:inline-block;width:14px;height:14px;margin:0 4px 0 0;border-width:3px;vertical-align:-2px}' +
+    '.sz-dA{width:18px;height:18px;margin:-9px 0 0 -9px;background:var(--ca,#000);border:2px solid #fff;z-index:2}' +
+    '.sz-dB{width:26px;height:26px;margin:-13px 0 0 -13px;background:var(--cb,#666);border:2px solid #fff;z-index:1}' +
+    '.sz-dB.s{position:static;display:inline-block;width:14px;height:14px;margin:0 4px 0 0;border:0;vertical-align:-2px}' +
     '.sz-ends{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#333;margin-top:8px}' +
     '.sz-ends span{max-width:48%;min-width:0;overflow-wrap:anywhere}' +
     '.sz-ends span:last-child{text-align:right}' +
@@ -198,8 +199,8 @@
 
   function legenda(o) {
     o = o || {};
-    var h = '<div class="sz-leg"><span><i style="width:14px;height:14px;border-radius:50%;background:#000"></i> ' + esc(o.a ? o.a.nome : 'luogo scelto') + '</span>';
-    if (o.b) h += '<span><i style="width:14px;height:14px;border-radius:50%;border:3px solid #000"></i> ' + esc(o.b.nome) + ' (confronto)</span>';
+    var h = '<div class="sz-leg"><span><i style="width:14px;height:14px;border-radius:50%;background:' + esc(o.colA || '#000') + '"></i> ' + esc(o.a ? o.a.nome : 'luogo scelto') + '</span>';
+    if (o.b) h += '<span><i style="width:14px;height:14px;border-radius:50%;background:' + esc(o.colB || '#666') + '"></i> ' + esc(o.b.nome) + ' (confronto)</span>';
     h += '<span><i style="width:3px;height:16px;background:#000"></i> ' + esc(o.cittaEtichetta || 'media della città') + '</span></div>';
     h += '<div style="font-size:13px">Ogni striscia va dal valore più basso (a sinistra) al più alto (a destra) tra ' + esc(o.luoghi || 'i luoghi') + '. Posizione: 1° = il valore più alto.</div>';
     return h;
@@ -207,7 +208,7 @@
 
   function disegna(el, o) {
     stile();
-    var h = '<div class="sz">' + (o.senzaLegenda ? '' : legenda(o));
+    var h = '<div class="sz" style="--ca:' + esc(o.colA || '#000') + ';--cb:' + esc(o.colB || '#666') + '">' + (o.senzaLegenda ? '' : legenda(o));
     (o.gruppi || []).forEach(function (gr) {
       if (!gr.righe || !gr.righe.length) return;
       h += '<div style="--c:' + esc(gr.colore || '#000') + '">';
