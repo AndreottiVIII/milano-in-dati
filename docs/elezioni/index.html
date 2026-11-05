@@ -50,6 +50,17 @@
   footer p { margin:4px 0; }
   .strip text { font-size:10px; }
   .big { font-size:26px; font-weight:600; }
+  .cm-sez { border-top:2px solid #111; margin-top:22px; padding-top:10px; }
+  .cm-leg { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:13px; margin:8px 0; }
+  .cm-leg i { display:inline-block; width:12px; height:12px; margin-right:5px; vertical-align:-1px; border:1px solid rgba(0,0,0,.2); }
+  .cm-rw, .cm-h { display:grid; grid-template-columns:92px minmax(0,1fr) 46px; gap:8px; align-items:center; }
+  .cm-rw { margin-bottom:2px; }
+  .cm-h { font-size:12px; margin:10px 0 4px; color:#333; }
+  .cm-rw svg { width:100%; height:24px; }
+  .cm-l b { font-size:17px; }
+  .cm-l span { font-size:12px; color:#333; display:block; line-height:1; }
+  .cm-a { font-size:13px; text-align:right; font-weight:700; }
+  @media (max-width:420px){ .cm-rw, .cm-h { grid-template-columns:78px minmax(0,1fr) 40px; gap:6px; } }
 </style>
 <script src="../menu.js" defer></script></head>
 <body>
@@ -86,6 +97,16 @@
   </div>
   <p class="info" id="fnote" hidden></p>
 
+  <div class="cm-sez" id="comunali">
+    <h2>Come è cambiata la forza dei blocchi a Milano</h2>
+    <p class="info" style="margin:0 0 4px">Una striscia di 100 tessere per ogni voto comunale, dal 1964 al 2021. Ogni tessera vale un centesimo dei voti ai partiti. Le comunali partono dal 1964 perché nei dati ci sono solo da lì: l&rsquo;archivio del Ministero dell&rsquo;Interno non ha le comunali 1946&ndash;1960. Il PCI è nella Sinistra.</p>
+    <div class="cm-leg" id="cmLeg"></div>
+    <div class="cm-h"><span>anno e sindaco</span><span>100 tessere, da sinistra a destra</span><span style="text-align:right">votanti</span></div>
+    <div id="cmRighe"></div>
+    <p class="info" id="cmNote">Le tessere sono proporzionali ai voti ai partiti, non sono i seggi veri del Consiglio. Il sindaco è quello in carica due mesi dopo il voto. Nel 1980 il file del Comune ha gli elettori a zero: la quota di votanti non si può calcolare e c&rsquo;è scritto «n.d.».</p>
+    <p class="info"><b>Fonte:</b> voti alle liste dei Consigli comunali (Comune di Milano e Ministero dell&rsquo;Interno, come in questa pagina); sindaci: pagina «Amministratori» di Milano in dati.</p>
+  </div>
+
   <div id="focus">
     <h2 id="focusTitle">Focus su un territorio</h2>
     <div id="focusEmpty" class="info">Clicca un territorio sulla mappa per vedere l'emiciclo, l'affluenza e le sezioni.</div>
@@ -117,6 +138,7 @@
 <li><b>Prima del 1979</b> ci sono solo i totali della città, senza sezioni né territori, da un archivio del Ministero dell'Interno. Mancano le Comunali 1946–1960. Le liste comuni (come il Fronte Democratico Popolare nel 1948) sono una sola riga e non si scompongono; nella Camera 1953 le schede bianche sono a zero perché il dato manca. Al Senato Milano è divisa in 6 collegi, sommati, e gli elettori sono solo i maggiori di 25 anni: non vanno confrontati con quelli della Camera.</li>
 <li><b>I quartieri (NIL) dal 2016 sono una stima.</b> Il Comune non pubblica i risultati per quartiere: i voti delle sezioni sono divisi con lo stradario del referendum del 2020. 344 sezioni su 1.238 hanno civici in più di un quartiere; le sezioni senza civici nello stradario (da 10 a 23 per elezione) non sono attribuite a nessun quartiere; 8 quartieri, quasi tutti parchi, restano senza sezioni; i quartieri cresciuti dopo il 2020 (come Cascina Merlata) sono sottostimati.</li>
 <li><b>Partiti e schieramenti.</b> I nomi delle liste cambiano da una fonte all'altra e le «famiglie» di partiti sono raggruppamenti provvisori. Confrontando le due fonti sulla Camera 1979, l'archivio del Ministero ha 553 voti di lista in meno della somma delle sezioni del Comune (−0,05%), con gli stessi votanti.</li>
+<li><b>Striscia delle comunali.</b> Conta solo i voti alle liste, senza i voti dati solo al sindaco. Prima e dopo il 1993 il sistema per eleggere il Consiglio è diverso, quindi i confronti tra le due epoche vanno presi con cautela.</li>
 </ul>
 
   <footer>
@@ -543,6 +565,33 @@ Promise.all([
 }).catch(function(err){
   el('info').textContent='Non riesco a caricare i dati (apri la pagina da un server web, non da file): '+err;
 });
+/* ---------- striscia dei blocchi nelle comunali ---------- */
+fetch('data/comunali_blocchi.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(d){
+  var NS='http://www.w3.org/2000/svg';
+  el('cmLeg').innerHTML=d.ordine.map(function(f,i){ return '<span><i style="background:'+d.colori[i]+'"></i>'+f+'</span>'; }).join('');
+  var box=el('cmRighe');
+  d.elezioni.forEach(function(e){
+    var row=document.createElement('div'); row.className='cm-rw';
+    var l=document.createElement('div'); l.className='cm-l';
+    l.innerHTML='<b>'+e.anno+'</b> <span></span>'; l.querySelector('span').textContent=e.sindaco;
+    var svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox','0 0 100 10'); svg.setAttribute('preserveAspectRatio','none');
+    svg.setAttribute('role','img'); svg.setAttribute('aria-label','Tessere '+e.anno);
+    var x=0;
+    e.seggi.forEach(function(n,fi){
+      for(var k=0;k<n;k++){
+        var r=document.createElementNS(NS,'rect');
+        r.setAttribute('x',x); r.setAttribute('y',0); r.setAttribute('width',0.9); r.setAttribute('height',10);
+        r.setAttribute('fill',d.colori[fi]);
+        if(d.ordine[fi]==='Centro'){ r.setAttribute('stroke','#999'); r.setAttribute('stroke-width','.12'); }
+        svg.appendChild(r); x++;
+      }
+    });
+    var a=document.createElement('div'); a.className='cm-a';
+    a.textContent=(e.elettori&&e.votanti)?pct(e.votanti,e.elettori,0):'n.d.';
+    row.appendChild(l); row.appendChild(svg); row.appendChild(a); box.appendChild(row);
+  });
+}).catch(function(){ el('cmRighe').textContent='Non riesco a caricare i dati della striscia.'; });
 </script>
 </body>
 </html>
