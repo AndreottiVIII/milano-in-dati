@@ -1,7 +1,11 @@
 """Dati compatti per la pagina docs/scala/ (La Scala, 1778-2027).
 Uso (dalla cartella scala/):   python -I -X utf8 scripts/pagina_dati.py
 Legge:  pulito/cartellone.csv, sbn/sbn_programmi.csv (se c'e'), raw/wikidata/premiere_p4647.json, pulito/_wp_aperture.csv
+        locandine/titoli_anno_locandine.csv, locandine/prime_assolute_verificate.csv, ../docs/scala/data/serate/*.json
 Scrive: ../docs/scala/data/{copertura,titoli,classifiche,prime,sette_dicembre,fonti}.json
+
+Locandine (codice L, priorita' massima): per gli anni 1944-2023 sostituiscono tutte le altre fonti; il 1943 tiene le vecchie fonti piu'
+le locandine di fine dicembre; prima del 1943 e dal 2024 non cambia nulla. Una riga L = un titolo in un anno (con il numero di recite).
 
 Regole di licenza (vedi NOTE.md):
  - ripubblicabile=no (Gatti vol. I): si pubblicano SOLO titolo, compositore, stagione/anno e direttore; mai testo, mai pagine,
@@ -32,12 +36,14 @@ SRC = {
     "ia_programmi":                 ("I", 1),     # programmi di sala 2002-2011 su Internet Archive (+ "alla Scala dal..." storici)
     "sbn_registrazioni":            ("V", 1),     # registrazioni sonore dal vivo alla Scala (Catalogo SBN)
 }
+LOC_Y0, LOC_Y1 = 1944, 2023       # anni in cui le locandine sostituiscono le altre fonti
 CODE = {k: v[0] for k, v in SRC.items()}
 PRIO = {v[0]: v[1] for v in SRC.values()}
-TITLE_PRIO = "SIBWDRGCVM"          # da quale fonte prendere il titolo (piu' pulito prima)
-CAST_PRIO = "SIVBWCRG"
-DATE_PRIO = "SIBVDWC"
-SEASON_PRIO = "SIBVGMWCR"
+PRIO["L"] = -1                     # locandine: la fonte migliore
+TITLE_PRIO = "LSIBWDRGCVM"          # da quale fonte prendere il titolo (piu' pulito prima)
+CAST_PRIO = "LSIVBWCRG"
+DATE_PRIO = "LSIBVDWC"
+SEASON_PRIO = "LSIBVGMWCR"
 WITHHELD_ROWS = {"M"}            # solo conteggi
 RESTRICTED_KEEP = ("titolo", "autore", "stagione", "anno", "direttore")   # per ripubblicabile=no
 
@@ -131,6 +137,8 @@ def kind_of(genere, tipo=""):
         return "balletto"
     if "ragazzi" in g:
         return "ragazzi"
+    if g == "altro":
+        return "altro"
     return "opera"
 
 
@@ -258,152 +266,180 @@ if sbn_present:
         stats["sbn"]["righe_usate"] += 1
     stats["sbn"]["righe_fonte"] = sbn_info["righe"]
 
+# ------------------------------------------------------------------ locandine
+rows_full = list(rows)            # tutte le fonti vecchie, per prime assolute e 7 dicembre degli anni coperti dalle locandine
+rows = [r for r in rows if not (LOC_Y0 <= r["anno"] <= LOC_Y1)]
+LOC_KIND = {"opera": "opera", "balletto": "balletto", "concerto": "concerto", "altro": "altro"}
+loc_n = 0
+with open(os.path.join(BASE, "locandine", "titoli_anno_locandine.csv"), encoding="utf-8-sig") as f:
+    for x in csv.DictReader(f):
+        y = int(x["anno"])
+        if not (1943 <= y <= LOC_Y1) or not x["titolo"].strip():
+            continue
+        sala = re.sub(r"^Milano\s*-\s*", "", x["sala"].strip())
+        rows.append(dict(src="L", anno=y, stagione="", data="", titolo=x["titolo"].strip(), autore=x["autore"].strip(),
+                         kind=LOC_KIND[x["genere"]], direttore="; ".join(d.strip() for d in x["direttori"].split(";") if d.strip()),
+                         regista="", interpreti="", sala="" if sala in ("", "Teatro alla Scala") else sala, rel=2, prima=0, ripub=True,
+                         recite=int(x["recite"] or 0)))
+        loc_n += 1
+
 # ------------------------------------------------------------------ fusione per anno
-class G:
-    __slots__ = ("anno", "rows", "nk", "ck", "srcs", "dates")
+def build(rows):
+    class G:
+        __slots__ = ("anno", "rows", "nk", "ck", "srcs", "dates")
 
-    def __init__(self, r):
-        self.anno = r["anno"]; self.rows = [r]; self.nk = normtitle(r["titolo"]); self.ck = composer_key(r["autore"])
-        self.srcs = {r["src"]}; self.dates = {r["data"]} if r["data"] else set()
+        def __init__(self, r):
+            self.anno = r["anno"]; self.rows = [r]; self.nk = normtitle(r["titolo"]); self.ck = composer_key(r["autore"])
+            self.srcs = {r["src"]}; self.dates = {r["data"]} if r["data"] else set()
 
-    def add(self, r):
-        self.rows.append(r); self.srcs.add(r["src"])
-        if r["data"]: self.dates.add(r["data"])
-        if not self.ck: self.ck = composer_key(r["autore"])
+        def add(self, r):
+            self.rows.append(r); self.srcs.add(r["src"])
+            if r["data"]: self.dates.add(r["data"])
+            if not self.ck: self.ck = composer_key(r["autore"])
 
 
-groups_by_year = collections.defaultdict(list)
-for r in sorted(rows, key=lambda r: (r["anno"], PRIO[r["src"]])):
-    nk = normtitle(r["titolo"])
-    if not nk:
-        continue
-    ck = composer_key(r["autore"])
-    isconc = r["kind"] == "concerto"
-    found = None
-    for g in groups_by_year[r["anno"]]:
-        if (g.rows[0]["kind"] == "concerto") != isconc:
+    groups_by_year = collections.defaultdict(list)
+    for r in sorted(rows, key=lambda r: (r["anno"], PRIO[r["src"]])):
+        nk = normtitle(r["titolo"])
+        if not nk:
             continue
-        if g.nk == nk:
-            found = g; break
-    if not found:
+        ck = composer_key(r["autore"])
+        isconc = r["kind"] == "concerto"
+        found = None
+        if r["src"] == "L" and r["anno"] >= LOC_Y0:
+            groups_by_year[r["anno"]].append(G(r))      # una riga delle locandine = un gruppo (titoli uguali con autori diversi non si fondono)
+            continue
         for g in groups_by_year[r["anno"]]:
-            if (g.rows[0]["kind"] == "concerto") != isconc or r["src"] in g.srcs:
+            if (g.rows[0]["kind"] == "concerto") != isconc:
                 continue
-            if g.ck and ck and g.ck != ck:
-                continue
-            if same_title(g.nk, nk):
+            if g.nk == nk:
                 found = g; break
-    if found:
-        found.add(r)
-    else:
-        groups_by_year[r["anno"]].append(G(r))
+        if not found:
+            for g in groups_by_year[r["anno"]]:
+                if (g.rows[0]["kind"] == "concerto") != isconc or r["src"] in g.srcs:
+                    continue
+                if g.ck and ck and g.ck != ck:
+                    continue
+                if same_title(g.nk, nk):
+                    found = g; break
+        if found:
+            found.add(r)
+        else:
+            groups_by_year[r["anno"]].append(G(r))
 
-# fase 2: gruppi solo Wikipedia/Wikidata si agganciano all'anno teatrale di Cambiasi/Romani (anno prima/dopo)
-n_adj = 0
-for y in sorted(groups_by_year):
-    if y > 1881:
-        continue
-    for g in list(groups_by_year[y]):
-        if not g.srcs <= {"W", "D"}:
+    # fase 2: gruppi solo Wikipedia/Wikidata si agganciano all'anno teatrale di Cambiasi/Romani (anno prima/dopo)
+    n_adj = 0
+    for y in sorted(groups_by_year):
+        if y > 1881:
             continue
-        for y2 in (y + 1, y - 1):
-            tgt = None
-            for h in groups_by_year.get(y2, []):
-                if h.srcs & {"C", "R"} and not (h.srcs & {"W", "D"}) and (h.nk == g.nk or (not (h.ck and g.ck and h.ck != g.ck) and same_title(h.nk, g.nk))):
-                    tgt = h; break
-            if tgt:
-                for r in g.rows: tgt.add(r)
-                groups_by_year[y].remove(g); n_adj += 1
-                break
+        for g in list(groups_by_year[y]):
+            if not g.srcs <= {"W", "D"}:
+                continue
+            for y2 in (y + 1, y - 1):
+                tgt = None
+                for h in groups_by_year.get(y2, []):
+                    if h.srcs & {"C", "R"} and not (h.srcs & {"W", "D"}) and (h.nk == g.nk or (not (h.ck and g.ck and h.ck != g.ck) and same_title(h.nk, g.nk))):
+                        tgt = h; break
+                if tgt:
+                    for r in g.rows: tgt.add(r)
+                    groups_by_year[y].remove(g); n_adj += 1
+                    break
 
-# ------------------------------------------------------------------ campi finali dei gruppi
-def pick(rows_, field, prio, extra_ok=lambda r: True):
-    for c in prio:
-        for r in rows_:
-            if r["src"] == c and r[field] and extra_ok(r):
-                return r[field]
-    return ""
-
-
-def best_composer(rows_):
-    cands = []
-    for c in TITLE_PRIO:
-        for r in rows_:
-            if r["src"] == c and r["autore"]:
-                cands.append(r["autore"])
-    if not cands:
+    # ------------------------------------------------------------------ campi finali dei gruppi
+    def pick(rows_, field, prio, extra_ok=lambda r: True):
+        for c in prio:
+            for r in rows_:
+                if r["src"] == c and r[field] and extra_ok(r):
+                    return r[field]
         return ""
-    best = cands[0]
-    for c in cands[1:]:
-        if len(c.split()) > len(best.split()) and composer_key(c) == composer_key(best):
-            best = c
-    return best
 
 
-def in_closure(rec_rows, y):
-    """1943-46: teatro distrutto (15-16 agosto 1943), riaperto l'11 maggio 1946."""
-    if y in (1944, 1945):
-        return True
-    ds = [r["data"] for r in rec_rows if re.match(r"^\d{4}-\d\d-\d\d$", r["data"] or "")]
-    if ds:
-        d = min(ds)
-        return "1943-08-16" <= d < "1946-05-11"
-    st = " ".join(r["stagione"] for r in rec_rows)
-    return y in (1943, 1946) and (("1943-44" in st) or ("1945-46" in st))
+    def best_composer(rows_):
+        cands = []
+        for c in TITLE_PRIO:
+            for r in rows_:
+                if r["src"] == c and r["autore"]:
+                    cands.append(r["autore"])
+        if not cands:
+            return ""
+        best = cands[0]
+        for c in cands[1:]:
+            if len(c.split()) > len(best.split()) and composer_key(c) == composer_key(best):
+                best = c
+        return best
 
 
-pub = []         # righe pubblicate
-ALLG = []        # tutti i gruppi (anche solo-Marangoni) per grafico e classifiche
-for y in sorted(groups_by_year):
-    for g in groups_by_year[y]:
-        rs = g.rows
-        pr = {c: 0 for c in PRIO}
-        title = pick(rs, "titolo", TITLE_PRIO)
-        comp = best_composer(rs)
-        kind = collections.Counter(r["kind"] for r in rs if r["src"] not in "G").most_common(1)
-        kind = kind[0][0] if kind else rs[0]["kind"]
-        if kind == "opera/balletto" and any(r["src"] == "G" and r["kind"] != "opera/balletto" for r in rs):
-            kind = "opera"
-        srcs = "".join(sorted(g.srcs, key=lambda c: PRIO[c]))
-        top = min(g.srcs, key=lambda c: PRIO[c])
-        prima = max(r["prima"] for r in rs)
-        rec = dict(anno=y, titolo=title, autore=comp, kind=kind, srcs=srcs, top=top, ck=composer_key(comp), nk=g.nk,
-                   dates=g.dates, prima=prima, concerto=(kind == "concerto"))
-        # campi per la pubblicazione: mai da Marangoni
-        pubrs = [r for r in rs if r["src"] not in WITHHELD_ROWS]
-        rec["publish"] = bool(pubrs)
-        if pubrs:
-            rec["stagione"] = pick(pubrs, "stagione", SEASON_PRIO)
-            rec["data"] = pick(pubrs, "data", DATE_PRIO, lambda r: bool(re.match(r"^\d{4}-\d\d-\d\d$", r["data"])))
-            rec["direttore"] = pick(pubrs, "direttore", CAST_PRIO)
-            rec["regista"] = pick(pubrs, "regista", CAST_PRIO)
-            rec["interpreti"] = pick(pubrs, "interpreti", CAST_PRIO)
-            rec["sala"] = pick(pubrs, "sala", "SB")
-            if not rec["sala"] and 1943 <= y <= 1946 and in_closure(pubrs, y):
-                rec["sala"] = "teatro distrutto: altra sala?"
-            rec["rel"] = max(r["rel"] for r in pubrs)
-            rec["pubsrcs"] = "".join(sorted({r["src"] for r in pubrs}, key=lambda c: PRIO[c]))
-            rec["n_righe_pub"] = collections.Counter(r["src"] for r in pubrs)
-        ALLG.append(rec)
-        if pubrs:
-            pub.append(rec)
+    def in_closure(rec_rows, y):
+        """1943-46: teatro distrutto (15-16 agosto 1943), riaperto l'11 maggio 1946."""
+        if y in (1944, 1945):
+            return True
+        ds = [r["data"] for r in rec_rows if re.match(r"^\d{4}-\d\d-\d\d$", r["data"] or "")]
+        if ds:
+            d = min(ds)
+            return "1943-08-16" <= d < "1946-05-11"
+        st = " ".join(r["stagione"] for r in rec_rows)
+        return y in (1943, 1946) and (("1943-44" in st) or ("1945-46" in st))
 
-# se una riga e' fatta solo di Gatti, genere non distinto: va bene; tolgo i 'solo Marangoni' dalla pubblicazione (gia' fatto)
+
+    pub = []         # righe pubblicate
+    ALLG = []        # tutti i gruppi (anche solo-Marangoni) per grafico e classifiche
+    for y in sorted(groups_by_year):
+        for g in groups_by_year[y]:
+            rs = g.rows
+            pr = {c: 0 for c in PRIO}
+            title = pick(rs, "titolo", TITLE_PRIO)
+            comp = best_composer(rs)
+            kind = collections.Counter(r["kind"] for r in rs if r["src"] not in "G").most_common(1)
+            kind = kind[0][0] if kind else rs[0]["kind"]
+            if kind == "opera/balletto" and any(r["src"] == "G" and r["kind"] != "opera/balletto" for r in rs):
+                kind = "opera"
+            srcs = "".join(sorted(g.srcs, key=lambda c: PRIO[c]))
+            top = min(g.srcs, key=lambda c: PRIO[c])
+            prima = max(r["prima"] for r in rs)
+            rec = dict(anno=y, titolo=title, autore=comp, kind=kind, srcs=srcs, top=top, ck=composer_key(comp), nk=g.nk,
+                       dates=g.dates, prima=prima, concerto=(kind == "concerto"), recite=sum(r.get("recite", 0) for r in rs))
+            # campi per la pubblicazione: mai da Marangoni
+            pubrs = [r for r in rs if r["src"] not in WITHHELD_ROWS]
+            rec["publish"] = bool(pubrs)
+            if pubrs:
+                rec["stagione"] = pick(pubrs, "stagione", SEASON_PRIO)
+                rec["data"] = pick(pubrs, "data", DATE_PRIO, lambda r: bool(re.match(r"^\d{4}-\d\d-\d\d$", r["data"])))
+                rec["direttore"] = pick(pubrs, "direttore", CAST_PRIO)
+                rec["regista"] = pick(pubrs, "regista", CAST_PRIO)
+                rec["interpreti"] = pick(pubrs, "interpreti", CAST_PRIO)
+                rec["sala"] = pick(pubrs, "sala", "LSB")
+                if not rec["sala"] and 1943 <= y <= 1946 and in_closure(pubrs, y):
+                    rec["sala"] = "teatro distrutto: altra sala?"
+                rec["rel"] = max(r["rel"] for r in pubrs)
+                rec["pubsrcs"] = "".join(sorted({r["src"] for r in pubrs}, key=lambda c: PRIO[c]))
+                rec["n_righe_pub"] = collections.Counter(r["src"] for r in pubrs)
+            ALLG.append(rec)
+            if pubrs:
+                pub.append(rec)
+
+    return pub, ALLG, n_adj
+
+
+pub, ALLG, n_adj = build(rows)
+pub_full, _, _ = build(rows_full)
 
 # ------------------------------------------------------------------ titoli.json
-GCODE = {"opera": "o", "balletto": "b", "concerto": "c", "ospiti": "g", "ragazzi": "r", "opera/balletto": "x", "tournee": "t"}
+GCODE = {"opera": "o", "balletto": "b", "concerto": "c", "ospiti": "g", "ragazzi": "r", "opera/balletto": "x", "tournee": "t", "altro": "a"}
 GCOUNT = collections.Counter()
 titoli = []
 for rec in sorted(pub, key=lambda r: (r["anno"], r["data"] or "9999", r["titolo"].lower())):
-    titoli.append([rec["anno"], rec["stagione"], rec["data"], rec["titolo"], rec["autore"], GCODE.get(rec["kind"], "o"),
-                   rec["direttore"], rec["regista"], rec["interpreti"], rec["pubsrcs"], rec["rel"], rec["prima"], rec["sala"]])
+    riga = [rec["anno"], rec["stagione"], rec["data"], rec["titolo"], rec["autore"], GCODE.get(rec["kind"], "o"),
+            rec["direttore"], rec["regista"], rec["interpreti"], rec["pubsrcs"], rec["rel"], rec["prima"], rec["sala"]]
+    if rec["anno"] >= LOC_Y0 and "L" in rec["pubsrcs"]:
+        riga.append(rec["recite"])                 # solo le righe delle locandine hanno il 14o campo: numero di recite
+    titoli.append(riga)
 published_by_src = collections.Counter()
 for rec in pub:
     for c, n in rec["n_righe_pub"].items():
         published_by_src[c] += n
 
 # ------------------------------------------------------------------ copertura.json (grafico: ogni titolo una volta, colore = fonte migliore)
-CLASS = {"S": "S", "B": "B", "I": "B", "V": "B", "C": "C", "R": "C", "G": "G", "M": "G", "W": "W", "D": "W"}
+CLASS = {"L": "L", "S": "S", "B": "B", "I": "B", "V": "B", "C": "C", "R": "C", "G": "G", "M": "G", "W": "W", "D": "W"}
 cov = {y: collections.Counter() for y in range(Y0, Y1 + 1)}
 cov_src = {y: collections.defaultdict(set) for y in range(Y0, Y1 + 1)}
 for rec in ALLG:
@@ -414,8 +450,8 @@ for rec in ALLG:
         cov_src[rec["anno"]][c].add(rec["nk"])
 anni = []
 for y in range(Y0, Y1 + 1):
-    d = dict(y=y, S=cov[y]["S"], B=cov[y]["B"], C=cov[y]["C"], G=cov[y]["G"], W=cov[y]["W"])
-    d["t"] = d["S"] + d["B"] + d["C"] + d["G"] + d["W"]
+    d = dict(y=y, S=cov[y]["S"], B=cov[y]["B"], C=cov[y]["C"], G=cov[y]["G"], W=cov[y]["W"], L=cov[y]["L"])
+    d["t"] = d["S"] + d["B"] + d["C"] + d["G"] + d["W"] + d["L"]
     anni.append(d)
 
 PERIODI = [
@@ -423,10 +459,9 @@ PERIODI = [
     (1882, 1905, "Gatti vol. I, Wikipedia, Wikidata: nessuna cronologia dopo Cambiasi"),
     (1906, 1920, "Marangoni-Vanbianchi (solo conteggi), Gatti vol. I, Wikipedia, Wikidata"),
     (1921, 1942, "Gatti vol. I, Wikipedia, Wikidata"),
-    (1943, 1946, "bombardamento e ricostruzione: quasi nulla"),
-    (1947, 1963, "Gatti vol. I, Wikipedia, Wikidata"),
-    (1964, 2022, "programmi di sala del Catalogo SBN, Wikipedia, Wikidata"),
-    (2023, 2027, "sito della Scala (stagioni 2023-24 ... 2026-27)"),
+    (1943, 1943, "bombardamento (agosto): le vecchie fonti, piu' le locandine di fine dicembre"),
+    (1944, 2023, "locandine dell'archivio storico del teatro (quasi ogni recita)"),
+    (2024, 2027, "sito della Scala (stagioni 2023-24 ... 2026-27)"),
 ]
 periodi = []
 for a, b, fonti_txt in PERIODI:
@@ -440,7 +475,7 @@ json.dump(dict(anni=anni, periodi=periodi, anni_vuoti=vuoti), open(os.path.join(
           ensure_ascii=False, separators=(",", ":"))
 
 # ------------------------------------------------------------------ classifiche
-opere = [r for r in ALLG if r["kind"] not in ("concerto", "tournee", "ospiti") and r["nk"] and not (r["kind"] == "balletto" and r["anno"] <= 1881)]   # i balli di Cambiasi (1778-1881) non entrano nelle classifiche delle opere
+opere = [r for r in ALLG if r["kind"] not in ("concerto", "tournee", "ospiti", "altro") and r["nk"] and not (r["kind"] == "balletto" and r["anno"] <= 1881)]   # i balli di Cambiasi (1778-1881) non entrano nelle classifiche delle opere
 # cluster dei titoli (varianti ortografiche) per compositore; i gruppi senza compositore si agganciano al cluster piu' vicino nel tempo
 reps = []                     # (nk, ck, cid)
 byblock = collections.defaultdict(list)
@@ -497,7 +532,7 @@ title_names = collections.defaultdict(collections.Counter)
 for r in opere:
     title_names[r["cid"]][r["titolo"]] += 1
 
-PER_CL = [("1778-1881", 1778, 1881), ("1882-1963", 1882, 1963), ("1964-2027", 1964, 2027), ("1778-2027", 1778, 2027)]
+PER_CL = [("1778-1881", 1778, 1881), ("1882-1943", 1882, 1943), ("1944-2023", 1944, 2023), ("1778-2027", 1778, 2027)]
 classifiche = {}
 for name, a, b in PER_CL:
     sel = [r for r in opere if a <= r["anno"] <= b]
@@ -524,16 +559,47 @@ for name, a, b in PER_CL:
 json.dump(classifiche, open(os.path.join(OUT, "classifiche.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 # ------------------------------------------------------------------ prime assolute
+# negli anni delle locandine le prime assolute restano quelle delle altre fonti (Wikipedia, Wikidata), piu' le 13 verificate sulle locandine
 prime = []
-for rec in sorted(pub, key=lambda r: (r["anno"], r["data"] or "9999", r["titolo"].lower())):
+for rec in sorted(pub_full, key=lambda r: (r["anno"], r["data"] or "9999", r["titolo"].lower())):
     if rec["prima"] and rec["kind"] not in ("concerto",):
         prime.append([rec["anno"], rec["data"], rec["titolo"], rec["autore"], GCODE.get(rec["kind"], "o"), rec["pubsrcs"], rec["prima"]])
+prime_loc = dict(aggiunte=0, doppioni=0)
+with open(os.path.join(BASE, "locandine", "prime_assolute_verificate.csv"), encoding="utf-8-sig") as f:
+    for x in csv.DictReader(f):
+        y = int(x["data"][:4]); nk = normtitle(x["titolo"]); ck = composer_key(x["autore"])
+        dup = None
+        for e in prime:
+            if abs(e[0] - y) <= 1 and (normtitle(e[2]) == nk or same_title(normtitle(e[2]), nk)) and (not ck or not e[3] or composer_key(e[3]) == ck):
+                dup = e; break
+        if dup:
+            prime_loc["doppioni"] += 1
+            if "L" not in dup[5]:
+                dup[5] = "L" + dup[5]
+            if not dup[1]:
+                dup[1] = x["data"]
+            print("prima gia' presente:", dup[:4], "<-", x["data"], x["titolo"])
+        else:
+            prime.append([y, x["data"], x["titolo"], x["autore"], "b" if x["genere"] == "balletto" else "o", "L", 2])
+            prime_loc["aggiunte"] += 1
+prime.sort(key=lambda r: (r[0], r[1] or "9999", r[2].lower()))
+print("prime dalle locandine", prime_loc)
 json.dump(prime, open(os.path.join(OUT, "prime.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 # ------------------------------------------------------------------ 7 dicembre
 sette = []
 by_y = collections.defaultdict(list)
-for rec in pub:
+# anni 1944-2023: la serata del 7 dicembre viene dalle locandine (opere e balletti); se per quell'anno non c'e' la locandina restano le altre fonti
+loc7 = collections.defaultdict(dict)
+for fn in sorted(os.listdir(os.path.join(OUT, "serate"))):
+    if not re.match(r"^\d{4}\.json$", fn):
+        continue
+    for rr in json.load(open(os.path.join(OUT, "serate", fn), encoding="utf-8")):
+        if rr[0].endswith("1207") and rr[9] == "" and rr[2] in ("O", "B") and LOC_Y0 <= int(rr[0][:4]) <= LOC_Y1:
+            loc7[int(rr[0][:4])].setdefault(rr[3], rr)
+for rec in pub_full:
+    if rec["anno"] >= LOC_Y0 and rec["anno"] <= LOC_Y1 and int(rec["anno"]) in loc7:
+        continue
     if [d for d in rec["dates"] if d.endswith("-12-07")] and rec["kind"] != "concerto":
         by_y[int(sorted(d for d in rec["dates"] if d.endswith("-12-07"))[0][:4])].append(rec)
 for y, lst in by_y.items():
@@ -542,7 +608,12 @@ for y, lst in by_y.items():
     sette += [dict(r, anno=y) for r in (auth or lst)]
 sette.sort(key=lambda r: (r["anno"], r["titolo"].lower()))
 serate = [[r["anno"], r["titolo"], r["autore"], r["direttore"], r["regista"], r["pubsrcs"], r["rel"]] for r in sette]
-anni_sette = sorted({r["anno"] for r in sette})
+for y, d in loc7.items():
+    for rr in d.values():
+        serate.append([y, rr[3], rr[4], rr[7], "", "L", 2])
+serate.sort(key=lambda r: (r[0], r[1].lower()))
+anni_sette = sorted({r[0] for r in serate})
+anni_sette_loc = sorted(loc7)
 aper = []
 aper_path = os.path.join(BASE, "pulito", "_wp_aperture.csv")
 if os.path.exists(aper_path):
@@ -551,28 +622,32 @@ if os.path.exists(aper_path):
         if m and int(m.group(1)) >= 1951 and int(m.group(1)) not in anni_sette:
             aper.append([int(m.group(1)), x["titolo"], x["compositore"]])
 aper.sort()
-json.dump(dict(serate=serate, anni_con_data=anni_sette, aperture_senza_data=aper), open(os.path.join(OUT, "sette_dicembre.json"), "w", encoding="utf-8"),
+json.dump(dict(serate=serate, anni_con_data=anni_sette, anni_da_locandine=anni_sette_loc, aperture_senza_data=aper), open(os.path.join(OUT, "sette_dicembre.json"), "w", encoding="utf-8"),
           ensure_ascii=False, separators=(",", ":"))
 
 # ------------------------------------------------------------------ fonti.json
 y_by_src = collections.defaultdict(list)
 for r in rows:
     y_by_src[r["src"]].append(r["anno"])
+rn = json.load(open(os.path.join(OUT, "serate", "riepilogo.json"), encoding="utf-8"))["numeri"]
 FONTI = [
+    dict(c="L", nome="Locandine dell'archivio storico del Teatro alla Scala", dettaglio="circa %s locandine dal 26 dicembre 1943 al 17 luglio 2026, lette in automatico; qui si usano quelle del 1944-2023 e le 4 di fine dicembre 1943. Un titolo conta una volta per anno, con il numero di recite" % format(round(rn["locandine"], -2), ",").replace(",", "."),
+         licenza="Dati del Teatro; citare: (c) Teatro alla Scala. Le immagini non sono ripubblicate.", pubblicate="titolo, autore, direttore, numero di recite, sala (stima)",
+         note="Per gli anni 1944-2023 sostituiscono tutte le altre fonti. Titoli ricavati dalla lettura automatica, controllati a campione. Dal 2024 i concerti sono quasi assenti, per questo da quell'anno restano il sito della Scala e le altre fonti."),
     dict(c="S", nome="Sito pubblico del Teatro alla Scala", dettaglio="pagine di stagione 2023-24 ... 2026-27 (spettacoli e concerti, con cast)",
          licenza="Dati del Teatro; citare: (c) Teatro alla Scala.", pubblicate="titolo, autore, data, direttore, regia, interpreti", note="Affidabilita alta. Concerti senza programma."),
     dict(c="B", nome="Catalogo SBN - ICCU (programmi di sala)", dettaglio="schede bibliografiche dei programmi di sala della Scala, 1963-2024, cercate per anno e per stagione",
          licenza="Dati bibliografici del Servizio Bibliotecario Nazionale; citare: Catalogo SBN - ICCU (opac.sbn.it).", pubblicate="titolo, compositore, direttore, regia/coreografia, interpreti principali, data",
          note="Una riga per produzione, non per serata. Direttore, regia, coreografia e interpreti vengono dai nomi con ruolo della scheda e dal titolo: presenti solo per una parte dei programmi. Affidabilita media; bassa se l'anno viene solo dall'anno di stampa del programma o e' incerto. Non usati: %d libretti di stagione, %d schede da verificare, %d tournee, e le schede senza anno." % (sbn_info["libretti_stagione"], sbn_info["da_verificare"], sbn_info["tournee"])),
-    dict(c="C", nome="Cambiasi, Teatro alla Scala 1778-1881", dettaglio="serie delle opere in musica e serie dei balli per stagione (Ricordi 1881), da testo OCR di Internet Archive",
-         licenza="Libro di pubblico dominio; si pubblicano i fatti estratti, non la scansione.", pubblicate="opere: titolo, maestro, genere, data, interpreti (solo dove l'OCR e' buono); balli: titolo, coreografo, compositore, data",
-         note="Non e' l'elenco delle sere: un titolo vale una volta per stagione. OCR con errori nei nomi. Anni 1832 e 1835 vuoti per le opere. I balli (1778-1881, 104 anni su 104) sono letti dal testo a stagioni; controllo a mano su 3 stagioni; le prime ballerine non sono pubblicate."),
-    dict(c="R", nome="Romani, Teatro alla Scala: cronologia di tutti gli spettacoli (1862)", dettaglio="stagione per stagione 1778-1862, da testo OCR",
+    dict(c="C", nome="Cambiasi, Teatro alla Scala 1778-1881", dettaglio="serie delle opere in musica e serie dei balli per stagione (Ricordi 1881), dalla lettura automatica del testo di Internet Archive",
+         licenza="Libro di pubblico dominio; si pubblicano i fatti estratti, non la scansione.", pubblicate="opere: titolo, maestro, genere, data, interpreti (solo dove la lettura automatica e' buona); balli: titolo, coreografo, compositore, data",
+         note="Non e' l'elenco delle sere: un titolo vale una volta per stagione. Lettura automatica con errori nei nomi. Anni 1832 e 1835 vuoti per le opere. I balli (1778-1881, 104 anni su 104) sono letti dal testo a stagioni; controllo a mano su 3 stagioni; le prime ballerine non sono pubblicate."),
+    dict(c="R", nome="Romani, Teatro alla Scala: cronologia di tutti gli spettacoli (1862)", dettaglio="stagione per stagione 1778-1862, dalla lettura automatica del testo",
          licenza="Libro di pubblico dominio; si pubblicano i fatti estratti.", pubblicate="titolo, maestro, genere", note="Letti 46 anni su 85: mancano quelli con intestazione illeggibile."),
     dict(c="G", nome="C. Gatti, Il Teatro alla Scala nella storia e nell'arte, vol. I (Ricordi, Milano 1964)", dettaglio="titoli citati come rappresentati nel racconto, 1882-1963",
          licenza="Libro ancora protetto: dal libro si ricavano solo fatti (titolo, compositore, stagione, direttore). Nessun testo, nessuna pagina riprodotta.", pubblicate="titolo, compositore, stagione, direttore",
          note="Il volume I e' un racconto, non la cronologia (che e' nel vol. II): nomina 10-12 titoli per stagione su 20-30. Precisione controllata a mano: 87% su 70 righe."),
-    dict(c="M", nome="Marangoni e Vanbianchi, La Scala. Studi e ricerche, note storiche e statistiche 1906-1920 (1922)", dettaglio="cartelloni di stagione 1906-1918 (OCR)",
+    dict(c="M", nome="Marangoni e Vanbianchi, La Scala. Studi e ricerche, note storiche e statistiche 1906-1920 (1922)", dettaglio="cartelloni di stagione 1906-1918 (lettura automatica)",
          licenza="Stato dei diritti non verificato: dal libro si pubblicano solo i conteggi per anno nel grafico, nessuna riga nelle tabelle.", pubblicate="solo conteggi",
          note="Mancano 1914-15, 1917-18, 1919-20."),
     dict(c="W", nome="Wikipedia in italiano: Stagioni liriche del Teatro alla Scala", dettaglio="cronistoria 1778-2024, titoli con date, direttori e interpreti (revisione 152735080 del 3/10/2026); anche le aperture di stagione",
@@ -581,9 +656,9 @@ FONTI = [
     dict(c="D", nome="Wikidata (query SPARQL del 29/10/2026)", dettaglio="'luogo della prima rappresentazione' (P4647) e 'luogo' (P276/P291) uguale al Teatro alla Scala, con data",
          licenza="CC0 (pubblico dominio).", pubblicate="titolo, compositore (dove c'e'), data, genere",
          note="Solo le voci con P4647 sono prime assolute (%d); le altre %d sono produzioni e sono segnate cosi'." % (sum(1 for r in rows if r["src"] == "D" and r["prima"] == 2), sum(1 for r in rows if r["src"] == "D" and r["prima"] != 2))),
-    dict(c="I", nome="Programmi di sala del Teatro alla Scala 2002-2011 (Internet Archive)", dettaglio="14 programmi aperti con testo OCR (opere, concerti, gala), piu' i capitoli 'alla Scala dal... al...' di 4 programmi (Carmen, Don Giovanni, L'elisir d'amore, Der Rosenkavalier) con data, direttore, regia di ogni produzione storica",
+    dict(c="I", nome="Programmi di sala del Teatro alla Scala 2002-2011 (Internet Archive)", dettaglio="14 programmi letti in automatico (opere, concerti, gala), piu' i capitoli 'alla Scala dal... al...' di 4 programmi (Carmen, Don Giovanni, L'elisir d'amore, Der Rosenkavalier) con data, direttore, regia di ogni produzione storica",
          licenza="Edizioni del Teatro alla Scala, messe su Internet Archive: si pubblicano solo fatti (titolo, data, direttore, regia, solisti), non testi ne' pagine.", pubblicate="titolo, compositore, data, direttore, regia, interpreti (dove il testo li da' per ruolo)",
-         note="Affidabilita alta per i programmi, media per le produzioni storiche (OCR a colonne: i cast per ruolo non sono letti). La data e' quella della prima; le repliche sono lette solo dove l'OCR le tiene in ordine."),
+         note="Affidabilita alta per i programmi, media per le produzioni storiche (testo a colonne: i cast per ruolo non sono letti). La data e' quella della prima; le repliche sono lette solo dove la lettura automatica le tiene in ordine."),
     dict(c="V", nome="Catalogo SBN - registrazioni sonore dal vivo alla Scala", dettaglio="schede di registrazioni sonore con la nota 'Registrazione dal vivo, Milano, Teatro alla Scala, <data>', lette per circa 3.000 candidati; tenute solo le esecuzioni alla Scala, non le incisioni in studio",
          licenza="Dati bibliografici del Servizio Bibliotecario Nazionale; citare: Catalogo SBN - ICCU (opac.sbn.it).", pubblicate="titolo, compositore, data dell'esecuzione, direttore, interpreti",
          note="E' la data dell'esecuzione registrata (una sera), non l'intera produzione. Affidabilita alta se la nota nomina il Teatro alla Scala e il giorno; media se il luogo e' solo 'Milano' con orchestra della Scala o la data e' solo mese/anno."),
@@ -597,7 +672,7 @@ for fd in FONTI:
                       anni_distinti=len(set(ys))))
 tot_pub_titles = len(titoli)
 meta = dict(generato=datetime.date.today().isoformat(), righe_pagina=tot_pub_titles, gruppi_totali=len(ALLG), sbn_presente=sbn_present, sbn=sbn_info,
-            agganci_anno_adiacente=n_adj, prime=len(prime), serate_7_dicembre=len(serate), anni_7_dicembre=len(anni_sette))
+            agganci_anno_adiacente=n_adj, prime=len(prime), prime_da_locandine=prime_loc, righe_locandine=loc_n, serate_7_dicembre=len(serate), anni_7_dicembre=len(anni_sette))
 json.dump(dict(fonti=fonti, meta=meta), open(os.path.join(OUT, "fonti.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 json.dump(titoli, open(os.path.join(OUT, "titoli.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 

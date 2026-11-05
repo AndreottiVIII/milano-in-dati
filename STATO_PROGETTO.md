@@ -18,7 +18,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | 5 | Aria | Online |
 | 6 | Area C | Online, con il legame con l'aria |
 | 7 | Bici, auto o mezzi | Online, tarata su 120 tragitti Google, con gli incidenti |
-| 8 | La Scala | Online, con il focus sulle prime (76 su 76 dal 1951, dubbi 1954 e 1978 risolti il 30/10) |
+| 8 | La Scala | Online, con il focus sulle prime (76 su 76 dal 1951). Dal 5/11 serata per serata dal 1943 dalle locandine: ricerca per data, classifiche, direttori, interpreti, prezzi |
 | 9 | Città dei 15 minuti | Online, con 10 servizi extra |
 | 10 | Violenza politica | Online, 84 eventi |
 | 11 | Milano raccontata (film e libri) | Online |

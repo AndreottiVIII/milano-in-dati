@@ -2923,3 +2923,13 @@ python -I scripts\inventario.py <cartella censimenti>
 ## 94. Impianti sportivi: prova sulle palestre private
 
 - 2026-11-04 — Chiesta da Davide. `sport/scripts/prova_catene.py`: 41 sedi di 5 catene dai loro siti contro OpenStreetMap e la pagina: 31 trovate (76%). Vale solo per le catene; nessun elenco per le indipendenti. Aggiunta una riga nei limiti di `docs/sport/`; numeri della pagina non toccati. Dettagli in `sport/NOTE.md`.
+
+## 95. La Scala: serata per serata dalle locandine
+
+- 2026-11-04/05 — Davide ha scaricato con un suo strumento l'archivio delle locandine (17.340 immagini, 26/12/1943-17/7/2026) in `Downloads\Scala_Locandine_Archivio`. I programmi di scarico sono suoi, non li ho lanciati né modificati. Quella zona del sito è vietata ai programmi da robots.txt; termini d'uso non letti. Glielo ho detto. Sua scelta sul testo pubblico: "Dal 1943 usiamo le locandine dell'archivio storico del teatro; le immagini non sono ripubblicate", senza nominare il divieto. Immagini e nomi dei file non sono online.
+- Regola di Davide: per il 1944-2023 le locandine sostituiscono tutte le altre fonti; dal 2024 restano i dati del sito della Scala (sulle locandine i concerti recenti mancano). Tutto nella pagina `docs/scala/`, niente pagina nuova.
+- Programmi: `scala/scripts/locandine_*` (conta, ocr, titoli_ocr, lavori, persone, excel, pagina). Lettura col motore di Windows, ingrandita 3 volte. Dettagli in `scala/NOTE.md`. Risultati in `scala/locandine/`, non tracciati.
+- Numeri, ricontati dai nomi dei file senza passare dai programmi: 17.340 file, 17.282 recite, 16.943 date e ore, 14.757 giorni, 2.896 recite prima delle 18. Serate "circa 17.000".
+- Controlli: 428 date su 459 di altre fonti hanno la locandina quel giorno (93%). Direttori su 326 confronti: 248 giusti, 15 sbagliati, 63 non letti. Prezzi a vista: 11 giusti su 14. Interpreti solo da un elenco scelto, come minimo; controllo: Callas su 112 locandine, tutte 1950-1961.
+- Limiti trovati: 6 locandine del 7 dicembre mancano su 75 dal 1951; 7 aperture senza locandina restano con le altre fonti; il catalogo a volte accoppia scheda e immagine sbagliate (58 scartate); una sigla può valere lavori diversi (MANO, ANNA, CAMP, ORFE, SERV: regole in `scala/scripts/locandine_regole_fogli.csv`); i compositori dei balletti della lettura automatica erano sbagliati (Romeo e Giulietta a Puccini): tabella a mano in `locandine_pagina.py`, fuori da lì vuoti. Prime assolute: 13 aggiunte a mano, tra quelle lette, da ricordo verificabile ma non controllate una per una su una fonte.
+- Corretta anche la frase in `docs/scala/prime/` che diceva che l'archivio non era stato usato. Riscritte dall'agente: note del grafico, buchi C e D, testo della ricerca.
