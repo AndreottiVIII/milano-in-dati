@@ -464,67 +464,67 @@ def rg(ts):
 
 
 te = giorni_estremi['tmax_alta'][0]
-fatto(f"Il giorno piu caldo della serie e il {te['data']}: massima {fmt(te['valore'])} °C.", 'serie_unica.csv, campo tmax; records.json giorni_estremi.tmax_alta', [te])
+fatto(f"Il giorno più caldo della serie è il {te['data']}: massima {fmt(te['valore'])} °C.", 'serie giornaliera, massime', [te])
 te = giorni_estremi['tmin_bassa'][0]
-fatto(f"Il giorno piu freddo (minima piu bassa) e il {te['data']}: {fmt(te['valore'])} °C.", 'serie_unica.csv, campo tmin; records.json giorni_estremi.tmin_bassa', [te])
+fatto(f"Il giorno più freddo (minima più bassa) è il {te['data']}: {fmt(te['valore'])} °C.", 'serie giornaliera, minime', [te])
 te = giorni_estremi['tmax_bassa'][0]
-fatto(f"La massima piu bassa di sempre e {fmt(te['valore'])} °C, il {te['data']}.", 'serie_unica.csv, campo tmax; records.json giorni_estremi.tmax_bassa', [te])
+fatto(f"La massima più bassa di sempre è {fmt(te['valore'])} °C, il {te['data']}.", 'serie giornaliera, massime', [te])
 te = giorni_estremi['tmin_alta'][0]
-fatto(f"La notte piu calda (minima piu alta) e il {te['data']}: {fmt(te['valore'])} °C.", 'serie_unica.csv, campo tmin; records.json giorni_estremi.tmin_alta', [te])
+fatto(f"La notte più calda (minima più alta) è il {te['data']}: {fmt(te['valore'])} °C.", 'serie giornaliera, minime', [te])
 te = giorni_estremi['escursione_max'][0]
-fatto(f"La maggiore escursione termica in un giorno e {fmt(te['valore'])} °C (da {fmt(te['tmin'])} a {fmt(te['tmax'])}), il {te['data']}.", 'serie_unica.csv, campi tmax-tmin', [te])
+fatto(f"La maggiore escursione termica in un giorno è {fmt(te['valore'])} °C (da {fmt(te['tmin'])} a {fmt(te['tmax'])}), il {te['data']}.", 'serie giornaliera, massime e minime', [te])
 a, b = anni_caldi[0], anni_freddi[0]
-fatto(f"L'anno piu caldo e il {a['anno']} ({fmt(a['tmedia'])} °C di media), il piu freddo il {b['anno']} ({fmt(b['tmedia'])} °C): differenza {fmt(a['tmedia']-b['tmedia'])} °C.", 'annuale.json campo tmedia (solo anni validi)', [])
+fatto(f"L'anno più caldo è il {a['anno']} ({fmt(a['tmedia'])} °C di media), il più freddo il {b['anno']} ({fmt(b['tmedia'])} °C): differenza {fmt(a['tmedia']-b['tmedia'])} °C.", 'medie annue, solo anni validi', [])
 a, b = mesi_caldi[0], mesi_freddi[0]
-fatto(f"Il mese piu caldo di sempre e {MESI[a['mese']-1]} {a['anno']} ({fmt(a['tmedia'])} °C di media); il piu freddo {MESI[b['mese']-1]} {b['anno']} ({fmt(b['tmedia'])} °C).", 'mensile.json campo tmedia (solo mesi validi)', [])
+fatto(f"Il mese più caldo di sempre è {MESI[a['mese']-1]} {a['anno']} ({fmt(a['tmedia'])} °C di media); il più freddo {MESI[b['mese']-1]} {b['anno']} ({fmt(b['tmedia'])} °C).", 'medie mensili, solo mesi validi', [])
 a, b = est_s[-1], est_s[0]
-fatto(f"L'estate (giu-ago) piu calda e quella del {a['anno']} ({fmt(a['tmedia'])} °C), la piu fredda quella del {b['anno']} ({fmt(b['tmedia'])} °C).", 'mensile.json campo tmedia, mesi 6-7-8', [])
+fatto(f"L'estate (giu-ago) più calda è quella del {a['anno']} ({fmt(a['tmedia'])} °C), la più fredda quella del {b['anno']} ({fmt(b['tmedia'])} °C).", 'medie mensili di giugno, luglio e agosto', [])
 a, b = inv_s[-1], inv_s[0]
-fatto(f"L'inverno (dic-feb) piu caldo e quello che finisce nel {a['anno']} ({fmt(a['tmedia'])} °C), il piu freddo quello che finisce nel {b['anno']} ({fmt(b['tmedia'])} °C).", 'mensile.json campo tmedia, mesi 12-1-2', [])
+fatto(f"L'inverno (dic-feb) più caldo è quello che finisce nel {a['anno']} ({fmt(a['tmedia'])} °C), il più freddo quello che finisce nel {b['anno']} ({fmt(b['tmedia'])} °C).", 'medie mensili di dicembre, gennaio e febbraio', [])
 top10 = [o['anno'] for o in anni_caldi]
-fatto(f"Dei 10 anni piu caldi, {sum(1 for y in top10 if y>=2000)} sono dal 2000 in poi e {sum(1 for y in top10 if y>=1990)} dal 1990 in poi (anni: {', '.join(str(y) for y in sorted(top10))}).", 'records.json anni_caldi', [])
+fatto(f"Dei 10 anni più caldi, {sum(1 for y in top10 if y>=2000)} sono dal 2000 in poi e {sum(1 for y in top10 if y>=1990)} dal 1990 in poi (anni: {', '.join(str(y) for y in sorted(top10))}).", 'medie annue, solo anni validi', [])
 w = caldo[0]
-fatto(f"La serie piu lunga di giorni consecutivi con massima di almeno 30 °C dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']} (massima media {fmt(w['media'])} °C).", 'serie_unica.csv, campo tmax; records.json serie_caldo_tmax30', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}, {'data': w['fine'], 'fonte': w['fonti'], 'riga': w['riga_fine']}])
+fatto(f"La serie più lunga di giorni consecutivi con massima di almeno 30 °C dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']} (massima media {fmt(w['media'])} °C).", 'serie giornaliera, massime', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}, {'data': w['fine'], 'fonte': w['fonti'], 'riga': w['riga_fine']}])
 w = gelo[0]
-fatto(f"La serie piu lunga di giorni consecutivi con gelo (minima sotto 0 °C) dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']}.", 'serie_unica.csv, campo tmin; records.json serie_gelo_tmin0', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}, {'data': w['fine'], 'fonte': w['fonti'], 'riga': w['riga_fine']}])
+fatto(f"La serie più lunga di giorni consecutivi con gelo (minima sotto 0 °C) dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']}.", 'serie giornaliera, minime', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}, {'data': w['fine'], 'fonte': w['fonti'], 'riga': w['riga_fine']}])
 w = ghiaccio[0]
-fatto(f"La serie piu lunga di «giorni di ghiaccio» (massima sotto 0 °C) dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']}.", 'serie_unica.csv, campo tmax; records.json serie_ghiaccio_tmax0', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}])
+fatto(f"La serie più lunga di «giorni di ghiaccio» (massima sotto 0 °C) dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']}.", 'serie giornaliera, massime', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}])
 w = tropic[0]
-fatto(f"La serie piu lunga di notti tropicali (minima di almeno 20 °C) dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']}.", 'serie_unica.csv, campo tmin; records.json serie_notti_tropicali', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}])
+fatto(f"La serie più lunga di notti tropicali (minima di almeno 20 °C) dura {w['giorni']} giorni, dal {w['inizio']} al {w['fine']}.", 'serie giornaliera, minime', [{'data': w['inizio'], 'fonte': w['fonti'], 'riga': w['riga_inizio']}])
 nt = df[df.tmin >= 20]
 if len(nt):
     t0 = nt.index.min()
-    fatto(f"La prima notte tropicale della serie e il {dstr(t0)}; in tutto le notti tropicali sono {len(nt)}, di cui {int((nt.y>=2000).sum())} dal 2000 in poi.", 'serie_unica.csv, campo tmin>=20', [rg(t0)])
+    fatto(f"La prima notte tropicale della serie è il {dstr(t0)}; in tutto le notti tropicali sono {len(nt)}, di cui {int((nt.y>=2000).sum())} dal 2000 in poi.", 'serie giornaliera, minime', [rg(t0)])
 h35 = df[df.tmax >= 35]
 if len(h35):
-    fatto(f"Giorni con massima di almeno 35 °C: {len(h35)} in tutta la serie, il primo il {dstr(h35.index.min())}, l'ultimo il {dstr(h35.index.max())}.", 'serie_unica.csv, campo tmax>=35', [rg(h35.index.min()), rg(h35.index.max())])
+    fatto(f"Giorni con massima di almeno 35 °C: {len(h35)} in tutta la serie, il primo il {dstr(h35.index.min())}, l'ultimo il {dstr(h35.index.max())}.", 'serie giornaliera, massime', [rg(h35.index.min()), rg(h35.index.max())])
 r = V.loc[V.gg_caldi.idxmax()]; r2 = V.loc[V.notti_tropicali.idxmax()]
-fatto(f"L'anno con piu giorni caldi (massima >= 30 °C) e il {int(r.name)} con {int(r.gg_caldi)}; quello con piu notti tropicali il {int(r2.name)} con {int(r2.notti_tropicali)}.", 'annuale.json campi gg_caldi, notti_tropicali (anni validi)', [])
+fatto(f"L'anno con più giorni caldi (massima >= 30 °C) è il {int(r.name)} con {int(r.gg_caldi)}; quello con più notti tropicali il {int(r2.name)} con {int(r2.notti_tropicali)}.", 'giorni caldi e notti tropicali per anno, solo anni validi', [])
 r = V.loc[V.gg_gelo.idxmax()]; r2 = V.loc[V.gg_gelo.idxmin()]
-fatto(f"L'anno con piu giorni di gelo e il {int(r.name)} con {int(r.gg_gelo)}; quello con meno il {int(r2.name)} con {int(r2.gg_gelo)}.", 'annuale.json campo gg_gelo (anni validi)', [])
+fatto(f"L'anno con più giorni di gelo è il {int(r.name)} con {int(r.gg_gelo)}; quello con meno il {int(r2.name)} con {int(r2.gg_gelo)}.", 'giorni di gelo per anno, solo anni validi', [])
 a1 = V[(V.index >= 1951) & (V.index <= 1980)].gg_gelo.mean(); a2 = V[(V.index >= 1991) & (V.index <= 2020)].gg_gelo.mean()
-fatto(f"Giorni di gelo l'anno in media: {fmt(a1)} nel 1951-1980, {fmt(a2)} nel 1991-2020.", 'annuale.json campo gg_gelo (media sugli anni validi dei due periodi)', [])
+fatto(f"Giorni di gelo l'anno in media: {fmt(a1)} nel 1951-1980, {fmt(a2)} nel 1991-2020.", 'giorni di gelo per anno, media sugli anni validi dei due periodi', [])
 dt = df.tmean.reindex(full).diff().dropna()
 tup, tdw = dt.idxmax(), dt.idxmin()
-fatto(f"Il maggiore salto di temperatura media da un giorno al successivo: +{fmt(dt.max())} °C il {dstr(tup)}; il maggiore calo {fmt(dt.min())} °C il {dstr(tdw)}.", 'serie_unica.csv, campo tmean (giorni consecutivi)', [rg(tup), rg(tdw)])
+fatto(f"Il maggiore salto di temperatura media da un giorno al successivo: +{fmt(dt.max())} °C il {dstr(tup)}; il maggiore calo {fmt(dt.min())} °C il {dstr(tdw)}.", 'serie giornaliera, medie di giorni consecutivi', [rg(tup), rg(tdw)])
 # anno corrente rispetto a 1991-2020, sugli stessi giorni
 c = df[(df.y == ANNO_CORR) & df.tmean.notna()]
 base = mm9120['tmean']
 diff = [r.tmean - base.loc[(r.m, r.d)] for r in c.itertuples()]
-fatto(f"Il {ANNO_CORR} finora ({len(c)} giorni con dato, fino al {dstr(c.index.max())}) e stato {fmt(np.mean(diff))} °C sopra la media 1991-2020 degli stessi giorni del calendario."
+fatto(f"Il {ANNO_CORR} finora ({len(c)} giorni con dato, fino al {dstr(c.index.max())}) è stato {fmt(np.mean(diff))} °C sopra la media 1991-2020 degli stessi giorni del calendario."
       if np.mean(diff) >= 0 else
-      f"Il {ANNO_CORR} finora ({len(c)} giorni con dato, fino al {dstr(c.index.max())}) e stato {fmt(-np.mean(diff))} °C sotto la media 1991-2020 degli stessi giorni del calendario.",
-      'serie_unica.csv, campo tmean dell\'anno corrente (ARPA 5897) contro media 1991-2020 per giorno del calendario (giorni.json campo tm_9120)', [])
+      f"Il {ANNO_CORR} finora ({len(c)} giorni con dato, fino al {dstr(c.index.max())}) è stato {fmt(-np.mean(diff))} °C sotto la media 1991-2020 degli stessi giorni del calendario.",
+      'medie giornaliere dell\'anno in corso (ARPA) contro la media 1991-2020 di ogni giorno del calendario', [])
 if righe_f:
     rt = righe_f[0]
-    fatto(f"Nello stesso periodo (1 gennaio - {mdc[1]} {MESI[mdc[0]-1]}) il {ANNO_CORR} e al posto {rt['rank_alto']} su {rt['n']} per temperatura media ({fmt(rt['valore'])} °C; media degli altri anni {fmt(rt['media_altri'])} °C), contando dal piu caldo.",
-          'finora.json campo righe (tmedia); stesso periodo di ogni anno con almeno il 90% dei giorni', [])
+    fatto(f"Nello stesso periodo (1 gennaio - {mdc[1]} {MESI[mdc[0]-1]}) il {ANNO_CORR} è al posto {rt['rank_alto']} su {rt['n']} per temperatura media ({fmt(rt['valore'])} °C; media degli altri anni {fmt(rt['media_altri'])} °C), contando dal più caldo.",
+          'stesso periodo di ogni anno, con almeno il 90% dei giorni', [])
 records['curiosita'] = cur_list
 salva('records.json', records)
 
 # ------------------------------------------------------------------ META
 salva('meta.json', {
-    'stato_cucitura': splice.get('stato'), 'segmenti': [s for s in splice.get('segmenti', []) if s.get('attivo', True)], 'config_fonti': splice.get('fonti'),  # segmenti spenti (proposte) esclusi
+    'segmenti': [s for s in splice.get('segmenti', []) if s.get('attivo', True)],  # segmenti spenti (proposte) esclusi; stato e percorsi dei file di lavoro non si pubblicano
     'data_scarico': DATA_SCARICO, 'primo_giorno': df.index.min(), 'ultimo_giorno': ULT, 'anno_corrente': ANNO_CORR,
     'ultimo_anno_valido': ULT_VALIDO, 'n_giorni': int(len(df)), 'n_giorni_tmean': int(df.tmean.count()),
     'soglie': {'giorni_anno_valido': MIN_GIORNI_ANNO, 'frazione_mese_valido': MIN_FRAZ_MESE, 'gelo': 'tmin < 0', 'caldo': 'tmax >= 30',

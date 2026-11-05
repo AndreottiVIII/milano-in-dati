@@ -123,6 +123,8 @@ for r in tram:
     c['fermate'] += int(r['n_fermate'])
     c['dubbi'] += 1 if r['da_verificare'] else 0
 tp = [r for r in tram if r['categoria'] == 'persona']
+# denominazioni senza il nome della persona nel file: nome per esteso, dalla nota del file (uid 3211 Via COSTANZA ARCONATI)
+NOME_DONNA = {'via arconati': 'Costanza Arconati'}
 ts = [r for r in tram if r['categoria'] == 'santo/santa']
 tg = collections.OrderedDict()
 tsec = {}
@@ -136,7 +138,7 @@ trm = dict(
     denominazioni=len(tram), dubbi=sum(1 for r in tram if r['da_verificare']),
     categorie=sorted([[k, v['den'], v['fermate'], v['dubbi']] for k, v in cat_t.items()], key=lambda x: -x[1]),
     persone=len(tp), uomini=sum(1 for r in tp if r['sesso'] == 'uomo'), donne=sum(1 for r in tp if r['sesso'] == 'donna'),
-    donne_nomi=[(r['persona'] or r['denominazione']) + (' (da verificare)' if r['da_verificare'] else '') for r in tp if r['sesso'] == 'donna'],
+    donne_nomi=[NOME_DONNA.get(r['denominazione'], r['persona'] or r['denominazione']) + (' (identificazione incerta)' if r['da_verificare'] else '') for r in tp if r['sesso'] == 'donna'],
     persone_dubbie=sum(1 for r in tp if r['da_verificare']),
     santi=dict(uomini=sum(1 for r in ts if r['sesso'] == 'uomo'), donne=sum(1 for r in ts if r['sesso'] == 'donna'),
                donne_nomi=[(r['persona'] or r['denominazione']) for r in ts if r['sesso'] == 'donna']),

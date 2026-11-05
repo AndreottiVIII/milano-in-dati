@@ -125,6 +125,8 @@ function tutto(){intro();corrente();caldo();gas();lockdown();anni();settori();le
   var t=null;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(ridisegna,150)});
   Array.prototype.forEach.call(document.querySelectorAll('details'),function(d){d.addEventListener('toggle',function(){if(d.open)ridisegna()})});
 }
+/* larghezza del riquadro; se il riquadro e' chiuso o strettissimo (0 o poche decine di pixel) si disegna a 240 almeno, cosi' nessuna barra ha larghezza negativa; si ridisegna all'apertura */
+function larg(box){return Math.max(box.clientWidth||320,240)}
 function ridisegna(){REDRAW.forEach(function(f){f()})}
 function Y(a,anno){return a.filter(function(x){return x.anno===anno})[0]}
 function tabella(id,testa,righe){setH(id,'<thead><tr>'+testa+'</tr></thead><tbody>'+righe+'</tbody>')}
@@ -313,7 +315,7 @@ function tipOn(box,svg,rect,W,idxAt,xAt,html){
 }
 
 function chartAnno(id,i0,i1,anno){
-  var box=el(id),g=D.giornaliero,n=i1-i0,W=box.clientWidth||320,H=W<500?190:210,m={l:40,r:10,t:22,b:26},pw=W-m.l-m.r,ph=H-m.t-m.b,lo=10,hi=32,st=5;
+  var box=el(id),g=D.giornaliero,n=i1-i0,W=larg(box),H=W<500?190:210,m={l:40,r:10,t:22,b:26},pw=W-m.l-m.r,ph=H-m.t-m.b,lo=10,hi=32,st=5;
   function X(i){return m.l+(i-i0)/(n-1)*pw} function Yf(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità erogata a Milano, giorno per giorno, nel '+anno+'">';
   // fasce
@@ -342,7 +344,7 @@ function chartAnno(id,i0,i1,anno){
 }
 
 function chartCaldo(){
-  var box=el('g2'),C=D.caldo,g=D.giornaliero,W=box.clientWidth||320,H=W<500?340:380,m={l:42,r:10,t:26,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b,x0=0,x1=40,lo=10,hi=32;
+  var box=el('g2'),C=D.caldo,g=D.giornaliero,W=larg(box),H=W<500?340:380,m={l:42,r:10,t:26,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b,x0=0,x1=40,lo=10,hi=32;
   function X(t){return m.l+(t-x0)/(x1-x0)*pw} function Yf(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità giornaliera a Milano contro la temperatura massima, giorni feriali 2019 e 2020">'+griglia(m,W,Yf,lo,hi,5,'GWh al giorno');
   for(var t=0;t<=40;t+=5){s+='<line x1="'+X(t).toFixed(1)+'" x2="'+X(t).toFixed(1)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(t).toFixed(1)+'" y="'+(m.t+ph+18)+'" text-anchor="middle">'+t+'</text>'}
@@ -362,7 +364,7 @@ function chartCaldo(){
 }
 
 function chartFerr(){
-  var box=el('g3'),F=D.ferragosto,G=F.giorni,n=G.length,W=box.clientWidth||320,H=W<500?320:350,m={l:42,r:10,t:30,b:62},pw=W-m.l-m.r,ph=H-m.t-m.b,mx=F.feriali_marzo2019;
+  var box=el('g3'),F=D.ferragosto,G=F.giorni,n=G.length,W=larg(box),H=W<500?320:350,m={l:42,r:10,t:30,b:62},pw=W-m.l-m.r,ph=H-m.t-m.b,mx=F.feriali_marzo2019;
   G.forEach(function(g){if(g.gwh>mx)mx=g.gwh});
   var st=niceStep(mx/4),hi=Math.ceil(mx/st-1e-9)*st,bw=pw/n;
   function Yf(v){return m.t+ph-v/hi*ph}
@@ -382,7 +384,7 @@ function chartFerr(){
 }
 
 function chartAnnuale(){
-  var box=el('g4'),S=D.annuale.serie,n=S.length,W=box.clientWidth||320,H=W<500?280:310,m={l:44,r:10,t:26,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,hi=8000,bw=pw/n;
+  var box=el('g4'),S=D.annuale.serie,n=S.length,W=larg(box),H=W<500?280:310,m={l:44,r:10,t:26,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,hi=8000,bw=pw/n;
   function Yf(v){return m.t+ph-v/hi*ph}
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità consumata a Milano per anno, 2015-2024">'+griglia(m,W,Yf,0,hi,2000,'GWh all’anno');
   S.forEach(function(x,i){var xx=m.l+i*bw,col=x.anno===2020?AMB:BLU;
@@ -394,7 +396,7 @@ function chartAnnuale(){
 }
 
 function chartCittaE(){
-  var box=el('g5'),C=D.annuale.citta.slice().sort(function(a,b){return b.kwh_ab_2024-a.kwh_ab_2024}),n=C.length,W=box.clientWidth||320,rh=24,m={l:W<500?96:128,r:46,t:6,b:24},H=m.t+m.b+n*rh,pw=W-m.l-m.r,hi=7000;
+  var box=el('g5'),C=D.annuale.citta.slice().sort(function(a,b){return b.kwh_ab_2024-a.kwh_ab_2024}),n=C.length,W=larg(box),rh=24,m={l:W<500?96:128,r:46,t:6,b:24},H=m.t+m.b+n*rh,pw=W-m.l-m.r,hi=7000;
   function X(v){return m.l+v/hi*pw}
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità per abitante nel 2024, 14 capoluoghi di città metropolitana">';
   for(var v=0;v<=hi;v+=1000){s+='<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+n*rh)+'" stroke="#e3e3e3"/><text class="mu" x="'+X(v).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+f0(v)+'</text>'}
@@ -410,7 +412,7 @@ function chartCittaE(){
 
 function chartAcqua(){
   function dumb(id,k18,k24,hi,st,fmt,unit){
-    var box=el(id),C=D.acqua.citta.slice().sort(function(a,b){return b[k24]-a[k24]}),n=C.length,W=box.clientWidth||320,rh=24,m={l:W<500?96:128,r:14,t:6,b:24},H=m.t+m.b+n*rh,pw=W-m.l-m.r;
+    var box=el(id),C=D.acqua.citta.slice().sort(function(a,b){return b[k24]-a[k24]}),n=C.length,W=larg(box),rh=24,m={l:W<500?96:128,r:14,t:6,b:24},H=m.t+m.b+n*rh,pw=W-m.l-m.r;
     function X(v){return m.l+v/hi*pw}
     var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+esc(unit)+', 2018 e 2024, 14 capoluoghi di città metropolitana">';
     for(var v=0;v<=hi;v+=st){s+='<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+m.t+'" y2="'+(m.t+n*rh)+'" stroke="#e3e3e3"/><text class="mu" x="'+X(v).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+fmt(v)+'</text>'}
@@ -427,7 +429,7 @@ function chartAcqua(){
 }
 
 function chartGas(){
-  var box=el('g8'),G=D.gas,g=D.giornaliero,n=g.gwh.length,W=box.clientWidth||320,H=W<500?330:370,m={l:36,r:10,t:26,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b,x0=-5,x1=30,lo=0,hi=9;
+  var box=el('g8'),G=D.gas,g=D.giornaliero,n=g.gwh.length,W=larg(box),H=W<500?330:370,m={l:36,r:10,t:26,b:46},pw=W-m.l-m.r,ph=H-m.t-m.b,x0=-5,x1=30,lo=0,hi=9;
   function X(t){return m.l+(t-x0)/(x1-x0)*pw} function Yf(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Gas erogato a Milano contro la temperatura media del giorno, 2019 e 2020">'+griglia(m,W,Yf,lo,hi,3,'milioni di Smc al giorno');
   for(var t=x0;t<=x1;t+=5){s+='<line x1="'+X(t).toFixed(1)+'" x2="'+X(t).toFixed(1)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(t).toFixed(1)+'" y="'+(m.t+ph+18)+'" text-anchor="middle">'+(t<0?'−'+(-t):t)+'</text>'}
@@ -446,7 +448,7 @@ function chartGas(){
 }
 
 function chartSettori(){
-  var box=el('g9'),Sx=D.settori.serie,W=box.clientWidth||320,H=W<500?290:330,m={l:44,r:12,t:22,b:28},pw=W-m.l-m.r,ph=H-m.t-m.b,a0=2000,a1=2024,lo=0,hi=24000;
+  var box=el('g9'),Sx=D.settori.serie,W=larg(box),H=W<500?290:330,m={l:44,r:12,t:22,b:28},pw=W-m.l-m.r,ph=H-m.t-m.b,a0=2000,a1=2024,lo=0,hi=24000;
   function X(a){return m.l+(a-a0)/(a1-a0)*pw} function Yf(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Elettricità per settore, provincia di Milano e Monza e Brianza, 2000-2024">';
   var rb=D.settori.rottura;
@@ -467,7 +469,7 @@ function chartSettori(){
 }
 
 function chartLed(){
-  var box=el('g10'),L=D.led,n=L.length,W=box.clientWidth||320,H=96,m={l:4,r:4,t:6,b:18},pw=W-m.l-m.r,ph=H-m.t-m.b,hi=160000,bw=pw/n;
+  var box=el('g10'),L=D.led,n=L.length,W=larg(box),H=96,m={l:4,r:4,t:6,b:18},pw=W-m.l-m.r,ph=H-m.t-m.b,hi=160000,bw=pw/n;
   function Yf(v){return m.t+ph-v/hi*ph}
   var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Lampade pubbliche a Milano, tradizionali e LED, 2002-2020">';
   L.forEach(function(x,i){var xx=m.l+i*bw;

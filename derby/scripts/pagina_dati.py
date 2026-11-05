@@ -16,6 +16,7 @@ E = html.escape
 MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
 def dm(s): return f"{s[8:10]}/{s[5:7]}/{s[:4]}"
 def dl(s): return f"{int(s[8:10])} {MESI[int(s[5:7]) - 1]} {s[:4]}"
+def al(s): return ("all&rsquo;" if int(s[8:10]) in (8, 11) else "al ") + dl(s)
 def mese_anno(s): return f"{MESI[int(s[5:7]) - 1]} {s[:4]}"
 def sg(b): return f"+{b}" if b > 0 else ("−" + str(-b) if b < 0 else "0")
 def pct(a, n): return f"{100 * a / n:.0f}%" if n else "-"
@@ -85,13 +86,13 @@ TAB_COMP = ("<table><tr><th>Competizione</th><th class='r'>Derby</th><th class='
             + rows + "</table>")
 
 wi_off = int(((off.res == 1)).sum()); wm_off = int(((off.res == -1)).sum()); dr_off = int((off.res == 0).sum())
-pending = "31 ottobre 2026"  # prossimo derby gia' in calendario (Serie A 2026-27), non ancora giocato
+pending = "31 ottobre 2026"  # derby di Serie A 2026-27 successivo all'ultimo dato (i dati arrivano all'ultima riga di derby.csv)
 BIG = f"{N} derby: {WI} vittorie dell&rsquo;Inter, {DR} pareggi, {WM} del Milan. Gol: {GI} a {GM} per l&rsquo;Inter."
 BREVE = f"""<ul>
-<li>Sono i derby <b>ufficiali</b> dal {dl(first)} al {dl(lastd)}, in tutte le competizioni (campionato, Coppa Italia, Supercoppa, Champions League). Il totale &egrave; lo stesso della tabella riassuntiva di it.wikipedia.</li>
+<li>Sono i derby <b>ufficiali</b> dal {dl(first)} {al(lastd)} (l&rsquo;ultimo derby che i dati contengono), in tutte le competizioni (campionato, Coppa Italia, Supercoppa, Champions League). Il totale &egrave; lo stesso della tabella riassuntiva di it.wikipedia.</li>
 <li><b>Due partite del 1944</b> ({dm(war.date.iloc[0])} e {dm(war.date.iloc[1])}, campionato di guerra Alta Italia) sono contate perch&eacute; Wikipedia le conta, ma sono riconosciute solo a titolo onorifico. Senza, i derby sarebbero {len(off)}: Inter {wi_off}, pari {dr_off}, Milan {wm_off}. Nel resto della pagina compaiono sempre segnalate.</li>
 <li><b>Il derby di Champions del {dm(AW.date)}</b> fu sospeso al 73&prime; sullo 0-1 (fumogeni dei tifosi interisti) e la UEFA diede 0-3 a tavolino. Qui vale 0-3, come nelle statistiche ufficiali: per questo {GI + GM - tg_real} dei {GI + GM} gol non hanno un marcatore.</li>
-<li><b>Non sono contati</b> i prossimi derby gi&agrave; in calendario ({pending}, Serie A 2026-27, e quello di febbraio 2027) e le {int(nu.matches.sum())} partite non ufficiali (amichevoli, tornei minori, coppe di guerra).</li>
+<li><b>Non sono contati</b> i derby dopo {dl(lastd)}, perch&eacute; i dati arrivano fino a quel giorno: manca quello del {pending} (Serie A 2026-27) e non c&rsquo;&egrave; ancora quello di febbraio 2027. Non sono contate neanche le {int(nu.matches.sum())} partite non ufficiali (amichevoli, tornei minori, coppe di guerra).</li>
 </ul>"""
 
 # ----------------------------------------------------------------- saldo / decenni

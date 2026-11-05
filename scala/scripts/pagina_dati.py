@@ -588,6 +588,99 @@ print("prime dalle locandine", prime_loc)
 prime = [r for r in prime if r[2] != "An Inconvenient Truth"]
 for r in prime:
     r[2] = r[2].replace("<sub>", "").replace("</sub>", "")
+
+# --- correzioni esplicite all'elenco delle prime (review del 5/11/2026). Ogni voce e' certa; niente fatti nuovi.
+# (anno-stagione, titolo esatto) -> righe che NON sono prime alla Scala o sono testo illeggibile: si tolgono
+PRIME_TOGLI = {
+    (1857, "Simon Boccanegra"): "prima a Venezia, non alla Scala",
+    (1867, "Don Carlos"): "prima a Parigi, non alla Scala",
+    (1874, "Seconda versione"): "non e' un titolo, e' una nota della fonte",
+    (1861, "Nabucco"): "Nabucco e' del 1842; qui e' una ripresa",
+    (1842, "La tkta di bronzo"): "titolo illeggibile (errore di lettura ottica)",
+    (2010, "Die Walkure"): "La Walkiria e' di Monaco 1870; qui e' una produzione",
+}
+# (anno-stagione, titolo, compositore o None) -> (anno-stagione, titolo da tenere): stesso lavoro con due nomi (stessa data e
+# stesso compositore, o errore di lettura); le sigle delle fonti si sommano nella riga che resta
+PRIME_UNISCI = {
+    (1790, "La morte", None): (1791, "La morte di Cesare"),
+    (1805, "Zoraide e Abenadet", None): (1806, "Abenamet e Zoraide"),
+    (1809, "Raoul", None): (1809, "Raoul di Crequì"),
+    (1816, "La testa", None): (1816, "La testa di bronzo"),
+    (1818, "Federico II", None): (1818, "Il barone di Dolsheim"),
+    (1818, "Il barone", None): (1818, "Il barone di Dolsheim"),
+    (1822, "L'esule", None): (1822, "L'esule di Granata"),
+    (1822, "Chiara e Serafina, prima opera", None): (1822, "Chiara e Serafina"),
+    (1831, "Chiara", None): (1831, "Chiara di Rosemberg"),
+    (1834, "Gemma", None): (1834, "Gemma di Vergy"),
+    (1837, "Odio e amore", "Marià Obiols i Tramullas"): (1837, "Odio e amore"),
+    (1839, "Gianni", None): (1839, "Gianni di Parigi"),
+    (1839, "Oberto, Conte", "San Bonifacio"): (1839, "Oberto, Conte di San Bonifacio"),
+    (1840, "Un giorno", None): (1840, "Un giorno di regno"),
+    (1841, "Il contadino di Agliate", None): (1841, "Il contadino d'Agliate"),
+    (1841, "Gonzaivo", None): (1841, "Gonzalvo"),
+    (1842, "Bianca", None): (1842, "Bianca di Belmonte"),
+    (1846, "Azema", None): (1846, "Azema di Granata"),
+    (1854, "Ottavia e Cleopatra", None): (1854, "Ottavia"),
+    (1855, "Ines", None): (1854, "Ines de Mendoza"),
+    (1856, "Elnava o L’assedio", None): (1856, "L'assedio di Leida"),
+    (1857, "Pergolesi", None): (1857, "Pergolese"),
+    (1858, "L'Uscocco, opera", None): (1858, "L'uscocco"),
+    (1859, "Il duca", None): (1859, "Il duca di Scilla"),
+    (1882, "Bianca", None): (1882, "Bianca da Cervia"),
+    (1897, "Il signor", None): (1897, "Il signor di Pourceaugnac"),
+    (1804, "Sofì trippone o i desiderii", None): (1804, "Il Sofi trippone"),
+    (1821, "La sciocca per astuzia y", None): (1821, "La sciocca per astuzia"),
+    (1927, "Sly, ovvero la leggenda del dormiente svegliato", None): (1927, "Sly"),
+}
+# la prima di Sly e' del 29 dicembre 1927 (lo dice la riga di Wikipedia); Wikidata aveva 29 settembre
+PRIME_DATA = {(1927, "Sly"): "1927-12-29"}
+# titolo/compositore da correggere (errori di lettura o di trascrizione): (anno, titolo) -> (titolo nuovo, compositore nuovo o None)
+PRIME_CORREGGI = {
+    (1792, "II mercato di Monfregoso"): ("Il mercato di Monfregoso", None),
+    (1808, "Di posta in posta -c"): ("Di posta in posta", None),
+    (1812, "La pietra del paragone, prima apparizione scaligera"): ("La pietra del paragone", None),
+    (1831, "Ugo, Conte"): ("Ugo, conte di Parigi", None),
+    (1870, "Amore ed arte"): ("Amore ed arte", "Strigelli e Marenco"),
+    (1902, "Germania (opera)"): ("Germania", None),
+    (1907, "Gloria (opera)"): ("Gloria", None),
+    (1924, "La cena delle beffe (opera)"): ("La cena delle beffe", None),
+    (1929, "Il re (opera)"): ("Il re", None),
+    (1933, "Un partita"): ("Una partita", None),
+    (2005, "Il ddissoluto assolto"): ("Il dissoluto assolto", None),
+    (1801, "Il sedicente filosofo"): ("Il sedicente filosofo", ""),    # il "compositore" era un altro titolo ("Che originali!")
+    (1933, "Il velo di Poppea"): ("Il velo di Poppea", ""),            # Donatoni nel 1933 non era ancora nato
+}
+_n0 = len(prime)
+_assorbite = []
+_tenute = []
+for r in prime:
+    if (r[0], r[2]) in PRIME_TOGLI:
+        continue
+    k = (r[0], r[2], r[3]) if (r[0], r[2], r[3]) in PRIME_UNISCI else (r[0], r[2], None)
+    if k in PRIME_UNISCI:
+        _assorbite.append((k, r))
+        continue
+    _tenute.append(r)
+prime = _tenute
+assert _n0 - len(prime) >= len(PRIME_UNISCI), "voci di PRIME_UNISCI non trovate"
+for k, r in _assorbite:
+    dest = PRIME_UNISCI[k]
+    t = [x for x in prime if (x[0], x[2]) == dest]
+    assert len(t) == 1, ("destinazione non trovata", k, dest)
+    t[0][5] = "".join(sorted(set(t[0][5] + r[5]), key=lambda c: "SBCRGMWDLIV".index(c)))
+    if not t[0][1] and r[1]:
+        t[0][1] = r[1]
+for r in prime:
+    c = PRIME_CORREGGI.get((r[0], r[2]))
+    if c:
+        r[2] = c[0]
+        if c[1] is not None:
+            r[3] = c[1]
+    if (r[0], r[2]) in PRIME_DATA:
+        r[1] = PRIME_DATA[(r[0], r[2])]
+# la data vera comanda: l'anno nella riga resta quello di stagione (serve ai filtri), ma l'elenco e' in ordine di data
+prime.sort(key=lambda r: (r[1] or "%d-12-31" % r[0], r[2].lower()))
+print("prime: tolte/unite", _n0 - len(prime), "su", _n0)
 json.dump(prime, open(os.path.join(OUT, "prime.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 # ------------------------------------------------------------------ 7 dicembre
@@ -678,6 +771,16 @@ tot_pub_titles = len(titoli)
 meta = dict(generato=datetime.date.today().isoformat(), righe_pagina=tot_pub_titles, gruppi_totali=len(ALLG), sbn_presente=sbn_present, sbn=sbn_info,
             agganci_anno_adiacente=n_adj, prime=len(prime), prime_da_locandine=prime_loc, righe_locandine=loc_n, serate_7_dicembre=len(serate), anni_7_dicembre=len(anni_sette))
 json.dump(dict(fonti=fonti, meta=meta), open(os.path.join(OUT, "fonti.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+# stesse correzioni anche nella tabella di ricerca: le righe tolte dalle prime non portano piu' l'etichetta "prima assoluta"
+# e i titoli con errore di battitura certo sono corretti
+for _t in titoli:
+    if (_t[0], _t[3]) in PRIME_TOGLI:
+        _t[11] = 0
+    _c = PRIME_CORREGGI.get((_t[0], _t[3]))
+    if _c and _t[11]:
+        _t[3] = _c[0]
+        if _c[1] is not None:
+            _t[4] = _c[1]
 json.dump(titoli, open(os.path.join(OUT, "titoli.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 print("OK", meta)
