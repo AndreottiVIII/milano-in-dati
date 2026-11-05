@@ -787,3 +787,7 @@ print("OK", meta)
 for fd in fonti:
     print(fd["c"], fd["nome"][:40], "anni", fd["anni"], "lette", fd["righe_lette"], "pubblicate", fd["righe_pubblicate"])
 print("righe pagina", tot_pub_titles, "prime", len(prime), "7 dic", len(serate), "anni 7 dic", len(anni_sette), "aperture senza data", len(aper))
+
+# grafici della pagina (orari, repertorio, compositori): file separato, riscritto qui cosi' resta allineato alle serate
+import runpy
+runpy.run_path(os.path.join(HERE, "pagina_grafici.py"), run_name="pagina_grafici").get("main", lambda: None)()
