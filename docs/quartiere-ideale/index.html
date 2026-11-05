@@ -51,11 +51,12 @@ details table{border-collapse:collapse;font-size:.82rem;margin:.4em 0;width:100%
 td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media(max-width:900px){#top-h{scroll-margin-top:96px}.live2{display:block}.grid{grid-template-columns:minmax(0,1fr)}.right{position:static}}
 @media(max-width:620px){.card .nm{font-size:1rem}.card .sc b{font-size:1.15rem}}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
+.prof{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:.5em 0}.prof button{font:inherit;text-align:left;border:1px solid var(--line);background:#fff;color:var(--ink);padding:5px 9px;border-radius:8px;cursor:pointer;line-height:1.2;min-height:44px}.prof button b{display:block;font-size:.92rem}.prof button span{display:block;font-size:.74rem;color:var(--mut)}.prof button.on{border-color:var(--acc);background:var(--soft);box-shadow:inset 0 0 0 1px var(--acc)}.bud{border-top:1px solid var(--line);margin:.5em 0;padding:6px 0}.bud .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.bud label{font-weight:600}.bud .val{font-weight:700;color:var(--acc);white-space:nowrap}.bud input{width:100%;margin:2px 0;accent-color:var(--acc);height:28px}@media(max-width:420px){.prof button b{font-size:.88rem}.prof button span{font-size:.72rem}}footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
 </style><script src="../menu.js" defer></script></head><body><main>
 <h1>Il mio quartiere ideale</h1>
 <p>Che cosa conta per te in un quartiere? Il verde, il prezzo delle case, la metropolitana, la vita in strada? Muovi i cursori da 0 (non conta) a 5 (conta moltissimo): la pagina mette in fila i quartieri di Milano in base a quanto somigliano a quello che hai chiesto, sulla mappa e in una classifica dei primi 10. &Egrave; un gioco con dati veri, non un consiglio per scegliere casa.</p>
 
+<h2 id="prof-h" style="margin-top:.8em">Parti da un profilo</h2><div class="prof" id="prof"></div><p class="sub" style="margin:.2em 0">Sono scelte nostre, non regole: un tocco imposta i cursori e i servizi qui sotto, poi puoi cambiarli come vuoi.</p><div class="bud"><div class="top"><label for="bud">Budget per l&rsquo;affitto</label><span class="val" id="bud-v"></span></div><input type="range" id="bud" min="450" max="1550" step="50" value="1550"><div class="sub" id="bud-n"></div></div><div class="warn" id="bud-w" hidden></div>
 <div class="grid">
 <div class="left">
 <h2 id="criteri-h" style="margin-top:.6em">Che cosa conta per te</h2>
@@ -99,7 +100,8 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 (function(){
 'use strict';
 var D=null,NF=null,MAP=null,LAY={},MARK=null,NIL={},CR={},W={},ADD={},SEL=null,RES=null;
-var BASE={parchi:3,prezzo:3,servizi:3,metro:2};
+var BASE={parchi:3,prezzo:3,servizi:3,metro:2},BUD=null,BMAX=1550;
+var PROF=[{id:'famiglia',n:'Famiglia con bambini',t:'parchi, aree gioco, pediatri, quiete',w:{parchi:4,servizi:4,calmo:3,gioco:4,pediatri:3,farmacia:2,cemento:2}},{id:'studente',n:'Studente',t:'metro, vita in strada, affitto basso',w:{metro:5,vivo:4,affitto:4,servizi:3,giovani:3}},{id:'pensionato',n:'Pensionato',t:'farmacia, servizi vicini, quiete',w:{servizi:4,farmacia:4,calmo:4,parchi:3,metro:3,alberi:2,caldo:2}},{id:'cane',n:'Chi ha il cane',t:'aree per cani, parchi, alberi',w:{cani:5,parchi:4,alberi:3,calmo:2,cemento:2}},{id:'senzauto',n:'Senza auto',t:'metro, servizi a piedi, farmacia',w:{metro:5,servizi:4,farmacia:3,parchi:2,vivo:2}}];
 var RAMP=['#00504a','#2a8a7b','#6fb8ac','#b4dad3','#e3f1ee'];
 var SCALA=['non conta','poco','così così','abbastanza','molto','moltissimo'];
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -132,12 +134,15 @@ function rankTxt(r){return r.rank+'° su '+RES.ranked.length+(r.pari?', a pari m
 /* ---------- pesi e indirizzo ---------- */
 function leggiHash(){
   var h=location.hash.replace(/^#/,'');if(!h)return null;
-  var o={},any=false;
-  h.split('&').forEach(function(p){var kv=p.split('=');if(CR[kv[0]]){var v=parseInt(kv[1],10);if(v>=0&&v<=5){o[kv[0]]=v;any=true}}});
-  return any?o:null;
+  var o={},any=false,b=null;
+  h.split('&').forEach(function(p){var kv=p.split('=');
+    if(kv[0]==='budget'){var x=parseInt(kv[1],10);if(x>=400&&x<=3000)b=x;return}
+    if(CR[kv[0]]){var v=parseInt(kv[1],10);if(v>=0&&v<=5){o[kv[0]]=v;any=true}}});
+  return {w:any?o:null,b:b};
 }
 function scriviHash(){
   var p=[];D.criteri.forEach(function(c){if(W[c.id]>0)p.push(c.id+'='+W[c.id])});
+  if(BUD!=null)p.push('budget='+BUD);
   try{history.replaceState(null,'',location.pathname+location.search+(p.length?'#'+p.join('&'):''))}catch(e){}
 }
 function impostaPesi(o){ADD={};D.criteri.forEach(function(c){W[c.id]=o[c.id]||0;if(c.extra&&W[c.id]>0)ADD[c.id]=1})}
@@ -158,7 +163,8 @@ function calcola(){
     var cov=tot?wav/tot:0,rk=wav>0&&cov>=.5,sc=wav?100*num/wav:null;
     /* dato mancante = posto di mezzo (0,5): ne' vantaggio ne' svantaggio */
     if(rk&&wmis)sc=100*(num+.5*wmis)/tot;
-    rows.push({n:n,score:sc,k:sc==null?null:Math.round(sc*1e6),cov:cov,mis:mis,g:g,ranked:rk});
+    var af=n.d.affitto?n.d.affitto[0]:null,over=BUD!=null&&af!=null&&af>BUD;
+    rows.push({n:n,score:sc,k:sc==null?null:Math.round(sc*1e6),cov:cov,mis:mis,g:g,ranked:rk&&!over,over:over,af:af});
   });
   var ranked=rows.filter(function(r){return r.ranked}).sort(function(a,b){return b.k-a.k||a.n.nome.localeCompare(b.n.nome,'it')});
   var cnt={};
@@ -204,7 +210,8 @@ function scheda(r,mostraMotivo){
   if(r.score!=null)h+='<div class="sc"><b>'+Math.round(r.score)+'</b><span>su 100</span></div>';
   h+='</div>';
   if(r.score!=null)h+='<div class="bar" aria-hidden="true"><i style="width:'+r.score.toFixed(1)+'%"></i></div>';
-  if(!r.ranked){
+  if(r.over)h+='<div class="mis"><b>Oltre il budget:</b> affitto stimato '+f0(r.af)+' € al mese per 60 m², il tuo limite è '+f0(BUD)+' €. Non entra nei primi 10.</div>';
+  else if(!r.ranked){
     h+='<div class="mis">'+(r.score==null?'Nessun criterio con peso da calcolare.':'Fuori classifica: per questo profilo mancano i dati di '+r.mis.map(function(c){return esc(c.et.toLowerCase())}).join(', ')+', cioè più della metà del peso scelto.')+'</div>';
   }
   var p=perche(r);
@@ -227,7 +234,8 @@ function stile(f){
   var i=f.properties.i,n=NIL[i],st={color:'#555',weight:1,fillOpacity:.8};
   if(!n.ok){st.fillColor='#d6d6d6';st.fillOpacity=.5;return st}
   var r=RES&&RES.by[i];
-  if(!r||!r.ranked){st.fillColor='#ececec';st.fillOpacity=.6;st.dashArray='3 3';}
+  if(r&&r.over){st.fillColor='#fff';st.fillOpacity=.25;st.dashArray='5 4';}
+  else if(!r||!r.ranked){st.fillColor='#ececec';st.fillOpacity=.6;st.dashArray='3 3';}
   else st.fillColor=RAMP[classe(r)];
   if(r&&r.rank&&r.rank<=RES.topmax){st.color='#000';st.weight=2.5}
   if(SEL===i){st.color='#c26a1b';st.weight=4}
@@ -258,11 +266,12 @@ function disegna(){
     pari.innerHTML=nota;pari.hidden=!nota;
     top10.innerHTML=rk.slice(0,10).map(function(r){return '<li>'+scheda(r)+'</li>'}).join('');
     el('tutti-c').innerHTML='<table><tr><th>#</th><th>Quartiere</th><th class="r">Punteggio</th></tr>'+rk.map(function(r){return '<tr><td>'+r.rank+(r.pari?' =':'')+'</td><td>'+esc(r.n.nome)+(r.mis.length?' <span class="pill">dato mancante</span>':'')+'</td><td class="r">'+Math.round(r.score)+'</td></tr>'}).join('')+'</table>'+(rk.some(function(r){return r.pari})?'<p class="sub">«=» vuol dire a pari merito: stesso punteggio, stesso posto.</p>':'')+
-      (RES.rows.length>rk.length?'<p class="sub">Fuori classifica per dati mancanti: '+RES.rows.filter(function(r){return !r.ranked}).map(function(r){return esc(r.n.nome)}).join(', ')+'.</p>':'');
+      (RES.rows.some(function(r){return r.over})?'<p class="sub">Oltre il budget: '+RES.rows.filter(function(r){return r.over}).map(function(r){return esc(r.n.nome)+' ('+f0(r.af)+' €)'}).join(', ')+'.</p>':'')+
+      (RES.rows.some(function(r){return !r.ranked&&!r.over})?'<p class="sub">Fuori classifica per dati mancanti: '+RES.rows.filter(function(r){return !r.ranked&&!r.over}).map(function(r){return esc(r.n.nome)}).join(', ')+'.</p>':'');
   }
   l2.innerHTML=live.innerHTML+' <a href="#top-h" data-go="top-h">Vai ai primi 10</a>';
   mostraSel();
-  legenda();
+  legenda();aggUI();
   scriviHash();
 }
 function mostraSel(){
@@ -277,8 +286,41 @@ function legenda(){
     h+='<span>Somiglia di più</span>'+RAMP.map(function(c){return '<span><i style="background:'+c+'"></i></span>'}).join('')+'<span>di meno</span>';
     h+='<span><i style="background:#ececec;border-style:dashed"></i>fuori classifica (dati mancanti)</span>';
   }
+  if(BUD!=null)h+='<span><i style="background:#fff;border-style:dashed"></i>oltre il budget</span>';
   h+='<span><i style="background:#d6d6d6"></i>non ammesso (meno di 3.000 residenti, parchi)</span><span><i style="background:#fff;border:2px solid #000"></i>primi 10'+(RES.nTop>10?' (con i pari merito)':'')+'</span>';
   el('lg-map').innerHTML=h;
+}
+
+/* ---------- profili e budget ---------- */
+function profAttivo(){
+  for(var i=0;i<PROF.length;i++){var ok=true;
+    D.criteri.forEach(function(c){if((PROF[i].w[c.id]||0)!==W[c.id])ok=false});
+    if(ok)return PROF[i].id}
+  return null;
+}
+function aggUI(){
+  var a=profAttivo();
+  [].forEach.call(document.querySelectorAll('#prof button'),function(b){var on=b.getAttribute('data-p')===a;b.className=on?'on':'';b.setAttribute('aria-pressed',on?'true':'false')});
+  var inp=el('bud'),n=0,tot=0;
+  inp.value=String(BUD==null?BMAX:BUD);
+  D.nil.forEach(function(x){if(x.ok){tot++;if(BUD==null||!x.d.affitto||x.d.affitto[0]<=BUD)n++}});
+  el('bud-v').textContent=BUD==null?'nessun limite':'fino a '+f0(BUD)+' € al mese';
+  el('bud-n').textContent=BUD==null?'Affitto stimato di 60 m² al mese (OMI 2024). Muovi il cursore per escludere i quartieri più cari.':n+' quartieri su '+tot+' dentro il budget (60 m², stima OMI 2024). Gli altri restano sulla mappa, tratteggiati, ma fuori dai primi 10.';
+  var w=el('bud-w');
+  if(BUD!=null){
+    w.hidden=false;
+    w.innerHTML='Il budget toglie i quartieri troppo cari'+(W.affitto>0?'; il cursore «Affitto basso» mette poi in ordine quelli rimasti, quindi conta due volte: se vuoi solo il limite, portalo a 0':', senza cambiare l&rsquo;ordine degli altri')+'. <a href="../permettersi/">Chi può permettersi di vivere dove</a>.';
+  }else{w.hidden=true;w.innerHTML=''}
+}
+function profili(){
+  el('prof').innerHTML=PROF.map(function(p){return '<button type="button" data-p="'+p.id+'"><b>'+esc(p.n)+'</b><span>'+esc(p.t)+'</span></button>'}).join('');
+  [].forEach.call(document.querySelectorAll('#prof button'),function(b){
+    b.addEventListener('click',function(){
+      var p=PROF.filter(function(x){return x.id===b.getAttribute('data-p')})[0];
+      impostaPesi(p.w);tuttiVal();disegna();
+    });
+  });
+  el('bud').addEventListener('input',function(){var v=parseInt(this.value,10);BUD=v>=BMAX?null:v;disegna()});
 }
 
 /* ---------- slider ---------- */
@@ -335,6 +377,7 @@ function testi(){
    '<b>Il posto, non il valore.</b> Per ogni criterio ogni quartiere riceve un posto da 0 a 100 tra i quartieri ammessi che hanno quel dato (100 = il migliore per quel criterio). Si usa il posto e non il numero, così un criterio con numeri enormi (euro, alberi) non pesa più di uno con numeri piccoli. Se più quartieri hanno lo stesso valore, hanno lo stesso posto, a metà del gruppo: per questo, per esempio, per la metropolitana 19 quartieri hanno il 100% e hanno tutti il posto 87, non 100.',
    '<b>Il punteggio.</b> È la media dei posti, pesata con i tuoi cursori. Il punteggio è una somma delle tue preferenze: non è un giudizio sul quartiere né su chi ci vive. Quartieri con lo stesso punteggio hanno lo stesso posto in classifica («a pari merito») e nell&rsquo;elenco sono in ordine alfabetico, non di merito. Con un solo cursore succede spesso: la pagina lo dice.',
    '<b>Dati mancanti.</b> Se per un quartiere manca un dato che hai scelto (per esempio gli alberi, che il Comune conta solo nei quartieri con almeno 5.000 abitanti), per quel criterio il quartiere conta come un posto di mezzo (0,5): così il buco non lo avvantaggia né lo penalizza, e la scheda lo dice. Se mancano dati per più della metà del peso, il quartiere resta fuori classifica e sulla mappa è tratteggiato.',
+   '<b>Profili e budget.</b> I profili sono scelte nostre: un tocco imposta dei cursori, che puoi cambiare. Il budget non pesa nel punteggio: toglie dai primi 10 i quartieri con l&rsquo;affitto stimato per 60 m² sopra la cifra scelta (stima OMI 2024, non un affitto vero), che restano sulla mappa tratteggiati.',
    '<b>Chi è escluso.</b> I quartieri con meno di 3.000 residenti e i parchi e le aree verdi quasi senza abitanti non entrano: con così poche persone i rapporti per abitante oscillano troppo. Sulla mappa sono in grigio.',
    '<b>Che cosa non c&rsquo;è.</b> Non si sceglie un quartiere per chi ci abita: reddito, cittadinanza, titolo di studio, voto e reati non sono criteri e non lo saranno. Sono nella scheda del quartiere, per chi vuole leggerli, non in una classifica.'
   ].map(function(x){return '<li>'+x+'</li>'}).join('');
@@ -363,7 +406,7 @@ function init(){
     for(k in cnt)if(cnt[k]>m){m=cnt[k];mv=Number(k)}
     c.tie=m>=10?{n:m,v:mv}:null;
   });
-  var h=leggiHash();impostaPesi(h||BASE);
+  var h=leggiHash();impostaPesi((h&&h.w)||BASE);BUD=h?h.b:null;profili();
   testi();costruisciSlider();
   el('add-sv').addEventListener('change',function(){
     var id=this.value;if(!id||!CR[id])return;
@@ -378,13 +421,14 @@ function init(){
   });
   el('b-base').addEventListener('click',function(){impostaPesi(BASE);tuttiVal();disegna()});
   el('b-zero').addEventListener('click',function(){impostaPesi({});tuttiVal();disegna()});
-  window.addEventListener('hashchange',function(){var o=leggiHash();if(o){impostaPesi(o);tuttiVal();disegna()}});
+  window.addEventListener('hashchange',function(){var o=leggiHash();if(o){if(o.w){impostaPesi(o.w);tuttiVal()}BUD=o.b;disegna()}});
   MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:false}).setView([45.4655,9.19],11);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
   LAY.nil=L.geoJSON(NF,{style:stile,onEachFeature:function(f,l){
     l.bindTooltip(function(){
       var i=f.properties.i,n=NIL[i],r=RES&&RES.by[i];
       if(!n.ok)return esc(n.nome)+'<br>non in classifica: '+esc(n.motivo);
+      if(r&&r.over)return esc(n.nome)+'<br>oltre il budget: affitto '+f0(r.af)+' € al mese';
       if(!r||r.score==null)return esc(n.nome);
       return esc(n.nome)+'<br>'+(r.ranked?rankTxt(r)+' · punteggio '+Math.round(r.score):'fuori classifica: troppi dati mancanti');
     },{sticky:true});
