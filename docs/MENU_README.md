@@ -2,6 +2,8 @@
 
 `docs/menu.js` (JavaScript puro, nessuna dipendenza) mette in cima a ogni pagina una barra con il link a "Milano in dati" (la home) e il pulsante "Sezioni" che apre l'elenco di tutte le sezioni. La sezione corrente è in grassetto e sottolineata. Il menu non resta fisso e non copre il contenuto; Esc lo chiude; non si stampa.
 
+Dentro il pannello c'è un campo "Cerca una sezione" (filtra per etichetta, senza badare agli accenti) e una riga di pulsanti, uno per tema, con i colori e il numero di pagine presi da `docs/temi.json` (letto una volta sola, lo stesso file usato da "Pagine vicine"). Un clic su un tema mostra solo le sue sezioni, un secondo clic toglie il filtro; filtro e testo lavorano insieme. I pulsanti hanno `aria-pressed`. Una pagina nuova entra da sola appena è in `temi.json`; i temi senza pagine non compaiono. Se `temi.json` non si carica, i pulsanti non appaiono e il menu funziona come prima (resta il campo di ricerca). Sulla pagina `elenco/` non è stato rifatto nulla.
+
 L'elenco delle sezioni è l'array `SEZIONI` dentro `menu.js` (stesso ordine e stesse etichette dell'elenco numerato di `docs/index.html`).
 
 ## Come aggiungere una sezione

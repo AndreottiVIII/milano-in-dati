@@ -149,6 +149,13 @@
     '#mid-menu li a{display:block;padding:7px 0;border-top:1px solid #ddd}' +
     '#mid-menu li a[aria-current]{font-weight:700;text-decoration:underline;text-underline-offset:3px}' +
     '#mid-menu .mid-home[aria-current]{text-decoration:underline;text-underline-offset:3px}' +
+    '#mid-menu .mid-q{display:block;width:100%;font:inherit;color:#000;background:#fff;border:1px solid #000;border-radius:0;padding:6px 10px;margin:0 0 8px;min-height:36px}' +
+    '#mid-menu .mid-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;padding:0}' +
+    '#mid-menu .mid-chip{font:inherit;font-size:14px;color:#000;background:#fff;border:2px solid var(--c);border-radius:0;padding:3px 10px;margin:0;cursor:pointer;min-height:32px}' +
+    '#mid-menu .mid-chip[aria-pressed=true]{background:var(--c);color:var(--tc);font-weight:700}' +
+    '#mid-menu .mid-chip small{font-size:12px;opacity:.8}' +
+    '#mid-menu .mid-vuoto{margin:8px 0;color:#555}' +
+    '#mid-menu li[hidden]{display:none}' +
     '@media (min-width:600px){#mid-menu ul{columns:2;column-gap:32px}}' +
     '@media (min-width:900px){#mid-menu ul{columns:3}}' +
     '@media print{#mid-menu{display:none}}';
@@ -196,7 +203,62 @@
     li.appendChild(a);
     ul.appendChild(li);
   });
+  var lis = ul.children;
+  var q = document.createElement('input');
+  q.type = 'search'; q.className = 'mid-q'; q.placeholder = 'Cerca una sezione'; q.setAttribute('aria-label', 'Cerca una sezione');
+  var chipBox = document.createElement('div');
+  chipBox.className = 'mid-chips'; chipBox.setAttribute('role', 'group'); chipBox.setAttribute('aria-label', 'Filtra per tema'); chipBox.hidden = true;
+  var vuoto = document.createElement('p');
+  vuoto.className = 'mid-vuoto'; vuoto.hidden = true; vuoto.textContent = 'Nessuna sezione corrisponde.';
+  panel.appendChild(q);
+  panel.appendChild(chipBox);
   panel.appendChild(ul);
+  panel.appendChild(vuoto);
+
+  // temi.json (letto una sola volta, da tutti): se manca, il menu funziona senza pulsanti dei temi
+  var temiP = null;
+  function getTemi() {
+    if (!temiP) {
+      temiP = window.fetch ? fetch(new URL('temi.json', rootUrl).href, { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) : Promise.resolve(null);
+    }
+    return temiP;
+  }
+  function norm(x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  var temaDi = {}, filtroTema = '';
+  function filtra() {
+    var w = norm(q.value).split(/\s+/).filter(Boolean), n = 0;
+    for (var m = 0; m < SEZIONI.length; m++) {
+      var l = norm(SEZIONI[m].label);
+      var ok = (!filtroTema || temaDi[SEZIONI[m].path] === filtroTema) && w.every(function (x) { return l.indexOf(x) !== -1; });
+      lis[m].hidden = !ok; if (ok) n++;
+    }
+    vuoto.hidden = n !== 0;
+    Array.prototype.forEach.call(chipBox.children, function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-tema') === filtroTema ? 'true' : 'false'); });
+  }
+  q.addEventListener('input', filtra);
+  function costruisciTemi() {
+    if (chipBox.children.length) return;
+    getTemi().then(function (T) {
+      try {
+        if (!T || !T.temi || !T.pagine || chipBox.children.length) return;
+        var cont = {};
+        T.pagine.forEach(function (p) { temaDi[p.path] = p.tema; cont[p.tema] = (cont[p.tema] || 0) + 1; });
+        T.temi.forEach(function (t) {
+          if (!cont[t.id]) return;
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'mid-chip'; b.setAttribute('data-tema', t.id); b.setAttribute('aria-pressed', 'false');
+          b.style.setProperty('--c', t.colore); b.style.setProperty('--tc', t.testo || '#fff');
+          b.appendChild(document.createTextNode(t.nome + ' '));
+          var sm = document.createElement('small'); sm.textContent = '(' + cont[t.id] + ')'; b.appendChild(sm);
+          b.addEventListener('click', function () { filtroTema = (filtroTema === t.id ? '' : t.id); filtra(); });
+          chipBox.appendChild(b);
+        });
+        chipBox.hidden = !chipBox.children.length;
+        filtra();
+      } catch (e3) { /* niente pulsanti, il menu resta com'era */ }
+    });
+  }
 
   nav.appendChild(bar);
   nav.appendChild(panel);
@@ -205,6 +267,7 @@
     panel.hidden = !open;
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     btn.textContent = open ? 'Sezioni ▴' : 'Sezioni ▾';
+    if (open) costruisciTemi();
   }
   btn.addEventListener('click', function () { setOpen(panel.hidden); });
   nav.addEventListener('keydown', function (e) {
@@ -216,9 +279,8 @@
   // ---- "Pagine vicine": in fondo a ogni pagina (non sulla home né sulle bozze), 3-5 link a pagine dello stesso tema.
   // L'elenco dei temi sta in docs/temi.json (letto una volta); se manca o qualcosa va storto, la pagina resta com'è.
   try {
-    if (!isHome && current && here.indexOf(rootPath + 'elenco/') !== 0 && window.fetch) {
-      fetch(new URL('temi.json', rootUrl).href, { cache: 'no-cache' })
-        .then(function (r) { return r.ok ? r.json() : null; })
+    if (!isHome && current && here.indexOf(rootPath + 'elenco/') !== 0) {
+      getTemi()
         .then(function (T) {
           try {
             if (!T || !T.pagine || document.getElementById('mid-vicine')) return;
