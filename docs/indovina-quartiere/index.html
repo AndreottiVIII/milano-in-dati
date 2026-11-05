@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milano in dati · Indovina il quartiere</title>
+<style>
+:root{--m1:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#8E4FB3;--nero:#111;--grigio:#6b6b6b;--riga:#ddd}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--nero);font-family:Helvetica,Arial,sans-serif;font-size:17px;line-height:1.4}
+.pagina{max-width:720px;margin:0 auto;padding:0 16px 48px;overflow-wrap:break-word}
+.testata{border-top:14px solid var(--m5);padding-top:14px}
+h1{font-size:34px;line-height:1.05;margin:6px 0 10px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;margin:34px 0 8px;line-height:1.15;border-top:2px solid var(--nero);padding-top:12px}
+p{margin:8px 0}
+a{color:#5b2d82}
+.sotto{font-size:18px;color:#333}
+.riga{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+button{font:inherit;font-size:16px;border:2px solid var(--nero);background:#fff;color:var(--nero);padding:8px 14px;border-radius:0;cursor:pointer}
+button.pieno{background:var(--nero);color:#fff;font-weight:700}
+button:disabled{opacity:.4;cursor:default}
+input[type=text]{font:inherit;font-size:18px;padding:8px;border:3px solid var(--nero);border-radius:0;flex:1;min-width:0;width:100%}
+.indizi{margin:16px 0}
+.indizio{border-left:8px solid var(--m5);padding:6px 0 6px 14px;margin:10px 0}
+.indizio .k{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#333}
+.indizio .v{font-size:22px;font-weight:700;line-height:1.2}
+.indizio .v small{font-size:15px;font-weight:400;color:#333}
+.indizio .av{font-size:13px;color:#333}
+.indizio.chiuso{border-color:var(--riga);color:var(--grigio)}
+.tentativi{margin:14px 0}
+.tent{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--riga);font-size:17px}
+.tent .q{flex:1;font-weight:700}
+.tent .dir{font-size:26px;width:34px;text-align:center}
+.tent .km{color:#333;white-space:nowrap}
+.tent.ok{background:var(--m3)}
+.msg{font-size:15px;color:#a1000b;min-height:1.3em;margin:4px 0}
+.fine{border:3px solid var(--nero);padding:14px;margin:18px 0}
+.fine h2{margin:0 0 6px;font-size:26px;border:0;padding:0}
+textarea{width:100%;font:inherit;font-size:14px;border:1px solid var(--riga);padding:8px;min-height:90px;margin:8px 0}
+svg{display:block;width:100%;height:auto}
+.m ul,ul.m{padding-left:20px;margin:6px 0} ul.m li{margin:.4em 0}
+.sub{font-size:14px;color:#333}
+footer{margin:34px 0 0;font-size:14px;color:#333;border-top:2px solid var(--nero);padding-top:10px}
+footer li{margin:.4em 0}
+@media (max-width:420px){h1{font-size:30px}.indizio .v{font-size:20px}}
+</style>
+<script src="../menu.js" defer></script>
+</head>
+<body>
+<div class="pagina">
+<header class="testata">
+  <h1>Indovina il quartiere</h1>
+  <p class="sotto">Milano ha 88 quartieri. Ne abbiamo scelto uno: sei indizi, presi dai numeri veri del sito, e sei tentativi. Dopo ogni errore ti diciamo quanto sei lontano e in che direzione sta quello giusto.</p>
+</header>
+
+<div class="riga"><span id="numero" style="font-weight:700"></span><button type="button" id="caso">Un altro quartiere</button></div>
+
+<div class="indizi" id="indizi"></div>
+
+<div class="riga" id="form">
+  <input type="text" id="risposta" list="nomi" placeholder="Scrivi il nome del quartiere" autocomplete="off" aria-label="Il tuo tentativo">
+  <datalist id="nomi"></datalist>
+  <button type="button" class="pieno" id="prova">Prova</button>
+</div>
+<div class="msg" id="msg" role="status"></div>
+<div class="tentativi" id="tentativi"></div>
+<div id="fine"></div>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<ul class="m">
+  <li><b>A cosa serve il numero &laquo;tutta Milano&raquo;.</b> Accanto a ogni indizio mettiamo un riferimento, ma non è sempre il valore dell&rsquo;intera città. Per i residenti e per le botteghe storiche è il <b>valore tipico dei quartieri</b> (la mediana: metà dei quartieri sta sotto, metà sopra). Per la variazione dei prezzi delle case è la mediana dei quartieri in classifica. Per le notti calde è la media delle stazioni ARPA in città. Per tutti gli altri è il valore di tutta Milano. Ogni riferimento dice quale dei tre è.</li>
+  <li>I quartieri con pochi residenti (parchi, zone industriali) hanno numeri che oscillano: nel gioco restano, ma l&rsquo;indizio lo dice. Quelli quasi vuoti o con meno di mille residenti non vengono mai scelti come risposta.</li>
+  <li>Non tutte le misure esistono per tutti i quartieri: la posizione in classifica (per esempio &laquo;42° su 88&raquo;) è tra i quartieri conteggiati per quella misura, che a volte sono meno di 88.</li>
+  <li>Il reddito è stimato dai CAP (il Comune lo pubblica solo per CAP) e vale per chi paga le tasse, non per tutti i residenti. I prezzi delle case sono stime per zona.</li>
+  <li>La distanza è tra i centri geometrici dei due quartieri; la direzione è approssimata a otto punti della bussola.</li>
+  <li>Il &laquo;quartiere del giorno&raquo; cambia a mezzanotte ed è uguale per tutti; &laquo;Un altro quartiere&raquo; ne prende uno a caso. I numeri descrivono, non spiegano: una correlazione non è una causa.</li>
+</ul>
+
+<h2 id="scarica">File scaricabili</h2>
+<ul class="m">
+  <li><a href="data/indizi_quartieri.csv" download>I 24 indizi per ognuno degli 88 quartieri</a> (CSV)</li>
+  <li><a href="data/indizi_indicatori.csv" download>Che cosa misura ogni indizio</a>: anno, unità, riferimento e sua etichetta, note (CSV)</li>
+  <li><a href="data/indovina.json" download>Tutti i dati del gioco</a> (JSON, con le posizioni in classifica e i confini semplificati)</li>
+</ul>
+
+<footer id="fonti"><p><b>Fonti.</b> I numeri vengono dalla pagina <a href="../quartiere/">Il tuo quartiere</a>, che per ogni misura indica fonte, anno e limiti: Comune di Milano (anagrafe, dati aperti e registri, licenza CC BY), ISTAT (censimento permanente), Agenzia delle Entrate (quotazioni OMI), Inside Airbnb (annunci al 19 settembre 2026), ARPA Lombardia, ISPRA (consumo di suolo), ALER e le altre citate là. Confini dei quartieri (NIL): Comune di Milano. Dati elaborati dal sito; ricontrollati il 5 novembre 2026.</p></footer>
+</div>
+<script>
+(function(){
+'use strict';
+var D, Q, IND, seed, target, tentativi, aperti;
+var ORDINE = ['residenti','eta_media','stranieri','prezzo_vendita','reddito','alberi','affluenza21','locali','famiglie_sole','airbnb','laureati','c15_metro','suolo','botteghe','aree_cani','quota_65','var_prezzo','nuove_case','biblioteche','c15_parchi','notte_calda','alunni_var','pietre','aler'];
+var MAXT = 6;
+var LINK = 'https://andreottiviii.github.io/milano-in-dati/indovina-quartiere/';
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function mig(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function fmt(v,i){
+  if(v==null) return '–';
+  if(typeof v==='string') return v;
+  if(i.tipo==='conto'||i.fmt==='int'||Math.abs(v)>=1000) return mig(v);
+  var d=i.dec==null?1:i.dec;
+  return v.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function unita(i){
+  var u=(i.unita||'').replace(/\s*\(euro 2025\)/,'');
+  if(!u) return '';
+  if(u==='percento') return '%';
+  if(u.charAt(0)==='%') return u;
+  return ' '+u;
+}
+/* riferimento accanto al valore: dice se e' tutta Milano o la mediana dei quartieri */
+function riferimento(i){
+  var r=i.ref||'';
+  if(i.id==='biblioteche') return 'in tutta Milano: 25 biblioteche';
+  if(i.citta==null) return '';
+  var v=fmt(i.citta,i)+unita(i);
+  if(r==='città') return 'tutta Milano: '+v;
+  if(r.indexOf('mediana dei quartieri')===0) return 'valore tipico dei quartieri (mediana): '+v;
+  if(r==='media delle stazioni urbane') return 'media delle stazioni in città: '+v;
+  return r+': '+v;
+}
+function rnd(){seed=(seed*1103515245+12345)%2147483648;return seed/2147483648}
+function nuovo(s,etichetta){
+  seed=s;
+  var giocabili=Q.filter(function(q){return !q.quasi_vuoto&&q.residenti>=1000});
+  target=giocabili[Math.floor(rnd()*giocabili.length)];
+  tentativi=[];aperti=2;
+  var disp=ORDINE.filter(function(k){return target.v[k]&&target.v[k].v!=null});
+  var lista=[],pool=disp.slice();
+  while(lista.length<MAXT&&pool.length){var j=Math.floor(rnd()*Math.min(pool.length,4));lista.push(pool.splice(j,1)[0])}
+  target._indizi=lista;
+  $('numero').textContent=etichetta;
+  $('fine').innerHTML='';$('form').style.display='flex';$('risposta').value='';$('msg').textContent='';
+  disegna();
+}
+function testoIndizio(k){
+  var i=IND[k],x=target.v[k];
+  var pos=(x.r!=null&&i.n)?' <small>· '+x.r+'° su '+i.n+'</small>':'';
+  var rif=riferimento(i);
+  if(rif) pos+=' <small>· '+esc(rif)+'</small>';
+  return '<div class="k">'+esc(i.et)+(i.anno?' · '+esc(i.anno):'')+'</div><div class="v">'+esc(fmt(x.v,i)+unita(i))+pos+'</div>'+(target.piccolo?'<div class="av">quartiere con pochi residenti: il valore oscilla</div>':'');
+}
+function disegna(){
+  var el=$('indizi');el.innerHTML='';
+  target._indizi.forEach(function(k,n){
+    var d=document.createElement('div');
+    d.className='indizio'+(n<aperti?'':' chiuso');
+    d.innerHTML=n<aperti?testoIndizio(k):'<div class="k">Indizio '+(n+1)+'</div><div class="v" style="font-size:16px;font-weight:400">si apre dopo il prossimo tentativo</div>';
+    el.appendChild(d);
+  });
+  var t=$('tentativi');t.innerHTML='';
+  tentativi.forEach(function(x){
+    var d=document.createElement('div');d.className='tent'+(x.ok?' ok':'');
+    d.innerHTML='<span class="q">'+esc(x.q.nome)+'</span>'+(x.ok?'<span class="dir">✓</span><span class="km">esatto</span>':'<span class="dir">'+x.freccia+'</span><span class="km">'+x.km+' km'+(x.q.municipio===target.municipio?' · stesso municipio':'')+'</span>');
+    t.appendChild(d);
+  });
+}
+function dist(a,b){var R=6371,la1=a[0]*Math.PI/180,la2=b[0]*Math.PI/180,dla=la2-la1,dlo=(b[1]-a[1])*Math.PI/180;var h=Math.sin(dla/2)*Math.sin(dla/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dlo/2)*Math.sin(dlo/2);return 2*R*Math.asin(Math.sqrt(h))}
+function freccia(a,b){var dy=b[0]-a[0],dx=(b[1]-a[1])*Math.cos(a[0]*Math.PI/180);var ang=(Math.atan2(dx,dy)*180/Math.PI+360)%360;return ['↑','↗','→','↘','↓','↙','←','↖'][Math.round(ang/45)%8]}
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
+function prova(){
+  var testo=$('risposta').value;if(!testo.trim())return;
+  var n=norm(testo);
+  var q=Q.find(function(x){return norm(x.nome)===n})||Q.find(function(x){return norm(x.nome).split(' ').indexOf(n)>=0})||Q.find(function(x){return norm(x.nome).indexOf(n)>=0});
+  if(!q){$('msg').textContent='Non trovo questo quartiere: scegli un nome dall’elenco.';return}
+  $('msg').textContent='';
+  if(tentativi.some(function(t){return t.q.id===q.id})){$('risposta').value='';$('msg').textContent='Questo l’hai già provato.';return}
+  var ok=q.id===target.id;
+  tentativi.push({q:q,ok:ok,km:dist(q.c,target.c).toFixed(1).replace('.',','),freccia:freccia(q.c,target.c)});
+  $('risposta').value='';
+  if(ok||tentativi.length>=MAXT){aperti=MAXT;disegna();fine(ok);return}
+  aperti=Math.min(MAXT,2+tentativi.length);disegna();
+}
+function fine(ok){
+  $('form').style.display='none';
+  var righe=tentativi.map(function(t){return t.ok?'■ esatto':'□ '+t.freccia+' '+t.km+' km'}).join('\n');
+  var testo='Indovina il quartiere · '+$('numero').textContent+'\n'+(ok?tentativi.length+'/'+MAXT:'X/'+MAXT)+'\n'+righe+'\n'+LINK;
+  $('fine').innerHTML='<div class="fine"><h2>'+(ok?'Sì: ':'Era ')+esc(target.nome)+'</h2><p>Municipio '+target.municipio+', '+mig(target.residenti)+' residenti.</p>'+mappa()+'<textarea id="ris" readonly aria-label="Risultato da copiare"></textarea><button type="button" id="copia">Copia il risultato</button> <span id="copiato" class="sub" role="status"></span></div>';
+  $('ris').value=testo;
+  $('copia').addEventListener('click',function(){
+    function ko(){$('ris').select();$('copiato').textContent='Seleziona e copia.'}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(testo).then(function(){$('copiato').textContent='Copiato.'},ko)}else ko();
+  });
+}
+function mappa(){
+  var pts=[];Q.forEach(function(q){(q.anello||[]).forEach(function(p){pts.push(p)})});
+  var la=pts.map(function(p){return p[0]}),lo=pts.map(function(p){return p[1]});
+  var la0=Math.min.apply(null,la),la1=Math.max.apply(null,la),lo0=Math.min.apply(null,lo),lo1=Math.max.apply(null,lo);
+  var W=Math.max(300,document.querySelector('.pagina').clientWidth-66),H=Math.round(W*0.78),k=Math.cos((la0+la1)/2*Math.PI/180);
+  var s=Math.min(W/((lo1-lo0)*k),H/(la1-la0));
+  function X(p){return ((p[1]-lo0)*k*s+(W-(lo1-lo0)*k*s)/2).toFixed(1)}
+  function Y(p){return ((la1-p[0])*s+(H-(la1-la0)*s)/2).toFixed(1)}
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Mappa dei quartieri con la risposta e i tentativi">';
+  Q.forEach(function(q){
+    if(!q.anello)return;
+    var t=q.id===target.id,g=tentativi.find(function(x){return x.q.id===q.id&&!x.ok});
+    svg+='<polygon points="'+q.anello.map(function(p){return X(p)+','+Y(p)}).join(' ')+'" fill="'+(t?'#FFD500':g?'#ddd':'#fff')+'" stroke="#111" stroke-width="'+(t?2.5:0.8)+'"/>';
+  });
+  tentativi.filter(function(x){return !x.ok}).forEach(function(x,n){svg+='<text x="'+X(x.q.c)+'" y="'+Y(x.q.c)+'" font-size="'+(W<560?15:22)+'" text-anchor="middle" dominant-baseline="middle" font-weight="700">'+(n+1)+'</text>'});
+  svg+='<circle cx="'+X(target.c)+'" cy="'+Y(target.c)+'" r="'+(W<560?6:9)+'" fill="#E30613" stroke="#fff" stroke-width="2"/></svg>';
+  return svg;
+}
+function avvia(){
+  Q=D.quartieri;IND={};D.indicatori.forEach(function(i){IND[i.id]=i});
+  var dl=$('nomi');
+  Q.slice().sort(function(a,b){return a.nome.localeCompare(b.nome)}).forEach(function(q){var o=document.createElement('option');o.value=q.nome;dl.appendChild(o)});
+  $('prova').addEventListener('click',prova);
+  $('risposta').addEventListener('keydown',function(e){if(e.key==='Enter')prova()});
+  var giorni=Math.floor(Date.now()/86400000);
+  $('caso').addEventListener('click',function(){nuovo(Math.floor(Math.random()*2147483647),'Quartiere a caso')});
+  nuovo(giorni*7919+13,'Quartiere del giorno n. '+(giorni-20761));
+}
+fetch('data/indovina.json').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){D=d;avvia()}).catch(function(e){$('indizi').innerHTML='<p><b>Dati non caricati.</b> '+esc(e.message)+'</p>'});
+})();
+</script>
+</body>
+</html>

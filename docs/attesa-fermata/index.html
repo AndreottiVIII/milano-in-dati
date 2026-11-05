@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milano in dati · Quanto aspetti alla fermata</title>
+<style>
+:root{--m1:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#8E4FB3;--tram:#F39200;--bus:#111;--nero:#111;--grigio:#6b6b6b;--riga:#ddd}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--nero);font-family:Helvetica,Arial,sans-serif;font-size:17px;line-height:1.4}
+.pagina{max-width:720px;margin:0 auto;padding:0 16px 48px;overflow-wrap:break-word}
+.testata{border-top:14px solid var(--m2);padding-top:14px}
+h1{font-size:34px;line-height:1.05;margin:6px 0 10px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;margin:34px 0 8px;line-height:1.15;border-top:2px solid var(--nero);padding-top:12px}
+p{margin:8px 0}
+a{color:#006b33}
+.sotto{font-size:18px;color:#333}
+.schede{display:flex;gap:0;margin:20px 0 10px;border-bottom:3px solid var(--nero)}
+.schede button{flex:1;border:0;background:#fff;font:inherit;font-size:16px;font-weight:700;padding:10px 6px;cursor:pointer;color:#333}
+.schede button[aria-pressed="true"]{background:var(--nero);color:#fff}
+.bolli{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.bollo{font:inherit;font-weight:700;font-size:16px;width:46px;height:46px;border-radius:50%;border:3px solid transparent;color:#fff;cursor:pointer}
+.bollo[aria-pressed="true"]{border-color:var(--nero);box-shadow:0 0 0 3px #fff inset}
+select{font:inherit;font-size:15px;padding:8px;border:2px solid var(--nero);background:#fff;max-width:100%;border-radius:0}
+.titolo{font-size:24px;font-weight:700;margin:16px 0 4px;line-height:1.1}
+.frase{font-size:18px;margin:4px 0 12px}
+.frase b{background:var(--m3);padding:0 3px}
+svg{display:block;width:100%;height:auto}
+.scheda{border-left:8px solid var(--m2);padding:4px 0 4px 14px;margin:10px 0;font-size:16px;min-height:50px}
+table{width:100%;border-collapse:collapse;font-size:15px;margin:10px 0}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--riga);vertical-align:middle}
+th{border-bottom:2px solid var(--nero)}
+td.n,th.n{text-align:right;white-space:nowrap}
+.barra{height:14px;background:var(--m2)}
+.barra.v{background:#fff;border:1px solid var(--grigio)}
+ul.m{padding-left:20px;margin:6px 0} ul.m li{margin:.4em 0}
+.nascosto{display:none}
+.sub{font-size:14px;color:#333}
+button.piccolo{font:inherit;font-size:14px;border:2px solid var(--nero);background:#fff;padding:5px 10px;cursor:pointer}
+button.piccolo[aria-pressed="true"]{background:var(--nero);color:#fff}
+footer{margin:34px 0 0;font-size:14px;color:#333;border-top:2px solid var(--nero);padding-top:10px}
+@media (max-width:420px){h1{font-size:30px}.titolo{font-size:21px}.frase{font-size:16px}}
+</style>
+<script src="../menu.js" defer></script>
+</head>
+<body>
+<div class="pagina">
+<header class="testata">
+  <h1>Quanto aspetti alla fermata</h1>
+  <p class="sotto">Gli orari programmati di tutte le linee di Milano, letti per un martedì: ogni quanto passa un mezzo, ora per ora, e quanti passaggi ci sono davanti a casa di chi abita in ogni quartiere.</p>
+  <p class="sub">Sono orari scritti sulla carta, non attese vere: ritardi e corse saltate non ci sono. Vedi i limiti in fondo.</p>
+</header>
+
+<div class="schede">
+  <button type="button" aria-pressed="true" data-v="linea">Linea per linea</button>
+  <button type="button" aria-pressed="false" data-v="quartiere">Quartiere per quartiere</button>
+</div>
+
+<section id="v-linea">
+  <div class="bolli" id="bolli" role="group" aria-label="Linee della metropolitana"></div>
+  <div class="bolli">
+    <label for="sel-tram" class="sub">Tram</label><select id="sel-tram"><option value="">scegli…</option></select>
+    <label for="sel-bus" class="sub">Bus e filobus</label><select id="sel-bus"><option value="">scegli…</option></select>
+  </div>
+  <div class="titolo" id="l-titolo"></div>
+  <p class="frase" id="l-frase"></p>
+  <div id="l-grafico"></div>
+  <p class="sub">Corse per ora in una direzione; sopra le barre, ogni quanti minuti passa un mezzo. Le ore con meno di una corsa sono vuote. Le ore 0-2 sono dopo mezzanotte.</p>
+</section>
+
+<section id="v-quartiere" class="nascosto">
+  <p>Qui si contano tutti i passaggi programmati a tutte le fermate dentro ogni quartiere, in un giorno intero, ogni 1.000 residenti. Un quartiere attraversato da molte linee conta di più: è una misura di quanto ti passa davanti, non di dove ti porta.</p>
+  <div class="bolli"><button type="button" class="piccolo" aria-pressed="true" data-o="per_1000">Passaggi ogni 1.000 residenti</button><button type="button" class="piccolo" aria-pressed="false" data-o="sera_su_punta">Quanto resta la sera (21-24) rispetto alla punta (7-9)</button></div>
+  <p class="frase" id="q-frase"></p>
+  <div class="scheda" id="q-scheda">Tocca una riga per vedere le 24 ore del quartiere.</div>
+  <div id="q-grafico"></div>
+  <table id="q-tab"><thead><tr><th>Quartiere</th><th class="n" id="q-th">ogni 1.000 res.</th><th style="width:40%"></th></tr></thead><tbody></tbody></table>
+  <p class="sub">I quartieri con meno di 5.000 residenti (parchi, zone industriali, lo stadio) hanno la barra vuota: il &laquo;per 1.000 residenti&raquo; lì non vuol dire molto.</p>
+</section>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<ul class="m">
+  <li>Sono orari <b>programmati</b>, non passaggi veri: ritardi, corse saltate e guasti non ci sono.</li>
+  <li>Si legge <b>un giorno solo</b>, martedì <span id="giorno"></span> (<span id="corse"></span> corse): il sabato, la domenica, l&rsquo;estate e i giorni di sciopero hanno orari diversi. È il giorno infrasettimanale con più servizi nel feed.</li>
+  <li>&laquo;Ogni quanti minuti&raquo; è 60 diviso le corse dell&rsquo;ora in una direzione: una media, non il tempo che aspetti davvero, che dipende da quando arrivi e da quanto l&rsquo;orario è regolare.</li>
+  <li>Le corse di una linea sono contate al capolinea e divise per due versi di marcia; sulle linee a rami (M1, M2) il tronco comune ha più corse di quante ne mostra ogni ramo.</li>
+  <li>Per quartiere si contano le fermate dentro il confine: quelle sul bordo possono finire nel quartiere accanto; le linee dell&rsquo;hinterland contano solo nel tratto dentro Milano. Un passaggio è una partenza da una fermata: chi ha più linee vicine ne ha di più.</li>
+  <li>Residenti per quartiere: anagrafe del Comune, fine 2025. I numeri descrivono, non spiegano: dire perché un quartiere ha più passaggi di un altro richiederebbe altri dati.</li>
+</ul>
+
+<h2 id="scarica">File scaricabili</h2>
+<ul class="m">
+  <li><a href="data/linee_corse_per_ora.csv" download>Ogni linea, corse per ora in una direzione</a> (CSV, 161 linee)</li>
+  <li><a href="data/quartieri_passaggi_per_ora.csv" download>Ogni quartiere, passaggi per ora e ogni 1.000 residenti</a> (CSV, 88 quartieri)</li>
+  <li><a href="data/fermate.json" download>Tutti i numeri della pagina</a> (JSON)</li>
+</ul>
+
+<footer id="fonti"><p><b>Fonti.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, dataset ds929 &laquo;Orari del trasporto pubblico locale in formato GTFS&raquo; (prodotto da AMAT su dati ATM, aggiornato ogni due settimane), licenza CC BY 4.0. Feed del 26 ottobre 2026, scaricato il 29 ottobre 2026. Confini dei quartieri e residenti: Comune di Milano, anagrafe a fine 2025, dalla pagina <a href="../quartiere/">Il tuo quartiere</a>. Dati elaborati dal sito (conteggio delle partenze per ora e per quartiere).</p></footer>
+</div>
+<script>
+(function(){
+'use strict';
+var D,COL={'1':'#E30613','2':'#00A651','3':'#FFD500','4':'#0072BC','5':'#8E4FB3'};
+var MESI=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+var metro,tram,bus,Q,ordine='per_1000',lineaCorrente=null,quartiereCorrente=null;
+function attesa(c){return c>0?60/c:null}
+function larg(){return Math.max(300,document.querySelector('.pagina').clientWidth-32)}
+function og(a){return a==null?'<b>non passa</b>':'un mezzo ogni <b>'+min(a)+'</b>'}
+function min(x){return x==null?'–':(x<10?x.toFixed(1).replace('.',','):Math.round(x))+' min'}
+function it(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function riempi(sel,lista){
+  lista.forEach(function(l){var o=document.createElement('option');o.value=l.id;o.textContent=l.n+' · '+l.nome;sel.appendChild(o)});
+  sel.addEventListener('change',function(){if(sel.value)mostraLinea(sel.value)});
+}
+function mostraLinea(id){
+  var l=D.linee.find(function(x){return x.id===id});lineaCorrente=id;
+  document.querySelectorAll('.bollo').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.id===id))});
+  if(l.tipo!=='tram')$('sel-tram').value='';
+  if(l.tipo==='metro'||l.tipo==='tram')$('sel-bus').value='';
+  if(l.tipo==='tram')$('sel-tram').value=id;
+  if(l.tipo!=='metro'&&l.tipo!=='tram')$('sel-bus').value=id;
+  var col=l.tipo==='metro'?(COL[l.n]||'#111'):l.tipo==='tram'?'#F39200':'#111';
+  $('l-titolo').innerHTML=(l.tipo==='metro'?'M'+esc(l.n):(l.tipo==='tram'?'Tram ':'Linea ')+esc(l.n))+' <span style="font-weight:400;font-size:17px;color:#333">'+esc(l.nome.replace(/^m\d\s*-\s*/i,''))+'</span>';
+  var a8=attesa(l.ore[8]),a13=attesa(l.ore[13]),a22=attesa(l.ore[22]);
+  var prima=l.ore.findIndex(function(c,h){return h>=3&&c>0}),dopo=l.ore.slice(0,3).some(function(c){return c>0});
+  var rev=l.ore.slice().reverse().findIndex(function(c){return c>0}),ultima=23-rev;
+  if(a8==null&&a13==null&&a22==null){$('l-frase').innerHTML='Questa linea non ha corse alle 8, alle 13 e alle 22 (<b>servizio notturno o con poche corse</b>). '+it(l.corse)+' corse in tutto il giorno (nei due versi); le ore sono nel grafico.'}
+  else $('l-frase').innerHTML='Alle 8 '+og(a8)+', alle 13 '+og(a13)+', alle 22 '+og(a22)+'. Corse dalle '+prima+' '+(dopo?'fino a dopo mezzanotte':'alle '+ultima)+'; '+it(l.corse)+' corse in tutto il giorno (nei due versi).';
+  var W=larg(),H=260,L=8,T=34,B=30,bw=(W-L-8)/24,max=Math.max.apply(null,l.ore.concat([1])),passo=W<560?4:3;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Corse per ora della linea '+esc(l.n)+'">';
+  l.ore.forEach(function(c,h){
+    var hh=c/max*(H-T-B),x0=L+h*bw+2,w=bw-4;
+    if(c>=1)s+='<rect x="'+x0+'" y="'+(H-B-hh)+'" width="'+w+'" height="'+hh+'" fill="'+col+'"/>';
+    if(c>=1&&(h%passo===0))s+='<text x="'+(x0+w/2)+'" y="'+(H-B-hh-6)+'" font-size="11" text-anchor="middle" font-weight="700">'+((60/c)<10?(60/c).toFixed(1).replace('.',','):Math.round(60/c))+'\'</text>';
+    if(h%3===0)s+='<text x="'+(x0+w/2)+'" y="'+(H-B+18)+'" font-size="12" text-anchor="middle">'+h+'</text>';
+  });
+  s+='<line x1="'+L+'" x2="'+(W-8)+'" y1="'+(H-B)+'" y2="'+(H-B)+'" stroke="#111" stroke-width="2"/><text x="'+L+'" y="'+(T-18)+'" font-size="12" fill="#333">corse per ora, in una direzione</text></svg>';
+  $('l-grafico').innerHTML=s;
+  try{history.replaceState(null,'','#linea='+id)}catch(e){}
+}
+function tabella(){
+  var validi=Q.filter(function(q){return q.residenti>=5000&&q[ordine]!=null});
+  var ord=Q.filter(function(q){return q[ordine]!=null}).sort(function(a,b){return b[ordine]-a[ordine]});
+  var max=Math.max.apply(null,validi.map(function(q){return q[ordine]}));
+  var top=validi.reduce(function(m,q){return q[ordine]>m[ordine]?q:m},validi[0]),low=validi.reduce(function(m,q){return q[ordine]<m[ordine]?q:m},validi[0]);
+  $('q-th').textContent=ordine==='per_1000'?'ogni 1.000 res.':'sera / punta';
+  $('q-frase').innerHTML=ordine==='per_1000'
+    ?'Tra i quartieri con almeno 5.000 residenti: più passaggi nel quartiere <b>'+esc(top.nome)+'</b> ('+it(Math.round(top.per_1000))+' ogni 1.000 residenti), meno nel quartiere <b>'+esc(low.nome)+'</b> ('+Math.round(low.per_1000)+'). Tra i due c’è un rapporto di '+(top.per_1000/low.per_1000).toFixed(0)+' a 1.'
+    :'La sera (21-24) restano in media il <b>'+Math.round(validi.reduce(function(s,q){return s+q.sera_su_punta},0)/validi.length*100)+'%</b> dei passaggi della punta del mattino. Dove resta di più: <b>'+esc(top.nome)+'</b> ('+Math.round(top.sera_su_punta*100)+'%); dove meno: <b>'+esc(low.nome)+'</b> ('+Math.round(low.sera_su_punta*100)+'%).';
+  var tb=document.querySelector('#q-tab tbody');tb.innerHTML='';
+  ord.forEach(function(q){
+    var tr=document.createElement('tr'),v=q[ordine],pic=q.residenti<5000;
+    tr.innerHTML='<td>'+esc(q.nome)+(pic?' <span style="color:#6b6b6b;font-size:12px">pochi residenti</span>':'')+'</td><td class="n">'+(ordine==='per_1000'?it(Math.round(v)):Math.round(v*100)+'%')+'</td><td><div class="barra'+(pic?' v':'')+'" style="width:'+Math.min(100,v/max*100)+'%"></div></td>';
+    tr.style.cursor='pointer';tr.tabIndex=0;
+    tr.addEventListener('click',function(){profilo(q)});
+    tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();profilo(q)}});
+    tb.appendChild(tr);
+  });
+}
+function profilo(q){
+  var nuovo=quartiereCorrente!==q;quartiereCorrente=q;
+  $('q-scheda').innerHTML='<b>'+esc(q.nome)+'</b> · '+it(q.residenti)+' residenti · '+q.fermate+' fermate, '+q.linee+' linee · '+it(q.tot)+' passaggi nel giorno';
+  var W=larg(),H=180,L=8,T=10,B=28,bw=(W-L-8)/24,max=Math.max.apply(null,q.ore.concat([1]));
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Passaggi per ora a '+esc(q.nome)+'">';
+  q.ore.forEach(function(c,h){
+    var hh=c/max*(H-T-B),x0=L+h*bw+2,w=bw-4;
+    s+='<rect x="'+x0+'" y="'+(H-B-hh)+'" width="'+w+'" height="'+hh+'" fill="#00A651"/>';
+    if(h%3===0)s+='<text x="'+(x0+w/2)+'" y="'+(H-B+18)+'" font-size="12" text-anchor="middle">'+h+'</text>';
+    if(h===8||h===22)s+='<text x="'+(x0+w/2)+'" y="'+(H-B-hh-5)+'" font-size="12" text-anchor="middle" font-weight="700">'+c+'</text>';
+  });
+  s+='<line x1="'+L+'" x2="'+(W-8)+'" y1="'+(H-B)+'" y2="'+(H-B)+'" stroke="#111" stroke-width="2"/></svg>';
+  $('q-grafico').innerHTML=s;
+  if(nuovo)$('q-scheda').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function avvia(){
+  $('giorno').textContent=(+D.giorno.slice(6))+' '+MESI[+D.giorno.slice(4,6)]+' '+D.giorno.slice(0,4);
+  $('corse').textContent=it(D.corse);
+  document.querySelectorAll('.schede button').forEach(function(b){b.addEventListener('click',function(){
+    document.querySelectorAll('.schede button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+    $('v-linea').classList.toggle('nascosto',b.dataset.v!=='linea');
+    $('v-quartiere').classList.toggle('nascosto',b.dataset.v!=='quartiere');
+  })});
+  metro=D.linee.filter(function(l){return l.tipo==='metro'});tram=D.linee.filter(function(l){return l.tipo==='tram'});bus=D.linee.filter(function(l){return l.tipo!=='metro'&&l.tipo!=='tram'});
+  metro.forEach(function(l){
+    var b=document.createElement('button');b.type='button';b.className='bollo';b.textContent='M'+l.n;b.setAttribute('aria-label','Metro M'+l.n);
+    b.style.background=COL[l.n]||'#111';b.style.color=l.n==='3'?'#111':'#fff';b.dataset.id=l.id;b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',function(){mostraLinea(l.id)});$('bolli').appendChild(b);
+  });
+  riempi($('sel-tram'),tram);riempi($('sel-bus'),bus);
+  Q=D.quartieri.filter(function(q){return q.residenti>0});
+  document.querySelectorAll('#v-quartiere .piccolo').forEach(function(b){b.addEventListener('click',function(){
+    document.querySelectorAll('#v-quartiere .piccolo').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});ordine=b.dataset.o;tabella();
+  })});
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(lineaCorrente)mostraLinea(lineaCorrente);if(quartiereCorrente)profilo(quartiereCorrente)},120)});
+  tabella();
+  var h=location.hash.match(/linea=([^&]+)/);
+  mostraLinea(h&&D.linee.some(function(l){return l.id===h[1]})?h[1]:metro[2].id);
+}
+fetch('data/fermate.json').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){D=d;avvia()}).catch(function(e){$('l-frase').innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+})();
+</script>
+</body>
+</html>

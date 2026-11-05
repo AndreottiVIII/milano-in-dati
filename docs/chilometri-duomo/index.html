@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milano in dati · Milano per chilometri dal Duomo</title>
+<style>
+:root{--m1:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#8E4FB3;--nero:#111;--grigio:#6b6b6b;--riga:#ddd}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--nero);font-family:Helvetica,Arial,sans-serif;font-size:17px;line-height:1.4}
+.pagina{max-width:720px;margin:0 auto;padding:0 16px 48px;overflow-wrap:break-word}
+.testata{border-top:14px solid var(--m1);padding-top:14px}
+h1{font-size:34px;line-height:1.05;margin:6px 0 10px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;margin:34px 0 8px;line-height:1.15;border-top:2px solid var(--nero);padding-top:12px}
+p{margin:8px 0}
+a{color:#a1000b}
+.sotto{font-size:18px;color:#333}
+.temi{margin:14px 0 4px}
+select{font:inherit;font-size:16px;padding:8px;border:3px solid var(--nero);background:#fff;border-radius:0;max-width:100%;width:100%}
+.tema{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#333;margin:12px 0 6px}
+.bottoni{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;font-size:14px;border:2px solid var(--nero);background:#fff;color:var(--nero);padding:6px 10px;border-radius:0;cursor:pointer;text-align:left}
+button[aria-pressed="true"]{background:var(--nero);color:#fff}
+.titolo{font-size:26px;font-weight:700;margin:26px 0 4px;line-height:1.1}
+.frase{font-size:19px;margin:4px 0 14px}
+.frase b{background:var(--m3);padding:0 3px}
+svg{display:block;width:100%;height:auto}
+.scheda{border-left:8px solid var(--m1);padding:4px 0 4px 14px;margin:10px 0;font-size:16px;min-height:50px}
+.scheda b{font-size:18px}
+.sub{font-size:14px;color:#333}
+ul.m{padding-left:20px;margin:6px 0} ul.m li{margin:.4em 0}
+footer{margin:34px 0 0;font-size:14px;color:#333;border-top:2px solid var(--nero);padding-top:10px}
+@media (max-width:420px){h1{font-size:30px}.titolo{font-size:22px}.frase{font-size:17px}}
+</style>
+<script src="../menu.js" defer></script>
+</head>
+<body>
+<div class="pagina">
+<header class="testata">
+  <h1>Milano per chilometri dal Duomo</h1>
+  <p class="sotto">Ogni quartiere messo alla sua distanza dal Duomo, e i numeri del sito riassunti per fasce di due chilometri. Scegli una misura e guarda come cambia andando verso il confine della città. È una descrizione: non dice perché.</p>
+</header>
+
+<div>
+  <label for="sel" class="sub" style="display:block;margin:14px 0 4px">Scegli la misura</label>
+  <select id="sel" aria-label="Misura"></select>
+</div>
+<div class="bottoni" id="rapidi" style="margin-top:8px"></div>
+<details id="temi-dett" style="margin:8px 0"><summary style="font-size:14px;cursor:pointer">Tutte le misure, per tema</summary><div class="temi" id="temi"></div></details>
+
+<div class="titolo" id="titolo"></div>
+<p class="frase" id="frase"></p>
+<div id="barre"></div>
+<p class="sub" style="margin-top:2px">Media di ogni fascia, pesata con i residenti dei quartieri. Sotto, ogni quartiere è un punto: a sinistra il Duomo, a destra il confine della città. Tocca un punto per il nome.</p>
+<div id="punti"></div>
+<div class="scheda" id="scheda" role="status">Nessun quartiere scelto.</div>
+
+<h2 id="suolo-t">Il cemento, chilometro per chilometro</h2>
+<p>Qui le fasce sono di un chilometro e il dato è dell&rsquo;ISPRA (pagina <a href="../suolo/">Suolo</a>): quanta parte del terreno non è più naturale o agricola nel 2025, perché coperta da edifici, strade e piazzali.</p>
+<div id="suolo"></div>
+<p id="suolo-frase" style="font-size:15px"></p>
+
+<h2 id="limiti">Limiti dei dati</h2>
+<ul class="m">
+  <li>Una fascia è una media: dentro ci sono quartieri molto diversi (tra 4 e 6 km stanno insieme, per esempio, Città Studi e Corvetto). I punti mostrano quanto sono sparsi.</li>
+  <li>La distanza non spiega niente da sola. Qui si descrive, non si spiega: se una misura cambia con la distanza dal Duomo, i dati non dicono perché. Correlazione non è causa.</li>
+  <li>La distanza è quella del centro geometrico di ogni quartiere dal Duomo, in linea d&rsquo;aria: non è il tempo di viaggio.</li>
+  <li>I quartieri con pochi residenti (parchi, zone industriali) pesano poco nelle medie; nel grafico a punti ci sono e sono i punti vuoti.</li>
+  <li>La speranza di vita è una stima dai decessi di quattro anni; i quartieri piccolissimi sono esclusi.</li>
+  <li>L&rsquo;anno del dato cambia da misura a misura: è scritto sotto il titolo. Il reddito è stimato dai CAP e vale per chi paga le tasse; i prezzi delle case sono stime per zona.</li>
+  <li>Le misure sulle persone (stranieri, reddito, voto, età) descrivono dove abitano, non giudicano nessuno.</li>
+</ul>
+
+<h2 id="scarica">File scaricabili</h2>
+<ul class="m">
+  <li><a href="data/fasce_2km.csv" download>Le cinque fasce di due chilometri, tutte le misure</a> (CSV)</li>
+  <li><a href="data/quartieri_distanza.csv" download>Ogni quartiere con la distanza dal Duomo e le sue misure</a> (CSV)</li>
+  <li><a href="data/suolo_anelli_1km.csv" download>Suolo coperto per fasce di un chilometro</a> (CSV, ISPRA)</li>
+  <li><a href="data/misure.csv" download>Elenco delle misure: unità, anno e valore di riferimento</a> (CSV)</li>
+  <li><a href="data/chilometri.json" download>Tutti i numeri della pagina</a> (JSON)</li>
+</ul>
+
+<footer id="fonti"><p><b>Fonti.</b> I numeri vengono dalle pagine del sito: <a href="../quartiere/">Il tuo quartiere</a>, che per ogni misura cita la sua fonte e il suo anno (Comune di Milano, ISTAT, Agenzia delle Entrate, Inside Airbnb, ARPA e le altre), <a href="../speranza-vita/">Speranza di vita</a> e <a href="../suolo/">Suolo</a> (ISPRA, consumo di suolo 2012-2025). Confini dei quartieri (NIL) e residenti: Comune di Milano. Il Duomo è preso a 45,4641 N, 9,1919 E. Medie, pesi e distanze sono calcolati dal sito; ricontrollati il 5 novembre 2026.</p></footer>
+</div>
+<script>
+(function(){
+'use strict';
+var D,IND,corrente=null;
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function mig(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function fmt(v,i){
+  if(v==null)return '–';
+  if(i.fmt==='int'||(i.unita&&/euro|€/.test(i.unita)&&Math.abs(v)>=1000))return mig(v);
+  var d=(i.dec==null?1:i.dec);
+  return v.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function unita(i){
+  var u=(i.unita||'').replace(/\s*\(euro 2025\)/,'');
+  if(!u)return '';
+  if(u==='percento')return '%';
+  if(u.charAt(0)==='%')return u;
+  return ' '+u;
+}
+function larg(){return Math.max(300,document.querySelector('.pagina').clientWidth-32)}
+function rifLabel(i){
+  if(i.citta==null||typeof i.citta!=='number')return null;
+  if(i.ref==='città')return 'tutta Milano';
+  if(String(i.ref||'').indexOf('mediana dei quartieri')===0)return 'mediana dei quartieri';
+  return null;
+}
+function scegli(id){
+  corrente=id;
+  document.querySelectorAll('.bottoni button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.id===id))});
+  $('sel').value=id;
+  var i=IND.find(function(x){return x.id===id});
+  $('titolo').textContent=i.et+(i.anno?' · '+i.anno:'');
+  var F=D.fasce,v0=F[0].v[id],vN=F[F.length-1].v[id],u=unita(i),frase='';
+  if(v0!=null&&vN!=null){
+    var r=v0/vN;
+    frase='Nei primi 2 km: <b>'+fmt(v0,i)+u+'</b>. Oltre 8 km: <b>'+fmt(vN,i)+u+'</b>. ';
+    if(Math.abs(v0)>0&&Math.abs(vN)>0&&(r>=1.3||r<=0.77))frase+='Il valore dei primi 2 km è <b>'+r.toFixed(1).replace('.',',')+' volte</b> quello oltre 8 km.';
+    else frase+='Tra i due c’è poca differenza.';
+  }
+  $('frase').innerHTML=frase;
+  /* barre: una per fascia */
+  var W=larg(),H=230,L=8,T=30,B=44,n=F.length,bw=(W-L-8)/n;
+  var vals=F.map(function(f){return f.v[id]}).filter(function(v){return v!=null});
+  var max=Math.max.apply(null,vals.concat([0.0001])),min=Math.min.apply(null,vals.concat([0]));
+  function y(v){return T+(max-v)/(max-min||1)*(H-T-B)}
+  var y0=y(0);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(i.et)+' per fascia di distanza dal Duomo">';
+  F.forEach(function(f,k){
+    var v=f.v[id];if(v==null)return;
+    var x0=L+k*bw+6,w=bw-12,yy=Math.min(y(v),y0),hh=Math.abs(y(v)-y0);
+    s+='<rect x="'+x0+'" y="'+yy+'" width="'+w+'" height="'+hh+'" fill="'+(k===0?'#111':'#E30613')+'" opacity="'+(1-k*0.15)+'"/>';
+    s+='<text x="'+(x0+w/2)+'" y="'+(yy-6)+'" font-size="'+(W<560?13:16)+'" font-weight="700" text-anchor="middle">'+fmt(v,i)+'</text>';
+    s+='<text x="'+(x0+w/2)+'" y="'+(H-B+18)+'" font-size="12" text-anchor="middle">'+(f.a?f.da+'-'+f.a+' km':'oltre '+f.da)+'</text>';
+    s+='<text x="'+(x0+w/2)+'" y="'+(H-B+34)+'" font-size="11" text-anchor="middle" fill="#333">'+f.n+' quart.</text>';
+  });
+  s+='<line x1="'+L+'" x2="'+(W-8)+'" y1="'+y0+'" y2="'+y0+'" stroke="#111" stroke-width="2"/></svg>';
+  $('barre').innerHTML=s;
+  /* punti: un quartiere ciascuno */
+  var Q=D.quartieri.filter(function(q){return q.v[id]!=null&&q.km!=null});
+  var W2=larg(),H2=260,L2=56,R2=12,T2=14,B2=34,kmax=11;
+  function xs(km){return L2+Math.min(km,kmax)/kmax*(W2-L2-R2)}
+  var qv=Q.map(function(q){return q.v[id]}),vmax=Math.max.apply(null,qv),vmin=Math.min.apply(null,qv);
+  function ys(v){return T2+(vmax-v)/(vmax-vmin||1)*(H2-T2-B2)}
+  var p='<svg viewBox="0 0 '+W2+' '+H2+'" role="img" aria-label="Ogni quartiere per distanza dal Duomo e '+esc(i.et)+'">';
+  for(var k=0;k<=10;k+=2)p+='<line x1="'+xs(k)+'" x2="'+xs(k)+'" y1="'+T2+'" y2="'+(H2-B2)+'" stroke="#eee"/><text x="'+xs(k)+'" y="'+(H2-B2+18)+'" font-size="12" text-anchor="middle">'+k+' km</text>';
+  [vmin,vmax].forEach(function(v){p+='<text x="'+(L2-6)+'" y="'+(ys(v)+4)+'" font-size="12" text-anchor="end" fill="#333">'+fmt(v,i)+'</text>'});
+  var rl=rifLabel(i);
+  if(rl&&i.citta>=vmin&&i.citta<=vmax)p+='<line x1="'+L2+'" x2="'+(W2-R2)+'" y1="'+ys(i.citta)+'" y2="'+ys(i.citta)+'" stroke="#111" stroke-dasharray="4 4"/><text x="'+(W2-R2)+'" y="'+(ys(i.citta)-4)+'" font-size="11" text-anchor="end">'+rl+' '+fmt(i.citta,i)+'</text>';
+  p+='<line x1="'+L2+'" x2="'+(W2-R2)+'" y1="'+(H2-B2)+'" y2="'+(H2-B2)+'" stroke="#111" stroke-width="2"/>';
+  Q.forEach(function(q){
+    var pic=q.piccolo||q.res<5000;
+    p+='<circle class="q" data-id="'+q.id+'" cx="'+xs(q.km).toFixed(1)+'" cy="'+ys(q.v[id]).toFixed(1)+'" r="'+(pic?5:7)+'" fill="'+(pic?'#fff':'#E30613')+'" stroke="'+(pic?'#6b6b6b':'#fff')+'" stroke-width="1.5" style="cursor:pointer" tabindex="0" role="button" aria-label="'+esc(q.nome)+'"><title>'+esc(q.nome)+': '+fmt(q.v[id],i)+unita(i)+' · '+q.km+' km</title></circle>';
+  });
+  p+='</svg>';
+  $('punti').innerHTML=p;
+  function mostra(c){
+    var q=D.quartieri.find(function(x){return x.id===+c.dataset.id});
+    $('scheda').innerHTML='<b>'+esc(q.nome)+'</b> · '+q.km.toLocaleString('it-IT')+' km dal Duomo · '+mig(q.res)+' residenti<br>'+esc(i.et)+': <b>'+fmt(q.v[id],i)+unita(i)+'</b>'+((q.piccolo||q.res<5000)?' · pochi residenti: il valore oscilla':'');
+  }
+  document.querySelectorAll('#punti .q').forEach(function(c){
+    c.addEventListener('click',function(){mostra(c)});
+    c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();mostra(c)}});
+  });
+  try{history.replaceState(null,'','#'+id)}catch(e){}
+}
+function suolo(){
+  var A=D.suolo_anelli,W=larg(),H=190,L=6,T=22,B=30,bw=(W-L-6)/A.length;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Quota di suolo coperto per fascia di un chilometro dal Duomo, 2025">';
+  A.forEach(function(a,k){
+    var hh=a.pct_2025/100*(H-T-B),x0=L+k*bw+2,w=bw-4;
+    s+='<rect x="'+x0+'" y="'+(H-B-hh)+'" width="'+w+'" height="'+hh+'" fill="#E30613" opacity="'+(0.35+0.65*a.pct_2025/100)+'"><title>'+a.anello+' km: '+a.pct_2025.toString().replace('.',',')+'% nel 2025</title></rect>';
+    s+='<text x="'+(x0+w/2)+'" y="'+(H-B-hh-5)+'" font-size="'+(W<420?10:12)+'" font-weight="700" text-anchor="middle">'+Math.round(a.pct_2025)+'</text>';
+    s+='<text x="'+(x0+w/2)+'" y="'+(H-B+14)+'" font-size="'+(W<420?9:11)+'" text-anchor="middle" fill="#333">'+a.anello.replace('-','–')+'</text>';
+  });
+  s+='<line x1="'+L+'" x2="'+(W-6)+'" y1="'+(H-B)+'" y2="'+(H-B)+'" stroke="#111" stroke-width="2"/><text x="'+L+'" y="12" font-size="11" fill="#333">% di suolo coperto nel 2025, per chilometri dal Duomo</text></svg>';
+  $('suolo').innerHTML=s;
+  var nuovo=A.reduce(function(t,a){return t+a.nuovo_ha},0),picco=A.reduce(function(m,a){return a.nuovo_ha>m.nuovo_ha?a:m},A[0]);
+  $('suolo-frase').innerHTML='Nel primo chilometro il <b>'+String(A[0].pct_2025).replace('.',',')+'%</b> del suolo è coperto; tra 11 e 12 km il <b>'+String(A[A.length-1].pct_2025).replace('.',',')+'%</b>. Il suolo coperto in più tra 2012 e 2025 ('+Math.round(nuovo)+' ettari in tutto) sta soprattutto tra '+picco.anello.replace('-',' e ')+' km ('+picco.nuovo_ha.toFixed(1).replace('.',',')+' ettari).';
+}
+function avvia(){
+  IND=D.indicatori.filter(function(i){return D.fasce.some(function(f){return f.v[i.id]!=null})});
+  var temi={};
+  IND.forEach(function(i){var t=i.tema||'Altro';(temi[t]=temi[t]||[]).push(i)});
+  var cont=$('temi'),sel=$('sel');
+  Object.keys(temi).forEach(function(t){
+    var h=document.createElement('div');h.className='tema';h.textContent=t;cont.appendChild(h);
+    var b=document.createElement('div');b.className='bottoni';
+    var og=document.createElement('optgroup');og.label=t;
+    temi[t].forEach(function(i){
+      var bt=document.createElement('button');bt.type='button';bt.textContent=i.et;bt.dataset.id=i.id;bt.setAttribute('aria-pressed','false');
+      bt.addEventListener('click',function(){scegli(i.id)});b.appendChild(bt);
+      var o=document.createElement('option');o.value=i.id;o.textContent=i.et;og.appendChild(o);
+    });
+    cont.appendChild(b);sel.appendChild(og);
+  });
+  sel.addEventListener('change',function(){scegli(sel.value)});
+  var rap=$('rapidi');
+  ['reddito','prezzo_vendita','stranieri','eta_media','vita_f','affluenza21'].forEach(function(id){
+    var i=IND.find(function(x){return x.id===id});if(!i)return;
+    var bt=document.createElement('button');bt.type='button';bt.textContent=i.et.split(' (')[0].split(',')[0];bt.dataset.id=id;bt.setAttribute('aria-pressed','false');
+    bt.addEventListener('click',function(){scegli(id)});rap.appendChild(bt);
+  });
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(corrente)scegli(corrente);suolo()},120)});
+  suolo();
+  var iniziale=location.hash.replace('#','');
+  scegli(IND.some(function(i){return i.id===iniziale})?iniziale:'reddito');
+}
+fetch('data/chilometri.json').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){D=d;avvia()}).catch(function(e){$('frase').innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+})();
+</script>
+</body>
+</html>
