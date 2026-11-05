@@ -193,67 +193,61 @@ var EV=[
  {l:'Europee 2024',ids:['europee_2024-06-08']}];
 function evVal(ev,v){for(var i=0;i<ev.ids.length;i++){var x=gv(ev.ids[i],v);if(x)return {x:x,id:ev.ids[i]}}return null}
 
-/* ---------- distanza tra zone ricche e povere: somma di Centrosinistra e Centro ---------- */
+/* ---------- distanza tra zone ricche e povere: Centrosinistra e Centrodestra ---------- */
 var DS=[['comunali_consiglio_2016-06-05','Comunali','2016'],['camera_2018-03-04','Camera','2018'],['europee_2019-05-26','Europee','2019'],['comunali_consiglio_2021-10-03','Comunali','2021'],['camera_2022-09-25','Camera','2022'],['regionali_consiglio_2023-02-12','Regionali','2023'],['europee_2024-06-08','Europee','2024']];
 function listaDi(id,pre){var e=eById(id);for(var i=0;i<e.voci.length;i++)if(e.voci[i].n.indexOf(pre)===0)return e.voci[i];return null}
+function sg0(x){return Math.round(Math.abs(x)*10)===0?'0,0':sg(x,1)}
 function distanza(){
-  var cs=[],ce=[],so=[],pic=[];
-  DS.forEach(function(d,i){var a=gv(d[0],'Centrosinistra'),b=gv(d[0],'Centro');cs.push(a.gap);ce.push(b?b.gap:null);so.push(Math.round((a.gap+(b?b.gap:0))*100)/100);pic.push(!!(b&&b.city<1))});
-  return {cs:cs,ce:ce,so:so,pic:pic};
+  var cs=[],cd=[];
+  DS.forEach(function(d){cs.push(gv(d[0],'Centrosinistra').gap);cd.push(gv(d[0],'Centrodestra').gap)});
+  return {cs:cs,cd:cd};
 }
 function distanzaSvg(D){
-  var W=360,H=310,X0=50,ST=47.5,Y0=36,Y1=262,all=D.so.concat(D.cs,D.ce.filter(function(v){return v!=null}));
-  var VMAX=Math.ceil(Math.max.apply(null,all))+3,VMIN=Math.floor(Math.min.apply(null,all))-4,sy=(Y1-Y0)/(VMAX-VMIN);
+  var W=340,H=420,X0=33,ST=47,Y0=30,Y1=330,all=D.cs.concat(D.cd);
+  var VMAX=Math.ceil(Math.max.apply(null,all))+4,VMIN=Math.floor(Math.min.apply(null,all))-3,sy=(Y1-Y0)/(VMAX-VMIN);
   function X(i){return X0+i*ST} function Y(v){return Y0+(VMAX-v)*sy}
-  function fm(v,star){return sg(v,1)+(star?'*':'')}
-  var C={cs:'#c8403c',ce:'#6f5aa8',so:'#111'},HALO='stroke="#fff" stroke-width="3.5" paint-order="stroke"',o=[],n=DS.length-1;
-  for(var t=10;t<VMAX;t+=10)o.push('<line x1="'+(X0-14)+'" x2="'+(X(n)+14)+'" y1="'+Y(t).toFixed(1)+'" y2="'+Y(t).toFixed(1)+'" stroke="#ddd"/><text x="'+(X0-18)+'" y="'+(Y(t)+3.5).toFixed(1)+'" font-size="10.5" text-anchor="end" fill="#444">+'+t+'</text>');
+  var C={cs:'#c8403c',cd:'#2f7cc4'},HALO='stroke="#fff" stroke-width="3.5" paint-order="stroke"',o=[],n=DS.length-1;
+  for(var t=5;t<VMAX;t+=5)o.push('<line x1="'+(X0-14)+'" x2="'+(X(n)+14)+'" y1="'+Y(t).toFixed(1)+'" y2="'+Y(t).toFixed(1)+'" stroke="#ddd"/><text x="'+(X0-18)+'" y="'+(Y(t)+3.5).toFixed(1)+'" font-size="11" text-anchor="end" fill="#444">'+t+'</text>');
   var xm=(X(3)+X(4))/2;
-  o.push('<line x1="'+xm.toFixed(1)+'" x2="'+xm.toFixed(1)+'" y1="'+(Y0-4)+'" y2="'+(Y1+2)+'" stroke="#111" stroke-dasharray="3 3"/><text x="'+(xm+5).toFixed(1)+'" y="'+(Y0+4)+'" font-size="11" font-weight="700" fill="#111">dal 2022</text>');
-  o.push('<line x1="'+(X0-14)+'" x2="'+(X(n)+14)+'" y1="'+Y(0).toFixed(1)+'" y2="'+Y(0).toFixed(1)+'" stroke="#111" stroke-width="2"/><text x="'+(X0-18)+'" y="'+(Y(0)+4).toFixed(1)+'" font-size="11" font-weight="700" text-anchor="end" fill="#111">0</text>');
-  o.push('<text x="'+(X0-14)+'" y="'+(Y0-14)+'" font-size="10.5" font-weight="700" fill="#111">↑ zone ricche più forti</text><text x="'+(X0-14)+'" y="'+(Y1+2)+'" font-size="10.5" font-weight="700" fill="#111">↓ zone povere più forti</text>');
-  DS.forEach(function(d,i){o.push('<text x="'+X(i).toFixed(1)+'" y="'+(Y1+22)+'" font-size="10" font-weight="700" text-anchor="middle" fill="#111">'+d[1]+'</text><text x="'+X(i).toFixed(1)+'" y="'+(Y1+35)+'" font-size="10" text-anchor="middle" fill="#111">'+d[2]+'</text>')});
-  function line(vals,k,w){var p=[];vals.forEach(function(v,i){if(v!=null)p.push(X(i).toFixed(1)+','+Y(v).toFixed(1))});o.push('<polyline fill="none" stroke="'+C[k]+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round" points="'+p.join(' ')+'"/>')}
-  function dots(vals,k,lab,r,small){vals.forEach(function(v,i){if(v==null)return;var sm=small&&small[i];
-    if(sm)o.push('<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="3.5" fill="#fff" stroke="'+C[k]+'" stroke-width="2" stroke-dasharray="2 1.5"/>');
-    else o.push('<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="'+r+'" fill="'+(k==='so'?'#111':'#fff')+'" stroke="'+C[k]+'" stroke-width="2.5"/>');
-    var p=lab[i];if(p){var dy=p==='u'?-10:(p==='D'?30:18);
-      if(p==='D')o.push('<line x1="'+X(i).toFixed(1)+'" x2="'+X(i).toFixed(1)+'" y1="'+(Y(v)+6).toFixed(1)+'" y2="'+(Y(v)+16).toFixed(1)+'" stroke="#111" stroke-width="1"/>');
-      o.push('<text x="'+X(i).toFixed(1)+'" y="'+(Y(v)+dy).toFixed(1)+'" font-size="12" font-weight="800" fill="'+C[k]+'" text-anchor="middle" '+HALO+'>'+fm(v,sm)+'</text>')}})}
-  line(D.so,'so',5.5);line(D.cs,'cs',2.6);line(D.ce,'ce',2.6);
-  dots(D.cs,'cs',{3:'d',4:'d',6:'d'},4);dots(D.ce,'ce',{1:'d',3:'d',4:'u',6:'u'},4,D.pic);dots(D.so,'so',{0:'u',1:'u',2:'u',3:'u',4:'D',5:'d',6:'d'},5);
-  o.push('<text x="'+(X(1)+24).toFixed(1)+'" y="'+(Y(D.so[1])-26).toFixed(1)+'" font-size="13" font-weight="800" text-anchor="middle" fill="#111" '+HALO+'>Somma</text>');
-  o.push('<text x="'+(X(1)+20).toFixed(1)+'" y="'+(Y((D.cs[1]+D.cs[2])/2)-17).toFixed(1)+'" font-size="12.5" font-weight="800" fill="'+C.cs+'" text-anchor="middle" '+HALO+'>Centrosinistra</text>');
-  o.push('<text x="'+(X(5)-6).toFixed(1)+'" y="'+(Y(D.ce[5])-12).toFixed(1)+'" font-size="12.5" font-weight="800" fill="'+C.ce+'" text-anchor="middle" '+HALO+'>Centro</text>');
-  function lab(v){return DS.map(function(d,i){return v[i]==null?'':d[2]+' '+d[1]+' '+sg(v[i],1)}).filter(Boolean).join(', ')}
-  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Distanza in punti tra fascia ricca e fascia povera, dal 2016 al 2024. Somma: '+lab(D.so)+'. Centrosinistra: '+lab(D.cs)+'. Centro: '+lab(D.ce)+'.">'+o.join('')+'</svg>';
+  o.push('<line x1="'+xm.toFixed(1)+'" x2="'+xm.toFixed(1)+'" y1="'+(Y0-4)+'" y2="'+(Y1+2)+'" stroke="#111" stroke-dasharray="3 3"/><text x="'+(xm+5).toFixed(1)+'" y="'+(Y0+4)+'" font-size="11.5" font-weight="700" fill="#111">dal 2022</text>');
+  o.push('<line x1="'+(X0-14)+'" x2="'+(X(n)+14)+'" y1="'+Y(0).toFixed(1)+'" y2="'+Y(0).toFixed(1)+'" stroke="#111" stroke-width="2.5"/><text x="'+(X0-18)+'" y="'+(Y(0)+4).toFixed(1)+'" font-size="12" font-weight="800" text-anchor="end" fill="#111">0</text>');
+  o.push('<text x="'+(X0-14)+'" y="'+(Y0-12)+'" font-size="11.5" font-weight="700" fill="#111">↑ meglio nelle zone ricche</text><text x="'+(X0-14)+'" y="'+(Y1+4)+'" font-size="11.5" font-weight="700" fill="#111">↓ meglio nelle zone povere</text>');
+  DS.forEach(function(d,i){o.push('<text x="'+X(i).toFixed(1)+'" y="'+(Y1+24)+'" font-size="10.5" text-anchor="middle" fill="#111">'+d[1]+'</text><text x="'+X(i).toFixed(1)+'" y="'+(Y1+37)+'" font-size="11.5" font-weight="700" text-anchor="middle" fill="#111">'+d[2]+'</text>')});
+  function line(vals,k){var p=[];vals.forEach(function(v,i){p.push(X(i).toFixed(1)+','+Y(v).toFixed(1))});o.push('<polyline fill="none" stroke="'+C[k]+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="'+p.join(' ')+'"/>')}
+  line(D.cs,'cs');line(D.cd,'cd');
+  /* etichetta del valore: sopra al punto per la linea più alta, sotto per l'altra */
+  function dots(vals,k,altri){vals.forEach(function(v,i){
+    o.push('<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="4.5" fill="#fff" stroke="'+C[k]+'" stroke-width="2.5"/>');
+    var su=v>altri[i]||(v===altri[i]&&k==='cs'),ty=Y(v)+(su?-10:19);
+    if(su&&v<0)ty=Y(0)-5;
+    o.push('<text x="'+X(i).toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="12.5" font-weight="800" fill="'+C[k]+'" text-anchor="middle" '+HALO+'>'+sg0(v)+'</text>')})}
+  dots(D.cs,'cs',D.cd);dots(D.cd,'cd',D.cs);
+  o.push('<text x="'+(X(1.5)).toFixed(1)+'" y="'+(Y(D.cs[2])-30).toFixed(1)+'" font-size="13" font-weight="800" text-anchor="middle" fill="'+C.cs+'" '+HALO+'>Centrosinistra</text>');
+  o.push('<text x="'+(X(1)-2).toFixed(1)+'" y="'+(Y(D.cd[1])+54).toFixed(1)+'" font-size="13" font-weight="800" text-anchor="middle" fill="'+C.cd+'" '+HALO+'>Centrodestra</text>');
+  function lab(v){return DS.map(function(d,i){return d[2]+' '+d[1]+' '+sg0(v[i])}).join(', ')}
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Differenza in punti percentuali tra zone ricche e zone povere, dal 2016 al 2024. Centrosinistra: '+lab(D.cs)+'. Centrodestra: '+lab(D.cd)+'.">'+o.join('')+'</svg>';
 }
-function distanzaHtml(D,rif,az,pe,z21){
-  var cs=D.cs,d10=P.d10_cap.map(function(c){return c.cap}).join(', ');
-  var s21=gv('comunali_sindaco_2021-10-03','Centrosinistra'),s16=gv('comunali_sindaco_2016-06-05','Centrosinistra');
-  var zero=[4,5,6].every(function(i){var v=gv(DS[i][0],'Centrosinistra');return v.glo<0&&v.ghi>0});
-  var h='<div class="dist"><div class="pair">Punti in più (o in meno) di voto nelle zone ricche rispetto alle povere</div>';
-  h+='<p class="sub" style="margin-top:0">Per ogni elezione: quota nella fascia più ricca (D10) meno quota nella più povera (D1). La linea nera è la somma delle altre due.</p>';
+function distanzaHtml(D,rif,z22,z24){
+  var d10=P.d10_cap.map(function(c){return c.cap}).join(', ');
+  var h='<div class="dist"><div class="pair">Quanto va meglio ogni famiglia nelle zone ricche che in quelle povere (punti percentuali)</div>';
   h+=distanzaSvg(D);
-  h+='<p class="src"><b>Come si legge.</b> Sopra lo zero si va meglio nelle zone ricche, sotto nelle povere. La somma è la somma delle due distanze (le fasce sono le stesse in ogni elezione). <b>Perché la somma.</b> Nel 2021 Azione, Italia Viva e +Europa stavano dentro la lista I Riformisti (insieme ad altri gruppi civici), contata nel Centrosinistra: '+nf(rif.city,1)+'% dei voti. Dal 2022 sono contate nel Centro: Azione-Italia Viva '+nf(az.city,1)+'% e +Europa '+nf(pe.city,1)+'% alle Politiche. Così il calo del Centrosinistra e la salita del Centro nel 2022 sono in parte un cambio di casella. <b>Il Centro nel 2016 e nel 2021.</b> Nel 2016 nessuna lista delle Comunali è contata nel Centro (Milano Popolare Parisi è nel Centrodestra, Radicali con Cappato tra gli Altri): la somma è il solo Centrosinistra. *Nel 2021 il Centro sono solo due liste piccole, Milano Liberale e Partito Liberale Europeo, '+nf(z21.city,1)+'% dei voti: quel '+sg(D.ce[3],1)+' non si legge come gli altri punti. <b>Quale voto.</b> Per le Comunali è il voto ai partiti per il consiglio, come nelle altre elezioni (Centrosinistra '+sg(cs[0],1)+' nel 2016 e '+sg(cs[3],1)+' nel 2021). Il voto al sindaco dà numeri vicini: '+sg(s16.gap,1)+' nel 2016 e '+sg(s21.gap,1)+' nel 2021, le cifre citate nel testo. <b>Limiti dei dati.</b> La fascia più ricca sono solo 4 CAP centrali ('+d10+'). Il confronto è tra zone, non tra persone. Elezioni di tipo diverso (Comunali, Politiche, Europee, Regionali) non sono del tutto comparabili. '+(zero?'Dal 2022 le distanze del solo Centrosinistra sono vicine a zero e i loro intervalli comprendono lo zero. ':'')+'Le somme sono calcolate dai valori con due decimali del file e possono differire di un decimale dalla somma dei numeri arrotondati.</p></div>';
+  h+='<p class="src"><b>Il crollo del Centrosinistra nel 2022 dipende in parte da come sono contate le liste.</b> Nel 2021 I Riformisti (Azione, Italia Viva, +Europa, '+nf(rif.city,1)+'%) stanno nel Centrosinistra; dal 2022 Azione-Italia Viva e +Europa stanno nel Centro, che nelle zone ricche è molto forte ('+sg(z22.gap)+' nel 2022, '+sg(z24.gap)+' nel 2024). <b>Che cosa è il Centrodestra qui.</b> Solo Forza Italia e alleati: Lega e Fratelli d&rsquo;Italia sono contati a parte, e la Lega va sempre più forte nelle zone povere. <b>Quale voto.</b> Per le Comunali è il voto alle liste per il consiglio, non quello al sindaco. <b>Limiti dei dati.</b> Le zone più ricche sono solo 4 CAP centrali ('+d10+'). Il confronto è tra zone, non tra persone. Elezioni di tipo diverso non sono del tutto comparabili.</p></div>';
   return h;
 }
 
 /* ---------- cosa sorprende ---------- */
 function sorpresa(){
-  var c16=gv('comunali_sindaco_2016-06-05','Centrosinistra'),c18=gv('camera_2018-03-04','Centrosinistra'),c19=gv('europee_2019-05-26','Centrosinistra'),c21=gv('comunali_sindaco_2021-10-03','Centrosinistra'),
-      c22=gv('camera_2022-09-25','Centrosinistra'),c23=gv('regionali_consiglio_2023-02-12','Centrosinistra'),c24=gv('europee_2024-06-08','Centrosinistra'),
-      z22=gv('camera_2022-09-25','Centro'),z23=gv('regionali_consiglio_2023-02-12','Centro'),z24=gv('europee_2024-06-08','Centro'),
-      s22=gv('camera_2022-09-25','Sx+Centro (Sinistra+Centrosinistra+Centro)'),
-      p22=P.robustezza.filter(function(r){return r.e==='Politiche - Camera 2022'&&r.v==='Centrosinistra'})[0];
-  var D=distanza(),so=D.so,z21=gv('comunali_consiglio_2021-10-03','Centro'),
-      rif=listaDi('comunali_consiglio_2021-10-03','lista: I RIFORMISTI'),az=listaDi('camera_2022-09-25','lista: AZIONE'),pe=listaDi('camera_2022-09-25','lista: +EUROPA');
+  var D=distanza(),cs=D.cs,cd=D.cd,
+      z21=gv('comunali_consiglio_2021-10-03','Centro'),z22=gv('camera_2022-09-25','Centro'),z24=gv('europee_2024-06-08','Centro'),
+      ex=gv('comunali_consiglio_2021-10-03','Centrosinistra'),
+      p22=P.robustezza.filter(function(r){return r.e==='Politiche - Camera 2022'&&r.v==='Centrosinistra'})[0],
+      rif=listaDi('comunali_consiglio_2021-10-03','lista: I RIFORMISTI');
   setH('fam-rif','Azione, Italia Viva e +Europa insieme ad altri gruppi civici, '+nf(rif.city,1)+'% dei voti');setH('fam-c21',nf(z21.city,1)+'% dei voti');
-  var h='<p><b>Il vantaggio di Centrosinistra e Centro insieme nelle zone con i redditi più alti resta anche dopo il 2022</b> ('+sg(so[3])+' nel 2021, '+sg(so[4])+' nel 2022, '+sg(so[6])+' nel 2024, voto ai partiti), <b>e ora è diviso tra due caselle.</b></p>';
-  h+='<p>Parte del passaggio dipende da come sono contate le liste: nel 2021 I Riformisti (Azione, Italia Viva, +Europa, '+nf(rif.city,1)+'%) stanno nel Centrosinistra, nel 2022 Azione-Italia Viva e +Europa stanno nel Centro.</p>';
-  h+=distanzaHtml(D,rif,az,pe,z21);
-  h+='<p>Fino al 2021, nelle zone con i redditi più alti (fascia D10) il Centrosinistra prendeva da 9 a 15 punti in più che in quelle con i redditi più bassi (D1): '+sg(c16.gap)+' alle Comunali 2016, '+sg(c18.gap)+' alle Politiche 2018, '+sg(c19.gap)+' alle Europee 2019, '+sg(c21.gap)+' alle Comunali 2021. Per le Comunali è il voto al sindaco; il grafico usa il voto ai partiti per il consiglio (vedi la nota). Dal 2022 il Centrosinistra <b>non ha più la forte salita del 2016-2021</b>: '+sg(c22.gap)+' alle Politiche 2022, '+sg(c23.gap)+' alle Regionali 2023, '+sg(c24.gap)+' alle Europee 2024, con intervalli che comprendono lo zero. Questo dice come votano le zone, non dove siano andati gli elettori.</p>';
-  h+='<p>Nelle stesse elezioni le liste di Centro vanno dal '+nf(z22.dec[0],0)+'% al '+nf(z22.dec[9],0)+'% tra la fascia più bassa e la più alta (Politiche 2022); dal '+nf(z23.dec[0],0)+'% al '+nf(z23.dec[9],0)+'% (Regionali 2023); dall’'+nf(z24.dec[0],0)+'% al '+nf(z24.dec[9],0)+'% (Europee 2024). Nel 2021 il Centro erano solo due liste, '+nf(z21.city,1)+'% dei voti, e le liste cambiano da un’elezione all’altra: il Centro del 2022 non è lo stesso del 2021. Messi insieme Sinistra, Centrosinistra e Centro, il divario alle Politiche 2022 è '+sg(s22.gap)+' punti.</p>';
+  var h='<p><b>Nel 2021 il Centrosinistra è molto più forte nelle zone ricche ('+sg(cs[3])+' punti); dal 2022 non più ('+sg0(cs[4])+', '+sg0(cs[5])+', '+sg0(cs[6])+'). Il Centrodestra è vicino a zero dal 2021 al 2023 e nel 2024 torna a '+sg0(cd[6])+'.</b></p>';
+  h+='<p><b>Come si legge.</b> Prendiamo le zone di Milano più ricche e quelle più povere e guardiamo quanto prende una famiglia di partiti in ciascuna. Esempio, Comunali 2021: il Centrosinistra ha preso il <b>'+nf(ex.dec[9],1)+'%</b> nelle zone più ricche e il <b>'+nf(ex.dec[0],1)+'%</b> nelle più povere. La differenza, <b>'+sg(ex.gap)+' punti</b>, è il punto del Centrosinistra sul grafico nel 2021. Il grafico mostra questa differenza, elezione per elezione.</p>';
+  h+='<p><b>Sopra lo zero</b> la famiglia va meglio nelle zone ricche; <b>sotto lo zero</b> va meglio nelle zone povere; <b>sullo zero</b> prende lo stesso nelle une e nelle altre.</p>';
+  h+=distanzaHtml(D,rif,z22,z24);
+  h+='<p class="sub">Nelle stesse elezioni le liste di Centro vanno dal '+nf(z22.dec[0],0)+'% al '+nf(z22.dec[9],0)+'% tra la fascia più bassa e la più alta (Politiche 2022). Nel 2021 il Centro erano solo due liste, '+nf(z21.city,1)+'% dei voti, e le liste cambiano da un’elezione all’altra: il Centro del 2022 non è lo stesso del 2021.</p>';
   h+='<p class="sub">Una precisazione: togliendo i tre CAP pi&ugrave; ricchi, il Centrosinistra 2022-2024 sale ancora un poco con il reddito (correlazione di Spearman '+nf(p22.sp3,2)+' contro '+nf(p22.sp,2)+' con tutti i 38 CAP per le Politiche 2022). Sono confronti tra zone, non spiegazioni.</p>';
   h+='<p class="btnrow"><button type="button" data-e="comunali_sindaco_2021-10-03" data-v="Centrosinistra">Vedi Sala 2021</button><button type="button" data-e="camera_2022-09-25" data-v="Centrosinistra">Vedi il PD 2022</button><button type="button" data-e="camera_2022-09-25" data-v="Centro">Vedi il Centro 2022</button></p>';
   setH('sorpresa',h);

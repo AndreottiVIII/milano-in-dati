@@ -35,6 +35,8 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 @media(max-width:760px){.bars .row{grid-template-columns:minmax(80px,32%) 1fr auto} .bars .v{white-space:normal;max-width:150px}} .bars .row>*{min-width:0}
 .nav3{font-size:.9rem;margin:.2em 0 .8em} .nav3 a{margin-right:12px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:.5em 0} .chips button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:#fff;padding:2px 10px;border-radius:14px;cursor:pointer} .chips button.on{color:#fff;border-color:transparent} #yr{font-weight:700;min-width:3.2em;display:inline-block} th.so{cursor:pointer;user-select:none} th.so:hover{color:var(--ink)} #q{font:inherit;border:1px solid var(--line);border-radius:14px;padding:4px 10px;min-width:0;flex:1 1 180px;max-width:320px}
+.rw{position:relative} .ro{position:sticky;bottom:0;z-index:6;background:#fff;border-top:3px solid var(--ink);padding:8px 10px;min-height:68px;font-size:.88rem;line-height:1.35;box-shadow:0 -2px 6px rgba(0,0,0,.1)} .ro .hint{color:var(--mut)}
+.rk svg{touch-action:pan-y} .rk g{cursor:pointer}
 </style><script src="../menu.js" defer></script></head><body><main>
 
 <h1>Le comunità quartiere per quartiere</h1>
@@ -73,6 +75,11 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 <div class="ctl"><label class="sub" for="sel-add">Aggiungi:</label><select id="sel-add" aria-label="Aggiungi una cittadinanza al grafico"></select></div>
 <div class="ch" id="ch-top" role="img" aria-label="Residenti per cittadinanza, 1999-2025"></div>
 <p class="src">Residenti con ciascuna cittadinanza in tutta la città, al 31 dicembre (ds27, CC BY). Prima del 1999 (dal 1979) c’è solo il totale per cittadinanza della città: <a href="data/residenti_per_cittadinanza_citta.csv">residenti_per_cittadinanza_citta.csv</a> parte dal 1999; la serie dal 1979 è nel dataset ds74 del Comune.</p>
+<h3>La classifica, anno per anno</h3>
+<div id="rk-testo"></div>
+<div class="lgd" id="lg-rk"></div>
+<div class="rw"><div class="ch rk" id="ch-rk" role="img" aria-label="Posizione delle 30 cittadinanze per numero di residenti, dal 1999 al 2025"></div><div class="ro" id="ro-rk"><span class="hint">Tocca una linea o un nome per leggere posizione e residenti.</span></div></div>
+<p class="src">Fonte: residenti per cittadinanza al 31 dicembre, Comune di Milano (ds27, CC BY). Limiti dei dati: la posizione è tra le 30 cittadinanze più numerose nel 2025, quindi chi non è nell’elenco non compare; chi prende la cittadinanza italiana esce dal conteggio (vedi le naturalizzazioni qui sotto); una posizione che sale o scende non dice il perché.</p>
 <h3>Le naturalizzazioni</h3>
 <div id="nat-testo"></div>
 <div class="ch" id="ch-nat" role="img" aria-label="Acquisizioni di cittadinanza italiana per anno"></div>
@@ -246,11 +253,60 @@ function classifica(){var tops=Z.cit.slice(0,10).map(function(c){return c.k});SH
   function chips(){setH('chips',SHOW.map(function(k,i){var on=true;return '<button type="button" data-k="'+esc(k)+'" class="on" style="background:'+PAL[i%PAL.length]+'">'+esc(citBy(k).l)+' ✕</button>'}).join(''));
     Array.prototype.forEach.call(document.querySelectorAll('#chips button'),function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-k');SHOW=SHOW.filter(function(x){return x!==k});chips();ch()})})}
   function ch(){lineChart('ch-top',{series:SHOW.map(function(k,i){var c=citBy(k);return {n:c.l,c:PAL[i%PAL.length],dash:i>=10,pts:c.c.map(function(v,j){return [ANNI[j],v]})}}),xmin:1999,xmax:2025,xt:[2000,2005,2010,2015,2020,2025],ymin:0,h:340,marks:[{x:2021,t:'Egitto supera Filippine'}],yf:f0,ml:56})}
-  chips();ch();
+  chips();ch();rango();
   var nat=RZ.naturalizzazioni,ys=Object.keys(nat).map(Number).sort(),v=ys.map(function(y){return nat[y]});
   setH('nat-testo','<p>Ogni anno qualche migliaio di residenti stranieri diventa cittadino italiano: da 730 nel 2003 a <b>'+f0(nat[2016])+' nel 2016</b>, 2.279 nel 2020 e <b>'+f0(nat[2024])+' nel 2024</b>. Per le cittadinanze più numerose, dal 2021 al 2024 hanno preso la cittadinanza italiana '+f0(RZ.naturalizzazioni_per_cittadinanza_2021_2024['Egitto'])+' residenti con cittadinanza egiziana, '+f0(RZ.naturalizzazioni_per_cittadinanza_2021_2024['Filippine'])+' filippina, '+f0(RZ.naturalizzazioni_per_cittadinanza_2021_2024['Perù'])+' peruviana e '+f0(RZ.naturalizzazioni_per_cittadinanza_2021_2024['Ecuador'])+' ecuadoriana. Nel registro diventano «Italia»: sono una parte, non l’intera spiegazione, del calo dei gruppi.</p>');
   colChart('ch-nat',{cats:ys,series:[{n:'Acquisizioni di cittadinanza italiana',c:ACC,v:v}],h:220,yf:f0,step:3});
   var np=RZ.naturalizzazioni_per_cittadinanza_2021_2024;table('tab-nat',['Cittadinanza precedente','Acquisizioni 2021-2024'],Object.keys(np).map(function(k){return [esc(k),f0(np[k])]}))}
+/* ---- classifica: posizione anno per anno ---- */
+var RK=null,RKSEL=null,RKJ=0;
+function rkShort(l){return l.replace(' D\u2019America','').replace(" D'America",'')}
+function rkOrd(n){return n+'\u00ba'}
+function rango(){
+  var NY=ANNI.length;
+  RK=Z.cit.map(function(c){return {k:c.k,n:rkShort(c.l),v:c.c,r:[]}});
+  for(var j=0;j<NY;j++){RK.slice().sort(function(a,b){return b.v[j]-a.v[j]}).forEach(function(d,i){d.r[j]=i+1})}
+  RKJ=NY-1;
+  function g(k){for(var i=0;i<RK.length;i++)if(RK[i].k===k)return RK[i]}
+  var R=g('Romania'),L=NY-1;
+  var prima=RK.filter(function(d){return d.r[0]===1})[0];
+  var ahead=RK.filter(function(d){return d.r[L]<prima.r[L]}).sort(function(a,b){return a.r[L]-b.r[L]});
+  setH('rk-testo','<p>Nel '+ANNI[0]+' al primo posto c’era «'+esc(prima.n)+'», con '+f0(prima.v[0])+' residenti; nel '+ANNI[L]+' è al '+rkOrd(prima.r[L])+' posto, con '+f0(prima.v[L])+'. Davanti ci sono '+ahead.map(function(d){return esc(d.n)+' ('+f0(d.v[L])+', nel '+ANNI[0]+' al '+rkOrd(d.r[0])+' posto)'}).join(' e ')+'. La Romania passa dal '+rkOrd(R.r[0])+' al '+rkOrd(R.r[L])+' posto. Tocca una linea per seguirla.</p>');
+  var COLS=rkCols();
+  setH('lg-rk',Object.keys(COLS).map(function(k){return '<span><i style="background:'+COLS[k]+'"></i>'+esc(g(k).n)+'</span>'}).join('')+'<span><i style="background:#bbb"></i>le altre '+(RK.length-Object.keys(COLS).length)+'</span>');
+  rkDraw();
+  var b=el('ch-rk');b._f=rkDraw;if(RD.indexOf(b)<0)RD.push(b);
+}
+function rkCols(){var o={};o['Egitto']='#b03a48';o['Cinese, Rep. Popolare']='#d4a017';o['Filippine']='#3a6ea5';o['Romania']=ACC;o['Perù']='#8e44ad';return o}
+function rkSay(h){el('ro-rk').innerHTML=h}
+function rkInfo(){
+  if(!RKSEL)return;var d=RK.filter(function(z){return z.k===RKSEL})[0],j=RKJ,L=ANNI.length-1;
+  rkSay('<b>'+esc(d.n)+'</b>, '+ANNI[j]+': <b>'+rkOrd(d.r[j])+' posto</b> su '+RK.length+', '+f0(d.v[j])+' residenti. Nel '+ANNI[0]+' era '+rkOrd(d.r[0])+' ('+f0(d.v[0])+'), nel '+ANNI[L]+' '+rkOrd(d.r[L])+' ('+f0(d.v[L])+').')}
+function rkDraw(){
+  var box=el('ch-rk'),COLS=rkCols(),NY=ANNI.length,W=Math.max(300,box.clientWidth),LW=W<520?88:120,RW=W<520?76:120,RH=W<520?18:20,TOP=24,H=TOP+RK.length*RH+10,PW=W-LW-RW;
+  function X(j){return LW+j/(NY-1)*PW}function Y(r){return TOP+(r-.5)*RH}
+  box.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img"></svg>';var svg=box.firstChild;
+  [0,5,10,15,20,NY-1].forEach(function(j){svg.appendChild(S('line',{x1:X(j),x2:X(j),y1:TOP-4,y2:H-8,stroke:'#e4e4e4'}));svg.appendChild(S('text',{x:X(j),y:12,'text-anchor':'middle',class:'mu'},String(ANNI[j])))});
+  var ord=RK.slice().sort(function(a,b){return (COLS[a.k]?1:0)-(COLS[b.k]?1:0)});
+  if(RKSEL)ord.sort(function(a,b){return (a.k===RKSEL?1:0)-(b.k===RKSEL?1:0)});
+  ord.forEach(function(d){
+    var pts=d.r.map(function(r,j){return X(j).toFixed(1)+','+Y(r).toFixed(1)}).join(' '),on=d.k===RKSEL,c=COLS[d.k]||'#bbb',w=on?4.5:(COLS[d.k]?3:1.6);
+    var g=S('g',{'data-k':d.k,opacity:RKSEL&&!on?'.35':'1'});
+    g.appendChild(S('polyline',{points:pts,fill:'none',stroke:on&&!COLS[d.k]?'#111':c,'stroke-width':w,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    g.appendChild(S('polyline',{points:pts,fill:'none',stroke:'transparent','stroke-width':14}));
+    g.appendChild(S('text',{x:LW-6,y:Y(d.r[0])+4,'text-anchor':'end'},d.n));
+    g.appendChild(S('text',{x:X(NY-1)+6,y:Y(d.r[NY-1])+4},d.n));
+    svg.appendChild(g)});
+  function jOf(e){var b=svg.getBoundingClientRect(),x=(e.clientX-b.left)*(W/b.width);return Math.max(0,Math.min(NY-1,Math.round((x-LW)/PW*(NY-1))))}
+  function pick(e,fromMouse){var t=e.target,g=t.closest?t.closest('g'):null;RKJ=jOf(e);
+    if(g){var k=g.getAttribute('data-k');if(fromMouse&&k===RKSEL){rkInfo();return}RKSEL=k;rkDraw();rkInfo();rkClear(e.clientY)}
+    else if(!fromMouse){RKSEL=null;rkDraw();rkSay('<span class="hint">Tocca una linea o un nome per leggere posizione e residenti.</span>')}
+    else if(RKSEL)rkInfo()}
+  svg.addEventListener('click',function(e){pick(e,false)});
+  svg.addEventListener('pointermove',function(e){if(e.pointerType==='mouse')pick(e,true)});
+}
+/* il riquadro in basso non deve coprire il punto toccato */
+function rkClear(y){var r=el('ro-rk').getBoundingClientRect(),lim=window.innerHeight-r.height-10;if(y>lim)window.scrollBy(0,y-lim)}
 /* ---- dove ---- */
 function dove(){var c=citBy('Cinese, Rep. Popolare'),ks=[['82','Comasina',WARM],['69','Sarpi',ACC],['71','Villapizzone-Cagnola-Boldinasco','#3a6ea5']];
   setH('dove-testo','<p>Un esempio: le persone con cittadinanza cinese in tre quartieri. <b>Sarpi</b> è il caso noto: '+f0(c.n['69'][0])+' nel 1999, '+f0(c.n['69'][12])+' nel 2011, '+f0(c.n['69'][26])+' nel 2025. Ma altrove il numero cresce più in fretta: <b>Comasina</b> passa da '+c.n['82'][0]+' a '+f0(c.n['82'][26])+', <b>Villapizzone-Cagnola-Boldinasco</b> da '+f0(c.n['71'][0])+' a '+f0(c.n['71'][26])+'. I dati non spiegano le ragioni: dicono dove i residenti sono iscritti.</p>');

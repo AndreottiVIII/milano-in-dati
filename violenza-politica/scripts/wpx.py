@@ -1,6 +1,6 @@
 # Aiuto per l'API MediaWiki in più lingue (it, en, de). Solo lettura.
 import requests, time
-UA = {"User-Agent": "milano-in-dati/1.0 (davide.caniatti@gmail.com; research)"}
+UA = {"User-Agent": "milano-in-dati/1.0 (milano-in-dati; research)"}
 def api(lang="it", **p):
     p["format"] = "json"; p.setdefault("formatversion", "2")
     url = f"https://{lang}.wikipedia.org/w/api.php"
