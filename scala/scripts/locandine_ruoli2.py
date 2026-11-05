@@ -132,7 +132,8 @@ def main():
         b = base[n[0]]
         m = difflib.get_close_matches(n, b, n=1, cutoff=0.85) if c < 60 else []
         # stesso nome con lettere lette male, non due persone: anche il cognome da solo deve somigliare molto (Armiato non è Barbato)
-        if m and difflib.SequenceMatcher(None, n.split()[-1], m[0].split()[-1]).ratio() < .8:
+        # i cognomi corti devono essere uguali: Merli non è Meli
+        if m and (difflib.SequenceMatcher(None, n.split()[-1], m[0].split()[-1]).ratio() < (.8 if min(len(n.split()[-1]), len(m[0].split()[-1])) > 6 else .99) or abs(len(n.split()[0]) - len(m[0].split()[0])) > 2):
             m = []
         mappa[n] = m[0] if m else n
         if not m:
@@ -153,7 +154,8 @@ def main():
             return ' '.join(pz[:2])
         if freq2.get(n, 0) < 10:
             for g in grandi:
-                if g != n and pz[-1] == g.split()[-1] and difflib.SequenceMatcher(None, n, g).ratio() >= .8:
+                # stesso cognome e nome quasi uguale: Orla e Carla sì, Franco e Francesco no
+                if g != n and pz[-1] == g.split()[-1] and abs(len(pz[0]) - len(g.split()[0])) <= 1 and difflib.SequenceMatcher(None, n, g).ratio() >= .8:
                     return g
         return n
     for u in usc:

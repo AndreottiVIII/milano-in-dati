@@ -158,7 +158,9 @@ def main():
               "Noella Pontois": 'Noëlla Pontois', 'Maximiliano Guerra': 'Maximiliano Guerra'}
     ruoli = {'Balletto': C.defaultdict(lambda: {'f': set(), 'd': C.Counter()}), 'Opera': C.defaultdict(lambda: {'f': set(), 'd': C.Counter()})}
     for x in leggi(U, 'ruoli_letti.csv'):
-        q = ruoli[x['tipo']][GRAFIE.get(x['nome'], x['nome'])]
+        nome_r = GRAFIE.get(x['nome'], x['nome'])
+        nome_r = re.sub(r'^Oi(no|ulio|lda|anni|useppe|orgio|ovanni|ancarlo|ulietta)\b', r'Gi\1', nome_r)  # G letta come O
+        q = ruoli[x['tipo']][nome_r]
         if x['file'] not in q['f']:
             q['f'].add(x['file'])
             q['d'][x['data'][:3] + '0'] += 1
