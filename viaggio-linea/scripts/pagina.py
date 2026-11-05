@@ -170,7 +170,7 @@ zo = leggi_csv(P('docs', 'prezzi-case', 'data', 'zone_ultimo_semestre.csv')).set
 # ---------------------------------------------------------------- 3. indicatori (metadati)
 IND = [
     dict(id='reddito', et='Reddito', lungo='Reddito medio per contribuente', unita='€', dec=0, liv='NIL', anno="anno d'imposta 2024 (euro 2025)",
-         fonte='Ministero dell\'Economia, redditi per CAP, portati ai NIL con i civici (filone quartieri-che-cambiano)', pagina='../redditi/', pagina_et='Redditi'),
+         fonte='Ministero dell\'Economia, redditi per CAP, portati ai quartieri con i civici', pagina='../redditi/', pagina_et='Redditi'),
     dict(id='prezzo', et='Prezzo casa', lungo='Prezzo medio di una casa (OMI)', unita='€/m²', dec=0, liv='OMI', anno='1° semestre 2026',
          fonte='Agenzia delle Entrate, Osservatorio del Mercato Immobiliare (zone OMI)', pagina='../prezzi-case/', pagina_et='Prezzi delle case'),
     dict(id='eta', et='Età media', lungo='Età media dei residenti', unita='anni', dec=1, liv='NIL', anno='31/12/2025',
@@ -182,13 +182,13 @@ IND = [
     dict(id='airbnb', et='Airbnb', lungo='Annunci Airbnb ogni 100 abitazioni', unita='annunci', dec=1, liv='NIL', anno='settembre 2026',
          fonte='Inside Airbnb (annunci, snapshot 19/9/2026) e ISTAT, censimento 2023 (abitazioni)', pagina='../affitti-brevi/', pagina_et='Affitti brevi'),
     dict(id='servizi', et='Servizi a 15 minuti', lungo='Punteggio «città dei 15 minuti» (su 10)', unita='su 10', dec=1, liv='NIL', anno='2025',
-         fonte='Comune di Milano e OpenStreetMap, calcolo del filone citta-15-minuti', pagina='../citta-15-minuti/', pagina_et='La città dei 15 minuti'),
+         fonte='Comune di Milano e OpenStreetMap, calcolo di questo sito', pagina='../citta-15-minuti/', pagina_et='La città dei 15 minuti'),
     dict(id='scuole', et='Scuole', lungo='Scuole (infanzia, primaria, media) ogni 10.000 residenti', unita='scuole', dec=1, liv='NIL', anno='a.s. 2024/25',
-         fonte='Comune di Milano e Ministero dell\'Istruzione (filone scuole)', pagina='../scuole/', pagina_et='Scuole'),
+         fonte='Comune di Milano e Ministero dell\'Istruzione', pagina='../scuole/', pagina_et='Scuole'),
     dict(id='voto_sx', et='Voto centrosinistra', lungo='Voto al candidato del centrosinistra (sindaco 2021)', unita='%', dec=1, liv='NIL', anno='3 ottobre 2021',
-         fonte='Comune di Milano, risultati per sezione, portati ai quartieri con i civici (filone elezioni)', pagina='../elezioni/', pagina_et='Elezioni'),
+         fonte='Comune di Milano, risultati per sezione, portati ai quartieri con i civici', pagina='../elezioni/', pagina_et='Elezioni'),
     dict(id='voto_dx', et='Voto centrodestra', lungo='Voto al candidato del centrodestra (sindaco 2021)', unita='%', dec=1, liv='NIL', anno='3 ottobre 2021',
-         fonte='Comune di Milano, risultati per sezione, portati ai quartieri con i civici (filone elezioni)', pagina='../elezioni/', pagina_et='Elezioni'),
+         fonte='Comune di Milano, risultati per sezione, portati ai quartieri con i civici', pagina='../elezioni/', pagina_et='Elezioni'),
 ]
 IDS = [d['id'] for d in IND]
 
