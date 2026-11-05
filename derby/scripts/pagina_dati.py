@@ -17,6 +17,7 @@ MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", 
 def dm(s): return f"{s[8:10]}/{s[5:7]}/{s[:4]}"
 def dl(s): return f"{int(s[8:10])} {MESI[int(s[5:7]) - 1]} {s[:4]}"
 def al(s): return ("all&rsquo;" if int(s[8:10]) in (8, 11) else "al ") + dl(s)
+def dopo(s): return ("l&rsquo;" if int(s[8:10]) in (8, 11) else "il ") + dl(s)
 def mese_anno(s): return f"{MESI[int(s[5:7]) - 1]} {s[:4]}"
 def sg(b): return f"+{b}" if b > 0 else ("−" + str(-b) if b < 0 else "0")
 def pct(a, n): return f"{100 * a / n:.0f}%" if n else "-"
@@ -36,7 +37,7 @@ nu.loc[_pm, "matches"] = NU_TOT - int(nu.loc[~_pm, "matches"].sum())
 assert int(nu.matches.sum()) == NU_TOT and int(nu.loc[_pm, "matches"].iloc[0]) >= 1
 nu["tournament"] = nu.tournament.str.replace("Tournee", "Tournée").str.replace("Coppa Citta", "Coppa Città")
 N = len(d)
-assert N == 246, N
+assert N == 247, N
 
 d["res"] = d.winner.map({"Inter": 1, "Milan": -1, "draw": 0})
 d["w"] = d.winner.map({"Inter": "I", "Milan": "M", "draw": "D"})
@@ -47,7 +48,7 @@ d["gm"] = d.apply(lambda r: r.home_goals if r.home == "Milan" else r.away_goals,
 d["awarded"] = d.result_note.fillna("").str.contains("awarded")
 WI, DR, WM = int((d.res == 1).sum()), int((d.res == 0).sum()), int((d.res == -1).sum())
 GI, GM = int(d.gi.sum()), int(d.gm.sum())
-assert (WI, DR, WM, GI, GM) == (91, 71, 84, 341, 324), (WI, DR, WM, GI, GM)  # tabella riassuntiva di it.wikipedia
+assert (WI, DR, WM, GI, GM) == (91, 71, 85, 342, 327), (WI, DR, WM, GI, GM)  # 246 derby = tabella riassuntiva di it.wikipedia (91-71-84, 341-324) + Milan-Inter 3-1 del 31/10/2026
 war = d[d.status != "official"]
 off = d[d.status == "official"]
 assert len(war) == 2
@@ -86,13 +87,12 @@ TAB_COMP = ("<table><tr><th>Competizione</th><th class='r'>Derby</th><th class='
             + rows + "</table>")
 
 wi_off = int(((off.res == 1)).sum()); wm_off = int(((off.res == -1)).sum()); dr_off = int((off.res == 0).sum())
-pending = "31 ottobre 2026"  # derby di Serie A 2026-27 successivo all'ultimo dato (i dati arrivano all'ultima riga di derby.csv)
 BIG = f"{N} derby: {WI} vittorie dell&rsquo;Inter, {DR} pareggi, {WM} del Milan. Gol: {GI} a {GM} per l&rsquo;Inter."
 BREVE = f"""<ul>
 <li>Sono i derby <b>ufficiali</b> dal {dl(first)} {al(lastd)} (l&rsquo;ultimo derby che i dati contengono), in tutte le competizioni (campionato, Coppa Italia, Supercoppa, Champions League). Il totale &egrave; lo stesso della tabella riassuntiva di it.wikipedia.</li>
 <li><b>Due partite del 1944</b> ({dm(war.date.iloc[0])} e {dm(war.date.iloc[1])}, campionato di guerra Alta Italia) sono contate perch&eacute; Wikipedia le conta, ma sono riconosciute solo a titolo onorifico. Senza, i derby sarebbero {len(off)}: Inter {wi_off}, pari {dr_off}, Milan {wm_off}. Nel resto della pagina compaiono sempre segnalate.</li>
 <li><b>Il derby di Champions del {dm(AW.date)}</b> fu sospeso al 73&prime; sullo 0-1 (fumogeni dei tifosi interisti) e la UEFA diede 0-3 a tavolino. Qui vale 0-3, come nelle statistiche ufficiali: per questo {GI + GM - tg_real} dei {GI + GM} gol non hanno un marcatore.</li>
-<li><b>Non sono contati</b> i derby dopo {dl(lastd)}, perch&eacute; i dati arrivano fino a quel giorno: manca quello del {pending} (Serie A 2026-27) e non c&rsquo;&egrave; ancora quello di febbraio 2027. Non sono contate neanche le {int(nu.matches.sum())} partite non ufficiali (amichevoli, tornei minori, coppe di guerra).</li>
+<li><b>Non sono contati</b> i derby dopo {dopo(lastd)}, perch&eacute; i dati arrivano fino a quel giorno: non c&rsquo;&egrave; ancora quello di febbraio 2027. Non sono contate neanche le {int(nu.matches.sum())} partite non ufficiali (amichevoli, tornei minori, coppe di guerra).</li>
 </ul>"""
 
 # ----------------------------------------------------------------- saldo / decenni
@@ -353,9 +353,10 @@ FONTI = f"""<h3>Da dove vengono i numeri</h3>
 <li><b>Controlli esterni</b> (solo per confrontare, non copiati nella pagina): <b>Almanacco nerazzurro di interfc.it</b> (copia di web.archive.org del febbraio 2017; 149 derby fino al 27 gennaio 2000), <b>engsoccerdata</b> di James Curley (licenza GPL; 186 derby di Serie A dal 1929-30), <b>openfootball/italy</b> (CC0; 31 derby dal 2013-14), <b>RSSSF</b> (libera copia citando la fonte; 196 derby letti).</li>
 <li><b>football-data.co.uk</b>: usato <b>solo per controllare data e punteggio</b> di 66 derby (1993-2026). I suoi termini d&rsquo;uso ammettono solo uso privato: nessun suo dato &egrave; ripubblicato qui o nei file scaricabili.</li>
 <li>Wikidata: provato, inutilizzabile (le partite non ci sono). Dati raccolti il 30 ottobre 2026.</li>
+<li><b>Derby del 31 ottobre 2026</b> (Milan-Inter 3-1, aggiunto il 5 novembre 2026): risultato e marcatori coincidono nei siti ufficiali del Milan e dell&rsquo;Inter e in due giornali o blog (Il Post, Lifestyleblog). Le fonti danno lo stesso minuto per tutti i gol tranne un sito che mette il gol di Bastoni al 23&prime; invece che al 22&prime;.</li>
 </ul>
 <h3>Quanto concordano</h3>
-<p>Ogni derby &egrave; stato confrontato con <b>almeno un&rsquo;altra fonte non Wikipedia</b>, tranne le 3 Supercoppe (2011, 2023, 2025), che hanno solo Wikipedia. Il punteggio &egrave; uguale in tutte le fonti in 240 derby su {N}; le altre 6 differenze riguardano solo quale squadra &egrave; &ldquo;di casa&rdquo; (il vincitore non cambia mai): 2 le correggo, 4 restano contestate (sotto).</p>
+<p>Ogni derby &egrave; stato confrontato con <b>almeno un&rsquo;altra fonte non Wikipedia</b>, tranne le 3 Supercoppe (2011, 2023, 2025), che hanno solo Wikipedia. Il punteggio &egrave; uguale in tutte le fonti in {N - 6} derby su {N}; le altre 6 differenze riguardano solo quale squadra &egrave; &ldquo;di casa&rdquo; (il vincitore non cambia mai): 2 le correggo, 4 restano contestate (sotto).</p>
 <h3>Le 4 correzioni a Wikipedia</h3>
 <p>Regola: correggo solo se almeno 3 fonti indipendenti da Wikipedia dicono la stessa cosa contro it.wikipedia ed en.wikipedia.</p>
 <div class="box">{ctab}</div>
@@ -373,7 +374,7 @@ FONTI = f"""<h3>Da dove vengono i numeri</h3>
 <ul>
 <li><b>Partite non ufficiali</b>: ce ne sono {int(nu.matches.sum())} (amichevoli, tornei minori, coppe di guerra, Mundialito, tourn&eacute;e). Non sono nei conteggi e non le ho: in fonti libere esistono solo i totali per torneo.
 <details><summary>Totali per torneo</summary><div class="box">{nutab}</div><p class="src">Per la tourn&eacute;e a Perth del 2026 Wikipedia non scrive il numero: l&rsquo;1 &egrave; ricavato dal suo totale di {NU_TOT}.</p></details></li>
-<li><b>Prossimi derby</b>: {pending} (Serie A 2026-27) e febbraio 2027 non sono ancora giocati.</li>
+<li><b>Prossimo derby</b>: quello di febbraio 2027 non &egrave; ancora giocato.</li>
 <li><b>Numero di giornata</b> per il campionato e turno di Coppa Italia nelle prime edizioni: non disponibili.</li>
 </ul>
 <h3>Limiti dei dati</h3>
@@ -386,13 +387,17 @@ FONTI = f"""<h3>Da dove vengono i numeri</h3>
 
 # ----------------------------------------------------------------- composizione
 tpl = open(os.path.join(HERE, "pagina_template.html"), encoding="utf-8").read()
+# blocco "vittorie per decennio" (grafico a quadratini, disegnato nel browser): i numeri del testo sono calcolati qui
+for _k, _v in {"WI": WI, "DR": DR, "WM": WM, "ULTIMO_MESE": mese_anno(lastd), "ULTIMO_ANNO": lastd[:4],
+               "FINO_AL": "all'" + dl(lastd) if int(lastd[8:10]) in (8, 11) else "al " + dl(lastd)}.items():
+    tpl = tpl.replace(f"@@{_k}@@", str(_v))
 subs = dict(BIG=BIG, BREVE=BREVE, TAB_COMP=TAB_COMP, SALDO_TXT=SALDO_TXT, TAB_DEC=TAB_DEC, TAB_STREAK=TAB_STREAK, STREAK_NOTE=STREAK_NOTE,
             TAB_BIG=TAB_BIG, GAPS=gaps_txt, TAB_GOALS=TAB_GOALS, CASA=CASA, MARC=MARC, FONTI=FONTI, N=str(N))
 for k, v in subs.items():
     assert f"@@{k}@@" in tpl, k
     tpl = tpl.replace(f"@@{k}@@", v)
 assert "@@" not in tpl
-open(os.path.join(OUT, "index.html"), "w", encoding="utf-8", newline="\n").write(tpl)
+open(os.path.join(OUT, "index.html"), "w", encoding="utf-8", newline="\r\n").write(tpl)
 print("scritto", OUT, "| derby", N, "| gol con marcatore", tg_real, "| giocatori", n_players, "| top", topl[0][0], sum(topl[0][1].values()))
 print("casa pre", sp, "post", sq, "margini", round(mar_pre, 1), round(mar_post, 1), round(mar_diff, 1), "diff", round(diff_pt, 1), "flip", flh)
 print("big", len(bg), "goals", len(hg))

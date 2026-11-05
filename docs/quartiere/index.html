@@ -105,7 +105,7 @@ function cella(ind,c,cls){
   h+='<div class="big">'+esc(c.v)+s+'</div>';
   if(ind.tipo==='testo_voto'&&c.x&&c.x.c!=null)h+='<div class="sm">In tutta Milano: '+esc(c.v)+' '+nf(c.x.c,1)+'%'+(ind.citta&&ind.citta!==c.v?' (in tutta Milano è prima: '+esc(ind.citta)+')':'')+'</div>';
   else if(ind.citta)h+='<div class="sm">In tutta Milano: '+esc(ind.citta)+'</div>';
-  if(c.f)h+='<div class="fx"><span class="pill">'+(c.f==='stazione'?'misura puntuale':'poco affidabile')+'</span>'+esc(ind.ftxt||S.flags[c.f])+'</div>';
+  if(c.f)h+='<div class="fx"><span class="pill">'+(c.f==='stazione'?'misura puntuale':'poco affidabile')+'</span> '+esc(ind.ftxt||S.flags[c.f])+'</div>';
   return h+'</div>';
 }
 function tagsDi(ind){
@@ -134,7 +134,7 @@ function rigaStriscia(ind){
     var c=S.valori[n.id][ind.id];
     var p={id:n.id,nome:n.nome,v:c.v,pos:c.r!=null};
     if(c.v==null)p.mancante=c.m||'dato mancante nella fonte';
-    if(c.f){p.flag=c.f==='stazione'?'misura puntuale':'poco affidabile';p.nota=c.f==='stazione'?'':(ind.ftxt||S.flags[c.f]);}
+    if(c.f){p.flag=c.f==='stazione'?'misura puntuale':'poco affidabile';p.nota=c.f==='stazione'?'':' '+(ind.ftxt||S.flags[c.f]);}
     return p;
   });
   var citta=null;
@@ -159,7 +159,7 @@ function tabella(){
     if(c.v==null)return 'non disponibile';
     if(ind.tipo==='rango')return c.r+'° su '+ind.n;
     if(ind.tipo==='testo'||ind.tipo==='testo_voto')return c.v;
-    return fmt(ind,c.v)+(c.r!=null?' ('+c.r+'° su '+ind.n+')':'');
+    return fmt(ind,c.v)+(c.r!=null&&c.v!==0?' ('+c.r+'° su '+ind.n+')':'');
   }
   S.indicatori.forEach(function(ind){
     var cit=ind.citta==null?'':(ind.tipo==='testo'||ind.tipo==='testo_voto'?ind.citta:fmt(ind,ind.citta));
@@ -173,7 +173,7 @@ function fraseSal(s,id){
   var ind=IND[s.i],c=S.valori[id][s.i],pre,fr;
   if(s.i==='cambiamento'){
     fr=s.verso==='alto'?'tra i quartieri che cambiano di più':'tra i quartieri che cambiano di meno';
-    return 'È '+fr+' ('+c.r+'° su '+ind.n+' nella classifica dei sette segnali: posto stabile anche cambiando pesi e dati).';
+    return 'È '+fr+' ('+c.r+'° su '+ind.n+' nella classifica dei nove segnali: posto stabile anche cambiando pesi e dati).';
   }
   var frase=s.verso==='alto'?ind.alto:ind.basso;
   if(s.k===1)pre='È il quartiere con '+frase;

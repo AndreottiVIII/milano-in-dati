@@ -51,11 +51,15 @@ ul{padding-left:1.2em} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 2
 <h2 id="saldo">Chi era davanti, anno per anno</h2>
 <p>Il grafico somma i derby uno dopo l&rsquo;altro: ogni vittoria dell&rsquo;Inter porta la linea su di uno, ogni vittoria del Milan la porta gi&ugrave;, un pareggio la lascia ferma. Sopra lo zero (blu) l&rsquo;Inter ha vinto pi&ugrave; derby del Milan <i>fino a quel giorno</i>; sotto (rosso) il Milan.</p>
 <p class="key"><span class="sw i"></span>Inter avanti<span class="sw m"></span>Milan avanti &nbsp;&middot;&nbsp; Le fasce a righe sono pause senza derby: @@GAPS@@.</p>
-<div id="bal" class="box" role="img" aria-label="Grafico del saldo cumulato dei derby: vittorie dell'Inter meno vittorie del Milan, dal 1909 a oggi. La tabella dei decenni qui sotto riporta gli stessi numeri."><noscript>Il grafico richiede JavaScript; la tabella dei decenni qui sotto ha gli stessi numeri.</noscript></div>
+<div id="bal" class="box" role="img" aria-label="Grafico del saldo cumulato dei derby: vittorie dell'Inter meno vittorie del Milan, dal 1909 @@FINO_AL@@. La tabella dei decenni qui sotto riporta gli stessi numeri."><noscript>Il grafico richiede JavaScript; la tabella dei decenni qui sotto ha gli stessi numeri.</noscript></div>
 <div id="bal-info" aria-live="polite">Passa il mouse o il dito sul grafico per vedere ogni derby.</div>
 @@SALDO_TXT@@
 
 <h3 id="decenni">Decennio per decennio</h3>
+<p id="dec-txt"></p>
+<p class="key"><span class="sw i"></span>una vittoria dell&rsquo;Inter<span class="sw m"></span>una vittoria del Milan &nbsp;&middot;&nbsp; Sotto ogni decennio, in grigio, i pareggi. Il riquadro tratteggiato segna i decenni incompleti: gli anni 1900 hanno un solo derby (gennaio 1909), gli anni 2020 arrivano fino a @@ULTIMO_MESE@@.</p>
+<div id="dec" class="box" role="img" aria-label="Grafico a quadratini: vittorie dell'Inter (sopra) e del Milan (sotto) in ogni decennio, con i pareggi scritti sotto. La tabella qui sotto riporta gli stessi numeri."><noscript>Il grafico richiede JavaScript; la tabella qui sotto ha gli stessi numeri.</noscript></div>
+<p class="src">Ogni quadratino &egrave; un derby vinto. Il totale dei decenni d&agrave; @@WI@@ vittorie dell&rsquo;Inter, @@DR@@ pareggi e @@WM@@ del Milan, come in &ldquo;In breve&rdquo;. La tabella qui sotto unisce il derby del 1909 agli anni 1910 (riga 1909&ndash;1919).</p>
 <div class="box">@@TAB_DEC@@</div>
 <p class="src">&laquo;Nel decennio&raquo; &egrave; il saldo dei soli derby di quegli anni; &laquo;Totale&raquo; &egrave; la linea del grafico alla fine del decennio. La barra mostra la quota di vittorie dell&rsquo;Inter, pareggi e vittorie del Milan.</p>
 
@@ -110,6 +114,38 @@ function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ
 
 /* ---------- grafico del saldo ---------- */
 var SEL=-1,GAPS=[];
+/* ---------- vittorie per decennio ---------- */
+function drawDec(){
+  var box=document.getElementById('dec');if(!box||!P.length)return;
+  var D={},ks=[],tot=[0,0,0];
+  P.forEach(function(p){var k=Math.floor(+p.date.slice(0,4)/10)*10;if(!D[k]){D[k]={I:0,D:0,M:0,n:0};ks.push(k)}D[k][p.w]++;D[k].n++;tot[p.w==='I'?0:(p.w==='D'?1:2)]++});
+  ks.sort(function(a,b){return a-b});
+  var W=Math.max(300,Math.floor(box.clientWidth)),narrow=W<520,ml=narrow?30:44,n=ks.length,cw=(W-ml-4)/n,sq=Math.min(cw-4,26),st=sq+2;
+  var mI=0,mM=0;ks.forEach(function(k){mI=Math.max(mI,D[k].I);mM=Math.max(mM,D[k].M)});
+  var top=20,ax=top+mI*st+6,lab=ax+16,pr=lab+17,y0=pr+8,H=y0+mM*st+22;
+  var s='<svg class="ch" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
+  s+='<text x="0" y="12" style="fill:#13307f;font-weight:700">Inter</text><text x="0" y="'+(H-4)+'" style="fill:#b0101f;font-weight:700">Milan</text>';
+  s+='<line x1="'+ml+'" x2="'+(W-2)+'" y1="'+ax+'" y2="'+ax+'" stroke="#111" stroke-width="1.2"/>';
+  s+='<text class="mu" x="0" y="'+(pr-4)+'">pari</text>';
+  ks.forEach(function(k,i){
+    var d=D[k],cx=ml+i*cw+cw/2,x=cx-sq/2,j,inc=(k===1900||k===2020);
+    var ttl=(k===1900?'1909':(k+'–'+(k===2020?'@@ULTIMO_ANNO@@':k+9)))+': Inter '+d.I+', pari '+d.D+', Milan '+d.M+(inc?' (decennio incompleto)':'');
+    s+='<g><title>'+ttl+'</title>';
+    if(inc)s+='<rect x="'+(ml+i*cw+1)+'" y="'+(top-4)+'" width="'+(cw-2)+'" height="'+(H-top-6)+'" fill="none" stroke="#666" stroke-dasharray="4 3"/>';
+    for(j=0;j<d.I;j++)s+='<rect x="'+x.toFixed(1)+'" y="'+(ax-4-(j+1)*st+2)+'" width="'+sq+'" height="'+sq+'" fill="#13307f"/>';
+    for(j=0;j<d.M;j++)s+='<rect x="'+x.toFixed(1)+'" y="'+(y0+j*st)+'" width="'+sq+'" height="'+sq+'" fill="#b0101f"/>';
+    s+='<text x="'+cx+'" y="'+lab+'" text-anchor="middle" style="font-weight:700">'+(narrow?'’'+String(k%100<10?'0'+k%100:k%100):k)+'</text>';
+    s+='<text class="mu" x="'+cx+'" y="'+pr+'" text-anchor="middle">'+d.D+'</text></g>';
+  });
+  s+='</svg>';box.innerHTML=s;
+  /* frase di commento, calcolata dai dati */
+  var full=ks.filter(function(k){return k!==1900&&k!==2020}),wi=[],wm=[],wp=[],best=null;
+  ks.forEach(function(k){var d=D[k];if(d.I>d.M)wi.push(k);else if(d.M>d.I)wm.push(k);else wp.push(k)});
+  full.forEach(function(k){var g=Math.abs(D[k].I-D[k].M);if(!best||g>best.g)best={k:k,g:g}});
+  var t='L&rsquo;Inter ha vinto pi&ugrave; derby del Milan in '+wi.length+' decenni su '+n+', il Milan in '+wm.length+(wp.length?', in '+(wp.length===1?'uno':wp.length)+' sono pari (anni '+wp.join(', ')+')':'')+'. Lo scarto pi&ugrave; largo tra i decenni completi &egrave; negli anni '+best.k+': Inter '+D[best.k].I+', Milan '+D[best.k].M+'.';
+  document.getElementById('dec-txt').innerHTML=t;
+}
+
 function drawBal(){
   var box=document.getElementById('bal'),W=Math.max(300,Math.floor(box.clientWidth)),H=W<520?300:360;
   var m={l:34,r:34,t:18,b:28},pw=W-m.l-m.r,ph=H-m.t-m.b;
@@ -196,8 +232,8 @@ function render(){
 }
 
 J('data/partite.json').then(function(d){
-  P=d;computeGaps();drawBal();build();
-  var t;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(drawBal,150)});
+  P=d;computeGaps();drawBal();drawDec();build();
+  var t;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(function(){drawBal();drawDec()},150)});
 }).catch(function(e){
   document.getElementById('bal').innerHTML='<p class="warn">Impossibile caricare i dati ('+esc(e.message)+'). Le tabelle di questa pagina restano valide; il grafico e l’elenco no.</p>';
 });

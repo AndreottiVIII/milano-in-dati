@@ -98,3 +98,5 @@ In breve (totali e per competizione); saldo cumulato Inter-Milan 1909-oggi (graf
 - Licenza dei file pubblici in `docs\derby\data\`: dichiarata CC BY-SA 4.0 (partono dai fatti di Wikipedia). `derby.csv` pubblico toglie `sources_list`, `report_url` (link all'Almanacco Inter) e `official`. `differenze.md` pubblico toglie le righe che citano football-data.co.uk. Nessun dato di football-data ne' dell'Almanacco Inter e' ripubblicato.
 - Decennio 1909-1919 unisce il solo derby del 1909 agli anni Dieci.
 - Da decidere con Davide: aggiungere il link dalla home `docs\index.html`; pubblicazione (GitHub Pages) non fatta, niente git.
+
+Derby D247 (31/10/2026, Milan-Inter 3-1) aggiunto a mano in coda a `pulito/derby.csv` e `pulito/marcatori.csv`: se si rilancia `10_build.py` la riga si perde, va messa nello script. Fonti: acmilan.com, inter.it, Il Post; Bastoni al 22 per tre fonti, 23 per calciomercato.com.
