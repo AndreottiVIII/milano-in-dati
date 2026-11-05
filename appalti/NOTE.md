@@ -54,3 +54,22 @@ La pagina legge solo `riepilogo.json`; i csv sono gli stessi numeri in forma pia
 - Il link al paper nazionale non c'è: nel `<footer>` della pagina c'è il commento `<!-- link paper nazionale: lo decide Davide -->` e la frase "L'analisi nazionale da cui viene questo focus sarà pubblicata a parte."
 - La voce di menu e la home non sono state toccate (`docs/index.html`, `docs/menu.js`, `docs/MENU_README.md`): le aggiunge chi coordina. La pagina ha già il tag `<script src="../menu.js" defer>`.
 - Il controllo del JavaScript non è stato fatto con `node` (non installato) ma aprendo la pagina in un browser: nessun errore in console, 5 grafici e 7 tabelle disegnati, nessuno scorrimento orizzontale a 375 px.
+
+## Sezione "Quanti appalti senza gara" (Comune di Milano), 5 novembre 2026
+
+Sezione aggiunta alla pagina (`id="senzagara"`, prima di "Metodo e limiti dei dati"). Programma: `appalti/scripts/diretti_comune.py`; dati: `docs/appalti/data/diretti_comune.json` (la pagina legge solo questo, con un `fetch` a parte: se manca, il resto della pagina funziona).
+
+Come si rifà (serve duckdb: si usa il Python del progetto appalti-anac, non quello di sistema):
+```
+C:\Users\davide\Desktop\ClaudeTower\appalti-anac\.venv\Scripts\python.exe -I -X utf8 ^
+  C:\Users\davide\Desktop\ClaudeTower\milano-in-dati\appalti\scripts\diretti_comune.py ^
+  C:\Users\davide\Desktop\ClaudeTower\appalti-anac\dati\appalti.duckdb ^
+  C:\Users\davide\Desktop\ClaudeTower\milano-in-dati\docs\appalti\data\diretti_comune.json
+```
+Metodo: CIG e smartcig del Comune (codice fiscale 01199250158), senza doppioni (`flag_doppione`), anno = `anno_cig`. Diretti = codici 24, 32, 37, 40, 12, 18, 26; in house (25) e adesioni (27) fuori. Valore = `importo_lotto` senza gli importi anomali (12 righe). Serie principale: importo da 5.000 euro in su (numero: tutte le righe; valore: senza anomali, come nel rapporto). Fornitori: un vincitore per CIG (tolti ausiliari, mandanti, consorziati; codici fiscali non validi esclusi), solo CIG ordinari; quota dei diretti con vincitore noto che va a fornitori con almeno 3 diretti nell'anno, con e senza ordini da accordo quadro.
+Il programma si ferma se la serie principale non coincide con il rapporto `_idee/verifica_quattro_pagine.md` e se i numeri scritti a mano nel testo della sezione non tornano; le differenze sul resto sono nel campo `differenze` del JSON.
+
+Differenze rispetto al rapporto: la serie (totali, diretti, valore, quote da 5.000 euro, smartcig, diretti sopra 40.000, ordini da accordo quadro) coincide in tutto. Cambiano di poco i fornitori, perché la regola "un vincitore per CIG" è nostra: vincitori noti 587 e 593 (rapporto 594 e 595); quota con almeno 3 diretti 30,7% e 28,5% (29,3% e 28,1%); senza accordi quadro 18,0% e 9,7% (17,2% e 10,2%); persone fisiche 18 e 50 (20 e 51); vincitori noti prima del 2024: 14, 33, 48, 84, 82 (8, 32, 42, 72, 78). Il testo della pagina usa i numeri ricalcolati, arrotondati.
+
+Limiti: il vincitore c'è solo per i CIG ordinari (mai per gli smartcig), quindi i fornitori si misurano solo nel 2024-2025. Il calo degli smartcig dal 2024 resta senza spiegazione verificata: per questo la serie parte da 5.000 euro (soglia scelta per confrontare gli anni, non una soglia di legge). Un diretto 2024-2025 può essere un ordine da accordo quadro (126 e 182), dato assente prima. Proroghe e rinnovi: nessun campo; segnali in `varianti` (motivo 18 e 19, `cig_proroga`) da 3 a 20 CIG all'anno fino al 2023 e 0 nel 2024-2025: non si pubblica un numero, solo una frase nei limiti.
+Norme: verificate su normattiva.it la data di entrata in vigore del DL 76/2020 (17/07/2020), le soglie 139.000/150.000 del DL 77/2021 (in vigore dal 01/06/2021) e l'art. 50 del d.lgs. 36/2023 (140.000/150.000). Non verificato sul testo originale del 17/07/2020 il valore di 75.000 euro (è nel testo convertito dalla legge 120/2020): la pagina dice solo "più alte". Il correttivo 209/2024 non è citato.
