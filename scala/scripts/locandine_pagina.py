@@ -5,7 +5,7 @@ Legge lavori_per_recita.csv, persone_per_recita.csv, opere.csv, balletti.csv, co
 interpreti_noti.csv, prezzi_per_anno.csv, per_anno.csv, riepilogo.json, numeri.json e prime_assolute_verificate.csv.
 Nessun nome di file, nessun indirizzo di immagine: solo fatti (data, ora, tipo, titolo, autore, altri lavori, sala, direttore, per bambini, fonte).
 """
-import argparse, collections as C, csv, json, os, re, unicodedata
+import argparse, collections as C, csv, importlib.util, json, os, re, unicodedata
 
 ARTICOLI = re.compile(r'^(IL|LO|LA|I|GLI|LE|L|UN|UNA|UNO|DIE|DER|DAS|THE|LES)\s+')
 TIPI = {'Opera': 'O', 'Balletto': 'B', 'Concerto': 'C', 'Recital': 'R', 'Manifestazione': 'M', 'Diversi': 'D', 'Altro': 'A', '': 'A'}
@@ -63,6 +63,9 @@ def main():
     rie = json.load(open(os.path.join(U, 'riepilogo.json'), encoding='utf-8'))
     num = json.load(open(os.path.join(U, 'numeri.json'), encoding='utf-8'))
 
+    # compositori dei concerti, letti sul foglio
+    musiche = {x['file']: [q for q in x['musiche'].split(' ; ') if q] for x in leggi(U, 'concerti_compositori.csv')}
+
     # una riga per recita, un file per decennio
     dec = C.defaultdict(list)
     for x in rec:
@@ -71,7 +74,7 @@ def main():
         if x['verifica'] == 'dubbio' and x['origine_titolo'] != 'scheda':
             t = ''
         sala = x['sala'] or x['sala_stimata']
-        dec[x['data'][:3] + '0'].append([x['data'], x['ora'], TIPI.get(x['tipo'], 'A'), t, musica(t) if x['tipo'] == 'Balletto' else x['autore_principale'], bello(x['altri_lavori']), sala, d, 1 if x['per_bambini'] == 'si' else 0])
+        dec[x['data'][:3] + '0'].append([x['data'], x['ora'], TIPI.get(x['tipo'], 'A'), t, musica(t) if x['tipo'] == 'Balletto' else ('musiche di ' + ', '.join(musiche[x['file']][:6]) if musiche.get(x['file']) else '') if x['tipo'] in ('Concerto', 'Recital') else x['autore_principale'], bello(x['altri_lavori']), sala, d, 1 if x['per_bambini'] == 'si' else 0])
     # fino al 2023 comandano le locandine. Dal 2024 sono incomplete (concerti quasi assenti): si aggiunge il sito della Scala.
     # Colonna 9: '' locandina, 's' sito della Scala, 'a' altre fonti (aperture di stagione senza locandina).
     for v in dec.values():
@@ -152,6 +155,31 @@ def main():
                       'A': v.get('Altro', 0) + v.get('Manifestazione', 0) + v.get('Diversi', 0), 'g': v.get('Di giorno (prima delle 18)', 0)}
     prime = leggi(U, 'prime_assolute_verificate.csv') if os.path.exists(os.path.join(U, 'prime_assolute_verificate.csv')) else []
     tipi = num['tipi']
+    conc = C.Counter(q for v in musiche.values() for q in v)
+    con_nome = sum(1 for v in musiche.values() if v)
+
+    # la Prima: locandine fino al 1978, articoli dal 2011. Vuoto = fonte dubbia o solo di seconda mano
+    spec = importlib.util.spec_from_file_location('prezzi', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locandine_prezzi.py'))
+    pr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pr)
+    co = pr.coefficienti(os.path.join(U, '..', 'raw', 'istat_moneta', 'tavole.zip'))
+    prima = [{'y': 1970, 'v': 25000, 'm': 'L', 'ok': 1, 'f': 'locandina'}, {'y': 1972, 'v': 25000, 'm': 'L', 'ok': 1, 'f': 'locandina'},
+             {'y': 1977, 'v': 32000, 'm': 'L', 'ok': 1, 'f': 'locandina'}, {'y': 1978, 'v': 32000, 'm': 'L', 'ok': 1, 'f': 'locandina'}]
+    giudizio = {'2011': 1, '2019': 0, '2021': 0, '2022': 0, '2023': 1, '2024': 1, '2025': 1, '2026': 0}
+    visti = set()
+    for x in leggi(U, 'prezzi_prima_stampa.csv'):
+        y = x['anno']
+        if y not in giudizio or y in visti or not x['prezzo_platea']:
+            continue
+        v_ = float(re.sub(r'[^0-9.]', '', x['prezzo_platea']))
+        if y == '2011' and 'blitz' in x['fonte_testata'].lower():
+            continue  # articolo vago: vale il riassunto del Sole 24 Ore
+        visti.add(y)
+        prima.append({'y': int(y), 'v': v_, 'm': 'E', 'ok': giudizio[y], 'f': x['fonte_testata'], 'u': x['fonte_url'] if x['fonte_url'].startswith('http') else ''})
+    for q in prima:
+        c = co.get(q['y'], 1.0)
+        q['v25'] = round(q['v'] * c / 1936.27) if q['m'] == 'L' else round(q['v'] * c)
+    print('prima', [(q['y'], q['v'], q['v25'], q['ok'], q['f'][:18]) for q in prima])
 
     # ruoli principali: vedi locandine_ruoli2.py. Un foglio conta una volta per persona.
     GRAFIE = {'Timoffj Andrijashenko': 'Timofej Andrijashenko', 'Maria Meneghini Callas': 'Maria Callas', 'Nicola Rossi Lemeni': 'Nicola Rossi-Lemeni', 'Jean Charles Gil': 'Jean-Charles Gil',
@@ -196,7 +224,8 @@ def main():
                'danza': [{'c': x['nome'], 'n': int(x['locandine']), 'da': x['prima'][:4], 'al': x['ultima'][:4]} for x in inter if x['ruolo'] == 'danza'],
                'canto_dec': per_decennio('canto'), 'danza_dec': per_decennio('danza'),
                'prot_danza': prot('Balletto'), 'prot_canto': prot('Opera'), 'prot_danza_dec': prot_dec('Balletto'), 'prot_canto_dec': prot_dec('Opera'),
-               'prezzi': pz, 'prime': prime, 'generato': '2026-11-05'},
+               'concerti_compositori': [{'c': k, 'n': c} for k, c in conc.most_common(20)], 'concerti_con_nome': con_nome, 'concerti_tot': len(musiche),
+               'prezzi': pz, 'prima_prezzi': sorted(prima, key=lambda q: q['y']), 'prime': prime, 'generato': '2026-11-05'},
               open(os.path.join(O, 'riepilogo.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print({k: len(v) for k, v in dec.items()}, sum(os.path.getsize(os.path.join(O, f)) for f in os.listdir(O)))
     print('prezzi', len(pz))

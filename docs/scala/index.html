@@ -63,6 +63,11 @@ details{margin:.6em 0;border:1px solid var(--line);padding:6px 10px} details>sum
 <p class="note">Si contano le recite. Una locandina con due lavori conta per entrambi.</p>
 <details><summary>Le prime 5 opere di ogni decennio</summary><div class="tw"><table id="tdec"></table></div></details>
 
+<h3>Nei concerti</h3>
+<p id="ncomp"></p>
+<div id="bcomp"></div>
+<p class="note">Il catalogo dei concerti indica un brano solo e nessun autore: i compositori sono letti in automatico sul programma delle locandine. Qualcuno pu&ograve; mancare, e un interprete con lo stesso cognome di un compositore pu&ograve; finire nel conto. Una locandina conta una volta per compositore, cos&igrave; come nella ricerca per data.</p>
+
 <h2>Chi dirigeva</h2>
 <div id="bdir"></div>
 <details id="ddir"><summary>Gli altri direttori</summary><div id="bdir2"></div></details>
@@ -88,6 +93,13 @@ details{margin:.6em 0;border:1px solid var(--line);padding:6px 10px} details>sum
 <div class="lg"><span><i style="background:#a3122a"></i>Poltrona di platea</span><span><i style="background:#f0d5da"></i>Da quanto a quanto, tra i titoli letti</span><span><i style="background:#111"></i>Biglietto meno caro</span></div>
 <details><summary>Tutti gli anni, in moneta dell&rsquo;epoca e in euro di oggi</summary><div class="tw"><table id="ptab"></table></div></details>
 <p class="note">Solo opera, in euro del 2025 con i coefficienti ISTAT <i>Il valore della moneta in Italia dal 1861 al 2025</i>, calcolati per l&rsquo;analisi storica. Per il 2026 il coefficiente non c&rsquo;&egrave; ancora: il prezzo resta com&rsquo;&egrave;. I prezzi sono letti a occhio sulle locandine, da 2 a 6 per anno e di titoli diversi: sere normali nella sala principale, senza il 7 dicembre, gli spettacoli per bambini e le serate a prezzo unico popolare. &Egrave; un campione: ogni anno i titoli costavano in modo diverso, quindi conta la tendenza e non il singolo anno. La linea segue il valore centrale di tre anni vicini, i punti sono i singoli anni. Il biglietto meno caro &egrave; di solito l&rsquo;ingresso in galleria, senza posto numerato; nel 1947 &egrave; il posto in piedi. Dal 1992 la voce si chiama &ldquo;posto unico di platea&rdquo;, dal 2000 &ldquo;platea&rdquo;.</p>
+
+<h3>E la Prima?</h3>
+<p id="ptprima"></p>
+<div id="pcprima" role="img" aria-label="Prezzo della poltrona alla Prima del 7 dicembre e nelle altre sere, in euro del 2025"></div>
+<div class="lg"><span><i style="background:#a3122a"></i>Poltrona alla Prima</span><span><i style="background:#fff;border:2px solid #a3122a;box-sizing:border-box"></i>Dato di seconda mano o incerto</span><span><i style="background:#111"></i>Poltrona nelle altre sere</span></div>
+<details><summary>I prezzi e le fonti</summary><div class="tw"><table id="ptprimat"></table></div></details>
+<p class="note">Dal 1952 al 1969 le locandine del 7 dicembre scrivono &ldquo;platea e palchi esauriti&rdquo;, senza prezzo. Dal 1979 il prezzo non compare: fino al 2010 non abbiamo trovato una fonte libera, e neppure per 2012-2018 e 2020. Non &egrave; detto che i prezzi citati dalla stampa comprendano la prevendita: nel 2011 erano 2.000 euro pi&ugrave; il 20%, dal 2023 risulta compresa.</p>
 
 <h2>Quanto sappiamo</h2>
 <p>Ogni barra è un anno: l’altezza è il numero di titoli diversi (opere, balletti, altri spettacoli; senza i concerti) che troviamo nelle fonti. Il colore dice quale fonte ha visto quel titolo per prima, in ordine di affidabilità. Dal 1944 al 2023 le barre vengono dalle locandine. <i>Clic su una barra per vedere i titoli di quell’anno.</i></p>
@@ -172,7 +184,7 @@ Promise.all([get('data/copertura.json'),get('data/fonti.json'),get('data/titoli.
   var cov=r[0], fonti=r[1], titoli=r[2], cls=r[3], prime=r[4], sette=r[5], rie=r[6];
   fonti.fonti.forEach(function(f){NAMES[f.c]=f.nome});
   $('gen').textContent='Aggiornato il '+fonti.meta.generato+'.';
-  quella(rie); dal43(rie); opere(rie); direttori(rie); canto(rie); prezzi(rie);
+  quella(rie); dal43(rie); opere(rie); direttori(rie); canto(rie); compositoriConcerti(rie); prezzi(rie); prezziPrima(rie);
   chart(cov); gaps(cov); periodi(cov); search(titoli); tops(cls); primeT(prime); setteT(sette); fontiT(fonti);
 }).catch(function(e){var el=$('errore');el.hidden=false;el.textContent='Non riesco a caricare i dati ('+e.message+').'});
 
@@ -339,6 +351,38 @@ function canto(rie){
 }
 
 /* ---------- prezzi ---------- */
+function compositoriConcerti(rie){
+  var L=rie.concerti_compositori,max=L[0].n,h='';
+  $('ncomp').textContent='Su '+fmt(rie.concerti_tot)+' locandine di concerti e recital troviamo almeno un compositore su '+fmt(rie.concerti_con_nome)+'.';
+  L.forEach(function(x){h+='<div class="bar"><span class="nm">'+esc(x.c)+'</span><span class="bx"><i style="width:'+(100*x.n/max).toFixed(1)+'%"></i></span><span class="nn">'+fmt(x.n)+'</span></div>'});
+  $('bcomp').innerHTML=h;
+}
+function prezziPrima(rie){
+  var D=rie.prima_prezzi,P=rie.prezzi,y0=1965,y1=2026,ymax=3600;
+  var ult=D.filter(function(d){return d.ok}).slice(-1)[0],pri=D[0];
+  function norm(y){var v=P.filter(function(p){return p.y===y})[0];return v?v.p25:null}
+  $('ptprima').innerHTML='Nel '+pri.y+' una poltrona della Prima costava '+fmt(pri.v)+' lire, circa <b>'+pri.v25+' euro</b> di oggi. Nel '+ult.y+' sono <b>'+fmt(ult.v)+' euro</b>, contro circa <b>'+norm(ult.y)+'</b> di una sera normale.';
+  function draw(){
+    var el=$('pcprima'),W=Math.max(300,el.clientWidth),H=280,L=50,R=14,T=14,B=28,pw=W-L-R,ph=H-T-B;
+    function X(y){return L+pw*(y-y0)/(y1-y0)}
+    function Y(v){return T+ph*(1-v/ymax)}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">';
+    for(var v=0;v<=ymax;v+=1000){s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#ddd"/><text x="'+(L-5)+'" y="'+(Y(v)+4)+'" font-size="12" fill="#666" text-anchor="end">'+fmt(v)+' €</text>'}
+    for(var yy=1970;yy<=2020;yy+=W<520?20:10){s+='<line x1="'+X(yy)+'" x2="'+X(yy)+'" y1="'+Y(0)+'" y2="'+(Y(0)+4)+'" stroke="#111"/><text x="'+X(yy)+'" y="'+(H-8)+'" font-size="12" fill="#111" text-anchor="middle">'+yy+'</text>'}
+    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#111"/>';
+    var q=P.filter(function(p){return p.y>=y0});
+    s+='<polyline fill="none" stroke="#111" stroke-width="2" points="'+q.map(function(p){return X(p.y).toFixed(1)+','+Y(p.p25).toFixed(1)}).join(' ')+'"/>';
+    D.forEach(function(d){
+      s+='<circle cx="'+X(d.y).toFixed(1)+'" cy="'+Y(d.v25).toFixed(1)+'" r="5" fill="'+(d.ok?'#a3122a':'#fff')+'" stroke="#a3122a" stroke-width="2"><title>'+d.y+': '+fmt(d.v)+(d.m==='L'?' lire':' euro')+' = '+fmt(d.v25)+' euro di oggi</title></circle>';
+    });
+    s+='</svg>';
+    el.innerHTML=s;
+  }
+  draw();redraw.push(draw);
+  var h='<tr><th>Anno</th><th class="r">Poltrona</th><th class="r">In euro di oggi</th><th>Fonte</th></tr>';
+  D.slice().reverse().forEach(function(d){var f=d.u?'<a href="'+esc(d.u)+'" rel="noopener">'+esc(d.f)+'</a>':esc(d.f);h+='<tr><td>'+d.y+'</td><td class="r">'+fmt(d.v)+(d.m==='L'?' lire':' €')+'</td><td class="r">'+fmt(d.v25)+' €</td><td>'+f+(d.ok?'':' <span class="sub">(da confermare)</span>')+'</td></tr>'});
+  $('ptprimat').innerHTML=h;
+}
 function prezzi(rie){
   var P=rie.prezzi,y0=P[0].y,y1=P[P.length-1].y,ymax=400;
   function mediana(a){a=a.slice().sort(function(x,y){return x-y});var n=a.length;return n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2}
