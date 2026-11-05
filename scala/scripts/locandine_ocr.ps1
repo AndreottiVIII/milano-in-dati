@@ -1,8 +1,8 @@
 # Legge il testo delle locandine con il motore integrato di Windows 11, senza installare nulla.
 # Per ogni immagine scrive una riga JSON: file e righe di testo con l'altezza media delle parole.
 # Se il file di uscita esiste già, salta le immagini già lette: si può interrompere e riprendere.
-# Uso: powershell -NoProfile -ExecutionPolicy Bypass -File locandine_ocr.ps1 -Elenco <percorsi.txt> -Uscita <testo.jsonl> [-Scala 3]
-param([string]$Elenco, [string]$Uscita, [int]$Scala = 1)
+# Uso: powershell -NoProfile -ExecutionPolicy Bypass -File locandine_ocr.ps1 -Elenco <percorsi.txt> -Uscita <testo.jsonl> [-Scala 3] [-Parole]
+param([string]$Elenco, [string]$Uscita, [int]$Scala = 1, [switch]$Parole)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 [void][Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType=WindowsRuntime]
@@ -35,7 +35,13 @@ foreach ($p in [IO.File]::ReadLines($Elenco)) {
     }
     $r = Await ($eng.RecognizeAsync($b)) ([Windows.Media.Ocr.OcrResult])
     $righe = @($r.Lines | % { $w = @($_.Words); @{ t = $_.Text; h = [int](($w | % { $_.BoundingRect.Height } | Measure-Object -Average).Average); y = [int]$w[0].BoundingRect.Y } })
-    $sw.WriteLine((@{ file = $nome; righe = $righe } | ConvertTo-Json -Depth 4 -Compress))
+    if ($Parole) {
+      # ogni parola con la sua posizione: serve per capire in quale colonna sta un nome
+      $pp = @($r.Lines | % { $_.Words } | % { @{ t = $_.Text; x = [int]$_.BoundingRect.X; y = [int]$_.BoundingRect.Y; w = [int]$_.BoundingRect.Width; h = [int]$_.BoundingRect.Height } })
+      $sw.WriteLine((@{ file = $nome; parole = $pp } | ConvertTo-Json -Depth 4 -Compress))
+    } else {
+      $sw.WriteLine((@{ file = $nome; righe = $righe } | ConvertTo-Json -Depth 4 -Compress))
+    }
     $b.Dispose(); $s.Dispose()
   } catch {
     $sw.WriteLine((@{ file = $nome; errore = "$($_.Exception.Message)" } | ConvertTo-Json -Compress))

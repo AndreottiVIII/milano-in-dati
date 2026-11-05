@@ -153,6 +153,27 @@ def main():
     prime = leggi(U, 'prime_assolute_verificate.csv') if os.path.exists(os.path.join(U, 'prime_assolute_verificate.csv')) else []
     tipi = num['tipi']
 
+    # ruoli principali: vedi locandine_ruoli2.py. Un foglio conta una volta per persona.
+    GRAFIE = {'Timoffj Andrijashenko': 'Timofej Andrijashenko', 'Maria Meneghini Callas': 'Maria Callas', 'Nicola Rossi Lemeni': 'Nicola Rossi-Lemeni', 'Jean Charles Gil': 'Jean-Charles Gil',
+              "Noella Pontois": 'Noëlla Pontois', 'Maximiliano Guerra': 'Maximiliano Guerra'}
+    ruoli = {'Balletto': C.defaultdict(lambda: {'f': set(), 'd': C.Counter()}), 'Opera': C.defaultdict(lambda: {'f': set(), 'd': C.Counter()})}
+    for x in leggi(U, 'ruoli_letti.csv'):
+        q = ruoli[x['tipo']][GRAFIE.get(x['nome'], x['nome'])]
+        if x['file'] not in q['f']:
+            q['f'].add(x['file'])
+            q['d'][x['data'][:3] + '0'] += 1
+
+    def prot(tipo):
+        v = sorted(ruoli[tipo].items(), key=lambda kv: -len(kv[1]['f']))[:30]
+        return [{'c': k, 'n': len(q['f']), 'da': min(f[:4] for f in q['f']), 'al': max(f[:4] for f in q['f'])} for k, q in v]
+
+    def prot_dec(tipo):
+        d = C.defaultdict(list)
+        for k, q in ruoli[tipo].items():
+            for dec, c in q['d'].items():
+                d[dec].append({'c': k, 'n': c})
+        return {k: sorted(v, key=lambda q: -q['n'])[:5] for k, v in sorted(d.items())}
+
     def per_decennio(ruolo):
         # i primi 5 di ogni decennio: una classifica unica favorirebbe gli anni con più recite
         d = C.defaultdict(list)
@@ -172,6 +193,7 @@ def main():
                'canto': [{'c': x['nome'], 'n': int(x['locandine']), 'da': x['prima'][:4], 'al': x['ultima'][:4]} for x in inter if x['ruolo'] == 'canto'],
                'danza': [{'c': x['nome'], 'n': int(x['locandine']), 'da': x['prima'][:4], 'al': x['ultima'][:4]} for x in inter if x['ruolo'] == 'danza'],
                'canto_dec': per_decennio('canto'), 'danza_dec': per_decennio('danza'),
+               'prot_danza': prot('Balletto'), 'prot_canto': prot('Opera'), 'prot_danza_dec': prot_dec('Balletto'), 'prot_canto_dec': prot_dec('Opera'),
                'prezzi': pz, 'prime': prime, 'generato': '2026-11-05'},
               open(os.path.join(O, 'riepilogo.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print({k: len(v) for k, v in dec.items()}, sum(os.path.getsize(os.path.join(O, f)) for f in os.listdir(O)))

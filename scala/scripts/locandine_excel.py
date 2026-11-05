@@ -212,6 +212,11 @@ def main():
         d3 = list(csv.DictReader(open(os.path.join(U, 'prezzi_serie.csv'), encoding='utf-8-sig')))
         scheda(wb, 'Prezzi opera', ['Anno', 'Moneta', 'Poltrona di platea', 'Biglietto meno caro', 'Poltrona in euro 2025', 'Meno caro in euro 2025', 'Locandine lette'],
                [[int(x['y']), x['m'], float(x['p']), float(x['b']) if x['b'] else None, int(x['p25']), float(x['b25']) if x['b25'] else None, int(x['n'])] for x in d3], [8, 8, 18, 18, 20, 22, 14])
+    if os.path.exists(os.path.join(U, 'ruoli_letti.csv')):
+        d4 = C.defaultdict(set)
+        for x in csv.DictReader(open(os.path.join(U, 'ruoli_letti.csv'), encoding='utf-8-sig')):
+            d4[(x['nome'], x['tipo'])].add(x['file'])
+        scheda(wb, 'Ruoli principali', ['Nome', 'Tipo', 'Recite (minimo)'], [[k[0], k[1], len(v)] for k, v in sorted(d4.items(), key=lambda kv: -len(kv[1]))[:300]], [32, 10, 14])
     wb.save(os.path.join(U, 'Serate_alla_Scala.xlsx'))
 
     def csvw(nome, intest, righe):
