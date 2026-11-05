@@ -1,7 +1,7 @@
 """Scarica da en/it Wikipedia (API MediaWiki, CC BY-SA) il wikitesto delle pagine delle opere che hanno aperto la stagione della Scala.
 Cache in raw/aperture_wp/<lingua>__<titolo>.json (salta i file presenti). 2,5 s tra richieste. Uso: python -I -X utf8 aperture_scarica.py <cartella_raw_aperture_wp>"""
 import sys, os, json, time, requests, re
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
 PAGES = [
  ("en","I vespri siciliani"),("en","Macbeth (opera)"),("en","La Wally"),("en","La vestale"),("en","Norma (opera)"),("en","Aida"),

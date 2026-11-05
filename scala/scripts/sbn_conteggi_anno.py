@@ -1,6 +1,6 @@
 """Conta i record SBN per anno (solo numFound, rows=1) per due ricerche. Piccolo campione, pausa 3 s."""
 import json, sys, time, urllib.request, urllib.parse, csv
-UA = "MilanoInDati-research/0.1 (davide.caniatti@gmail.com; small samples)"
+UA = "MilanoInDati-research/0.1 (milano-in-dati; small samples)"
 out = sys.argv[1]
 def n(q):
     u = "https://opac.sbn.it/opacmobilegw/search.json?" + urllib.parse.urlencode({"any": q, "rows": 1})

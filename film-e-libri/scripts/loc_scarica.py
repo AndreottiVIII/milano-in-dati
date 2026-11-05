@@ -1,6 +1,6 @@
 """LoC catalogo via SRU (lx2.loc.gov:210/lcdb, pubblico). L'API loc.gov/books e dietro Cloudflare (403) e NON e stata aggirata. Uso: python -I loc_scarica.py <raw/loc>"""
 import sys, os, time, requests, re
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
 QS = {"fiction": 'bath.subject="Milan (Italy)--Fiction"', "tutti_milan_italy": 'bath.subject="Milan (Italy)"'}
 def sru(q, start, n):

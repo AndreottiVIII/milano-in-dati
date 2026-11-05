@@ -2,7 +2,7 @@
 Usage: python -I 03_download.py <raw_dir>"""
 import sys, os, time, requests
 raw = sys.argv[1]
-UA = {"User-Agent": "MilanoInDati/1.0 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (research; milano-in-dati)"}
 def get(url, dest):
     if os.path.exists(dest) and os.path.getsize(dest) > 0:
         return

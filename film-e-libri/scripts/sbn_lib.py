@@ -1,6 +1,6 @@
 """Cliente educato per SBN OPAC (opacmobilegw): 1 richiesta alla volta, >=3 s, cache su raw/sbn, backoff, STOP su blocchi."""
 import json, os, time, hashlib, urllib.request, urllib.parse, urllib.error, sys
-UA = "milano-in-dati research project (davide.caniatti@gmail.com; catalogo SBN, fatti bibliografici, 1 richiesta ogni 3 s)"
+UA = "milano-in-dati research project (milano-in-dati; catalogo SBN, fatti bibliografici, 1 richiesta ogni 3 s)"
 BASE = "https://opac.sbn.it/opacmobilegw/"
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "raw", "sbn")
 os.makedirs(ROOT, exist_ok=True)

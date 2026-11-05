@@ -11,7 +11,7 @@ import sys, os, re, time, hashlib, csv, datetime, subprocess, urllib.request, ur
 BASE = sys.argv[1]
 OUT = os.path.join(BASE, "raw", "ministero_interno")
 os.makedirs(OUT, exist_ok=True)
-UA = "milano-in-dati/1.0 (ricerca open data; contatto: davide.caniatti@gmail.com)"
+UA = "milano-in-dati/1.0 (ricerca open data; contatto: milano-in-dati)"
 ROOT = "https://ucs.interno.gov.it"
 PAGINA = ROOT + "/it/le-statistiche/le-indagini/territorio/procedure-di-rilascio-di-immobili-ad-uso-abitativo"
 

@@ -1,5 +1,5 @@
 import requests,csv
-H={'User-Agent':'milano-in-dati/1.0 (research; davide.caniatti@gmail.com)','Accept':'application/sparql-results+json'}
+H={'User-Agent':'milano-in-dati/1.0 (research; milano-in-dati)','Accept':'application/sparql-results+json'}
 ids=['Q8018','Q797915','Q193507','Q523662','Q119289','Q462596','Q15916381']
 q='''SELECT ?t ?tLabel ?tDesc ?sexLabel ?nb ?nd ?occLabel WHERE { VALUES ?t {%s}
  OPTIONAL{?t wdt:P21 ?sex} OPTIONAL{?t wdt:P569 ?nb} OPTIONAL{?t wdt:P570 ?nd} OPTIONAL{?t wdt:P106 ?occ}

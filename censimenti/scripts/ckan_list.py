@@ -1,6 +1,6 @@
 import sys, json, requests, time, re
 root=sys.argv[1]
-UA={"User-Agent":"Mozilla/5.0 (research; davide.caniatti@gmail.com)"}
+UA={"User-Agent":"milano-in-dati/1.0"}
 seen={}
 for q in ["censimento","censimenti","censimento storico","sezioni di censimento","popolazione legale","censimenti storici","aree di censimento","censuario","ISTAT censimento permanente","popolazione residente censimento"]:
     start=0

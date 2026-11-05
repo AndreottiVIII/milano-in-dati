@@ -16,7 +16,7 @@ import sys
 import time
 import urllib.request
 
-UA = 'ClaudeTower-research (davide.caniatti@gmail.com)'
+UA = 'ClaudeTower-research (milano-in-dati)'
 ISPRA = 'https://www.catasto-rifiuti.isprambiente.it/'
 PAUSA = 3
 

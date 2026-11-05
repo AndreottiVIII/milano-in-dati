@@ -2,7 +2,7 @@
 Uso: python -I scarica_comune.py <cartella_raw>   (riprendibile: salta i file gia presenti)"""
 import requests,sys,time,json,os,re
 RAW=sys.argv[1]
-H={'User-Agent':'milano-in-dati/1.0 (ricerca open data; davide.caniatti)'}
+H={'User-Agent':'milano-in-dati/1.0'}
 API='https://dati.comune.milano.it/api/3/action/package_show'
 # (cartella, id dataset, formati da scaricare)
 DS=[

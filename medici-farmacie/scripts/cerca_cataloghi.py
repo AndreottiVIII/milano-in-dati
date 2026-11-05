@@ -3,7 +3,7 @@ Uso: python -I -X utf8 cerca.py <cartella medici-farmacie>   -> scrive raw/ricer
 """
 import sys, os, json, time, requests
 base = sys.argv[1]
-UA = {"User-Agent": "milano-in-dati-ricerca/1.0 (dati aperti; contatto: davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati-ricerca/1.0 (dati aperti; contatto: milano-in-dati)"}
 out = {}
 for q in ["medici di medicina generale", "pediatri", "pediatra libera scelta", "farmacie", "ambiti carenti", "medici di base", "assistiti", "guardia medica", "massimale"]:
     try:

@@ -1,6 +1,6 @@
 import sys, os, time, json, requests
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "MilanoInDati/1.0 (davide.caniatti@gmail.com; progetto dati aperti)", "Accept": "application/sparql-results+json"}
+UA = {"User-Agent": "MilanoInDati/1.0 (milano-in-dati; progetto dati aperti)", "Accept": "application/sparql-results+json"}
 COLS = """?item ?itemLabel ?itemDescription ?classLabel ?inception ?dissolved ?coord ?address ?streetLabel ?hn ?locLabel ?article"""
 OPT = """
   OPTIONAL { ?item wdt:P571 ?inception } OPTIONAL { ?item wdt:P576 ?dissolved }

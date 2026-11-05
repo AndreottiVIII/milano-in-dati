@@ -1,6 +1,6 @@
 """Open Library search API: libri con luogo/soggetto Milano. Uso: python -I ol_scarica.py <raw/openlibrary>"""
 import sys, os, json, time, requests
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
 F = "key,title,author_name,first_publish_year,subject,place,language,edition_count,isbn,lccn,lcc,ddc,cover_i"
 QS = {

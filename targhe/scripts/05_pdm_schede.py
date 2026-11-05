@@ -4,7 +4,7 @@ robots.txt: vieta solo /wp-admin/. Si salva l'HTML in raw/pdm/schede/ (NON pubbl
 Uso: python -I -X utf8 05_pdm_schede.py <raw/pdm assoluto>"""
 import sys, json, time, pathlib, re, urllib.request
 raw = pathlib.Path(sys.argv[1]); out = raw / "schede"; out.mkdir(exist_ok=True)
-UA = "milano-in-dati research (davide.caniatti@gmail.com)"
+UA = "milano-in-dati research (milano-in-dati)"
 items = json.load(open(raw / "_elenco_titoli.json", encoding="utf8"))
 todo = [(u, t) for u, t in items.items() if not re.search(r"inciampo", t, re.I)]
 print(len(items), "voci;", len(todo), "da scaricare (senza pietre d'inciampo)", flush=True)

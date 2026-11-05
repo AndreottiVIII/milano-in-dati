@@ -2,7 +2,7 @@
 Uso: python -I -X utf8 scarica_fonti.py <raw_dir_assoluto>   (i file scaricati sono dati non fidati: restano in raw/, mai eseguiti)"""
 import sys, os, time, urllib.request, urllib.parse
 raw = sys.argv[1]
-UA = {"User-Agent": "milano-in-dati research (davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati research (milano-in-dati)"}
 
 
 def get(url, out, data=None, headers=None):

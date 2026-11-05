@@ -3,7 +3,7 @@ Si salvano solo METADATI (titolo, categorie, coordinate, data, autore/licenza br
 Uso: python -I -X utf8 04_commons.py <uscita json assoluta>"""
 import sys, json, time, urllib.request, urllib.parse
 API="https://commons.wikimedia.org/w/api.php"
-UA={"User-Agent":"milano-in-dati research (davide.caniatti@gmail.com)"}
+UA={"User-Agent":"milano-in-dati research (milano-in-dati)"}
 def get(**p):
     p["format"]="json"
     r=urllib.request.urlopen(urllib.request.Request(API+"?"+urllib.parse.urlencode(p),headers=UA),timeout=60)

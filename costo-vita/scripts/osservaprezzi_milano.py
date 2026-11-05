@@ -4,7 +4,7 @@ Uso: python -I -X utf8 osservaprezzi_milano.py <costo-vita assoluto> [tipi separ
 import sys, os, time, urllib.request, urllib.parse, datetime, hashlib
 base = sys.argv[1]
 out = os.path.join(base, "raw", "mimit_osservaprezzi"); os.makedirs(out, exist_ok=True)
-H = {"User-Agent": "Mozilla/5.0 (ricerca open data; davide.caniatti@gmail.com)"}
+H = {"User-Agent": "milano-in-dati/1.0"}
 U = "https://osservaprezzi.mise.gov.it/prezzi/livelli/beni-e-servizi-di-largo-consumo/archivio-rilevazioni-beni-e-servizi-di-largo-consumo"
 TIPI = sys.argv[2].split(",") if len(sys.argv) > 2 else ["altri_alim", "orto", "ittici", "servizi", "energia", "groc"]
 log = open(os.path.join(base, "raw", "download_log.csv"), "a", encoding="utf-8")

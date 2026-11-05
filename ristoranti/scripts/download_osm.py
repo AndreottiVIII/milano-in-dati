@@ -9,7 +9,7 @@ out meta center;"""
 EPS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"]
 for ep in EPS:
     try:
-        req = urllib.request.Request(ep, data=urllib.parse.urlencode({"data": Q}).encode(), headers={"User-Agent": "milano-in-dati-research/1.0 (davide.caniatti@gmail.com)"})
+        req = urllib.request.Request(ep, data=urllib.parse.urlencode({"data": Q}).encode(), headers={"User-Agent": "milano-in-dati-research/1.0 (milano-in-dati)"})
         t0 = time.time()
         b = urllib.request.urlopen(req, timeout=290).read()
         d = json.loads(b)

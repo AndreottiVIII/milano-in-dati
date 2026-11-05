@@ -1,6 +1,6 @@
 # completa la catena P138 (nome -> intitolato a) per i nodi non ancora interrogati, fino a 3 giri
 import requests,csv,time
-H={'User-Agent':'milano-in-dati/1.0 (research; davide.caniatti@gmail.com)','Accept':'application/sparql-results+json'}
+H={'User-Agent':'milano-in-dati/1.0 (research; milano-in-dati)','Accept':'application/sparql-results+json'}
 f='raw/wd_hop2.csv'
 rows=list(csv.reader(open(f,encoding='utf-8')))
 hdr,rows=rows[0],rows[1:]

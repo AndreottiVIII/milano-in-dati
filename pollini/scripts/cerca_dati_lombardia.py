@@ -7,7 +7,7 @@ os.makedirs(out, exist_ok=True)
 res = {}
 for q in ["pollini", "pollen", "aerobiologia", "aerobiologico", "spore", "polline", "ambrosia", "graminacee", "betulla", "allergeni"]:
     url = "https://www.dati.lombardia.it/api/catalog/v1?limit=50&q=" + urllib.parse.quote(q)
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (research; milano-in-dati)"})
+    req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati/1.0"})
     d = json.load(urllib.request.urlopen(req, timeout=60))
     res[q] = [dict(id=r["resource"]["id"], nome=r["resource"]["name"], dominio=r["metadata"].get("domain"),
                    attribuzione=r["resource"].get("attribution"), aggiornato=r["resource"]["updatedAt"][:10])

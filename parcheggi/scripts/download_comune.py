@@ -14,7 +14,7 @@ for i in IDS:
         if fmt not in ("CSV", "GeoJSON"): continue
         fn = os.path.join(RAW, "comune_" + sid, os.path.basename(url.split("?")[0]) or (sid + "." + fmt.lower()))
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (milano-in-dati)"})
+            req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati/1.0"})
             b = urllib.request.urlopen(req, timeout=120).read()
             open(fn, "wb").write(b)
             log.append([i, fmt, url, fn, len(b), datetime.date.today().isoformat(), "ok"])

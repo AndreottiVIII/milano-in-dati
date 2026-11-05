@@ -4,7 +4,7 @@ import sys, os, re, json, time, requests
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib_wikitext import *
 base = sys.argv[1]
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 art = carica_articoli(base)
 targets = {"it": set(), "en": set()}
 for (lang, rich), (tit, w) in art.items():

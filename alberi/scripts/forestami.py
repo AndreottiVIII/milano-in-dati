@@ -8,7 +8,7 @@ rows = []
 for u in urls:
     fn = os.path.join(raw, "forestami", re.sub(r"[^a-z0-9]+", "_", u.lower()) + ".html")
     if not os.path.exists(fn):
-        h = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (ricerca open data)"}), timeout=40).read().decode("utf-8", "replace")
+        h = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "milano-in-dati/1.0"}), timeout=40).read().decode("utf-8", "replace")
         open(fn, "w", encoding="utf-8").write(h); time.sleep(0.7)
     h = open(fn, encoding="utf-8").read()
     x = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", h, flags=re.S)

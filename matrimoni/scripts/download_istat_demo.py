@@ -47,7 +47,7 @@ for name, app, q, f in R:
     if os.path.exists(dst): continue
     d = {"query": str(q)}; d.update(f)
     d.update({"hid-i": app, "hid-a": "2024", "hid-l": "it", "hid-cat": ("FE2" if app == "NU1" else "MAT"), "hid-dati": "dati-form-%d" % (q-1), "hid-tavola": "tavola-form-%d" % (q-1)})
-    r = urllib.request.Request("https://demo.istat.it/app/RPCCerca.php", data=urllib.parse.urlencode(d).encode(), headers={"User-Agent": "Mozilla/5.0"})
+    r = urllib.request.Request("https://demo.istat.it/app/RPCCerca.php", data=urllib.parse.urlencode(d).encode(), headers={"User-Agent": "milano-in-dati/1.0"})
     body = urllib.request.urlopen(r, timeout=90).read()
     open(dst, "wb").write(body)
     ok = json.loads(body).get("Status")

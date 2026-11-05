@@ -5,7 +5,7 @@ Uso: python -I scripts/scarica_scala_stagioni.py raw/scala_stagioni raw/alternat
 import sys, os, re, time, requests
 out, urlf = sys.argv[1], sys.argv[2]
 os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "milano-in-dati research project, authorized by Teatro alla Scala (contact: davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati research project, authorized by Teatro alla Scala (contact: milano-in-dati)"}
 CAT = ("opera", "balletto", "concerti", "grandi-spettacoli-per-piccoli", "grandi-spettacoli-per-piccoli-e-famiglie", "tournee", "eventi-fuori-sede")
 urls = [u.strip() for u in open(urlf, encoding="utf-8") if u.strip()]
 sel = []

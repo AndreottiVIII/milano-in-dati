@@ -13,7 +13,7 @@ for rel, name in jobs:
     dest = os.path.join(raw, name)
     st = "gia_presente"
     if not (os.path.exists(dest) and zipfile.is_zipfile(dest)):
-        req = urllib.request.Request(U + rel, headers={"User-Agent": "Mozilla/5.0 (ricerca open data, uso locale)"})
+        req = urllib.request.Request(U + rel, headers={"User-Agent": "milano-in-dati/1.0"})
         try:
             with urllib.request.urlopen(req, timeout=300) as r, open(dest, "wb") as f:
                 while True:

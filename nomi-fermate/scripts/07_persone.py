@@ -1,6 +1,6 @@
 # descrizione (it) e mestieri (P106) delle persone trovate nelle catene, per classificare in modo uniforme
 import requests,csv,time
-H={'User-Agent':'milano-in-dati/1.0 (research; davide.caniatti@gmail.com)','Accept':'application/sparql-results+json'}
+H={'User-Agent':'milano-in-dati/1.0 (research; milano-in-dati)','Accept':'application/sparql-results+json'}
 q=set()
 for r in csv.DictReader(open('raw/wd_hop2.csv',encoding='utf-8')):
     if r['sex']: q.add(r['target_qid'])

@@ -12,7 +12,7 @@ area["boundary"="administrative"]["admin_level"="8"]["wikidata"="Q490"]->.a;
 );
 out center tags;"""
 req = urllib.request.Request("https://overpass-api.de/api/interpreter", data=urllib.parse.urlencode({"data": q}).encode(),
-      headers={"User-Agent": "milano-in-dati research (davide.caniatti@gmail.com)"})
+      headers={"User-Agent": "milano-in-dati research (milano-in-dati)"})
 d = json.load(urllib.request.urlopen(req, timeout=180))
 open(sys.argv[1], "w", encoding="utf8").write(json.dumps(d, ensure_ascii=False))
 print(len(d["elements"]), d.get("osm3s", {}).get("timestamp_osm_base"))

@@ -12,7 +12,7 @@ from pathlib import Path
 
 P = Path(sys.argv[1])
 RAW = P / 'raw'
-UA = {'User-Agent': 'Mozilla/5.0 (milano-in-dati; download dati aperti)'}
+UA = {'User-Agent': 'milano-in-dati/1.0'}
 FILES = [
     ('istat_1991/matrici_pendolarismo_1991.zip', 'http://www.istat.it/storage/cartografia/matrici_pendolarismo/matrici_pendolarismo_1991.zip'),
     ('istat_2001/matrici_pendolarismo_2001.zip', 'http://www.istat.it/storage/cartografia/matrici_pendolarismo/matrici_pendolarismo_2001.zip'),

@@ -17,7 +17,7 @@ for rel, url in items:
     p = os.path.join(root, "raw", rel); os.makedirs(os.path.dirname(p), exist_ok=True)
     if os.path.exists(p): print("gia' presente", rel); continue
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati research (davide.caniatti)"})
+        req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati research"})
         b = urllib.request.urlopen(req, timeout=120).read()
         open(p, "wb").write(b); print("ok", rel, len(b))
         log.append(f"{datetime.date.today()};{rel};{url};{len(b)}")

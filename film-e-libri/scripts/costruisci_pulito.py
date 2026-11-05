@@ -3,7 +3,7 @@ import sys, os, json, csv, re, glob, time, collections, unicodedata, requests
 base = sys.argv[1]
 RAW = lambda *a: os.path.join(base, "raw", *a)
 OUT = os.path.join(base, "pulito"); os.makedirs(OUT, exist_ok=True)
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 q = lambda u: u.split("/")[-1]
 def load(n): return json.load(open(RAW("wikidata", n + ".json"), encoding="utf8"))["results"]["bindings"]
 def v(x, k): return x.get(k, {}).get("value")

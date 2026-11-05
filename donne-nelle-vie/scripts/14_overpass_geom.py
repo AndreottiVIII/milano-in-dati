@@ -14,7 +14,7 @@ area["boundary"="administrative"]["admin_level"="8"]["wikidata"="Q490"]->.a;
 );
 out geom qt;
 """
-UA = {"User-Agent": "milano-in-dati/0.2 (davide.caniatti@gmail.com; research on street names)"}
+UA = {"User-Agent": "milano-in-dati/0.2 (milano-in-dati; research on street names)"}
 for url in ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter", "https://overpass.kumi.systems/api/interpreter"]:
     for att in range(2):
         try:

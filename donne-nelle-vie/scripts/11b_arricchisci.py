@@ -6,7 +6,7 @@ import pandas as pd
 
 inp, outp, cache, verif = sys.argv[1:5]
 d = pd.read_csv(inp, dtype=str).fillna('')
-UA = {"User-Agent": "milano-in-dati/0.2 (davide.caniatti@gmail.com; street-name research, polite)"}
+UA = {"User-Agent": "milano-in-dati/0.2 (milano-in-dati; street-name research, polite)"}
 labels = json.load(open(cache, encoding='utf8')) if os.path.exists(cache) else {}
 W = d[d.categoria == 'donna']
 need = sorted({q for s in W.occupazioni_qid for q in s.split(';') if q} - set(labels), key=lambda q: int(q[1:]))

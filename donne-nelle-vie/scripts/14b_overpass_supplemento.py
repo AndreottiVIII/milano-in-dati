@@ -7,7 +7,7 @@ area["boundary"="administrative"]["admin_level"="8"]["wikidata"="Q490"]->.a;
 way(area.a)["highway"]["name"~"{rx}",i];
 out geom;
 """
-UA = {"User-Agent": "milano-in-dati/0.2 (davide.caniatti@gmail.com; research on street names)"}
+UA = {"User-Agent": "milano-in-dati/0.2 (milano-in-dati; research on street names)"}
 for url in ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"]:
     for att in range(3):
         try:

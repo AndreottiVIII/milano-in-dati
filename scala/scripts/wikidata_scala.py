@@ -1,6 +1,6 @@
 """Opere con prima rappresentazione alla Scala (Wikidata, CC0). Uso: python -I wikidata_scala.py <cartella_raw_wikidata>"""
 import sys, os, json, time, requests
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)", "Accept": "application/sparql-results+json"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)", "Accept": "application/sparql-results+json"}
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
 Q = {
 "premiere_p4647": """

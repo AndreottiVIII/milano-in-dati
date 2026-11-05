@@ -1,6 +1,6 @@
 import sys, os, time, requests
 root = sys.argv[1]
-UA = {"User-Agent": "Mozilla/5.0 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/1.0"}
 B = "https://www.istat.it/storage/cartografia/"
 items = [
  ("istat_sezioni_1991","basi_territoriali/WGS_84_UTM/1991/R03_91_WGS84.zip"),

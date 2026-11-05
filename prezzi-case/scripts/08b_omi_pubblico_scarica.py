@@ -13,7 +13,7 @@ PAUSA = float(sys.argv[2]) if len(sys.argv) > 2 else 2.5
 C = os.path.join(base, 'raw', 'omi_pubblico_cache')
 S = os.path.join(C, 'stampa')
 os.makedirs(S, exist_ok=True)
-UA = 'Mozilla/5.0 (research; milano-in-dati; polite; 1 req/%ss)' % PAUSA
+UA = 'milano-in-dati/1.0' % PAUSA
 BASE = 'https://www1.agenziaentrate.gov.it/servizi/geopoi_omi/stampaomi.php?'
 
 mp = json.load(open(os.path.join(C, 'zone_link_map.json'), encoding='utf-8'))  # semestre -> codice -> [LINK_ZONA]

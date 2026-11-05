@@ -21,7 +21,7 @@ area["name"="Milano"]["boundary"="administrative"]["admin_level"="8"]->.a;
  nwr(area.a)["name"]["wikidata"]["building"];
 );
 out center tags;"""
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 for ep in ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"):
     for t in range(3):
         try:

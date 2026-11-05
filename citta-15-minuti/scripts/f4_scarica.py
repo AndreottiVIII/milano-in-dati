@@ -3,7 +3,7 @@ Comune CKAN (aree gioco, aree cani, centri balneari/piscine, posti letto ospedal
 (georeferenziazione strutture di ricovero, 6n7g-5p5e) e una query Overpass (teatri, musei, ospedali, parchi gioco, aree cani, piscine)."""
 import requests, sys, os, time, json
 S = sys.argv[1]
-H = {'User-Agent': 'milano-in-dati/1.0 (ricerca open data; davide.caniatti)'}
+H = {'User-Agent': 'milano-in-dati/1.0'}
 API = 'https://dati.comune.milano.it/api/3/action/package_show'
 DS = [('aree_gioco', 'ds724_infogeo_aree_gioco_localizzazione', ['CSV', 'GeoJSON']),
       ('aree_cani', 'ds52_infogeo_aree_cani_localizzazione', ['CSV', 'GeoJSON']),

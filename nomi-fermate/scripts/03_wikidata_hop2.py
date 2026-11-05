@@ -1,5 +1,5 @@
 import requests,csv,time,json
-H={'User-Agent':'milano-in-dati/1.0 (research; davide.caniatti@gmail.com)','Accept':'application/sparql-results+json'}
+H={'User-Agent':'milano-in-dati/1.0 (research; milano-in-dati)','Accept':'application/sparql-results+json'}
 rows=list(csv.DictReader(open('raw/wd_metro_stations.csv',encoding='utf-8')))
 qids=sorted({r['named_qid'] for r in rows if r['named_qid']})
 out=[]

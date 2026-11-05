@@ -1,6 +1,6 @@
 """Per le pagine delle categorie it.wikipedia: QID Wikidata (pageprops) e, per quelle non gia in Wikidata-P840/P915-Milano, dati base via wbgetentities. Uso: python -I wp_qid.py <raw/wikipedia> <raw/wikidata>"""
 import sys, os, json, time, requests
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 wp, wd = sys.argv[1], sys.argv[2]
 cat = json.load(open(os.path.join(wp, "categorie.json"), encoding="utf8"))
 pages = {}

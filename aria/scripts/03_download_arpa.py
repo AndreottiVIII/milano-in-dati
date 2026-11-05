@@ -1,5 +1,5 @@
 import requests, pandas as pd, sys, os, time
-H={"User-Agent":"milano-in-dati/1.0 (research; davide.caniatti@gmail.com)"}
+H={"User-Agent":"milano-in-dati/1.0 (research; milano-in-dati)"}
 S="https://www.dati.lombardia.it/resource/%s.csv"
 st=pd.read_csv(sys.argv[1],dtype=str)
 out=sys.argv[2]

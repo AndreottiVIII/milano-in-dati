@@ -2,7 +2,7 @@ import sys, json, time, requests, os
 qfile, outdir = sys.argv[1:3]
 os.makedirs(outdir, exist_ok=True)
 qids = [x.strip() for x in open(qfile) if x.strip().startswith('Q')]
-UA = {"User-Agent": "milano-in-dati/0.1 (davide.caniatti@gmail.com; street-name research)", "Accept":"application/sparql-results+json"}
+UA = {"User-Agent": "milano-in-dati/0.1 (milano-in-dati; street-name research)", "Accept":"application/sparql-results+json"}
 B = 150
 TEMPL = """SELECT ?item ?itemLabel ?itemDescription
  (GROUP_CONCAT(DISTINCT STR(?p31); separator="|") AS ?p31s)

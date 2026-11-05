@@ -5,7 +5,7 @@ S = sys.argv[1]
 DS = ["ds224","ds225","ds226","ds105","ds188","ds187","ds102","ds103","ds104","ds294","ds295","ds296","ds297","ds298","ds299",
  "ds1736","ds1737","ds1738","ds1739","ds1740","ds1741","ds1742","ds1743",
  "ds3014","ds3015","ds3016","ds40","ds46","ds671","ds78","ds47","ds709","ds672","ds678","ds223","ds2427","ds2428","ds27","ds551"]
-UA = {"User-Agent": "Mozilla/5.0 (research; milano-in-dati)"}
+UA = {"User-Agent": "milano-in-dati/1.0"}
 names = json.load(open(f"{S}/raw/search_comune.json", encoding="utf-8")).keys()
 rows = []
 for d in DS:

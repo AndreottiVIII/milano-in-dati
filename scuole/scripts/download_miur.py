@@ -3,7 +3,7 @@ uso: python -I -X utf8 download_miur.py <abs scuole> """
 import sys, re, os, time, csv, hashlib, datetime, requests
 S = sys.argv[1]
 BASE = "https://dati.istruzione.it/opendata/opendata/catalogo/elements1/"
-UA = {"User-Agent": "Mozilla/5.0 (research; milano-in-dati)"}
+UA = {"User-Agent": "milano-in-dati/1.0"}
 want = {  # file in pagina -> prefissi
  "studenti.html": ["ALUCORSOETASTA","ALUCORSOETAPAR","ALUITASTRACITSTA","ALUITASTRACITPAR",
                    "INFANZIAETASTA","INFANZIAETAPAR","INFANZIASTRACITSTA","INFANZIASTRACITPAR",

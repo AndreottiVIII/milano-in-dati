@@ -8,7 +8,7 @@ Uso:  python -I -X utf8 scarica.py <cartella reati-citta assoluta> [--forza]
 """
 import sys, os, time, hashlib, csv, datetime, urllib.request
 
-UA = "milano-in-dati-research/1.0 (davide.caniatti@gmail.com)"
+UA = "milano-in-dati-research/1.0 (milano-in-dati)"
 SDMX = "https://esploradati.istat.it/SDMXWS/rest/data/IT1,{flow},1.0/"
 FILES = [
     # (percorso relativo, url, accept, descrizione, licenza)

@@ -1,5 +1,5 @@
 import requests, json, sys, time, os, re
-H={"User-Agent":"milano-in-dati/1.0 (research; davide.caniatti@gmail.com)"}
+H={"User-Agent":"milano-in-dati/1.0 (research; milano-in-dati)"}
 meta=json.load(open(sys.argv[1],encoding="utf-8"))
 outdir=sys.argv[2]
 os.makedirs(outdir,exist_ok=True)

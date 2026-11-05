@@ -12,7 +12,7 @@ out = {}
 for i in range(0, len(q), 40):
     ids = '|'.join(q[i:i+40])
     url = 'https://www.wikidata.org/w/api.php?' + urllib.parse.urlencode({'action': 'wbgetentities', 'ids': ids, 'props': 'sitelinks', 'sitefilter': 'itwiki|enwiki', 'format': 'json'})
-    req = urllib.request.Request(url, headers={'User-Agent': 'milano-in-dati/1.0 (davide.caniatti@gmail.com)'})
+    req = urllib.request.Request(url, headers={'User-Agent': 'milano-in-dati/1.0 (milano-in-dati)'})
     data = json.load(urllib.request.urlopen(req, timeout=60))
     for k, e in data.get('entities', {}).items():
         s = e.get('sitelinks', {})

@@ -4,7 +4,7 @@ Riprendibile: salta i file gia' presenti con la dimensione giusta."""
 import sys, os, json, time, requests
 base = sys.argv[1]
 raw = os.path.join(base, 'raw')
-H = {'User-Agent': 'milano-in-dati/1.0 (ricerca open data; contatto davide.caniatti@gmail.com)'}
+H = {'User-Agent': 'milano-in-dati/1.0 (ricerca open data; contatto milano-in-dati)'}
 API = 'https://dati.comune.milano.it/api/3/action/'
 
 def get(url, **kw):

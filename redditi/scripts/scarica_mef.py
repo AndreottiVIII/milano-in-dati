@@ -16,7 +16,7 @@ for kind, y in jobs:
     if os.path.exists(dest) and zipfile.is_zipfile(dest):
         st = "gia_presente"
     else:
-        req = urllib.request.Request(U + name, headers={"User-Agent": "Mozilla/5.0 (ricerca open data, uso locale)"})
+        req = urllib.request.Request(U + name, headers={"User-Agent": "milano-in-dati/1.0"})
         try:
             with urllib.request.urlopen(req, timeout=120) as r, open(dest, "wb") as f:
                 f.write(r.read())

@@ -3,7 +3,7 @@ inaugurale delle stagioni 2012-13 ... 2022-23 (indirizzi indovinati dal modello 
 si ferma a un blocco 403/429/captcha. Cache in raw/aperture_scala/. Uso: python -I -X utf8 aperture_scala_vecchie.py <cartella>"""
 import sys, os, time, requests
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "milano-in-dati research project, authorized by Teatro alla Scala (contact: davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati research project, authorized by Teatro alla Scala (contact: milano-in-dati)"}
 CAND = {
  "2021-2022": ["macbeth-7-dicembre-serata-inaugurale", "macbeth-prima-della-scala"],
  "2019-2020": ["tosca-7-dicembre-serata-inaugurale", "tosca"],

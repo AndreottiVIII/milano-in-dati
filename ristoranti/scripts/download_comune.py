@@ -13,7 +13,7 @@ for n in DS:
         fn = r["url"].rsplit("/", 1)[1]
         path = os.path.join(d, fn)
         if not os.path.exists(path):
-            data = urllib.request.urlopen(urllib.request.Request(r["url"], headers={"User-Agent": "milano-in-dati research (davide.caniatti)"}), timeout=180).read()
+            data = urllib.request.urlopen(urllib.request.Request(r["url"], headers={"User-Agent": "milano-in-dati research"}), timeout=180).read()
             open(path, "wb").write(data); time.sleep(1)
         b = open(path, "rb").read()
         log.append([n, r["format"], fn, len(b), hashlib.sha256(b).hexdigest()[:16], r.get("last_modified"), time.strftime("%Y-%m-%d")])

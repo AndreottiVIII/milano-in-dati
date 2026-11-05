@@ -14,7 +14,7 @@ base = sys.argv[1]
 C = os.path.join(base, 'raw', 'omi_pubblico_cache')
 os.makedirs(os.path.join(C, 'r8'), exist_ok=True)
 URL = 'https://www1.agenziaentrate.gov.it/servizi/geopoi_omi/zoneomi.php?richiesta=8&codcom=F205&semestre=%s&zo=%s'
-UA = 'Mozilla/5.0 (research; milano-in-dati; polite; 1 req/3s)'
+UA = 'milano-in-dati/1.0'
 PAUSA = 3.0
 
 geo = {}

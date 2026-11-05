@@ -2,7 +2,7 @@
 1 richiesta ogni 1,3 s, User-Agent che dice chi siamo. Uso: python -I -X utf8 01_pdm_elenco.py <cartella raw/pdm assoluta>"""
 import sys, time, urllib.request, pathlib
 out = pathlib.Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
-UA = "milano-in-dati research (davide.caniatti@gmail.com)"
+UA = "milano-in-dati research (milano-in-dati)"
 for p in range(1, 84):
     f = out / f"elenco_{p:02d}.html"
     if f.exists() and f.stat().st_size > 5000: continue

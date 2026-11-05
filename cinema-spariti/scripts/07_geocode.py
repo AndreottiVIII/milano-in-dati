@@ -1,6 +1,6 @@
 import sys, csv, json, os, time, re, requests
 src, cache_fn = sys.argv[1], sys.argv[2]
-UA = {"User-Agent": "MilanoInDati/1.0 (davide.caniatti@gmail.com; progetto dati aperti)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (milano-in-dati; progetto dati aperti)"}
 cache = json.load(open(cache_fn, encoding="utf-8")) if os.path.exists(cache_fn) else {}
 rows = list(csv.DictReader(open(src, encoding="utf-8")))
 def pulisci(a):

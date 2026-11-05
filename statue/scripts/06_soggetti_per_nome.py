@@ -7,7 +7,7 @@ import sys, os, re, json, time, collections, requests
 S = sys.argv[1]
 sys.path.insert(0, os.path.join(S, "scripts"))
 from wdlib import WD, norm
-UA = {"User-Agent": "milano-in-dati/0.3 (davide.caniatti@gmail.com; research on statues and monuments in Milan)"}
+UA = {"User-Agent": "milano-in-dati/0.3 (milano-in-dati; research on statues and monuments in Milan)"}
 CF = os.path.join(S, "raw/wikidata/entities_cache.json")
 wd = WD(CF)
 SF = os.path.join(S, "raw/wikidata/search_cache.json")

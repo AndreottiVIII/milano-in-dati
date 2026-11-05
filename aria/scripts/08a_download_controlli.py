@@ -1,7 +1,7 @@
 # Fase 2: scarica pochi sensori di stazioni ARPA fuori Milano (controllo per il prima/dopo).
 # uso: python -I scripts/08a_download_controlli.py raw/arpa_controllo
 import requests, sys, os, time
-H={"User-Agent":"milano-in-dati/1.0 (research; davide.caniatti@gmail.com)"}
+H={"User-Agent":"milano-in-dati/1.0 (research; milano-in-dati)"}
 S="https://www.dati.lombardia.it/resource/%s.csv"
 out=sys.argv[1]
 # Pioltello Limito (531), Magenta (546), Sesto S.Giovanni (504), Rho (514), Cinisello Balsamo (529)

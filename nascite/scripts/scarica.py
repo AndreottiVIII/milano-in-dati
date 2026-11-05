@@ -13,7 +13,7 @@ IDS = ["ds141-popolazione-nascite-quartiere", "ds140-popolazione-nascite-municip
        "ds289-popolazione-nascite", "ds2918-tassi-natalita-mortalita-dal-1880",
        "ds1495-popolazione-censimenti-storici-nati-vivi-residenti-nel-comune-di-milano-dal-1880",
        "ds72_popolazione_nascite_parti_gemellari-1979-avanti"]
-UA = {"User-Agent": "milano-in-dati/nascite (ricerca su open data; contatto: davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/nascite (ricerca su open data; contatto: milano-in-dati)"}
 log = open(os.path.join(N, "raw", "download_log.csv"), "a", encoding="utf-8")
 for pid in IDS:
     rq = urllib.request.Request("https://dati.comune.milano.it/api/3/action/package_show?id=" + pid, headers=UA)

@@ -2,7 +2,7 @@
 Due ricerche: (A) P131* = Milano; (B) coordinate nel rettangolo di Milano. Uso: python -I -X utf8 03_wikidata_items.py <cartella_raw_wikidata>"""
 import sys, os, time, json, requests
 out = sys.argv[1]
-UA = {"User-Agent": "milano-in-dati/0.3 (davide.caniatti@gmail.com; research on statues and monuments in Milan)", "Accept": "application/sparql-results+json"}
+UA = {"User-Agent": "milano-in-dati/0.3 (milano-in-dati; research on statues and monuments in Milan)", "Accept": "application/sparql-results+json"}
 CLS = "wd:Q179700 wd:Q4989906 wd:Q5003624 wd:Q860861 wd:Q721747 wd:Q557141"
 SEL = """SELECT ?item ?itemLabel ?itemDescription ?cls ?clsLabel ?coord ?inc ?depicts ?creator ?creatorLabel ?commem ?main ?loc ?locLabel WHERE {
   %s

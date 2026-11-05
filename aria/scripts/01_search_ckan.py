@@ -1,5 +1,5 @@
 import requests, json, sys, time
-H={"User-Agent":"milano-in-dati/1.0 (research; davide.caniatti@gmail.com)"}
+H={"User-Agent":"milano-in-dati/1.0 (research; milano-in-dati)"}
 out=sys.argv[1]
 res={}
 for q in ["Rilevazione qualità aria","qualità aria","Stazioni monitoraggio inquinanti","inquinanti aria"]:

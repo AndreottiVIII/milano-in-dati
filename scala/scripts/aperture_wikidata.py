@@ -1,7 +1,7 @@
 """Wikidata (CC0): per le voci 'serata inaugurale della stagione' del Teatro alla Scala scarica le dichiarazioni complete (wbgetentities) e le etichette dei valori.
 Cache in raw/aperture_wikidata/. Uso: python -I -X utf8 aperture_wikidata.py <wikidata_raw_p276_event.json> <cartella_out>"""
 import sys, os, json, time, requests
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 src, out = sys.argv[1], sys.argv[2]; os.makedirs(out, exist_ok=True)
 rows = json.load(open(src, encoding="utf8"))["results"]["bindings"]
 qs = []

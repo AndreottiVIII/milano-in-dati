@@ -2,7 +2,7 @@
 import sys, urllib.request, time, hashlib
 url, out = sys.argv[1], sys.argv[2]
 acc = sys.argv[3] if len(sys.argv) > 3 else "*/*"; to = int(sys.argv[4]) if len(sys.argv) > 4 else 300
-req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati research (davide.caniatti@gmail.com)", "Accept": acc})
+req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati research (milano-in-dati)", "Accept": acc})
 t = time.time()
 try:
     r = urllib.request.urlopen(req, timeout=to); d = r.read(); open(out, "wb").write(d)

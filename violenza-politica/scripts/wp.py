@@ -1,5 +1,5 @@
 import requests, time
-UA = {"User-Agent": "milano-in-dati/1.0 (davide.caniatti@gmail.com; research)"}
+UA = {"User-Agent": "milano-in-dati/1.0 (milano-in-dati; research)"}
 API = "https://it.wikipedia.org/w/api.php"
 def api(**p):
     p["format"] = "json"; p.setdefault("formatversion", "2")

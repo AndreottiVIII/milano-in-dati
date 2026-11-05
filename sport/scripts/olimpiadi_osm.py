@@ -1,6 +1,6 @@
 """Sport: coordinate delle sedi olimpiche 2026 dell'area di Milano, da OSM (Overpass, per nome). Uso: python -I -X utf8 olimpiadi_osm.py <out.json>"""
 import requests, sys, time, json
-H = {'User-Agent': 'milano-in-dati/1.0 (ricerca open data; davide.caniatti)'}
+H = {'User-Agent': 'milano-in-dati/1.0'}
 Q = """[out:json][timeout:120];
 (
 nwr["name"~"Giuseppe Meazza|San Siro",i]["leisure"="stadium"](45.3,8.9,45.6,9.4);

@@ -7,7 +7,7 @@ import sys, os, csv, time, hashlib, urllib.request, datetime
 
 L = "https://groupware.sinanet.isprambiente.it/uso-copertura-e-consumo-di-suolo/library/consumo-di-suolo"
 S = "https://www.snpambiente.it/wp-content/uploads"
-UA = "Mozilla/5.0 (ricerca open data; Milano in dati)"
+UA = "milano-in-dati/1.0"
 
 G = {
     "indicatori": [

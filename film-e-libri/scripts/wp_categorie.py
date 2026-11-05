@@ -1,6 +1,6 @@
 """Categorie it.wikipedia (API MediaWiki): pagine, profondita 2. Uso: python -I wp_categorie.py <raw/wikipedia>"""
 import sys, os, json, time, requests
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
 API = "https://it.wikipedia.org/w/api.php"
 ROOTS = ["Film ambientati a Milano", "Film girati a Milano", "Romanzi ambientati a Milano", "Opere letterarie ambientate a Milano", "Opere ambientate a Milano", "Serie televisive ambientate a Milano", "Opere teatrali ambientate a Milano"]

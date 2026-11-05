@@ -2,7 +2,7 @@
 import sys, json, re, time, os, unicodedata, requests, pandas as pd
 units_csv, outdir = sys.argv[1:3]
 os.makedirs(outdir, exist_ok=True)
-UA = {"User-Agent": "milano-in-dati/0.1 (davide.caniatti@gmail.com; street-name research)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (milano-in-dati; street-name research)"}
 API = "https://www.wikidata.org/w/api.php"
 def get(params, tries=5):
     for a in range(tries):

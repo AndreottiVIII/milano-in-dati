@@ -5,7 +5,7 @@ out = sys.argv[1]
 allp = {}
 for k in KW:
     url = "https://dati.comune.milano.it/api/3/action/package_search?rows=200&q=" + urllib.parse.quote(k)
-    req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati research (davide.caniatti)"})
+    req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati research"})
     d = json.load(urllib.request.urlopen(req, timeout=90))
     n = d["result"]["count"]
     for p in d["result"]["results"]:

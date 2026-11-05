@@ -1,7 +1,7 @@
 """Campione SBN: per alcuni anni scarica i record 'teatro alla scala AAAA' (pagine da 100, pausa 3 s),
 tiene quelli con editore/luogo che nomina la Scala e l'anno, e li salva in CSV + JSON grezzo."""
 import json, sys, time, urllib.request, urllib.parse, csv, re, os
-UA = "MilanoInDati-research/0.1 (davide.caniatti@gmail.com; small samples)"
+UA = "MilanoInDati-research/0.1 (milano-in-dati; small samples)"
 out = sys.argv[1]; years = [int(a) for a in sys.argv[2:]]
 os.makedirs(out, exist_ok=True)
 def get(q, start):

@@ -4,7 +4,7 @@ robots.txt: Disallow vuoto (tutto permesso). Note legali: libero accesso e ripro
 import sys, os, time, urllib.request
 raw = sys.argv[1]; idmax = int(sys.argv[2])
 d = os.path.join(raw, "biografie"); os.makedirs(d, exist_ok=True)
-UA = "milano-in-dati research (davide.caniatti@gmail.com)"
+UA = "milano-in-dati research (milano-in-dati)"
 log = open(os.path.join(raw, "download_biografie_log.csv"), "a", encoding="utf-8")
 for i in range(1, idmax + 1):
     f = os.path.join(d, f"{i}.html")

@@ -6,7 +6,7 @@ Le quotazioni OMI NON si scaricano qui (servono SPID, vedi COSA_SCARICARE.md).
 import os, sys, re, time, urllib.request, urllib.parse, json
 
 base = sys.argv[1]
-UA = 'Mozilla/5.0 (research; milano-in-dati; polite)'
+UA = 'milano-in-dati/1.0'
 
 
 def get(url, dest, headers=None, timeout=300, pausa=3):

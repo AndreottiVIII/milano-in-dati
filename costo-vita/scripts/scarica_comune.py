@@ -3,7 +3,7 @@ Uso: python -I -X utf8 scarica_comune.py <costo-vita assoluto>
 Solo risorse CSV; metadati in _metadati.json; log in raw/download_log.csv. Pausa 1 s."""
 import sys, os, re, json, urllib.request, urllib.parse, time, datetime, hashlib
 base = sys.argv[1]
-H = {"User-Agent": "Mozilla/5.0 (ricerca open data; davide.caniatti@gmail.com)"}
+H = {"User-Agent": "milano-in-dati/1.0"}
 def get(u):
     return urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=120).read()
 # 1) elenco pacchetti: dalla ricerca gia' fatta + ricerca "irpef"

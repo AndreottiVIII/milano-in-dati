@@ -9,7 +9,7 @@ Scrive: <raw>/concentrazioni/STAT<id>_<codice>.csv  e  <raw>/download_log.csv
 import csv, io, sys, time, urllib.parse, urllib.request, datetime, os
 
 BASE = "https://sdi.isprambiente.it/geoserver/om/ows"
-UA = "Mozilla/5.0 (research; milano-in-dati; dati aperti CC-BY)"
+UA = "milano-in-dati/1.0"
 PAGE = 3000
 STAZIONI = {113: "NO1", 143: "VC1", 124: "PC1", 114: "VB1", 152: "VR1", 148: "AL6"}
 

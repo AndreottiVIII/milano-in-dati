@@ -1,6 +1,6 @@
 import sys, csv, json, math, time, requests
 base = sys.argv[1]
-UA = {"User-Agent": "MilanoInDati/1.0 (davide.caniatti@gmail.com; progetto dati aperti)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (milano-in-dati; progetto dati aperti)"}
 rows = [r for r in csv.DictReader(open(f"{base}/pulito/cinema.csv", encoding="utf-8-sig")) if r["id"].startswith("SC") and r["lat"] and r["precisione_posizione"].startswith("civico")]
 SKIP = {"bench", "parking", "waste_basket", "bicycle_parking", "parking_entrance", "parking_space", "recycling", "post_box", "vending_machine", "atm", "drinking_water", "bicycle_rental", "car_sharing", "charging_station", "motorcycle_parking", "waste_disposal", "shelter", "toilets", "telephone", "clock", "fountain", "cinema"}
 def hav(a, b, c, d):

@@ -7,7 +7,7 @@ out = sys.argv[1]
 for p in sys.argv[2:]:
     for tent in range(6):
         try:
-            req = urllib.request.Request(B + p, headers={"User-Agent": "Mozilla/5.0 (ricerca open data)"})
+            req = urllib.request.Request(B + p, headers={"User-Agent": "milano-in-dati/1.0"})
             t = urllib.request.urlopen(req, timeout=60).read().decode("utf8", "replace")
             open(os.path.join(out, "pag_" + p.replace("/", "__") + ".html"), "w", encoding="utf8").write(t)
             dl = sorted(set(re.findall(r'href="([^"]*/download/en/\d+/[^"]*)"', t)))

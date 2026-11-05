@@ -31,7 +31,7 @@ for d, url in FILES:
     p = raw / d / url.rsplit('/', 1)[1]
     p.parent.mkdir(parents=True, exist_ok=True)
     if not p.exists():
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'milano-in-dati/1.0'})
         with urllib.request.urlopen(req, timeout=300) as r:
             p.write_bytes(r.read())
     b = p.read_bytes()

@@ -4,7 +4,7 @@ rifa' le ricerche Wikidata. TRAPPOLA: nel primo giro 737 ricerche su 3.047 erano
 Uso: python -I 10_chiavi_e_ricerca_v2.py strade_unite.csv old_search_dir new_dir"""
 import sys, json, re, time, os, requests, pandas as pd
 
-UA = {"User-Agent": "milano-in-dati/0.2 (davide.caniatti@gmail.com; street-name research, polite)"}
+UA = {"User-Agent": "milano-in-dati/0.2 (milano-in-dati; street-name research, polite)"}
 API = "https://www.wikidata.org/w/api.php"
 TYPE = r"^(via privata|via|viale|piazzale|piazza|piazzetta|largo|corso|vicolo|galleria|passaggio|bastioni|cavalcavia|strada|parco|giardino|alzaia|foro|sottopasso|sito|vicoletto|ripa|rampa|sottopassaggio|stradone|strada vicinale|passerella|passeggiata|rotatoria|sopraelevata|ponte)\s+"
 ART = r"^(?:(?:dell'|dall'|nell'|all'|d'|l')|(?:del|della|dello|dei|degli|delle|di|de|dal|dalla|dai|dagli|al|alla|alle|ai|agli|la|le|lo|il|i|gli)\s+)"

@@ -1,7 +1,7 @@
 """Scarica da it.wikipedia (API MediaWiki, CC BY-SA) il wikitesto delle pagine delle opere che hanno aperto la stagione, per cercarvi le discografie
 dal vivo alla Scala. Cache in raw/aperture_wp/it__<titolo>.json. 2,5 s tra richieste. Uso: python -I -X utf8 aperture_scarica_it.py <cartella>"""
 import sys, os, json, time, requests, re
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
 T = ["I vespri siciliani","Macbeth (opera)","La Wally","La Vestale (Spontini)","Norma (opera)","Aida","Un ballo in maschera","Turandot","Otello (Verdi)","Poliuto","La battaglia di Legnano",
  "Il trovatore","Cavalleria rusticana (opera)","L'amico Fritz","La forza del destino","Nabucco","Lucia di Lammermoor","Don Carlo","Ernani","Simon Boccanegra","L'italiana in Algeri","Fidelio",

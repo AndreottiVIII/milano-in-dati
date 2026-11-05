@@ -1,6 +1,6 @@
 """Cliente Wikidata SPARQL educato: cache su disco, pause, backoff."""
 import os, json, time, hashlib, requests
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)", "Accept": "application/sparql-results+json"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)", "Accept": "application/sparql-results+json"}
 _last = [0.0]
 def sparql(name, query, outdir, tries=5):
     p = os.path.join(outdir, name + ".json")

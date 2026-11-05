@@ -1,6 +1,6 @@
 import sys, os, time, json, requests
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "MilanoInDati/1.0 (davide.caniatti@gmail.com; progetto dati aperti)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (milano-in-dati; progetto dati aperti)"}
 base = "https://dati.comune.milano.it/api/3/action/"
 names = ["ds157-cultura-ingressi-spettacoli-manifestazione-1995-2010","ds252-economia-locali-pubblico-spettacolo","ds59-economia-pubblici-esercizi-fuori-piano"]
 # anche ricerche aggiuntive

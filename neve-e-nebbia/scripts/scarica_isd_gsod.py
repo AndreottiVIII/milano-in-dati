@@ -2,7 +2,7 @@
 Riprendibile: salta i file gia' presenti. Uso: python -I scarica_isd_gsod.py <cartella_raw>"""
 import sys, os, time, requests
 raw = sys.argv[1]
-UA = {"User-Agent": "milano-in-dati research (davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati research (milano-in-dati)"}
 stazioni = {"160800-99999": (1931, 2025), "160660-99999": (1965, 2025), "160810-99999": (2005, 2018)}
 s = requests.Session(); s.headers.update(UA)
 def get(url, dest):

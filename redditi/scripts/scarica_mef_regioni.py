@@ -7,7 +7,7 @@ rows = []
 for y in range(2017, 2026):
     name = f"REG_calcolo_irpef_{y}.csv"; dest = os.path.join(raw, name)
     if not (os.path.exists(dest) and os.path.getsize(dest) > 1000):
-        req = urllib.request.Request(U + name, headers={"User-Agent": "Mozilla/5.0 (ricerca open data, uso locale)"})
+        req = urllib.request.Request(U + name, headers={"User-Agent": "milano-in-dati/1.0"})
         with urllib.request.urlopen(req, timeout=120) as r, open(dest, "wb") as f: f.write(r.read())
         time.sleep(2)
     b = open(dest, "rb").read()

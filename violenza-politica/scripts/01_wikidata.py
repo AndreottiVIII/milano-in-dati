@@ -1,6 +1,6 @@
 import sys, json, time, requests
 out = sys.argv[1]
-UA = {"User-Agent": "milano-in-dati/1.0 (davide.caniatti@gmail.com; research on political violence in Milan)", "Accept": "application/sparql-results+json"}
+UA = {"User-Agent": "milano-in-dati/1.0 (milano-in-dati; research on political violence in Milan)", "Accept": "application/sparql-results+json"}
 Q1 = """
 SELECT ?item ?itemLabel ?itemLabelEn ?date ?cls ?clsLabel ?coord ?deaths ?inj ?itwiki ?enwiki ?place ?placeLabel WHERE {
   ?item wdt:P31 ?cls .

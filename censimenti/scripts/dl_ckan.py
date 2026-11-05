@@ -1,6 +1,6 @@
 import sys, os, json, time, re, requests
 root=sys.argv[1]
-UA={"User-Agent":"Mozilla/5.0 (research; davide.caniatti@gmail.com)"}
+UA={"User-Agent":"milano-in-dati/1.0"}
 sel=json.load(open(root+"/raw/comune_ckan/pacchetti_censimento.json",encoding="utf8"))
 # extra storici
 extra=["ds1494-popolazione-calcolata-nel-comune-di-milano-dal-1880","ds1495-popolazione-censimenti-storici-nati-vivi-residenti-nel-comune-di-milano-dal-1880","ds73-popolazione-residenti-suddivisi-per-genere","ds2918-tassi-natalita-mortalita-dal-1880"]

@@ -1,5 +1,5 @@
 import requests,sys,json,csv
-H={'User-Agent':'milano-in-dati/1.0 (research; davide.caniatti@gmail.com)','Accept':'application/sparql-results+json'}
+H={'User-Agent':'milano-in-dati/1.0 (research; milano-in-dati)','Accept':'application/sparql-results+json'}
 Q='''SELECT ?s ?sLabel ?n ?nLabel ?nDesc ?sex ?sexLabel ?nb ?nd ?inst ?instLabel ?sinst ?sinstLabel WHERE {
  SERVICE wikibase:box { ?s wdt:P625 ?loc . bd:serviceParam wikibase:cornerSouthWest "Point(9.03 45.40)"^^geo:wktLiteral . bd:serviceParam wikibase:cornerNorthEast "Point(9.46 45.56)"^^geo:wktLiteral . }
  ?s wdt:P31 ?sinst . VALUES ?sinst { wd:Q928830 wd:Q55488 wd:Q928830 }

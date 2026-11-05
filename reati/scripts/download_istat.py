@@ -18,7 +18,7 @@ for fn, flow, key in JOBS:
         print("gia presente", fn); continue
     url = f"{BASE}IT1,{flow},1.0/{key}"
     req = urllib.request.Request(url, headers={"Accept": "application/vnd.sdmx.data+csv;version=1.0.0",
-                                               "User-Agent": "Mozilla/5.0 (milano-in-dati research)"})
+                                               "User-Agent": "milano-in-dati/1.0"})
     t = time.time()
     try:
         r = urllib.request.urlopen(req, timeout=300)

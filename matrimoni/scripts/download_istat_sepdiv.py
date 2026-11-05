@@ -10,7 +10,7 @@ for f in files:
     dst = os.path.join(raw, f.replace("/", "__").replace(" ", "_"))
     url = base + urllib.parse.quote(f)
     if not os.path.exists(dst):
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati/1.0"})
         open(dst, "wb").write(urllib.request.urlopen(req, timeout=90).read()); time.sleep(1)
     h = hashlib.sha256(open(dst, "rb").read()).hexdigest()[:16]
     log.write(f"{datetime.date.today()};istat_sepdiv;xls;{url};{os.path.getsize(dst)};{h};;CC-BY 4.0 (note legali Istat)\n"); log.flush()

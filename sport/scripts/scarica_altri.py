@@ -1,7 +1,7 @@
 """Sport: ricerca catalogo Regione Lombardia (Socrata) e query Overpass OSM. Uso: python -I -X utf8 scarica_altri.py <ABS sport>  (riprendibile)"""
 import requests, sys, os, time, json
 S = sys.argv[1]
-H = {'User-Agent': 'milano-in-dati/1.0 (ricerca open data; davide.caniatti)'}
+H = {'User-Agent': 'milano-in-dati/1.0'}
 os.makedirs(S + '/raw/regione', exist_ok=True); os.makedirs(S + '/raw/osm', exist_ok=True)
 fn = S + '/raw/regione/catalogo_ricerca.json'
 if not os.path.exists(fn):

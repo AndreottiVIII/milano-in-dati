@@ -1,6 +1,6 @@
 import sys, os, time, json, requests
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "MilanoInDati/1.0 (davide.caniatti@gmail.com; progetto dati aperti)", "Accept": "application/sparql-results+json"}
+UA = {"User-Agent": "MilanoInDati/1.0 (milano-in-dati; progetto dati aperti)", "Accept": "application/sparql-results+json"}
 Q = {
 "cinema_milano": """
 SELECT DISTINCT ?item ?itemLabel ?itemDescription ?class ?classLabel ?inception ?dissolved ?coord ?address ?street ?streetLabel ?hn ?locLabel ?capacity ?article ?opening ?closed WHERE {

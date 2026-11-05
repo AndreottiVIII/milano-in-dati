@@ -10,7 +10,7 @@ base = sys.argv[1]
 R = os.path.join(base, "raw", "mimit"); A = os.path.join(R, "archivio"); M = os.path.join(R, "archivio_milano")
 os.makedirs(A, exist_ok=True); os.makedirs(M, exist_ok=True)
 log = open(os.path.join(base, "raw", "download_log.csv"), "a", encoding="utf-8")
-H = {"User-Agent": "Mozilla/5.0 (ricerca open data; davide.caniatti@gmail.com)"}
+H = {"User-Agent": "milano-in-dati/1.0"}
 quarters = [(y, q) for y in range(2015, 2027) for q in range(1, 5) if (y, q) <= (2026, 3)]
 def fetch(url, dst):
     if os.path.exists(dst): return

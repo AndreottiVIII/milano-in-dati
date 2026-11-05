@@ -6,7 +6,7 @@ qs = ["abitazioni", "alloggi", "case vuote", "abitazioni non occupate", "alloggi
 res = {}
 for q in qs:
     u = "https://dati.comune.milano.it/api/3/action/package_search?" + urllib.parse.urlencode({"q": q, "rows": 40})
-    req = urllib.request.Request(u, headers={"User-Agent": "milano-in-dati research (davide.caniatti)"})
+    req = urllib.request.Request(u, headers={"User-Agent": "milano-in-dati research"})
     d = json.load(urllib.request.urlopen(req, timeout=60))
     for p in d["result"]["results"]:
         res[p["name"]] = {"title": p["title"], "modified": p.get("metadata_modified"), "license": p.get("license_id"), "notes": (p.get("notes") or "")[:300], "q": q}

@@ -2,7 +2,7 @@
 Finestre di 400 numeri (l'endpoint va in errore 500 oltre OFFSET 9000). SOLO per controllo incrociato dei nomi.
 Uso: python -I -X utf8 cdec_sparql.py <out.csv>"""
 import sys, json, csv, time, urllib.request, urllib.parse
-UA = "milano-in-dati research (davide.caniatti@gmail.com)"
+UA = "milano-in-dati research (milano-in-dati)"
 PROPS = {"cognome": "http://xmlns.com/foaf/0.1/familyName", "nome": "http://xmlns.com/foaf/0.1/firstName", "nascita": "http://dati.cdec.it/lod/bio-ext/dateOfBirth",
          "sesso": "http://xmlns.com/foaf/0.1/gender", "sopravvissuto": "http://dati.cdec.it/lod/bio-ext/shoahSurvivor"}
 Q = ("SELECT ?s ?p ?o WHERE { ?s ?p ?o . VALUES ?p { %s } BIND(xsd:integer(STRAFTER(STR(?s),'/shoah/person/')) AS ?n) FILTER(STRSTARTS(STR(?s),'http://dati.cdec.it/lod/shoah/person/') && ?n >= %d && ?n < %d) }")

@@ -12,7 +12,7 @@ map_to_area->.a;
 );
 out tags center;
 """
-UA = {"User-Agent": "milano-in-dati/0.1 (davide.caniatti@gmail.com; research on street names)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (milano-in-dati; research on street names)"}
 for url in ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"]:
     for att in range(3):
         try:

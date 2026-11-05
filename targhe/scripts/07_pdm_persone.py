@@ -8,7 +8,7 @@ import requests
 T, P = sys.argv[1:3]
 sys.path.insert(0, os.path.join(P, "statue", "scripts"))
 from wdlib import norm, G
-UA = {"User-Agent": "milano-in-dati research (davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati research (milano-in-dati)"}
 os.makedirs(os.path.join(T, "raw/wikidata"), exist_ok=True)
 SF = os.path.join(T, "raw/wikidata/pdm_search_cache.json"); EF = os.path.join(T, "raw/wikidata/pdm_entities_cache.json")
 sc = json.load(open(SF, encoding="utf8")) if os.path.exists(SF) else {}

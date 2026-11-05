@@ -1,7 +1,7 @@
 """Ricerca CKAN dati.comune.milano.it con piu' parole chiave. Uso: python -I -X utf8 cerca_comune.py <costo-vita assoluto>"""
 import sys, os, json, urllib.request, urllib.parse, time, datetime
 base = sys.argv[1]
-H = {"User-Agent": "Mozilla/5.0 (ricerca open data; davide.caniatti@gmail.com)"}
+H = {"User-Agent": "milano-in-dati/1.0"}
 Q = ["prezzi al consumo", "indice NIC", "NIC", "prezzi medi", "rilevazione prezzi", "osservatorio prezzi", "tariffe", "prezzo", "inflazione",
      "costo della vita", "canoni di locazione", "affitti", "ATM biglietto", "tariffe trasporto", "retribuzioni", "stipendi", "carburante", "benzina", "energia elettrica", "pane", "caffe"]
 found = {}

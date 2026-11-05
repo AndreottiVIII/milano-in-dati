@@ -1,6 +1,6 @@
 import sys,re,html,requests
 area=sys.argv[1]; out=sys.argv[2]
-r=requests.get("https://dati.istruzione.it/opendata/opendata/catalogo/elements1/",params={"area":area},timeout=90,headers={"User-Agent":"Mozilla/5.0 (research; milano-in-dati)"})
+r=requests.get("https://dati.istruzione.it/opendata/opendata/catalogo/elements1/",params={"area":area},timeout=90,headers={"User-Agent":"milano-in-dati/1.0"})
 r.encoding="utf-8"; open(out,"w",encoding="utf-8").write(r.text)
 t=re.sub(r"<script.*?</script>|<style.*?</style>","",r.text,flags=re.S)
 blocks=re.split(r'(?=<div[^>]*class="[^"]*(?:parte-superiore|dettagli)[^"]*")',t)

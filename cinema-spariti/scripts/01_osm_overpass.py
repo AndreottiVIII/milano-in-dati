@@ -1,7 +1,7 @@
 import sys, os, time, json, requests
 out = sys.argv[1]
 os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "MilanoInDati/1.0 (davide.caniatti@gmail.com; progetto dati aperti)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (milano-in-dati; progetto dati aperti)"}
 AREA = 'area["name"="Milano"]["boundary"="administrative"]["admin_level"="8"]->.a;'
 queries = {
  "cinema_attuali_e_storici": AREA + '''

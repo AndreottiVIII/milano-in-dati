@@ -1,6 +1,6 @@
 import sys, os, time, json, requests
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "MilanoInDati/1.0 (davide.caniatti@gmail.com; progetto dati aperti)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (milano-in-dati; progetto dati aperti)"}
 API = "https://it.wikipedia.org/w/api.php"
 def get(params):
     for a in range(4):

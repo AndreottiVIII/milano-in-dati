@@ -5,7 +5,7 @@ url, out = sys.argv[1], sys.argv[2]
 acc = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else "*/*"
 to = int(sys.argv[4]) if len(sys.argv) > 4 else 600
 os.makedirs(os.path.dirname(out), exist_ok=True)
-req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (ricerca open data; davide.caniatti@gmail.com)", "Accept": acc})
+req = urllib.request.Request(url, headers={"User-Agent": "milano-in-dati/1.0", "Accept": acc})
 t = time.time()
 try:
     r = urllib.request.urlopen(req, timeout=to)

@@ -4,7 +4,7 @@ Giro 2: tutto cio' che i giri precedenti citano (P180 raffigura, P547 commemora,
 Uso: python -I -X utf8 04_wikidata_entities.py <raw/wikidata> <raw/osm/overpass_statue.json>"""
 import sys, os, json, time, re, requests
 W, OSM = sys.argv[1:3]
-UA = {"User-Agent": "milano-in-dati/0.3 (davide.caniatti@gmail.com; research on statues and monuments in Milan)"}
+UA = {"User-Agent": "milano-in-dati/0.3 (milano-in-dati; research on statues and monuments in Milan)"}
 cache_fn = os.path.join(W, "entities_cache.json")
 cache = json.load(open(cache_fn, encoding="utf8")) if os.path.exists(cache_fn) else {}
 def qid(u): return u.rsplit("/", 1)[-1]

@@ -5,7 +5,7 @@ Fa: (1) Wikidata: stagioni della Scala -> produzioni (P527) con direttore/regia/
 (4) Marangoni-Vanbianchi: estratto di una stagione dal testo OCR gia' scaricato. Pausa tra richieste, UA descrittivo, si saltano i file gia' presenti."""
 import sys, os, re, json, csv, time, html, requests
 out = sys.argv[1]; base = os.path.dirname(os.path.dirname(os.path.abspath(out))) if False else os.path.abspath(os.path.join(out, "..", ".."))
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 
 def put(path, text):
     os.makedirs(os.path.dirname(path), exist_ok=True)

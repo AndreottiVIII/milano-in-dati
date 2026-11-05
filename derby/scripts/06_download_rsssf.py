@@ -1,7 +1,7 @@
 """Download RSSSF Italian championship season pages (resumable, polite). Usage: python -I 06_download_rsssf.py <raw/rsssf>"""
 import sys, os, time, requests
 d = sys.argv[1]
-UA = {"User-Agent": "MilanoInDati/1.0 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (research; milano-in-dati)"}
 names = ["ital%02d" % y for y in range(26, 100)] + ["ital%02d" % y for y in range(0, 10)] + ["ital%d" % y for y in range(2010, 2027)] + ["ital-sic45", "ital-sicily20", "italhist98-25", "ital24", "ital25"]
 for n in names:
     dest = f"{d}/{n}.html"

@@ -2,7 +2,7 @@
 # Sensori: Brera vento 19007, pioggia 19373, temperatura 5897; Lambrate vento 2003, pioggia 2006, temperatura 2001 (registro nf78-nj6b).
 # uso: python -I 00_scarica_meteo.py <cartella raw_meteo>   (riprende: salta i file gia' completi)
 import requests, sys, os, time
-H = {"User-Agent": "milano-in-dati/1.0 (research; davide.caniatti@gmail.com)"}
+H = {"User-Agent": "milano-in-dati/1.0"}
 out = sys.argv[1]; os.makedirs(out, exist_ok=True)
 DS = {"vento": ["x9gp-z9xx", "hu5q-68e3"], "pioggia": ["2kar-pnuk", "pstb-pga6"], "temperatura": ["d4kj-kbpj", "w9wd-u6jh"]}
 SENS = {"Brera": {"vento": "19007", "pioggia": "19373", "temperatura": "5897", "da": "2016-08-25", "a": "2024-12-05"},

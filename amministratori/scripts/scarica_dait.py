@@ -5,7 +5,7 @@ Solo i file dei comuni (province e regioni non servono). Log in download_log.csv
 import sys, os, re, csv, time, urllib.request, hashlib, datetime
 RAW = sys.argv[1]
 BASE = "https://dait.interno.gov.it"
-UA = {"User-Agent": "Mozilla/5.0 (ricerca open data; contatto: davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/1.0"}
 def get(url, dest=None):
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=180) as r:

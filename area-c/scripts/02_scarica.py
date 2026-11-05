@@ -2,7 +2,7 @@
 Uso: python -I 02_scarica.py <catalogo.json> <cartella_raw>   (riprendibile: salta i file gia' presenti)"""
 import json,sys,os,time,re,requests
 cat=json.load(open(sys.argv[1])); raw=sys.argv[2]
-H={'User-Agent':'milano-in-dati/1.0 (ricerca open data; contatto davide.caniatti@gmail.com)'}
+H={'User-Agent':'milano-in-dati/1.0 (ricerca open data; contatto milano-in-dati)'}
 def wanted(n,t):
     s=(n+' '+t).lower()
     return ('area c' in s or 'area-c' in s or 'area_c' in s or 'varchi' in s or n.startswith('ds51_'))

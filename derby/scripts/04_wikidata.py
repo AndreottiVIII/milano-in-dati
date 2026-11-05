@@ -2,7 +2,7 @@
 Usage: python -I 04_wikidata.py <out_dir>"""
 import sys, json, requests, time
 out = sys.argv[1]
-UA = {"User-Agent": "MilanoInDati/1.0 (research; davide.caniatti@gmail.com)", "Accept": "application/sparql-results+json"}
+UA = {"User-Agent": "MilanoInDati/1.0 (research; milano-in-dati)", "Accept": "application/sparql-results+json"}
 Q = {
  "participants": """SELECT ?m ?mLabel ?date ?instLabel WHERE { ?m wdt:P1923 wd:Q1543, wd:Q631 . OPTIONAL{?m wdt:P585 ?date} OPTIONAL{?m wdt:P31 ?inst} SERVICE wikibase:label { bd:serviceParam wikibase:language "en,it". } } ORDER BY ?date""",
  "derby_instances": """SELECT ?m ?mLabel ?date WHERE { ?m wdt:P31/wdt:P279* wd:Q862108 . OPTIONAL{?m wdt:P585 ?date} SERVICE wikibase:label { bd:serviceParam wikibase:language "en,it". } } ORDER BY ?date""",

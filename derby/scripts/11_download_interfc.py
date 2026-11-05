@@ -2,7 +2,7 @@
 Resumable, polite (3 s). Usage: python -I 11_download_interfc.py <derby_dir>"""
 import sys, csv, re, os, time, requests
 base = sys.argv[1]
-UA = {"User-Agent": "MilanoInDati/1.0 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (research; milano-in-dati)"}
 rows = list(csv.DictReader(open(base + "/pulito/derby.csv", encoding="utf-8")))
 for x in rows:
     u = x["report_url"]

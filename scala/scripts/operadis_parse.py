@@ -7,7 +7,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 CACHE = os.path.join(ROOT, "raw", "discografie", "operadis"); os.makedirs(CACHE, exist_ok=True)
 BASE = "https://www.operadis-opera-discography.org.uk/"
-UA = "milano-in-dati research project (davide.caniatti@gmail.com; controllo incrociato, 1 richiesta ogni 3 s)"
+UA = "milano-in-dati research project (milano-in-dati; controllo incrociato, 1 richiesta ogni 3 s)"
 last = [0.0]
 def pagina(nome):
     p = os.path.join(CACHE, nome)

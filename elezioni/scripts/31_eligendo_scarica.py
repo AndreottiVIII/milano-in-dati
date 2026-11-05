@@ -14,7 +14,7 @@ for f in files:
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     if os.path.exists(dst) and os.path.getsize(dst) > 0:
         print('gia', f); continue
-    req = urllib.request.Request(base + f, headers={'User-Agent': 'Mozilla/5.0 (milano-in-dati)'})
+    req = urllib.request.Request(base + f, headers={'User-Agent': 'milano-in-dati/1.0'})
     try:
         data = urllib.request.urlopen(req, timeout=120).read()
         open(dst, 'wb').write(data)

@@ -3,7 +3,7 @@ Uso: python -I 20_scarica_wikitext.py <cartella_strand>"""
 import sys, os, csv, json, time, requests
 base = sys.argv[1]
 out = os.path.join(base, "raw", "wikitext"); os.makedirs(out, exist_ok=True)
-UA = {"User-Agent": "milano-in-dati/0.1 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "milano-in-dati/0.1 (research; milano-in-dati)"}
 titoli = {"it": set(), "en": set()}
 for f in ("film", "serie_tv", "libri", "altro"):
     for r in csv.DictReader(open(os.path.join(base, "pulito", f + ".csv"), encoding="utf8")):

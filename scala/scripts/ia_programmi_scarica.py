@@ -4,7 +4,7 @@ import sys, os, json, re, time, urllib.request
 sys.stdout.reconfigure(encoding="utf-8")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 OUT = os.path.join(ROOT, "raw", "ia_programmi"); os.makedirs(OUT, exist_ok=True)
-UA = "milano-in-dati research project (davide.caniatti@gmail.com; programmi di sala aperti, 1 richiesta ogni 3 s)"
+UA = "milano-in-dati research project (milano-in-dati; programmi di sala aperti, 1 richiesta ogni 3 s)"
 last = [0.0]
 def fetch(url, dest):
     if os.path.exists(dest) and os.path.getsize(dest) > 0: return False

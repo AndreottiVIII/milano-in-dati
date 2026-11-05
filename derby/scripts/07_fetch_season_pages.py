@@ -2,7 +2,7 @@
 Usage: python -I 07_fetch_season_pages.py <derby_dir>"""
 import sys, re, csv, json, os, time, requests
 base = sys.argv[1]
-UA = {"User-Agent": "MilanoInDati/1.0 (research; davide.caniatti@gmail.com)"}
+UA = {"User-Agent": "MilanoInDati/1.0 (research; milano-in-dati)"}
 rows = list(csv.DictReader(open(base + "/pulito/_itwiki_matches.csv", encoding="utf-8")))
 pages = []
 for x in rows:

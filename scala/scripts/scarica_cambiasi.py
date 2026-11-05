@@ -1,7 +1,7 @@
 """Scarica da Internet Archive i file di Cambiasi (1872, 1881) e il testo OCR di Marangoni-Vanbianchi 1906-1920.
 Uso: python -I scarica_cambiasi.py <cartella_raw_cambiasi>   (salta i file gia' presenti)"""
 import sys, os, time, requests
-UA = {"User-Agent": "Mozilla/5.0 (research; milano-in-dati)"}
+UA = {"User-Agent": "milano-in-dati/1.0"}
 out = sys.argv[1]
 items = {
  "teatroallascala100camb": ["teatroallascala100camb.pdf","teatroallascala100camb_djvu.txt","teatroallascala100camb_hocr.html","teatroallascala100camb_jp2.zip"],
