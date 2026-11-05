@@ -61,6 +61,12 @@ blockquote{margin:.5em 0;padding:4px 12px;border-left:3px solid var(--line);colo
 <p class="src">Alunni: Comune di Milano, ds224/225/226 (CC BY), scuole raggruppate per NIL in cui si trovano. Residenti: Comune di Milano, ds27 (CC BY), al 31 dicembre. In grigio i quartieri con meno di 200 alunni (o 200 bambini) nel 2015: la percentuale non ha senso. Mappa &copy; OpenStreetMap contributors.</p>
 <div id="scheda-n" class="card"><span class="sub">Scegli un quartiere sulla mappa.</span></div>
 
+<h3 id="quadrante">Calano i bambini o cambiano le scuole?</h3>
+<p id="quad-testo"></p>
+<div class="ch" id="ch-quad" style="max-width:640px" role="img" aria-label="Grafico a punti: per ogni quartiere, variazione dei bambini residenti contro variazione degli alunni, dal 2015 al 2024"></div>
+<div class="lgd" id="lg-quad"></div>
+<p class="src" id="src-quad"></p>
+
 <h2 id="gestione">Scuole statali, comunali, paritarie, private</h2>
 <div id="gest-testo"></div>
 <div class="ctl"><span class="sub">Scuola:</span><span id="b-liv2"></span></div>
@@ -159,7 +165,7 @@ Promise.all([J('data/riepilogo.json'),J('data/scuole.json'),J('data/nil.geojson'
 }).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
 
 function tutto(){
-  sorpresa();iscritti();quartieri();gestione();scuoleMappa();confronto();metodo();
+  sorpresa();iscritti();quartieri();quadrante();gestione();scuoleMappa();confronto();metodo();
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
 }
 function nilNome(i){return NILP[i]?NILP[i].n:''}
@@ -301,6 +307,47 @@ function coorti(){
   setH('coorti',h);
 }
 
+/* ---------- calano i bambini o cambiano le scuole? ---------- */
+function quadrante(){
+  var WA='#c26a1b',TE='#136459';
+  var all=Object.keys(NILP).map(function(k){return NILP[k]});
+  var pts=all.filter(function(p){return p.Iv!=null&&p.Rv!=null});
+  var lo=-35,hi=60,S0=62,SW=418;
+  function cl(v){return Math.max(lo,Math.min(hi,v))}
+  function X(v){return S0+(cl(v)-lo)/(hi-lo)*SW}
+  function Y(v){return 20+(hi-cl(v))/(hi-lo)*SW}
+  var s='<svg viewBox="0 0 500 530" role="img" aria-label="Variazione degli alunni contro variazione dei bambini residenti, per quartiere">';
+  [-20,0,20,40,60].forEach(function(v){
+    var c=v===0?'#111':'#e5e5e5',lb=v===0?'0%':sg(v)+'%';
+    s+='<line x1="'+X(v).toFixed(1)+'" y1="20" x2="'+X(v).toFixed(1)+'" y2="'+(20+SW)+'" stroke="'+c+'"/><line x1="'+S0+'" y1="'+Y(v).toFixed(1)+'" x2="'+(S0+SW)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c+'"/>';
+    s+='<text x="'+X(v).toFixed(1)+'" y="'+(20+SW+18)+'" font-size="14" font-weight="700" text-anchor="middle">'+lb+'</text><text x="'+(S0-5)+'" y="'+(Y(v)+5).toFixed(1)+'" font-size="14" font-weight="700" text-anchor="end">'+lb+'</text>';
+  });
+  s+='<line x1="'+X(lo)+'" y1="'+Y(lo)+'" x2="'+X(hi)+'" y2="'+Y(hi)+'" stroke="#111" stroke-width="2" stroke-dasharray="6 4"/>';
+  s+='<text x="'+X(50).toFixed(1)+'" y="'+Y(43).toFixed(1)+'" font-size="14" font-weight="700" text-anchor="end" transform="rotate(-45 '+X(50).toFixed(1)+' '+Y(43).toFixed(1)+')">alunni e bambini cambiano uguale</text>';
+  s+='<text x="'+(S0+6)+'" y="38" font-size="15" font-weight="800" style="fill:'+TE+'">le scuole perdono meno dei bambini</text>';
+  s+='<text x="'+(S0+SW-4)+'" y="'+(20+SW-8)+'" font-size="15" font-weight="800" text-anchor="end" style="fill:'+WA+'">le scuole perdono più dei bambini</text>';
+  var sotto=0,sopra=0,fuori=[];
+  pts.slice().sort(function(a,b){return b.I24-a.I24}).forEach(function(p){
+    var big=p.I24>=200,col=!big?'#aaa':(p.Iv<p.Rv?WA:TE);
+    if(big){if(p.Iv<p.Rv)sotto++;else if(p.Iv>p.Rv)sopra++}
+    var clip=p.Rv>hi||p.Rv<lo||p.Iv>hi||p.Iv<lo;if(clip)fuori.push(p.n);
+    s+='<circle cx="'+X(p.Rv).toFixed(1)+'" cy="'+Y(p.Iv).toFixed(1)+'" r="'+Math.max(3,Math.sqrt(p.I24)*.33).toFixed(1)+'" fill="'+col+'" fill-opacity=".72" stroke="'+(clip?'#111':'#fff')+'" stroke-width="'+(clip?1.5:.8)+'"/>';
+  });
+  var far=pts.filter(function(p){return p.I24>=200}).sort(function(a,b){return Math.abs(b.Iv-b.Rv)-Math.abs(a.Iv-a.Rv)}).slice(0,3);
+  pts.forEach(function(p){if((p.Rv>hi||p.Rv<lo||p.Iv>hi)&&far.indexOf(p)<0)far.push(p)});
+  far.forEach(function(p){
+    var edge=X(p.Rv)>S0+SW-90;
+    var rr=Math.max(3,Math.sqrt(p.I24)*.33)+5;
+    s+='<text x="'+(X(p.Rv)+(edge?-rr:rr)).toFixed(1)+'" y="'+(Y(p.Iv)+5).toFixed(1)+'" font-size="14" font-weight="800" text-anchor="'+(edge?'end':'start')+'">'+esc(p.n.split(' - ')[0])+'</text>';
+  });
+  s+='<text x="'+(S0+SW/2)+'" y="'+(20+SW+42)+'" font-size="15" font-weight="800" text-anchor="middle">bambini residenti di 3–13 anni, 2015→2024</text><text x="12" y="'+(20+SW/2)+'" font-size="15" font-weight="800" text-anchor="middle" transform="rotate(-90 12 '+(20+SW/2)+')">alunni nelle scuole del quartiere</text></svg>';
+  el('ch-quad').innerHTML=s;
+  var sum=function(k){return all.reduce(function(a,p){return a+(p[k]||0)},0)};
+  var vi=100*(sum('I24')/sum('I15')-1),vr=100*(sum('R24')/sum('R15')-1);
+  setH('quad-testo','Ogni punto è un quartiere. In orizzontale come sono cambiati i bambini residenti di 3&ndash;13 anni dal 2015 al 2024, in verticale come sono cambiati gli alunni nelle scuole del quartiere. Sulla linea tratteggiata i due numeri sono uguali. In tutta la città gli alunni sono <b>'+sgp(vi,1)+'</b> e i bambini residenti <b>'+sgp(vr,1)+'</b>.');
+  setH('lg-quad','<span><i style="background:'+WA+'"></i>sotto la linea ('+sotto+')</span><span><i style="background:'+TE+'"></i>sopra la linea ('+sopra+')</span><span><i style="background:#aaa"></i>meno di 200 alunni nel 2024</span><span>grandezza = alunni nel 2024</span>');
+  setH('src-quad','Come sopra: Comune di Milano, ds224/225/226 e ds27 (CC BY). Sono disegnati i '+pts.length+' quartieri con le due variazioni calcolabili. <b>Limiti dei dati:</b> gli alunni sono contati dove sta la scuola, non dove abitano; stare sopra o sotto la linea descrive, non spiega. Quartieri fuori scala, disegnati sul bordo con il contorno nero: '+(fuori.length?esc(fuori.join(', ')):'nessuno')+'.');
+}
 /* ---------- quartieri ---------- */
 var MN=null,NL=null,NM='Iv';
 var BRK=[-20,-10,0,10,20],NCOL=['#a8540f','#e0a96d','#f3dcc0','#c5e3dd','#62b0a4','#136459'];

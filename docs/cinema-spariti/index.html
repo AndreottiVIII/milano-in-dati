@@ -58,6 +58,12 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 <p class="leg"><span><i class="dot" style="background:#bbb;border-radius:2px"></i>aperture (sale chiuse e aperte con anno noto)</span><span><i class="dot d1" style="border-radius:2px"></i>chiusure (anno di fine dell&rsquo;ultimo periodo di attività)</span></p>
 <p class="src">Per i cinema con più periodi (chiusi e poi riaperti) la chiusura è quella dell&rsquo;ultimo periodo. Un decennio come «1980» comprende il 1980-1989. L&rsquo;ultima colonna (2020) conta solo l&rsquo;Odeon.</p>
 
+<h3 style="font-size:1rem;margin:1.6em 0 .2em">Quanto è vissuta ogni sala</h3>
+<p>Una linea per ogni sala, dal primo anno di apertura all&rsquo;ultimo anno di attività. Le sale sono in ordine: in alto quelle aperte prima. Le linee nere sono sale chiuse, quelle colorate sono sale ancora aperte di cui si conosce l&rsquo;anno di apertura.</p>
+<div id="chartC" class="chart"></div>
+<p class="leg"><span><i class="dot d1" style="border-radius:2px"></i>sale chiuse (<b id="cC1"></b>)</span><span><i class="dot d4" style="border-radius:2px"></i>aperte oggi, con anno di apertura (<b id="cC2"></b>)</span></p>
+<p class="src">Sono disegnate <span id="cC3"></span> sale; <span id="cC4"></span> sale aperte oggi non hanno l&rsquo;anno di apertura nei dati e sono nel riquadro tratteggiato. I nomi delle singole sale non ci sono, perché con tante righe sottili non si leggono: li trovi nell&rsquo;elenco qui sotto. Gli anni sono quelli della fonte, a volte approssimati. L&rsquo;elenco non registra chiusure dopo il 2017, tranne l&rsquo;Odeon (2023).</p>
+
 <h2>3. L&rsquo;elenco delle sale scomparse</h2>
 <div class="flt"><input id="q" type="search" placeholder="Cerca" aria-label="Cerca"><select id="ord" aria-label="Ordina"><option value="c">Ordina per anno di chiusura</option><option value="a">Ordina per anno di apertura</option><option value="n">Ordina per nome</option></select><span class="sub" id="cnt"></span></div>
 <div class="scroll"><table id="tab"><thead><tr><th>Cinema</th><th>Anni di attività</th><th>Cosa c&rsquo;è ora (candidato OpenStreetMap, da verificare)</th><th>Fonti</th></tr></thead><tbody></tbody></table></div>
@@ -277,12 +283,36 @@ function oggiLista(){
     h+='<li><b>'+esc(c.n)+'</b>'+(c.ind?', <span class="sub">'+esc(c.ind)+'</span>':'')+(c.per.length?' <span class="sub">(dal '+(c.ac?'ca. ':'')+c.per[0][0]+')</span>':'')+'</li>';});
   $('oggi').innerHTML=h;
 }
+function chartC(){
+  var el=$('chartC'),W=Math.max(300,el.clientWidth),m={l:6,r:8,t:22,b:6};
+  var dr=D.cinema.filter(function(c){return c.per&&c.per.length;});
+  var nd=D.cinema.length-dr.length;
+  function a0(c){return Math.min.apply(null,c.per.map(function(p){return p[0];}));}
+  function b1(c){return Math.max.apply(null,c.per.map(function(p){return p[1];}));}
+  dr.sort(function(x,y){return (a0(x)-a0(y))||(b1(x)-b1(y));});
+  var x0=1890,x1=2030,rh=4,top=m.t+4,yb=top+dr.length*rh+16,H=yb+50;
+  function X(v){return m.l+(v-x0)/(x1-x0)*(W-m.l-m.r);}
+  var g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Una linea di vita per ogni sala: dalla prima apertura alla fine dell&rsquo;attività">';
+  for(var yy=1900;yy<=2020;yy+=20){g+='<line x1="'+X(yy)+'" x2="'+X(yy)+'" y1="'+(m.t-4)+'" y2="'+(yb-12)+'" stroke="#e5e5e5"/><text x="'+X(yy)+'" y="12" font-size="11" fill="#666" text-anchor="middle">'+yy+'</text>';}
+  var nc=0,no=0;
+  dr.forEach(function(c,n){
+    var y=top+n*rh,open=c.st==='aperto';if(open)no++;else nc++;
+    c.per.forEach(function(p){g+='<rect x="'+X(p[0]).toFixed(1)+'" y="'+y+'" width="'+Math.max(1.5,X(p[1])-X(p[0])).toFixed(1)+'" height="'+(rh-1.2)+'" fill="'+(open?ACC:INK)+'"/>';});
+  });
+    g+='<line x1="'+X(2017)+'" x2="'+X(2017)+'" y1="'+(m.t-4)+'" y2="'+(yb-12)+'" stroke="'+ACC+'" stroke-width="1.5" stroke-dasharray="4 3"/><text class="hl" x="'+(X(2017)-4)+'" y="'+yb+'" font-size="11" fill="'+ACC+'" text-anchor="end">2017: fine dell&rsquo;elenco</text>';
+  g+='<text x="'+m.l+'" y="'+(yb+22)+'" font-size="11" fill="#111">'+nd+' sale aperte oggi, senza anno di apertura nei dati:</text>';
+  var wd=(W-m.l-m.r)/nd;
+  for(var k=0;k<nd;k++)g+='<rect x="'+(m.l+k*wd+1).toFixed(1)+'" y="'+(yb+28)+'" width="'+Math.max(1,wd-2).toFixed(1)+'" height="12" fill="none" stroke="'+ACC+'" stroke-width="1.5" stroke-dasharray="3 2"/>';
+  g+='</svg>';
+  el.innerHTML=g;
+  $('cC1').textContent=nc;$('cC2').textContent=no;$('cC3').textContent=dr.length;$('cC4').textContent=nd;
+}
 function init(){
   var pk=S.chiuse.map(function(v,i){return v+S.aperte_note[i];}),mx=Math.max.apply(null,pk);
   $('npicco').textContent=mx;$('apicco').textContent=S.anni[pk.indexOf(mx)];
-  initMap();chartA();chartB();tabSnap();lista();oggiLista();
+  initMap();chartA();chartB();chartC();tabSnap();lista();oggiLista();
   $('q').addEventListener('input',lista);$('ord').addEventListener('change',lista);
-  var rt=null;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){chartA();chartB();},150);});
+  var rt=null;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){chartA();chartB();chartC();},150);});
 }
 Promise.all([
   fetch('data/cinema.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
