@@ -28,6 +28,7 @@ EDITORI = [
     ("Dipartimento della Protezione civile", "Ministeri", r"Protezione [Cc]ivile"),
     ("Polizia di Stato", "Ministeri", r"Polizia di Stato|\bSDI\b"),
     ("ISPRA", "Enti nazionali", r"\bISPRA\b"),
+    ("INGV", "Enti nazionali", r"\bINGV\b|Istituto Nazionale di Geofisica"),
     ("ISS", "Enti nazionali", r"Istituto Superiore di Sanit[àa]"),
     ("INPS", "Enti nazionali", r"\bINPS\b"),
     ("INAIL", "Enti nazionali", r"\bINAIL\b"),

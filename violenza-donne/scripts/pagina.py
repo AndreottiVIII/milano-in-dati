@@ -257,7 +257,7 @@ Tutti i dettagli sono in <a href="#limiti">I limiti dei dati</a>.</div>
 <li>Quota Lombardia = chiamate Lombardia / (totale Italia &minus; regione ignota). Quota di donne = donne residenti in Lombardia / donne residenti in Italia, al 1° gennaio dell&rsquo;anno dopo (Istat, popolazione residente, <code>22_289_DF_DCIS_POPRES1_1</code>; disponibile dal 2019 in questo scarico).</li>
 <li>Centri: Istat <code>78_1260</code>, voce &ldquo;centri antiviolenza&rdquo;, e percentuali di servizio (le righe con &ldquo;sì&rdquo;); elenchi della Regione: conteggi per provincia (colonna provincia; per le case rifugio, provincia della sede legale dell&rsquo;ente). Per 100.000 donne = conteggio / donne residenti al 1° gennaio 2025 &times; 100.000. Controllo: 53 centri Istat in Lombardia = 53 &ldquo;centri&rdquo; nell&rsquo;elenco convenzionato.</li>
 <li>Femminicidi: valori del report Istat, trascritti in <code>femminicidi_italia_istat.csv</code>.</li>
-<li>Programmi rieseguibili in <code>violenza-donne/scripts/</code>: <code>scarica.py</code>, <code>costruisci.py</code>, <code>pagina.py</code>. Nessun dato personale, nessuna registrazione, nessun accesso aggirato; richieste con User-Agent dichiarato.</li>
+<li>Programmi rieseguibili. Nessun dato personale, nessuna registrazione, nessun accesso aggirato; richieste con User-Agent dichiarato.</li>
 </ul>
 
 <h2 id="download">File</h2>
