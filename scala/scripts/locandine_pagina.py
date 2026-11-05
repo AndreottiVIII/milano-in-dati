@@ -139,10 +139,8 @@ def main():
             pd[x['data'][:3] + '0'][x['titolo_principale']] += 1
     per_dec = {k: [{'t': bello(t), 'n': n} for t, n in v.most_common(10)] for k, v in sorted(pd.items())}
 
-    pz = []
-    for x in leggi(U, 'prezzi_per_anno.csv'):
-        if x['moneta'] == 'L' and int(x['locandine_con_prezzo']) >= 10 and '1953' <= x['anno'] <= '1993':
-            pz.append({'y': int(x['anno']), 'l': round(float(x['mediana'])), 'n': int(x['locandine_con_prezzo'])})
+    # prezzi letti a vista: vedi locandine_prezzi.py
+    pz = json.load(open(os.path.join(U, 'prezzi_serie.json'), encoding='utf-8'))
 
     anni = C.defaultdict(C.Counter)
     for x in rec:
@@ -177,7 +175,7 @@ def main():
                'prezzi': pz, 'prime': prime, 'generato': '2026-11-05'},
               open(os.path.join(O, 'riepilogo.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print({k: len(v) for k, v in dec.items()}, sum(os.path.getsize(os.path.join(O, f)) for f in os.listdir(O)))
-    print('prezzi', pz)
+    print('prezzi', len(pz))
 
 
 if __name__ == '__main__':

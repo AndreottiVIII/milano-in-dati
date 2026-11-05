@@ -200,14 +200,24 @@ def main():
     per_file = {}
     ruolo = {e['nome']: e['ruolo'] for e in el}
     for x in rec:
-        if x['tipo'] not in ('Opera', 'Balletto'):
+        if x['tipo'] not in ('Opera', 'Balletto', 'Altro'):
             continue
         tro = set()
         for r in testo.get(x['file'], []):
             tro |= noti_in_riga(norma(r.get('t')).replace(' ', ''))
+        # nomi scritti grandi: nome e cognome possono stare su due righe vicine. Vale solo se sono uguali, senza errori di lettura.
+        ord_y = sorted(testo.get(x['file'], []), key=lambda r: r.get('y', 0))
+        comp = [norma(r.get('t')).replace(' ', '') for r in ord_y]
+        for i in range(len(comp) - 1):
+            cop = comp[i] + comp[i + 1]
+            for e in el:
+                for q in e['cerca'].split('|'):
+                    q = q.replace(' ', '')
+                    if q in cop:
+                        tro.add(e['nome'])
         # chi canta sta sui fogli d'opera, chi danza su quelli di balletto
         vuole = {'canto'} if x['tipo'] == 'Opera' else {'danza'}
-        if x['mista']:
+        if x['mista'] or x['tipo'] == 'Altro':
             vuole = {'canto', 'danza'}
         tro = {n for n in tro if ruolo[n] in vuole}
         per_file[x['file']] = tro

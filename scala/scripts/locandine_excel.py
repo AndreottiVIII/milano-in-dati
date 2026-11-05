@@ -209,8 +209,9 @@ def main():
         scheda(wb, 'Direttori', ['Direttore', 'Recite (stima)'], [[x[0].title(), int(x[1])] for x in d1], [34, 14])
         d2 = list(csv.DictReader(open(os.path.join(U, 'interpreti_noti.csv'), encoding='utf-8-sig')))
         scheda(wb, 'Interpreti (elenco scelto)', ['Nome', 'Ruolo', 'Locandine col nome', 'Primo anno', 'Ultimo anno'], [[x['nome'], x['ruolo'], int(x['locandine']), int(x['prima'][:4]), int(x['ultima'][:4])] for x in d2], [28, 8, 18, 10, 10])
-        d3 = list(csv.DictReader(open(os.path.join(U, 'prezzi_per_anno.csv'), encoding='utf-8-sig')))
-        scheda(wb, 'Prezzi', ['Anno', 'Moneta', 'Locandine con prezzo', 'Mediana (poltrona di platea)'], [[int(x['anno']), x['moneta'], int(x['locandine_con_prezzo']), float(x['mediana'])] for x in d3], [8, 8, 20, 26])
+        d3 = list(csv.DictReader(open(os.path.join(U, 'prezzi_serie.csv'), encoding='utf-8-sig')))
+        scheda(wb, 'Prezzi opera', ['Anno', 'Moneta', 'Poltrona di platea', 'Biglietto meno caro', 'Poltrona in euro 2025', 'Meno caro in euro 2025', 'Locandine lette'],
+               [[int(x['y']), x['m'], float(x['p']), float(x['b']) if x['b'] else None, int(x['p25']), float(x['b25']) if x['b25'] else None, int(x['n'])] for x in d3], [8, 8, 18, 18, 20, 22, 14])
     wb.save(os.path.join(U, 'Serate_alla_Scala.xlsx'))
 
     def csvw(nome, intest, righe):

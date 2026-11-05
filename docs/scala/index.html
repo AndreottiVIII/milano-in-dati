@@ -77,8 +77,11 @@ details{margin:.6em 0;border:1px solid var(--line);padding:6px 10px} details>sum
 </details>
 
 <h2>Quanto costava una poltrona</h2>
-<div id="pchart" role="img" aria-label="Prezzo tipico della poltrona di platea in lire, dal 1953 al 1993"></div>
-<p class="note">Prezzo tipico della poltrona di platea scritto sulle locandine d’opera. Lire dell’epoca, non corrette per l’inflazione. Il prezzo cambiava con la serata e la lettura automatica a volte sbaglia: leggere la tendenza, non il singolo anno.</p>
+<p id="ptesto"></p>
+<div id="pchart" role="img" aria-label="Prezzo della poltrona di platea e del biglietto meno caro all&rsquo;opera, in euro del 2025, dal 1944 al 2026"></div>
+<div class="lg"><span><i style="background:#a3122a"></i>Poltrona di platea</span><span><i style="background:#f0d5da"></i>Da quanto a quanto, tra i titoli letti</span><span><i style="background:#111"></i>Biglietto meno caro</span></div>
+<details><summary>Tutti gli anni, in moneta dell&rsquo;epoca e in euro di oggi</summary><div class="tw"><table id="ptab"></table></div></details>
+<p class="note">Solo opera, in euro del 2025 con i coefficienti ISTAT <i>Il valore della moneta in Italia dal 1861 al 2025</i>, calcolati per l&rsquo;analisi storica. Per il 2026 il coefficiente non c&rsquo;&egrave; ancora: il prezzo resta com&rsquo;&egrave;. I prezzi sono letti a occhio sulle locandine, da 2 a 6 per anno e di titoli diversi: sere normali nella sala principale, senza il 7 dicembre, gli spettacoli per bambini e le serate a prezzo unico popolare. &Egrave; un campione: ogni anno i titoli costavano in modo diverso, quindi conta la tendenza e non il singolo anno. La linea segue il valore centrale di tre anni vicini, i punti sono i singoli anni. Il biglietto meno caro &egrave; di solito l&rsquo;ingresso in galleria, senza posto numerato; nel 1947 &egrave; il posto in piedi. Dal 1992 la voce si chiama &ldquo;posto unico di platea&rdquo;, dal 2000 &ldquo;platea&rdquo;.</p>
 
 <h2>Quanto sappiamo</h2>
 <p>Ogni barra è un anno: l’altezza è il numero di titoli diversi (opere, balletti, altri spettacoli; senza i concerti) che troviamo nelle fonti. Il colore dice quale fonte ha visto quel titolo per prima, in ordine di affidabilità. Dal 1944 al 2023 le barre vengono dalle locandine. <i>Clic su una barra per vedere i titoli di quell’anno.</i></p>
@@ -329,27 +332,44 @@ function canto(rie){
 
 /* ---------- prezzi ---------- */
 function prezzi(rie){
-  var P=rie.prezzi,y0=P[0].y,y1=P[P.length-1].y,max=0;P.forEach(function(p){if(p.l>max)max=p.l});
-  var step=50000,ymax=Math.ceil(max/step)*step;
+  var P=rie.prezzi,y0=P[0].y,y1=P[P.length-1].y,ymax=400;
+  function mediana(a){a=a.slice().sort(function(x,y){return x-y});var n=a.length;return n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2}
+  function mobile(k){
+    return P.filter(function(p){return p[k]!=null}).map(function(p){
+      var v=P.filter(function(q){return q[k]!=null&&Math.abs(q.y-p.y)<=1}).map(function(q){return q[k]});
+      return {y:p.y,v:mediana(v)};
+    });
+  }
+  var LP=mobile('p25'),LB=mobile('b25');
+  function dec(a,b,k){var v=P.filter(function(p){return p.y>=a&&p.y<=b&&p[k]!=null}).map(function(p){return p[k]});return Math.round(mediana(v))}
+  $('ptesto').innerHTML='Negli anni ’50 una poltrona di platea all’opera costava circa <b>'+dec(1950,1959,'p25')+' euro</b> di oggi. Negli anni ’70 scende a circa <b>'+dec(1970,1979,'p25')+'</b>: i prezzi crescono meno dell’inflazione. A metà anni ’80 è intorno a <b>'+dec(1984,1987,'p25')+'</b>, e oggi arriva a <b>'+P[P.length-1].p25+'</b>. Il biglietto meno caro resta molto più fermo: circa <b>'+dec(1950,1989,'b25')+' euro</b> di oggi per quarant’anni, <b>'+dec(2002,2022,'b25')+'</b> dal 2002 al 2022, <b>'+dec(2023,2026,'b25')+'</b> adesso.';
+  function linea(L){var seg=[],cur=[];L.forEach(function(q,i){if(i>0&&q.y-L[i-1].y>2){seg.push(cur);cur=[]}cur.push(q)});seg.push(cur);return seg}
   function draw(){
-    var el=$('pchart'),W=Math.max(300,el.clientWidth),H=280,L=58,R=40,T=18,B=28,pw=W-L-R,ph=H-T-B;
+    var el=$('pchart'),W=Math.max(300,el.clientWidth),H=320,L=44,R=14,T=14,B=28,pw=W-L-R,ph=H-T-B;
     function X(y){return L+pw*(y-y0)/(y1-y0)}
-    function Y(v){return T+ph*(1-v/ymax)}
+    function Y(v){return T+ph*(1-Math.min(v,ymax)/ymax)}
     var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">';
-    for(var v=0;v<=ymax;v+=step){s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#ddd"/><text x="'+(L-5)+'" y="'+(Y(v)+4)+'" font-size="12" fill="#666" text-anchor="end">'+fmt(v)+'</text>'}
-    for(var yy=1955;yy<=1990;yy+=5){s+='<line x1="'+X(yy)+'" x2="'+X(yy)+'" y1="'+Y(0)+'" y2="'+(Y(0)+4)+'" stroke="#111"/><text x="'+X(yy)+'" y="'+(H-8)+'" font-size="12" fill="#111" text-anchor="middle">'+yy+'</text>'}
+    for(var v=0;v<=ymax;v+=100){s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#ddd"/><text x="'+(L-5)+'" y="'+(Y(v)+4)+'" font-size="12" fill="#666" text-anchor="end">'+v+' €</text>'}
+    var passo=W<520?20:10;
+    for(var yy=1950;yy<=2020;yy+=passo){s+='<line x1="'+X(yy)+'" x2="'+X(yy)+'" y1="'+Y(0)+'" y2="'+(Y(0)+4)+'" stroke="#111"/><text x="'+X(yy)+'" y="'+(H-8)+'" font-size="12" fill="#111" text-anchor="middle">'+yy+'</text>'}
     s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#111"/>';
-    var seg=[],cur=[];
-    P.forEach(function(p,i){if(i>0&&p.y!==P[i-1].y+1){seg.push(cur);cur=[]}cur.push(p)});seg.push(cur);
-    seg.forEach(function(sg){if(sg.length>1)s+='<polyline fill="none" stroke="#a3122a" stroke-width="2" points="'+sg.map(function(p){return X(p.y).toFixed(1)+','+Y(p.l).toFixed(1)}).join(' ')+'"/>'});
-    P.forEach(function(p){s+='<circle cx="'+X(p.y).toFixed(1)+'" cy="'+Y(p.l).toFixed(1)+'" r="3" fill="#a3122a"><title>'+p.y+': '+fmt(p.l)+' lire ('+p.n+' locandine)</title></circle>'});
-    var f=P[0],l=P[P.length-1];
-    s+='<text x="'+(X(f.y)+6)+'" y="'+(Y(f.l)-8)+'" font-size="12" fill="#111">'+fmt(f.l)+'</text>';
-    s+='<text x="'+(X(l.y)-6)+'" y="'+(Y(l.l)-8)+'" font-size="12" fill="#111" text-anchor="end">'+fmt(l.l)+'</text>';
-    s+='<text x="'+L+'" y="11" font-size="12" fill="#666">lire</text></svg>';
+    linea(P).forEach(function(sg){if(sg.length<2)return;var a=sg.map(function(p){return X(p.y).toFixed(1)+','+Y(p.hi25).toFixed(1)}).join(' '),c=sg.slice().reverse().map(function(p){return X(p.y).toFixed(1)+','+Y(p.lo25).toFixed(1)}).join(' ');s+='<polygon points="'+a+' '+c+'" fill="#f0d5da" fill-opacity=".75"/>'});
+    linea(LP).forEach(function(sg){if(sg.length>1)s+='<polyline fill="none" stroke="#a3122a" stroke-width="2.5" points="'+sg.map(function(q){return X(q.y).toFixed(1)+','+Y(q.v).toFixed(1)}).join(' ')+'"/>'});
+    linea(LB).forEach(function(sg){if(sg.length>1)s+='<polyline fill="none" stroke="#111" stroke-width="2.5" points="'+sg.map(function(q){return X(q.y).toFixed(1)+','+Y(q.v).toFixed(1)}).join(' ')+'"/>'});
+    P.forEach(function(p){
+      var tit=p.y+': poltrona '+fmt(p.p)+(p.m==='L'?' lire':' euro')+' = '+p.p25+' euro di oggi'+(p.b!=null?'; meno caro '+fmt(p.b)+(p.m==='L'?' lire':' euro')+' = '+String(p.b25).replace('.',',')+' euro di oggi':'')+' ('+p.n+' locandine)';
+      s+='<circle cx="'+X(p.y).toFixed(1)+'" cy="'+Y(p.p25).toFixed(1)+'" r="2.5" fill="#a3122a"><title>'+tit+'</title></circle>';
+    });
+    var u=LP[LP.length-1],ub=LB[LB.length-1];
+    s+='<text x="'+(X(u.y)-4)+'" y="'+(Y(u.v)-9)+'" font-size="12" font-weight="700" fill="#a3122a" text-anchor="end">'+Math.round(u.v)+' €</text>';
+    s+='<text x="'+(X(ub.y)-4)+'" y="'+(Y(ub.v)-7)+'" font-size="12" font-weight="700" fill="#111" text-anchor="end">'+Math.round(ub.v)+' €</text>';
+    s+='</svg>';
     el.innerHTML=s;
   }
   draw();redraw.push(draw);
+  var h='<tr><th>Anno</th><th class="r">Poltrona</th><th class="r">In euro di oggi</th><th class="r">Meno caro</th><th class="r">In euro di oggi</th><th class="r">Locandine</th></tr>';
+  P.slice().reverse().forEach(function(p){var u=p.m==='L'?' lire':' €';h+='<tr><td>'+p.y+'</td><td class="r">'+fmt(p.p)+u+'</td><td class="r">'+p.p25+' €</td><td class="r">'+(p.b!=null?fmt(p.b)+u:'–')+'</td><td class="r">'+(p.b25!=null?String(p.b25).replace('.',',')+' €':'–')+'</td><td class="r">'+p.n+'</td></tr>'});
+  $('ptab').innerHTML=h;
 }
 
 /* ---------- grafico ---------- */
