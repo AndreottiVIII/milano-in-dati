@@ -108,7 +108,7 @@
   }
 
   function descrPosto(r, c, p) {
-    if (p.pos === false || c.posto[p.id] == null) return '';
+    if (p.pos === false || p.v === 0 || c.posto[p.id] == null) return '';  // con zero il posto a pari merito non dice nulla
     var k = c.posto[p.id], pari = 0;
     r.punti.forEach(function (q) { if (q.pos !== false && q.v === p.v) pari++; });
     return k + '° su ' + c.n + (pari > 1 ? ', a pari con altri ' + (pari - 1) : '');
