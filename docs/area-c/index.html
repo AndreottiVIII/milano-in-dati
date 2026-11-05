@@ -54,6 +54,7 @@
     <li><a href="#grafico">Grafico: ingressi al giorno 2016-2024</a></li>
     <li><a href="#vecchia">La serie 2012-2015 (conteggio diverso)</a></li>
     <li><a href="#mappa-s">Mappa dei varchi</a></li>
+    <li><a href="#anello">Da che parte si entra</a></li>
     <li><a href="#anni">Anno per anno</a></li>
     <li><a href="#covid">Mese per mese: 2019, 2020, 2021</a></li>
     <li><a href="#giorni">Giorno della settimana, agosto, festivi</a></li>
@@ -76,23 +77,31 @@
 <div id="leggi"></div>
 <p class="nota">Le date degli eventi vengono da giornali e siti web (il link è accanto a ogni riga), non da atti ufficiali: possono essere imprecise di uno o due giorni. Le righe «Dai dati» si vedono invece nei file del Comune.</p>
 <ul class="ev" id="eventi-c"></ul>
-<p class="fonte">Fonte: <code>data/giorni.json</code>, costruito da ds1085 (1/9/2016-31/12/2018), ds1072 (2019 - 30/11/2024) e, per 61 giorni del 2024 mancanti lì, dalla somma dei file mensili per varco. 16 giorni non hanno nessun dato. Il totale comprende le moto.</p>
+<p class="fonte">Fonte: Comune di Milano, ds1085 (1/9/2016-31/12/2018), ds1072 (2019 - 30/11/2024) e, per 61 giorni del 2024 mancanti lì, dalla somma dei file mensili per varco. 16 giorni non hanno nessun dato. Il totale comprende le moto.</p>
 
 <h2 id="vecchia">La serie 2012-2015 (conteggio diverso): non confrontabile</h2>
 <div class="avviso forte">ATTENZIONE. Questa serie è un'altra cosa: da gennaio 2016 scende da circa 135.000 a circa 45.000 al giorno senza che il traffico sia calato. Non va letta insieme al grafico sopra.</div>
 <div id="vecchia-c"></div>
 <div id="vecchia-t"></div>
-<p class="fonte">Fonte: <code>data/vecchia.json</code> (ds779-ds783, campo <code>totale</code>). In grigio i giorni da gennaio 2016 (livello ridotto); i cerchi vuoti sono giorni parziali; le interruzioni sono giorni senza dato (2012: 2; 2014: 16; 2015: 52; 2016: 21).</p>
+<p class="fonte">Fonte: Comune di Milano (ds779-ds783, campo <code>totale</code>). In grigio i giorni da gennaio 2016 (livello ridotto); i cerchi vuoti sono giorni parziali; le interruzioni sono giorni senza dato (2012: 2; 2014: 16; 2015: 52; 2016: 21).</p>
 
 <h2 id="mappa-s">Mappa dei varchi</h2>
 <p class="nota">Cerchio = media degli ingressi nei giorni feriali normali (non agosto, non Natale), 2017-2024. Clicca un varco per la scheda. I due varchi tolti a maggio 2022 sono in grigio. Il bordo è l'Area C (dati del Comune). I quadratini neri sono le stazioni dell'aria più vicine (solo posizione).</p>
 <div id="mappa"></div>
 <div class="scheda" id="scheda"><span class="vuoto">Clicca un varco sulla mappa.</span></div>
-<p class="fonte">Fonte: <code>data/varchi.json</code> (posizioni: ds82; ingressi: file mensili Settembre 2016 - Novembre 2024, somma delle mezz'ore). Base: © OpenStreetMap contributors.</p>
+<p class="fonte">Fonte: Comune di Milano (posizioni: ds82; ingressi: file mensili Settembre 2016 - Novembre 2024, somma delle mezz'ore). Base: © OpenStreetMap contributors.</p>
+
+<h2 id="anello">Da che parte si entra</h2>
+<p class="nota">La Cerchia dei Bastioni disegnata come un cerchio. Ogni barra è un varco, messo in fila nell'ordine in cui si incontrano girando intorno al centro, a distanza uguale (è uno schema, non una mappa). Barra più lunga = più ingressi in un giorno feriale del 2023. Il trattino nero è il livello del 2019; in grigio i due varchi chiusi nel 2022, con il dato 2019. Tocca o passa il mouse su una barra per leggere nome e numeri, oppure usa i due tasti.</p>
+<div id="anello-c"></div>
+<div class="scheda" id="anello-info" aria-live="polite"><span class="vuoto">Tocca una barra.</span></div>
+<p class="nota"><button type="button" id="anello-prec">‹ varco precedente</button> <button type="button" id="anello-succ">varco successivo ›</button></p>
+<p class="nota" id="anello-nota"></p>
+<p class="fonte">Media degli ingressi nei feriali normali (fuori da agosto e da 24/12-6/1), come nella mappa. Conta i passaggi, non i veicoli diversi. Il confronto 2019-2023 riguarda i varchi attivi in entrambi gli anni.</p>
 
 <h2 id="anni">Anno per anno</h2>
 <div id="anni-c"></div>
-<p class="fonte">Fonte: <code>data/tabelle.json</code> (<code>anno</code>). "Feriali" = lunedì-venerdì non festivi. "Feriali normali" = feriali fuori da agosto e da 24/12-6/1. Il 2016 ha solo settembre-dicembre, il 2024 solo gennaio-novembre: per confrontare gli anni usa le colonne settembre-novembre, i soli mesi presenti in tutti gli anni.</p>
+<p class="fonte">Fonte: Comune di Milano. "Feriali" = lunedì-venerdì non festivi. "Feriali normali" = feriali fuori da agosto e da 24/12-6/1. Il 2016 ha solo settembre-dicembre, il 2024 solo gennaio-novembre: per confrontare gli anni usa le colonne settembre-novembre, i soli mesi presenti in tutti gli anni.</p>
 
 <h2 id="covid">Mese per mese: media dei feriali nel 2019, 2020 e 2021</h2>
 <div id="covid-c"></div>
@@ -291,6 +300,94 @@ function sezioneMappa() {
   const grp = L.featureGroup(Object.values(layers)); map.fitBounds(grp.getBounds().pad(0.12));
   const top = V.varchi.reduce((a, b) => (b.mtot || 0) > (a.mtot || 0) ? b : a); scheda(top, m0);
 }
+function sezioneAnello() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const nf = x => Number(x).toLocaleString('it-IT', { useGrouping: 'always', maximumFractionDigits: 0 });
+  const fix = n => n.replace(/^Xx /, 'XX ').replace(/ Di /g, ' di ');
+  const cf = DATA.confine, xs = [], ys = [];
+  (function w(c) { if (typeof c[0] === 'number') { xs.push(c[0]); ys.push(c[1]); } else c.forEach(w); })(cf.geometry.coordinates);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const vs = DATA.varchi.varchi.map(g => ({ g, nome: fix(g.nome), a: Math.atan2((g.lon - cx) * Math.cos(cy * Math.PI / 180), g.lat - cy), chiuso: g.m2023 === null || g.m2023 === undefined }));
+  vs.sort((p, q) => p.a - q.a);
+  let k0 = vs.findIndex(v => v.a >= 0); if (k0 < 0) k0 = 0; // si parte da nord e si gira in senso orario
+  const ord = vs.slice(k0).concat(vs.slice(0, k0));
+  const N = ord.length, S = 240, R0 = 76, BM = 96;
+  const mx = Math.max(...ord.map(v => v.g.m2019 || 0));
+  const sc = BM / mx;
+  ord.forEach((v, i) => { v.ang = 2 * Math.PI * i / N; v.ux = Math.sin(v.ang); v.uy = -Math.cos(v.ang); v.val = v.chiuso ? v.g.m2019 : v.g.m2023; });
+  const attivi = ord.filter(v => !v.chiuso);
+  const t19 = attivi.reduce((a, v) => a + v.g.m2019, 0), t23 = attivi.reduce((a, v) => a + v.g.m2023, 0);
+  const var_ = (t23 / t19 - 1) * 100, sg = x => (x < 0 ? '−' : '+') + nf(Math.abs(x));
+  const col = '#c2410c';
+  let s = `<svg class="g" viewBox="0 0 ${S * 2} ${S * 2}" role="img" aria-label="Anello dei varchi di Area C: ogni barra è un varco, lunga come gli ingressi di un feriale del 2023" style="max-width:600px;margin:0 auto;touch-action:manipulation">`;
+  s += `<circle cx="${S}" cy="${S}" r="${R0}" fill="none" stroke="#000" stroke-width="3"/>`;
+  ord.forEach((v, i) => {
+    const L = (v.val || 0) * sc, x1 = S + v.ux * R0, y1 = S + v.uy * R0, x2 = S + v.ux * (R0 + Math.max(L, 1)), y2 = S + v.uy * (R0 + Math.max(L, 1));
+    s += `<line id="an-b${i}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${v.chiuso ? '#bbb' : col}" stroke-width="5"/>`;
+    if (!v.chiuso) {
+      const l19 = v.g.m2019 * sc, tx = S + v.ux * (R0 + l19), ty = S + v.uy * (R0 + l19);
+      s += `<line x1="${(tx + v.uy * 4.5).toFixed(1)}" y1="${(ty - v.ux * 4.5).toFixed(1)}" x2="${(tx - v.uy * 4.5).toFixed(1)}" y2="${(ty + v.ux * 4.5).toFixed(1)}" stroke="#000" stroke-width="1.8"/>`;
+    }
+    s += `<circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="2.6" fill="#fff" stroke="#000" stroke-width="1.5"/>`;
+  });
+  s += `<g id="an-sel"></g><g id="an-lab"></g>`;
+  s += `<text x="${S}" y="${S - 8}" font-size="30" font-weight="800" text-anchor="middle" fill="${col}">${nf(Math.round(t23 / 1000) * 1000)}</text>`;
+  s += `<text x="${S}" y="${S + 10}" font-size="12" text-anchor="middle">ingressi in un feriale</text>`;
+  s += `<text x="${S}" y="${S + 25}" font-size="12" text-anchor="middle">nel 2023, ${sg(var_)}%</text>`;
+  s += `<text x="${S}" y="${S + 40}" font-size="12" text-anchor="middle">sul 2019</text>`;
+  s += `</svg>`;
+  $('#anello-c').innerHTML = s;
+  const svg = $('#anello-c svg'), lab = svg.querySelector('#an-lab');
+  // nomi sul grafico: solo i più grandi, mai troppo vicini; poi si spostano dentro i bordi
+  const pos = [];
+  ord.map((v, i) => [v, i]).sort((p, q) => q[0].g.m2019 - p[0].g.m2019).slice(0, 8).forEach(([v, i]) => {
+    if (pos.some(j => Math.min((i - j + N) % N, (j - i + N) % N) < 3)) return;
+    pos.push(i);
+    const d = R0 + (v.val || 0) * sc + 8, x = S + v.ux * d, y = S + v.uy * d + 5;
+    const anc = Math.abs(v.ux) < .3 ? 'middle' : (v.ux > 0 ? 'start' : 'end');
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', x.toFixed(1)); t.setAttribute('y', y.toFixed(1)); t.setAttribute('text-anchor', anc);
+    t.setAttribute('font-size', '15'); t.setAttribute('font-weight', '800'); t.textContent = v.nome; lab.appendChild(t);
+    let b = t.getBBox(); let dx = 0;
+    if (b.width > 85 && v.nome.indexOf(' ') > 0) { // nome lungo: due righe
+      const pr = v.nome.slice(0, v.nome.indexOf(' ')), re = v.nome.slice(v.nome.indexOf(' ') + 1);
+      t.textContent = ''; const x0 = t.getAttribute('x');
+      [pr, re].forEach((w, q) => { const ts = document.createElementNS(NS, 'tspan'); ts.setAttribute('x', x0); ts.setAttribute('dy', q ? '16' : '-8'); ts.textContent = w; t.appendChild(ts); });
+      b = t.getBBox();
+    }
+    if (b.x < 4) dx = 4 - b.x; else if (b.x + b.width > S * 2 - 4) dx = S * 2 - 4 - (b.x + b.width);
+    if (dx) { t.setAttribute('x', (x + dx).toFixed(1)); t.querySelectorAll('tspan').forEach(ts => ts.setAttribute('x', (x + dx).toFixed(1))); }
+  });
+  const info = $('#anello-info'), sel = svg.querySelector('#an-sel');
+  let cur = -1;
+  function mostra(i) {
+    cur = i; const v = ord[i], g = v.g;
+    sel.innerHTML = `<line x1="${S + v.ux * (R0 - 10)}" y1="${S + v.uy * (R0 - 10)}" x2="${S + v.ux * (R0 + mx * sc + 4)}" y2="${S + v.uy * (R0 + mx * sc + 4)}" stroke="#000" stroke-width="1" stroke-dasharray="3 3"/>`;
+    if (v.chiuso) {
+      info.innerHTML = `<b>${v.nome}</b><br>Varco chiuso dal 29 maggio 2022. Nel 2019: ${nf(g.m2019)} ingressi in un feriale.`;
+    } else {
+      const d = g.m2019 ? (g.m2023 / g.m2019 - 1) * 100 : null;
+      info.innerHTML = `<b>${v.nome}</b><br>2023: <b>${nf(g.m2023)}</b> ingressi in un feriale<br>2019: ${nf(g.m2019)}${d === null ? '' : ' (' + sg(d) + '%)'}`;
+    }
+    svg.querySelectorAll('[id^=an-b]').forEach(e => e.setAttribute('stroke-width', 5)); svg.querySelector('#an-b' + i).setAttribute('stroke-width', 8);
+  }
+  function daPunto(ev) {
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const q = pt.matrixTransform(svg.getScreenCTM().inverse()), dx = q.x - S, dy = q.y - S;
+    if (Math.hypot(dx, dy) < R0 - 6) return -1;
+    let a = Math.atan2(dx, -dy); if (a < 0) a += 2 * Math.PI;
+    return Math.round(a / (2 * Math.PI) * N) % N;
+  }
+  svg.addEventListener('click', ev => { const i = daPunto(ev); if (i >= 0) mostra(i); });
+  svg.addEventListener('pointermove', ev => { if (ev.pointerType === 'mouse') { const i = daPunto(ev); if (i >= 0 && i !== cur) mostra(i); } });
+  $('#anello-prec').onclick = () => mostra((cur + N - 1) % N);
+  $('#anello-succ').onclick = () => mostra((cur + 1) % N);
+  const top = ord.reduce((a, b, i) => (b.val > ord[a].val ? i : a), 0); mostra(top);
+  // spiegazione dei due numeri
+  const A = DATA.tabelle.anno, ya = y => A.find(r => r.anno === y);
+  const sn = y => ya(y).lavorativi_sett_nov, v24 = (sn(2024) / sn(2019) - 1) * 100, v23 = (sn(2023) / sn(2019) - 1) * 100;
+  $('#anello-nota').innerHTML = `<b>Perché qui ${sg(var_)}% e in alto ${sg(v24)}%?</b> Sono due numeri veri con due definizioni. Qui: 2023 contro 2019, ${attivi.length} varchi aperti in entrambi gli anni, feriali di tutto l'anno. In alto: settembre-novembre 2024 contro settembre-novembre 2019, tutti gli ingressi. Con la definizione di settembre-novembre il 2023 è a ${sg(v23)}%: il resto della distanza è il calo tra 2023 e 2024.`;
+}
 function scheda(g, m0) {
   const n = g.serie, W = 520, H = 130, ml = 44, mt = 8, mb = 22, mr = 6;
   const mx = Math.max(...n.filter(v => v !== null), 1), ym = Math.ceil(mx / 1000) * 1000 || 1000;
@@ -340,7 +437,7 @@ function sezioniTabelle() {
 (async () => {
   try {
     await carica();
-    sezioneInBreve(); sezioneGrafico(); sezioneVecchia(); sezioniTabelle();
+    sezioneInBreve(); sezioneGrafico(); sezioneVecchia(); sezioniTabelle(); sezioneAnello();
     if (window.L) sezioneMappa(); else $('#mappa').innerHTML = '<p class="nota" style="padding:8px">La mappa non si è caricata (libreria Leaflet non raggiungibile).</p>';
   } catch (e) {
     const el = $('#errore'); el.style.display = 'block'; el.textContent = 'Errore nel caricamento dei dati: ' + e.message; console.error(e);
