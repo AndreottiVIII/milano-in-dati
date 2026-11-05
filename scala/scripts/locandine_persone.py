@@ -175,7 +175,7 @@ def main():
 
     # interpreti da un elenco scelto: il nome intero deve stare sul foglio, anche con piccoli errori di lettura
     el = list(csv.DictReader(open(a.interpreti, encoding='utf-8-sig')))
-    conti = C.defaultdict(lambda: {'n': 0, 'prima': '', 'ultima': '', 'tit': C.Counter()})
+    conti = C.defaultdict(lambda: {'n': 0, 'prima': '', 'ultima': '', 'tit': C.Counter(), 'dec': C.Counter()})
     memo2 = {}
 
     def noti_in_riga(c):
@@ -206,18 +206,21 @@ def main():
         for r in testo.get(x['file'], []):
             tro |= noti_in_riga(norma(r.get('t')).replace(' ', ''))
         # chi canta sta sui fogli d'opera, chi danza su quelli di balletto
-        vuole = 'canto' if x['tipo'] == 'Opera' else 'danza'
-        tro = {n for n in tro if ruolo[n] == vuole}
+        vuole = {'canto'} if x['tipo'] == 'Opera' else {'danza'}
+        if x['mista']:
+            vuole = {'canto', 'danza'}
+        tro = {n for n in tro if ruolo[n] in vuole}
         per_file[x['file']] = tro
         for n in tro:
             k = conti[n]
             k['n'] += 1
+            k['dec'][x['data'][:3] + '0'] += 1
             k['prima'] = min(k['prima'] or x['data'], x['data'])
             k['ultima'] = max(k['ultima'], x['data'])
             if x['titolo_principale']:
                 k['tit'][x['titolo_principale']] += 1
-    scrivi('interpreti_noti.csv', ['nome', 'ruolo', 'locandine', 'prima', 'ultima', 'titoli'],
-           [(n, ruolo[n], k['n'], k['prima'], k['ultima'], ' | '.join(f'{t}:{c}' for t, c in k['tit'].most_common(5))) for n, k in sorted(conti.items(), key=lambda q: -q[1]['n'])])
+    scrivi('interpreti_noti.csv', ['nome', 'ruolo', 'locandine', 'prima', 'ultima', 'titoli', 'decenni'],
+           [(n, ruolo[n], k['n'], k['prima'], k['ultima'], ' | '.join(f'{t}:{c}' for t, c in k['tit'].most_common(5)), json.dumps(k['dec'])) for n, k in sorted(conti.items(), key=lambda q: -q[1]['n'])])
     print('INTERPRETI', [(n, k['n'], k['prima'][:4], k['ultima'][:4]) for n, k in sorted(conti.items(), key=lambda q: -q[1]['n'])])
     print('CALLAS', conti['Maria Callas']['tit'].most_common(30))
     # prova: cast del cartellone, per decennio, cognome sul foglio

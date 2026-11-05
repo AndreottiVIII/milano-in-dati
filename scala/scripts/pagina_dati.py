@@ -584,6 +584,10 @@ with open(os.path.join(BASE, "locandine", "prime_assolute_verificate.csv"), enco
             prime_loc["aggiunte"] += 1
 prime.sort(key=lambda r: (r[0], r[1] or "9999", r[2].lower()))
 print("prime dalle locandine", prime_loc)
+# stesso lavoro con due nomi: CO2 di Battistelli, in Wikidata col titolo inglese del film da cui viene
+prime = [r for r in prime if r[2] != "An Inconvenient Truth"]
+for r in prime:
+    r[2] = r[2].replace("<sub>", "").replace("</sub>", "")
 json.dump(prime, open(os.path.join(OUT, "prime.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 # ------------------------------------------------------------------ 7 dicembre

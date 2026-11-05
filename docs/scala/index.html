@@ -69,9 +69,12 @@ details{margin:.6em 0;border:1px solid var(--line);padding:6px 10px} details>sum
 <p class="note">Letto in automatico dalle locandine: su 326 confronti con altre fonti 248 giusti, 15 sbagliati, 63 non letti. Prima del 1960 ne leggiamo circa la metà: quegli anni sono sottostimati.</p>
 
 <h2>Chi cantava e chi danzava</h2>
-<p class="note">Non è una classifica completa: cerchiamo un elenco di nomi scelti da noi. Il numero è quante locandine riportano quel nome, ed è un minimo; dal 2010 circa molte locandine non hanno i nomi.</p>
-<p class="note">In cima non ci sono le grandi voci ma ruoli secondari e corpo di ballo.</p>
+<p id="ndanza"></p>
+<div class="two"><div><h3>Canto</h3><div id="tcantod"></div></div><div><h3>Danza</h3><div id="tdanzad"></div></div></div>
+<p class="note">Non è una classifica completa: cerchiamo un elenco di nomi scelti da noi. Il numero dice quante locandine riportano quel nome, non quante sere quella persona è andata in scena: una locandina può elencare più interpreti per lo stesso ruolo, e chi è anche coreografo compare pure per quello. Nel canto, in cima ci sono spesso i ruoli secondari e non le grandi voci.</p>
+<details><summary>Tutti gli anni insieme</summary>
 <div class="two"><div><h3>Canto</h3><div id="tcanto"></div></div><div><h3>Danza</h3><div id="tdanza"></div></div></div>
+</details>
 
 <h2>Quanto costava una poltrona</h2>
 <div id="pchart" role="img" aria-label="Prezzo tipico della poltrona di platea in lire, dal 1953 al 1993"></div>
@@ -309,7 +312,20 @@ function persone(list,el){
   if(list.length>15)h+='<details><summary>Gli altri '+(list.length-15)+'</summary><div class="tw"><table>'+rows(15,list.length)+'</table></div></details>';
   $(el).innerHTML=h;
 }
-function canto(rie){persone(rie.canto,'tcanto');persone(rie.danza,'tdanza')}
+function decenni(o,el){
+  var h='<div class="tw"><table><tr><th>Anni</th><th>I più presenti (locandine col nome)</th></tr>';
+  Object.keys(o).sort().forEach(function(k){
+    var v=o[k].filter(function(x){return x.n>=5});
+    if(!v.length)return;
+    h+='<tr><td>'+k.slice(2)+'</td><td>'+v.map(function(x){return esc(x.c)+' <span class="sub">'+fmt(x.n)+'</span>'}).join(' · ')+'</td></tr>';
+  });
+  $(el).innerHTML=h+'</table></div>';
+}
+function canto(rie){
+  decenni(rie.canto_dec,'tcantod');decenni(rie.danza_dec,'tdanzad');
+  persone(rie.canto,'tcanto');persone(rie.danza,'tdanza');
+  $('ndanza').textContent='Oggi si danno molti più balletti: '+fmt(rie.decenni['1950'].B)+' recite negli anni ’50, '+fmt(rie.decenni['2010'].B)+' negli anni 2010. Una classifica unica favorirebbe chi balla adesso: per questo i nomi si leggono decennio per decennio.';
+}
 
 /* ---------- prezzi ---------- */
 function prezzi(rie){

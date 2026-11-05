@@ -154,6 +154,15 @@ def main():
                       'A': v.get('Altro', 0) + v.get('Manifestazione', 0) + v.get('Diversi', 0), 'g': v.get('Di giorno (prima delle 18)', 0)}
     prime = leggi(U, 'prime_assolute_verificate.csv') if os.path.exists(os.path.join(U, 'prime_assolute_verificate.csv')) else []
     tipi = num['tipi']
+
+    def per_decennio(ruolo):
+        # i primi 5 di ogni decennio: una classifica unica favorirebbe gli anni con più recite
+        d = C.defaultdict(list)
+        for x in inter:
+            if x['ruolo'] == ruolo:
+                for k, c in json.loads(x['decenni']).items():
+                    d[k].append({'c': x['nome'], 'n': c})
+        return {k: sorted(v, key=lambda q: -q['n'])[:5] for k, v in sorted(d.items())}
     json.dump({'numeri': {'locandine': rie['locandine'], 'recite': rie['recite'], 'date_ore': rie['date_ora_distinte'], 'serate': rie['serate'], 'giorni': rie['giorni'],
                           'di_giorno': num['giorno'], 'opere': num['opere'], 'balletti': num['balletti'], 'compositori': num['compositori'], 'prima': rie['prima'], 'ultima': rie['ultima'],
                           'tipi': {k: tipi.get(k, 0) for k in ('Opera', 'Balletto', 'Concerto', 'Recital', 'Manifestazione', 'Diversi', 'Altro')}, 'bambini': num['bambini']},
@@ -164,6 +173,7 @@ def main():
                'direttori': [{'c': nome(x['nome']), 'n': int(x['recite'])} for x in dirs[:25]],
                'canto': [{'c': x['nome'], 'n': int(x['locandine']), 'da': x['prima'][:4], 'al': x['ultima'][:4]} for x in inter if x['ruolo'] == 'canto'],
                'danza': [{'c': x['nome'], 'n': int(x['locandine']), 'da': x['prima'][:4], 'al': x['ultima'][:4]} for x in inter if x['ruolo'] == 'danza'],
+               'canto_dec': per_decennio('canto'), 'danza_dec': per_decennio('danza'),
                'prezzi': pz, 'prime': prime, 'generato': '2026-11-05'},
               open(os.path.join(O, 'riepilogo.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print({k: len(v) for k, v in dec.items()}, sum(os.path.getsize(os.path.join(O, f)) for f in os.listdir(O)))
