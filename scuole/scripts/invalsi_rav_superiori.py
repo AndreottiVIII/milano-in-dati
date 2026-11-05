@@ -26,6 +26,8 @@ def parse(b):
     for n, i in enumerate(teste):
         fine = teste[n + 1] - 2 if n + 1 < len(teste) else len(c)
         grado_tab, materia = c[i - 2], c[i - 1]
+        if not grado_tab.startswith("Scuola secondaria di II"):
+            continue
         j = i + 1
         cols = []
         while j < fine and c[j] != "Riferimenti":
@@ -61,6 +63,9 @@ for f in sorted(glob.glob(os.path.join(IN, "*.json"))):
     d = json.load(open(f, encoding="utf8"))
     if d.get("http") == 200 and not d.get("righe"):
         codici.append(d["istituto"])
+# educandato e convitto: nell'anagrafe il liceo ha un suo codice, ma i punteggi stanno sotto l'istituto che lo contiene
+# (Setti Carraro: MIPC110009 sotto MIVE01000P; Longone: MIPS67000C sotto MIVC01000Q)
+codici += ["MIVE01000P", "MIVC01000Q"]
 print("istituti", len(codici), flush=True)
 ultimo = 0.0
 for cod in codici:

@@ -38,6 +38,20 @@ a = a[(a.anno_inizio == 2024) & (a.tipo == "statale") & a.ordine.isin(["primaria
 a = a.merge(m, on="codice_mecc", how="left")
 print("plessi statali 2024/25 senza istituto di riferimento (anagrafe 2025/26):", a.istituto.isna().sum(), "su", len(a))
 a = a.dropna(subset=["istituto"])
+# educandato e convitto: i punteggi stanno sotto MIVE01000P e MIVC01000Q, le scuole annesse hanno codici propri
+ANNESSE = {"MIMM01900D": "MIVE01000P", "MIPC110009": "MIVE01000P", "MIMM023005": "MIVC01000Q", "MIPS67000C": "MIVC01000Q"}
+a["istituto"] = a.codice_mecc.map(ANNESSE).fillna(a.istituto)
+# le elementari annesse sono nei dati del Comune (scuole_anno_tidy), non nel file del Ministero per istituto
+ELEM = {"SETTI CARRARO DALLA CHIESA": "MIVE01000P", "LONGONE": "MIVC01000Q"}
+_t = pd.read_csv(os.path.join(BASE, "pulito", "scuole_anno_tidy.csv"), sep=";", dtype=str, keep_default_na=False)
+_t = _t[(_t.anno_scolastico == "2024/2025") & (_t.ordine == "primaria")]
+_e = []
+for chiave, ist in ELEM.items():
+    x = _t[_t.denominazione.str.upper().str.contains(chiave)]
+    for _, r in x.iterrows():
+        _e.append(dict(codice_mecc=r.codice, istituto=ist, ordine="primaria", iscritti=float(r.iscritti), cittadinanza_non_italiana=float(r.cittadinanza_non_italiana)))
+if _e:
+    a = pd.concat([a, pd.DataFrame(_e)], ignore_index=True)
 q = a.groupby(["istituto", "ordine"]).agg(iscritti=("iscritti", "sum"), nonita=("cittadinanza_non_italiana", "sum"), plessi=("codice_mecc", "nunique")).reset_index()
 q["quota"] = q.nonita / q.iscritti * 100
 Q = q.pivot(index="istituto", columns="ordine", values=["quota", "iscritti"])
