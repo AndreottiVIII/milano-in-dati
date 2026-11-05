@@ -83,6 +83,7 @@
     { path: 'targhe/', label: 'Lapidi e targhe' },
     { path: 'palazzi/', label: 'Età dei palazzi' },
     { path: 'reati-citta/', label: 'Reati e sicurezza in città' },
+    { path: 'omicidi/', label: 'Gli omicidi' },
     { path: 'nascite/', label: 'Nascite e mamme' },
     { path: 'tribunale/', label: 'Il tribunale di Milano' },
     { path: 'auto/', label: 'Le auto dei milanesi' },

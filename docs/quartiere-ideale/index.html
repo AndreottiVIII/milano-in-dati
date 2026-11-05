@@ -28,6 +28,9 @@ main{max-width:1100px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{fo
 .sl .sp{font-size:.8rem;color:var(--mut);line-height:1.3}
 .pill{display:inline-block;font-size:.74rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin:0 4px 2px 0;white-space:nowrap}
 .pill.g{border-color:#7a9a95;color:#37574f;background:var(--soft)}
+.add{margin:.9em 0 .2em;padding:8px 0;border-top:2px solid var(--ink)} .add label{font-weight:700;display:block;margin-bottom:4px} .add select{font:inherit;width:100%;max-width:100%;padding:6px 8px;border:1px solid var(--ink);background:#fff;color:var(--ink);min-height:40px}
+.sl .rm{font:inherit;font-size:.8rem;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:1px 10px;margin-left:8px;cursor:pointer} .sl .rm:hover{border-color:var(--acc)}
+.sl .poco{font-size:.8rem;color:var(--warm);margin-top:2px}
 .live2{display:none;position:sticky;top:0;z-index:5;margin:.4em 0}
 .live{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
 .top10{list-style:none;margin:0;padding:0}
@@ -46,7 +49,7 @@ main{max-width:1100px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{fo
 details{margin:.3em 0} summary{cursor:pointer;color:var(--acc);font-size:.85rem}
 details table{border-collapse:collapse;font-size:.82rem;margin:.4em 0;width:100%} details td,details th{border-top:1px solid var(--line);padding:3px 6px 3px 0;text-align:left;vertical-align:top} details th{font-weight:600;color:var(--mut)}
 td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-@media(max-width:900px){.live2{display:block}.grid{grid-template-columns:minmax(0,1fr)}.right{position:static}}
+@media(max-width:900px){#top-h{scroll-margin-top:96px}.live2{display:block}.grid{grid-template-columns:minmax(0,1fr)}.right{position:static}}
 @media(max-width:620px){.card .nm{font-size:1rem}.card .sc b{font-size:1.15rem}}
 footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
 </style><script src="../menu.js" defer></script></head><body><main>
@@ -59,6 +62,9 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 <div class="live live2" id="live2" aria-live="off"></div>
 <div class="ctl"><button type="button" id="b-base">Valori di partenza</button><button type="button" id="b-zero">Azzera tutto</button></div>
 <div id="sliders"></div>
+<div class="warn" id="insieme">Attenzione: «Poco cemento», «Case a prezzo basso» e «Vita in strada» misurano quasi la stessa cosa, cioè quanto un quartiere è centrale. I primi due premiano la periferia, il terzo il centro: se li alzi insieme, o si annullano o contano più volte la stessa cosa.</div>
+<div class="add"><label for="add-sv">Aggiungi un servizio</label><select id="add-sv"></select><p class="sub" style="margin:.4em 0 0">Scegli un servizio dal menu: compare un cursore, da 0 a 5. Puoi toglierlo quando vuoi.</p></div>
+<div id="sliders-x"></div>
 <p class="sub">Scala: 0 non conta · 1 poco · 3 abbastanza · 5 moltissimo. I due cursori su bar e locali si escludono: se ne alzi uno, l&rsquo;altro torna a zero. Le scelte restano nell&rsquo;indirizzo della pagina: puoi copiarlo e mandarlo a qualcuno.</p>
 </div>
 <div class="right">
@@ -73,6 +79,7 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 <div id="sel"></div>
 
 <h2 id="top-h">I primi 10</h2>
+<div class="warn" id="pari" hidden></div>
 <ol class="top10" id="top10"><li class="sub">Caricamento&hellip;</li></ol>
 <details id="tutti"><summary>Tutta la classifica</summary><div id="tutti-c"></div></details>
 
@@ -83,7 +90,7 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 <div class="warm"><ul id="limiti-lista"></ul></div>
 
 <footer>
-<p><b>Da dove vengono i numeri.</b> Tutti i valori vengono dalla pagina <a href="../quartiere/">Il tuo quartiere</a>, che li prende a sua volta dalle altre pagine del sito, ognuna con la sua fonte e la sua licenza. Il file che alimenta questa pagina &egrave; <a href="data/criteri.json">data/criteri.json</a>: per ogni criterio e ogni quartiere il valore e il suo posto (percentile) tra i quartieri ammessi; per ogni criterio il file e il campo di origine.</p>
+<p><b>Da dove vengono i numeri.</b> Tutti i valori vengono dalla pagina <a href="../quartiere/">Il tuo quartiere</a>, che li prende a sua volta dalle altre pagine del sito, ognuna con la sua fonte e la sua licenza. I dati di questa pagina sono in <a href="data/criteri.json">un file aperto</a>: per ogni criterio e ogni quartiere il valore e il suo posto (percentile) tra i quartieri ammessi; per ogni criterio da dove viene il numero.</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
@@ -91,7 +98,7 @@ footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid
 <script>
 (function(){
 'use strict';
-var D=null,NF=null,MAP=null,LAY={},MARK=null,NIL={},CR={},W={},SEL=null,RES=null;
+var D=null,NF=null,MAP=null,LAY={},MARK=null,NIL={},CR={},W={},ADD={},SEL=null,RES=null;
 var BASE={parchi:3,prezzo:3,servizi:3,metro:2};
 var RAMP=['#00504a','#2a8a7b','#6fb8ac','#b4dad3','#e3f1ee'];
 var SCALA=['non conta','poco','così così','abbastanza','molto','moltissimo'];
@@ -107,9 +114,20 @@ function fmt(c,v){
   if(c.fmt==='pct')return nf(v,c.dec)+'%';
   return nf(v,c.dec);
 }
-function unitOf(c){if(c.fmt==='eur')return /m²/.test(c.unita)?'al m²':'';return c.fmt==='pct'?'':c.unita}
+function unitOf(c){if(c.suf!=null)return c.suf;if(c.fmt==='eur')return /m²/.test(c.unita)?'al m²':'';return c.fmt==='pct'?'':c.unita}
 function valTxt(c,v){var u=unitOf(c);return fmt(c,v)+(u?' '+u:'')}
 function good(c,p){return c.verso>0?p:1-p}
+function altriN(k){return k===1?'un altro quartiere':'altri '+k+' quartieri'}
+/* dove sta un valore tra i quartieri che hanno il dato, dicendo i pari merito */
+function posiz(c,v){
+  var a=c.vals,N=a.length,mig=0,uguali=0,i,x;
+  for(i=0;i<N;i++){x=a[i];if(x===v)uguali++;else if(c.verso>0?x>v:x<v)mig++}
+  var altri=uguali-1,peg=N-mig-uguali;
+  if(!mig)return altri?'il valore migliore, uguale a quello di '+altriN(altri)+' (su '+N+')':'il valore migliore dei '+N+' quartieri';
+  if(!peg)return altri?'il valore peggiore, uguale a quello di '+altriN(altri)+' (su '+N+')':'il valore peggiore dei '+N+' quartieri';
+  return 'meglio di '+peg+' quartieri su '+N+(altri?'; uguale a quello di '+altriN(altri):'');
+}
+function rankTxt(r){return r.rank+'° su '+RES.ranked.length+(r.pari?', a pari merito con '+altriN(r.pari):'')}
 
 /* ---------- pesi e indirizzo ---------- */
 function leggiHash(){
@@ -122,7 +140,7 @@ function scriviHash(){
   var p=[];D.criteri.forEach(function(c){if(W[c.id]>0)p.push(c.id+'='+W[c.id])});
   try{history.replaceState(null,'',location.pathname+location.search+(p.length?'#'+p.join('&'):''))}catch(e){}
 }
-function impostaPesi(o){D.criteri.forEach(function(c){W[c.id]=o[c.id]||0})}
+function impostaPesi(o){ADD={};D.criteri.forEach(function(c){W[c.id]=o[c.id]||0;if(c.extra&&W[c.id]>0)ADD[c.id]=1})}
 
 /* ---------- calcolo ---------- */
 function calcola(){
@@ -130,20 +148,26 @@ function calcola(){
   var rows=[];
   D.nil.forEach(function(n){
     if(!n.ok){return}
-    var num=0,wav=0,mis=[],g={};
+    var num=0,wav=0,wmis=0,mis=[],g={};
     D.criteri.forEach(function(c){
       var w=W[c.id];if(!w)return;
       var d=n.d[c.id];
-      if(!d){mis.push(c);return}
+      if(!d){mis.push(c);wmis+=w;return}
       var gg=good(c,d[1]);g[c.id]=gg;num+=w*gg;wav+=w;
     });
-    var cov=tot?wav/tot:0;
-    rows.push({n:n,score:wav?100*num/wav:null,cov:cov,mis:mis,g:g,ranked:wav>0&&cov>=.5});
+    var cov=tot?wav/tot:0,rk=wav>0&&cov>=.5,sc=wav?100*num/wav:null;
+    /* dato mancante = posto di mezzo (0,5): ne' vantaggio ne' svantaggio */
+    if(rk&&wmis)sc=100*(num+.5*wmis)/tot;
+    rows.push({n:n,score:sc,k:sc==null?null:Math.round(sc*1e6),cov:cov,mis:mis,g:g,ranked:rk});
   });
-  var ranked=rows.filter(function(r){return r.ranked}).sort(function(a,b){return b.score-a.score||a.n.nome.localeCompare(b.n.nome,'it')});
-  ranked.forEach(function(r,i){r.rank=i+1});
+  var ranked=rows.filter(function(r){return r.ranked}).sort(function(a,b){return b.k-a.k||a.n.nome.localeCompare(b.n.nome,'it')});
+  var cnt={};
+  ranked.forEach(function(r,i){r.rank=(i>0&&ranked[i-1].k===r.k)?ranked[i-1].rank:i+1;cnt[r.rank]=(cnt[r.rank]||0)+1});
+  ranked.forEach(function(r){r.pari=cnt[r.rank]-1});
   var by={};rows.forEach(function(r){by[r.n.id]=r});
-  return {tot:tot,rows:rows,ranked:ranked,by:by};
+  var topmax=ranked.length>=10?ranked[9].rank:(ranked.length?ranked[ranked.length-1].rank:0);
+  var nTop=ranked.filter(function(r){return r.rank<=topmax}).length;
+  return {tot:tot,rows:rows,ranked:ranked,by:by,topmax:topmax,nTop:nTop};
 }
 function perche(r){
   var L=[];
@@ -160,23 +184,23 @@ function rigaPerche(x,n){
   var c=x.c,d=n.d[c.id],h='<li><b>'+esc(c.et)+'</b>: '+esc(valTxt(c,d[0]));
   var sm=[];
   if(c.citta!=null)sm.push('Milano: '+valTxt(c,c.citta));
-  sm.push('meglio di '+Math.round(100*x.g)+' quartieri su 100');
-  if(c.stima==='omi')sm.push('stima');
+  sm.push(posiz(c,d[0]));
+  if(c.stima)sm.push('stima');
   return h+'<span class="sm">'+esc(sm.join(' · '))+'</span></li>';
 }
 function dettaglio(r){
-  var h='<details><summary>Tutti i criteri scelti</summary><table><tr><th>Criterio</th><th class="r">Peso</th><th class="r">Valore</th><th class="r">Meglio di (quartieri su 100)</th></tr>';
+  var h='<details><summary>Tutti i criteri scelti</summary><table><tr><th>Criterio</th><th class="r">Peso</th><th class="r">Valore</th><th>Posto tra i quartieri</th></tr>';
   D.criteri.forEach(function(c){
     if(!W[c.id])return;
     var d=r.n.d[c.id];
-    h+='<tr><td>'+esc(c.et)+'</td><td class="r">'+W[c.id]+'</td>'+(d?'<td class="r">'+esc(valTxt(c,d[0]))+'</td><td class="r">'+Math.round(100*good(c,d[1]))+' su 100</td>':'<td class="r" colspan="2"><i>dato mancante</i></td>')+'</tr>';
+    h+='<tr><td>'+esc(c.et)+'</td><td class="r">'+W[c.id]+'</td>'+(d?'<td class="r">'+esc(valTxt(c,d[0]))+'</td><td>'+esc(posiz(c,d[0]))+'</td>':'<td colspan="2"><i>dato mancante: conta come posto di mezzo</i></td>')+'</tr>';
   });
   return h+'</table></details>';
 }
 function scheda(r,mostraMotivo){
   var n=r.n,h='<div class="card"><div class="hd">';
   if(r.rank&&r.rank<=10)h+='<div class="rk">'+r.rank+'</div>';
-  h+='<div class="nm">'+esc(n.nome)+'<span class="sub">Municipio '+n.municipio+' · '+f0(n.residenti)+' residenti (2025)'+(r.rank?' · '+r.rank+'° su '+RES.ranked.length:'')+'</span></div>';
+  h+='<div class="nm">'+esc(n.nome)+'<span class="sub">Municipio '+n.municipio+' · '+f0(n.residenti)+' residenti (2025)'+(r.rank?' · '+rankTxt(r):'')+'</span></div>';
   if(r.score!=null)h+='<div class="sc"><b>'+Math.round(r.score)+'</b><span>su 100</span></div>';
   h+='</div>';
   if(r.score!=null)h+='<div class="bar" aria-hidden="true"><i style="width:'+r.score.toFixed(1)+'%"></i></div>';
@@ -187,7 +211,7 @@ function scheda(r,mostraMotivo){
   if(p.length)h+='<div class="sub" style="margin-top:6px">Perché somiglia al tuo profilo:</div><ul class="why">'+p.map(function(x){return rigaPerche(x,n)}).join('')+'</ul>';
   if(r.mis.length){
     var tot=D.criteri.filter(function(c){return W[c.id]>0}).length;
-    h+='<div class="mis"><b>Dato mancante:</b> '+r.mis.map(function(c){return esc(c.et)}).join(', ')+'. Il punteggio è calcolato sugli altri '+(tot-r.mis.length)+' criteri su '+tot+'.</div>';
+    h+='<div class="mis"><b>Dato mancante:</b> '+r.mis.map(function(c){return esc(c.et)}).join(', ')+'. '+(r.ranked?'Per questo quartiere il criterio conta come un posto di mezzo (0,5): nessun vantaggio e nessuno svantaggio. Il punteggio usa tutti i '+tot+' criteri scelti.':'Il punteggio, che non entra in classifica, è calcolato sugli altri '+(tot-r.mis.length)+' criteri su '+tot+'.')+'</div>';
   }
   h+=dettaglio(r);
   h+='<div class="lk"><a href="../quartiere/#nil='+n.id+'">Scheda completa del quartiere</a></div></div>';
@@ -205,7 +229,7 @@ function stile(f){
   var r=RES&&RES.by[i];
   if(!r||!r.ranked){st.fillColor='#ececec';st.fillOpacity=.6;st.dashArray='3 3';}
   else st.fillColor=RAMP[classe(r)];
-  if(r&&r.rank&&r.rank<=10){st.color='#000';st.weight=2.5}
+  if(r&&r.rank&&r.rank<=RES.topmax){st.color='#000';st.weight=2.5}
   if(SEL===i){st.color='#c26a1b';st.weight=4}
   return st;
 }
@@ -216,20 +240,27 @@ function disegna(){
   if(MARK){MARK.clearLayers();
     LAY.nil.eachLayer(function(l){
       var r=RES.by[l.feature.properties.i];
-      if(r&&r.rank&&r.rank<=10)L.marker(l.getBounds().getCenter(),{interactive:false,keyboard:false,icon:L.divIcon({className:'',html:'<div class="num-ic">'+r.rank+'</div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(MARK);
+      if(RES.nTop<=10&&r&&r.rank&&r.rank<=RES.topmax)L.marker(l.getBounds().getCenter(),{interactive:false,keyboard:false,icon:L.divIcon({className:'',html:'<div class="num-ic">'+r.rank+'</div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(MARK);
     });
   }
-  var live=el('live'),top10=el('top10');var l2=el('live2');
+  var live=el('live'),top10=el('top10'),pari=el('pari');var l2=el('live2');
   if(!RES.tot){
-    live.innerHTML='Metti almeno un cursore sopra lo zero per vedere la classifica.';
+    live.innerHTML='Metti almeno un cursore sopra lo zero per vedere la classifica.';pari.hidden=true;
     top10.innerHTML='<li class="sub">Nessun criterio scelto.</li>';el('tutti-c').innerHTML='';
   }else{
-    live.innerHTML='Primi tre adesso: <b>'+rk.slice(0,3).map(function(r){return esc(r.n.nome)}).join('</b>, <b>')+'</b>.';
+    var g1=rk.filter(function(r){return r.rank===1}).length,t3=rk.slice(0,3),tie3=t3.some(function(r){return r.pari});
+    if(g1>1)live.innerHTML='Al primo posto ci sono <b>'+g1+' quartieri</b> a pari merito: i cursori scelti non li distinguono tra loro.';
+    else live.innerHTML='Primi tre adesso: <b>'+t3.map(function(r){return esc(r.n.nome)}).join('</b>, <b>')+'</b>.'+(tie3?' Alcuni sono a pari merito.':'');
+    var nota='';
+    if(g1>1)nota+='Con queste scelte '+g1+' quartieri sono al primo posto con lo stesso punteggio: il criterio (o i criteri) che hai scelto non li separa. Per distinguerli alza o aggiungi un altro cursore. ';
+    if(g1>1&&RES.nTop===g1&&g1>10)nota+='Qui ne vedi 10, in ordine alfabetico e non di merito: gli altri '+(g1-10)+' sono nella classifica completa.';
+    else if(RES.nTop>10)nota+='Oltre ai 10 mostrati, altri '+(RES.nTop-10)+' quartieri hanno lo stesso punteggio del 10°: sono nella classifica completa. A pari merito l’elenco è in ordine alfabetico, non di merito.';
+    pari.innerHTML=nota;pari.hidden=!nota;
     top10.innerHTML=rk.slice(0,10).map(function(r){return '<li>'+scheda(r)+'</li>'}).join('');
-    el('tutti-c').innerHTML='<table><tr><th>#</th><th>Quartiere</th><th class="r">Punteggio</th></tr>'+rk.map(function(r){return '<tr><td>'+r.rank+'</td><td>'+esc(r.n.nome)+(r.mis.length?' <span class="pill">dato mancante</span>':'')+'</td><td class="r">'+Math.round(r.score)+'</td></tr>'}).join('')+'</table>'+
+    el('tutti-c').innerHTML='<table><tr><th>#</th><th>Quartiere</th><th class="r">Punteggio</th></tr>'+rk.map(function(r){return '<tr><td>'+r.rank+(r.pari?' =':'')+'</td><td>'+esc(r.n.nome)+(r.mis.length?' <span class="pill">dato mancante</span>':'')+'</td><td class="r">'+Math.round(r.score)+'</td></tr>'}).join('')+'</table>'+(rk.some(function(r){return r.pari})?'<p class="sub">«=» vuol dire a pari merito: stesso punteggio, stesso posto.</p>':'')+
       (RES.rows.length>rk.length?'<p class="sub">Fuori classifica per dati mancanti: '+RES.rows.filter(function(r){return !r.ranked}).map(function(r){return esc(r.n.nome)}).join(', ')+'.</p>':'');
   }
-  l2.innerHTML=live.innerHTML+' <a href="#top-h">Vai ai primi 10</a>';
+  l2.innerHTML=live.innerHTML+' <a href="#top-h" data-go="top-h">Vai ai primi 10</a>';
   mostraSel();
   legenda();
   scriviHash();
@@ -246,7 +277,7 @@ function legenda(){
     h+='<span>Somiglia di più</span>'+RAMP.map(function(c){return '<span><i style="background:'+c+'"></i></span>'}).join('')+'<span>di meno</span>';
     h+='<span><i style="background:#ececec;border-style:dashed"></i>fuori classifica (dati mancanti)</span>';
   }
-  h+='<span><i style="background:#d6d6d6"></i>non ammesso (meno di 3.000 residenti, parchi)</span><span><i style="background:#fff;border:2px solid #000"></i>primi 10</span>';
+  h+='<span><i style="background:#d6d6d6"></i>non ammesso (meno di 3.000 residenti, parchi)</span><span><i style="background:#fff;border:2px solid #000"></i>primi 10'+(RES.nTop>10?' (con i pari merito)':'')+'</span>';
   el('lg-map').innerHTML=h;
 }
 
@@ -256,55 +287,95 @@ function slider(c){
   h+='<input type="range" min="0" max="5" step="1" id="s-'+c.id+'" value="'+(W[c.id]||0)+'">';
   var tags='';
   if(c.stima==='omi')tags+='<span class="pill g">stima dalle quotazioni OMI</span>';
-  h+='<div class="sp">'+esc(c.spieg)+' <span class="sub">('+esc(String(c.anno))+')</span>'+(tags?'<br>'+tags:'')+'</div></div>';
-  return h;
+  if(c.stima==='posti')tags+='<span class="pill">stima: il Comune non pubblica i posti</span>';
+  h+='<div class="sp">'+esc(c.spieg)+' <span class="sub">('+esc(String(c.anno))+')</span>';
+  if(c.extra)h+='<br><span class="sub">Dati per '+c.n+' quartieri su '+D.n_ammessi+' · Fonte: la pagina <a href="../'+esc(c.pagina)+'/">'+esc(c.pagina_nome)+'</a></span>';
+  if(tags)h+='<br>'+tags;
+  h+='</div>';
+  if(c.tie)h+='<div class="poco">Questo criterio separa poco: '+c.tie.n+' quartieri su '+c.n+' hanno lo stesso valore ('+esc(valTxt(c,c.tie.v))+').</div>';
+  if(c.extra)h+='<div style="margin-top:4px"><button type="button" class="rm" data-rm="'+c.id+'">Togli questo servizio</button></div>';
+  return h+'</div>';
 }
 function aggVal(c){
+  var e=el('v-'+c.id);if(!e)return;
   var v=W[c.id];
-  el('v-'+c.id).textContent=v+' · '+SCALA[v];
+  e.textContent=v+' · '+SCALA[v];
   var s=el('s-'+c.id);s.value=String(v);s.setAttribute('aria-valuetext',v+' su 5, '+SCALA[v]);
 }
+function menuServizi(){
+  var sel=el('add-sv'),h='<option value="">Scegli un servizio…</option>',k=0;
+  D.criteri.forEach(function(c){if(c.extra&&!ADD[c.id]){h+='<option value="'+c.id+'">'+esc(c.et)+'</option>';k++}});
+  if(!k)h='<option value="">Hai aggiunto tutti i servizi</option>';
+  sel.innerHTML=h;sel.disabled=!k;sel.value='';
+}
 function costruisciSlider(){
-  el('sliders').innerHTML=D.criteri.map(slider).join('');
+  el('sliders').innerHTML=D.criteri.filter(function(c){return !c.extra}).map(slider).join('');
+  el('sliders-x').innerHTML=D.criteri.filter(function(c){return c.extra&&ADD[c.id]}).map(slider).join('');
   D.criteri.forEach(function(c){
-    el('s-'+c.id).addEventListener('input',function(){
+    var inp=el('s-'+c.id);if(!inp)return;
+    inp.addEventListener('input',function(){
       W[c.id]=parseInt(this.value,10);
       if(c.gruppo&&W[c.id]>0)D.criteri.forEach(function(o){if(o.id!==c.id&&o.gruppo===c.gruppo){W[o.id]=0;aggVal(o)}});
       aggVal(c);disegna();
     });
     aggVal(c);
   });
+  [].forEach.call(document.querySelectorAll('[data-rm]'),function(b){
+    b.addEventListener('click',function(){var id=b.getAttribute('data-rm');W[id]=0;delete ADD[id];costruisciSlider();disegna();el('add-sv').focus()});
+  });
+  menuServizi();
 }
-function tuttiVal(){D.criteri.forEach(aggVal)}
+function tuttiVal(){costruisciSlider()}
 
 /* ---------- testi ---------- */
 function testi(){
-  var nrk=D.n_ammessi,al=D.criteri.filter(function(c){return c.id==='alberi'})[0];
+  var nrk=D.n_ammessi,nbase=D.criteri.filter(function(c){return !c.extra}).length;
   el('come-lista').innerHTML=[
-   '<b>I criteri.</b> Sono '+D.criteri.length+', scelti tra gli indicatori più solidi di <a href="../quartiere/">Il tuo quartiere</a>. Ognuno ha un peso da 0 a 5 che decidi tu.',
-   '<b>Il posto, non il valore.</b> Per ogni criterio ogni quartiere riceve un posto da 0 a 100 tra i '+nrk+' quartieri ammessi (100 = il migliore per quel criterio). Si usa il posto e non il numero, così un criterio con numeri enormi (euro, alberi) non pesa più di uno con numeri piccoli.',
-   '<b>Il punteggio.</b> È la media dei posti, pesata con i tuoi cursori. 100 vorrebbe dire il primo quartiere in tutti i criteri che hai scelto: nessuno ci arriva, perché i criteri spesso si contraddicono (le case costano meno dove c&rsquo;è meno metropolitana).',
-   '<b>Dati mancanti.</b> Se per un quartiere manca un dato che hai scelto (per esempio gli alberi, che il Comune conta solo nei quartieri con almeno 5.000 abitanti), il punteggio è calcolato sugli altri criteri e la scheda lo dice. Se mancano dati per più della metà del peso, il quartiere resta fuori classifica e sulla mappa è tratteggiato.',
+   '<b>I criteri.</b> I cursori in alto sono '+nbase+', scelti tra gli indicatori più solidi di <a href="../quartiere/">Il tuo quartiere</a>. Sotto, il menu «Aggiungi un servizio» ne offre altri '+(D.criteri.length-nbase)+': ognuno compare come cursore solo se lo scegli. Ogni cursore ha un peso da 0 a 5 che decidi tu.',
+   '<b>Il posto, non il valore.</b> Per ogni criterio ogni quartiere riceve un posto da 0 a 100 tra i quartieri ammessi che hanno quel dato (100 = il migliore per quel criterio). Si usa il posto e non il numero, così un criterio con numeri enormi (euro, alberi) non pesa più di uno con numeri piccoli. Se più quartieri hanno lo stesso valore, hanno lo stesso posto, a metà del gruppo: per questo, per esempio, per la metropolitana 19 quartieri hanno il 100% e hanno tutti il posto 87, non 100.',
+   '<b>Il punteggio.</b> È la media dei posti, pesata con i tuoi cursori. Il punteggio è una somma delle tue preferenze: non è un giudizio sul quartiere né su chi ci vive. Quartieri con lo stesso punteggio hanno lo stesso posto in classifica («a pari merito») e nell&rsquo;elenco sono in ordine alfabetico, non di merito. Con un solo cursore succede spesso: la pagina lo dice.',
+   '<b>Dati mancanti.</b> Se per un quartiere manca un dato che hai scelto (per esempio gli alberi, che il Comune conta solo nei quartieri con almeno 5.000 abitanti), per quel criterio il quartiere conta come un posto di mezzo (0,5): così il buco non lo avvantaggia né lo penalizza, e la scheda lo dice. Se mancano dati per più della metà del peso, il quartiere resta fuori classifica e sulla mappa è tratteggiato.',
    '<b>Chi è escluso.</b> I quartieri con meno di 3.000 residenti e i parchi e le aree verdi quasi senza abitanti non entrano: con così poche persone i rapporti per abitante oscillano troppo. Sulla mappa sono in grigio.',
-   '<b>Che cosa non c&rsquo;è.</b> La cittadinanza o l&rsquo;origine dei residenti non è un criterio e non lo sarà: i quartieri non si mettono in classifica per chi ci abita.'
+   '<b>Che cosa non c&rsquo;è.</b> Non si sceglie un quartiere per chi ci abita: reddito, cittadinanza, titolo di studio, voto e reati non sono criteri e non lo saranno. Sono nella scheda del quartiere, per chi vuole leggerli, non in una classifica.'
   ].map(function(x){return '<li>'+x+'</li>'}).join('');
   el('limiti-lista').innerHTML=[
-   '<b>È un gioco, non un consiglio.</b> Il punteggio dice quanto un quartiere somiglia a quello che hai chiesto, secondo pochi numeri. Non dice se ci si vive bene.',
+   '<b>È un gioco, non un consiglio.</b> Il punteggio dice quanto un quartiere somiglia a quello che hai chiesto, secondo pochi numeri. Non dice se ci si vive bene e non giudica chi ci abita.',
    '<b>Anni e fonti diversi.</b> I dati sono del 2025 e del 2026 e vengono dal Comune, dall&rsquo;Agenzia delle Entrate, da OpenStreetMap e da altri: non fotografano lo stesso momento e contano le cose in modi diversi.',
-   '<b>I prezzi delle case sono stime.</b> Vengono dalle quotazioni OMI dell&rsquo;Agenzia delle Entrate, che sono per zona e non per quartiere: sono portate al quartiere con i civici. Non sono prezzi di annunci. Il costo dell&rsquo;affitto qui non c&rsquo;è: la scheda ha solo come è cambiato negli anni, che non serve a questo scopo.',
+   '<b>I prezzi delle case sono stime.</b> Vengono dalle quotazioni OMI dell&rsquo;Agenzia delle Entrate, che sono per zona e non per quartiere: sono portate al quartiere con i civici. Non sono prezzi di annunci. Per chi cerca in affitto c&rsquo;è, tra i servizi da aggiungere, l&rsquo;affitto di un appartamento di 60 m², anche questo una stima.',
+   '<b>Tre cursori si muovono insieme.</b> «Poco cemento», «Case a prezzo basso» e «Vita in strada» misurano quasi la stessa cosa, cioè quanto un quartiere è centrale. I primi due premiano la periferia, il terzo il centro: alzarli insieme li fa annullare o conta più volte la stessa cosa.',
    '<b>La media del quartiere nasconde le differenze.</b> Dentro un quartiere possono esserci strade tranquille e strade piene di locali, case care e case economiche. I numeri sono medie.',
    '<b>I locali sono uno solo.</b> «Tranquillità» e «Vita in strada» usano lo stesso numero (bar, ristoranti e locali per abitante), letto in due versi: pochi locali o tanti. Non misurano il rumore.',
    '<b>Verde.</b> Gli alberi sono solo quelli gestiti dal Comune: mancano giardini e cortili privati. Il verde ha tre criteri diversi (parchi vicini, alberi, poco cemento) che si sovrappongono un po&rsquo;.',
    '<b>Scuole e giovani.</b> Le scuole non hanno un criterio a sé, perché i dati disponibili dicono quanti alunni ci sono e non quanto sono buone o vicine; contano però dentro i «servizi a 15 minuti». «Residenti più giovani» usa l&rsquo;età media di tutti i residenti.'
-  ].map(function(x){return '<li>'+x+'</li>'}).join('');
+  ].map(function(x){return '<li>'+x+'</li>'}).join('')+
+  '<li><b>I servizi che puoi aggiungere</b> (dal menu sotto i cursori). Per ognuno: quanti quartieri hanno il dato, l&rsquo;anno e che cosa va tenuto presente.<ul>'+
+  D.criteri.filter(function(c){return c.extra}).map(function(c){
+    return '<li><b>'+esc(c.et)+'</b> ('+esc(String(c.anno))+', '+c.n+' quartieri su '+nrk+', '+(c.verso>0?'più è meglio':'meno è meglio')+(c.stima?', stima':'')+'). '+esc(c.limite)+' Fonte: la pagina <a href="../'+esc(c.pagina)+'/">'+esc(c.pagina_nome)+'</a>.</li>'}).join('')+
+  '</ul></li>';
 }
 
 /* ---------- avvio ---------- */
 function init(){
   D.nil.forEach(function(n){NIL[n.id]=n});
-  D.criteri.forEach(function(c){CR[c.id]=c});
+  D.criteri.forEach(function(c){
+    CR[c.id]=c;c.vals=[];var cnt={},m=0,mv=null,k;
+    D.nil.forEach(function(n){if(n.ok&&n.d[c.id]){var v=n.d[c.id][0];c.vals.push(v);cnt[v]=(cnt[v]||0)+1}});
+    for(k in cnt)if(cnt[k]>m){m=cnt[k];mv=Number(k)}
+    c.tie=m>=10?{n:m,v:mv}:null;
+  });
   var h=leggiHash();impostaPesi(h||BASE);
   testi();costruisciSlider();
+  el('add-sv').addEventListener('change',function(){
+    var id=this.value;if(!id||!CR[id])return;
+    ADD[id]=1;if(!W[id])W[id]=3;costruisciSlider();disegna();
+    var inp=el('s-'+id);if(inp&&inp.scrollIntoView)inp.scrollIntoView({block:'nearest'});
+  });
+  el('live2').addEventListener('click',function(ev){
+    var a=ev.target;while(a&&a!==this&&!(a.getAttribute&&a.getAttribute('data-go')))a=a.parentNode;
+    if(!a||a===this)return;
+    ev.preventDefault();
+    var t=el(a.getAttribute('data-go'));if(t&&t.scrollIntoView)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
   el('b-base').addEventListener('click',function(){impostaPesi(BASE);tuttiVal();disegna()});
   el('b-zero').addEventListener('click',function(){impostaPesi({});tuttiVal();disegna()});
   window.addEventListener('hashchange',function(){var o=leggiHash();if(o){impostaPesi(o);tuttiVal();disegna()}});
@@ -315,7 +386,7 @@ function init(){
       var i=f.properties.i,n=NIL[i],r=RES&&RES.by[i];
       if(!n.ok)return esc(n.nome)+'<br>non in classifica: '+esc(n.motivo);
       if(!r||r.score==null)return esc(n.nome);
-      return esc(n.nome)+'<br>'+(r.ranked?r.rank+'° su '+RES.ranked.length+' · punteggio '+Math.round(r.score):'fuori classifica: troppi dati mancanti');
+      return esc(n.nome)+'<br>'+(r.ranked?rankTxt(r)+' · punteggio '+Math.round(r.score):'fuori classifica: troppi dati mancanti');
     },{sticky:true});
     l.on('click',function(){SEL=f.properties.i;disegna();var s=el('sel');if(window.innerWidth<=900&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'start'})});
   }}).addTo(MAP);

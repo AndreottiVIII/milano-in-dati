@@ -138,3 +138,9 @@ Tra le scuole, gli alunni con cittadinanza non italiana sono molto più concentr
 - **Statale / comunale / paritaria** per ordine, nel tempo; l'infanzia comunale è il fatto milanese.
 - **Cittadinanza non italiana: scuola contro quartiere**: un punto per scuola (asse x quota dei residenti del NIL, asse y quota della scuola), presentato come confronto e con la diagonale; spiegare chiaramente cittadinanza ≠ nascita. Da decidere: nomi delle scuole private e internazionali nel confronto (dati pubblici, ma sono scuole private).
 - Una frase di avviso su Comune vs MIM e sul fatto che i dati si fermano al 2024/25.
+
+## INVALSI per istituto (raccolta del 5/11/2026)
+- Fonte: pagina pubblica "Indicatori" del portale SNV (`snv.pubblica.istruzione.it`, collegata da Scuola in Chiaro), riquadro 2.2.a.1. Raccolta il 5/11/2026, 5 s tra richieste, UA `milano-in-dati/1.0`, nessun login.
+- Condizioni: robots.txt 503 (manutenzione), nessuna nota legale propria del portale; note legali MIM CC BY 3.0 IT senza cenni a raccolta automatica. Dettagli in `_idee/invalsi_stranieri.md` sez. 7. Non pubblicare senza conferma del Ministero.
+- Copertura: 135 istituti statali (anagrafe MIM 2025/26, comune F205): 127 pagine, 8 con 404, 71 con punteggi. Solo righe di istituto, mai plesso/sezione. Anno prevalente 2024/25.
+- File: `raw/invalsi_rav/*.json` (non tracciati), `pulito/invalsi_istituti.csv`, `invalsi_istituti_quota_stranieri.csv`, `invalsi_istituti_incrocio.csv`. Programmi `scripts/invalsi_rav_raccolta.py`, `invalsi_rav_incrocio.py`.
