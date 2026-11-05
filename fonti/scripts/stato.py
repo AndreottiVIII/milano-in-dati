@@ -69,7 +69,7 @@ def attendi(sito):
             time.sleep(d)
 
 
-def chiedi(url, leggi=False, max_byte=3_000_000):
+def chiedi(url, leggi=False, max_byte=3_000_000, riprova=False):
     """Una richiesta GET. Ritorna (codice, intestazioni, corpo|None, errore|None). Non segue i reindirizzamenti."""
     global N_RICHIESTE
     sito = urllib.parse.urlsplit(url).netloc.lower()
@@ -94,6 +94,10 @@ def chiedi(url, leggi=False, max_byte=3_000_000):
         if isinstance(mot, socket.timeout) or "timed out" in str(mot):
             return None, {}, None, "nessuna risposta entro %d secondi" % TIMEOUT
         if isinstance(mot, socket.gaierror):
+            # spesso è la rete di chi controlla, non il sito: una seconda prova prima di scriverlo
+            if not riprova:
+                time.sleep(20)
+                return chiedi(url, leggi, max_byte, riprova=True)
             return None, {}, None, "indirizzo del sito non trovato"
         return None, {}, None, "connessione non riuscita"
     except (socket.timeout, TimeoutError):

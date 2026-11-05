@@ -277,7 +277,7 @@ for i in MASTER:
         dq[i] = (None, None, 'fuori classifica: meno di 2.000 residenti')
 add('cambiamento', 'Case e soldi', 'Posto nella classifica dei quartieri che cambiano (1° = cambia di più)', 'quartieri-che-cambiano',
     'quartieri-che-cambiano/data/nil.csv', 'rango (e rango_min_varianti, rango_max_varianti)', '2011–2026', 'posto su 73', 'rango', None, dq, tipo='rango',
-    nota='Indice di sette segnali (redditi, prezzi, affitti, affitti brevi, locali, giovani adulti, laureati). Confronto tra quartieri, non misura chi se ne va o chi arriva.')
+    nota='Indice di nove segnali (redditi, prezzi, affitti, affitti brevi, locali, giovani adulti, laureati, botteghe storiche, nuove abitazioni). Confronto tra quartieri, non misura chi se ne va o chi arriva.')
 
 ab = read_csv('affitti-brevi/data/nil.csv')
 dab = {}
