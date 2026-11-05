@@ -240,7 +240,7 @@ R = dict(
         areab="ACI Autoritratto, autovetture della provincia di Milano per alimentazione e classe Euro; regole all'avvio di Area B: Confcommercio Milano (2019).",
         eta_potenza="ACI Autoritratto, autovetture per provincia e anno di immatricolazione, kW e cilindrata.",
         snap2017="Comune di Milano ds545 (Motorizzazione, parco circolante dei residenti, fine 2017): solo conteggi aggregati.",
-        areac="Filone Area C: passaggi dei giorni feriali normali, % su tutti i passaggi (anche moto, furgoni, bus, non classificati); Comune di Milano / AMAT (CC-BY).",
+        areac="Pagina Area C: passaggi dei giorni feriali normali, % su tutti i passaggi (anche moto, furgoni, bus, non classificati); Comune di Milano / AMAT (CC-BY).",
     ))
 json.dump(R, open(os.path.join(DATA, "riepilogo.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 

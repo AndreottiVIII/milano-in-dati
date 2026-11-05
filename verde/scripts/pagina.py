@@ -97,7 +97,7 @@ tipi = SP.groupby("tipo").schede.sum().to_dict()
 rim = {
     "meta": {
         "nota": "Tutti i numeri della pagina 'Parchi e verde'. Origine = file in verde/pulito/ (e programmi verde/scripts/build.py, pagina.py).",
-        "scaricato": "2026-11-02 (Comune di Milano ds89, ds52, ds724, ds2186, ds2187, ds2811, OpenStreetMap/Overpass); 2026-11-01 (ds339, ds1323, ds2926, ds2927, ds2484, ds2813: filone alberi)",
+        "scaricato": "2026-11-02 (Comune di Milano ds89, ds52, ds724, ds2186, ds2187, ds2811, OpenStreetMap/Overpass); 2026-11-01 (ds339, ds1323, ds2926, ds2927, ds2484, ds2813: pagina alberi)",
         "residenti": "ds205 anno 2024, alberi/pulito/nil_alberi.csv",
     },
     "citta": {

@@ -347,7 +347,7 @@ def main(base, root):
             'costi': 'ISPRA, Catasto Rifiuti - costi di gestione comunali pro capite, 2011-2024',
             'tari': 'bilancio-comune (capitoli usati), Comune di Milano ds397...ds3013, CC BY',
             'turisti': 'turisti (serie_totale.csv): Comune di Milano / ISTAT / PoliS-Lombardia, CC BY',
-            'prezzi': 'ISTAT FOI senza tabacchi, via filone bilancio-comune',
+            'prezzi': 'ISTAT FOI senza tabacchi, tramite la pagina bilancio-comune',
         },
     }
     with open(os.path.join(out, 'riepilogo.json'), 'w', encoding='utf-8') as f:

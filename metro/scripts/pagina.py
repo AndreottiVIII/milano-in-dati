@@ -76,7 +76,7 @@ R["stazioni_per_anno_prima_apertura"] = {str(k): n for k, n in sorted(anni_ap.it
 with open(os.path.join(OUT, "stazioni_metro.csv"), "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f); w.writerow(["stazione", "linee", "apertura_per_linea (da it.wikipedia, CC BY-SA 4.0)", "lat", "lon", "corse_giorno_feriale_orario_2026"])
     for s, r in zip(colonne, st): w.writerow([s["n"], r["linee"], r["apertura_per_linea_wikipedia"], s["lat"], s["lon"], s["corse"]])
-R["origine"]["stazioni"] = "Elenco: filone nomi-fermate (GTFS ATM/AMAT, feed 425, CC-BY); date di apertura: it.wikipedia 'Stazioni della metropolitana di Milano' (CC BY-SA 4.0), scaricato 1/11/2026."
+R["origine"]["stazioni"] = "Elenco: pagina nomi-fermate (GTFS ATM/AMAT, feed 425, CC-BY); date di apertura: it.wikipedia 'Stazioni della metropolitana di Milano' (CC BY-SA 4.0), scaricato 1/11/2026."
 
 # ---------- Linate M4 mensile
 lm = rd("report24_m4_linate_mese.csv")

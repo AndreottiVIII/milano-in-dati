@@ -161,7 +161,7 @@ fonti = {
             "licenza": "Creative Commons Attribution 3.0 (CC BY 3.0), dichiarata nei metadati RDF dei file; la pagina web del MEF lascia vuoto il campo Tipo licenza",
             "url": "https://www1.finanze.gov.it/finanze/analisi_stat/public/index.php?opendata=yes", "scaricato": "2026-11-01"},
     "istat_popolazione": {"nome": "ISTAT, demo.istat.it, popolazione residente al 1 gennaio (ricostruzione 2002-2019 e POSAS 2020-2026)", "licenza": "CC BY 4.0", "url": "https://demo.istat.it/", "scaricato": "2026-11-01"},
-    "istat_foi": {"nome": "ISTAT, indice FOI (senza tabacchi), medie annue raccordate a 2025 = 100 (da filone prezzi-case)", "licenza": "CC BY 4.0", "url": "https://esploradati.istat.it/", "scaricato": "2026-10"},
+    "istat_foi": {"nome": "ISTAT, indice FOI (senza tabacchi), medie annue raccordate a 2025 = 100 (dalla pagina prezzi-case)", "licenza": "CC BY 4.0", "url": "https://esploradati.istat.it/", "scaricato": "2026-10"},
     "comune_pop_2000_01": {"nome": "Comune di Milano, ds71 popolazione calcolata ISTAT 31/12 (solo per il rapporto contribuenti/abitanti 2000-2001, non usato nella pagina)", "licenza": "CC BY"},
 }
 J = {"meta": {"titolo": "Redditi dei milanesi dal 2000", "anni_imposta": [2000, 2024], "generato_da": "redditi/scripts/pagina.py", "deflatore": "euro 2025 = euro correnti x 100 / FOI annuale (2025 = 100), anno d'imposta"},

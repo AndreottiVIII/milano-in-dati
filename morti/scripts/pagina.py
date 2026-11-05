@@ -147,7 +147,7 @@ dump("riepilogo.json", {
               "release": "25 agosto 2026", "scaricato": "2026-11-01", "periodo": "2011-01-01 / 2026-06-30",
               "file": "comuni_giornaliero_30giugno26.csv (zip 51.592.163 byte)",
               "licenza": "Creative Commons Attribuzione 4.0 (note legali ISTAT, https://www.istat.it/note-legali/)",
-              "temperature": "Milano Brera, serie giornaliera del filone temperature (massima TX), fino al 28/10/2026",
+              "temperature": "Milano Brera, serie giornaliera della pagina temperature (massima TX), fino al 28/10/2026",
               "popolazione": "ISTAT demo.istat.it, POSAS al 1 gennaio 2019-2026"},
     "origine": "morti/pulito/*.csv (fase 1: morti/NOTE.md); questi file sono copie aggregate (Milano, Lombardia, Italia)",
     "ultimo_giorno": "2026-06-30", "giorni_senza_tmax": NTX,

@@ -51,7 +51,7 @@ R = [
     # --- Centro
     (r'^dc$|democrazia cristiana|^pri$|^pri |^pli$|^psdi$|^udc|alleanza di centro|liberali centro|lista dini|rinnov italiano|^patto segni|patto con milano|patto per l italia|^ppi$|^popolari$|dem europea|con le donne|udeur|part liberale|bassetti|fare per fermare|futuro e liberta|centro popolare|repubbl eur|liberal', 'Centro', 0, ''),
     # --- Centrosinistra
-    (r'^pds$|^ds$|^pd$|^pd |partito democratico|part democratico|i democratici|^democratici|ulivo|^l unione|margherita|^psi$|^sdi$|soc italiani|part socialista|socialisti|soc riformisti|patto democr|all democratica|alleanza democratica|popolari prodi|centro sinistra|italia dei valori|italia valori|di pietro|beppe sala|sala sindaco|volt sala|milano in salute|la milano radicale|impegno civico|^centro democratico|ferrante|milano civica per pisapia|milly moratti|lombardia civica|patto civico|gori presidente|lombardia progressista|majorino|penati|laburisti|riformisti lavoriamo|rosa nel pugno|girasole|civica popolare lorenzin|italia europa insieme|patto per milano|fiducia in milano|italia democr|\bsala\b|dalla chiesa|fumagalli|antoniazzi|borghini|pisapia', 'Centrosinistra', 0, 'filone PCI-PDS-DS-PD piu alleati storici (PSI, Margherita, IdV)'),
+    (r'^pds$|^ds$|^pd$|^pd |partito democratico|part democratico|i democratici|^democratici|ulivo|^l unione|margherita|^psi$|^sdi$|soc italiani|part socialista|socialisti|soc riformisti|patto democr|all democratica|alleanza democratica|popolari prodi|centro sinistra|italia dei valori|italia valori|di pietro|beppe sala|sala sindaco|volt sala|milano in salute|la milano radicale|impegno civico|^centro democratico|ferrante|milano civica per pisapia|milly moratti|lombardia civica|patto civico|gori presidente|lombardia progressista|majorino|penati|laburisti|riformisti lavoriamo|rosa nel pugno|girasole|civica popolare lorenzin|italia europa insieme|patto per milano|fiducia in milano|italia democr|\bsala\b|dalla chiesa|fumagalli|antoniazzi|borghini|pisapia', 'Centrosinistra', 0, 'linea PCI-PDS-DS-PD piu alleati storici (PSI, Margherita, IdV)'),
 ]
 RI = [(re.compile(p), f, d, n) for p, f, d, n in R]
 # liste incerte (segnate da_rivedere anche se una regola le prende)
@@ -63,7 +63,7 @@ for lista in sorted(tot.index):
     if n == 'pci':
         for (a, b, fam) in [(1, 1992, 'Centrosinistra'), (1993, 2100, 'Sinistra')]:
             rows.append(dict(lista=lista, famiglia=fam, anno_da=a, anno_a=b, stato='regola', da_rivedere='si',
-                             voti_totali=int(tot[lista]), elezioni=gruppi[lista], nota='PCI storico (fino al 1992) nel filone PDS-PD; "PCI" 2021 e un partito nuovo, Sinistra'))
+                             voti_totali=int(tot[lista]), elezioni=gruppi[lista], nota='PCI storico (fino al 1992) nella linea PDS-PD; "PCI" 2021 e un partito nuovo, Sinistra'))
         continue
     fam, dr, nota, stato = 'Altri', 0, '', 'altri_di_default'
     for rx, f, d, nt in RI:

@@ -200,7 +200,7 @@ riep = {
     {"nome": "Comune di Milano, Database Topografico 2012 e 2020 (ds2892, ds2889)", "licenza": "CC BY", "scaricato": "2026-11-01", "url": "https://dati.comune.milano.it/"},
     {"nome": "Comune di Milano, residenti per quartiere (ds205) e confini dei NIL (ds964)", "licenza": "CC BY", "scaricato": "2026-11-01", "url": "https://dati.comune.milano.it/"},
     {"nome": "ISTAT, permessi di costruire (IstatData)", "licenza": "CC BY 4.0 dichiarata da ISTAT", "scaricato": "2026-11-01", "url": "https://www.istat.it/tavole-di-dati/statistiche-sui-permessi-di-costruire-anno-2025/"},
-    {"nome": "Agenzia delle Entrate, OMI (compravendite)", "licenza": "CC BY 4.0", "scaricato": "2026-10-30 (filone prezzi-case)", "url": "https://www.agenziaentrate.gov.it/"}],
+    {"nome": "Agenzia delle Entrate, OMI (compravendite)", "licenza": "CC BY 4.0", "scaricato": "2026-10-30 (pagina prezzi-case)", "url": "https://www.agenziaentrate.gov.it/"}],
   "avvisi_controlli": AVVISI,
   "origine": {"anni": "costruzioni/pulito/serie_annuale.csv (da titoli_edilizi.csv e ds205)", "titoli": "pulito/nuovi_per_tipo_titolo_anno.csv", "ricostruzioni": "pulito/riepilogo.json e titoli_edilizi.csv (campo abbattimento_ricostruzione)",
               "trimestri": "pulito/nuovi_per_trimestre_2021_2024.csv", "nil": "pulito/nil_costruzioni.csv", "dbt": "pulito/dbt_controlli.json e dbt_nil.csv", "grandi": "pulito/titoli_edilizi.csv (solo campi ammessi)"}}
