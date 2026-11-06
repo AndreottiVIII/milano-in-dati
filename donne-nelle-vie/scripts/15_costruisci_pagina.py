@@ -132,7 +132,7 @@ Fonte dei numeri: <a href="data/percentuali.json">data/percentuali.json</a> (cal
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-var map = L.map('map').setView([45.4642, 9.19], 12);
+var map = L.map('map',{{scrollWheelZoom:false}}).setView([45.4642, 9.19], 12);
 L.tileLayer('https://tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}}).addTo(map);
 function esc(s) {{ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) {{ return {{'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}}[c]; }}); }}
@@ -154,3 +154,8 @@ fetch('data/vie_donne.geojson',{{cache:'no-cache'}}).then(function(r) {{ return 
 </script></body></html>"""
 open(f"{docs}/index.html", 'w', encoding='utf8').write(page)
 print('pagina scritta', len(page) // 1024, 'KB')
+
+# dopo la pagina: aggiunge le sezioni 'Cerca la tua via' (anno di intitolazione e nomi sulle mappe storiche), cosi' il rilancio non le cancella
+import os, subprocess
+_agg = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'vie-storiche', 'scripts', 'pagina_vie_anno_nomi.py')
+subprocess.run([sys.executable, '-I', '-X', 'utf8', _agg, docs], check=True)
