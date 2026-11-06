@@ -50,7 +50,7 @@ table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
 table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
 table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
 table.kt th:first-child,table.kt td:first-child{text-align:left}
-table.kt tr.mi td{color:var(--mi);font-weight:700}
+table.kt td:last-child{white-space:nowrap}table.kt td:first-child{width:36%}table.kt tr.mi td{color:var(--mi);font-weight:700}
 .tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
 .find label{display:block;font-weight:750;margin:0 0 4px}
 .find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
@@ -286,7 +286,7 @@ function highlights(){
     {c:C.m2,h:'t-mappa',n:sg0(best.v[4])+'<small>%</small>',p:'i residenti di '+esc(best.sn)+', il quartiere cresciuto di più: da '+f0(best.pop[0])+' a '+f0(best.pop[4])+'.'},
     {c:C.m4,h:'t-mappa',n:sg0(worst.v[4])+'<small>%</small>',p:'i residenti di '+esc(worst.sn)+', il quartiere calato di più: da '+f0(worst.pop[0])+' a '+f0(worst.pop[4])+'.'},
     {c:C.m5,h:'t-scatter',n:fampiu+'<small> su '+NB.length+'</small>',p:'quartieri hanno più famiglie di trent’anni fa, anche i '+meno+' che hanno meno residenti.'},
-    {c:C.ora,h:'tuo',n:'88',p:'quartieri: scrivi il tuo e guarda come è cambiato, dal 1991 a oggi.'}
+    {c:C.ora,h:'t-fam',n:f1(c.f1[4])+'<small>%</small>',p:'delle famiglie è di una persona sola nel 2023. Nel 1991 era il '+f1(c.f1[0])+'%.'}
   ];
   $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
@@ -445,6 +445,7 @@ function scatter(){
 }
 
 /* ---------- 4. il tuo quartiere ---------- */
+function vr(a,b,pt){return pt?sg1(a-b)+' punti':sg1(pct(a,b))+'%'}
 function scheda(){
   var r=$('ris');
   if(!sel){r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quartiere sulla mappa: ti dico quanti residenti e quante famiglie c’erano nel 1991, quanti ce ne sono oggi e come si colloca tra gli altri.';return}
@@ -455,13 +456,13 @@ function scheda(){
     ['Residenti',o.pop[0],o.pop[4],c.pop[0],c.pop[4],f0],
     ['Famiglie',o.fam[0],o.fam[4],c.fam[0],c.fam[4],f0],
     ['Età media (anni)',o.eta[0],o.eta[4],c.eta[0],c.eta[4],f1],
-    ['Stranieri (% dei residenti)',o.str[0],o.str[4],c.str[0],c.str[4],f1],
-    ['Famiglie di una persona (%)',o.f1[0],o.f1[4],c.f1[0],c.f1[4],f1]];
+    ['Stranieri (% dei residenti)',o.str[0],o.str[4],c.str[0],c.str[4],f1,1],
+    ['Famiglie di una persona (%)',o.f1[0],o.f1[4],c.f1[0],c.f1[4],f1,1]];
   var t='<table class="kt"><tr><th></th><th>1991</th><th>2023</th><th>Variazione</th></tr>';
-  rows.forEach(function(w){t+='<tr><td>'+w[0]+'</td><td>'+w[5](w[1])+'</td><td>'+w[5](w[2])+'</td><td>'+sg1(pct(w[2],w[1]))+'%</td></tr>'+
-    '<tr class="mi"><td>Milano</td><td>'+w[5](w[3])+'</td><td>'+w[5](w[4])+'</td><td>'+sg1(pct(w[4],w[3]))+'%</td></tr>'});
+  rows.forEach(function(w){t+='<tr><td>'+w[0]+'</td><td>'+w[5](w[1])+'</td><td>'+w[5](w[2])+'</td><td>'+vr(w[2],w[1],w[6])+'</td></tr>'+
+    '<tr class="mi"><td>Milano</td><td>'+w[5](w[3])+'</td><td>'+w[5](w[4])+'</td><td>'+vr(w[4],w[3],w[6])+'</td></tr>'});
   t+='</table>';
-  r.innerHTML=h+'<div class="ch" id="ch-sp"></div>'+t+'<p class="note">Stranieri sono i cittadini con passaporto straniero. Il 2023 è una stima del censimento permanente. Per le percentuali la variazione è relativa: una quota che passa dal 2% al 4% è +100%. L’età media e le percentuali sono calcolate dai dati delle sezioni.</p>';
+  r.innerHTML=h+'<div class="ch" id="ch-sp"></div>'+t+'<p class="note">Stranieri sono i cittadini con passaporto straniero. Il 2023 è una stima del censimento permanente. L’età media e le percentuali sono calcolate dai dati delle sezioni.</p>';
   spark(o,c);
 }
 function spark(o,c){
