@@ -53,6 +53,7 @@ h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;paddin
 .notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
 .notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
 .note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
 table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
 table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
 table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
@@ -85,7 +86,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <h2 id="quanti">Quanti rifiuti fa Milano</h2>
 <div class="fig">
   <h3 id="t-sacco"></h3>
-  <p class="sub">Rifiuti di un milanese in un anno, per tipo. Ogni quadretto = 5 chili.</p>
+  <p class="sub">Rifiuti di un milanese in un anno, per tipo. Ogni quadretto = 5 chili. In mezzo: quanto pesa ogni tipo, prima e dopo.</p>
   <div class="ch" id="ch-sacco" role="img" aria-label="Quadretti: rifiuti per abitante a Milano nel 2010 e nel 2024, per tipo"></div>
   <table class="kt" id="tab-sacco"></table>
   <p class="src">Fonte: ISPRA (CC BY 4.0). Chili per abitante residente. L'aumento delle «altre raccolte» dal 2016 è in parte un cambio nel modo di contare (vedi i limiti dei dati in fondo).</p>
@@ -131,10 +132,10 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <h2 id="metro">Milano e i comuni intorno</h2>
 <div class="fig">
   <h3 id="t-com"></h3>
-  <p class="sub">Ogni pallino è uno dei 132 comuni della città metropolitana, nel 2024.</p>
+  <p class="sub">I comuni della città metropolitana nel 2024, colorati per quanto separano e per quanto buttano. Il numero accanto a ogni colore conta i comuni. Tocca un comune per leggerlo.</p>
   <div class="ch" id="ch-com" role="img" aria-label="Pallini: i 132 comuni della città metropolitana per quota di differenziata e per chili a testa"></div>
   <p class="note">Una grande città ha case alte, pochi giardini, molti pendolari e turisti: il confronto dice cosa fanno gli altri, non cosa è «giusto» per Milano.</p>
-  <p class="src">Fonte: ISPRA (CC BY 4.0). Comuni della provincia di Milano con dati in tutti gli anni dal 2010 al 2024; Monza e Brianza non c'è. Tocca un pallino per vedere il comune.</p>
+  <p class="src">Fonte: ISPRA (CC BY 4.0). Comuni della provincia di Milano con dati in tutti gli anni dal 2010 al 2024; Monza e Brianza non c'è. Confini dei comuni: ISTAT (CC BY 4.0), come nella pagina <a href="../hinterland/">Hinterland</a>.</p>
 </div>
 
 <!-- ============ 5 ============ -->
@@ -148,8 +149,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 
 <div class="fig">
   <h3 id="t-cm"></h3>
-  <p class="sub">Milano, costo del servizio per abitante. Colonne: in euro di oggi (prezzi 2025). Punti: in euro di quell'anno.</p>
-  <div class="lg"><span><i style="background:var(--mi)"></i>euro di oggi</span><span><i class="dot" style="background:var(--ink)"></i>euro di quell'anno</span></div>
+  <p class="sub">Milano, costo del servizio per abitante. La linea rossa è in euro di oggi (prezzi del 2025), quella grigia in euro di quell'anno: la fascia tra le due è l'inflazione.</p>
   <div class="ch" id="ch-cm" role="img" aria-label="Colonne: costo del servizio rifiuti per abitante a Milano, 2011-2024"></div>
   <p class="src">Fonte: ISPRA (CC BY 4.0); prezzi: indice ISTAT FOI, 2025 = 100.</p>
 </div>
@@ -223,10 +223,10 @@ var GR=[ // ordine fisso dei tipi
   {id:'indiff',  nome:'Indifferenziato',          corto:'Indifferenziato',      col:C.ind, txt:'w'},
   {id:'organico',nome:'Umido',                    corto:'Umido',                col:C.umi, txt:'w'},
   {id:'carta',   nome:'Carta',                    corto:'Carta',                col:C.car, txt:'w'},
-  {id:'vpm',     nome:'Vetro, plastica e metalli',corto:'Vetro, plastica, metalli',col:C.vpm, txt:'k'},
+  {id:'vpm',     nome:'Vetro, plastica e metalli',corto:'Vetro e plastica',col:C.vpm, txt:'k'},
   {id:'altre',   nome:'Altre raccolte',           corto:'Altre',                col:C.alt, txt:'w'}];
 var CN=['Milano','Roma','Torino','Napoli','Bologna','Firenze','Genova'];
-var D,COM,RD=[];
+var D,COM,GEO,RD=[];
 
 /* ---------- formattazione ---------- */
 function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
@@ -289,8 +289,8 @@ function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)th
 function getCSV(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){
   var L=t.replace(/\r/g,'').split('\n').filter(Boolean),h=L[0].split(';');
   return L.slice(1).map(function(l){var v=l.split(';'),o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
-Promise.all([getJ(DATA+'riepilogo.json'),getCSV(DATA+'area_metropolitana_2024.csv')]).then(function(r){
-  D=r[0];COM=r[1].map(function(x){return{nome:x.comune,pop:+x.abitanti_ISPRA,kg:+x.kg_per_abitante_RU,rd:+x.RD_percento}});
+Promise.all([getJ(DATA+'riepilogo.json'),getCSV(DATA+'area_metropolitana_2024.csv'),getJ('../hinterland/data/comuni.geojson')]).then(function(r){
+  D=r[0];COM=r[1].map(function(x){return{cod:x.cod_istat.slice(-6),nome:x.comune,pop:+x.abitanti_ISPRA,kg:+x.kg_per_abitante_RU,rd:+x.RD_percento}});GEO=r[2];
   try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
 }).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
 
@@ -312,11 +312,11 @@ function highlights(){
   var piuRD=COM.filter(function(c){return c.nome!=='Milano'&&c.rd>M.rd_pct[i24]}).length;
   var T=[
     {c:C.mi,h:'t-sacco',n:f0(M.ru_pc[i24]),u:'kg',p:'di rifiuti a testa nel 2024: '+(kg[0][0]==='Milano'?'il meno di tutte le sette grandi città':'')+'. In Italia: '+f0(D.italia.ru_pc[i24])+'.'},
-    {c:C.ind,h:'t-anni',n:sg0(indVar)+'%',u:'',p:'di indifferenziato in 14 anni: da '+f0(ind.t[0]/1000)+' a '+f0(last(ind.t)/1000)+' mila tonnellate.'},
+    {c:'#FFD500',h:'t-anni',n:sg0(indVar)+'%',u:'',p:'di indifferenziato in 14 anni: da '+f0(ind.t[0]/1000)+' a '+f0(last(ind.t)/1000)+' mila tonnellate.'},
     {c:C.umi,h:'t-anni',n:'×'+Math.round(orgX),u:'',p:'l’umido raccolto: da '+f0(org.t[0]/1000)+' mila tonnellate nel 2010 a '+f0(last(org.t)/1000)+' mila nel 2024.'},
-    {c:C.hint,h:'t-rd',n:f0(M.rd_pct[i24]),u:'%',p:'di raccolta differenziata. Nei comuni intorno è il '+f0(last(D.metro.rd_pct))+'%: '+piuRD+' su '+D.metro.n_comuni_hinterland+' fanno di più.'},
-    {c:C.mi,h:'t-cc',n:f0(M.costo_pc[i24]),u:'€',p:'a testa per il servizio nel 2024: '+(co[0][0]==='Milano'?'il meno caro delle sette città':'')+' (poi '+co[1][0]+', '+f0(co[1][1])+' €).'},
-    {c:C.car,h:'t-cm',n:sg0(cr)+'%',u:'',p:'il costo del servizio a testa dal 2011 al 2024, contando l’inflazione.'}
+    {c:'#0072BC',h:'t-rd',n:f0(M.rd_pct[i24]),u:'%',p:'di raccolta differenziata. Nei comuni intorno è il '+f0(last(D.metro.rd_pct))+'%: '+piuRD+' su '+D.metro.n_comuni_hinterland+' fanno di più.'},
+    {c:'#7B3FA0',h:'t-cc',n:f0(M.costo_pc[i24]),u:'€',p:'a testa per il servizio nel 2024: '+(co[0][0]==='Milano'?'il meno caro delle sette città':'')+' (poi '+co[1][0]+', '+f0(co[1][1])+' €).'},
+    {c:'#F58220',h:'t-cm',n:sg0(cr)+'%',u:'',p:'il costo del servizio a testa dal 2011 al 2024, contando l’inflazione.'}
   ];
   $('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
@@ -328,20 +328,26 @@ function quadretti(kgs,unit){ // metodo dei resti più grandi
   for(var k=0;k<rest;k++)fl[ord[k][1]]++;return fl;
 }
 function sacco(){
-  var box=$('ch-sacco'),W=width('ch-sacco'),yrs=[2010,2024],gap=20,colW=(W-gap)/2,cell=Math.min(17,Math.floor(colW/10)),sq=cell-2;
+  var box=$('ch-sacco'),W=width('ch-sacco'),yrs=[2010,2024];
+  var lc=Math.max(112,Math.min(170,Math.round(W*0.34))),colW=(W-lc)/2,cell=Math.min(17,Math.floor(colW/10)),sq=cell-2,gw=cell*10;
   var data=yrs.map(function(a){var i=yi(a);return GR.map(function(g){return G(g.id).kg_ab[i]})});
   var tot=data.map(function(k){return k.reduce(function(a,b){return a+b},0)});
-  // ogni tipo comincia su una riga nuova (blocchi separati da 5 px), dal basso verso l'alto
-  var q=data.map(function(k){return quadretti(k,5)}),sep=5;
-  var hgt=q.map(function(a){return a.reduce(function(h,n){return h+(n?Math.ceil(n/10)*cell+sep:0)},0)});
-  var maxH=Math.max.apply(null,hgt),top=8,H=top+maxH+44,s=svgOpen(W,H);
-  yrs.forEach(function(a,c){
-    var x0=c*(colW+gap)+(colW-cell*10)/2,base=top+maxH,yb=base;
-    q[c].forEach(function(n,g){if(!n)return;for(var j=0;j<n;j++){var r=Math.floor(j/10),cc=j%10;
-      s+='<rect x="'+r1(x0+cc*cell)+'" y="'+r1(yb-(r+1)*cell+2)+'" width="'+sq+'" height="'+sq+'" rx="2" fill="'+GR[g].col+'"'+tip('<b>'+a+'</b><br>'+sw(GR[g].col)+GR[g].nome+': '+f0(data[c][g])+' kg a testa')+'/>'}
-      yb-=Math.ceil(n/10)*cell+sep});
-    s+=T(x0,base+22,a,{c:'b',st:'font-size:16px'})+T(x0+cell*10-2,base+22,f0(tot[c])+' kg',{a:'end',c:'b',st:'font-size:16px'});
-    s+=T(x0,base+38,'a testa',{c:'m'});
+  var q=data.map(function(k){return quadretti(k,5)}),sep=10,top=44;
+  // dall'alto: altre, vetro, carta, umido, indifferenziato (in basso, come nel sacco)
+  var ord=[4,3,2,1,0],y=top,band=[];
+  ord.forEach(function(g){var rows=Math.max(Math.ceil(q[0][g]/10),Math.ceil(q[1][g]/10),1),h=Math.max(rows*cell,34);band[g]={y:y,h:h};y+=h+sep});
+  var H=y+4,s=svgOpen(W,H),x0s=[(colW-gw)/2,colW+lc+(colW-gw)/2];
+  yrs.forEach(function(a,cI){
+    var x0=x0s[cI];
+    s+=T(x0,16,a,{c:'b',st:'font-size:16px'})+T(x0+gw-2,16,f0(tot[cI])+' kg',{a:'end',c:'b',st:'font-size:16px'})+T(x0,32,'a testa, in tutto',{c:'m'});
+    ord.forEach(function(g){var n=q[cI][g],bb=band[g],base=bb.y+bb.h;
+      for(var j=0;j<n;j++){var r=Math.floor(j/10),cc=j%10;
+        s+='<rect x="'+r1(x0+cc*cell)+'" y="'+r1(base-(r+1)*cell+2)+'" width="'+sq+'" height="'+sq+'" rx="2" fill="'+GR[g].col+'"'+tip('<b>'+a+'</b><br>'+sw(GR[g].col)+GR[g].nome+': '+f0(data[cI][g])+' kg a testa')+'/>'}
+    });
+  });
+  ord.forEach(function(g){var bb=band[g],cx=colW+lc/2,cy=bb.y+bb.h/2,vv=(data[1][g]/data[0][g]-1)*100;
+    s+=T(cx,cy-3,GR[g].corto,{a:'middle',c:'b',st:'font-size:'+(lc<130?12:13)+'px'});
+    s+=T(cx,cy+13,f0(data[0][g])+' → '+f0(data[1][g])+' kg ('+sg0(vv)+'%)',{a:'middle',c:'m'});
   });
   box.innerHTML=s+'</svg>';
   $('t-sacco').textContent='Ogni milanese butta '+f0(tot[0]-tot[1])+' chili in meno che nel 2010, e il sacco grigio si è dimezzato';
@@ -387,7 +393,7 @@ function anni(){
   $('nt-anni').innerHTML=
     '<li><b class="nb">1</b><span>Dal 2012 al 2014 l’umido quasi triplica: da '+f0(org.t[yi(2012)]/1000)+' a '+f0(org.t[yi(2014)]/1000)+' mila tonnellate.</span></li>'+
     '<li><b class="nb">2</b><span>Nel 2016 le «altre» salgono da '+f0(al.t[yi(2015)]/1000)+' a '+f0(al.t[yi(2016)]/1000)+' mila: da quell’anno si contano anche macerie e pulizia delle strade.</span></li>'+
-    '<li><b class="nb">3</b><span>Nel 2020, con il Covid, i rifiuti calano del '+f1(Math.abs(D.covid.citta.Milano.var_2019_2020_pct))+'% in un anno.</span></li>';
+    '<li><b class="nb">3</b><span>Nel 2020, con il Covid, i rifiuti calano del '+f1(Math.abs(D.covid.citta.Milano.var_2019_2020_pct))+'% in un anno: vedi <a href="../anno-covid/">L’anno del Covid</a>.</span></li>';
 }
 
 /* ---------- linee generiche ---------- */
@@ -479,36 +485,37 @@ function scat(){
 /* ---------- 5. i comuni intorno: pallini ---------- */
 function comuni(){
   var box=$('ch-com'),W=width('ch-com'),mi=COM.filter(function(c){return c.nome==='Milano'})[0],oth=COM.filter(function(c){return c.nome!=='Milano'});
+  var by={};COM.forEach(function(c){by[c.cod]=c});
+  var F=GEO.features.filter(function(f){return f.properties.g==='MI'||f.properties.g==='MILANO'});
+  // proiezione semplice: longitudine schiacciata per il coseno della latitudine
+  var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,k=Math.cos(45.45*Math.PI/180);
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  F.forEach(function(f){anelli(f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0),H=Math.ceil((y1-y0)*sc)+2;
+  function path(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')}
   var P=[
-    {k:'rd',tit:'Raccolta differenziata, %',step:2,fmt:function(v){return f1(v)+'%'},ticks:[50,60,70,80,90],tf:function(v){return v+'%'},
-     more:'più di Milano',less:'meno di Milano'},
-    {k:'kg',tit:'Chili di rifiuti a testa',step:20,fmt:function(v){return f0(v)+' kg'},ticks:[400,500,600,700,800],tf:function(v){return v},
-     more:'più di Milano',less:'meno di Milano'}];
-  var s='',yoff=0,parts=[];
-  P.forEach(function(p,pi){
-    var vals=COM.map(function(c){return c[p.k]}),lo=Math.floor(Math.min.apply(null,vals)/p.step)*p.step,hi=(Math.floor(Math.max.apply(null,vals)/p.step)+1)*p.step;
-    var nb=(hi-lo)/p.step,pw=W-4,bw=pw/nb,d=Math.min(bw,13),r=d/2-0.8,bins={};
-    COM.slice().sort(function(a,b){return (a.nome==='Milano')-(b.nome==='Milano')}).forEach(function(c){var b=Math.floor((c[p.k]-lo)/p.step);(bins[b]=bins[b]||[]).push(c)});
-    var maxc=0;for(var b in bins)maxc=Math.max(maxc,bins[b].length);
-    var X=function(v){return 2+(v-lo)/(hi-lo)*pw},top=yoff+74,base=top+maxc*d,g='';
-    g+=T(0,yoff+16,p.tit,{c:'b',st:'font-size:14px'});
-    var nMore=oth.filter(function(c){return c[p.k]>mi[p.k]}).length,nLess=oth.filter(function(c){return c[p.k]<mi[p.k]}).length,
-        xm=X(lo+(Math.floor((mi[p.k]-lo)/p.step)+0.5)*p.step); // la linea passa per il pallino di Milano
-    // linea di Milano; conteggi ai due bordi
-    g+=L(xm,top-30,xm,base,C.mi,1.5);
-    g+=T(0,top-30,'← '+nLess+' comuni',{c:'b'})+T(0,top-15,p.less,{c:'m'});
-    g+=T(W,top-30,nMore+' comuni →',{a:'end',c:'b'})+T(W,top-15,p.more,{a:'end',c:'m'});
-    for(b in bins){bins[b].forEach(function(c,j){
-      var cx=X(lo+(+b+0.5)*p.step),cy=base-j*d-d/2,isM=c.nome==='Milano';
-      g+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+r1(isM?r+1.5:r)+'" fill="'+(isM?C.mi:C.hint)+'"'+(isM?' stroke="#fff" stroke-width="1.5"':'')+tip('<b>'+esc(c.nome)+'</b><br>'+p.fmt(c[p.k])+'<br>'+f0(c.pop)+' abitanti')+'/>';
-    })}
-    g+=L(0,base+2,W,base+2,C.axis);
-    p.ticks.forEach(function(v){if(v>=lo&&v<=hi)g+=L(X(v),base+2,X(v),base+6,C.axis)+T(X(v),base+19,p.tf(v),{a:'middle',c:'m'})});
-    // nome di Milano sotto l'asse
-    g+=T(Math.min(Math.max(xm,30),W-60),base+36,'Milano '+p.fmt(mi[p.k]),{a:'middle',c:'b',st:'fill:'+C.ink});
-    parts.push(g);yoff=base+64;
+    {k:'rd',tit:'Raccolta differenziata, 2024',cl:[[0,60,'meno del 60%'],[60,70,'60-70%'],[70,80,'70-80%'],[80,90,'80-90%'],[90,101,'90% e più']],
+     col:['#d7efe0','#9fd8b4','#55b97f','#00A651','#00602f'],fmt:function(v){return f1(v)+'%'},
+     frase:function(){return '<b>'+oth.filter(function(c){return c.rd>mi.rd}).length+' comuni su '+oth.length+'</b> separano una quota più alta di Milano ('+f1(mi.rd)+'%).'}},
+    {k:'kg',tit:'Chili di rifiuti a testa, 2024',cl:[[0,400,'meno di 400'],[400,450,'400-450'],[450,500,'450-500'],[500,550,'500-550'],[550,9999,'550 e più']],
+     col:['#fde4cf','#fbc08f','#F58220','#c4600f','#7d3a05'],fmt:function(v){return f0(v)+' kg'},
+     frase:function(){return '<b>'+oth.filter(function(c){return c.kg<mi.kg}).length+' comuni</b> fanno meno rifiuti a testa di Milano ('+f0(mi.kg)+' kg), <b>'+oth.filter(function(c){return c.kg>mi.kg}).length+'</b> di più.'}}];
+  var h='';
+  P.forEach(function(p){
+    function cls(v){for(var i=0;i<p.cl.length;i++)if(v>=p.cl[i][0]&&v<p.cl[i][1])return i;return -1}
+    var cont=p.cl.map(function(){return 0});oth.forEach(function(c){var i=cls(c[p.k]);if(i>=0)cont[i]++});
+    var s=svgOpen(W,H),sM='';
+    F.forEach(function(f){var c=by[f.properties.i],isM=c&&c.nome==='Milano',i=c?cls(c[p.k]):-1;
+      var t=c?'<b>'+esc(c.nome)+'</b><br>'+p.fmt(c[p.k])+'<br>'+f0(c.pop)+' abitanti':'<b>'+esc(f.properties.n)+'</b><br>dato non disponibile';
+      var el='<path d="'+path(f)+'" fill="'+(isM?C.mi:i>=0?p.col[i]:'#e6e8ec')+'" stroke="#fff" stroke-width="'+(isM?1.5:0.6)+'"'+tip(t)+'/>';
+      if(isM)sM=el;else s+=el});
+    s+=sM; // Milano sopra, intera
+    var mf=F.filter(function(f){return by[f.properties.i]&&by[f.properties.i].nome==='Milano'})[0];
+    if(mf){var bx=1e9,bX=-1e9,by0=1e9,bY=-1e9;anelli(mf).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;bx=Math.min(bx,x);bX=Math.max(bX,x);by0=Math.min(by0,y);bY=Math.max(bY,y)})});
+      s+=T((bx+bX)/2,(by0+bY)/2+5,'Milano',{a:'middle',c:'w',st:'font-size:13px'})}
+    h+='<p class="mt">'+p.tit+'</p><div class="lg">'+p.cl.map(function(q,i){return '<span><i style="background:'+p.col[i]+'"></i>'+q[2]+' <b>&nbsp;'+cont[i]+'</b></span>'}).join('')+'<span><i style="background:'+C.mi+'"></i>Milano</span><span><i style="background:#e6e8ec"></i>senza dato</span></div>'+s+'</svg><p class="note">'+p.frase()+'</p>';
   });
-  box.innerHTML=svgOpen(W,yoff)+parts.join('')+'</svg>';
+  box.innerHTML=h;
   var nRD=oth.filter(function(c){return c.rd>mi.rd}).length;
   $('t-com').textContent=nRD+' comuni su '+oth.length+' intorno a Milano hanno una differenziata più alta della città';
 }
@@ -536,20 +543,27 @@ function costiCitta(){
 
 /* ---------- 6b. Milano nel tempo: colonne in euro di oggi ---------- */
 function costoMilano(){
-  var box=$('ch-cm'),W=width('ch-cm'),K=D.costi.componenti,an=D.costi.anni,n=an.length,H=250,m={l:34,r:4,t:24,b:24};
+  var box=$('ch-cm'),W=width('ch-cm'),an=D.costi.anni,n=an.length,H=240,m={l:4,r:4,t:20,b:26};
   var reale=an.map(function(a){return D.citta.Milano.costo_pc_euro2025[yi(a)]}),nom=an.map(function(a){return D.citta.Milano.costo_pc[yi(a)]});
-  var pw=W-m.l-m.r,ph=H-m.t-m.b,slot=pw/n,bw=Math.min(14,slot-4),X=function(i){return m.l+i*slot+slot/2},Y=function(v){return m.t+ph-v/320*ph};
+  var lo=190,hi=305,pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(i){return m.l+50+i*(pw-100)/(n-1)},Y=function(v){return m.t+ph-(v-lo)/(hi-lo)*ph};
   var s=svgOpen(W,H);
-  [0,100,200,300].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})});
-  var imin=reale.indexOf(Math.min.apply(null,reale));
-  an.forEach(function(a,i){
-    s+=vbar(X(i)-bw/2,bw,Y(0),Y(reale[i]),C.mi);
-    s+='<circle cx="'+r1(X(i))+'" cy="'+r1(Y(nom[i]))+'" r="4" fill="'+C.ink+'" stroke="#fff" stroke-width="2"/>';
-    if(i===0||i===n-1)s+=T(X(i),Y(reale[i])-8,f0(reale[i]),{a:'middle',c:'b'});
-    if([2011,2015,2020,2024].indexOf(a)>=0)s+=T(X(i),m.t+ph+16,a,{a:'middle',c:'m'});
-    s+='<rect x="'+r1(X(i)-slot/2)+'" y="'+m.t+'" width="'+r1(slot)+'" height="'+ph+'" fill="transparent"'+tip('<b>'+a+'</b><br>'+sw(C.mi)+'euro di oggi: '+f0(reale[i])+'<br>'+sw(C.ink)+'euro di quell’anno: '+f0(nom[i]))+'/>';
+  [200,250,300].forEach(function(v){s+=L(m.l+40,Y(v),W-m.r-40,Y(v),C.grid)});
+  // la distanza tra le due linee è l'inflazione: fascia leggera
+  var area='M'+an.map(function(a,i){return r1(X(i))+' '+r1(Y(reale[i]))}).join('L')+'L'+an.map(function(a,i){var j=n-1-i;return r1(X(j))+' '+r1(Y(nom[j]))}).join('L')+'Z';
+  s+='<path d="'+area+'" fill="'+C.mi+'" fill-opacity=".09"/>';
+  function linea(v,col,w){return '<path d="M'+v.map(function(x,i){return r1(X(i))+' '+r1(Y(x))}).join('L')+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linejoin="round"/>'}
+  s+=linea(nom,C.ink2,2)+linea(reale,C.mi,3.5);
+  [[reale,C.mi,true],[nom,C.ink2,false]].forEach(function(z){var v=z[0];
+    s+='<circle cx="'+r1(X(0))+'" cy="'+r1(Y(v[0]))+'" r="4" fill="'+z[1]+'"/><circle cx="'+r1(X(n-1))+'" cy="'+r1(Y(v[n-1]))+'" r="4" fill="'+z[1]+'"/>';
+    var dy=Math.abs(Y(reale[n-1])-Y(nom[n-1]))<16?(z[2]?-7:9):0;
+    s+=T(X(0)-8,Y(v[0])+5,f0(v[0])+' €',{a:'end',c:'b',st:'fill:'+z[1]})+T(X(n-1)+8,Y(v[n-1])+5+dy,f0(v[n-1])+' €',{c:'b',st:'fill:'+z[1]});
   });
-  s+=L(m.l,Y(0),W-m.r,Y(0),C.axis);
+  var im=Math.round(n*0.32);
+  s+=T(X(im),Y(reale[im])-12,'in euro di oggi',{a:'middle',c:'b',st:'fill:'+C.mi});
+  s+=T(X(im),Y(nom[im])+30,'in euro di quell’anno',{a:'middle',c:'b',st:'fill:'+C.ink2});
+  var ig=Math.round(n*0.62);s+=T(X(ig),(Y(reale[ig])+Y(nom[ig]))/2+4,'inflazione',{a:'middle',c:'m',st:'font-style:italic'});
+  an.forEach(function(a,i){if([2011,2015,2020,2024].indexOf(a)>=0)s+=T(X(i),H-6,a,{a:'middle',c:'m'});
+    s+='<rect x="'+r1(X(i)-(pw-88)/(n-1)/2)+'" y="'+m.t+'" width="'+r1((pw-88)/(n-1))+'" height="'+ph+'" fill="transparent"'+tip('<b>'+a+'</b><br>'+sw(C.mi)+'euro di oggi: '+f0(reale[i])+'<br>'+sw(C.ink2)+'euro di quell’anno: '+f0(nom[i]))+'/>'});
   box.innerHTML=s+'</svg>';
   var v=(last(reale)/reale[0]-1)*100;
   $('t-cm').textContent='Contando l’inflazione, a Milano il servizio costa il '+f0(Math.abs(v))+'% in meno che nel 2011';

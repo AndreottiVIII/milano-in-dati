@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · L'anno del Covid</title>
+<style>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --m1:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  --y20:#E30613;   /* il 2020: rosso M1 */
+  --norm:#c9ced6;  /* il normale: grigio */
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* highlights */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+.src .da{display:inline-block;font-weight:700;color:var(--ink)}
+/* sections */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.lg i.band{width:18px;height:10px;background:var(--norm)}
+.lg i.shade{width:14px;height:12px;background:rgba(11,13,18,.12)}
+.lg i.grad{width:90px;height:10px;border-radius:2px}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.85rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:5px 3px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top}
+table.kt th{color:var(--mut);font-weight:600;font-size:.78rem;line-height:1.2}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td.v{font-weight:700}
+table.kt td small{display:block;color:var(--mut);font-size:.75rem;line-height:1.2}
+table.kt tr.gr td{font-weight:700;color:var(--mut);font-size:.78rem;padding-top:10px;border-bottom:1px solid var(--axis)}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+</style><script src="../menu.js" defer></script></head><body><main>
+
+<h1>L’anno del Covid</h1>
+<p class="lead">Che cosa ha fatto il 2020 a Milano, letto nei dati delle altre pagine del sito: quanto è calata ogni cosa nell’anno del virus, e quanto ci ha messo a tornare.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Ogni numero viene da una pagina del sito, con la sua fonte: ISTAT, Comune di Milano, ARPA Lombardia, Eurostat, ISPRA, INGV e altri (elenco in fondo). Lockdown = la chiusura nazionale dal 9 marzo al 3 maggio 2020.</p>
+
+<!-- ============ 1 ============ -->
+<h2 id="tutto">Tutto insieme</h2>
+<div class="fig">
+  <h3 id="t-rias"></h3>
+  <p class="sub">Ogni riga è una cosa misurata a Milano. Il 2019 vale 100: il punto rosso dice dove è finita nel 2020, il grigio nel 2021, il nero nell’ultimo anno con dati.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--y20)"></i>2020</span><span><i class="dot" style="background:var(--axis)"></i>2021</span><span><i class="dot" style="background:var(--ink)"></i>ultimo anno (2024 o 2025)</span></div>
+  <div class="ch" id="ch-rias" role="img" aria-label="Punti collegati: quattordici indicatori di Milano nel 2020, nel 2021 e nell’ultimo anno, con il 2019 uguale a 100"></div>
+  <p class="note">Tocca una riga per i numeri. Sono cose diverse messe sulla stessa scala: dicono quanto è cambiato ognuna, non che una abbia causato l’altra.</p>
+  <p class="src">Fonti: quelle delle pagine da cui viene ogni riga (elenco in fondo, in «Come è fatto»).</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="morti">I morti</h2>
+<div class="fig">
+  <h3 id="t-morti"></h3>
+  <p class="sub">Morti a Milano ogni giorno, da febbraio a giugno 2020, e quanti ce ne sarebbero stati in un anno normale.</p>
+  <div class="lg"><span><i style="background:var(--y20)"></i>morti del giorno</span><span><i class="ln" style="background:var(--ink)"></i>normale</span><span><i class="shade"></i>lockdown</span></div>
+  <div class="ch" id="ch-morti" role="img" aria-label="Colonne: morti a Milano giorno per giorno da febbraio a giugno 2020, con la linea del normale"></div>
+  <table class="kt" id="tab-morti"></table>
+  <p class="src"><span class="da">Dalla pagina <a href="../morti/">Morti giorno per giorno</a>.</span> Fonte: ISTAT, decessi giornalieri per comune di residenza (CC BY 4.0). Il «normale» è un calcolo della pagina: per ogni giorno, la media dello stesso giorno nei 5 anni prima, senza 2020 e 2021.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="ferma">La città ferma</h2>
+<div class="fig">
+  <h3 id="t-areac"></h3>
+  <p class="sub">Auto e moto entrate in Area C ogni giorno del 2020 (media di 7 giorni), e la fascia in cui stavano gli stessi giorni del 2017, 2018 e 2019.</p>
+  <div class="lg"><span><i class="ln" style="background:var(--y20)"></i>2020</span><span><i class="band"></i>2017-2019, dal più basso al più alto</span><span><i class="shade"></i>lockdown</span><span><i style="background:var(--ink);opacity:.55;height:6px"></i>Area C sospesa</span></div>
+  <div class="ch" id="ch-areac" role="img" aria-label="Linea: ingressi giornalieri in Area C nel 2020 contro la fascia degli anni 2017-2019"></div>
+  <p class="note" id="nt-areac"></p>
+  <p class="src"><span class="da">Dalla pagina <a href="../area-c/">Area C</a>.</span> Fonte: Comune di Milano, AMAT, ingressi giornalieri ai varchi (CC BY). Sono passaggi ai varchi, non persone. Le date di sospensione vengono da giornali e siti, non da atti ufficiali.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-vib"></h3>
+  <p class="sub">Quanto vibra il terreno sotto Milano, ora per ora, in tre settimane: una di marzo 2019, una di febbraio 2020 e una del lockdown. Media dei 7 giorni.</p>
+  <div class="lg"><span><i class="ln" style="background:var(--norm)"></i>marzo 2019</span><span><i class="ln" style="background:var(--ink)"></i>febbraio 2020</span><span><i class="ln" style="background:var(--y20)"></i>lockdown, marzo 2020</span></div>
+  <div class="ch" id="ch-vib" role="img" aria-label="Linee: vibrazione del suolo ora per ora in tre settimane del 2019 e del 2020"></div>
+  <p class="src"><span class="da">Dalla pagina <a href="../vibrazioni/">Il respiro di Milano</a>.</span> Fonte: INGV, Rete Sismica Nazionale, stazione IV.MILN (CC BY 4.0). Il sismografo sente traffico, treni, cantieri: è la somma di tutto, non si può dire quanto viene da cosa.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-cal"></h3>
+  <p class="sub">Ogni quadretto è un giorno del 2020: elettricità usata a Milano rispetto allo stesso giorno della settimana del 2019. Bordo nero: lockdown.</p>
+  <div class="lg" id="lg-cal"></div>
+  <div class="ch" id="ch-cal" role="img" aria-label="Calendario: consumo di elettricità di ogni giorno del 2020 rispetto al 2019"></div>
+  <p class="note">Anche il tempo conta: un inverno più mite o un’estate più calda cambiano i consumi quanto una chiusura. Le due cose qui non si separano.</p>
+  <p class="src"><span class="da">Dalla pagina <a href="../consumi/">Quanta corrente, quanta acqua</a>.</span> Fonte: Comune di Milano, energia elettrica distribuita da A2A, totale giornaliero 2019-2020 (CC BY). Bianco con bordo grigio: giorno di festa in uno solo dei due anni.</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="muoversi">Muoversi</h2>
+<div class="fig">
+  <h3 id="t-metro"></h3>
+  <p class="sub">Passeggeri di ogni linea del metrò in un anno, in milioni. In colore pieno il 2020.</p>
+  <div class="ch" id="ch-metro" role="img" aria-label="Colonne piccole: passeggeri all’anno delle linee M1, M2, M3 e M5, dal 2016 al 2024"></div>
+  <p class="note" id="nt-metro"></p>
+  <p class="src"><span class="da">Dalla pagina <a href="../metro/">Il metrò</a>.</span> Fonte: AMAT, Report della Mobilità 2024 (numeri citati con la fonte; tutti i diritti riservati). La M4 non c’è: ha aperto alla fine del 2022.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-inc"></h3>
+  <p class="sub">Incidenti stradali con feriti o morti a Milano, mese per mese: 2019 e 2020.</p>
+  <div class="lg"><span><i style="background:var(--norm)"></i>2019</span><span><i style="background:var(--mag)"></i>2020</span></div>
+  <div class="ch" id="ch-inc" role="img" aria-label="Colonne: incidenti stradali a Milano per mese nel 2019 e nel 2020"></div>
+  <p class="note" id="nt-inc"></p>
+  <p class="src"><span class="da">Dalla pagina <a href="../incroci/">Incroci e incidenti</a>.</span> Fonte: Comune di Milano, «Incidenti stradali nel Comune di Milano», totali mensili (CC0).</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="fuori">Chi arrivava da fuori</h2>
+<div class="fig">
+  <h3 id="t-cielo"></h3>
+  <p class="sub">Ogni mese, rispetto allo stesso mese del 2019 (= 100): passeggeri dei tre aeroporti e notti dei turisti negli alberghi e nelle altre strutture di Milano.</p>
+  <div class="lg"><span><i class="ln" style="background:var(--teal)"></i>passeggeri in aereo</span><span><i class="ln" style="background:var(--ora)"></i>notti dei turisti</span></div>
+  <div class="ch" id="ch-cielo" role="img" aria-label="Linee: passeggeri degli aeroporti e notti dei turisti, mese per mese dal 2020 al 2023, rispetto al 2019"></div>
+  <p class="note">Due linee sullo stesso grafico non dicono che una spieghi l’altra: in aereo viaggiano anche i milanesi, e i turisti arrivano anche in treno e in auto.</p>
+  <p class="src"><span class="da">Dalle pagine <a href="../aeroporti/">Aeroporti</a> e <a href="../turisti/">Turisti</a>.</span> Passeggeri: Eurostat, avia_paoa, Linate + Malpensa + Bergamo (CC BY 4.0). Notti: Comune di Milano (ds215, CC BY).</p>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 id="aria">L’aria</h2>
+<div class="fig">
+  <h3 id="t-aria"></h3>
+  <p class="sub">Media del 2020 di ogni centralina di Milano, rispetto alla media degli anni 2017-2019. Microgrammi per metro cubo.</p>
+  <div class="lg"><span><i class="ring"></i>2017-2019</span><span><i class="dot" style="background:var(--teal)"></i>2020, biossido di azoto</span><span><i class="dot" style="background:var(--m5)"></i>2020, polveri</span></div>
+  <div class="ch" id="ch-aria" role="img" aria-label="Punti collegati: biossido di azoto e polveri sottili nelle centraline di Milano, 2017-2019 e 2020"></div>
+  <p class="note" id="nt-aria"></p>
+  <p class="src"><span class="da">Dalla pagina <a href="../aria/">Aria</a>.</span> Fonte: ARPA Lombardia, misure orarie delle centraline (CC0). L’aria dipende anche dal vento, dalla pioggia e dal riscaldamento: il calo non viene tutto dal traffico.</p>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="vita">Leggere, sposarsi, nascere</h2>
+<div class="fig">
+  <h3 id="t-bib"></h3>
+  <p class="sub">Prestiti delle biblioteche comunali in ogni mese, rispetto allo stesso mese del 2019 (= 100). Più chiaro = più vuoto.</p>
+  <div class="ch" id="ch-bib" role="img" aria-label="Tabella colorata: prestiti in biblioteca mese per mese dal 2020 al 2025 rispetto al 2019"></div>
+  <p class="src"><span class="da">Dalla pagina <a href="../biblioteche/">Biblioteche</a>.</span> Fonte: Comune di Milano, «Biblioteche: prestiti per mese» (ds2986, CC BY).</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-vita"></h3>
+  <p class="sub">Alcuni momenti della vita, contati nel 2019, nel 2020 e nel 2024.</p>
+  <table class="kt" id="tab-vita"></table>
+  <p class="src"><span class="da">Dalle pagine <a href="../matrimoni/">Matrimoni e separazioni</a>, <a href="../nascite/">Nascite e mamme</a>, <a href="../arrivi-partenze/">Chi arriva e chi lascia</a>, <a href="../imprese/">Imprese che nascono e muoiono</a>.</span> Fonti: Comune di Milano (CC BY); ISTAT (CC BY 4.0); Camera di commercio di Milano Monza Brianza Lodi su dati del Registro Imprese (numeri citati con la fonte).</p>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2 id="citta">Milano e le altre città</h2>
+<div class="fig">
+  <h3 id="t-rif"></h3>
+  <p class="sub">Rifiuti raccolti nel 2020 e nel 2024 rispetto al 2019, in percento.</p>
+  <div class="lg"><span><i style="background:var(--y20)"></i>2020</span><span><i style="background:var(--y20);opacity:.45"></i>2024</span></div>
+  <div class="ch" id="ch-rif" role="img" aria-label="Barre: variazione dei rifiuti nel 2020 e nel 2024 rispetto al 2019 in sette città e in Italia"></div>
+  <p class="src"><span class="da">Dalla pagina <a href="../rifiuti/">Rifiuti e differenziata</a>.</span> Fonte: ISPRA, Catasto Rifiuti, dati comunali (CC BY 4.0).</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-rea"></h3>
+  <p class="sub">Delitti denunciati ogni 100.000 abitanti nel 2020 e nel 2024, rispetto al 2019, in percento. Milano: il comune; le altre: la provincia.</p>
+  <div class="lg"><span><i style="background:var(--mag)"></i>2020</span><span><i style="background:var(--mag);opacity:.45"></i>2024</span></div>
+  <div class="ch" id="ch-rea" role="img" aria-label="Barre: variazione dei delitti denunciati nel 2020 e nel 2024 rispetto al 2019"></div>
+  <p class="note">Le denunce contano i reati scoperti o segnalati, non tutti quelli commessi: nel 2020 sono cambiati sia i reati possibili (case piene, strade vuote) sia il modo di denunciare.</p>
+  <p class="src"><span class="da">Dalla pagina <a href="../reati/">Reati denunciati</a>.</span> Fonte: ISTAT, delitti denunciati dalle forze di polizia all’autorità giudiziaria (CC BY 4.0).</p>
+</div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Lockdown</dt><dd>La chiusura di tutta Italia dal 9 marzo al 3 maggio 2020: si poteva uscire solo per lavoro, salute o spesa.</dd>
+<dt>2019 = 100</dt><dd>Il valore di un anno (o di un mese) diviso per quello del 2019, per 100. 50 vuol dire la metà del 2019, 120 un quinto in più.</dd>
+<dt>Normale (per i morti)</dt><dd>Quanti morti ci sarebbero stati in quei giorni secondo gli anni precedenti. È una stima, non un dato ufficiale.</dd>
+<dt>Feriale</dt><dd>Dal lunedì al venerdì, senza le feste.</dd>
+<dt>Area C</dt><dd>La zona del centro dove si paga per entrare in auto nei feriali, dalle 7.30 alle 19.30. I varchi contano i veicoli anche quando non si paga.</dd>
+<dt>Biossido di azoto (NO₂)</dt><dd>Un gas che viene soprattutto dai motori, in particolare diesel.</dd>
+<dt>Polveri sottili (PM10, PM2,5)</dt><dd>Particelle nell’aria più piccole di 10 o di 2,5 millesimi di millimetro. Vengono da motori, riscaldamento, freni, gomme, e si formano anche nell’aria stessa.</dd>
+<dt>Delitti denunciati</dt><dd>I reati più gravi (non le multe e le contravvenzioni) che polizia e carabinieri segnalano al magistrato.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Questa pagina non ha file suoi: legge quelli delle altre pagine, che si scaricano da qui.</p>
+<ul id="file-lista"></ul></div></details>
+</div>
+
+<footer>
+<p><b>Fonti e licenze.</b> Morti: ISTAT, «Decessi e cause di morte: dati giornalieri comunali» (CC BY 4.0). Area C: Comune di Milano / AMAT, dati.comune.milano.it (CC BY). Vibrazioni: INGV, Rete Sismica Nazionale, stazione IV.MILN (CC BY 4.0). Elettricità giornaliera: Comune di Milano, dati A2A (ds1574, CC BY); elettricità annua: ISTAT su dati Arera. Metrò: AMAT, Report della Mobilità 2024 (numeri citati con la fonte). Incidenti: Comune di Milano, «Incidenti stradali nel Comune di Milano» (CC0). Aeroporti: Eurostat, avia_paoa (CC BY 4.0). Turisti: Comune di Milano (ds210-ds220, CC BY). Aria: ARPA Lombardia, dati.lombardia.it (CC0). Biblioteche: Comune di Milano (ds2986, CC BY). Musei statali: Comune di Milano (ds513, CC BY). Matrimoni e unioni civili: Comune di Milano (CC BY); separazioni e divorzi: ISTAT (CC BY 4.0). Nascite: Comune di Milano (CC BY). Trasferimenti di residenza: ISTAT, bilancio demografico (CC BY 4.0). Imprese: Camera di commercio di Milano Monza Brianza Lodi su dati del Registro Imprese (licenza non indicata: solo numeri, con citazione). BikeMi: Comune di Milano (ds574, CC BY). Rifiuti: ISPRA, Catasto Rifiuti (CC BY 4.0). Delitti: ISTAT (CC BY 4.0). Date e dettagli di ogni fonte sono nelle pagine di origine.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+var P='../';
+var FILES={
+  mf:['morti/data/finestre_covid.csv',','], md:['morti/data/covid2020.json'], ma:['morti/data/annuale.json'],
+  ac:['area-c/data/giorni.json'],
+  me:['metro/data/passeggeri_linea_anno.csv',','],
+  ae:['aeroporti/data/riepilogo.json'], tu:['turisti/data/dati.json'],
+  ar:['aria/data/covid_2020_vs_2017_2019.csv',','],
+  co:['consumi/data/consumi_giornalieri.csv',','], cp:['consumi/data/pagina.json'],
+  vi:['vibrazioni/data/pagina.json'],
+  ic:['incroci/data/riepilogo.json'],
+  ri:['rifiuti/data/riepilogo.json'], re:['reati/data/covid.json'],
+  mt:['matrimoni/data/covid_2020.csv',';'],
+  bi:['biblioteche/data/riepilogo.json'],
+  mu:['musei/data/statali_milano_1996_2024.csv',';'],
+  bk:['bici/data/bikemi_serie.csv',';'],
+  na:['nascite/data/citta_anno.csv',';'],
+  im:['imprese/data/milano_annuale.csv',','],
+  ap:['arrivi-partenze/data/saldi_anno.csv',';']
+};
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={m1:cv('--m1'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  y20:cv('--y20'),norm:cv('--norm'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),soft:cv('--soft')};
+var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+var MESIL=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+var D={},RD=[],I={};
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null||isNaN(x))return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+grp(String(Math.abs(r)))}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function pct(a,b){return (b/a-1)*100}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function sum(a){return a.reduce(function(s,v){return s+v},0)}
+function mean(a){return a.length?sum(a)/a.length:null}
+function median(a){var b=a.slice().sort(function(x,y){return x-y}),n=b.length;return n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2}
+function find(arr,k,v){for(var i=0;i<arr.length;i++)if(String(arr[i][k])===String(v))return arr[i];return null}
+
+/* ---------- date ---------- */
+var DAY=864e5;
+function dP(s){var p=s.split('-');return Date.UTC(+p[0],+p[1]-1,+p[2])}
+function dS(t){return new Date(t).toISOString().slice(0,10)}
+function dd(t){var d=new Date(t);return d.getUTCDate()+' '+MESIL[d.getUTCMonth()]}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/&[a-z]+;/g,'x')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function R(x,y,w,h,fill,extra){return '<rect x="'+r1(x)+'" y="'+r1(y)+'" width="'+r1(Math.max(0,w))+'" height="'+r1(Math.max(0,h))+'" fill="'+fill+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function dot(x,y,r,fill,extra){return '<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="'+r+'" fill="'+fill+'"'+(extra||'')+'/>'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d=x1>=x0?
+    'M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z':
+    'M'+r1(r)+' '+r1(y)+'H'+r1(l+rr)+'Q'+r1(l)+' '+r1(y)+' '+r1(l)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(l)+' '+r1(y+h)+' '+r1(l+rr)+' '+r1(y+h)+'H'+r1(r)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(3,h,w/2);if(h<0.5)return '';
+  var d='M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function path(pts){var d='',pen=false;pts.forEach(function(p){if(p==null||p[1]==null||isNaN(p[1])){pen=false;return}d+=(pen?'L':'M')+r1(p[0])+' '+r1(p[1]);pen=true});return d}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+/* mescola un colore col bianco: k=0 bianco, k=1 colore pieno */
+function mix(hex,k,base){base=base||'#ffffff';var a=parseInt(base.slice(1),16),b=parseInt(hex.slice(1),16),o=[16,8,0].map(function(s){var x=(a>>s)&255,y=(b>>s)&255;return Math.round(x+(y-x)*k)});return 'rgb('+o.join(',')+')'}
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getCSV(u,sep){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){
+  var Ls=t.replace(/\r/g,'').split('\n').filter(Boolean),h=Ls[0].split(sep);
+  return Ls.slice(1).map(function(l){var v=l.split(sep),o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
+var keys=Object.keys(FILES);
+Promise.all(keys.map(function(k){var f=FILES[k];return f[1]?getCSV(P+f[0],f[1]):getJ(P+f[0])})).then(function(r){
+  keys.forEach(function(k,i){D[k]=r[i]});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+function tutto(){
+  prep();
+  highlights();
+  draw(riassunto);draw(morti);draw(areac);draw(vib);draw(cal);draw(metro);draw(incidenti);draw(cielo);draw(aria);draw(bib);vita();draw(rifiuti);draw(reati);
+  limiti();metodo();fileLista();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+
+/* ---------- preparazione: Area C per data, indicatori ---------- */
+var AC={};
+function acMean(y,m0,m1,tipo){ // media dei giorni di quel tipo, mesi m0..m1 (1-12)
+  var v=[];for(var k in AC){var o=AC[k],yy=+k.slice(0,4),mm=+k.slice(5,7);if(yy===y&&mm>=m0&&mm<=m1&&o.v!=null&&(!tipo||o.t===tipo))v.push(o.v)}
+  return mean(v);
+}
+function prep(){
+  var g=D.ac,t0=dP(g.d0);
+  g.n.forEach(function(v,i){AC[dS(t0+i*DAY)]={v:(g.flag[i]===3||v==null)?null:v,t:g.tipo[i]}});
+  // indicatori: valore 2019, 2020, 2021, ultimo
+  function Y(arr,ky,kv,y){var r=find(arr,ky,y);return r?+r[kv]:null}
+  var tu=D.tu.serie,ae=D.ae.covid,mu=D.mu,me=D.me,bk=D.bk,ic=D.ic.comune_annuale,ri=D.ri,cp=D.cp.annuale.serie,ma=D.ma.morti_2011_2025;
+  function mus(y){return sum(mu.filter(function(r){return +r.anno===y&&(r.museo==='Pinacoteca di Brera'||r.museo==='Cenacolo Vinciano')}).map(function(r){return +r.totale}))}
+  function met(y){var r=find(me,'anno',y);return +r.M1 + +r.M2 + +r.M3 + +r.M5}
+  function icv(y){return ic.inc[ic.anno.indexOf(y)]}
+  function rea(y){var r=find(D.re,'territorio','Milano comune');return r['t'+y]}
+  var mt=find(D.mt,'serie','Milano matrimoni celebrati - totale');
+  var riAnni=ri.meta.anni;
+  I.list=[
+    {k:'tur',n:'Notti dei turisti',p:'turisti',pl:'Turisti',u:'milioni di notti',div:1e6,dec:1,ly:2025,v:[2019,2020,2021,2025].map(function(y){return find(tu,'a',y).pt})},
+    {k:'aer',n:'Passeggeri in aereo',p:'aeroporti',pl:'Aeroporti',u:'(2019 = 100)',idx:true,ly:2025,v:[2019,2020,2021,2025].map(function(y){return ae.sistema[ae.anni.indexOf(y)]})},
+    {k:'mus',n:'Brera e Cenacolo',p:'musei',pl:'Musei',u:'visitatori',ly:2024,v:[2019,2020,2021,2024].map(mus)},
+    {k:'bib',n:'Prestiti in biblioteca',p:'biblioteche',pl:'Biblioteche',u:'prestiti',ly:2025,v:[2019,2020,2021,2025].map(function(y){return D.bi.totali[y]})},
+    {k:'met',n:'Passeggeri del metrò',p:'metro',pl:'Il metrò',u:'milioni (M1, M2, M3, M5)',dec:1,ly:2024,v:[2019,2020,2021,2024].map(met)},
+    {k:'mat',n:'Matrimoni',p:'matrimoni',pl:'Matrimoni e separazioni',u:'celebrati a Milano',ly:2024,v:[+mt.v2019,+mt.v2020,+mt.v2021,+mt.v2024]},
+    {k:'bik',n:'Noleggi BikeMi',p:'bici',pl:'BikeMi e bici',u:'noleggi al giorno (bici alle stazioni)',ly:2025,v:[2019,2020,2021,2025].map(function(y){return Y(bk,'anno','noleggi_giorno_sb',y)})},
+    {k:'inc',n:'Incidenti stradali',p:'incroci',pl:'Incroci e incidenti',u:'incidenti con feriti o morti',ly:2025,v:[2019,2020,2021,2025].map(icv)},
+    {k:'rea',n:'Reati denunciati',p:'reati',pl:'Reati denunciati',u:'delitti ogni 100.000 abitanti',ly:2024,v:[2019,2020,2021,2024].map(rea)},
+    {k:'arc',n:'Auto in Area C',p:'area-c',pl:'Area C',u:'ingressi in un feriale medio, gen-nov',ly:2024,v:[2019,2020,2021,2024].map(function(y){return acMean(y,1,11,'L')})},
+    {k:'imp',n:'Nuove imprese',p:'imprese',pl:'Imprese che nascono e muoiono',u:'iscrizioni, provincia di Milano',ly:2025,v:[2019,2020,2021,2025].map(function(y){return Y(D.im,'anno','iscrizioni',y)})},
+    {k:'rif',n:'Rifiuti',p:'rifiuti',pl:'Rifiuti e differenziata',u:'mila tonnellate',div:1000,ly:2024,v:[ri.covid.milano['2019'].ru_t,ri.covid.milano['2020'].ru_t,ri.covid.milano['2021'].ru_t,ri.milano.ru_t[riAnni.indexOf(2024)]]},
+    {k:'ele',n:'Elettricità',p:'consumi',pl:'Quanta corrente, quanta acqua',u:'GWh nell’anno',ly:2024,v:[2019,2020,2021,2024].map(function(y){return find(cp,'anno',y).gwh})},
+    {k:'mor',n:'Morti',p:'morti',pl:'Morti giorno per giorno',u:'morti residenti',ly:2025,v:[2019,2020,2021,2025].map(function(y){return find(ma,'anno',y).morti})}
+  ];
+  I.list.forEach(function(o){o.ix=o.v.map(function(v){return o.idx?v:v/o.v[0]*100});I[o.k]=o});
+  // morti: finestre
+  I.mf={};D.mf.filter(function(r){return r.scope==='Milano'}).forEach(function(r){I.mf[r.finestra]=r});
+}
+function fv(o,v){if(o.idx)return f1(v);var x=v/(o.div||1);return o.dec?f1(x):f0(x)}
+
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var a20=I.mf['anno 2020'],pr=I.mf['primavera 2020'];
+  var apr=pct(acMean(2019,4,4,'L'),acMean(2020,4,4,'L'));
+  var met=I.met,tur=I.tur;
+  var ar=D.ar.filter(function(r){return r.inquinante==='NO2'&&r.stazione==='Marche'})[0];
+  var pm=D.ar.filter(function(r){return r.inquinante==='PM10'&&r.stazione==='Marche'})[0];
+  var M=D.ic.comune_mesi_covid,iap=pct(M['2019'][3],M['2020'][3]);
+  var T=[
+    {c:C.m1,h:'t-morti',n:f0(+a20.eccesso_B),u:'',p:'morti in più del normale a Milano nel 2020 ('+sg0(+a20.pct_B)+'%). Da marzo a maggio: '+sg0(+pr.pct_B)+'%.'},
+    {c:C.m3,h:'t-areac',n:sg0(apr)+'%',u:'',p:'auto entrate in Area C nei feriali di aprile 2020, rispetto ad aprile 2019.'},
+    {c:C.m2,h:'t-metro',n:sg0(pct(met.v[0],met.v[1]))+'%',u:'',p:'passeggeri del metrò nel 2020. Nel '+met.ly+' ancora '+sg0(pct(met.v[0],met.v[3]))+'%.'},
+    {c:C.ora,h:'t-cielo',n:sg0(pct(tur.v[0],tur.v[1]))+'%',u:'',p:'notti dei turisti nel 2020. Nel '+tur.ly+' sono '+sg0(pct(tur.v[0],tur.v[3]))+'% sul 2019.'},
+    {c:C.teal,h:'t-aria',n:sg0(+ar.variazione_2020_pct)+'%',u:'',p:'biossido di azoto in viale Marche nel 2020. Le polveri sottili: '+sg0(+pm.variazione_2020_pct)+'%.'},
+    {c:C.mag,h:'t-inc',n:sg0(iap)+'%',u:'',p:'incidenti stradali ad aprile 2020: '+f0(M['2020'][3])+', contro '+f0(M['2019'][3])+' di aprile 2019.'}
+  ];
+  $('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. tutto insieme: punti collegati ---------- */
+function riassunto(){
+  var box=$('ch-rias'),W=width('ch-rias');
+  var rows=I.list.slice().sort(function(a,b){return a.ix[1]-b.ix[1]});
+  var lw=Math.ceil(Math.max.apply(null,rows.map(function(r){return tw(r.n,13,r.k==='mor')})))+10,rh=32,top=24,H=top+rows.length*rh+6;
+  var lo=0,hi=140,X=function(v){return lw+(v-lo)/(hi-lo)*(W-lw-46)};
+  var s=svgOpen(W,H);
+  [0,50,100].forEach(function(v){s+=L(X(v),top-6,X(v),H-4,v===100?C.ink:C.grid,v===100?1.5:1)+T(X(v),top-11,v===100?'2019 = 100':v,{a:v===0?'start':'middle',c:v===100?'b':'m',st:v===100?'font-size:12px':''})});
+  rows.forEach(function(r,k){
+    var y=top+k*rh+rh/2,x20=X(r.ix[1]),x21=X(r.ix[2]),xl=X(r.ix[3]),xs=[x20,x21,xl];
+    var mn=Math.min.apply(null,xs),mx=Math.max.apply(null,xs);
+    if(r.k==='mor')s+=R(0,y-rh/2,W,rh,C.soft);
+    s+=T(0,y+4.5,r.n,{c:r.k==='mor'?'b':''});
+    s+=L(mn,y,mx,y,C.norm,2.5);
+    s+=dot(x21,y,4,C.axis,' stroke="#fff" stroke-width="1.5"');
+    s+=dot(xl,y,5.5,C.ink,' stroke="#fff" stroke-width="2"');
+    s+=dot(x20,y,6,C.y20,' stroke="#fff" stroke-width="2"');
+    var lab=sg0(r.ix[1]-100)+'%',left=x20<=mn+0.5;
+    if(left&&x20-9-tw(lab,12,true)<lw-4)left=false;
+    if(left)s+=T(x20-9,y+4,lab,{a:'end',c:'b',st:'font-size:12px;fill:'+C.y20});
+    else{var xr=mx+9;s+=T(xr,y+4,lab,{c:'b',st:'font-size:12px;fill:'+C.y20})}
+    var h='<b>'+r.n+'</b><br>'+r.u+'<br>2019: '+fv(r,r.v[0])+'<br>'+sw(C.y20)+'2020: '+fv(r,r.v[1])+' ('+sg0(r.ix[1]-100)+'%)<br>'+sw(C.axis)+'2021: '+fv(r,r.v[2])+' ('+sg0(r.ix[2]-100)+'%)<br>'+sw(C.ink)+r.ly+': '+fv(r,r.v[3])+' ('+sg0(r.ix[3]-100)+'%)<br>Dalla pagina '+esc(r.pl);
+    s+=R(0,y-rh/2,W,rh,'transparent',tip(h));
+  });
+  box.innerHTML=s+'</svg>';
+  var altri=I.list.filter(function(r){return r.k!=='mor'}),torn=altri.filter(function(r){return r.ix[3]>=100}).length,giu=altri.filter(function(r){return r.ix[1]<100}).length;
+  $('t-rias').textContent='Nel 2020 '+(giu===altri.length?'è calato tutto':giu+' cose su '+altri.length+' calano')+', tranne i morti. Oggi '+torn+' su '+altri.length+' sono tornate almeno al livello del 2019';
+}
+
+/* ---------- 2. morti giorno per giorno ---------- */
+function shadeLock(X,yTop,h,t0){ // fascia del lockdown, X su millisecondi
+  var a=X(dP('2020-03-09')),b=X(dP('2020-05-04'));
+  return R(a,yTop,b-a,h,'rgba(11,13,18,.07)')+T(a+4,yTop+13,'lockdown',{c:'m',st:'font-weight:600;fill:'+C.ink2});
+}
+function monthTicks(X,y0,yb,from,to,fmt){var s='';for(var m=from;m<=to;m++){var t=Date.UTC(2020,m,1),x=X(t);s+=L(x,yb,x,yb+4,C.axis)+T(x+2,yb+16,fmt?fmt(m):MESI[m],{c:'m'})}return s}
+function morti(){
+  var box=$('ch-morti'),W=width('ch-morti'),M=D.md.Milano,t0=dP(D.md.inizio),n=M.morti.length,H=280,m={l:32,r:6,t:14,b:24};
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(t){return m.l+(t-t0)/DAY/n*pw},Y=function(v){return m.t+ph-v/150*ph},bw=pw/n;
+  var s=svgOpen(W,H);
+  s+=shadeLock(X,m.t,ph);
+  [0,50,100,150].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v?C.grid:C.axis)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})});
+  var imax=0;M.morti.forEach(function(v,i){if(v>M.morti[imax])imax=i});
+  M.morti.forEach(function(v,i){var x=m.l+i*bw;s+=R(x+0.15,Y(v),Math.max(0.6,bw-0.3),Y(0)-Y(v),C.y20,v<=M.attesi[i]?' fill-opacity=".45"':'')});
+  s+='<path d="'+path(M.attesi.map(function(v,i){return[m.l+(i+0.5)*bw,Y(v)]}))+'" fill="none" stroke="'+C.ink+'" stroke-width="2"/>';
+  var xm=m.l+(imax+0.5)*bw,vm=M.morti[imax],rm=vm/M.attesi[imax];
+  s+=T(xm+6,Y(vm)+4,dd(t0+imax*DAY)+': '+vm,{c:'b'});
+  s+=monthTicks(X,0,m.t+ph,1,5);
+  for(var i=0;i<n;i++)s+=R(m.l+i*bw,m.t,bw,ph,'transparent',tip('<b>'+dd(t0+i*DAY)+' 2020</b><br>'+sw(C.y20)+'morti: '+M.morti[i]+'<br>'+sw(C.ink)+'normale: '+f1(M.attesi[i])));
+  box.innerHTML=s+'</svg>';
+  $('t-morti').textContent='Il '+dd(t0+imax*DAY)+' 2020 a Milano sono morte '+vm+' persone: '+f1(rm).replace(',0','')+' volte un giorno normale';
+  var F=I.mf,rows=[['primavera 2020','marzo-maggio 2020'],['autunno 2020','ottobre-dicembre 2020'],['anno 2020','tutto il 2020'],['anno 2021','tutto il 2021']];
+  var h='<thead><tr><th>Periodo</th><th>Morti</th><th>Normale</th><th>In più</th><th>Variazione</th></tr></thead><tbody>';
+  rows.forEach(function(r){var o=F[r[0]];h+='<tr><td>'+r[1]+'</td><td>'+f0(+o.morti)+'</td><td>'+f0(+o.attesi_B)+'</td><td>'+f0(+o.eccesso_B)+'</td><td class="v">'+sg0(+o.pct_B)+'%</td></tr>'});
+  $('tab-morti').innerHTML=h+'</tbody>';
+}
+
+/* ---------- 3. Area C: 2020 contro la fascia 2017-2019 ---------- */
+function m7(y,mo,da){ // media centrata di 7 giorni attorno a una data
+  var t=Date.UTC(y,mo,da),v=[];for(var k=-3;k<=3;k++){var o=AC[dS(t+k*DAY)];if(o&&o.v!=null)v.push(o.v)}return v.length>=5?mean(v):null}
+function areac(){
+  var box=$('ch-areac'),W=width('ch-areac'),H=290,m={l:34,r:8,t:16,b:24},t0=Date.UTC(2020,0,1),n=366;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(t){return m.l+(t-t0)/DAY/(n-1)*pw},Y=function(v){return m.t+ph-v/200000*ph};
+  var s=svgOpen(W,H),lo=[],hi=[],v20=[],wk=[];
+  for(var i=0;i<n;i++){var d=new Date(t0+i*DAY),mo=d.getUTCMonth(),da=d.getUTCDate();if(mo===1&&da===29)da=28;
+    var b=[2017,2018,2019].map(function(y){return m7(y,mo,da)}).filter(function(v){return v!=null});
+    lo.push(b.length?Math.min.apply(null,b):null);hi.push(b.length?Math.max.apply(null,b):null);v20.push(m7(2020,d.getUTCMonth(),d.getUTCDate()));}
+  s+=shadeLock(X,m.t,ph);
+  // sospensioni di Area C
+  [['2020-03-11','2020-06-14'],['2020-11-05','2020-12-31']].forEach(function(p,j){var a=X(dP(p[0])),b2=X(dP(p[1]));s+=R(a,m.t+ph-6,b2-a,6,C.ink,' fill-opacity=".55"')});
+  [0,50000,100000,150000,200000].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v?C.grid:C.axis)+T(m.l-6,Y(v)+4,v?(v/1000)+'k':'0',{a:'end',c:'m'})});
+  var up=[],dn=[];for(i=0;i<n;i++)if(lo[i]!=null){up.push(r1(X(t0+i*DAY))+' '+r1(Y(hi[i])));dn.unshift(r1(X(t0+i*DAY))+' '+r1(Y(lo[i])))}
+  s+='<path d="M'+up.join('L')+'L'+dn.join('L')+'Z" fill="'+C.norm+'" fill-opacity=".8"/>';
+  s+='<path d="'+path(v20.map(function(v,i){return[X(t0+i*DAY),v==null?null:Y(v)]}))+'" fill="none" stroke="'+C.y20+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  var imin=-1;v20.forEach(function(v,i){if(v!=null&&(imin<0||v<v20[imin]))imin=i});
+  s+=dot(X(t0+imin*DAY),Y(v20[imin]),4,C.y20,' stroke="#fff" stroke-width="1.5"');
+  s+=monthTicks(X,0,m.t+ph,0,11,function(mo){return mo%2===0?MESI[mo]:''});
+  // tocco: una zona per settimana
+  for(i=0;i<n;i+=7){var j=Math.min(n-1,i+3),h='<b>settimana dal '+dd(t0+i*DAY)+'</b><br>'+sw(C.y20)+'2020: '+f0(v20[j])+' al giorno<br>'+sw(C.norm)+'2017-2019: tra '+f0(lo[j])+' e '+f0(hi[j]);
+    s+=R(X(t0+i*DAY),m.t,X(t0+Math.min(n-1,i+7)*DAY)-X(t0+i*DAY),ph,'transparent',tip(h))}
+  box.innerHTML=s+'</svg>';
+  var r=acMean(2020,4,4,'L')/acMean(2019,4,4,'L');
+  $('t-areac').textContent='Nei feriali di aprile 2020 in centro è entrata un’auto su '+Math.round(1/r)+' rispetto ad aprile 2019';
+  var sn=pct(acMean(2019,9,11,'L'),acMean(2024,9,11,'L'));
+  $('nt-areac').innerHTML='Il punto più basso: la settimana attorno al '+dd(t0+imin*DAY)+', '+f0(v20[imin])+' ingressi al giorno. La barra scura in basso segna i periodi in cui Area C era sospesa (non si pagava). Quattro anni dopo il centro non è tornato come prima: nei feriali di settembre-novembre 2024 gli ingressi sono '+sg0(sn)+'% rispetto agli stessi mesi del 2019.';
+}
+
+/* ---------- 3b. vibrazioni ora per ora ---------- */
+function vib(){
+  var box=$('ch-vib'),W=width('ch-vib'),H=262,m={l:38,r:8,t:26,b:36},Pp=D.vi.giornata.periodi;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(h){return m.l+h/23*pw},Y=function(v){return m.t+ph-v/700*ph};
+  var col={marzo2019:C.norm,febbraio2020:C.ink,lockdown2020:C.y20},wd={marzo2019:3,febbraio2020:2,lockdown2020:3};
+  var s=svgOpen(W,H);
+  [0,200,400,600].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v?C.grid:C.axis)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})});
+  [0,6,12,18,23].forEach(function(h){s+=T(X(h),m.t+ph+16,h===23?'23':h,{a:h===0?'start':h===23?'end':'middle',c:'m'})});
+  s+=T(m.l+pw/2,H-2,'ora del giorno',{a:'middle',c:'m'});
+  s+=T(m.l-6,12,'nanometri al secondo',{c:'m'});
+  ['marzo2019','febbraio2020','lockdown2020'].forEach(function(id){var p=Pp.filter(function(x){return x.id===id})[0];
+    s+='<path d="'+path(p.ore.map(function(v,h){return[X(h),Y(v)]}))+'" fill="none" stroke="'+col[id]+'" stroke-width="'+wd[id]+'" stroke-linejoin="round" stroke-linecap="round"/>'});
+  var A=Pp.filter(function(x){return x.id==='marzo2019'})[0],F=Pp.filter(function(x){return x.id==='febbraio2020'})[0],K=Pp.filter(function(x){return x.id==='lockdown2020'})[0];
+  for(var h=0;h<24;h++){s+=R(X(h)-pw/46,m.t,pw/23,ph,'transparent',tip('<b>ore '+h+'</b><br>'+sw(C.norm)+'marzo 2019: '+f0(A.ore[h])+'<br>'+sw(C.ink)+'febbraio 2020: '+f0(F.ore[h])+'<br>'+sw(C.y20)+'lockdown: '+f0(K.ore[h]))+'')}
+  box.innerHTML=s+'</svg>';
+  $('t-vib').textContent='Nella settimana del lockdown, di giorno, il suolo di Milano si muoveva il '+f0(-pct(A.giorno,K.giorno))+'% in meno';
+}
+
+/* ---------- 3c. calendario dell'elettricità ---------- */
+function cal(){
+  var box=$('ch-cal'),W=width('ch-cal'),byD={};
+  D.co.forEach(function(r){byD[r.data]={v:+r.gwh_a2a,t:r.tipo_giorno}});
+  var lw=34,cw=Math.min(18,Math.floor((W-lw)/31)),ch=Math.min(18,Math.max(14,cw+4)),top=4,H=top+12*ch+8;
+  var lo=-30,hi=15;
+  function col(p){if(p==null)return '#fff';if(p<0)return mix(C.m4,Math.min(1,-p/(-lo))*0.95+0.05,'#eceef1');return mix(C.ora,Math.min(1,p/hi)*0.95+0.05,'#eceef1')}
+  var s=svgOpen(W,H),lk0=dP('2020-03-09'),lk1=dP('2020-05-03'),fer=[],fer19=[];
+  for(var mo=0;mo<12;mo++){
+    var y=top+mo*ch;s+=T(0,y+ch/2+4,MESI[mo],{c:'m'});
+    var nd=new Date(Date.UTC(2020,mo+1,0)).getUTCDate();
+    for(var da=1;da<=nd;da++){
+      var t=Date.UTC(2020,mo,da),k=dS(t),a=byD[k],b=byD[dS(t-364*DAY)],x=lw+(da-1)*cw,p=null,diff=false;
+      if(a&&b){if(a.t!==b.t)diff=true;else p=pct(b.v,a.v)}
+      var inL=t>=lk0&&t<=lk1;
+      if(inL&&a&&b&&a.t==='feriale'&&b.t==='feriale'){fer.push(a.v);fer19.push(b.v)}
+      var dd2=new Date(t),wdN=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'][dd2.getUTCDay()];
+      var h='<b>'+wdN+' '+dd(t)+' 2020</b>'+(a?'<br>'+f1(a.v)+' GWh':'')+(b?'<br>stesso giorno 2019 ('+dd(t-364*DAY)+'): '+f1(b.v)+' GWh':'')+(p!=null?'<br><b>'+sg0(p)+'%</b>':diff?'<br>festa in uno solo dei due anni':'');
+      s+=R(x+0.5,y+0.5,cw-1,ch-1,col(p),(diff||p==null?' stroke="'+C.norm+'" stroke-width="1"':'')+tip(h));
+    }
+  }
+  // bordo del lockdown: contorno dei giorni
+  for(mo=2;mo<=4;mo++){var y2=top+mo*ch,d0=mo===2?9:1,d1=mo===4?3:new Date(Date.UTC(2020,mo+1,0)).getUTCDate();
+    s+='<rect x="'+r1(lw+(d0-1)*cw)+'" y="'+r1(y2)+'" width="'+r1((d1-d0+1)*cw)+'" height="'+ch+'" fill="none" stroke="'+C.ink+'" stroke-width="2" pointer-events="none"/>'}
+  box.innerHTML=s+'</svg>';
+  var g='linear-gradient(90deg,'+col(lo)+','+col(lo/2)+','+col(0)+','+col(hi)+')';
+  $('lg-cal').innerHTML='<span>'+sg0(lo)+'%&nbsp;<i class="grad" style="background:'+g+'"></i>'+sg0(hi)+'%</span><span>blu = meno del 2019, arancio = di più</span>';
+  $('t-cal').textContent='Nei feriali del lockdown Milano ha usato il '+f0(-pct(mean(fer19),mean(fer)))+'% di corrente in meno dello stesso periodo del 2019';
+}
+
+/* ---------- 4. metrò: piccoli multipli ---------- */
+function metro(){
+  var box=$('ch-metro'),W=width('ch-metro'),Ls=[['M1',C.m1,'#fff'],['M2',C.m2,'#fff'],['M3',C.m3,C.ink],['M5',C.m5,'#fff']];
+  var rows=D.me.filter(function(r){return +r.anno<=2024}),n=rows.length,cols=W>=600?4:2,gap=16,pw=(W-gap*(cols-1))/cols,ph=130,head=30,bot=20,PH=head+ph+bot;
+  var vmax=160,s=svgOpen(W,Math.ceil(Ls.length/cols)*(PH+12));
+  Ls.forEach(function(l,k){
+    var x0=(k%cols)*(pw+gap),y0=Math.floor(k/cols)*(PH+12),slot=pw/n,bw=Math.max(4,slot-4),Y=function(v){return y0+head+ph-v/vmax*ph};
+    var i19=-1,i20=-1;rows.forEach(function(r,i){if(+r.anno===2019)i19=i;if(+r.anno===2020)i20=i});
+    var v19=+rows[i19][l[0]],v20=+rows[i20][l[0]],vl=+last(rows)[l[0]];
+    s+=dot(x0+11,y0+11,11,l[1])+T(x0+11,y0+15.5,l[0],{a:'middle',st:'font-weight:800;font-size:12px;fill:'+l[2]});
+    s+=T(x0+28,y0+16,'2020: '+sg0(pct(v19,v20))+'%',{c:'b'});
+    s+=L(x0,Y(0),x0+pw,Y(0),C.axis);
+    [50,100,150].forEach(function(v){s+=L(x0,Y(v),x0+pw,Y(v),C.grid,1,' stroke-dasharray="2 3"')});
+    rows.forEach(function(r,i){var v=+r[l[0]],x=x0+i*slot+(slot-bw)/2,is20=+r.anno===2020;
+      s+=vbar(x,bw,Y(0),Y(v),l[1],is20?'':' fill-opacity="'+(l[0]==='M3'?'.5':'.35')+'"');
+      if(is20||i===i19||i===n-1)s+=T(x+bw/2,Y(v)-4,f0(v),{a:'middle',c:'b',st:'font-size:12px'});
+      if(i===0||is20||i===n-1)s+=T(x+bw/2,Y(0)+14,"’"+String(r.anno).slice(2),{a:'middle',c:'m'});
+      s+=R(x0+i*slot,y0+head,slot,ph,'transparent',tip('<b>'+l[0]+', '+r.anno+'</b><br>'+f1(v)+' milioni di passeggeri'+(i!==i19?'<br>'+sg0(pct(v19,v))+'% sul 2019':'')));
+    });
+  });
+  box.innerHTML=s+'</svg>';
+  var o=I.met;
+  $('t-metro').textContent='Nel 2020 il metrò ha perso più di metà dei passeggeri; nel '+o.ly+' le quattro linee sono ancora '+sg0(o.ix[3]-100)+'% sul 2019';
+  var t25=find(D.me,'anno',2025);
+  $('nt-metro').innerHTML='Totale delle quattro linee: '+f1(o.v[0])+' milioni nel 2019, '+f1(o.v[1])+' nel 2020, '+f1(o.v[3])+' nel '+o.ly+'. Con la M4 nel '+o.ly+' sono '+f1(+find(D.me,'anno',o.ly).totale)+' milioni. Per il 2025 c’è un dato non ancora verificato sull’originale ('+f1(+t25.totale)+' milioni con la M4), qui non usato.';
+}
+
+/* ---------- 4b. incidenti mese per mese ---------- */
+function incidenti(){
+  var box=$('ch-inc'),W=width('ch-inc'),M=D.ic.comune_mesi_covid,a=M['2019'],b=M['2020'],H=250,m={l:32,r:4,t:22,b:24};
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,slot=pw/12,bw=Math.min(26,slot-4),Y=function(v){return m.t+ph-v/900*ph},X=function(i){return m.l+i*slot+slot/2};
+  var s=svgOpen(W,H);
+  var la=X(2)-slot/2+slot*8/31,lb=X(4)-slot/2+slot*3/31;s+=R(la,m.t-4,lb-la,ph+4,'rgba(11,13,18,.07)');
+  s+=T(la+3,m.t+8,'lockdown',{c:'m',st:'font-weight:600;fill:'+C.ink2});
+  [0,300,600,900].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v?C.grid:C.axis)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})});
+  var imin=0;b.forEach(function(v,i){if(pct(a[i],v)<pct(a[imin],b[imin]))imin=i});
+  for(var i=0;i<12;i++){var x=X(i)-bw/2;
+    s+=vbar(x-2,bw+4,Y(0),Y(a[i]),C.norm);
+    s+=vbar(x+bw*0.2,bw*0.6,Y(0),Y(b[i]),C.mag);
+    s+=T(X(i),m.t+ph+16,MESI[i].charAt(0).toUpperCase(),{a:'middle',c:'m'});
+    if(i===imin)s+=T(X(i),Y(b[i])-6,f0(b[i]),{a:'middle',c:'b'});
+    s+=R(X(i)-slot/2,m.t,slot,ph,'transparent',tip('<b>'+MESIL[i]+'</b><br>'+sw(C.norm)+'2019: '+f0(a[i])+'<br>'+sw(C.mag)+'2020: '+f0(b[i])+' ('+sg0(pct(a[i],b[i]))+'%)'+(M['2021']?'<br>2021: '+f0(M['2021'][i]):'')));
+  }
+  box.innerHTML=s+'</svg>';
+  $('t-inc').textContent='Ad '+MESIL[imin]+' 2020 a Milano ci sono stati '+f0(b[imin])+' incidenti, contro '+f0(a[imin])+' di un anno prima: '+sg0(pct(a[imin],b[imin]))+'%';
+  var o=I.inc;
+  $('nt-inc').innerHTML='In tutto l’anno: '+f0(o.v[0])+' incidenti nel 2019, '+f0(o.v[1])+' nel 2020 ('+sg0(o.ix[1]-100)+'%). Nel '+o.ly+' sono '+f0(o.v[3])+' ('+sg0(o.ix[3]-100)+'% sul 2019). Morti sulle strade: '+f0(D.ic.comune_annuale.morti[D.ic.comune_annuale.anno.indexOf(2019)])+' nel 2019, '+f0(D.ic.comune_annuale.morti[D.ic.comune_annuale.anno.indexOf(2020)])+' nel 2020: con numeri così piccoli il confronto dice poco.';
+}
+
+/* ---------- 5. aerei e turisti, mese per mese ---------- */
+function cielo(){
+  var box=$('ch-cielo'),W=width('ch-cielo'),A=D.ae.mensile,E=A.etichette,Tm=D.tu.mensile_tot,H=270,m={l:34,r:8,t:14,b:24};
+  function aer(y,mo){var k=y+'-'+(mo<9?'0':'')+(mo+1),i=E.indexOf(k);return i<0?null:A.linate[i]+A.malpensa[i]+A.bergamo[i]}
+  var yrs=[2020,2021,2022,2023],n=48,pa=[],pt=[];
+  yrs.forEach(function(y){for(var mo=0;mo<12;mo++){pa.push(aer(y,mo)/aer(2019,mo)*100);pt.push(Tm[y]?Tm[y][mo]/Tm['2019'][mo]*100:null)}});
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(i){return m.l+i/(n-1)*pw},Y=function(v){return m.t+ph-Math.min(v,140)/140*ph};
+  var s=svgOpen(W,H);
+  [0,50,100].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v===100?C.ink:v?C.grid:C.axis,v===100?1.5:1)+T(m.l-6,Y(v)+4,v,{a:'end',c:v===100?'b':'m'})});
+  yrs.forEach(function(y,k){var x=X(k*12);s+=L(x,m.t+ph,x,m.t+ph+4,C.axis)+T(x,m.t+ph+16,y,{a:k===0?'start':'middle',c:'m'})});
+  s+='<path d="'+path(pt.map(function(v,i){return[X(i),v==null?null:Y(v)]}))+'" fill="none" stroke="'+C.ora+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  s+='<path d="'+path(pa.map(function(v,i){return[X(i),Y(v)]}))+'" fill="none" stroke="'+C.teal+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  for(var i=0;i<n;i++){var y=yrs[Math.floor(i/12)],mo=i%12;
+    s+=R(X(i)-pw/(n-1)/2,m.t,pw/(n-1),ph,'transparent',tip('<b>'+MESIL[mo]+' '+y+'</b><br>'+sw(C.teal)+'aerei: '+f0(pa[i])+' (2019 = 100)<br>'+sw(C.ora)+'notti dei turisti: '+f0(pt[i])))}
+  box.innerHTML=s+'</svg>';
+  var ia=3,va=pa[ia],vt=pt[ia];
+  $('t-cielo').textContent='Ad aprile 2020 negli aeroporti è passato lo '+f1(va)+'% dei viaggiatori di un anno prima; negli alberghi c’era il '+f0(vt)+'% delle notti';
+}
+
+/* ---------- 6. aria: punti collegati ---------- */
+function aria(){
+  var box=$('ch-aria'),W=width('ch-aria');
+  var G=[{k:'NO2',n:'Biossido di azoto (NO₂)',col:C.teal},{k:'PM10',n:'Polveri PM10',col:C.m5},{k:'PM25',n:'Polveri PM2,5',col:C.m5}];
+  var rows=[];G.forEach(function(g){rows.push({h:g.n});D.ar.filter(function(r){return r.inquinante===g.k&&r.zona.indexOf('Milano')===0}).sort(function(a,b){return +a.variazione_2020_pct-(+b.variazione_2020_pct)}).forEach(function(r){rows.push({g:g,r:r})})});
+  var lw=Math.ceil(Math.max.apply(null,rows.filter(function(x){return x.r}).map(function(x){return tw(x.r.stazione,13)})))+10,rh=26,hh=26,top=20,H=top;rows.forEach(function(x){H+=x.h?hh:rh});H+=6;
+  var hi=70,X=function(v){return lw+v/hi*(W-lw-46)};
+  var s=svgOpen(W,H),y=top;
+  [0,20,40,60].forEach(function(v){s+=L(X(v),top-6,X(v),H-4,C.grid)+T(X(v),top-10,v,{a:'middle',c:'m'})});
+  rows.forEach(function(x){
+    if(x.h){s+=T(0,y+18,x.h,{c:'b',st:'font-size:13px'});y+=hh;return}
+    var r=x.r,a=+r.media_2017_2019,b=+r.media_2020,yc=y+rh/2;
+    s+=T(0,yc+4.5,r.stazione,{});
+    s+=L(X(a),yc,X(b),yc,mix(x.g.col,.35),3);
+    s+=dot(X(a),yc,5,'#fff',' stroke="'+C.axis+'" stroke-width="2"');
+    s+=dot(X(b),yc,6,x.g.col,' stroke="#fff" stroke-width="2"');
+    s+=T(X(Math.max(a,b))+9,yc+4.5,sg0(+r.variazione_2020_pct)+'%',{c:'b',st:'font-size:12px'});
+    s+=R(0,y,W,rh,'transparent',tip('<b>'+esc(r.stazione)+'</b> ('+esc(r.zona)+')<br>'+x.g.n+'<br>2017-2019: '+f1(a)+' µg/m³'+(+r.anni_ref<3?' (solo '+r.anni_ref+' anni)':'')+'<br>2020: '+f1(b)+' µg/m³ ('+sg1(+r.variazione_2020_pct)+'%)<br>2021: '+f1(+r.media_2021)+' µg/m³ ('+sg1(+r.variazione_2021_pct)+'%)'));
+    y+=rh;
+  });
+  box.innerHTML=s+'</svg>';
+  function md(k,mil){return median(D.ar.filter(function(r){return r.inquinante===k&&(mil?r.zona.indexOf('Milano')===0:r.zona.indexOf('Milano')!==0)}).map(function(r){return +r.variazione_2020_pct}))}
+  var no=md('NO2',true),pm=md('PM10',true);
+  $('t-aria').textContent='Nel 2020 il biossido di azoto scende di '+(no<-40&&no>-50?'quasi metà':f0(-no)+'%')+', le polveri sottili solo del '+f0(-pm)+'%';
+  var fo=D.ar.filter(function(r){return r.inquinante==='NO2'&&r.zona.indexOf('Milano')!==0}).map(function(r){return +r.variazione_2020_pct});
+  var n21=median(D.ar.filter(function(r){return r.inquinante==='NO2'&&r.zona.indexOf('Milano')===0}).map(function(r){return +r.variazione_2021_pct}));
+  $('nt-aria').innerHTML='Nelle '+fo.length+' centraline fuori città usate per controllo il biossido di azoto scende tra il '+f0(-Math.max.apply(null,fo))+' e il '+f0(-Math.min.apply(null,fo))+'%: non è una cosa solo di Milano. Nel 2021, a Milano, il calo a metà strada tra le centraline è ancora del '+f0(-n21)+'%.';
+}
+
+/* ---------- 7. biblioteche: tabella colorata ---------- */
+function bib(){
+  var box=$('ch-bib'),W=width('ch-bib'),Mm={};D.bi.mensile.forEach(function(r){Mm[r[0]]=r[1]});
+  var yrs=[2020,2021,2022,2023,2024,2025],lw=40,cw=(W-lw)/12,ch=30,top=20,H=top+yrs.length*ch+4,s=svgOpen(W,H);
+  function v(y,mo){var k=y+'-'+(mo<9?'0':'')+(mo+1),b=(2019)+'-'+(mo<9?'0':'')+(mo+1);return Mm[k]==null?null:Mm[k]/Mm[b]*100}
+  for(var mo=0;mo<12;mo++)s+=T(lw+mo*cw+cw/2,top-7,MESI[mo].charAt(0).toUpperCase(),{a:'middle',c:'m'});
+  yrs.forEach(function(y,k){var yy=top+k*ch;s+=T(0,yy+ch/2+4.5,y,{c:'b'});
+    for(var mo=0;mo<12;mo++){var p=v(y,mo),x=lw+mo*cw;
+      if(p==null){s+=R(x+1,yy+1,cw-2,ch-2,'#fff',' stroke="'+C.grid+'"');continue}
+      var kk=Math.max(0.04,Math.min(1,p/110)),fill=mix(C.m5,kk);
+      s+=R(x+1,yy+1,cw-2,ch-2,fill,' rx="2"'+tip('<b>'+MESIL[mo]+' '+y+'</b><br>'+f0(Mm[y+'-'+(mo<9?'0':'')+(mo+1)])+' prestiti<br>'+f0(p)+' ogni 100 dello stesso mese del 2019'));
+      s+=T(x+cw/2,yy+ch/2+4.5,f0(p),{a:'middle',st:'font-size:12px;pointer-events:none;font-weight:'+(kk>0.55?'700':'400')+';fill:'+(kk>0.55?'#fff':C.ink)});
+    }});
+  box.innerHTML=s+'</svg>';
+  var ap=Mm['2020-04'],o=I.bib;
+  $('t-bib').textContent='Ad aprile 2020 le biblioteche di Milano hanno fatto '+f0(ap)+' prestiti in tutto; nel '+o.ly+' sono ancora '+sg0(o.ix[3]-100)+'% sul 2019';
+}
+
+/* ---------- 7b. vita: tabella ---------- */
+function vita(){
+  var mt=D.mt,na=D.na,ap=D.ap,im=D.im;
+  function M(lbl){var r=find(mt,'serie',lbl);return[+r.v2019,+r.v2020,+r.v2024]}
+  function Y(arr,ky,kv,ys){return ys.map(function(y){var r=find(arr,ky,y);return r?+r[kv]:null})}
+  var R3=[2019,2020,2024];
+  var G=[
+    {g:'Sposarsi e lasciarsi'},
+    {n:'Matrimoni celebrati a Milano',v:M('Milano matrimoni celebrati - totale')},
+    {n:'di cui in chiesa',v:M('Milano matrimoni religiosi')},
+    {n:'Unioni civili',v:M('Milano unioni civili (Comune)')},
+    {n:'Separazioni',s:'province di Milano e Monza',v:M('Milano+Monza separazioni (ISTAT)')},
+    {n:'Divorzi',s:'province di Milano e Monza',v:M('Milano+Monza divorzi (ISTAT)')},
+    {g:'Nascere, arrivare, partire'},
+    {n:'Nati',s:'da genitori residenti',v:Y(na,'anno','nati_residenti',R3)},
+    {n:'Arrivati da altri comuni',v:Y(ap,'a','isc_i',R3)},
+    {n:'Partiti per altri comuni',v:Y(ap,'a','canc_i',R3)},
+    {n:'Arrivati dall’estero',v:Y(ap,'a','isc_e',R3)},
+    {g:'Lavoro'},
+    {n:'Nuove imprese',s:'provincia di Milano',v:Y(im,'anno','iscrizioni',R3)}
+  ];
+  var h='<thead><tr><th></th><th>2019</th><th>2020</th><th>2020 sul 2019</th><th>2024</th><th>2024 sul 2019</th></tr></thead><tbody>';
+  G.forEach(function(r){if(r.g){h+='<tr class="gr"><td colspan="6">'+r.g+'</td></tr>';return}
+    var a=r.v[0],b=r.v[1],c=r.v[2];
+    h+='<tr><td>'+r.n+(r.s?'<small>'+r.s+'</small>':'')+'</td><td>'+f0(a)+'</td><td>'+f0(b)+'</td><td class="v">'+sg0(pct(a,b))+'%</td><td>'+f0(c)+'</td><td class="v">'+sg0(pct(a,c))+'%</td></tr>'});
+  $('tab-vita').innerHTML=h+'</tbody>';
+  var m=G[1].v,nn=G[7].v;
+  $('t-vita').textContent='Nel 2020 i matrimoni si '+(pct(m[0],m[1])<-45?'dimezzano':'riducono del '+f0(-pct(m[0],m[1]))+'%')+'; le nascite calano appena, come già facevano da anni';
+}
+
+/* ---------- 8. Milano e le altre città: barre ---------- */
+function cityBars(id,rows,col){
+  var box=$(id),W=width(id),lw=Math.ceil(Math.max.apply(null,rows.map(function(r){return tw(r.n,13,r.mi||r.it)})))+8,rh=44,b1=14,b2=8,top=22,H=top+rows.length*rh+6;
+  var mn=Math.min.apply(null,rows.map(function(r){return Math.min(r.a,r.b)})),mx=Math.max.apply(null,rows.map(function(r){return Math.max(r.a,r.b)})),st=(mx-mn)>45?20:10;
+  var lo=Math.min(-st,Math.floor(mn/st)*st),hi=Math.max(st,Math.ceil(mx/st)*st);
+  var pad=34,X=function(v){return lw+pad+(v-lo)/(hi-lo)*(W-lw-pad*2)};
+  var s=svgOpen(W,H);
+  for(var v=lo;v<=hi;v+=st){s+=L(X(v),top-6,X(v),H-4,v===0?C.ink:C.grid,v===0?1.5:1)+T(X(v),top-10,(v<0?'−':v>0?'+':'')+Math.abs(v)+'%',{a:'middle',c:'m'})}
+  function lab(v,y,cl){var o=v<0;return T(X(v)+(o?-5:5),y,sg1(v)+'%',{a:o?'end':'start',c:cl,st:'font-size:12px'})}
+  rows.forEach(function(r,k){
+    var y=top+k*rh,c=r.mi?col:r.it?C.ink2:C.axis,y1=y+8,y2=y1+b1+4;
+    if(r.it)s+=L(0,y+1,W,y+1,C.axis);
+    s+=T(0,y1+b1/2+5,r.n,{c:r.mi||r.it?'b':''});
+    s+=hbar(X(0),X(r.a),y1,b1,c)+lab(r.a,y1+b1/2+4.5,'b');
+    s+=hbar(X(0),X(r.b),y2,b2,c,' fill-opacity=".45"')+lab(r.b,y2+b2/2+4,'m');
+    s+=R(0,y,W,rh,'transparent',tip('<b>'+r.n+'</b>, rispetto al 2019<br>2020: '+sg1(r.a)+'%<br>2024: '+sg1(r.b)+'%'));
+  });
+  box.innerHTML=s+'</svg>';
+}
+function rifiuti(){
+  var V=D.ri.covid,Iy=D.ri.italia,an=D.ri.meta.anni;
+  var rows=Object.keys(V.citta).map(function(n){return{n:n,a:V.citta[n].var_2019_2020_pct,b:V.citta[n].var_2019_2024_pct,mi:n==='Milano'}}).sort(function(x,y){return x.a-y.a});
+  rows.push({n:'Italia',a:V.italia_var_2019_2020_pct,b:pct(Iy.ru_t[an.indexOf(2019)],Iy.ru_t[an.indexOf(2024)]),it:true});
+  cityBars('ch-rif',rows,C.y20);
+  var c=rows.filter(function(r){return !r.it});
+  $('t-rif').textContent=c[0].mi?'Nel 2020 Milano ha perso il '+f0(-c[0].a)+'% dei rifiuti, più di ogni altra grande città; l’Italia il '+f1(-last(rows).a).replace(',0','')+'%':'Rifiuti nel 2020 rispetto al 2019';
+}
+function reati(){
+  var rows=D.re.map(function(r){var n=r.territorio.replace(' prov.','').replace('Milano comune','Milano');return{n:n,a:r.v20,b:r.v24,mi:r.territorio==='Milano comune',it:r.territorio==='Italia',x:r.territorio==='Milano prov.'}}).filter(function(r){return !r.x});
+  var it=rows.filter(function(r){return r.it})[0];rows=rows.filter(function(r){return !r.it}).sort(function(x,y){return x.a-y.a});rows.push(it);
+  cityBars('ch-rea',rows,C.mag);
+  var mi=rows.filter(function(r){return r.mi})[0],pos=rows.indexOf(mi);
+  var itr=last(rows);$('t-rea').textContent='Nel 2020 a Milano le denunce calano del '+f0(-mi.a)+'%'+(pos<=1?', quasi il doppio dell’Italia ('+sg0(itr.a)+'%)':'')+'; nel 2024 sono '+sg0(mi.b)+'% sul 2019';
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var L=[];
+  L.push('<b>Nel 2020 succedono molte cose insieme.</b> Il lockdown, le scuole e gli uffici chiusi, il lavoro da casa, i turisti che non arrivano, i milanesi che passano mesi altrove (restando residenti). I dati dicono quanto è cambiata ogni cosa, non quanto pesa ciascuna di queste cause.');
+  L.push('<b>Il confronto è con il 2019, un anno solo.</b> Se il 2019 era un anno un po’ strano, il confronto ne risente. Per esempio a Milano nel 2019 i morti erano stati pochi: per questo per i morti si usa anche il «normale» calcolato su più anni (+'+f0(+I.mf['anno 2020'].pct_B)+'% invece di '+sg0(I.mor.ix[1]-100)+'% sul solo 2019). Linate è stata chiusa per lavori da fine luglio a fine ottobre 2019: per questo gli aeroporti sono sommati.');
+  L.push('<b>Nel 2020 è cambiato anche il modo di contare.</b> Con gli uffici chiusi o a ritmo ridotto, una parte di quello che si registra (trasferimenti di residenza, imprese, separazioni) è stato probabilmente registrato più tardi, nel 2021 (ipotesi nostra). Le denunce dipendono anche da quanto la gente denuncia e da quanto controllano le forze dell’ordine.');
+  L.push('<b>Area C sospesa.</b> Dall’11 marzo al 14 giugno 2020 e dal 5 novembre 2020 al 23 febbraio 2021 non si pagava per entrare: chi di solito evita il centro per non pagare poteva entrare. I varchi contano comunque i passaggi. Le date vengono da giornali e siti, non da atti ufficiali.');
+  L.push('<b>I passeggeri del metrò</b> vengono dal Report della Mobilità di AMAT: sono numeri arrotondati, letti dai grafici del rapporto. I passeggeri sono contati per linea: chi cambia linea è contato due volte.');
+  L.push('<b>I morti</b> sono quelli residenti a Milano, dai dati giornalieri provvisori dell’ISTAT. Il «normale» è un calcolo della pagina Morti giorno per giorno, non un valore ufficiale.');
+  L.push('<b>L’aria</b> non dipende solo dalle emissioni: vento, pioggia e temperatura contano molto, e le polveri si formano anche nell’aria da sostanze che vengono da lontano. Le medie sono annue: mescolano i mesi di lockdown con quelli normali. Per la centralina di via Liguria la media di riferimento ha solo 2 anni.');
+  L.push('<b>L’elettricità giornaliera</b> c’è solo per il 2019 e il 2020, ed è quella distribuita da A2A in città. Le feste che cadono in giorni diversi (Pasqua, per esempio) fanno sembrare un giorno molto più alto o più basso: per questo i giorni di festa in uno solo dei due anni sono lasciati in bianco.');
+  L.push('<b>Le vibrazioni</b> vengono da un solo sismografo e da tre settimane in tutto: sono un indizio, non una misura della città intera.');
+  L.push('<b>I noleggi BikeMi al giorno</b> sono un ordine di grandezza, non una misura precisa (vedi la pagina BikeMi e bici). Sono solo le bici delle stazioni, non quelle a flusso libero.');
+  L.push('<b>Separazioni, divorzi e nuove imprese</b> non sono del solo comune: le prime due sono delle province di Milano e Monza insieme, le imprese della provincia di Milano (senza Monza e Brianza).');
+  L.push('<b>Le nascite del 2020</b> vengono quasi tutte da gravidanze cominciate prima del virus: il calo di quell’anno continua quello degli anni prima, non si può leggere come effetto del Covid.');
+  L.push('<b>Gli «ultimi anni» non sono tutti uguali:</b> per alcune righe del primo grafico è il 2025, per altre il 2024 (lo dice il riquadro che si apre toccando la riga). Area C arriva a novembre 2024: per confrontare anni uguali si usano i feriali da gennaio a novembre.');
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function metodo(){
+  var L=[];
+  L.push('<b>Da dove vengono i numeri.</b> Questa pagina non ha dati suoi: legge, così come sono, i file delle altre pagine del sito e fa solo somme, medie e divisioni. Ogni grafico dice da quale pagina viene; lì ci sono la fonte originale, la data in cui è stata scaricata e i controlli fatti.');
+  L.push('<b>Il primo grafico.</b> Per ogni cosa: il valore del 2020, del 2021 e dell’ultimo anno diviso per quello del 2019, per 100. Le righe sono in ordine dal calo più forte del 2020. '+I.list.map(function(o){return esc(o.n)+': '+o.u+' (pagina '+esc(o.pl)+', ultimo anno '+o.ly+')'}).join('; ')+'. Per gli aeroporti l’indice è già calcolato nella pagina Aeroporti (Linate + Malpensa + Bergamo).');
+  L.push('<b>Area C.</b> Per ogni giorno del 2020 la media dei 7 giorni attorno (3 prima, 3 dopo). La fascia grigia va dal valore più basso al più alto della stessa media negli stessi giorni del 2017, 2018 e 2019. Il confronto di aprile usa la media dei soli giorni feriali.');
+  L.push('<b>Elettricità.</b> Ogni giorno del 2020 è confrontato con il giorno di 52 settimane prima (364 giorni), così un lunedì si confronta con un lunedì. Nel titolo: media dei feriali dal 9 marzo al 3 maggio 2020 contro i feriali corrispondenti del 2019.');
+  L.push('<b>Aerei e turisti mese per mese.</b> Ogni mese diviso per lo stesso mese del 2019, per 100. Gli aeroporti sono la somma di Linate, Malpensa e Bergamo.');
+  L.push('<b>Aria.</b> La variazione è quella calcolata nella pagina Aria, tra la media del 2020 e quella del 2017-2019 di ogni centralina. Nei titoli si usa la mediana: il valore a metà tra le centraline.');
+  L.push('<b>Biblioteche.</b> I prestiti di ogni mese divisi per quelli dello stesso mese del 2019, per 100.');
+  L.push('<b>Arrotondamenti.</b> Le percentuali sono arrotondate all’unità, quindi possono non tornare di un punto con quelle delle pagine di origine.');
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function fileLista(){
+  var F=[['morti/data/finestre_covid.csv','Morti: i periodi del Covid'],['morti/data/covid2020.json','Morti giorno per giorno, febbraio-giugno 2020'],['area-c/data/ingressi_giornalieri.csv','Area C: ingressi giorno per giorno'],['vibrazioni/data/vibrazioni_orarie.csv','Vibrazioni ora per ora'],['consumi/data/consumi_giornalieri.csv','Elettricità giorno per giorno, 2019-2020'],['metro/data/passeggeri_linea_anno.csv','Passeggeri del metrò per linea'],['aeroporti/data/mensile_tre_aeroporti.csv','Passeggeri dei tre aeroporti, mese per mese'],['turisti/data/serie_totale.csv','Turisti anno per anno'],['aria/data/covid_2020_vs_2017_2019.csv','Aria: 2020 contro 2017-2019'],['incroci/data/serie_annuale.csv','Incidenti anno per anno'],['biblioteche/data/mensile.csv','Prestiti in biblioteca mese per mese'],['matrimoni/data/covid_2020.csv','Matrimoni, unioni civili, separazioni e divorzi nel 2020'],['nascite/data/citta_anno.csv','Nascite anno per anno'],['arrivi-partenze/data/saldi_anno.csv','Arrivi e partenze anno per anno'],['imprese/data/milano_annuale.csv','Imprese anno per anno'],['rifiuti/data/riepilogo.json','Rifiuti (numeri della pagina)'],['reati/data/covid.json','Delitti denunciati 2019-2024']];
+  $('file-lista').innerHTML=F.map(function(f){return '<li><a href="'+P+f[0]+'">'+f[1]+'</a></li>'}).join('');
+}
+})();
+</script>
+</body></html>
