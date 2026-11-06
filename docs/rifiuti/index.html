@@ -4,12 +4,12 @@
 <style>
 :root{
   --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
-  --mi:#e6007e;     /* Milano */
+  --mi:#E30613;     /* Milano: rosso M1 */
   --it:#0b0d12;     /* Italia */
-  --hint:#0891b2;   /* comuni intorno */
-  --tur:#ea580c;    /* turisti */
-  --ind:#4b5563;--umi:#16a34a;--car:#2563eb;--vpm:#f59e0b;--alt:#9333ea; /* tipi di rifiuto */
-  --pos:#ea580c;--neg:#2563eb;
+  --hint:#0072BC;   /* comuni intorno: blu M4 */
+  --tur:#F58220;    /* turisti: arancio della home */
+  --ind:#4b5563;--umi:#00A651;--car:#0072BC;--vpm:#FFD500;--alt:#7B3FA0; /* tipi di rifiuto: grigio, verde M2, blu M4, giallo M3, viola M5 */
+  --pos:#F58220;--neg:#0072BC;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -22,7 +22,10 @@ h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spa
 /* highlights */
 .hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
 @media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
-.hl>div{border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
 .hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
 .hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
 .hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
@@ -156,23 +159,6 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
   <p class="sub">TARI incassata dal Comune per ogni 100 euro di costo del servizio.</p>
   <div class="ch" id="ch-tari" role="img" aria-label="Barre attorno a 100: TARI incassata per ogni 100 euro di costo, 2015-2024"></div>
   <p class="src">TARI: bilancio del Comune di Milano, parte ordinaria incassata nell'anno (CC BY); vedi <a href="../bilancio-comune/">Dove vanno i soldi del Comune</a>. Costo: ISPRA per abitante per gli abitanti. Sono due fonti diverse: il confronto è solo indicativo.</p>
-</div>
-
-<!-- ============ 6 ============ -->
-<h2 id="covid">L'anno del Covid</h2>
-<div class="fig">
-  <h3 id="t-cov"></h3>
-  <p class="sub">Rifiuti totali rispetto al 2019, in percento.</p>
-  <div class="lg"><span><i style="background:var(--axis);height:14px"></i>2020 (barra spessa)</span><span><i style="background:var(--axis);opacity:.55;height:7px"></i>2024 (barra sottile)</span><span><i style="background:var(--mi)"></i>Milano</span></div>
-  <div class="ch" id="ch-cov" role="img" aria-label="Barre: variazione dei rifiuti nel 2020 e nel 2024 rispetto al 2019, sette città e Italia"></div>
-  <p class="src">Fonte: ISPRA (CC BY 4.0). Tonnellate totali, non per abitante.</p>
-</div>
-
-<div class="fig">
-  <h3 id="t-covt"></h3>
-  <p class="sub">Milano, rifiuti del 2020 rispetto al 2019, per tipo.</p>
-  <div class="ch" id="ch-covt" role="img" aria-label="Barre: variazione 2019-2020 dei rifiuti di Milano per tipo"></div>
-  <p class="src">Fonte: ISPRA (CC BY 4.0).</p>
 </div>
 
 <!-- ============ 7 ============ -->
@@ -311,7 +297,7 @@ Promise.all([getJ(DATA+'riepilogo.json'),getCSV(DATA+'area_metropolitana_2024.cs
 function draw(f){f();RD.push(f)}
 function tutto(){
   highlights();
-  draw(sacco);draw(anni);draw(rd);draw(dumb);draw(scat);draw(comuni);draw(costiCitta);draw(costoMilano);draw(tari);draw(covid);draw(covidTipi);draw(turisti);draw(turDot);
+  draw(sacco);draw(anni);draw(rd);draw(dumb);draw(scat);draw(comuni);draw(costiCitta);draw(costoMilano);draw(tari);draw(turisti);draw(turDot);
   limiti();metodo();
   var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
 }
@@ -321,18 +307,18 @@ function highlights(){
   var i24=yi(2024),M=D.citta.Milano,ind=G('indiff'),org=G('organico');
   var kg=CN.map(function(n){return[n,D.citta[n].ru_pc[i24]]}).sort(function(a,b){return a[1]-b[1]});
   var co=CN.map(function(n){return[n,D.citta[n].costo_pc[i24]]}).filter(function(x){return x[1]!=null}).sort(function(a,b){return a[1]-b[1]});
-  var cvd=CN.map(function(n){return[n,D.covid.citta[n].var_2019_2020_pct]}).sort(function(a,b){return a[1]-b[1]});
+  var cre=D.costi.anni.map(function(a){return M.costo_pc_euro2025[yi(a)]}),cr=(last(cre)/cre[0]-1)*100;
   var indVar=(last(ind.t)/ind.t[0]-1)*100,orgX=last(org.t)/org.t[0];
   var piuRD=COM.filter(function(c){return c.nome!=='Milano'&&c.rd>M.rd_pct[i24]}).length;
   var T=[
-    {c:C.mi,n:f0(M.ru_pc[i24]),u:'kg',p:'di rifiuti a testa nel 2024: '+(kg[0][0]==='Milano'?'il meno di tutte le sette grandi città':'')+'. In Italia: '+f0(D.italia.ru_pc[i24])+'.'},
-    {c:C.ind,n:sg0(indVar)+'%',u:'',p:'di indifferenziato in 14 anni: da '+f0(ind.t[0]/1000)+' a '+f0(last(ind.t)/1000)+' mila tonnellate.'},
-    {c:C.umi,n:'×'+Math.round(orgX),u:'',p:'l’umido raccolto: da '+f0(org.t[0]/1000)+' mila tonnellate nel 2010 a '+f0(last(org.t)/1000)+' mila nel 2024.'},
-    {c:C.hint,n:f0(M.rd_pct[i24]),u:'%',p:'di raccolta differenziata. Nei comuni intorno è il '+f0(last(D.metro.rd_pct))+'%: '+piuRD+' su '+D.metro.n_comuni_hinterland+' fanno di più.'},
-    {c:C.mi,n:f0(M.costo_pc[i24]),u:'€',p:'a testa per il servizio nel 2024: '+(co[0][0]==='Milano'?'il meno caro delle sette città':'')+' (poi '+co[1][0]+', '+f0(co[1][1])+' €).'},
-    {c:C.ink,n:sg0(D.covid.citta.Milano.var_2019_2020_pct)+'%',u:'',p:'di rifiuti nel 2020, l’anno del Covid: '+(cvd[0][0]==='Milano'?'il calo più forte delle sette città':'')+'.'}
+    {c:C.mi,h:'t-sacco',n:f0(M.ru_pc[i24]),u:'kg',p:'di rifiuti a testa nel 2024: '+(kg[0][0]==='Milano'?'il meno di tutte le sette grandi città':'')+'. In Italia: '+f0(D.italia.ru_pc[i24])+'.'},
+    {c:C.ind,h:'t-anni',n:sg0(indVar)+'%',u:'',p:'di indifferenziato in 14 anni: da '+f0(ind.t[0]/1000)+' a '+f0(last(ind.t)/1000)+' mila tonnellate.'},
+    {c:C.umi,h:'t-anni',n:'×'+Math.round(orgX),u:'',p:'l’umido raccolto: da '+f0(org.t[0]/1000)+' mila tonnellate nel 2010 a '+f0(last(org.t)/1000)+' mila nel 2024.'},
+    {c:C.hint,h:'t-rd',n:f0(M.rd_pct[i24]),u:'%',p:'di raccolta differenziata. Nei comuni intorno è il '+f0(last(D.metro.rd_pct))+'%: '+piuRD+' su '+D.metro.n_comuni_hinterland+' fanno di più.'},
+    {c:C.mi,h:'t-cc',n:f0(M.costo_pc[i24]),u:'€',p:'a testa per il servizio nel 2024: '+(co[0][0]==='Milano'?'il meno caro delle sette città':'')+' (poi '+co[1][0]+', '+f0(co[1][1])+' €).'},
+    {c:C.car,h:'t-cm',n:sg0(cr)+'%',u:'',p:'il costo del servizio a testa dal 2011 al 2024, contando l’inflazione.'}
   ];
-  $('hl').innerHTML=T.map(function(t){return '<div style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p></div>'}).join('');
+  $('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
 /* ---------- 1. il sacco: quadretti 2010 vs 2024 ---------- */
@@ -359,9 +345,10 @@ function sacco(){
   });
   box.innerHTML=s+'</svg>';
   $('t-sacco').textContent='Ogni milanese butta '+f0(tot[0]-tot[1])+' chili in meno che nel 2010, e il sacco grigio si è dimezzato';
-  var h='<thead><tr><th>Chili a testa</th><th>2010</th><th>2024</th></tr></thead><tbody>';
-  GR.forEach(function(g,k){h+='<tr><td>'+sw(g.col)+g.nome+'</td><td>'+f0(data[0][k])+'</td><td>'+f0(data[1][k])+'</td></tr>'});
-  h+='<tr class="tot"><td>Totale</td><td>'+f0(tot[0])+'</td><td>'+f0(tot[1])+'</td></tr></tbody>';
+  function vp(a,b){return sg0((b/a-1)*100)+'%'}
+  var h='<thead><tr><th>Chili a testa</th><th>2010</th><th>2024</th><th>Variazione</th></tr></thead><tbody>';
+  GR.forEach(function(g,k){h+='<tr><td>'+sw(g.col)+g.nome+'</td><td>'+f0(data[0][k])+'</td><td>'+f0(data[1][k])+'</td><td>'+vp(data[0][k],data[1][k])+'</td></tr>'});
+  h+='<tr class="tot"><td>Totale</td><td>'+f0(tot[0])+'</td><td>'+f0(tot[1])+'</td><td>'+vp(tot[0],tot[1])+'</td></tr></tbody>';
   $('tab-sacco').innerHTML=h;
 }
 
@@ -585,45 +572,6 @@ function tari(){
   box.innerHTML=s+'</svg>';
   var first=R.filter(function(t){return t.tari_su_costo>=100})[0];
   $('t-tari').textContent='Dal '+first.anno+' la TARI incassata supera il costo dichiarato del servizio';
-}
-
-/* ---------- 7. Covid ---------- */
-function covid(){
-  var box=$('ch-cov'),W=width('ch-cov'),V=D.covid,I=D.italia;
-  var rows=CN.map(function(n){return{n:n,a:V.citta[n].var_2019_2020_pct,b:V.citta[n].var_2019_2024_pct}}).sort(function(x,y){return x.a-y.a});
-  rows.push({n:'Italia',a:V.italia_var_2019_2020_pct,b:(I.ru_t[yi(2024)]/I.ru_t[yi(2019)]-1)*100,it:true});
-  // due barre per città: 2020 (spessa) e 2024 (sottile, sotto)
-  var lw=70,rh=44,b1=14,b2=7,top=22,H=top+rows.length*rh+6,lo=-18,hi=6,X=function(v){return lw+(v-lo)/(hi-lo)*(W-lw-4)};
-  var s=svgOpen(W,H);
-  [-15,-10,-5,0,5].forEach(function(v){s+=L(X(v),top-6,X(v),H-4,v===0?C.ink:C.grid,v===0?1.5:1)+T(X(v),top-10,(v<0?'−':v>0?'+':'')+Math.abs(v)+'%',{a:'middle',c:'m'})});
-  function lab(v,y,bold){var o=v<0;return T(X(v)+(o?-5:5),y,sg1(v),{a:o?'end':'start',c:bold?'b':'m'})}
-  rows.forEach(function(r,k){
-    var y=top+k*rh,isM=r.n==='Milano',col=isM?C.mi:r.it?C.ink2:C.axis,y1=y+8,y2=y1+b1+5;
-    if(r.it)s+=L(0,y+1,W,y+1,C.axis);
-    s+=T(0,y1+b1/2+5,r.n,{c:isM||r.it?'b':''});
-    s+=hbar(X(0),X(r.a),y1,b1,col)+lab(r.a,y1+b1/2+5,isM);
-    s+=hbar(X(0),X(r.b),y2,b2,col,' fill-opacity=".55"')+'<text x="'+r1(X(r.b)+(r.b<0?-5:5))+'" y="'+r1(y2+b2/2+4)+'" text-anchor="'+(r.b<0?'end':'start')+'" class="m" style="font-size:12px">'+sg1(r.b)+'</text>';
-    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+r.n+'</b>, rispetto al 2019<br>2020: '+sg1(r.a)+'%<br>2024: '+sg1(r.b)+'%')+'/>';
-  });
-  box.innerHTML=s+'</svg>';
-  $('t-cov').textContent=rows[0].n==='Milano'?'Nel 2020 Milano ha perso il '+f0(Math.abs(rows[0].a))+'% dei rifiuti, più di ogni altra città'+(rows[0].b<0?', e nel 2024 è ancora sotto il 2019':''):'Rifiuti nel 2020 rispetto al 2019';
-}
-function covidTipi(){
-  var box=$('ch-covt'),W=width('ch-covt'),mi=D.covid.milano;
-  var rows=GR.map(function(g){return{g:g,v:(mi[g.id]['2020']/mi[g.id]['2019']-1)*100,a:mi[g.id]['2019'],b:mi[g.id]['2020']}}).sort(function(x,y){return x.v-y.v});
-  var lw=150,rh=30,bh=16,top=4,H=top+rows.length*rh+4,lo=-22,X=function(v){return lw+(v-lo)/(0-lo)*(W-lw-4)};
-  if(W<360){lw=128}
-  var s=svgOpen(W,H);
-  s+=L(X(0),0,X(0),H,C.ink,1.5);
-  rows.forEach(function(r,k){var y=top+k*rh,yc=y+rh/2;
-    s+=T(0,yc+5,r.g.corto,{});
-    s+=hbar(X(0),X(r.v),yc-bh/2,bh,r.g.col);
-    var lab=sg1(r.v)+'%',ww=tw(lab,13,true);
-    s+=X(0)-X(r.v)>ww+12?T(X(r.v)+6,yc+5,lab,{c:r.g.txt==='k'?'k':'w',st:'font-size:13px'}):T(X(r.v)-6,yc+5,lab,{a:'end',c:'b'});
-    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+r.g.nome+'</b><br>2019: '+f0(r.a/1000)+' mila t<br>2020: '+f0(r.b/1000)+' mila t')+'/>';
-  });
-  box.innerHTML=s+'</svg>';
-  $('t-covt').textContent='Calano umido e indifferenziato; vetro, plastica e metalli quasi non si muovono';
 }
 
 /* ---------- 8. turisti ---------- */
