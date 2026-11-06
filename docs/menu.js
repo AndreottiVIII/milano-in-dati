@@ -131,6 +131,8 @@
 
   // Sezione corrente: il percorso della pagina, senza "index.html", confrontato con quello di ogni sezione
   var here = location.pathname.replace(/index\.html$/, '');
+  // le anteprime (anteprima/<pagina>/) si comportano come la pagina vera: stessi capitoli, stessa voce accesa
+  if (here.indexOf(rootPath + 'anteprima/') === 0) here = rootPath + here.slice((rootPath + 'anteprima/').length);
   var current = null;
   var isHome = (here === rootPath);
   for (var j = 0; j < SEZIONI.length; j++) {
