@@ -61,3 +61,14 @@ Il file dei luoghi (`docs/sport/data/siti.csv|json`) contiene dati OSM: va ripub
 - Reddito per CAP (gli impianti sono per NIL).
 - Distinzione coperto/scoperto; orari e tariffe.
 - Esagoni 100 m per l'accesso (solo NIL).
+
+## Piscine "solo per iscritti" (6 novembre 2026, richiesta di Davide: "la Virgin in Duomo non la conta")
+Prima le piscine OSM con access=customers/members/private erano tutte escluse. Ora sono una categoria a parte, mai mischiata con le "aperte a tutti" (62 nei dati).
+**Regola** (scripts/tempi_a_piedi.py):
+- piscine OSM (leisure=swimming_pool) dentro il Comune con access=customers/members/permit; oppure senza access ma a meno di 80 m da una palestra/centro sportivo/circolo con nome (virgin, aspria, club, tennis, sporting, fitness, wellness, palestra, gym) non segnato private/no;
+- **sempre escluse** le piscine access=private o no (condomini, case, alberghi chiusi), anche se vicine a un circolo;
+- non si contano due volte: a meno di 80 m da una piscina gia' aperta a tutti, o da un'altra "per iscritti" (si tiene quella con nome);
+- 8 sedi Virgin Active dove la pagina del club (virginactive.it/club/milano-..., letta il 6/11/2026) dice che c'e' una piscina: Cavour, Corso Como, Vittorio Emanuele, Bocconi (era gia' tra le aperte, a meno di 80 m: non aggiunta), Bicocca, Kennedy, Maciachini, Piazzale Lodi. Dal sito si usa solo il si'. Corso Vercelli e Diaz: non chiaro; Porta Vittoria e Citta' Studi: pagina 404; non contate. Altre catene non controllate.
+**Risultato:** 15 piscine aggiunte: Aspria Harbour Club, Tennis Club Ambrosiano, Tennis Club Lombardo, 7 Virgin Active (Vittorio Emanuele, Cavour, Corso Como, Bicocca, Kennedy, Maciachini, Piazzale Lodi), 5 piscine senza nome segnate "solo clienti" (2 Parco Bosco in citta', 2 Lorenteggio, 1 Porta Romana; potrebbero essere di alberghi o residence).
+Minuti a piedi, residenti entro 15': aperte a tutti 62,2% (mediana 12,7 min); anche per iscritti 65,0% (12,2 min); solo le 15 per iscritti 16,8% (26,9 min). Dati in docs/sport/data/sport_tempi.json (campo `iscritti` con la lista).
+Dubbio aperto: tra le "aperte a tutti" ci sono 5 piscine di scuole (ds1867), non davvero aperte.
