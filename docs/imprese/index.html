@@ -2,429 +2,626 @@
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · Imprese che nascono e muoiono</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .tabmax{max-height:340px;overflow:auto}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.bars.dv .tr .fill{position:absolute;top:0} .bars.dv .tr:after{content:"";position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;height:auto;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-.tip i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-#tab-ann{min-width:640px} #tab-set{min-width:480px} #tab-cat{min-width:560px} #tab-prov{min-width:420px} #tab-all{min-width:420px}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --it:#0b0d12;     /* Italia */
+  --hint:#0072BC;   /* comuni intorno: blu M4 */
+  --tur:#F58220;    /* turisti: arancio della home */
+  --ind:#4b5563;--umi:#00A651;--car:#0072BC;--vpm:#FFD500;--alt:#7B3FA0; /* tipi di rifiuto: grigio, verde M2, blu M4, giallo M3, viola M5 */
+  --pos:#F58220;--neg:#0072BC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* highlights */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* sections */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+:root{--up:#0072BC;--dn:#F58220;--ma:#E6007E}
+.ch svg .v{fill:var(--ink);font-size:12px}
+@media(max-width:639px){.hl>a:last-child:nth-child(odd){grid-column:1/-1}}
 </style><script src="../menu.js" defer></script></head><body><main>
+
 <h1>Imprese che nascono e muoiono</h1>
-<p>Ogni anno nel Registro delle imprese delle Camere di commercio si iscrivono migliaia di nuove imprese e altre ne escono. Qui guardiamo la <b>provincia di Milano</b> (senza Monza e Brianza, che è provincia a sé dal 2007) dal 2007 al 2025: quante imprese si iscrivono, quante cessano, in quali settori, di che tipo, e come va Milano rispetto alle altre province. Nel 2025 le iscritte sono <b id="n-isc">26.262</b> e le cessate <b id="n-ces">17.083</b>, con un saldo di <b id="n-saldo">+9.179</b>. <b>Iscrizioni e cessazioni sono atti del Registro, non aperture e chiusure di negozi</b>: leggi prima <a href="#limiti">i limiti dei dati</a>.</p>
+<p class="lead">Quante imprese entrano nel Registro delle imprese e quante ne escono ogni anno in provincia di Milano, in quali settori e come va rispetto alle altre province, dal 2000 al 2025.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="hl" id="hl"></div>
+<p class="src">Tutti i numeri: Movimprese (InfoCamere per Unioncamere), Rapporto Milano Produttiva della Camera di commercio e Comune di Milano (CC BY). Provincia di Milano senza Monza e Brianza, anno 2025 se non è scritto altro. «Iscritta» e «cessata» sono atti del Registro, non aperture e chiusure di negozi: vedi i limiti dei dati in fondo.</p>
 
-<div class="warm"><b>Prima di leggere.</b> «Iscritta» vuol dire che l’impresa è entrata nel Registro; «cessata» che ne è uscita. Non dicono se l’attività ha davvero aperto o chiuso. In più, una parte delle «cessazioni» sono <b>cancellazioni d’ufficio</b> (il Registro toglie imprese ferme da anni): qui, come fa la Camera di commercio, le chiusure del grafico principale sono <b>senza</b> quelle d’ufficio, e le d’ufficio hanno la loro sezione. Per il solo comune di Milano non abbiamo trovato dati aperti su iscrizioni e cessazioni (sezione <a href="#comune">«E il comune?»</a>).</div>
-
+<!-- ============ 1 ============ -->
 <h2 id="nascono">Quante ne nascono e quante ne chiudono</h2>
-<div id="nascono-testo"></div>
-<div class="ctl"><span class="sub">Cessazioni:</span>
-<button type="button" data-c="ces" class="on">senza cancellazioni d’ufficio</button><button type="button" data-c="lorde">con cancellazioni d’ufficio (lorde)</button></div>
-<div class="lgd" id="lg-nasc"></div>
-<div class="ch" id="ch-nasc" role="img" aria-label="Grafico: imprese iscritte, cessate e saldo nella provincia di Milano, 2007-2025"></div>
-<p class="src">Provincia di Milano, perimetro attuale (senza Monza e Brianza). Fonte: Movimprese, InfoCamere per Unioncamere; elaborazione nostra. Cessazioni senza d’ufficio = cessazioni meno cancellazioni d’ufficio (come nel glossario Movimprese). Il saldo è iscritte meno cessate senza d’ufficio.</p>
-<div class="scroll"><table id="tab-ann"></table></div>
-<p class="src">Tasso di crescita = (iscritte − cessate senza d’ufficio) / imprese registrate a fine anno precedente, come nel Rapporto della Camera di commercio.</p>
+<div class="fig">
+  <h3 id="t-nasc"></h3>
+  <p class="sub">Imprese iscritte e cessate ogni anno in provincia di Milano. Le cessate non contano le cancellazioni d’ufficio (vedi il capitolo dopo). Saldo = iscritte meno cessate.</p>
+  <div class="ch" id="ch-nasc" role="img" aria-label="Barre contrapposte: imprese cessate a sinistra e iscritte a destra, con il saldo, dal 2007 al 2025"></div>
+  <p class="note">Il 2020 è l’anno più basso per le iscrizioni: ne parla <a href="../anno-covid/">L’anno del Covid</a>.</p>
+  <p class="src">Fonte: Movimprese, InfoCamere per Unioncamere; elaborazione nostra. Cessate senza d’ufficio = cessazioni meno cancellazioni d’ufficio, come nel glossario Movimprese.</p>
+</div>
 
-<h3>Dal 2000: Milano e Monza Brianza insieme</h3>
-<div id="lungo-testo"></div>
-<div class="lgd" id="lg-lungo"></div>
-<div class="ch" id="ch-lungo" role="img" aria-label="Grafico: iscrizioni e cessazioni, Milano più Monza e Brianza, 2000-2025"></div>
-<p class="src">Fino al 2006 la provincia di Milano comprendeva Monza e Brianza: per avere un confronto sullo stesso territorio qui si sommano le due province per tutti gli anni. Le cancellazioni d’ufficio sono separate solo dal 2006 (il glossario Movimprese lo spiega): prima di quell’anno c’è solo la linea delle cessazioni lorde. Fonte: Movimprese; elaborazione nostra.</p>
+<div class="fig">
+  <h3 id="t-lungo"></h3>
+  <p class="sub">Imprese iscritte e cessate ogni anno, dal 2000, mettendo insieme Milano e Monza e Brianza (prima del 2007 erano una provincia sola).</p>
+  <div class="lg" id="lg-lungo"></div>
+  <div class="ch" id="ch-lungo" role="img" aria-label="Linee: iscrizioni e cessazioni di Milano e Monza e Brianza insieme, 2000-2025"></div>
+  <ol class="notes" id="nt-lungo"></ol>
+  <p class="src">Fonte: Movimprese; elaborazione nostra. Le cancellazioni d’ufficio sono separate solo dal 2006: prima di quell’anno c’è solo la linea grigia.</p>
+</div>
 
-<h2 id="ufficio">Le cancellazioni d’ufficio: il rumore nelle chiusure</h2>
-<div id="uff-testo"></div>
-<div class="lgd" id="lg-uff"></div>
-<div class="ch" id="ch-uff" role="img" aria-label="Grafico: cancellazioni d’ufficio per forma giuridica, provincia di Milano"></div>
-<p class="src">Cancellazioni d’ufficio nell’anno, per forma giuridica dell’impresa. Fonte: Movimprese, file «CDU» (cancellazioni d’ufficio) di ogni anno; elaborazione nostra.</p>
+<!-- ============ 2 ============ -->
+<h2 id="ufficio">Le cancellazioni d’ufficio</h2>
+<div class="fig">
+  <h3 id="t-uff"></h3>
+  <p class="sub">Chiusure ufficiali di ogni anno. In arancio le cessate vere, in magenta le cancellazioni d’ufficio: imprese ferme da anni che il Registro toglie dall’elenco. Sopra la colonna, quante sono.</p>
+  <div class="lg"><span><i style="background:var(--dn)"></i>cessate senza d’ufficio</span><span><i style="background:var(--ma)"></i>cancellazioni d’ufficio</span></div>
+  <div class="ch" id="ch-uff" role="img" aria-label="Colonne: cessazioni di ogni anno divise tra cessate vere e cancellazioni d’ufficio, 2007-2025"></div>
+  <p class="src">Fonte: Movimprese, file delle cancellazioni d’ufficio di ogni anno; elaborazione nostra. Una cancellazione d’ufficio non vuol dire che l’impresa abbia chiuso in quell’anno.</p>
+</div>
 
-<h2 id="settori">Per settore</h2>
-<div id="set-testo"></div>
-<div class="ctl"><label class="sub" for="sel-set">Settore:</label><select id="sel-set" aria-label="Scegli un settore"></select>
-<label class="sub" for="sel-anno">Anno della tabella:</label><select id="sel-anno" aria-label="Scegli un anno"></select></div>
-<h3 id="set-tit">Imprese attive</h3>
-<div class="ch" id="ch-att" role="img" aria-label="Grafico: imprese attive nel settore scelto"></div>
-<h3>Iscritte e cessate</h3>
-<div class="lgd" id="lg-set"></div>
-<div class="ch" id="ch-set" role="img" aria-label="Grafico: imprese iscritte e cessate nel settore scelto"></div>
-<div id="set-nota" class="warn"></div>
-<p class="src">Settori secondo la classificazione ATECO 2007 (sezioni; a parte «Commercio al dettaglio», «Alloggio» e «Ristorazione», che sono divisioni). Fonte: Movimprese; elaborazione nostra. Le «attive» sono le imprese che risultano operative nel Registro a fine anno.</p>
-<h3>Chi cresce e chi cala (imprese attive, 2009–2025)</h3>
-<div class="bars dv" id="b-var"></div>
-<p class="src">Variazione delle imprese attive tra fine 2009 e fine 2025, sezioni con almeno 1.000 imprese attive nel 2009. Una parte del calo di commercio, manifattura e agricoltura è fatta anche di cancellazioni d’ufficio di imprese ferme da tempo. Fonte: Movimprese; elaborazione nostra.</p>
-<h3 id="set-tab-tit">Tutti i settori nell’anno scelto</h3>
-<div class="scroll"><table id="tab-set"></table></div>
-<p class="src">Le nuove iscritte senza settore («non classificate») sono mostrate a parte: sommate ai settori danno il totale.</p>
+<!-- ============ 3 ============ -->
+<h2 id="settori">Quali settori crescono</h2>
+<div class="fig">
+  <h3 id="t-mix"></h3>
+  <p class="sub">Imprese attive di Milano per settore, 2009 e 2025. Ogni quadretto = 1 impresa attiva su 100. In mezzo: quanto pesa ogni settore, prima e dopo.</p>
+  <div class="ch" id="ch-mix" role="img" aria-label="Quadretti: peso dei settori sulle imprese attive di Milano nel 2009 e nel 2025"></div>
+  <p class="src">Fonte: Movimprese; elaborazione nostra. Settori ATECO 2007. «Attive» = imprese che risultano operative nel Registro a fine anno.</p>
+</div>
 
+<div class="fig">
+  <h3 id="t-sv"></h3>
+  <p class="sub">Variazione delle imprese attive tra fine 2009 e fine 2025, in percento. Settori con almeno 1.000 imprese attive nel 2009.</p>
+  <div class="ch" id="ch-sv" role="img" aria-label="Pallini su asta: variazione in percento delle imprese attive per settore, 2009-2025"></div>
+  <p class="note">Una parte della crescita viene da imprese che nel 2009 non avevano ancora un settore assegnato (erano <b id="nc09"></b>, nel 2025 sono <b id="nc25"></b>). Il calo di commercio, manifattura e agricoltura è fatto anche di cancellazioni d’ufficio di imprese ferme.</p>
+  <p class="src">Fonte: Movimprese; elaborazione nostra. Tocca un settore per vedere i numeri.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-sl"></h3>
+  <p class="sub">Imprese attive di alcuni settori, anno per anno. 2009 = 100.</p>
+  <div class="ch" id="ch-sl" role="img" aria-label="Linee: imprese attive in sei settori, 2009-2025, indice 2009 uguale 100"></div>
+  <p class="src">Fonte: Movimprese; elaborazione nostra. Il settore è quello assegnato dal Registro a fine anno.</p>
+</div>
+
+<!-- ============ 4 ============ -->
 <h2 id="forme">Società o ditte individuali</h2>
-<div id="forme-testo"></div>
-<div class="lgd" id="lg-forme"></div>
-<div class="ch" id="ch-forme" role="img" aria-label="Grafico: iscrizioni per forma giuridica, provincia di Milano"></div>
-<p class="src">Iscrizioni dell’anno per forma giuridica. Società di capitali = per esempio le S.r.l.; società di persone = per esempio le S.n.c. e le S.a.s.; ditte individuali = imprese di una sola persona (anche artigiani e commercianti); altre forme = soprattutto cooperative e consorzi. Fonte: Movimprese; elaborazione nostra.</p>
-<div class="lgd" id="lg-quote"></div>
-<div class="ch" id="ch-quote" role="img" aria-label="Grafico: quota delle imprese attive per forma giuridica"></div>
-<p class="src">Quota delle imprese attive per forma giuridica (altre forme non mostrate). Fonte: Movimprese; elaborazione nostra.</p>
+<div class="fig">
+  <h3 id="t-forme"></h3>
+  <p class="sub">Come sono fatte le nuove imprese: quota delle iscrizioni dell’anno per forma giuridica, in percento.</p>
+  <div class="lg"><span><i style="background:var(--up)"></i>società di capitali</span><span><i style="background:var(--dn)"></i>ditte individuali</span><span><i style="background:#aab0bb"></i>altre forme</span></div>
+  <div class="ch" id="ch-forme" role="img" aria-label="Barre al 100 per cento: iscrizioni per forma giuridica in cinque anni"></div>
+  <p class="src">Fonte: Movimprese; elaborazione nostra. Società di capitali = per esempio le S.r.l.; ditte individuali = imprese di una sola persona (anche artigiani e commercianti); altre forme = società di persone (S.n.c., S.a.s.), cooperative e consorzi.</p>
+</div>
 
+<!-- ============ 5 ============ -->
 <h2 id="categorie">Donne, giovani, stranieri</h2>
-<div id="cat-testo"></div>
-<div class="scroll"><table id="tab-cat"></table></div>
-<p class="src">Dati 2025, provincia di Milano. Iscritte e cessate: tabella 2 del Rapporto Milano Produttiva 2026 (Camera di commercio di Milano Monza Brianza Lodi, dati Registro Imprese). Attive: tabella 8 dello stesso Rapporto. «Nuove ogni 100 attive» divide le iscritte dell’anno per le attive della stessa categoria a fine anno: è un indicatore approssimato (le iscritte contano anche imprese mai diventate operative), buono per confrontare le categorie tra loro.</p>
-<div class="warn"><b>Che cosa vuol dire «straniere», «femminili», «giovanili».</b> Sono categorie ufficiali del Registro imprese: imprese con partecipazione di proprietà e di controllo detenuta per più del 50% da donne, da persone con meno di 35 anni, da cittadini di nazionalità estera. Una stessa impresa può stare in più categorie. Non descrivono le persone in generale, e un’impresa può entrare o uscire da una categoria senza nascere o chiudere (per esempio se cambia un socio): per questo iscritte e cessate delle categorie sono un indizio, non una misura precisa.</div>
-<div class="lgd" id="lg-cat"></div>
-<div class="ch" id="ch-cat" role="img" aria-label="Grafico: quota delle iscrizioni di imprese femminili, giovanili e straniere"></div>
-<p class="src">Quota sulle iscrizioni totali di ogni anno (le categorie si sovrappongono). Fonte: Rapporto Milano Produttiva, edizioni 2019–2026; elaborazione nostra.</p>
-<div class="lgd" id="lg-cat2"></div>
-<div class="ch" id="ch-cat2" role="img" aria-label="Grafico: imprese attive femminili, giovanili e straniere, 2018 uguale 100"></div>
-<p class="src">Imprese attive per categoria, 2018 = 100. Fonte: Rapporto Milano Produttiva (tabella «Imprese giovanili, femminili e straniere»); elaborazione nostra.</p>
+<div class="fig">
+  <h3 id="t-cat"></h3>
+  <p class="sub">Quota sul totale delle imprese nel 2025, in percento: quelle attive e quelle appena iscritte.</p>
+  <div class="lg"><span><i class="ring"></i>tra le attive</span><span><i class="dot" style="background:var(--ink2)"></i>tra le nuove iscritte</span></div>
+  <div class="ch" id="ch-cat" role="img" aria-label="Punti collegati: quota di imprese straniere, femminili e giovanili tra le attive e tra le nuove iscritte, 2025"></div>
+  <p class="note">Sono categorie ufficiali del Registro (più del 50% di proprietà e controllo di stranieri, donne o under 35): una stessa impresa può stare in più categorie. Le giovanili escono dalla categoria quando i soci superano i 35 anni: per questo tra le attive pesano poco.</p>
+  <p class="src">Fonte: Rapporto Milano Produttiva 2026, Camera di commercio di Milano Monza Brianza Lodi (dati Registro Imprese). Il sito non indica una licenza: sono riportati solo i numeri delle tabelle, con la citazione.</p>
+</div>
 
-<h2 id="confronto">Milano e le altre province</h2>
-<div id="conf-testo"></div>
-<div class="ctl"><label class="sub" for="sel-pa">Anno:</label><select id="sel-pa" aria-label="Scegli un anno"></select></div>
-<div class="grid2"><div><h3>Le 10 province dove le imprese crescono di più</h3><div class="bars dv" id="b-top"></div></div>
-<div><h3>Le 5 dove crescono meno o calano</h3><div class="bars dv" id="b-bot"></div></div></div>
-<p class="src" id="src-prov">Tasso di crescita = (iscritte − cessate senza d’ufficio) / imprese registrate a fine anno precedente. Fonte: Movimprese; elaborazione nostra.</p>
-<div class="ctl"><span class="sub">Mostra:</span><button type="button" data-m="cr" class="on">Crescita</button><button type="button" data-m="nat">Natalità</button><button type="button" data-m="mor">Mortalità</button></div>
-<div class="lgd" id="lg-prov"></div>
-<div class="ch" id="ch-prov" role="img" aria-label="Grafico: tassi delle imprese a Milano e in altre province"></div>
-<p class="src">Natalità = iscritte / registrate a fine anno precedente; mortalità = cessate senza d’ufficio / registrate a fine anno precedente. Non sono «tassi di sopravvivenza» delle nuove imprese: dividono per tutte le imprese esistenti. Fonte: Movimprese; elaborazione nostra.</p>
-<h3 id="prov-tab-tit">Alcune province nell’anno scelto</h3>
-<div class="scroll"><table id="tab-prov"></table></div>
-<details><summary>Tutte le province nell’anno scelto</summary><div class="tabmax"><div class="scroll"><table id="tab-all"></table></div></div></details>
+<div class="fig">
+  <h3 id="t-catv"></h3>
+  <p class="sub">Variazione delle imprese attive tra fine 2018 e fine 2025, in percento.</p>
+  <div class="ch" id="ch-catv" role="img" aria-label="Barre: variazione delle imprese attive straniere, femminili, giovanili e totali, 2018-2025"></div>
+  <p class="src">Fonte: Rapporto Milano Produttiva (edizioni 2019-2026), Camera di commercio; stessa nota sulla licenza. Un’impresa può entrare o uscire da una categoria senza nascere o chiudere, per esempio se cambia un socio.</p>
+</div>
 
+<!-- ============ 6 ============ -->
+<h2 id="province">Milano e le altre province</h2>
+<div class="fig">
+  <h3 id="t-strip"></h3>
+  <p class="sub">Tasso di crescita delle imprese nel 2025: iscritte meno cessate (senza d’ufficio), diviso per le imprese registrate a inizio anno. Ogni pallino è una provincia. Tocca un pallino per leggerla.</p>
+  <div class="ch" id="ch-strip" role="img" aria-label="Pallini su una riga: tasso di crescita delle imprese in tutte le province italiane nel 2025"></div>
+  <p class="src">Fonte: Movimprese; elaborazione nostra. Italia = somma delle regioni.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-nm"></h3>
+  <p class="sub">Nel 2025, ogni 100 imprese registrate a inizio anno: quante ne chiudono (cerchio vuoto) e quante ne nascono (pallino). La distanza è la crescita.</p>
+  <div class="ch" id="ch-nm" role="img" aria-label="Punti collegati: imprese chiuse e nate ogni 100 registrate in dieci province e in Italia, 2025"></div>
+  <p class="note">Non sono «tassi di sopravvivenza»: la mortalità divide per tutte le imprese esistenti, comprese le vecchie, e non dice quante delle nuove durano uno, tre o cinque anni.</p>
+  <p class="src">Fonte: Movimprese; elaborazione nostra. Le nove province di confronto sono scelte da noi (le più grandi o vicine), non sono un campione.</p>
+</div>
+
+<!-- ============ 7 ============ -->
 <h2 id="comune">E il solo comune di Milano?</h2>
-<div id="com-testo"></div>
-<div class="lgd" id="lg-com"></div>
-<div class="ch" id="ch-com" role="img" aria-label="Grafico: imprese attive nel comune di Milano e nella provincia"></div>
-<p class="src">Imprese attive nel comune (Comune di Milano, ds691, CC BY: fino al 2020 Annuario Statistico Regionale della Lombardia, dal 2021 Camera di commercio) e nella provincia (Movimprese). Le due serie vengono da fonti diverse e vanno lette come ordine di grandezza.</p>
-<h3>Quali settori nel comune (2010–2024)</h3>
-<div class="bars dv" id="b-com"></div>
-<p class="src">Variazione delle imprese attive nel comune tra 2010 e 2024, per i settori con almeno 1.000 imprese nel 2010. Il 2025 non è confrontabile: il Comune lo pubblica con la nuova classificazione ATECO 2025 (per esempio la riparazione di auto e moto passa agli «altri servizi»). Fonte: Comune di Milano, ds691 (CC BY); elaborazione nostra.</p>
-<div id="com-asia"></div>
+<div class="fig">
+  <h3 id="t-com"></h3>
+  <p class="sub">Imprese attive nel comune di Milano e nel resto della provincia. 2010 = 100. Per il solo comune non ci sono dati aperti su iscrizioni e cessazioni: c’è solo il numero di imprese attive.</p>
+  <div class="lg"><span><i class="ln" style="background:var(--mi)"></i>comune di Milano</span><span><i class="ln" style="background:var(--ink2)"></i>resto della provincia</span></div>
+  <div class="ch" id="ch-com" role="img" aria-label="Linee: imprese attive nel comune di Milano e nel resto della provincia, 2010-2025, indice 2010 uguale 100"></div>
+  <p class="src">Fonte: Comune di Milano, imprese attive per settore (CC BY): fino al 2020 Annuario Statistico Regionale della Lombardia, dal 2021 Camera di commercio. Provincia: Movimprese. Sono fonti diverse: leggi il confronto come ordine di grandezza.</p>
+</div>
 
-<h2 id="limiti">Limiti dei dati</h2>
-<div class="warm"><ul id="limiti-lista"></ul></div>
+<div class="fig">
+  <h3 id="t-comv"></h3>
+  <p class="sub">Variazione delle imprese attive nel comune di Milano tra 2010 e 2024, in percento. Settori con almeno 1.000 imprese nel 2010.</p>
+  <div class="ch" id="ch-comv" role="img" aria-label="Barre: variazione delle imprese attive nel comune di Milano per settore, 2010-2024"></div>
+  <p class="src">Fonte: Comune di Milano (CC BY); elaborazione nostra. Il 2025 non è confrontabile: il Comune lo pubblica con la nuova classificazione dei settori (ATECO 2025).</p>
+</div>
 
-<h2 id="metodo">Come è fatto</h2>
-<ul class="m" id="metodo-lista"></ul>
-
-<h2 id="download">File</h2>
-<p><a href="data/milano_annuale.csv">milano_annuale.csv</a> (provincia di Milano 2007–2025: registrate, attive, iscritte, cessate lorde, d’ufficio, senza d’ufficio, saldo, tassi, e lo stesso per forma giuridica), <a href="data/milano_piu_monza_brianza_2000_2025.csv">milano_piu_monza_brianza_2000_2025.csv</a> (Milano più Monza e Brianza dal 2000), <a href="data/milano_settori.csv">milano_settori.csv</a> (per sezione ATECO 2007, 2009–2025), <a href="data/province_tassi.csv">province_tassi.csv</a> (tutte le province, 2007–2025, con i tassi), <a href="data/categorie_milano.csv">categorie_milano.csv</a> (imprese femminili, giovanili, straniere e artigiane: iscritte, cessate, attive), <a href="data/comune_imprese_attive_settore.csv">comune_imprese_attive_settore.csv</a> (imprese attive nel comune), <a href="data/controlli.json">controlli.json</a> (confronti tra fonti diverse fatti dal programma) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l’origine). Sono tutti valori aggregati (province, settori, anni): nessuna impresa singola è ripubblicata.</p>
-
-<h2>Altre pagine sul lavoro e sul commercio</h2>
-<p><a href="../ristoranti/">Ristoranti</a> · <a href="../botteghe/">Botteghe storiche</a> · <a href="../lavoro/">Lavoro</a></p>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul>
+<p>Altre pagine sul lavoro e sul commercio: <a href="../ristoranti/">Ristoranti</a> · <a href="../botteghe/">Botteghe storiche</a> · <a href="../lavoro/">Lavoro</a>.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Iscritta</dt><dd>Impresa entrata nel Registro delle imprese delle Camere di commercio. Non vuol dire che abbia già aperto.</dd>
+<dt>Cessata</dt><dd>Impresa uscita dal Registro. Non vuol dire che abbia chiuso proprio in quell’anno.</dd>
+<dt>Cancellazione d’ufficio</dt><dd>Impresa ferma da anni, tolta dal Registro dalla Camera di commercio senza che il titolare lo chieda.</dd>
+<dt>Registrata e attiva</dt><dd>Registrate: tutte quelle nel Registro. Attive: quelle che risultano operative a fine anno.</dd>
+<dt>Saldo</dt><dd>Iscritte meno cessate (senza cancellazioni d’ufficio).</dd>
+<dt>Tasso di crescita</dt><dd>Il saldo diviso per le imprese registrate a fine anno precedente, in percento. Natalità = iscritte diviso registrate; mortalità = cessate diviso registrate.</dd>
+<dt>Settore</dt><dd>Il codice di attività (ATECO 2007) che il Registro dà a ogni impresa. Le nuove iscritte lo ricevono dopo l’iscrizione.</dd>
+<dt>Società di capitali, ditta individuale</dt><dd>Società di capitali: per esempio le S.r.l. Ditta individuale: impresa di una sola persona.</dd>
+<dt>Straniera, femminile, giovanile</dt><dd>Imprese in cui più del 50% della proprietà e del controllo è di cittadini stranieri, di donne, di persone con meno di 35 anni.</dd>
+<dt>Provincia di Milano</dt><dd>Senza Monza e Brianza, che è provincia a sé dal 2007. Nei grafici dal 2000 le due province sono sommate.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati per provincia, settore e anno, separati da virgola, con il punto per i decimali. Nessuna impresa singola è ripubblicata.</p>
+<ul>
+<li><a href="data/milano_annuale.csv">Provincia di Milano anno per anno, 2007-2025</a>: registrate, attive, iscritte, cessate, d’ufficio, saldo, tassi, e lo stesso per forma giuridica</li>
+<li><a href="data/milano_piu_monza_brianza_2000_2025.csv">Milano più Monza e Brianza dal 2000</a></li>
+<li><a href="data/milano_settori.csv">Imprese per settore, 2009-2025</a></li>
+<li><a href="data/province_tassi.csv">Tutte le province, 2007-2025, con i tassi</a></li>
+<li><a href="data/categorie_milano.csv">Imprese femminili, giovanili, straniere e artigiane</a>: iscritte, cessate, attive</li>
+<li><a href="data/comune_imprese_attive_settore.csv">Imprese attive nel comune di Milano per settore</a></li>
+<li><a href="data/controlli.json">Confronti tra fonti diverse</a> e <a href="data/riepilogo.json">tutti i numeri di questa pagina</a>, con l’origine</li>
+</ul></div></details>
+</div>
 
 <footer>
 <p><b>Fonti e termini.</b> <b>Movimprese</b> (InfoCamere, per conto di Unioncamere): file annuali «Totale imprese» 2000–2025 scaricati il 2 novembre 2026 dalla pagina pubblica <a href="https://www.infocamere.it/movimprese">infocamere.it/movimprese</a> (archivio documenti). Condizioni di utilizzo di InfoCamere (aggiornate al 30/4/2025): «l’uso e la diffusione delle informazioni contenute nei file scaricabili sono consentiti previa citazione della fonte»; InfoCamere declina ogni responsabilità per le rielaborazioni. Fonte citata: «Movimprese – InfoCamere, per conto di Unioncamere». Il modulo «Scarica CSV» dello stesso sito è protetto da reCAPTCHA e non è stato usato. <b>Rapporto Milano Produttiva</b> (Camera di commercio di Milano Monza Brianza Lodi, Studi, Statistica e Programmazione, su dati Registro Imprese), edizioni 2019–2026, capitolo «Struttura e dinamica delle imprese locali», pubblicato su <a href="https://ester.milomb.camcom.it/rapporto-mp">ester.milomb.camcom.it</a>, PDF letti il 2 novembre 2026. Il sito non indica una licenza: riportiamo solo i numeri delle tabelle, con la citazione, senza riprodurre i documenti. <b>Comune di Milano</b>, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: «Imprese attive per settore merceologico – serie storica» (ds691) e «Imprese suddivise per forma giuridica» (ds1481), licenza CC BY, scaricati il 2 novembre 2026.</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,MY={};
-var ACC='#00695c',WARM='#c26a1b',BLU='#3b6ea5',VIO='#7b2d6e',GRY='#8a8a8a',INK='#222';
-/* ---------- formati ---------- */
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
-function sgp(x,d){d=d==null?1:d;if(Math.round(Math.abs(x)*Math.pow(10,d))===0)return '0%';return sg(x,d)+'%'}
-function pc(x,d){return nf(x,d==null?1:d)+'%'}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function niceStep(r){if(!(r>0))return 1;var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function legend(id,items){setH(id,items.map(function(it){return it.line?'<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.c+'"></i>'+it.t+'</span>':'<span><i style="background:'+it.c+'"></i>'+it.t+'</span>'}).join(''))}
-function barsPlain(id,rows,max){
-  setH(id,rows.map(function(r){var w=Math.abs(r.v)/max*50,col=r.col||(r.v<0?WARM:ACC);
-    return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+(r.html||esc(r.nm))+'</span><span class="tr"><span class="fill" style="width:'+w+'%;'+(r.v<0?'right:50%':'left:50%')+';background:'+col+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/&[a-z]+;/g,'x')).width}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function r1(v){return Math.round(v*10)/10}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+/* barra orizzontale con estremo arrotondato (4px) lontano dalla base */
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d=x1>=x0?
+    'M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z':
+    'M'+r1(r)+' '+r1(y)+'H'+r1(l+rr)+'Q'+r1(l)+' '+r1(y)+' '+r1(l)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(l)+' '+r1(y+h)+' '+r1(l+rr)+' '+r1(y+h)+'H'+r1(r)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
 }
-/* ---------- grafico a barre/linee ---------- */
-function chart(id,o){
-  var box=el(id);box.innerHTML='';
-  var W=Math.max(280,box.clientWidth||600),H=o.h||280,m={l:o.ml||50,r:10,t:10,b:26};
-  var n=o.x.length,pw=W-m.l-m.r,ph=H-m.t-m.b,i,lo=0,hi=0;
-  if(o.stack){for(i=0;i<n;i++){var p=0,q=0;o.series.forEach(function(s){var v=s.d[i];if(v==null)return;if(v>=0)p+=v;else q+=v});hi=Math.max(hi,p);lo=Math.min(lo,q)}}
-  else{var mn=Infinity,mx=-Infinity;o.series.forEach(function(s){s.d.forEach(function(v){if(v==null)return;mn=Math.min(mn,v);mx=Math.max(mx,v)})});
-    if(o.zero===false){lo=mn;hi=mx}else{lo=Math.min(0,mn);hi=Math.max(0,mx)}}
-  if(!(hi>lo)){hi=lo+1}
-  var st=niceStep((hi-lo)/5),y0=Math.floor(lo/st+1e-9)*st,y1=Math.ceil(hi/st-1e-9)*st;
-  function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var bw=pw/n,bars=o.series.filter(function(s){return s.type==='bar'}),nb=o.stack?1:Math.max(1,bars.length),bwid=Math.max(2,bw*(o.stack?0.7:0.82)/nb);
-  function XC(k){return m.l+bw*(k+0.5)}
-  var yf=o.yf||f0,s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var v=y0;v<=y1+st/2;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+(Math.abs(v)<st/1e3?'#888':'#e3e3e3')+'"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end">'+yf(v)+'</text>'}
-  var every=Math.max(1,Math.ceil(n*(o.xw||34)/pw));
-  for(i=0;i<n;i+=every){s+='<text class="mu" x="'+XC(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+(o.xf?o.xf(o.x[i]):o.x[i])+'</text>'}
-  if(o.stack){
-    for(i=0;i<n;i++){var up=0,dn=0;o.series.forEach(function(sr){var vv=sr.d[i];if(vv==null||vv===0)return;var a,b;if(vv>=0){a=up;b=up+vv;up=b}else{a=dn;b=dn+vv;dn=b}
-      s+='<rect x="'+(XC(i)-bwid/2).toFixed(1)+'" y="'+Y(Math.max(a,b)).toFixed(1)+'" width="'+bwid.toFixed(1)+'" height="'+Math.max(0.5,Math.abs(Y(a)-Y(b))).toFixed(1)+'" fill="'+sr.c+'"/>'})}
-  }else{
-    bars.forEach(function(sr,bi){for(i=0;i<n;i++){var vv=sr.d[i];if(vv==null)continue;var x=XC(i)-bw*0.82/2+bi*bwid;
-      s+='<rect x="'+x.toFixed(1)+'" y="'+Y(Math.max(vv,0)).toFixed(1)+'" width="'+(bwid-0.5).toFixed(1)+'" height="'+Math.max(0.5,Math.abs(Y(0)-Y(vv))).toFixed(1)+'" fill="'+sr.c+'"/>'}});
-  }
-  o.series.filter(function(sr){return sr.type!=='bar'}).forEach(function(sr){
-    var d='',pen=false,pts='';
-    for(i=0;i<n;i++){var vv=sr.d[i];if(vv==null){pen=false;continue}var x=XC(i).toFixed(1),y=Y(vv).toFixed(1);d+=(pen?'L':'M')+x+' '+y;pen=true;if(n<=30)pts+='<circle cx="'+x+'" cy="'+y+'" r="2.4" fill="'+sr.c+'"/>'}
-    s+='<path d="'+d+'" fill="none" stroke="'+sr.c+'" stroke-width="'+(sr.w||2)+'"'+(sr.dash?' stroke-dasharray="5 4"':'')+'/>'+pts});
-  s+='<line id="vl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#555" stroke-dasharray="3 3" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,vl=svg.querySelector('#vl'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,k2=Math.floor((px-m.l)/bw);
-    if(k2<0||k2>=n){tip.style.display='none';vl.style.display='none';return}
-    vl.setAttribute('x1',XC(k2));vl.setAttribute('x2',XC(k2));vl.style.display='';
-    var h='<b>'+(o.xf?o.xf(o.x[k2]):o.x[k2])+'</b>';o.series.forEach(function(sr){var vv=sr.d[k2];if(vv==null)return;h+='<br><i style="background:'+sr.c+'"></i>'+sr.n+': '+(sr.f||o.tf||yf)(vv)});
-    if(o.extra)h+=o.extra(k2);
-    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=XC(k2)/k+12;if(left+tw>r.width)left=XC(k2)/k-tw-12;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
-  function hide(){tip.style.display='none';vl.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+/* colonna verticale, estremo arrotondato lontano dalla base */
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(4,h,w/2);if(h<0.5)return '';
+  var d=y1<=y0?
+    'M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z':
+    'M'+r1(x)+' '+r1(t)+'V'+r1(b-rr)+'Q'+r1(x)+' '+r1(b)+' '+r1(x+rr)+' '+r1(b)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(b)+' '+r1(x+w)+' '+r1(b-rr)+'V'+r1(t)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
 }
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+var DATA='data/';
 
-/* ---------- caricamento ---------- */
-J('data/riepilogo.json').then(function(d){
-  D=d;D.milano.forEach(function(r){MY[r.a]=r});
-  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
-var FN=[];
+function r1(v){return Math.round(v*10)/10}
+function f2(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*100)/100).toFixed(2).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sgf(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+f0(Math.abs(r))}
+function sp(x,d){var a=Math.abs(x),s=d===2?f2(a):d===1?f1(a):f0(a),z=+s.replace(/\./g,'').replace(',','.')===0;return (x>0&&!z?'+':x<0&&!z?'−':'')+s+'%'}
+function pc(x,d){return (d===1?f1(x):f0(x))+'%'}
+var C={mi:'#E30613',ink:'#0b0d12',ink2:'#2f3440',mut:'#5f6673',grid:'#e6e8ec',axis:'#9aa1ad',light:'#c9ced6',dot:'#aab0bb',
+  up:'#0072BC',dn:'#F58220',gr:'#00A651',ye:'#FFD500',pu:'#7B3FA0',te:'#00A19A',ma:'#E6007E',br:'#8C5A32',gy:'#4b5563'};
+var SN={A:'Agricoltura',C:'Manifattura',F:'Costruzioni',G:'Commercio',H:'Trasporti e magazzini',I:'Alloggio e ristorazione',J:'Informazione e comunicazione',K:'Finanza e assicurazioni',L:'Immobiliare',M:'Professionisti e tecnici',N:'Servizi alle imprese',P:'Istruzione',Q:'Sanità e assistenza',R:'Arte e sport',S:'Altri servizi'};
+var D,MY={},RD=[];
+function yv(a){return D.milano.filter(function(r){return r.a===a})[0]}
+function wrap(s,maxw,bold,size){var w=String(s).split(' '),out=[],cur='';w.forEach(function(x){var t=cur?cur+' '+x:x;if(cur&&tw(t,size||12,bold)>maxw){out.push(cur);cur=x}else cur=t});if(cur)out.push(cur);return out}
+function textLines(cx,cy,lines,o){o=o||{};var s='',n=lines.length;lines.forEach(function(t,i){s+=T(cx,cy+4+(i-(n-1)/2)*14,t,{a:o.a,c:o.c})});return s}
+
+getJ(DATA+'riepilogo.json').then(function(r){
+  D=r;D.milano.forEach(function(x){MY[x.a]=x});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
 function tutto(){
-  [sorpresa,nascono,lungo,ufficio,settori,forme,categorie,confronto,comune,limiti,metodo].forEach(function(f){f()});
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){FN.forEach(function(f){f()})},200)});
-}
-function reg(fn){FN.push(fn);fn()}
-function provRank(a,sig){var x=D.province.anni[String(a)].slice().sort(function(p,q){return q[6]-p[6]});for(var i=0;i<x.length;i++)if(x[i][0]===sig)return {r:i+1,n:x.length,x:x};return null}
-function serie(sig,k,a){var s=D.province.serie[sig];return s[k][s.a.indexOf(a)]}
-
-/* ---------- sorpresa ---------- */
-function sorpresa(){
-  var m=MY[2025],pr=provRank(2025,'MI'),top=pr.x[0],sec=pr.x[1];
-  var nc=D.settori.dati.NC['2025'][1],tot=m.isc;
-  var sc=m.forme.SC.isc,sc09=MY[2009].forme.SC.isc/MY[2009].isc*100,st=D.categorie.straniere,j=st.a.indexOf(2025),
-      shareIsc=st.isc[j]/D.categorie.totale.isc[j]*100,sk=D.stock_categorie,shareAtt=sk.straniere[sk.a.indexOf(2025)]/sk.att_tot[sk.a.indexOf(2025)]*100;
-  el('n-isc').textContent=f0(m.isc);el('n-ces').textContent=f0(m.ces);el('n-saldo').textContent=sg(m.saldo);
-  var h='<p><b>Le chiusure ufficiali sono più di quelle vere.</b> Nel 2025 il Registro segna '+f0(m.ces_lorde)+' cessazioni in provincia di Milano, ma '+f0(m.cdu)+' ('+pc(m.cdu/m.ces_lorde*100,0)+') sono cancellazioni d’ufficio, cioè imprese ferme da anni tolte dal Registro. Le cessate «vere» dell’anno sono '+f0(m.ces)+'. Nel 2019 le d’ufficio erano '+f0(MY[2019].cdu)+', nel 2017 appena '+f0(MY[2017].cdu)+': senza separarle, le chiusure salterebbero su e giù per motivi amministrativi.</p>';
-  h+='<p><b>Quasi 4 nuove iscritte su 10 non hanno ancora un settore.</b> Nel 2025 sono '+f0(nc)+' su '+f0(tot)+' ('+pc(nc/tot*100,0)+'): il codice di attività viene assegnato dopo l’iscrizione. Per questo il saldo di un singolo settore, nell’anno, sembra più negativo di quello che è.</p>';
-  var itn=serie('IT','nat',2025),itm=serie('IT','mor',2025);
-  h+='<p><b>Milano è '+pr.r+'ª su '+pr.n+' province per crescita delle imprese.</b> Nel 2025 il tasso di crescita è '+sgp(m.cr,2)+'; la prima è '+esc(top[1])+' ('+sgp(top[6],2)+'). Il vantaggio di Milano sta nelle <b>nascite</b>: ogni 100 imprese registrate a inizio anno ne sono nate '+nf(m.nat,1)+' (in Italia '+nf(itn,1)+'). Le chiusure, invece, sono in linea con la media ('+nf(m.mor,1)+' contro '+nf(itm,1)+').</p>';
-  h+='<p><b>Le società di capitali hanno superato le ditte individuali tra le nuove iscritte.</b> Nel 2025 le società di capitali sono il '+pc(sc/tot*100,0)+' delle nuove imprese (nel 2009 il '+pc(sc09,0)+'); le ditte individuali il '+pc(m.forme.DI.isc/tot*100,0)+'.</p>';
-  h+='<p><b>Le imprese «straniere» (categoria ufficiale) sono il '+pc(shareIsc,0)+' delle nuove iscritte ma il '+pc(shareAtt,0)+' delle imprese attive.</b> Nel 2025 sono '+f0(st.isc[j])+' su '+f0(D.categorie.totale.isc[j])+' iscritte. Chi è «straniera» nel Registro lo decide la partecipazione di cittadini di nazionalità estera (vedi <a href="#categorie">sotto</a>).</p>';
-  setH('sorpresa',h);
+  highlights();
+  draw(nascite);draw(lungo);draw(ufficio);draw(mix);draw(settoriVar);draw(settoriLinee);draw(forme);draw(categorie);draw(catVar);draw(strip);draw(natmor);draw(comuneLinee);draw(comuneSettori);
+  limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
 }
 
-/* ---------- nascono ---------- */
-var CES='ces';
-function nascono(){
-  var m=MY[2025],bs=D.milano.slice().sort(function(p,q){return q.saldo-p.saldo}),ws=bs[bs.length-1];
-  var h='<p>Nel 2025 in provincia di Milano si sono iscritte <b>'+f0(m.isc)+'</b> imprese e ne sono cessate <b>'+f0(m.ces)+'</b> (senza cancellazioni d’ufficio): saldo <b>'+sg(m.saldo)+'</b>, tasso di crescita <b>'+sgp(m.cr,2)+'</b>. Le imprese registrate a fine anno sono '+f0(m.reg)+', di cui '+f0(m.att)+' attive. Il saldo più alto della serie 2007–2025 è '+(bs[0].a===2025?'quello del 2025':'quello del '+bs[0].a+' ('+sg(bs[0].saldo)+')')+'; il più basso è quello del '+ws.a+' ('+sg(ws.saldo)+', iscrizioni a '+f0(ws.isc)+'), l’anno del Covid. ';
-  var cs=D.milano.filter(function(r){return r.cr!=null}),best=cs.slice().sort(function(p,q){return q.cr-p.cr})[0],worst=cs.slice().sort(function(p,q){return p.cr-q.cr})[0];
-  h+='Il tasso di crescita va da '+sgp(worst.cr,2)+' ('+worst.a+') a '+sgp(best.cr,2)+' ('+best.a+')'+(worst.cr>0?': in tutti gli anni nascono più imprese di quante ne chiudano.':'.')+'</p>';
-  setH('nascono-testo',h);
-  document.querySelectorAll('[data-c]').forEach(function(b){b.addEventListener('click',function(){CES=b.getAttribute('data-c');document.querySelectorAll('[data-c]').forEach(function(x){x.classList.toggle('on',x===b)});drawNasc()})});
-  reg(drawNasc);
-  table('tab-ann',['Anno','Registrate','Attive','Iscritte','Cessate lorde','di cui d’ufficio','Cessate senza d’ufficio','Saldo','Crescita'],
-    D.milano.slice().reverse().map(function(r){return [r.a,f0(r.reg),f0(r.att),f0(r.isc),f0(r.ces_lorde),f0(r.cdu),f0(r.ces),sg(r.saldo),r.cr==null?'—':sgp(r.cr,2)]}));
+/* ---------- dati comodi ---------- */
+function sec(c,a){return D.settori.dati[c][String(a)]}
+function settoriVarRows(){
+  return Object.keys(SN).filter(function(c){return sec(c,2009)[0]>=1000}).map(function(c){var a=sec(c,2009)[0],b=sec(c,2025)[0];return{c:c,n:SN[c],a:a,b:b,v:(b/a-1)*100}}).sort(function(x,y){return y.v-x.v});
 }
-function drawNasc(){
-  var yrs=D.milano.map(function(r){return r.a}),lorde=CES==='lorde';
-  legend('lg-nasc',[{c:ACC,t:'Iscritte'},{c:WARM,t:lorde?'Cessate lorde (con d’ufficio)':'Cessate senza d’ufficio'},{c:INK,t:'Saldo (iscritte − cessate senza d’ufficio)',line:1}]);
-  chart('ch-nasc',{x:yrs,h:300,series:[
-    {n:'Iscritte',c:ACC,type:'bar',d:D.milano.map(function(r){return r.isc})},
-    {n:lorde?'Cessate lorde':'Cessate senza d’ufficio',c:WARM,type:'bar',d:D.milano.map(function(r){return lorde?r.ces_lorde:r.ces})},
-    {n:'Saldo',c:INK,type:'line',d:D.milano.map(function(r){return r.saldo}),f:function(v){return sg(v)}}],
-    extra:function(k){var r=D.milano[k];return '<br>d’ufficio: '+f0(r.cdu)+(r.cr!=null?'<br>crescita: '+sgp(r.cr,2):'')}});
+function provRank(a,sig){var x=D.province.anni[String(a)].slice().sort(function(p,q){return q[6]-p[6]});for(var i=0;i<x.length;i++)if(x[i][0]===sig)return{r:i+1,n:x.length,x:x}}
+function ser(sig,k,a){var s=D.province.serie[sig];return s[k][s.a.indexOf(a)]}
+function catQuote(){
+  var Cc=D.categorie,S=D.stock_categorie,j=Cc.totale.a.indexOf(2025),js=S.a.indexOf(2025);
+  return[['straniere','Straniere'],['femminili','Femminili'],['giovanili','Giovanili']].map(function(p){var k=p[0];
+    return{k:k,n:p[1],a:S[k][js]/S.att_tot[js]*100,b:Cc[k].isc[j]/Cc.totale.isc[j]*100,isc:Cc[k].isc[j],att:S[k][js],nuove100:Cc[k].isc[j]/S[k][js]*100,
+      var18:(S[k][js]/S[k][0]-1)*100}});
+}
+
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var m=MY[2025],maxS=D.milano.every(function(r){return r.saldo<=m.saldo}),sv=settoriVarRows().filter(function(r){return r.a>=5000}),up=sv[0],dn=last(sv);
+  var cq=catQuote(),st=cq[0],pr=provRank(2025,'MI'),top=pr.x[0],C0=D.comune,y0=2010;
+  var quotaSC=m.forme.SC.isc/m.isc*100,quotaSC09=MY[2009].forme.SC.isc/MY[2009].isc*100;
+  var comV=(C0.totale['2025']/C0.totale[y0]-1)*100,resto=function(a){return C0.attive_provincia[a]-C0.totale[a]},restoV=(resto(2025)/resto(y0)-1)*100;
+  var T_=[
+    {c:C.mi,h:'t-nasc',n:f0(m.isc),u:'',p:'nuove imprese iscritte nel 2025 in provincia di Milano. Ne sono cessate '+f0(m.ces)+'.'},
+    {c:C.ye,h:'t-nasc',n:sgf(m.saldo),u:'',p:'il saldo del 2025'+(maxS?': il più alto dal 2007':'')+'. Ogni anno nascono più imprese di quante ne chiudano.'},
+    {c:C.gr,h:'t-uff',n:f0(m.cdu/m.ces_lorde*100),u:'%',p:'delle cessazioni del 2025 sono cancellazioni d’ufficio: imprese ferme da anni tolte dal Registro.'},
+    {c:C.up,h:'t-sv',n:sgf(up.v),u:'%',p:'imprese attive dal 2009 al 2025 in «'+up.n+'»: è il settore grande che cresce di più.'},
+    {c:C.pu,h:'t-sv',n:sgf(dn.v),u:'%',p:'imprese attive dal 2009 al 2025 in «'+dn.n+'»: è il calo più forte tra i settori grandi.'},
+    {c:C.dn,h:'t-forme',n:f0(quotaSC),u:'%',p:'delle nuove imprese del 2025 è una società di capitali (nel 2009: '+f0(quotaSC09)+'%). Le ditte individuali sono il '+f0(m.forme.DI.isc/m.isc*100)+'%.'},
+    {c:C.te,h:'t-cat',n:f0(st.b),u:'%',p:'delle nuove imprese è straniera, contro il '+f0(st.a)+'% delle imprese attive.'},
+    {c:C.ma,h:'t-strip',n:String(pr.r),u:'ª',p:'su '+pr.n+' province per crescita delle imprese nel 2025 ('+sp(m.cr,2)+')'+(pr.r>1?'; davanti '+(pr.r===2?'solo ':'')+top[1]+'.':'.')},
+    {c:C.br,h:'t-com',n:sgf(comV),u:'%',p:'imprese attive nel comune di Milano dal 2010; nel resto della provincia '+(Math.abs(restoV)<2?'quasi nessun cambiamento':sp(restoV,0))+'.'}
+  ];
+  $('hl').innerHTML=T_.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. nascono e muoiono: barre contrapposte ---------- */
+function nascite(){
+  var box=$('ch-nasc'),W=width('ch-nasc'),R=D.milano,n=R.length,yw=34,sw_=58,rh=22,bh=14,top=34;
+  var AW=W-yw-sw_-4,cx=yw+AW/2,K=(AW/2-46)/31000,H=top+n*rh+4,s=svgOpen(W,H);
+  s+=T(cx-24,16,'cessate',{a:'end',c:'b'})+'<rect x="'+r1(cx-20)+'" y="6" width="11" height="11" rx="2" fill="'+C.dn+'"/>';
+  s+='<rect x="'+r1(cx+9)+'" y="6" width="11" height="11" rx="2" fill="'+C.up+'"/>'+T(cx+25,16,'iscritte',{c:'b'});
+  s+=T(W,16,'saldo',{a:'end',c:'b'});
+  s+=L(cx,top-6,cx,H-2,C.axis);
+  R.forEach(function(r,i){
+    var y=top+i*rh,by=y+(rh-bh)/2,ty=y+rh/2+4,sa=sgf(r.saldo),wsa=tw(sa,12,true);
+    s+=T(0,ty,r.a,{c:'m'});
+    s+=hbar(cx,cx-r.ces*K,by,bh,C.dn)+hbar(cx,cx+r.isc*K,by,bh,C.up);
+    s+=T(cx-r.ces*K-5,ty,f0(r.ces),{a:'end',c:'v'})+T(cx+r.isc*K+5,ty,f0(r.isc),{c:'v'});
+    s+='<rect x="'+r1(W-wsa-14)+'" y="'+r1(y+rh/2-4)+'" width="8" height="8" rx="2" fill="'+(r.saldo>=0?C.gr:C.mi)+'"/>'+T(W,ty,sa,{a:'end',c:'k'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+r.a+'</b><br>'+sw(C.up)+'Iscritte: '+f0(r.isc)+'<br>'+sw(C.dn)+'Cessate senza d’ufficio: '+f0(r.ces)+'<br>Cancellazioni d’ufficio: '+f0(r.cdu)+'<br>Saldo: <b>'+sgf(r.saldo)+'</b>'+(r.a>2007?'<br>Crescita: '+sp((r.isc-r.ces)/R[i-1].reg*100,2):''))+'/>';
+  });
+  box.innerHTML=s+'</svg>';
+  var pos=R.every(function(r){return r.saldo>0}),m=R[n-1];
+  $('t-nasc').textContent=pos?'Dal 2007 ogni anno nascono più imprese di quante ne chiudano: nel 2025 il saldo è '+sgf(m.saldo):'Imprese iscritte e cessate in provincia di Milano, 2007-2025';
+}
+
+/* ---------- 2. dal 2000: linee ---------- */
+function lineChart(id,o){
+  var box=$(id),W=width(id),H=o.H||280,m={l:o.ml||40,r:o.mr||46,t:o.mt||12,b:24},ys=o.years,n=ys.length;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(i){return m.l+i*pw/(n-1)},Y=function(v){return m.t+ph-(v-o.lo)/(o.hi-o.lo)*ph};
+  var s=svgOpen(W,H);
+  o.ticks.forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v===o.base?C.axis:C.grid)+T(m.l-6,Y(v)+4,o.fmt(v),{a:'end',c:'m'})});
+  s+=L(m.l,m.t+ph,W-m.r,m.t+ph,C.axis);
+  o.xt.forEach(function(a){var i=ys.indexOf(a);s+=T(X(i),m.t+ph+16,a,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  (o.notes||[]).forEach(function(nt){var x=X(ys.indexOf(nt.a)),y=Y(nt.v);s+=L(x,m.t-6,x,y,C.ink,1)+'<circle cx="'+r1(x)+'" cy="'+(m.t-14)+'" r="10" fill="'+C.ink+'"/>'+T(x,m.t-10,nt.k,{a:'middle',c:'w'})});
+  o.series.forEach(function(se){var d='',pen=false;
+    se.vals.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+r1(X(i))+' '+r1(Y(v));pen=true});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.col+'" stroke-width="'+(se.w||2)+'"'+(se.dash?' stroke-dasharray="5 4"':'')+' stroke-linejoin="round" stroke-linecap="round"/>';
+    var li=se.vals.length-1;s+='<circle cx="'+r1(X(li))+'" cy="'+r1(Y(se.vals[li]))+'" r="4.5" fill="'+se.col+'" stroke="#fff" stroke-width="2"/>';
+    if(se.start!=null){s+='<circle cx="'+r1(X(0))+'" cy="'+r1(Y(se.vals[0]))+'" r="4" fill="'+se.col+'" stroke="#fff" stroke-width="2"/>'+T(X(0)+6,Y(se.vals[0])+(se.startDy||-8),se.start,{c:'b'})}
+  });
+  var ends=o.series.map(function(se){return{y:Y(last(se.vals)),t:se.end}}).sort(function(a,b){return a.y-b.y});
+  for(var k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<15)ends[k].y=ends[k-1].y+15;
+  ends.forEach(function(e){s+=T(W-m.r+8,e.y+4,e.t,{c:'b'})});
+  for(var i=0;i<n;i++)s+='<rect x="'+r1(X(i)-pw/(n-1)/2)+'" y="'+m.t+'" width="'+r1(pw/(n-1))+'" height="'+ph+'" fill="transparent"'+tip(o.tip(i))+'/>';
+  box.innerHTML=s+'</svg>';
 }
 function lungo(){
-  var V=D.milano_vecchio_perimetro,v25=V[V.length-1],v01=V[1],vmax=V.slice().sort(function(a,b){return b.isc-a.isc})[0];
-  var lowest=V.slice(1).sort(function(a,b){return a.isc-b.isc})[0];
-  setH('lungo-testo','<p>Con Milano e Monza e Brianza sommate (il territorio della vecchia provincia di Milano) le iscrizioni sono state '+f0(v01.isc)+' nel 2001 e '+f0(v25.isc)+' nel 2025: ogni anno nascono tra le 27.000 e le 32.000 imprese, con l’eccezione del 2020 (il massimo è del '+vmax.a+': '+f0(vmax.isc)+'; il minimo del '+lowest.a+': '+f0(lowest.isc)+'). Quello che cambia è il lato delle chiusure: le cessazioni lorde vanno da '+f0(v01.ces_lorde)+' nel 2001 a '+f0(v25.ces_lorde)+' nel 2025, ma nel 2025 '+f0(v25.cdu)+' sono d’ufficio.</p>');
-  legend('lg-lungo',[{c:ACC,t:'Iscritte',line:1},{c:WARM,t:'Cessate lorde',line:1,dash:1},{c:INK,t:'Cessate senza d’ufficio (dal 2006)',line:1}]);
-  reg(function(){chart('ch-lungo',{x:V.map(function(r){return r.a}),h:280,zero:true,series:[
-    {n:'Iscritte',c:ACC,type:'line',d:V.map(function(r){return r.isc})},
-    {n:'Cessate lorde',c:WARM,type:'line',dash:1,d:V.map(function(r){return r.ces_lorde})},
-    {n:'Cessate senza d’ufficio',c:INK,type:'line',d:V.map(function(r){return r.ces})}]})});
+  var V=D.milano_vecchio_perimetro,ys=V.map(function(r){return r.a}),i19=ys.indexOf(2019),i07=ys.indexOf(2007),mn=Math.min.apply(null,V.map(function(r){return r.isc})),mx=Math.max.apply(null,V.map(function(r){return r.isc}));
+  $('lg-lungo').innerHTML='<span><i class="ln" style="background:'+C.up+'"></i>iscritte</span><span><i class="ln" style="background:'+C.dn+'"></i>cessate senza d’ufficio</span><span><i class="ln" style="background:none;border-top:3px dashed '+C.axis+';height:0;border-radius:0"></i>cessate con d’ufficio</span>';
+  lineChart('ch-lungo',{years:ys,lo:15000,hi:42000,ticks:[20000,30000,40000],fmt:function(v){return f0(v/1000)+' mila'},H:300,ml:46,mr:50,mt:34,xt:[2000,2005,2010,2015,2020,2025],
+    notes:[{a:2007,k:1,v:V[i07].ces_lorde},{a:2019,k:2,v:V[i19].ces_lorde}],
+    series:[{col:C.axis,w:2,dash:1,vals:V.map(function(r){return r.ces_lorde}),end:f0(last(V).ces_lorde)},
+            {col:C.dn,w:2.5,vals:V.map(function(r){return r.ces}),end:f0(last(V).ces)},
+            {col:C.up,w:3,vals:V.map(function(r){return r.isc}),end:f0(last(V).isc)}],
+    tip:function(i){var r=V[i];return '<b>'+r.a+'</b><br>'+sw(C.up)+'Iscritte: '+f0(r.isc)+'<br>'+sw(C.axis)+'Cessate con d’ufficio: '+f0(r.ces_lorde)+(r.ces!=null?'<br>'+sw(C.dn)+'Cessate senza d’ufficio: '+f0(r.ces)+'<br>Cancellazioni d’ufficio: '+f0(r.cdu):'')}});
+  $('t-lungo').textContent='Dal 2000, con Milano e Monza e Brianza insieme, si iscrivono ogni anno tra '+f0(Math.floor(mn/1000))+' e '+f0(Math.floor(mx/1000))+' mila imprese';
+  $('nt-lungo').innerHTML=
+    '<li><b class="nb">1</b><span>Nel 2007 le cessazioni toccano '+f0(V[i07].ces_lorde)+', ma '+f0(V[i07].cdu)+' sono cancellazioni d’ufficio: il Registro fa pulizia.</span></li>'+
+    '<li><b class="nb">2</b><span>Succede di nuovo nel 2019: '+f0(V[i19].ces_lorde)+' cessazioni, di cui '+f0(V[i19].cdu)+' d’ufficio.</span></li>';
 }
 
-/* ---------- ufficio ---------- */
-var NF_={SC:'Società di capitali',SP:'Società di persone',DI:'Ditte individuali',AF:'Altre forme'},CF_={SC:ACC,SP:BLU,DI:WARM,AF:GRY};
+/* ---------- 3. d'ufficio: colonne impilate ---------- */
 function ufficio(){
-  var big=D.milano.slice().sort(function(a,b){return b.cdu-a.cdu}),small=D.milano.slice().sort(function(a,b){return a.cdu-b.cdu});
-  function dom(r){var k=Object.keys(r.forme).sort(function(a,b){return r.forme[b].cdu-r.forme[a].cdu})[0];return NF_[k].toLowerCase()+' ('+f0(r.forme[k].cdu)+')'}
-  var tot=D.milano.reduce(function(s,r){return s+r.cdu},0),totl=D.milano.reduce(function(s,r){return s+r.ces_lorde},0);
-  setH('uff-testo','<p>Il Registro delle imprese ogni tanto fa pulizia: toglie le imprese che da anni non operano e non hanno chiesto la cancellazione (una procedura prevista da un decreto del 2004; il glossario Movimprese la spiega). Dal 2006 Movimprese le conta a parte. Tra 2007 e 2025, in provincia di Milano, le cancellazioni d’ufficio sono state '+f0(tot)+', il '+pc(tot/totl*100,0)+' di tutte le cessazioni lorde. Vanno a ondate, e spesso ogni ondata colpisce una forma giuridica alla volta: il picco è del '+big[0].a+' ('+f0(big[0].cdu)+', soprattutto '+dom(big[0])+'); il minimo del '+small[0].a+' ('+f0(small[0].cdu)+'). Nel 2019 hanno colpito soprattutto '+dom(MY[2019])+', nel 2021 '+dom(MY[2021])+', nel 2025 '+dom(MY[2025])+'.</p><p>Conseguenza: le «imprese attive» e le «cessazioni lorde» di un anno dicono anche quante pulizie ha fatto il Registro. Il saldo di nati-mortalità senza d’ufficio è più stabile.</p>');
-  legend('lg-uff',['SC','SP','DI','AF'].map(function(k){return {c:CF_[k],t:NF_[k]}}));
-  reg(function(){chart('ch-uff',{x:D.milano.map(function(r){return r.a}),h:280,stack:1,series:['SC','SP','DI','AF'].map(function(k){return {n:NF_[k],c:CF_[k],type:'bar',d:D.milano.map(function(r){return r.forme[k].cdu})}}),extra:function(k){return '<br><b>totale: '+f0(D.milano[k].cdu)+'</b>'}})});
+  var box=$('ch-uff'),W=width('ch-uff'),R=D.milano,n=R.length,H=290,m={l:46,r:6,t:30,b:24},pw=W-m.l-m.r,ph=H-m.t-m.b,hi=40000;
+  var X=function(i){return m.l+(i+0.5)*pw/n},Y=function(v){return m.t+ph-v/hi*ph},bw=Math.min(20,pw/n-3);
+  var s=svgOpen(W,H);
+  [0,10000,20000,30000,40000].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v===0?C.axis:C.grid)+T(m.l-6,Y(v)+4,v?f0(v/1000)+' mila':'0',{a:'end',c:'m'})});
+  var sh=R.map(function(r){return r.cdu/r.ces_lorde*100}),imax=sh.indexOf(Math.max.apply(null,sh)),imin=sh.indexOf(Math.min.apply(null,sh));
+  var lab={};[0,R.map(function(r){return r.cdu}).indexOf(Math.max.apply(null,R.map(function(r){return r.cdu}))),R.map(function(r){return r.cdu}).indexOf(Math.min.apply(null,R.map(function(r){return r.cdu}))),R.map(function(r){return r.a}).indexOf(2019),n-1].forEach(function(i){lab[i]=1});
+  R.forEach(function(r,i){
+    var x=X(i)-bw/2,y1=Y(r.ces),y2=Y(r.ces+r.cdu);
+    s+='<rect x="'+r1(x)+'" y="'+r1(y1)+'" width="'+r1(bw)+'" height="'+r1(Y(0)-y1)+'" fill="'+C.dn+'"/>'+vbar(x,bw,y1,y2,C.ma);
+    if(lab[i]){var anc=i===0?'start':i===n-1?'end':'middle',tx=i===0?x:i===n-1?x+bw:X(i);s+=T(tx,y2-5,f0(r.cdu),{a:anc,c:'k',st:'fill:'+C.ma})}
+    if([2007,2010,2015,2020,2025].indexOf(r.a)>=0)s+=T(X(i),m.t+ph+16,r.a,{a:i===0?'start':i===n-1?'end':'middle',c:'m'});
+    s+='<rect x="'+r1(X(i)-pw/n/2)+'" y="'+m.t+'" width="'+r1(pw/n)+'" height="'+ph+'" fill="transparent"'+tip('<b>'+r.a+'</b><br>'+sw(C.dn)+'Cessate senza d’ufficio: '+f0(r.ces)+'<br>'+sw(C.ma)+'D’ufficio: '+f0(r.cdu)+'<br>Totale: '+f0(r.ces_lorde)+' (d’ufficio: '+f0(sh[i])+'%)')+'/>';
+  });
+  box.innerHTML=s+'</svg>';
+  $('t-uff').textContent='Nel '+R[imax].a+' il '+f0(sh[imax])+'% delle cessazioni era d’ufficio; nel '+R[imin].a+' solo il '+f0(sh[imin])+'%';
 }
 
-/* ---------- settori ---------- */
-var SETC='G',SETY=2025;
-function secData(c){return D.settori.dati[c]||(D.settori.divisioni[c]&&D.settori.divisioni[c].d)}
-function secNome(c){return D.settori.nomi[c]||(D.settori.divisioni[c]&&D.settori.divisioni[c].n)||c}
-function settori(){
-  var N=D.settori.nomi,codes=Object.keys(N).filter(function(c){return ['T','U','O','B','E'].indexOf(c)<0}),sel=el('sel-set');
-  var opts=codes.map(function(c){return '<option value="'+c+'">'+esc(N[c])+'</option>'});
-  Object.keys(D.settori.divisioni).forEach(function(c){opts.push('<option value="'+c+'">'+esc(D.settori.divisioni[c].n)+' (divisione)</option>')});
-  sel.innerHTML=opts.join('');sel.value=SETC;sel.addEventListener('change',function(){SETC=sel.value;drawSet()});
-  var ay=[];for(var a=2025;a>=2009;a--)ay.push('<option value="'+a+'">'+a+'</option>');el('sel-anno').innerHTML=ay.join('');el('sel-anno').addEventListener('change',function(){SETY=+el('sel-anno').value;tabSet()});
-  var A=D.settori.dati,a09=function(c){return A[c]['2009'][0]},a25=function(c){return A[c]['2025'][0]},a19=null;
-  var gy=2009,gmax=0;for(var yy=2009;yy<=2025;yy++){if(A.G[String(yy)][0]>gmax){gmax=A.G[String(yy)][0];gy=yy}}
-  setH('set-testo','<p>Il Registro classifica ogni impresa con un codice di attività (ATECO). Le imprese attive di Milano sono diventate di più dove si fanno servizi alle imprese e alla finanza: <b>'+esc(N.K.toLowerCase())+'</b> da '+f0(a09('K'))+' a '+f0(a25('K'))+' (2009–2025, '+sgp((a25('K')/a09('K')-1)*100,0)+'), <b>attività professionali, scientifiche e tecniche</b> da '+f0(a09('M'))+' a '+f0(a25('M'))+' ('+sgp((a25('M')/a09('M')-1)*100,0)+'). Calano la manifattura (da '+f0(a09('C'))+' a '+f0(a25('C'))+', '+sgp((a25('C')/a09('C')-1)*100,0)+') e il commercio, che aveva toccato il massimo nel '+gy+' con '+f0(gmax)+' imprese attive e nel 2025 ne ha '+f0(a25('G'))+' ('+sgp((a25('G')/gmax-1)*100,0)+').</p>');
-  var rows=Object.keys(A).filter(function(c){return c!=='NC'&&A[c]['2009'][0]>=1000}).map(function(c){var v=(a25(c)/a09(c)-1)*100;return {nm:N[c],v:v,txt:sgp(v,0)+' <span class="sub">('+sg(a25(c)-a09(c))+')</span>',col:v<0?WARM:ACC}}).sort(function(p,q){return q.v-p.v});
-  barsPlain('b-var',rows,Math.max.apply(null,rows.map(function(r){return Math.abs(r.v)})));
-  drawSet();tabSet();
-  FN.push(drawSet);
+/* ---------- 4. settori: quadretti ---------- */
+function quadretti(v,unit){
+  var tot=v.reduce(function(a,b){return a+b},0),n=Math.round(tot/unit),raw=v.map(function(x){return x/unit}),fl=raw.map(Math.floor),
+      rest=n-fl.reduce(function(a,b){return a+b},0),ord=raw.map(function(x,i){return[x-Math.floor(x),i]}).sort(function(a,b){return b[0]-a[0]});
+  for(var k=0;k<rest;k++)fl[ord[k][1]]++;return fl;
 }
-function drawSet(){
-  var d=secData(SETC),yrs=[];for(var a=2009;a<=2025;a++)yrs.push(a);
-  setH('set-tit','Imprese attive — '+esc(secNome(SETC)));
-  chart('ch-att',{x:yrs,h:220,zero:false,series:[{n:'Attive',c:ACC,type:'line',d:yrs.map(function(a){return d[a][0]})}]});
-  legend('lg-set',[{c:ACC,t:'Iscritte'},{c:WARM,t:'Cessate senza d’ufficio'},{c:INK,t:'Saldo',line:1}]);
-  chart('ch-set',{x:yrs,h:240,series:[{n:'Iscritte',c:ACC,type:'bar',d:yrs.map(function(a){return d[a][1]})},{n:'Cessate senza d’ufficio',c:WARM,type:'bar',d:yrs.map(function(a){return d[a][2]-d[a][3]})},
-    {n:'Saldo',c:INK,type:'line',d:yrs.map(function(a){return d[a][1]-(d[a][2]-d[a][3])}),f:function(v){return sg(v)}}],extra:function(k){return '<br>d’ufficio nel settore: '+f0(d[yrs[k]][3])}});
-  var nc=D.settori.dati.NC['2025'][1],isc=D.milano[D.milano.length-1].isc,x=d[2025];
-  var h='<b>Attenzione alle iscritte.</b> Nel 2025 '+f0(nc)+' iscritte su '+f0(isc)+' ('+pc(nc/isc*100,0)+') non avevano ancora un settore: quando il codice arriva, passano da «non classificate» al loro settore. Quindi le barre delle iscritte di un settore sono sottostimate e il suo saldo dell’anno è più negativo del reale. '+(SETC==='NC'?'Per le «non classificate» le cessate sono poche perché le imprese chiuse hanno già un settore. ':'')+'Per leggere un settore conta di più la linea delle imprese attive, che vale a fine anno.';
-  setH('set-nota',h);
-}
-function tabSet(){
-  var y=SETY,A=D.settori.dati,N=D.settori.nomi,rows=[],tot=[0,0,0];
-  setH('set-tab-tit','Tutti i settori nel '+y);
-  Object.keys(A).forEach(function(c){var v=A[c][String(y)];if(!v)return;tot[0]+=v[0];tot[1]+=v[1];tot[2]+=v[2]-v[3]});
-  Object.keys(A).filter(function(c){return c!=='NC'}).sort(function(a,b){return A[b][String(y)][0]-A[a][String(y)][0]}).forEach(function(c){var v=A[c][String(y)],ce=v[2]-v[3];rows.push([esc(N[c]),f0(v[0]),f0(v[1]),f0(ce),sg(v[1]-ce)])});
-  var v=A.NC[String(y)];rows.push(['<i>'+esc(N.NC)+'</i>',f0(v[0]),f0(v[1]),f0(v[2]-v[3]),sg(v[1]-(v[2]-v[3]))]);
-  rows.push(['<b>Totale</b>','<b>'+f0(tot[0])+'</b>','<b>'+f0(tot[1])+'</b>','<b>'+f0(tot[2])+'</b>','<b>'+sg(tot[1]-tot[2])+'</b>']);
-  table('tab-set',['Settore','Attive','Iscritte','Cessate senza d’ufficio','Saldo'],rows);
+function mix(){
+  var box=$('ch-mix'),W=width('ch-mix'),yrs=[2009,2025];
+  var G=[{id:'G',n:'Commercio',col:C.gy},{id:'F',n:'Costruzioni',col:C.dn},{id:'M',n:'Professionisti e tecnici',col:C.pu},{id:'L',n:'Immobiliare',col:C.up},{id:'C',n:'Manifattura',col:C.br},{id:'I',n:'Alloggio e ristorazione',col:C.ma},{id:'K',n:'Finanza e assicurazioni',col:C.gr},{id:'*',n:'Tutti gli altri',col:C.light}];
+  var data=yrs.map(function(y){var tot=0;Object.keys(D.settori.dati).forEach(function(c){tot+=sec(c,y)[0]});
+    var v=G.map(function(g){return g.id==='*'?0:sec(g.id,y)[0]});v[v.length-1]=tot-v.reduce(function(a,b){return a+b},0);return{tot:tot,v:v}});
+  var q=data.map(function(d){return quadretti(d.v,d.tot/100)});
+  var lc=Math.max(116,Math.min(160,Math.round(W*0.36))),colW=(W-lc)/2,cell=Math.min(17,Math.floor(colW/10)),sq=cell-2,gw=cell*10,sep=8,top=44,y=top,band=[];
+  G.forEach(function(g,k){var rows=Math.max(Math.ceil(q[0][k]/10),Math.ceil(q[1][k]/10),1),lines=wrap(g.n,lc-8,true,12),h=Math.max(rows*cell,(lines.length+1)*14+4);band[k]={y:y,h:h,lines:lines};y+=h+sep});
+  var H=y,s=svgOpen(W,H),x0s=[(colW-gw)/2,colW+lc+(colW-gw)/2];
+  yrs.forEach(function(a,ci){s+=T(x0s[ci],20,a,{c:'b',st:'font-size:16px'})+T(x0s[ci],36,'imprese attive',{c:'m'})});
+  G.forEach(function(g,k){var bb=band[k];
+    yrs.forEach(function(a,ci){for(var j=0;j<q[ci][k];j++){var r=Math.floor(j/10),cc=j%10;
+      s+='<rect x="'+r1(x0s[ci]+cc*cell)+'" y="'+r1(bb.y+r*cell+1)+'" width="'+sq+'" height="'+sq+'" rx="2" fill="'+g.col+'"'+tip('<b>'+a+'</b><br>'+sw(g.col)+g.n+': '+f0(data[ci].v[k])+' imprese attive ('+f0(data[ci].v[k]/data[ci].tot*100)+'%)')+'/>'}});
+    var cx=colW+lc/2,cy=bb.y+bb.h/2,all=bb.lines.concat([f0(data[0].v[k]/data[0].tot*100)+'% → '+f0(data[1].v[k]/data[1].tot*100)+'%']);
+    all.forEach(function(t,i){s+=T(cx,cy+4+(i-(all.length-1)/2)*14,t,{a:'middle',c:i===all.length-1?'m':'b'})});
+  });
+  box.innerHTML=s+'</svg>';
+  var g0=data[0].v[0]/data[0].tot*100,g1=data[1].v[0]/data[1].tot*100;
+  $('t-mix').textContent='Il commercio resta il settore più grande ma pesa meno: dal '+f0(g0)+'% al '+f0(g1)+'% delle imprese attive';
 }
 
-/* ---------- forme ---------- */
+/* ---------- barre / pallini che partono da zero ---------- */
+function hdiv(id,rows,o){
+  var box=$(id),W=width(id),lw=o.lw||120,rw=56,rh=o.rh||34,bh=16,pop=o.style==='pop',vs=rows.map(function(r){return r.v});
+  var lo=Math.min(0,Math.min.apply(null,vs)),hi=Math.max(0,Math.max.apply(null,vs)),pw=W-lw-rw-12;
+  var X=function(v){return lw+8+(v-lo)/(hi-lo)*pw},H=rows.length*rh+4,s=svgOpen(W,H);
+  s+=L(X(0),0,X(0),H-2,C.axis);
+  rows.forEach(function(r,i){
+    var y=i*rh,cy=y+rh/2,col=r.col||(r.v>=0?C.up:C.dn),x0=X(0),x1=X(r.v);
+    s+=textLines(0,cy,wrap(r.n,lw-4,r.b,12),{c:r.b?'b':''});
+    if(pop){s+=L(x0,cy,x1,cy,col,3)+'<circle cx="'+r1(x1)+'" cy="'+r1(cy)+'" r="6.5" fill="'+col+'" stroke="#fff" stroke-width="2"/>'}
+    else s+=hbar(x0,x1,cy-bh/2,bh,col);
+    s+=T(r.v>=0?x1+(pop?11:6):x0+7,cy+4,r.txt,{c:'k'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip(r.tip)+'/>';
+  });
+  box.innerHTML=s+'</svg>';
+}
+function settoriVar(){
+  var rows=settoriVarRows().map(function(r){return{n:r.n,v:r.v,txt:sp(r.v,0),tip:'<b>'+esc(r.n)+'</b><br>2009: '+f0(r.a)+' imprese attive<br>2025: '+f0(r.b)+'<br>'+sgf(r.b-r.a)+' ('+sp(r.v,1)+')'}});
+  hdiv('ch-sv',rows,{style:'pop',lw:128,rh:36});
+  var A=settoriVarRows().filter(function(r){return r.a>=5000}),up=A[0],dn=last(A);
+  $('t-sv').textContent=(up.v>=95&&up.v<=110?'Dal 2009 le imprese attive di '+up.n.toLowerCase()+' sono raddoppiate':'Dal 2009 le imprese attive di '+up.n.toLowerCase()+' sono cresciute del '+f0(up.v)+'%')+', quelle di '+dn.n.toLowerCase()+' sono calate del '+f0(Math.abs(dn.v))+'%';
+  $('nc09').textContent=f0(sec('NC',2009)[0]);$('nc25').textContent=f0(sec('NC',2025)[0]);
+}
+function settoriLinee(){
+  var ys=[];for(var a=2009;a<=2025;a++)ys.push(a);
+  var S=[['K','Finanza',C.gr],['M','Professionisti',C.pu],['I','Ristorazione',C.ma],['F','Costruzioni',C.dn],['G','Commercio',C.gy],['C','Manifattura',C.br]];
+  lineChart('ch-sl',{years:ys,lo:50,hi:210,ticks:[50,100,150,200],base:100,fmt:function(v){return v},H:300,ml:34,mr:116,xt:[2009,2013,2017,2021,2025],
+    series:S.map(function(z){var v=ys.map(function(a){return sec(z[0],a)[0]/sec(z[0],2009)[0]*100});return{col:z[2],w:z[0]==='G'?3:2.5,vals:v,end:z[1]+' '+f0(last(v))}}),
+    tip:function(i){var h='<b>'+ys[i]+'</b>';S.forEach(function(z){h+='<br>'+sw(z[2])+SN[z[0]]+': '+f0(sec(z[0],ys[i])[0])+' ('+f0(sec(z[0],ys[i])[0]/sec(z[0],2009)[0]*100)+')'});return h}});
+  var c=sec('G',2009)[0],mxv=0,mxa=2009;ys.forEach(function(a){if(sec('G',a)[0]>mxv){mxv=sec('G',a)[0];mxa=a}});
+  $('t-sl').textContent='Il commercio ha toccato il massimo nel '+mxa+' ('+f0(mxv)+' imprese attive) e da allora è sceso a '+f0(sec('G',2025)[0]);
+}
+
+/* ---------- 5. società o ditte: barre al 100% ---------- */
 function forme(){
-  var m=MY[2025],m9=MY[2009],t=function(r,k){return r.forme[k]};
-  setH('forme-testo','<p>Nel 2025 le nuove società di capitali iscritte sono state <b>'+f0(t(m,'SC').isc)+'</b> ('+pc(t(m,'SC').isc/m.isc*100,0)+' delle iscrizioni), le ditte individuali <b>'+f0(t(m,'DI').isc)+'</b> ('+pc(t(m,'DI').isc/m.isc*100,0)+'). Nel 2009 era il contrario: '+f0(t(m9,'DI').isc)+' ditte individuali ('+pc(t(m9,'DI').isc/m9.isc*100,0)+') contro '+f0(t(m9,'SC').isc)+' società di capitali ('+pc(t(m9,'SC').isc/m9.isc*100,0)+'). Le società di persone (S.n.c., S.a.s.) sono quasi sparite: '+f0(t(m,'SP').isc)+' iscrizioni nel 2025, '+f0(t(m9,'SP').isc)+' nel 2009. Tra le chiuse (senza d’ufficio) le ditte individuali pesano ancora molto: '+f0(t(m,'DI').ces)+' nel 2025, contro '+f0(t(m,'SC').ces)+' società di capitali. Tra le imprese attive le società di capitali sono ormai di più delle ditte individuali: '+f0(t(m,'SC').att)+' contro '+f0(t(m,'DI').att)+'.</p>');
-  var yrs=D.milano.map(function(r){return r.a}),ks=['SC','DI','SP','AF'];
-  legend('lg-forme',ks.map(function(k){return {c:CF_[k],t:NF_[k],line:1}}));
-  reg(function(){chart('ch-forme',{x:yrs,h:260,series:ks.map(function(k){return {n:NF_[k],c:CF_[k],type:'line',d:D.milano.map(function(r){return r.forme[k].isc})}})})});
-  var ks2=['SC','DI','SP'];
-  legend('lg-quote',ks2.map(function(k){return {c:CF_[k],t:NF_[k],line:1}}));
-  reg(function(){chart('ch-quote',{x:yrs,h:240,yf:function(v){return v+'%'},tf:function(v){return pc(v)},series:ks2.map(function(k){return {n:NF_[k],c:CF_[k],type:'line',d:D.milano.map(function(r){return r.forme[k].att/r.att*100})}})})});
+  var box=$('ch-forme'),W=width('ch-forme'),yrs=[2009,2013,2017,2021,2025],lw=38,rh=56,bh=28,top=4,bw=W-lw;
+  var H=top+yrs.length*rh,s=svgOpen(W,H);
+  yrs.forEach(function(a,i){
+    var r=MY[a],f=r.forme,v=[f.SC.isc,f.DI.isc,f.SP.isc+f.AF.isc],tot=r.isc,y=top+i*rh,x=lw;
+    var cols=[C.up,C.dn,C.dot],txc=['w','k','k'];
+    s+=T(0,y+bh/2+5,a,{c:'b'});
+    v.forEach(function(z,k){var w=z/tot*bw,p=z/tot*100;
+      s+='<rect x="'+r1(x)+'" y="'+y+'" width="'+r1(Math.max(w-1.5,0))+'" height="'+bh+'" fill="'+cols[k]+'"'+tip('<b>'+a+'</b><br>'+sw(cols[k])+['Società di capitali','Ditte individuali','Altre forme'][k]+': '+f0(z)+' iscritte ('+f1(p)+'%)'+(k===2?'<br>società di persone: '+f0(f.SP.isc)+', altre: '+f0(f.AF.isc):''))+'/>';
+      if(k<2)s+=T(x+w/2-0.75,y+bh/2+5,f0(p)+'%',{a:'middle',c:txc[k]});
+      else s+=T(W,y+bh+14,'altre forme '+f0(p)+'%',{a:'end',c:'m'});
+      x+=w});
+  });
+  box.innerHTML=s+'</svg>';
+  var a=MY[2009],b=MY[2025];
+  $('t-forme').textContent='Le società di capitali sono passate dal '+f0(a.forme.SC.isc/a.isc*100)+'% al '+f0(b.forme.SC.isc/b.isc*100)+'% delle nuove imprese; le ditte individuali dal '+f0(a.forme.DI.isc/a.isc*100)+'% al '+f0(b.forme.DI.isc/b.isc*100)+'%';
 }
 
-/* ---------- categorie ---------- */
+/* ---------- punti collegati ---------- */
+function dumbbell(id,rows,o){
+  var box=$(id),W=width(id),lw=o.lw||90,rw=o.rw||40,rh=o.rh||38,top=22,H=top+rows.length*rh+8,pw=W-lw-rw;
+  var X=function(v){return lw+(v-o.lo)/(o.hi-o.lo)*pw},s=svgOpen(W,H);
+  o.ticks.forEach(function(v){s+=L(X(v),top-6,X(v),H-6,C.grid)+T(X(v),top-10,o.tf(v),{a:'middle',c:'m'})});
+  rows.forEach(function(r,k){
+    var y=top+k*rh+rh/2,col=r.col||C.ink2,xa=X(r.a),xb=X(r.b),xl=Math.min(xa,xb),xh=Math.max(xa,xb),vl=Math.min(r.a,r.b),vh=Math.max(r.a,r.b);
+    if(r.sep)s+=L(0,y-rh/2,W,y-rh/2,C.axis);
+    s+=textLines(0,y,wrap(r.n,lw-6,!!r.b2,12),{c:r.b2?'b':''});
+    s+=L(xa,y,xb,y,r.line||C.light,r.w||2.5);
+    s+='<circle cx="'+r1(xa)+'" cy="'+y+'" r="5" fill="#fff" stroke="'+C.axis+'" stroke-width="2"/>';
+    s+='<circle cx="'+r1(xb)+'" cy="'+y+'" r="'+(r.big?7:6)+'" fill="'+col+'" stroke="#fff" stroke-width="2"/>';
+    s+=T(xl-9,y+4,o.lf(vl),{a:'end',c:'v'})+T(xh+11,y+4,o.lf(vh),{a:'start',c:r.b2?'k':'v'});
+    s+='<rect x="0" y="'+(y-rh/2)+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip(r.tip)+'/>';
+  });
+  box.innerHTML=s+'</svg>';
+}
 function categorie(){
-  var C=D.categorie,S=D.stock_categorie,j=C.totale.a.indexOf(2025),js=S.a.indexOf(2025);
-  var tI=C.totale.isc[j],tA=S.att_tot[js],rows=[];
-  [['Femminili','femminili'],['Giovanili','giovanili'],['Straniere','straniere']].forEach(function(p){var k=p[1],i=C[k].isc[j],c=C[k].ces[j],a=S[k][js];
-    rows.push([p[0],f0(i),pc(i/tI*100),f0(c),f0(a),pc(a/tA*100),nf(i/a*100,1)])});
-  var ar=C.artigiane;rows.push(['Artigiane (altra categoria del Registro)',f0(ar.isc[j]),pc(ar.isc[j]/tI*100),f0(ar.ces[j]),'—','—','—']);
-  rows.push(['<b>Tutte le imprese</b>','<b>'+f0(tI)+'</b>','100%','<b>'+f0(C.totale.ces[j])+'</b>','<b>'+f0(tA)+'</b>','100%','<b>'+nf(tI/tA*100,1)+'</b>']);
-  table('tab-cat',['Categoria','Iscritte','% delle iscritte','Cessate senza d’ufficio','Attive','% delle attive','Nuove ogni 100 attive'],rows);
-  var s=function(k,a){return C[k].isc[C.totale.a.indexOf(a)]/C.totale.isc[C.totale.a.indexOf(a)]*100};
-  var g=function(k){return (S[k][js]/S[k][0]-1)*100};
-  var ng=function(k){return C[k].isc[j]/S[k][js]*100};
-  setH('cat-testo','<p>Le imprese <b>straniere</b> (categoria ufficiale del Registro) sono '+f0(C.straniere.isc[j])+' tra le iscritte del 2025, il '+pc(s('straniere',2025))+' del totale (nel 2018 il '+pc(s('straniere',2018))+'), mentre tra le imprese attive pesano il '+pc(S.straniere[js]/tA*100)+'. Le <b>femminili</b> sono il '+pc(s('femminili',2025))+' delle iscritte e il '+pc(S.femminili[js]/tA*100)+' delle attive: due quote vicine. Le <b>giovanili</b> sono il '+pc(s('giovanili',2025))+' delle iscritte ma solo il '+pc(S.giovanili[js]/tA*100)+' delle attive ('+nf(ng('giovanili'),0)+' nuove ogni 100 attive, contro '+nf(ng('femminili'),0)+' delle femminili e '+nf(ng('straniere'),0)+' delle straniere): probabilmente perché un’impresa esce dalla categoria quando i soci superano i 35 anni, quindi tra le giovanili ci sono soprattutto imprese appena nate. Tra 2018 e 2025 le imprese attive straniere sono cambiate del '+sgp(g('straniere'),0)+', le femminili del '+sgp(g('femminili'),0)+', le giovanili del '+sgp(g('giovanili'),0)+'.</p>');
-  var yrs=C.totale.a,ks=[['femminili',VIO,'Femminili'],['giovanili',BLU,'Giovanili'],['straniere',WARM,'Straniere']];
-  legend('lg-cat',ks.map(function(k){return {c:k[1],t:k[2],line:1}}));
-  reg(function(){chart('ch-cat',{x:yrs,h:240,yf:function(v){return v+'%'},tf:function(v){return pc(v)},zero:true,series:ks.map(function(k){return {n:k[2],c:k[1],type:'line',d:yrs.map(function(a){return s(k[0],a)})}})})});
-  legend('lg-cat2',ks.map(function(k){return {c:k[1],t:k[2],line:1}}));
-  reg(function(){chart('ch-cat2',{x:S.a,h:240,zero:false,tf:function(v){return nf(v,1)},yf:function(v){return f0(v)},series:ks.map(function(k){return {n:k[2],c:k[1],type:'line',d:S[k[0]].map(function(v){return v/S[k[0]][0]*100})}})})});
+  var cq=catQuote(),rows=cq.map(function(c){return{n:c.n,a:c.a,b:c.b,b2:1,tip:'<b>'+c.n+'</b> (2025)<br>Tra le attive: '+f1(c.a)+'% ('+f0(c.att)+')<br>Tra le nuove iscritte: '+f1(c.b)+'% ('+f0(c.isc)+')<br>Nuove ogni 100 attive: '+f1(c.nuove100)}}).sort(function(x,y){return y.b-x.b});
+  dumbbell('ch-cat',rows,{lo:0,hi:30,ticks:[0,10,20,30],tf:function(v){return v+'%'},lf:function(v){return f0(v)+'%'},lw:84,rw:44,rh:44});
+  var st=cq[0],gi=cq[2];
+  $('t-cat').textContent='Tra le nuove imprese pesano molto più gli stranieri ('+f0(st.b)+'%) e i giovani ('+f0(gi.b)+'%) che tra quelle attive ('+f0(st.a)+'% e '+f0(gi.a)+'%)';
+}
+function catVar(){
+  var cq=catQuote(),S=D.stock_categorie,js=S.a.indexOf(2025),tot=(S.att_tot[js]/S.att_tot[0]-1)*100;
+  var rows=cq.map(function(c){return{n:c.n,v:c.var18,tip:'<b>'+c.n+'</b><br>2018: '+f0(S[c.k][0])+' imprese attive<br>2025: '+f0(c.att)+'<br>'+sp(c.var18,1)}});
+  rows.push({n:'Tutte le imprese',v:tot,col:C.gy,b:1,tip:'<b>Tutte le imprese</b><br>2018: '+f0(S.att_tot[0])+' attive<br>2025: '+f0(S.att_tot[js])+'<br>'+sp(tot,1)});
+  rows.sort(function(a,b){return b.v-a.v});rows.forEach(function(r){r.txt=sp(r.v,0)});
+  hdiv('ch-catv',rows,{style:'bar',lw:112,rh:34});
+  var st=rows.filter(function(r){return r.n==='Straniere'})[0],gi=rows.filter(function(r){return r.n==='Giovanili'})[0];
+  $('t-catv').textContent='Dal 2018 le imprese attive straniere sono cresciute del '+f0(st.v)+'%, '+(gi.v<0?'le giovanili sono calate del '+f0(Math.abs(gi.v))+'%':'le giovanili del '+f0(gi.v)+'%');
 }
 
-/* ---------- confronto ---------- */
-var PA=2025,PM='cr';
-function confronto(){
-  var sel=el('sel-pa'),o=[];for(var a=2025;a>=2008;a--)o.push('<option value="'+a+'">'+a+'</option>');sel.innerHTML=o.join('');sel.addEventListener('change',function(){PA=+sel.value;provAnno()});
-  var r25=provRank(2025,'MI'),r23=provRank(2023,'MI'),r19=provRank(2019,'MI');
-  var ys=D.province.serie.MI.a,rk=ys.map(function(a){return provRank(a,'MI').r}),first=ys.filter(function(a,i){return rk[i]===1}),top3=rk.filter(function(r){return r<=3}).length;
-  var tn=serie('TO','nat',2025),tm=serie('TO','mor',2025),bn=serie('BO','nat',2025),bm=serie('BO','mor',2025);
-  setH('conf-testo','<p>Per confrontare territori diversi si usano i tassi: iscritte e cessate (senza d’ufficio) divise per le imprese registrate a inizio anno. Nel 2025 Milano è <b>'+r25.r+'ª su '+r25.n+' province</b> per crescita ('+sgp(MY[2025].cr,2)+'); è stata prima '+(first.length?'nel '+first.join(', '):'mai')+', e tra le prime tre in '+top3+' anni su '+ys.length+' (2008–2025). Il suo vantaggio sta soprattutto nelle <b>nascite</b>: natalità '+pc(MY[2025].nat)+' nel 2025 contro '+pc(serie('IT','nat',2025))+' dell’Italia. La mortalità è invece vicina alla media ('+pc(MY[2025].mor)+' contro '+pc(serie('IT','mor',2025))+'): Milano non è un posto dove le imprese durano più che altrove, è un posto dove ne nascono di più. A Torino e a Bologna le nascite sono più basse ('+pc(tn)+' e '+pc(bn)+') e le chiusure più alte ('+pc(tm)+' e '+pc(bm)+'): per questo crescono molto meno.</p>');
-  document.querySelectorAll('[data-m]').forEach(function(b){b.addEventListener('click',function(){PM=b.getAttribute('data-m');document.querySelectorAll('[data-m]').forEach(function(x){x.classList.toggle('on',x===b)});drawProv()})});
-  FN.push(drawProv);
-  provAnno();drawProv();
+/* ---------- 6. le province: una riga di pallini ---------- */
+function strip(){
+  var box=$('ch-strip'),W=width('ch-strip'),P=D.province.anni['2025'],it=ser('IT','cr',2025);
+  var vals=P.map(function(r){return{s:r[0],n:r[1],v:r[6],reg:r[7]}}).sort(function(a,b){return a.v-b.v}),N=vals.length;
+  var lo=Math.floor(vals[0].v),hi=Math.ceil(last(vals).v),m={l:12,r:14},pw=W-m.l-m.r,X=function(v){return m.l+(v-lo)/(hi-lo)*pw},d=7.4,rr=3.5,top=70;
+  var lastx=[],maxk=0;
+  vals.forEach(function(p){var x=X(p.v),need=p.s==='MI'?12:d,k=0;while(lastx[k]!==undefined&&x-lastx[k]<need)k++;lastx[k]=x+(p.s==='MI'?5:0);p.x=x;p.k=k;if(k>maxk)maxk=k});
+  var yb=top+(maxk+1)*d+8,H=yb+30,s=svgOpen(W,H);
+  for(var v=lo;v<=hi;v++)s+=L(X(v),yb,X(v),yb+5,C.axis)+T(X(v),yb+19,(v>0?'+':v<0?'−':'')+Math.abs(v)+'%',{a:v===lo?'start':v===hi?'end':'middle',c:'m'});
+  s+=L(m.l,yb,W-m.r,yb,C.axis);
+  var xi=X(it);s+=L(xi,26,xi,yb,C.ink,1.5,' stroke-dasharray="4 3"')+T(xi,16,'Italia '+sp(it,2),{a:'middle',c:'b'});
+  var mi=vals.filter(function(p){return p.s==='MI'})[0],best=last(vals),worst=vals[0];
+  function yd(p){return yb-(p.k+0.5)*d-1}
+  vals.forEach(function(p){if(p.s==='MI')return;s+='<circle cx="'+r1(p.x)+'" cy="'+r1(yd(p))+'" r="'+rr+'" fill="'+C.dot+'" stroke="#fff" stroke-width="1"'+tip('<b>'+esc(p.n)+'</b><br>Crescita 2025: '+sp(p.v,2))+'/>'});
+  function lead(p,row,anc,col){var yt=row+4,yc=yd(p)-(p.s==='MI'?7:rr)-1;s+=L(p.x,yt,p.x,yc,col||C.axis,1)+T(p.x+(anc==='end'?4:anc==='start'?-4:0),row,p.n+' '+sp(p.v,2),{a:anc,c:'b',st:col?'fill:'+col:''})}
+  if(best.s!=='MI')lead(best,40,'end');
+  if(worst.s!=='MI')lead(worst,40,'start');
+  s+='<circle cx="'+r1(mi.x)+'" cy="'+r1(yd(mi))+'" r="6.5" fill="'+C.mi+'" stroke="#fff" stroke-width="2"'+tip('<b>Milano</b><br>Crescita 2025: '+sp(mi.v,2))+'/>';
+  lead(mi,64,'end',C.mi);
+  box.innerHTML=s+'</svg>';
+  var rk=provRank(2025,'MI'),mt='Milano è '+rk.r+(rk.r===1?'ª':'ª')+' su '+N+' province per crescita delle imprese';
+  $('t-strip').textContent=rk.r===1?'Milano è la prima su '+N+' province per crescita delle imprese':mt+(rk.r===2?': davanti c’è solo '+best.n:'');
 }
-function provAnno(){
-  var x=D.province.anni[String(PA)].slice().sort(function(p,q){return q[6]-p[6]}),mi=null;x.forEach(function(r,i){if(r[0]==='MI')mi=i});
-  var top=x.slice(0,10).map(function(r){return {nm:r[1],v:r[6],txt:sgp(r[6],2),col:r[0]==='MI'?INK:ACC}});
-  if(mi>=10)top.push({nm:'… Milano ('+(mi+1)+'ª)',v:x[mi][6],txt:sgp(x[mi][6],2),col:INK});
-  var bot=x.slice(-5).reverse().map(function(r){return {nm:r[1],v:r[6],txt:sgp(r[6],2),col:r[6]<0?WARM:ACC}});
-  var mxv=Math.max.apply(null,x.map(function(r){return Math.abs(r[6])}));
-  barsPlain('b-top',top,mxv);barsPlain('b-bot',bot,mxv);
-  setH('prov-tab-tit','Alcune province nel '+PA);
-  var ord=D.province.ordine_confronto,rows=[];
-  ord.forEach(function(s){var S=D.province.serie[s],i=S.a.indexOf(PA);if(i<0)return;var r=x.filter(function(q){return q[0]===s})[0];
-    rows.push([(s==='MI'?'<b>Milano</b>':esc(S.n)),r?f0(r[2]):'—',r?f0(r[3]):'—',pc(S.nat[i],2),pc(S.mor[i],2),sgp(S.cr[i],2)])});
-  table('tab-prov',['','Iscritte','Cessate senza d’ufficio','Natalità','Mortalità','Crescita'],rows);
-  table('tab-all',['Provincia','Registrate','Iscritte','Cessate','Natalità','Mortalità','Crescita'],x.map(function(r){return [(r[0]==='MI'?'<b>Milano</b>':esc(r[1])),f0(r[7]),f0(r[2]),f0(r[3]),pc(r[4],2),pc(r[5],2),sgp(r[6],2)]}));
-}
-function drawProv(){
-  var ks=[['MI',ACC,'Milano',3],['RM',BLU,'Roma',2],['TO',WARM,'Torino',2],['NA',VIO,'Napoli',2],['BO','#6a8a3a','Bologna',2],['IT',GRY,'Italia',2]];
-  legend('lg-prov',ks.map(function(k){return {c:k[1],t:k[2],line:1,dash:k[0]==='IT'}}));
-  var yrs=D.province.serie.MI.a;
-  chart('ch-prov',{x:yrs,h:280,zero:PM!=='mor'&&PM!=='nat'?true:false,yf:function(v){return nf(v,1)+'%'},tf:function(v){return nf(v,2)+'%'},series:ks.map(function(k){return {n:k[2],c:k[1],type:'line',w:k[3],dash:k[0]==='IT',d:D.province.serie[k[0]][PM]}})});
-}
-
-/* ---------- comune ---------- */
-function comune(){
-  var C=D.comune,ys=Object.keys(C.totale).map(Number).sort(),y0=ys[0],y1=ys[ys.length-1];
-  var sh=function(a){return C.totale[a]/C.attive_provincia[a]*100};
-  var rest=function(a){return C.attive_provincia[a]-C.totale[a]};
-  setH('com-testo','<p>Movimprese pubblica iscrizioni e cessazioni <b>solo per provincia</b>: per il comune di Milano non abbiamo trovato un dato aperto equivalente. Quello che il Comune pubblica è il numero di <b>imprese attive</b> per settore. Nel 2025 sono '+f0(C.totale['2025'])+' le imprese attive nel comune, il '+pc(sh(2025))+' di quelle della provincia ('+f0(C.attive_provincia['2025'])+'); nel '+y0+' erano il '+pc(sh(y0))+' ('+f0(C.totale[y0])+' su '+f0(C.attive_provincia[y0])+'). Dal '+y0+' al 2025 le imprese attive nel comune sono cresciute del '+pc((C.totale['2025']/C.totale[y0]-1)*100,0)+'; quelle del resto della provincia sono rimaste intorno a '+f0(rest(2025))+' ('+f0(rest(y0))+' nel '+y0+'). Sono due fonti diverse: dice l’ordine di grandezza, non il decimale.</p>');
-  legend('lg-com',[{c:ACC,t:'Comune di Milano',line:1},{c:GRY,t:'Provincia di Milano',line:1,dash:1}]);
-  reg(function(){chart('ch-com',{x:ys,h:240,zero:true,series:[{n:'Comune',c:ACC,type:'line',d:ys.map(function(a){return C.totale[a]})},{n:'Provincia',c:GRY,type:'line',dash:1,d:ys.map(function(a){return C.attive_provincia[a]})}]})});
-  var rows=[];Object.keys(C.settori).forEach(function(n){var s=C.settori[n];if(s['2010']>=1000&&s['2024']!=null){var v=(s['2024']/s['2010']-1)*100;rows.push({nm:n,v:v,txt:sgp(v,0)+' <span class="sub">('+sg(s['2024']-s['2010'])+')</span>',col:v<0?WARM:ACC})}});
-  rows.sort(function(p,q){return q.v-p.v});barsPlain('b-com',rows,Math.max.apply(null,rows.map(function(r){return Math.abs(r.v)})));
-  var F=C.forme_asia,i0=0,i1=F.a.length-1;
-  setH('com-asia','<p class="sub">Per forma giuridica il Comune pubblica anche le imprese attive secondo l’Archivio statistico ASIA (Istat), ma solo fino al '+F.a[i1]+' (ds1481): le società di capitali passano da '+f0(F.sc[i0])+' nel '+F.a[i0]+' a '+f0(F.sc[i1])+' nel '+F.a[i1]+' ('+sgp((F.sc[i1]/F.sc[i0]-1)*100,0)+'), le società di persone da '+f0(F.sp[i0])+' a '+f0(F.sp[i1])+' ('+sgp((F.sp[i1]/F.sp[i0]-1)*100,0)+'), le imprese individuali da '+f0(F.ind[i0])+' a '+f0(F.ind[i1])+' ('+sgp((F.ind[i1]/F.ind[i0]-1)*100,0)+'). Lo stesso spostamento verso le società che si vede nelle iscrizioni.</p>');
+function natmor(){
+  var K=['MI','RM','TO','NA','BO','FI','MB','GE','BG','BS'];
+  var rows=K.map(function(k){var S=D.province.serie[k];return{k:k,n:S.n,a:ser(k,'mor',2025),b:ser(k,'nat',2025),cr:ser(k,'cr',2025)}}).sort(function(x,y){return y.cr-x.cr});
+  rows=rows.map(function(r){var mi=r.k==='MI';return{n:r.n,a:r.a,b:r.b,col:mi?C.mi:C.ink2,line:mi?C.mi:C.light,w:mi?3:2.5,big:mi,b2:mi,tip:'<b>'+r.n+'</b> (2025)<br>Chiudono: '+f1(r.a)+' ogni 100<br>Nascono: '+f1(r.b)+' ogni 100<br>Crescita: '+sp(r.cr,2)}});
+  var itn=ser('IT','nat',2025),itm=ser('IT','mor',2025);
+  rows.push({n:'Italia',a:itm,b:itn,col:C.ink,sep:1,b2:1,tip:'<b>Italia</b> (2025)<br>Chiudono: '+f1(itm)+' ogni 100<br>Nascono: '+f1(itn)+' ogni 100<br>Crescita: '+sp(ser('IT','cr',2025),2)});
+  dumbbell('ch-nm',rows,{lo:2,hi:8,ticks:[2,4,6,8],tf:function(v){return v+'%'},lf:function(v){return f1(v)},lw:100,rw:44,rh:36});
+  $('t-nm').textContent='Il vantaggio di Milano sta nelle nascite: '+f1(ser('MI','nat',2025))+' ogni 100 imprese contro '+f1(itn)+' in Italia; le chiusure sono simili ('+f1(ser('MI','mor',2025))+' e '+f1(itm)+')';
 }
 
-/* ---------- limiti e metodo ---------- */
+/* ---------- 7. il comune ---------- */
+function comuneLinee(){
+  var Cc=D.comune,ys=[];for(var a=2010;a<=2025;a++)ys.push(a);
+  var com=ys.map(function(a){return Cc.totale[a]}),res=ys.map(function(a){return Cc.attive_provincia[a]-Cc.totale[a]});
+  var ic=com.map(function(v){return v/com[0]*100}),ir=res.map(function(v){return v/res[0]*100});
+  lineChart('ch-com',{years:ys,lo:95,hi:122,ticks:[100,110,120],base:100,fmt:function(v){return v},H:260,ml:34,mr:46,xt:[2010,2015,2020,2025],
+    series:[{col:C.ink2,w:2.5,vals:ir,end:f0(last(ir))},{col:C.mi,w:3.5,vals:ic,end:f0(last(ic))}],
+    tip:function(i){return '<b>'+ys[i]+'</b><br>'+sw(C.mi)+'Comune di Milano: '+f0(com[i])+' ('+f0(ic[i])+')<br>'+sw(C.ink2)+'Resto della provincia: '+f0(res[i])+' ('+f0(ir[i])+')'}});
+  var a25=Cc.totale['2025']/Cc.attive_provincia['2025']*100,a10=Cc.totale['2010']/Cc.attive_provincia['2010']*100;
+  $('t-com').textContent='Le imprese attive nel comune di Milano sono cresciute del '+f0(last(ic)-100)+'% dal 2010, nel resto della provincia sono ferme: oggi il comune ne ha il '+f0(a25)+'% (nel 2010: '+f0(a10)+'%)';
+}
+function comuneSettori(){
+  var Cc=D.comune,NM={'Attività professionali e tecniche':'Professionisti e tecnici','Noleggio, viaggi, servizi alle imprese':'Servizi alle imprese','Attività immobiliari':'Immobiliare','Arte, sport, intrattenimento':'Arte e sport','Trasporto e magazzinaggio':'Trasporti e magazzini'};
+  var rows=[];Object.keys(Cc.settori).forEach(function(n){if(n==='Non classificate')return;var s=Cc.settori[n];if(s['2010']>=1000&&s['2024']!=null){var v=(s['2024']/s['2010']-1)*100;rows.push({n:NM[n]||n,v:v,txt:sp(v,0),tip:'<b>'+esc(NM[n]||n)+'</b><br>2010: '+f0(s['2010'])+' imprese attive<br>2024: '+f0(s['2024'])+'<br>'+sgf(s['2024']-s['2010'])+' ('+sp(v,1)+')'})}});
+  rows.sort(function(a,b){return b.v-a.v});
+  hdiv('ch-comv',rows,{style:'bar',lw:128,rh:34});
+  var neg=rows.filter(function(r){return r.v<=-5}).map(function(r){return r.n.toLowerCase()});
+  $('t-comv').textContent='Nel comune di Milano il settore «'+rows[0].n+'» cresce del '+f0(rows[0].v)+'%'+(neg.length?'; calano '+neg.slice(0,-1).join(', ')+(neg.length>1?' e ':'')+last(neg):'');
+}
+
+/* ---------- in fondo ---------- */
 function limiti(){
-  var m=MY[2025];
-  var L=[
-   '<b>Iscritta non vuol dire aperta, cessata non vuol dire chiusa.</b> Il Registro registra atti: un’impresa può iscriversi senza mai operare e può restare iscritta anni dopo aver smesso. Per questo ci sono le «attive» ('+f0(m.att)+' nel 2025) accanto alle «registrate» ('+f0(m.reg)+'): le attive sono quelle che risultano operative, ma il glossario avverte che una parte delle «inattive» in realtà lavora.',
-   '<b>Le cancellazioni d’ufficio cambiano i numeri.</b> Il Registro toglie d’ufficio le imprese ferme da anni: sono '+f0(m.cdu)+' nel 2025 e '+f0(MY[2017].cdu)+' nel 2017. Qui le cessate dei grafici sono sempre senza d’ufficio (come fa la Camera di commercio), ma le imprese «registrate» e «attive» sì scendono quando il Registro fa pulizia: un calo dello stock non è per forza un calo di attività.',
-   '<b>Le nuove iscritte senza settore.</b> Il codice di attività non arriva con l’iscrizione: nel 2025 il '+pc(D.settori.dati.NC['2025'][1]/m.isc*100,0)+' delle iscritte è «non classificato». I settori delle iscritte e i saldi per settore dell’anno sono quindi parziali; per i settori vale di più lo stock di imprese attive. Nel 2025 le attive «non classificate» sono aumentate molto ('+f0(D.settori.dati.NC['2025'][0])+') anche per il passaggio alla classificazione ATECO 2025.',
-   '<b>Il perimetro di Milano.</b> La provincia è senza Monza e Brianza dal 2007 (prima, le due erano insieme): per questo la serie principale parte dal 2007 e il grafico dal 2000 somma le due province. Il Rapporto della Camera di commercio parla anche di «Milano Monza Brianza Lodi» insieme: qui non lo facciamo.',
-   '<b>Settori e classificazione.</b> I settori sono quelli ATECO 2007 per tutti gli anni dal 2009; i dati del 2000–2008 usano una classificazione più vecchia e non sono confrontabili. Dal 2025 l’Italia usa ATECO 2025: il Comune lo applica ai dati 2025 (non confrontabili con gli anni prima), Movimprese e la Camera hanno ancora ATECO 2007 per il 2025.',
-   '<b>Donne, giovani, stranieri sono categorie del Registro.</b> Vale la regola del più del 50% di proprietà e controllo (nazionalità estera, meno di 35 anni, donne): non descrive le persone in generale, e un’impresa può entrare o uscire dalla categoria per un cambio di soci senza nascere o chiudere. I dati vengono dalle tabelle dei Rapporti della Camera di commercio (2019–2026), non da un file aperto: sono copiati da un programma e controllati sui totali di Movimprese (tornano per tutti gli anni 2018–2025), ma non sono disponibili prima del 2018 né per forme o settori.',
-   '<b>I tassi non sono tassi di sopravvivenza.</b> «Mortalità» qui è: imprese cessate nell’anno divise per tutte le imprese registrate a inizio anno, comprese quelle vecchie. Non dice quante delle nuove imprese sopravvivono a uno, tre o cinque anni (questo dato non è in queste tabelle).',
-   '<b>Imprese non sono posti di lavoro.</b> Una ditta individuale può essere una persona sola, un professionista o un’azienda con dipendenti; un’iscrizione non dice quanti lavoratori. Gli addetti qui non sono usati, se non per le tre categorie nel file «categorie_milano.csv».',
-   '<b>Solo la provincia.</b> Non abbiamo trovato iscrizioni e cessazioni per il solo comune di Milano né per quartiere. Per il comune c’è solo lo stock di imprese attive per settore (con le avvertenze qui sopra).'
-  ];
-  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var m=MY[2025],L=[];
+  L.push('<b>Iscritta non vuol dire aperta, cessata non vuol dire chiusa.</b> Il Registro registra atti: un’impresa può iscriversi senza mai operare e può restare iscritta anni dopo aver smesso. Per questo ci sono le «attive» ('+f0(m.att)+' nel 2025) accanto alle «registrate» ('+f0(m.reg)+'): le attive sono quelle che risultano operative, ma una parte delle «inattive» in realtà lavora.');
+  L.push('<b>Le cancellazioni d’ufficio cambiano i numeri.</b> Il Registro toglie d’ufficio le imprese ferme da anni: sono '+f0(m.cdu)+' nel 2025 e '+f0(MY[2017].cdu)+' nel 2017. Le cessate dei grafici sono sempre senza d’ufficio (come fa la Camera di commercio), ma le imprese «registrate» e «attive» scendono quando il Registro fa pulizia: un calo del numero di imprese non è per forza un calo di attività.');
+  L.push('<b>Le nuove iscritte senza settore.</b> Il codice di attività non arriva con l’iscrizione: nel 2025 il '+f0(sec('NC',2025)[1]/m.isc*100)+'% delle iscritte è «non classificato». Per questo i settori sono letti sulle imprese attive e non sulle iscritte, e i saldi per settore di un solo anno sarebbero troppo negativi. Nel 2025 le attive «non classificate» sono salite a '+f0(sec('NC',2025)[0])+' anche per il passaggio alla nuova classificazione ATECO 2025.');
+  L.push('<b>Il perimetro di Milano.</b> La provincia è senza Monza e Brianza dal 2007 (prima le due erano insieme): per questo la serie principale parte dal 2007 e il grafico dal 2000 somma le due province. Il Rapporto della Camera di commercio parla anche di «Milano Monza Brianza Lodi» insieme: qui non lo facciamo.');
+  L.push('<b>Settori e classificazione.</b> I settori sono quelli ATECO 2007 per tutti gli anni dal 2009; i dati del 2000-2008 usano una classificazione più vecchia e non sono confrontabili. Dal 2025 l’Italia usa ATECO 2025: il Comune la applica ai dati 2025 (non confrontabili con gli anni prima), Movimprese e la Camera hanno ancora ATECO 2007 per il 2025.');
+  L.push('<b>Donne, giovani, stranieri sono categorie del Registro.</b> Vale la regola del più del 50% di proprietà e controllo: non descrive le persone in generale, e un’impresa può entrare o uscire dalla categoria per un cambio di soci senza nascere o chiudere. I dati vengono dalle tabelle dei Rapporti della Camera di commercio (2019-2026), non da un archivio aperto: sono controllati sui totali di Movimprese (tornano per tutti gli anni 2018-2025), ma non ci sono prima del 2018 né per forme giuridiche o settori.');
+  L.push('<b>I tassi non sono tassi di sopravvivenza.</b> «Mortalità» qui è: imprese cessate nell’anno divise per tutte le imprese registrate a inizio anno, comprese le vecchie. Non dice quante delle nuove imprese sopravvivono a uno, tre o cinque anni: questo dato non è in queste tabelle.');
+  L.push('<b>Imprese non sono posti di lavoro.</b> Una ditta individuale può essere una persona sola, un professionista o un’azienda con dipendenti; un’iscrizione non dice quanti lavoratori. Gli addetti qui non sono usati.');
+  L.push('<b>Solo la provincia.</b> Non abbiamo trovato iscrizioni e cessazioni per il solo comune di Milano né per quartiere. Per il comune c’è solo il numero di imprese attive per settore, da una fonte diversa da Movimprese.');
+  L.push('<b>Correlazione non è causa.</b> Dove due serie stanno sullo stesso grafico (per esempio comune e resto della provincia) si vede solo che vanno insieme o no, non il perché.');
+  L.push('<b>Il Covid è altrove.</b> Il calo del 2020 si vede nei grafici ma non è spiegato qui: vedi <a href="../anno-covid/">L’anno del Covid</a>.');
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 function metodo(){
-  var L=[
-   '<b>Dati di partenza.</b> I file annuali «Totale imprese» di Movimprese, dal 2000 al 2025 (26 archivi, uno per anno), con iscrizioni, cessazioni, registrate e attive per provincia, divisione ATECO e forma giuridica. Le cancellazioni d’ufficio sono nel file «CDU» dello stesso archivio. I file del 1997–1999 sono programmi eseguibili e non sono stati aperti.',
-   '<b>Cessazioni senza d’ufficio.</b> Cessazioni meno cancellazioni d’ufficio (il glossario Movimprese dice che dal 2006 le statistiche usano questo concetto). Per le «non classificate» il file CDU non ha la riga: la ricaviamo come differenza tra il totale e la somma dei settori. Dal 2021 Movimprese pubblica anche la colonna già calcolata: coincide con la nostra in tutte le righe (controlli.json).',
-   '<b>Tassi.</b> Natalità = iscritte / registrate a fine anno precedente; mortalità = cessate senza d’ufficio / registrate a fine anno precedente; crescita = la differenza (calcolata sui valori non arrotondati). L’Italia è la somma delle regioni.',
-   '<b>Controlli con una seconda fonte.</b> Iscritte e cessate di Milano 2018–2025 coincidono al numero con quelle del Rapporto Milano Produttiva della Camera di commercio (8 anni su 8); anche le imprese attive 2025 (314.726), il tasso di crescita di Milano (+2,37%), Monza Brianza (+1,06%), Lodi (+0,38%), Lombardia (+1,41%) e Italia (+0,96%), e i totali nazionali del 2025 (323.533 iscritte, 266.934 cessate, 5.849.524 registrate) tornano con la tabella 1 del Rapporto 2026. La somma dei settori è uguale al totale.',
-   '<b>Categorie.</b> Le tabelle «Imprese iscritte e cessate per settore e tipologia» e «Imprese giovanili, femminili e straniere» dei capitoli sulle imprese dei Rapporti 2019–2026 (anni 2018–2025). Le tabelle sono lette da un programma dal testo dei PDF; la somma di società di capitali, società di persone, ditte individuali e altre forme coincide col totale in tutti gli anni.',
-   '<b>Comune.</b> I due dataset del Comune sono usati così come sono (CC BY); per i settori si confronta solo 2010–2024.',
-   '<b>Non incluso.</b> Le unità locali per comune dell’Istat (archivio ASIA, licenza CC BY 4.0) sono state cercate, ma il servizio dati dell’Istat non ha risposto ai nostri tentativi (il 2 novembre 2026): per questo la pagina non ha un confronto con le sedi operative per comune. I dati sulle sedi (unità locali) sono diversi dalle imprese: un’impresa può averne molte.',
-   '<b>Modulo CSV di Movimprese.</b> Il sito offre anche un modulo «Scarica CSV» protetto da reCAPTCHA: non è stato usato. I file sono quelli dell’archivio documenti, pubblici.',
-   '<b>Pagina costruita da un programma</b> che legge le tabelle pulite e scrive i file di <code>data/</code> e questa pagina; ogni numero ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a> (campo <code>origine</code>). Si può rilanciare.'
-  ];
-  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var L=[];
+  L.push('<b>Dati di partenza.</b> Gli archivi annuali «Totale imprese» di Movimprese, dal 2000 al 2025 (uno per anno), con iscrizioni, cessazioni, registrate e attive per provincia, settore e forma giuridica. Le cancellazioni d’ufficio sono nel file dedicato dello stesso archivio. Gli archivi del 1997-1999 non si possono aprire e non sono stati usati.');
+  L.push('<b>Cessazioni senza d’ufficio.</b> Cessazioni meno cancellazioni d’ufficio (il glossario Movimprese dice che dal 2006 le statistiche usano questo concetto). Per le «non classificate» la riga delle d’ufficio manca: la ricaviamo come differenza tra il totale e la somma dei settori. Dal 2021 Movimprese pubblica anche la colonna già calcolata: coincide con la nostra in tutte le righe.');
+  L.push('<b>Tassi.</b> Natalità = iscritte / registrate a fine anno precedente; mortalità = cessate senza d’ufficio / registrate a fine anno precedente; crescita = la differenza. L’Italia è la somma delle regioni.');
+  L.push('<b>Controlli con una seconda fonte.</b> Iscritte e cessate di Milano 2018-2025 coincidono al numero con quelle del Rapporto Milano Produttiva della Camera di commercio (8 anni su 8); anche le imprese attive 2025 (314.726), il tasso di crescita di Milano (+2,37%), Monza Brianza (+1,06%), Lodi (+0,38%), Lombardia (+1,41%) e Italia (+0,96%), e i totali nazionali del 2025 (323.533 iscritte, 266.934 cessate, 5.849.524 registrate) tornano con la tabella 1 del Rapporto 2026. La somma dei settori è uguale al totale.');
+  L.push('<b>Settori.</b> Sezioni ATECO 2007, con nomi accorciati. Le variazioni sono sulle imprese attive a fine anno, dal 2009 (primo anno con la classificazione attuale). «Tutti gli altri» nei quadretti = tutto ciò che non è nei sette settori nominati, comprese le non classificate.');
+  L.push('<b>Categorie.</b> Le tabelle «Imprese iscritte e cessate per settore e tipologia» e «Imprese giovanili, femminili e straniere» dei capitoli sulle imprese dei Rapporti 2019-2026 (anni 2018-2025), lette dal testo dei PDF. La somma di società di capitali, società di persone, ditte individuali e altre forme coincide col totale in tutti gli anni.');
+  L.push('<b>Comune.</b> I due archivi del Comune sono usati così come sono (CC BY); per i settori si confronta solo 2010-2024. «Resto della provincia» = imprese attive della provincia (Movimprese) meno quelle del comune.');
+  L.push('<b>Pallini delle province.</b> I pallini sono messi uno accanto all’altro in base al valore: l’altezza della pila non misura niente.');
+  L.push('<b>Non incluso.</b> Le sedi operative per comune dell’Istat (archivio ASIA, CC BY 4.0) sono state cercate, ma il servizio dati dell’Istat non ha risposto ai nostri tentativi (il 2 novembre 2026): per questo non c’è un confronto con le sedi per comune. Le sedi sono diverse dalle imprese: un’impresa può averne molte. Il modulo «Scarica CSV» di Movimprese è protetto da un controllo anti-robot e non è stato usato: i file sono quelli dell’archivio documenti, pubblici.');
+  L.push('<b>Ogni numero di questa pagina</b> si ricalcola dai dati scaricabili in «File»; per ognuno è indicata l’origine.');
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
+
 })();
 </script>
 </body></html>
