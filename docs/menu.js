@@ -139,16 +139,33 @@
 
   var css =
     '#mid-menu{font:15px/1.4 system-ui,"Segoe UI",Arial,sans-serif;color:#000;background:#fff;' +
-    'border-bottom:1px solid #000;margin:0;padding:0;box-sizing:border-box;text-align:left}' +
+    'border-bottom:1px solid #000;margin:0;padding:0;box-sizing:border-box;text-align:left;' +
+    'position:sticky;top:0;z-index:1500;box-shadow:0 2px 6px rgba(0,0,0,.12)}' +
     '#mid-menu *{box-sizing:border-box}' +
-    '#mid-menu .mid-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;' +
-    'gap:4px 16px;max-width:1100px;margin:0 auto;padding:6px 16px}' +
+    '#mid-menu .mid-bar{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;' +
+    'gap:4px 12px;max-width:1100px;margin:0 auto;padding:6px 16px}' +
+    '#mid-menu .mid-b{flex:none;display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:14px;line-height:1.2;' +
+    'color:#000;background:#fff;border:1.5px solid #000;border-radius:18px;padding:5px 11px;margin:0;min-height:34px;' +
+    'white-space:nowrap;cursor:pointer;text-decoration:none}' +
+    '#mid-menu .mid-b:hover{background:#eee;text-decoration:none}' +
+    '#mid-menu .mid-home{background:#000;color:#fff;font-weight:700}' +
+    '#mid-menu .mid-home:hover{background:#333}' +
+    '#mid-menu .mid-lnk[aria-current]{background:#ffe1d6;border-color:#ff5a36}' +
+    '#mid-menu .mid-toggle{margin-left:auto}' +
+    '#mid-menu .mid-toggle[aria-expanded=true]{background:#000;color:#fff}' +
+    '@media (max-width:400px){#mid-menu .mid-bar{padding:6px 10px;gap:5px}#mid-menu .mid-b{font-size:13px;padding:5px 9px}#mid-menu .mid-tx{display:none}#mid-menu .mid-toggle{padding:5px 9px}}' +
+    '@media (max-width:360px){#mid-menu .mid-home span{display:none}#mid-menu .mid-b{font-size:12.5px;padding:5px 7px}}' +
+    '#mid-menu .mid-panel{max-height:calc(100vh - 120px);overflow-y:auto}' +
+    '#mid-menu .mid-cap{display:flex;gap:6px;overflow-x:auto;max-width:1100px;margin:0 auto;padding:6px 16px 8px;' +
+    'border-top:1px solid #ddd;scrollbar-width:none;-webkit-overflow-scrolling:touch}' +
+    '#mid-menu .mid-cap::-webkit-scrollbar{display:none}' +
+    '#mid-menu .mid-cap a{flex:none;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' +
+    'font-size:13px;line-height:1.3;border:1px solid #000;border-radius:14px;padding:4px 10px;color:#000;text-decoration:none}' +
+    '#mid-menu .mid-cap a:hover{text-decoration:none;background:#eee}' +
+    '#mid-menu .mid-cap a.on{background:#000;color:#fff}' +
+    '#mid-menu .mid-prog{height:3px;width:0;background:#ff5a36}' +
     '#mid-menu a{color:#000;text-decoration:none}' +
     '#mid-menu a:hover{text-decoration:underline}' +
-    '#mid-menu .mid-home{font-weight:700;padding:4px 0}' +
-    '#mid-menu .mid-toggle{font:inherit;color:#000;background:#fff;border:1px solid #000;border-radius:0;' +
-    'padding:4px 12px;margin:0;cursor:pointer;min-height:32px}' +
-    '#mid-menu .mid-toggle:hover{background:#eee}' +
     '#mid-menu a:focus-visible,#mid-menu button:focus-visible{outline:2px solid #000;outline-offset:2px}' +
     '#mid-menu .mid-panel{max-width:1100px;margin:0 auto;padding:0 16px 8px}' +
     '#mid-menu .mid-panel[hidden]{display:none}' +
@@ -156,7 +173,6 @@
     '#mid-menu li{margin:0;padding:0;break-inside:avoid}' +
     '#mid-menu li a{display:block;padding:7px 0;border-top:1px solid #ddd}' +
     '#mid-menu li a[aria-current]{font-weight:700;text-decoration:underline;text-underline-offset:3px}' +
-    '#mid-menu .mid-home[aria-current]{text-decoration:underline;text-underline-offset:3px}' +
     '#mid-menu .mid-q{display:block;width:100%;font:inherit;color:#000;background:#fff;border:1px solid #000;border-radius:0;padding:6px 10px;margin:0 0 8px;min-height:36px}' +
     '#mid-menu .mid-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;padding:0}' +
     '#mid-menu .mid-chip{font:inherit;font-size:14px;color:#000;background:#fff;border:2px solid var(--c);border-radius:0;padding:3px 10px;margin:0;cursor:pointer;min-height:32px}' +
@@ -180,20 +196,32 @@
   var bar = document.createElement('div');
   bar.className = 'mid-bar';
 
+  // Barra: Home, i due strumenti sui quartieri, Cerca (apre l'elenco di tutte le pagine con la ricerca)
+  var ICO_HOME = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 1.5 1 7.5h2v7h4v-4.5h2v4.5h4v-7h2z" fill="currentColor"/></svg>';
+  var ICO_CERCA = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="m10.4 10.4 4.1 4.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
   var home = document.createElement('a');
-  home.className = 'mid-home';
+  home.className = 'mid-b mid-home';
   home.href = rootUrl.href;
-  home.textContent = 'Milano in dati';
+  home.innerHTML = ICO_HOME + '<span>Home</span>';
+  home.title = 'Milano in dati: la pagina iniziale';
   if (isHome) home.setAttribute('aria-current', 'page');
+  bar.appendChild(home);
+  [['quartiere/', 'Il tuo quartiere'], ['quartiere-ideale/', 'Quartiere ideale']].forEach(function (x) {
+    var a = document.createElement('a');
+    a.className = 'mid-b mid-lnk';
+    a.href = new URL(x[0], rootUrl).href;
+    a.textContent = x[1];
+    if (current === x[0]) a.setAttribute('aria-current', 'page');
+    bar.appendChild(a);
+  });
 
   var btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = 'mid-toggle';
+  btn.className = 'mid-b mid-toggle';
   btn.setAttribute('aria-expanded', 'false');
   btn.setAttribute('aria-controls', 'mid-panel');
-  btn.textContent = 'Sezioni ▾';
-
-  bar.appendChild(home);
+  btn.setAttribute('aria-label', 'Cerca una pagina');
+  btn.innerHTML = ICO_CERCA + '<span class="mid-tx">Cerca</span>';
   bar.appendChild(btn);
 
   var panel = document.createElement('div');
@@ -213,7 +241,7 @@
   });
   var lis = ul.children;
   var q = document.createElement('input');
-  q.type = 'search'; q.className = 'mid-q'; q.placeholder = 'Cerca una sezione'; q.setAttribute('aria-label', 'Cerca una sezione');
+  q.type = 'search'; q.className = 'mid-q'; q.placeholder = 'Cerca una pagina (es. scuole, metro, affitti)'; q.setAttribute('aria-label', 'Cerca una pagina');
   var chipBox = document.createElement('div');
   chipBox.className = 'mid-chips'; chipBox.setAttribute('role', 'group'); chipBox.setAttribute('aria-label', 'Filtra per tema'); chipBox.hidden = true;
   var vuoto = document.createElement('p');
@@ -233,11 +261,11 @@
     return temiP;
   }
   function norm(x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
-  var temaDi = {}, filtroTema = '';
+  var temaDi = {}, descDi = {}, filtroTema = '';
   function filtra() {
     var w = norm(q.value).split(/\s+/).filter(Boolean), n = 0;
     for (var m = 0; m < SEZIONI.length; m++) {
-      var l = norm(SEZIONI[m].label);
+      var l = norm(SEZIONI[m].label + ' ' + (descDi[SEZIONI[m].path] || ''));
       var ok = (!filtroTema || temaDi[SEZIONI[m].path] === filtroTema) && w.every(function (x) { return l.indexOf(x) !== -1; });
       lis[m].hidden = !ok; if (ok) n++;
     }
@@ -251,7 +279,7 @@
       try {
         if (!T || !T.temi || !T.pagine || chipBox.children.length) return;
         var cont = {};
-        T.pagine.forEach(function (p) { temaDi[p.path] = p.tema; cont[p.tema] = (cont[p.tema] || 0) + 1; });
+        T.pagine.forEach(function (p) { temaDi[p.path] = p.tema; descDi[p.path] = p.descrizione || ''; cont[p.tema] = (cont[p.tema] || 0) + 1; });
         T.temi.forEach(function (t) {
           if (!cont[t.id]) return;
           var b = document.createElement('button');
@@ -274,8 +302,11 @@
   function setOpen(open) {
     panel.hidden = !open;
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btn.textContent = open ? 'Sezioni ▴' : 'Sezioni ▾';
-    if (open) costruisciTemi();
+    if (open) {
+      costruisciTemi();
+      // la casella di ricerca pronta per scrivere (sul telefono apre la tastiera: è quello che si vuole toccando "Cerca")
+      try { q.focus({ preventScroll: true }); } catch (e4) { q.focus(); }
+    }
   }
   btn.addEventListener('click', function () { setOpen(panel.hidden); });
   nav.addEventListener('keydown', function (e) {
@@ -283,6 +314,108 @@
   });
 
   document.body.insertBefore(nav, document.body.firstChild);
+
+  // ---- Barra fissa: i capitoli della pagina (dove ce ne sono almeno 4), la linea di lettura,
+  // e gli elementi della pagina che restano fermi in alto spostati sotto la barra.
+  try {
+    var prog = document.createElement('div');
+    prog.className = 'mid-prog';
+    var cap = null, capH = [];
+    var FUORI = /limiti|come (è|e'|&egrave;) fatto|metodo|^file|scaricabil|download|^fonti|pagine collegate|pagine vicine/i;
+    function costruisciCapitoli() {
+      if (cap || isHome || !current || current === 'elenco/' || current.indexOf('storia-') === 0) return;
+      var hs = Array.prototype.filter.call(document.querySelectorAll('h2'), function (h) {
+        var t = (h.textContent || '').trim();
+        return t && !h.closest('#mid-menu') && !h.closest('#mid-vicine') && !h.closest('details') &&
+          h.offsetParent !== null && !FUORI.test(t) && !FUORI.test(h.id || '');
+      });
+      if (hs.length < 4) return;
+      cap = document.createElement('div');
+      cap.className = 'mid-cap';
+      cap.setAttribute('aria-label', 'Capitoli della pagina');
+      hs.forEach(function (h, i) {
+        if (!h.id) h.id = 'cap-' + (i + 1);
+        var a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent.trim().replace(/^\d+\.\s*/, '');
+        a.title = a.textContent;
+        cap.appendChild(a);
+      });
+      capH = hs;
+      nav.insertBefore(cap, prog);
+      aggiorna();
+    }
+    nav.appendChild(prog);
+
+    var onK = -1;
+    function aggiorna() {
+      var navH = nav.offsetHeight;
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      prog.style.width = (max > 0 ? Math.min(100, 100 * window.scrollY / max) : 0) + '%';
+      if (!cap) return;
+      var k = -1;
+      for (var i = 0; i < capH.length; i++) { if (capH[i].getBoundingClientRect().top <= navH + 24) k = i; }
+      if (k === onK) return;
+      onK = k;
+      for (var m = 0; m < cap.children.length; m++) cap.children[m].classList.toggle('on', m === k);
+      if (k >= 0) {
+        var c = cap.children[k];
+        cap.scrollLeft = c.offsetLeft - cap.clientWidth / 2 + c.offsetWidth / 2;
+      }
+    }
+    var tick = false;
+    window.addEventListener('scroll', function () {
+      if (tick) return; tick = true;
+      window.requestAnimationFrame(function () { tick = false; aggiorna(); });
+    }, { passive: true });
+
+    // gli elementi "sticky" della pagina con top vicino a 0 finirebbero sotto la barra: li sposto sotto
+    var altezzaPrima = -1;
+    function spostaSticky() {
+      // se il body ha un margine interno, la barra lo copre lo stesso: altrimenti il testo che scorre si vede ai lati
+      var bs = window.getComputedStyle(document.body);
+      nav.style.marginLeft = (-parseFloat(bs.paddingLeft) || 0) + 'px';
+      nav.style.marginRight = (-parseFloat(bs.paddingRight) || 0) + 'px';
+      nav.style.marginTop = (-parseFloat(bs.paddingTop) || 0) + 'px';
+      var navH = nav.offsetHeight;
+      document.documentElement.style.scrollPaddingTop = (navH + 8) + 'px';
+      if (navH === altezzaPrima) return;
+      altezzaPrima = navH;
+      var tutti = document.body.querySelectorAll('*');
+      for (var i = 0; i < tutti.length; i++) {
+        var e = tutti[i];
+        if (e === nav || nav.contains(e)) continue;
+        var cs = window.getComputedStyle(e);
+        if (cs.position !== 'sticky') continue;
+        if (e.getAttribute('data-mid-top') === null) {
+          if (cs.top === 'auto') continue;
+          var t0 = parseFloat(cs.top);
+          if (!(t0 < 80)) continue;
+          // se un antenato scorre per conto suo (tabelle con barra di scorrimento), lo sticky vale li' dentro: non si tocca
+          var p = e.parentElement, propria = false;
+          while (p && p !== document.body) {
+            var o = window.getComputedStyle(p);
+            if (/(auto|scroll|hidden)/.test(o.overflowY + o.overflowX)) { propria = true; break; }
+            p = p.parentElement;
+          }
+          if (propria) continue;
+          e.setAttribute('data-mid-top', String(t0));
+          if (parseInt(cs.zIndex, 10) >= 1500) e.style.zIndex = '1400';
+        }
+        e.style.top = (parseFloat(e.getAttribute('data-mid-top')) + navH) + 'px';
+      }
+    }
+    function tutto() { costruisciCapitoli(); spostaSticky(); aggiorna(); }
+    tutto();
+    window.addEventListener('load', tutto);
+    setTimeout(tutto, 2500);
+    // sul telefono la barra degli indirizzi che compare e sparisce fa "resize" di continuo: si ricalcola solo se cambia la larghezza
+    var rt, larg = window.innerWidth;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () { if (window.innerWidth !== larg && panel.hidden) { larg = window.innerWidth; tutto(); } }, 200);
+    });
+  } catch (e0) { /* barra fissa senza capitoli, pagina intatta */ }
 
   // ---- "Pagine vicine": in fondo a ogni pagina (non sulla home né sulle bozze), 3-5 link a pagine dello stesso tema.
   // L'elenco dei temi sta in docs/temi.json (letto una volta); se manca o qualcosa va storto, la pagina resta com'è.
