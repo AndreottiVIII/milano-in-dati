@@ -409,7 +409,15 @@
         e.style.top = (parseFloat(e.getAttribute('data-mid-top')) + navH) + 'px';
       }
     }
-    function tutto() { costruisciCapitoli(); spostaSticky(); aggiorna(); }
+    // alcuni titoli si completano dopo (es. "Il 2026"): i nomi dei capitoli si rileggono
+    function rinomina() {
+      if (!cap) return;
+      for (var i = 0; i < capH.length; i++) {
+        var t = capH[i].textContent.trim().replace(/^\d+\.\s*/, '');
+        if (t && cap.children[i].textContent !== t) { cap.children[i].textContent = t; cap.children[i].title = t; }
+      }
+    }
+    function tutto() { costruisciCapitoli(); rinomina(); spostaSticky(); aggiorna(); }
     tutto();
     window.addEventListener('load', tutto);
     setTimeout(tutto, 2500);

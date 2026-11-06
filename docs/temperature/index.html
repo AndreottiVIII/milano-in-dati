@@ -92,16 +92,6 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <div class="hl" id="hl"></div>
 <p class="src">Tutti i numeri: stazione di Milano Brera. Serie storica di Maugeri e altri, Università di Milano (da NOAA ed ECA&amp;D, uso non commerciale con citazione) fino al 1994; ARPA Lombardia (CC0) dal 1995. Dati fino al <span class="ult"></span>.</p>
 
-<!-- ============ un giorno ============ -->
-<h2 id="giorno">Un giorno a scelta</h2>
-<p class="sub" style="font-size:.9rem;color:var(--mut);margin:.3em 0 0">Scegli una data: le temperature di quel giorno e come stanno rispetto agli altri anni.</p>
-<div class="pick">
-  <button type="button" id="u-prec" aria-label="Giorno prima">‹</button>
-  <input type="date" id="u-data" aria-label="Data">
-  <button type="button" id="u-succ" aria-label="Giorno dopo">›</button>
-</div>
-<div id="u-scheda" aria-live="polite"></div>
-
 <!-- ============ 1 ============ -->
 <h2 id="riscaldamento">Quanto si è scaldata Milano</h2>
 <div class="fig">
@@ -174,6 +164,16 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
   <table class="kt" id="tab-record"></table>
   <p class="src">Fonte: serie di Brera. A pari merito il record va al primo anno.</p>
 </div>
+
+<!-- ============ un giorno ============ -->
+<h2 id="giorno">Un giorno a scelta</h2>
+<p class="sub" style="font-size:.9rem;color:var(--mut);margin:.3em 0 0">Scegli una data: le temperature di quel giorno e come stanno rispetto agli altri anni.</p>
+<div class="pick">
+  <button type="button" id="u-prec" aria-label="Giorno prima">‹</button>
+  <input type="date" id="u-data" aria-label="Data">
+  <button type="button" id="u-succ" aria-label="Giorno dopo">›</button>
+</div>
+<div id="u-scheda" aria-live="polite"></div>
 
 <!-- ============ in fondo ============ -->
 <div class="fondo">
@@ -348,6 +348,8 @@ function unGiorno(){
   inp.min=primo;inp.max=ultimo;
   var h=(location.hash||'').match(/(\d{4}-\d{2}-\d{2})/);
   inp.value=h&&h[1]>=primo&&h[1]<=ultimo?h[1]:ultimo;
+  // con una data nell'indirizzo si va dritti alla scheda del giorno (che ora sta dopo i grafici per anno)
+  if(h&&h[1]>=primo&&h[1]<=ultimo)setTimeout(function(){var g=$('giorno');if(g)g.scrollIntoView()},600);
   function trova(iso,dec){var f=dec[iso.slice(0,3)+'0'];if(!f)return null;
     var i=Math.round((Date.UTC(+iso.slice(0,4),+iso.slice(5,7)-1,+iso.slice(8,10))-Date.UTC(+f.da.slice(0,4),+f.da.slice(5,7)-1,+f.da.slice(8,10)))/864e5);
     if(i<0||i>=f.r.length||!f.r[i])return null;return{r:f.r[i],q:(f.qflag&&f.qflag[i])||'',fonte:f.fonti[f.r[i][3]]}}
