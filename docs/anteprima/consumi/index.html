@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="it"><head><base href="../../consumi/"><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Quanta corrente, quanta acqua</title>
+<style>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --or:#F58220;--ord:#c4600f;--bl:#0072BC;--gr:#00A651;--pu:#7B3FA0;--te:#00A19A;--ye:#FFD500;--ma:#E6007E;--br:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri grandi */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a:last-child:nth-child(odd){grid-column:1/-1}
+@media(min-width:640px){.hl>a:last-child:nth-child(odd){grid-column:auto}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .hz{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dash{height:0;width:18px;border-radius:0;border-top:2px dashed var(--ink2);background:none!important}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+/* da toccare */
+.pick,.sl{background:var(--soft);padding:10px 12px 12px;margin:.7em 0;border-left:6px solid var(--mi)}
+.sl{border-left-color:var(--ink)}
+.pick label,.sl label{display:block;font-weight:700;font-size:.95rem;margin-bottom:6px}
+.pick input[type=date]{font:inherit;font-size:16px;min-height:44px;padding:6px 10px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink);max-width:100%}
+.sl input[type=range]{display:block;width:100%;height:44px;margin:0;accent-color:var(--ink)}
+.pkout{margin-top:8px;font-size:.95rem;line-height:1.4;color:var(--ink2)}
+.pkout .big{font-size:1.9rem;font-weight:800;line-height:1.1;color:var(--ink)}
+.pkout .big small{font-size:1rem;font-weight:700}
+.pkout ul{margin:.3em 0 0;padding-left:1.1em}
+.pkout li{margin:.15em 0}
+.lg .grad{display:inline-block;width:120px;height:12px;margin:0 6px;border-radius:2px;background:linear-gradient(90deg,#fde7e9,#f06a73,#E30613,#7a0008)}
+</style><script src="../menu.js" defer></script></head><body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../consumi/" style="color:#000">Pagina attuale</a></div><main>
+
+<h1>Quanta corrente, quanta acqua</h1>
+<p class="lead">Quanta elettricità, gas e acqua consuma Milano, giorno per giorno e anno per anno, e che cosa c’entrano il caldo e il freddo.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Corrente e gas giorno per giorno: Comune di Milano su dati A2A, solo 2019 e 2020 (CC BY). Lampade: Comune di Milano (CC BY). Anni, città e acqua: ISTAT (CC BY 4.0). Settori: Terna (licenza non indicata: solo somme annue). Temperature: ARPA Lombardia (CC0).</p>
+
+<!-- ============ 1 ============ -->
+<h2 id="corrente">La corrente, giorno per giorno</h2>
+<div class="fig">
+  <h3 id="t-cal"></h3>
+  <p class="sub">Elettricità erogata a Milano in ogni giorno del 2019 e del 2020, in GWh. Ogni quadretto è un giorno, ogni riga una settimana (da lunedì a domenica): più è scuro, più si consuma. Tocca un giorno, o scrivi la data che ti interessa.</p>
+  <div class="pick">
+    <label for="pk-d">Scegli un giorno del 2019 o del 2020</label>
+    <input type="date" id="pk-d" min="2019-01-01" max="2020-12-31" value="2019-06-27">
+    <div class="pkout" id="pk-out" aria-live="polite"></div>
+  </div>
+  <div class="lg" id="lg-cal"></div>
+  <div class="ch" id="ch-cal" role="img" aria-label="Calendario a colori: corrente consumata a Milano ogni giorno del 2019 e del 2020"></div>
+  <ol class="notes" id="nt-cal"></ol>
+  <p class="src">Fonte: Comune di Milano, elettricità erogata da A2A, totale giornaliero (CC BY). Temperatura: ARPA Lombardia, stazione di Brera (CC0). Il Comune pubblica il dato giornaliero solo per questi due anni.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="caldo">Il caldo</h2>
+<div class="fig">
+  <h3 id="t-scat"></h3>
+  <p class="sub">Ogni punto è un giorno feriale, nel 2019 o nel 2020: a destra i giorni più caldi (massima a Brera), in alto quelli in cui si consuma di più. Sposta il cursore per leggere la curva.</p>
+  <div class="lg" id="lg-scat"></div>
+  <div class="ch" id="ch-scat" role="img" aria-label="Grafico a punti: temperatura massima e corrente consumata nei giorni feriali del 2019 e del 2020"></div>
+  <div class="sl">
+    <label for="sl-t">Che temperatura massima c’è? <b id="sl-v"></b></label>
+    <input type="range" id="sl-t" min="0" max="38" step="0.5" value="33">
+    <div class="pkout" id="sl-out" aria-live="polite"></div>
+  </div>
+  <p class="note" id="nt-scat"></p>
+  <p class="src">Fonte: Comune di Milano su dati A2A (CC BY); temperature ARPA Lombardia (CC0). La linea è l’andamento stimato di un feriale del 2019. Un legame misurato non è una spiegazione: i dati non dicono dove si usi la corrente in più.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="stagioni">Estate e inverno</h2>
+<div class="fig">
+  <h3 id="t-clock"></h3>
+  <p class="sub">Un anno, il 2019, come un orologio: gennaio in alto, poi i mesi in senso orario. Ogni barra è il consumo medio di un giorno di quel mese, rispetto alla media dell’anno (cerchio tratteggiato = 100).</p>
+  <div class="lg" id="lg-clock"></div>
+  <div class="ch" id="ch-clock" role="img" aria-label="Orologio dell’anno 2019: gas e corrente consumati ogni mese rispetto alla media"></div>
+  <p class="note" id="nt-clock"></p>
+  <p class="src">Fonte: Comune di Milano, elettricità e gas erogati da A2A, totali giornalieri (CC BY); temperature ARPA Lombardia (CC0). Solo il 2019, perché il 2020 è stato un anno fuori dal normale. Smc = metro cubo standard di gas. Legame misurato, non spiegazione: i dati non dicono per che cosa si usi il gas.</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="citta">Milano e le altre grandi città</h2>
+<div class="fig">
+  <h3 id="t-citta"></h3>
+  <p class="sub">Elettricità per abitante nel 2024, nei 14 capoluoghi di città metropolitana. Ogni quadretto = 500 kWh. A destra: quanto è cambiata dal 2015.</p>
+  <div class="ch" id="ch-citta" role="img" aria-label="Quadretti: elettricità per abitante nel 2024 in 14 città"></div>
+  <p class="src">Fonte: ISTAT (CC BY 4.0). «Per abitante» divide per i residenti, ma a Milano la usa anche chi ci lavora o studia senza abitarci. La variazione dipende anche dai residenti che ISTAT conta in ciascun anno.</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="anni">Anno per anno</h2>
+<div class="fig">
+  <h3 id="t-idx"></h3>
+  <p class="sub">Elettricità e gas consumati a Milano, dal 2015 al 2024. 2015 = 100.</p>
+  <div class="ch" id="ch-idx" role="img" aria-label="Linee: elettricità e gas a Milano, indice 2015 = 100"></div>
+  <p class="note">Il calo del 2020 è l’anno del Covid: vedi <a href="../anno-covid/">L’anno del Covid</a>. Il gas dipende molto da quanto è freddo l’inverno e qui non abbiamo corretto per il clima.</p>
+  <p class="src">Fonte: ISTAT (CC BY 4.0). Gas prelevato dalle reti di distribuzione (esclusi industria e centrali). La serie parte dal 2015 (vedi i limiti dei dati).</p>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 id="luce">Le lampade della città</h2>
+<div class="fig">
+  <h3 id="t-led"></h3>
+  <p class="sub">Le lampade dell’illuminazione pubblica di Milano, dal 2002 al 2020. Ogni pallino = 1.000 lampade: gialle quelle tradizionali, bianche quelle a LED. Sposta il cursore sugli anni.</p>
+  <div class="sl">
+    <label for="sl-led">Anno: <b id="led-yv"></b></label>
+    <input type="range" id="sl-led" min="2002" max="2020" step="1" value="2014">
+  </div>
+  <div class="ch" id="ch-led" role="img" aria-label="Pallini: lampade pubbliche tradizionali e a LED a Milano, anno scelto con il cursore"></div>
+  <p class="note" id="nt-led"></p>
+  <p class="src">Fonte: Comune di Milano, «Transizione illuminazione: da tradizionale a LED», 2002-2020 (CC BY). Il dato conta le lampade, non l’energia: non diciamo quanta se ne sia risparmiata.</p>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="settori">Chi consuma: industria, servizi, case</h2>
+<div class="fig">
+  <h3 id="t-terna"></h3>
+  <p class="sub">Elettricità di Milano e Monza e Brianza insieme, dal 2000, in GWh all’anno. Terna le conta insieme, non il solo comune.</p>
+  <div class="ch" id="ch-terna" role="img" aria-label="Linee: elettricità totale, industria, servizi e case a Milano e Monza, 2000-2024"></div>
+  <p class="note" id="nt-terna"></p>
+  <p class="src">Fonte: Terna, Download center, «Energia elettrica per settore». Licenza non indicata: mostriamo solo somme annue, con citazione. Dal 2010 Terna separa Monza da Milano: sommiamo sempre le due.</p>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2 id="acqua">L’acqua</h2>
+<div class="fig">
+  <h3 id="t-drops"></h3>
+  <p class="sub">Acqua per abitante al giorno a Milano nel 2024. Ogni goccia = 10 litri.</p>
+  <div class="ch" id="ch-drops" role="img" aria-label="Gocce: acqua messa in rete a Milano per abitante al giorno, divisa tra case, altri usi e perdite, e confronto con le altre città"></div>
+  <p class="src">Fonte: ISTAT, Censimento delle acque per uso civile, dati 2024 provvisori (CC BY 4.0). I litri per abitante comprendono uffici, negozi, servizi e chi viene da fuori: non sono quanto usa un residente.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-glass"></h3>
+  <p class="sub">Ogni bicchiere è una città: la parte colorata è l’acqua che arriva a chi la usa, quella arancione l’acqua che si perde lungo la strada. Dalla città con meno perdite a quella con più, 2024.</p>
+  <div class="lg" id="lg-glass"></div>
+  <div class="ch" id="ch-glass" role="img" aria-label="Bicchieri: perdite della rete idrica nel 2024 in 14 città"></div>
+  <p class="src">Fonte: ISTAT (CC BY 4.0), dati 2024 provvisori. Le perdite sono la differenza tra acqua messa in rete e acqua consegnata. Tocca un bicchiere per leggere i litri.</p>
+</div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>kWh e GWh</dt><dd>Il kilowattora (kWh) è l’unità della bolletta. Un gigawattora (GWh) è un milione di kWh.</dd>
+<dt>Smc</dt><dd>Metro cubo «standard» di gas, l’unità con cui si misura il gas erogato.</dd>
+<dt>A2A</dt><dd>L’azienda che porta corrente e gas a Milano.</dd>
+<dt>Terna</dt><dd>Il gestore della rete elettrica nazionale.</dd>
+<dt>Giorno feriale</dt><dd>Da lunedì a venerdì, senza le feste.</dd>
+<dt>Valore tipico</dt><dd>La mediana: metà dei giorni sta sopra, metà sotto.</dd>
+<dt>Massima e media</dt><dd>La temperatura più alta del giorno, o la media del giorno. Sono calcolate dalle letture orarie della stazione di Brera.</dd>
+<dt>Soglia</dt><dd>La temperatura da cui, nel calcolo, la corrente (o il gas) comincia a salire. La cercano i dati, non un calendario.</dd>
+<dt>Acqua messa in rete, consegnata, fatturata</dt><dd>Messa in rete: tutta l’acqua che entra nei tubi. Consegnata: quella che arriva a chi la usa. Fatturata alle case: quella pagata per uso domestico.</dd>
+<dt>Per abitante</dt><dd>Diviso per i residenti.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori calcolati dai dati pubblici, non i file originali di ISTAT né di Terna.</p>
+<ul>
+<li><a href="data/consumi_giornalieri.csv">Un giorno per riga</a>: corrente, gas e temperature del 2019 e del 2020, e se il giorno è stato usato nel confronto con il caldo (valori separati da virgola)</li>
+<li><a href="data/pagina.json">Tutti i numeri di questa pagina</a></li>
+</ul></div></details>
+</div>
+
+<footer>
+<p id="fonti"></p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>. Vedi anche <a href="../temperature/">Temperature</a>, <a href="../vibrazioni/">Il respiro di Milano</a> e <a href="../anno-covid/">L’anno del Covid</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),or:cv('--or'),ord:cv('--ord'),bl:cv('--bl'),gr:cv('--gr'),pu:cv('--pu'),te:cv('--te'),ye:cv('--ye'),ma:cv('--ma'),br:cv('--br'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#c9ced6'};
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+var MESI3=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+var GIORNI=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+var D,DAYS=[],RD=[];
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function f2(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*100)/100).toFixed(2).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function k10(x){return f0(Math.round(x*100)*10000)}   // milioni di Smc -> Smc, a 10.000
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function med(a){var b=a.slice().sort(function(x,y){return x-y}),n=b.length;return n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2}
+function Y(a,anno){return a.filter(function(x){return x.anno===anno})[0]}
+function dataIt(iso){var p=iso.slice(0,10).split('-');return (+p[2]===1?'1°':+p[2])+' '+MESI[+p[1]-1]+' '+p[0]}
+function giornoDi(iso){var p=iso.split('-');return GIORNI[new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()]}
+function joinE(a){return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' e '+last(a)}
+function nomeC(n){return n==='Reggio di Calabria'?'Reggio C.':n}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(4,h,w/2);if(h<0.5)return '';
+  var d='M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function lerpCol(stops,t){t=Math.max(0,Math.min(1,t));var p=t*(stops.length-1),i=Math.min(stops.length-2,Math.floor(p)),f=p-i;
+  function h(c){return[1,3,5].map(function(k){return parseInt(c.substr(k,2),16)})}
+  var a=h(stops[i]),b=h(stops[i+1]);return 'rgb('+a.map(function(v,k){return Math.round(v+(b[k]-v)*f)}).join(',')+')'}
+var RAMP=['#fde4cf','#fbc08f','#F58220','#c4600f','#7d3a05'];
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getT(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()})}
+
+var SEL='2019-06-27',SLT=33,LEDY=2014,IDX={},MT={};
+var TIPO={feriale:'giorno feriale',sabato:'sabato',domenica:'domenica',festivo:'giorno di festa'};
+var RAMPC=['#fde7e9','#f06a73',C.mi,'#7a0008'],GLO=12,GHI=31;
+function gcol(v){return lerpCol(RAMPC,(v-GLO)/(GHI-GLO))}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function nomeG(d){return GIORNI[(d.dow+1)%7]}
+function dInt(d){return cap(nomeG(d))+' '+d.d+' '+MESI[d.m]+' '+d.y}
+var ORD=['prima','seconda','terza','quarta','quinta','sesta','settima','ottava','nona','decima','undicesima','dodicesima','tredicesima','quattordicesima'];
+
+Promise.all([getJ(DATA+'pagina.json'),getT(DATA+'consumi_giornalieri.csv')]).then(function(r){
+  D=r[0];
+  var Ls=r[1].replace(/\r/g,'').split('\n').filter(Boolean),h=Ls[0].split(',');
+  DAYS=Ls.slice(1).map(function(l){var v=l.split(','),o={};h.forEach(function(k,i){o[k]=v[i]});
+    return{data:o.data,gwh:+o.gwh_a2a,tmax:+o.tmax_c,tmean:+o.tmedia_c,tipo:o.tipo_giorno,uso:o.usato_per_il_caldo==='1',mot:o.motivo_esclusione,gas:+o.gas_smc_a2a/1e6}});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+function prep(){
+  DAYS.forEach(function(d,i){var p=d.data.split('-'),y=+p[0],m=+p[1]-1,dd=+p[2],t=Date.UTC(y,m,dd),t0=Date.UTC(y,0,1);
+    d.i=i;d.y=y;d.m=m;d.d=dd;d.dow=(new Date(t).getUTCDay()+6)%7;d.doy=Math.round((t-t0)/864e5);d.dow0=(new Date(t0).getUTCDay()+6)%7;d.row=Math.floor((d.doy+d.dow0)/7);IDX[d.data]=i});
+  DAYS.forEach(function(a){var n=0;DAYS.forEach(function(b){if(b.gwh>a.gwh)n++});a.rank=n+1});
+  ['feriale','sabato','domenica','festivo'].forEach(function(t){MT[t]=med(DAYS.filter(function(d){return d.tipo===t}).map(function(d){return d.gwh}))});
+}
+function refreshSel(){calendario();scat();pickOut()}
+function tutto(){
+  prep();highlights();
+  draw(calendario);draw(pickOut);draw(scat);draw(slOut);draw(orologio);draw(cittaQuadretti);draw(anniLinee);draw(led);draw(terna);draw(gocce);draw(bicchieri);
+  limiti();metodo();fonti();
+  $('pk-d').addEventListener('input',function(){var v=this.value;if(IDX[v]!=null){SEL=v;refreshSel()}});
+  $('sl-t').addEventListener('input',function(){SLT=+this.value;scat();slOut()});
+  $('sl-led').addEventListener('input',function(){LEDY=+this.value;led()});
+  document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-d]');if(el){SEL=el.getAttribute('data-d');$('pk-d').value=SEL;refreshSel()}});
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var g=D.giornaliero,rec=g.massimo,t=D.caldo.tmax,A=D.annuale,S=A.serie,G=D.gas,Sx=D.settori.serie,s0=Sx[0],s18=Y(Sx,2018);
+  var jan=DAYS.filter(function(d){return d.y===2019&&d.m===0}),ago=DAYS.filter(function(d){return d.y===2019&&d.m===7});
+  var mean=function(a,k){return a.reduce(function(s,d){return s+d[k]},0)/a.length};
+  var ratio=mean(jan,'gas')/mean(ago,'gas');
+  var ord=A.citta.slice().sort(function(a,b){return b.kwh_ab_2024-a.kwh_ab_2024}),pos=ord.map(function(c){return c.nome}).indexOf('Milano');
+  var l20=Y(D.led,2020),l14=Y(D.led,2014),ac=D.acqua.citta,altre=ac.filter(function(c){return c.nome!=='Milano'}),M=D.acqua.milano[3],Mi=ac.filter(function(c){return c.nome==='Milano'})[0];
+  var minPerd=ac.every(function(c){return c.perdite_2024>=Mi.perdite_2024}),maxEr=ac.every(function(c){return c.erogata_2024<=Mi.erogata_2024});
+  var gasVar=(Y(S,2024).gas_mm3/Y(S,2015).gas_mm3-1)*100,elVar=(Y(S,2024).gwh/Y(S,2015).gwh-1)*100;
+  var servV=(s18.servizi/s0.servizi-1)*100,indV=(s18.industria/s0.industria-1)*100;
+  var d815=DAYS[IDX['2019-08-15']];
+  var T=[
+    {c:C.mi,h:'t-cal',n:f1(rec.gwh),u:'GWh',p:'il giorno di più corrente: '+dataIt(rec.data)+', con '+f1(rec.tmax)+' °C. Il 15 agosto 2019: '+f1(d815.gwh)+' GWh.'},
+    {c:C.ye,h:'t-scat',n:'+'+f2(t.per_grado_caldo),u:'GWh',p:'in più per ogni grado sopra '+f0(t.soglia_caldo)+' °C, in un giorno feriale (2019-2020).'},
+    {c:C.gr,h:'t-clock',n:'×'+f0(ratio),u:'',p:'il gas di un giorno di gennaio contro uno di agosto (2019). La corrente cambia molto meno.'},
+    {c:C.bl,h:'t-glass',n:f0(Mi.perdite_2024),u:'%',p:'dell’acqua si perde nei tubi a Milano nel 2024'+(minPerd?': il valore più basso delle 14 città':'')+'. Le altre, in mediana: '+f0(med(altre.map(function(c){return c.perdite_2024})))+'%.'},
+    {c:C.pu,h:'t-led',n:f0(l20.led/l20.totale*100),u:'%',p:'delle lampade pubbliche è a LED nel 2020. Nel 2014 era il '+f0(l14.led/l14.totale*100)+'%, nel 2013 nessuna.'},
+    {c:C.or,h:'t-citta',n:f0(Y(S,2024).kwh_ab),u:'kWh',p:'di corrente a testa nel 2024: Milano è la '+ORD[pos]+' tra 14 città. Dal 2015: '+sg0(A.citta.filter(function(c){return c.nome==='Milano'})[0].var)+'%.'},
+    {c:C.te,h:'t-drops',n:f0(M.erogata_pc),u:'litri',p:'di acqua consegnata a testa ogni giorno'+(maxEr?': la più alta delle 14 città':'')+'. Alle case ne arrivano '+f0(M.domestica_pc)+'.'},
+    {c:C.ma,h:'t-idx',n:sg0(gasVar),u:'%',p:'di gas consumato a Milano dal 2015 al 2024 (non corretto per il clima). La corrente: '+sg0(elVar)+'%.'},
+    {c:C.br,h:'t-terna',n:sg0(servV),u:'%',p:'di elettricità ai servizi dal 2000 al 2018 (Milano e Monza e Brianza). All’industria: '+sg0(indV)+'%.'}
+  ];
+  $('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. calendario ---------- */
+function calendario(){
+  var box=$('ch-cal'),W=width('ch-cal'),lab=30,gap=38,bw=Math.min(238,(W-2*lab-gap)/2),cw=bw/7,rh=W<500?12:14,top=40;
+  var x0=(W-(2*bw+gap))/2,xs=[x0,x0+bw+gap],H=top+53*rh+6,s=svgOpen(W,H),rec=D.giornaliero.massimo.data,lk=D.giornaliero.lockdown;
+  [2019,2020].forEach(function(y,k){
+    s+=T(xs[k]+bw/2,14,y,{a:'middle',c:'b',st:'font-size:16px'});
+    'LMMGVSD'.split('').forEach(function(c,j){s+=T(xs[k]+j*cw+cw/2,33,c,{a:'middle',c:'m'})});
+  });
+  DAYS.forEach(function(d){
+    var k=d.y-2019,x=xs[k]+d.dow*cw+1,y=top+d.row*rh+1,sel=d.data===SEL;
+    var h='<b>'+dInt(d)+'</b> ('+TIPO[d.tipo]+')<br>Corrente: '+f1(d.gwh)+' GWh<br>Massima: '+f1(d.tmax)+' °C';
+    s+='<rect x="'+r1(x)+'" y="'+r1(y)+'" width="'+r1(cw-2)+'" height="'+(rh-2)+'" rx="1.5" fill="'+gcol(d.gwh)+'" data-d="'+d.data+'"'+tip(h)+'/>';
+  });
+  // mesi
+  [0,1].forEach(function(k){
+    MESI3.forEach(function(mn,m){var d=DAYS.filter(function(x){return x.y===2019+k&&x.m===m&&x.d===1})[0],y=top+d.row*rh+rh/2+4;
+      s+=k===0?T(xs[0]-6,y,mn,{a:'end',c:'m'}):T(xs[1]+bw+6,y,mn,{c:'m'})});
+  });
+  // giorno scelto
+  var sd=DAYS[IDX[SEL]];
+  s+='<rect x="'+r1(xs[sd.y-2019]+sd.dow*cw-0.5)+'" y="'+r1(top+sd.row*rh-0.5)+'" width="'+r1(cw+1)+'" height="'+(rh+1)+'" fill="none" stroke="'+C.ink+'" stroke-width="2.5" pointer-events="none"/>';
+  // note numerate
+  function rowY(iso){var d=DAYS[IDX[iso]];return top+d.row*rh+rh/2}
+  function nota(n,iso){var d=DAYS[IDX[iso]],y=rowY(iso),cx=xs[0]+bw+18;
+    s+=L(xs[0]+d.dow*cw+cw,y,cx-9,y,C.ink,1)+'<circle cx="'+r1(cx)+'" cy="'+r1(y)+'" r="9" fill="'+C.ink+'"/>'+T(cx,y+4,n,{a:'middle',c:'w'})}
+  nota(1,rec);nota(2,'2019-08-15');
+  var y1=rowY(lk[0]),y2=rowY(lk[1]),cx3=xs[1]-19,ym=(y1+y2)/2;
+  s+=L(xs[1]-6,y1,xs[1]-6,y2,C.ink,2)+L(cx3+9,ym,xs[1]-6,ym,C.ink,1)+'<circle cx="'+r1(cx3)+'" cy="'+r1(ym)+'" r="9" fill="'+C.ink+'"/>'+T(cx3,ym+4,3,{a:'middle',c:'w'});
+  box.innerHTML=s+'</svg>';
+  var mx=D.giornaliero.massimo,d815=DAYS[IDX['2019-08-15']],F=D.ferragosto,Lk=D.lockdown;
+  $('t-cal').textContent='Il '+dataIt(mx.data)+' Milano ha usato '+f1(mx.gwh)+' GWh di corrente, il 15 agosto '+f1(d815.gwh)+'. Guarda ogni giorno di due anni';
+  $('lg-cal').innerHTML='<span>'+f0(GLO)+' GWh<i class="grad"></i>'+f0(GHI)+' GWh</span><span><i style="background:#fff;border:2.5px solid '+C.ink+'"></i>giorno scelto</span>';
+  $('nt-cal').innerHTML=
+    '<li><b class="nb">1</b><span>Il giorno con più corrente: '+dataIt(mx.data)+', '+f1(mx.gwh)+' GWh, con una massima di '+f1(mx.tmax)+' °C. I dieci giorni di maggior consumo sono tutti feriali, tra il 26 giugno e il 25 luglio 2019.</span></li>'+
+    '<li><b class="nb">2</b><span>Ferragosto: il 15 agosto 2019 si consumano '+f1(d815.gwh)+' GWh, come in una domenica di marzo ('+f1(Lk.dom_marzo2019)+'). I feriali dal 12 al 16 agosto stanno in mediana a '+f1(F.sett_feriali)+' GWh, il '+f0(Math.abs(F.sett_var))+'% in meno di marzo 2019, anche se fa caldo.</span></li>'+
+    '<li><b class="nb">3</b><span>Dal 24 febbraio al 30 giugno 2020 i quadretti si schiariscono: nel lockdown i feriali scendono del '+f0(Math.abs(Lk.var_marzo2019))+'% rispetto a marzo 2019. La storia è nella pagina <a href="../anno-covid/">L’anno del Covid</a>.</span></li>';
+}
+function pickOut(){
+  var d=DAYS[IDX[SEL]],lk=D.giornaliero.lockdown,alt=DAYS[IDX[(d.y===2019?'2020':'2019')+SEL.slice(4)]];
+  var h='<b>'+dInt(d)+'</b> · '+TIPO[d.tipo]+'<br><span class="big">'+f1(d.gwh)+' <small>GWh</small></span> di corrente<ul>';
+  h+='<li>È il giorno numero '+f0(d.rank)+' su '+f0(DAYS.length), h+=', contando dal più alto (1) al più basso ('+f0(DAYS.length)+').</li>';
+  h+='<li>Un '+TIPO[d.tipo]+' dei due anni usa in mediana '+f1(MT[d.tipo])+' GWh: questo giorno '+(Math.abs(d.gwh-MT[d.tipo])<0.05?'è nella media':d.gwh>MT[d.tipo]?'ne usa di più ('+sg1(d.gwh-MT[d.tipo])+')':'ne usa di meno ('+sg1(d.gwh-MT[d.tipo])+')')+'.</li>';
+  h+='<li>Massima '+f1(d.tmax)+' °C. Gas: '+f1(d.gas)+' milioni di Smc.</li>';
+  if(alt)h+='<li>Lo stesso giorno del '+alt.y+': '+f1(alt.gwh)+' GWh, massima '+f1(alt.tmax)+' °C.</li>';
+  if(d.data>=lk[0]&&d.data<=lk[1])h+='<li>Questo giorno è nel lockdown: vedi <a href="../anno-covid/">L’anno del Covid</a>.</li>';
+  $('pk-out').innerHTML=h+'</ul>';
+}
+
+/* ---------- 2. caldo: grafico a punti ---------- */
+function cvAt(t){var c=D.caldo.curva,i=Math.max(0,Math.min(c.length-2,Math.floor(t*2))),f=t*2-i;return c[i][1]+(c[i+1][1]-c[i][1])*f}
+function scat(){
+  var box=$('ch-scat'),W=width('ch-scat'),H=350,m={l:34,r:10,t:22,b:38},pw=W-m.l-m.r,ph=H-m.t-m.b;
+  var X=function(t){return m.l+t/40*pw},Yv=function(v){return m.t+ph-(v-14)/18*ph};
+  var Cd=D.caldo,t0=Cd.tmax.soglia_caldo,t1=Cd.tmax.soglia_freddo,cur=Cd.curva,s=svgOpen(W,H);
+  s+='<rect x="'+r1(X(t0))+'" y="'+m.t+'" width="'+r1(W-m.r-X(t0))+'" height="'+ph+'" fill="'+C.or+'" fill-opacity=".12"/>';
+  [15,20,25,30].forEach(function(v){s+=L(m.l,Yv(v),W-m.r,Yv(v),C.grid)+T(m.l-6,Yv(v)+4,v,{a:'end',c:'m'})});
+  s+=T(m.l-6,m.t-8,'GWh',{a:'end',c:'m'});
+  [0,10,20,30,40].forEach(function(t){s+=T(X(t),H-m.b+16,t,{a:t===0?'start':t===40?'end':'middle',c:'m'})});
+  s+=T(m.l+pw/2,H-6,'temperatura massima del giorno, °C',{a:'middle',c:'m'});
+  s+=L(m.l,m.t+ph,W-m.r,m.t+ph,C.axis);
+  s+=L(X(t0),m.t,X(t0),m.t+ph,C.ord,1.5,' stroke-dasharray="4 3"');
+  s+=T(X(t0)+6,m.t+ph-8,'sopra '+f0(t0)+' °C',{c:'b',st:'fill:'+C.ord});
+  s+=T(m.l+4,m.t+14,'sotto '+f0(t1)+' °C sale un po’',{c:'m'});
+  DAYS.forEach(function(d){if(!d.uso)return;
+    var col=d.tmax>t0?C.or:d.tmax<t1?C.bl:'#7b8494';
+    s+='<circle cx="'+r1(X(d.tmax))+'" cy="'+r1(Yv(d.gwh))+'" r="3.4" fill="'+col+'" fill-opacity=".8"'+tip('<b>'+dInt(d)+'</b><br>'+f1(d.gwh)+' GWh · massima '+f1(d.tmax)+' °C')+'/>'});
+  var p='';cur.forEach(function(c,i){p+=(i?'L':'M')+r1(X(c[0]))+' '+r1(Yv(c[1]))});
+  s+='<path d="'+p+'" fill="none" stroke="'+C.ink+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  // triangolo della pendenza
+  var a=27,b=31,va=cvAt(a),vb=cvAt(b);
+  s+=L(X(a),Yv(va),X(b),Yv(va),C.ink,1.5)+L(X(b),Yv(va),X(b),Yv(vb),C.ink,1.5);
+  s+=T((X(a)+X(b))/2,Yv(va)+16,'+'+f0(b-a)+' °C',{a:'middle',c:'b hz'})+T(X(b)+5,(Yv(va)+Yv(vb))/2+4,'+'+f1(vb-va)+' GWh',{c:'b hz'});
+  // record
+  var rec=D.giornaliero.massimo;
+  s+=T(X(rec.tmax)-8,Yv(rec.gwh)+4,dataIt(rec.data)+': '+f1(rec.gwh),{a:'end',c:'b hz'});
+  // giorno scelto
+  var sd=DAYS[IDX[SEL]];
+  s+='<circle cx="'+r1(X(sd.tmax))+'" cy="'+r1(Yv(sd.gwh))+'" r="7.5" fill="none" stroke="'+C.mi+'" stroke-width="3" pointer-events="none"/>';
+  // cursore
+  var cs=cvAt(SLT);
+  s+=L(X(SLT),m.t,X(SLT),m.t+ph,C.ink,1.2,' stroke-dasharray="2 3"')+'<circle cx="'+r1(X(SLT))+'" cy="'+r1(Yv(cs))+'" r="6.5" fill="#fff" stroke="'+C.ink+'" stroke-width="3" pointer-events="none"/>';
+  s+=T(X(SLT)+(SLT>28?-10:10),Yv(cs)-12,f1(cs)+' GWh',{a:SLT>28?'end':'start',c:'b hz'});
+  box.innerHTML=s+'</svg>';
+  $('t-scat').textContent='Sopra i '+f0(t0)+' °C, ogni grado in più porta circa '+f2(Cd.tmax.per_grado_caldo)+' GWh di corrente in più';
+  $('lg-scat').innerHTML='<span><i class="dot" style="background:'+C.or+'"></i>più di '+f0(t0)+' °C</span><span><i class="dot" style="background:#7b8494"></i>tra '+f0(t1)+' e '+f0(t0)+' °C</span><span><i class="dot" style="background:'+C.bl+'"></i>meno di '+f0(t1)+' °C</span><span><i class="ln" style="background:'+C.ink+'"></i>andamento stimato</span><span><i class="ring" style="border-color:'+C.mi+'"></i>il giorno scelto sopra</span>';
+  var F=Cd.fasce,f7=F[7],f4=F[4];
+  $('nt-scat').innerHTML='Nei feriali con almeno 35 °C ('+f0(f7.n)+' giorni, '+f0(f7.n2019)+' del 2019) la corrente è in mediana '+f1(f7.mediana)+' GWh, il '+f0((f7.mediana/f4.mediana-1)*100)+'% in più dei feriali con 20-25 °C ('+f1(f4.mediana)+'). La fascia tra '+f0(t1)+' e '+f0(t0)+' °C è piatta. Sono '+f0(Cd.n_base)+' giorni di due anni: il numero ('+f2(Cd.tmax.boot_caldo[0])+'-'+f2(Cd.tmax.boot_caldo[1])+' GWh per grado, a seconda dei giorni scelti) è una stima, non una legge.';
+}
+function slOut(){
+  var t=SLT,cur=D.caldo.curva,v=cvAt(t),mite=Math.min.apply(null,cur.map(function(c){return c[1]}));
+  $('sl-v').textContent=f1(t)+' °C';
+  var near=DAYS.filter(function(d){return d.uso&&Math.abs(d.tmax-t)<=1}).map(function(d){return d.gwh}),pc=(v/mite-1)*100;
+  var h='<span class="big">'+f1(v)+' <small>GWh</small></span> in un giorno feriale ('+(Math.round(pc)<=0?'come un giorno mite':sg0(pc)+'% rispetto a un giorno mite, che ne usa '+f1(mite))+')';
+  h+=near.length>=3?'<br>Nei dati, con una massima tra '+f1(t-1)+' e '+f1(t+1)+' °C ci sono '+f0(near.length)+' giorni feriali: ne usano in mediana '+f1(med(near))+' GWh.':'<br>Nei dati ci sono solo '+f0(near.length)+' giorni feriali con una massima tra '+f1(t-1)+' e '+f1(t+1)+' °C: la curva è una stima.';
+  $('sl-out').innerHTML=h;
+}
+
+/* ---------- 3. orologio dell'anno ---------- */
+function wedge(cx,cy,r0,r1_,a0,a1){
+  function P(r,a){var t=a*Math.PI/180;return r1(cx+r*Math.sin(t))+' '+r1(cy-r*Math.cos(t))}
+  return 'M'+P(r0,a0)+'L'+P(r1_,a0)+'A'+r1(r1_)+' '+r1(r1_)+' 0 0 1 '+P(r1_,a1)+'L'+P(r0,a1)+'A'+r1(r0)+' '+r1(r0)+' 0 0 0 '+P(r0,a0)+'Z';
+}
+function orologio(){
+  var box=$('ch-clock'),W=width('ch-clock'),S=Math.min(W,520),cx=W/2,cy=S/2+4,H=S+8,r0=18,Rm=S/2-58;
+  var ms=MESI3.map(function(){return{n:0,e:0,g:0,t:0}}),ne=0,sE=0,sG=0;
+  DAYS.forEach(function(d){if(d.y!==2019)return;var o=ms[d.m];o.n++;o.e+=d.gwh;o.g+=d.gas;o.t+=d.tmean;ne++;sE+=d.gwh;sG+=d.gas});
+  var aE=sE/ne,aG=sG/ne;
+  ms.forEach(function(o){o.me=o.e/o.n;o.mg=o.g/o.n;o.ie=o.me/aE*100;o.ig=o.mg/aG*100;o.mt=o.t/o.n});
+  var maxI=Math.max.apply(null,ms.map(function(o){return o.ig})),k=(Rm-r0)/maxI;
+  function P(r,a){var t=a*Math.PI/180;return[cx+r*Math.sin(t),cy-r*Math.cos(t)]}
+  var s=svgOpen(W,H);
+  s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+r1(r0+100*k)+'" fill="none" stroke="'+C.ink2+'" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  ms.forEach(function(o,m){
+    var a=m*30,tp='<b>'+cap(MESI[m])+' 2019</b><br>Temperatura media: '+f1(o.mt)+' °C';
+    s+='<path d="'+wedge(cx,cy,r0,r0+o.ig*k,a+2,a+14.5)+'" fill="'+C.bl+'"'+tip(tp+'<br>'+sw(C.bl)+'Gas: '+f1(o.mg)+' milioni di Smc al giorno ('+f0(o.ig)+' rispetto alla media)')+'/>';
+    s+='<path d="'+wedge(cx,cy,r0,r0+o.ie*k,a+15.5,a+28)+'" fill="'+C.mi+'"'+tip(tp+'<br>'+sw(C.mi)+'Corrente: '+f1(o.me)+' GWh al giorno ('+f0(o.ie)+' rispetto alla media)')+'/>';
+    var q=P(Rm+36,a+15);s+=T(q[0],q[1]+4,MESI3[m],{a:'middle',c:'m'});
+  });
+  var iG=ms.map(function(o){return o.ig}),iE=ms.map(function(o){return o.ie}),gM=iG.indexOf(Math.max.apply(null,iG)),gm=iG.indexOf(Math.min.apply(null,iG)),eM=iE.indexOf(Math.max.apply(null,iE)),em=iE.indexOf(Math.min.apply(null,iE));
+  var q=P(r0+iG[gM]*k+11,gM*30+8.5);s+=T(q[0],q[1]+4,'gas '+f0(iG[gM]),{a:'middle',c:'b hz',st:'fill:'+C.bl});
+  q=P(r0+iG[gm]*k+10,gm*30+8.5);s+=T(q[0],q[1]+4,f0(iG[gm]),{a:'middle',c:'b hz',st:'fill:'+C.bl});
+  q=P(r0+iE[eM]*k+11,eM*30+21.5);s+=T(q[0],q[1]+4,'corrente '+f0(iE[eM]),{a:eM>=6?'end':'start',c:'b hz',st:'fill:'+C.mi});
+  s+=T(cx,cy+4,'2019',{a:'middle',c:'m'});
+  box.innerHTML=s+'</svg>';
+  $('lg-clock').innerHTML='<span><i style="background:'+C.bl+'"></i>gas</span><span><i style="background:'+C.mi+'"></i>corrente</span><span><i class="dash"></i>media dell’anno = 100</span>';
+  $('t-clock').textContent='Il gas segue l’inverno: a '+MESI[gM]+' ne serve '+f0(ms[gM].mg/ms[gm].mg)+' volte più che ad '+MESI[gm]+'. La corrente cambia molto meno';
+  var G=D.gas;
+  $('nt-clock').innerHTML='In un giorno medio di '+MESI[gM]+' si usano '+f1(ms[gM].mg)+' milioni di Smc di gas, ad '+MESI[gm]+' '+f1(ms[gm].mg)+'. La corrente va da '+f1(ms[em].me)+' GWh ('+MESI[em]+') a '+f1(ms[eM].me)+' ('+MESI[eM]+'): da '+f0(iE[em])+' a '+f0(iE[eM])+' rispetto alla media. Sotto i '+f0(G.soglia)+' °C di temperatura media il gas sale di circa '+f2(G.per_grado)+' milioni di Smc per ogni grado in meno (giorni feriali, 2019-2020).';
+}
+
+/* ---------- 4. città: barre di quadretti ---------- */
+function cittaQuadretti(){
+  var box=$('ch-citta'),W=width('ch-citta'),R=D.annuale.citta.slice().sort(function(a,b){return b.kwh_ab_2024-a.kwh_ab_2024}),short=W<430;
+  var nm=function(n){return short?nomeC(n):n},nw=0;R.forEach(function(c){nw=Math.max(nw,tw(nm(c.nome),13,true))});nw=Math.ceil(nw)+10;
+  var rw=100,avail=W-nw-rw,mx=Math.ceil(R[0].kwh_ab_2024/500),sq=Math.min(16,Math.floor(avail/mx)-2),st=sq+2,rh=Math.max(26,sq+10),top=26,H=top+R.length*rh+6,s=svgOpen(W,H);
+  s+=T(W-60,14,'kWh',{a:'end',c:'m'})+T(W,14,'dal 2015',{a:'end',c:'m'});
+  R.forEach(function(c,i){
+    var y=top+i*rh,cy=y+rh/2,mi=c.nome==='Milano',col=mi?C.mi:'#9aa1ad',u=c.kwh_ab_2024/500,full=Math.floor(u),fr=u-full;
+    var h='<b>'+c.nome+'</b><br>'+f0(c.kwh_ab_2024)+' kWh a testa nel 2024 ('+f0(c.gwh_2024)+' GWh in tutto)<br>2015: '+f0(c.kwh_ab_2015)+' kWh ('+sg1(c.var)+'%)';
+    s+='<g'+tip(h)+'>'+T(0,cy+4,nm(c.nome),{c:mi?'b':'',st:mi?'fill:'+C.mi:''});
+    for(var j=0;j<full;j++)s+='<rect x="'+r1(nw+j*st)+'" y="'+r1(cy-sq/2)+'" width="'+sq+'" height="'+sq+'" rx="2" fill="'+col+'"/>';
+    if(fr>0.08)s+='<rect x="'+r1(nw+full*st)+'" y="'+r1(cy-sq/2)+'" width="'+r1(Math.max(2,sq*fr))+'" height="'+sq+'" rx="2" fill="'+col+'"/>';
+    s+=T(W-60,cy+4,f0(c.kwh_ab_2024),{a:'end',c:'b',st:mi?'fill:'+C.mi:''})+T(W,cy+4,sg0(c.var)+'%',{a:'end',c:'m'})+'<rect x="0" y="'+r1(y)+'" width="'+W+'" height="'+rh+'" fill="transparent"/></g>';
+  });
+  box.innerHTML=s+'</svg>';
+  var mi=R.filter(function(c){return c.nome==='Milano'})[0],pos=R.indexOf(mi);
+  $('t-citta').textContent='Milano è la '+ORD[pos]+' tra 14 città per corrente a testa: '+f0(mi.kwh_ab_2024)+' kWh nel 2024, il '+f0(Math.abs(mi.var))+'% in meno che nel 2015';
+}
+
+/* ---------- 5. anno per anno: due linee ---------- */
+function anniLinee(){
+  var S=D.annuale.serie,box=$('ch-idx'),W=width('ch-idx'),H=270,m={l:34,r:84,t:14,b:26},n=S.length,pw=W-m.l-m.r,ph=H-m.t-m.b,lo=80,hi=105;
+  var X=function(i){return m.l+i*pw/(n-1)},Yv=function(v){return m.t+ph-(v-lo)/(hi-lo)*ph};
+  var el=S.map(function(x){return x.gwh/S[0].gwh*100}),gs=S.map(function(x){return x.gas_mm3/S[0].gas_mm3*100}),s=svgOpen(W,H);
+  [80,90,100].forEach(function(v){s+=L(m.l,Yv(v),W-m.r,Yv(v),v===100?C.axis:C.grid)+T(m.l-6,Yv(v)+4,v,{a:'end',c:'m'})});
+  s+=L(m.l,m.t+ph,W-m.r,m.t+ph,C.axis);
+  S.forEach(function(x,i){if([2015,2020,2024].indexOf(x.anno)>=0)s+=T(X(i),H-6,x.anno,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  var x20=X(5);s+=L(x20,m.t,x20,m.t+ph,C.ink,1)+T(x20-5,m.t+ph-8,'Covid',{a:'end',c:'m',st:'fill:'+C.ink+';font-weight:600'});
+  [[gs,C.bl,'gas'],[el,C.mi,'corrente']].forEach(function(se){
+    var d='';se[0].forEach(function(v,i){d+=(i?'L':'M')+r1(X(i))+' '+r1(Yv(v))});
+    s+='<path d="'+d+'" fill="none" stroke="'+se[1]+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+    s+='<circle cx="'+r1(X(n-1))+'" cy="'+r1(Yv(last(se[0])))+'" r="4.5" fill="'+se[1]+'" stroke="#fff" stroke-width="2"/>'+T(W-m.r+9,Yv(last(se[0]))+4,se[2]+' '+f0(last(se[0])),{c:'b',st:'fill:'+se[1]});
+  });
+  s+='<circle cx="'+r1(X(0))+'" cy="'+r1(Yv(100))+'" r="4" fill="'+C.ink+'" stroke="#fff" stroke-width="2"/>';
+  for(var i=0;i<n;i++)s+='<rect x="'+r1(X(i)-pw/(n-1)/2)+'" y="'+m.t+'" width="'+r1(pw/(n-1))+'" height="'+ph+'" fill="transparent"'+tip('<b>'+S[i].anno+'</b><br>'+sw(C.mi)+'Corrente: '+f0(S[i].gwh)+' GWh ('+f0(el[i])+')<br>'+sw(C.bl)+'Gas: '+f0(S[i].gas_mm3)+' milioni di m³ ('+f0(gs[i])+')')+'/>';
+  box.innerHTML=s+'</svg>';
+  $('t-idx').textContent='Dal 2015 la corrente consumata a Milano è calata del '+f0(Math.abs(last(el)-100))+'% e il gas del '+f0(Math.abs(last(gs)-100))+'%';
+}
+
+/* ---------- 6. lampade ---------- */
+function led(){
+  var box=$('ch-led'),W=width('ch-led'),A=D.led,cols=W<500?17:24,mxT=Math.max.apply(null,A.map(function(x){return x.totale})),nmax=Math.ceil(mxT/1000),rows=Math.ceil(nmax/cols),pad=14;
+  var cs=Math.floor((W-2*pad)/cols),top=56,H=top+rows*cs+44,y=Y(A,LEDY),s=svgOpen(W,H),w='fill:#fff';
+  s+='<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="6" fill="#0b0d12"/>';
+  s+=T(pad,36,LEDY,{st:'fill:#fff;font-size:26px;font-weight:800'})+T(W-pad,22,f0(y.totale)+' lampade',{a:'end',st:'fill:#fff;font-size:14px;font-weight:700'});
+  s+=T(W-pad,40,f0(y.led/y.totale*100)+'% a LED',{a:'end',st:'fill:#c9ced6;font-size:13px'});
+  var nl=Math.round(y.led/1000),no=Math.round(y.tradizionali/1000),gx=(W-cols*cs)/2;
+  for(var i=0;i<nl+no&&i<cols*rows;i++){
+    var cx=gx+(i%cols)*cs+cs/2,cy=top+Math.floor(i/cols)*cs+cs/2,isL=i<nl,r=Math.max(3,cs*0.32);
+    if(isL)s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+r1(r+Math.min(3,cs*0.15))+'" fill="#fff" fill-opacity=".18"/>';
+    s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+r1(r)+'" fill="'+(isL?'#fff':'#FFC400')+'"/>';
+  }
+  var yb=H-16;
+  s+='<circle cx="'+(pad+5)+'" cy="'+(yb-4)+'" r="5" fill="#fff"/>'+T(pad+16,yb,f0(y.led)+' a LED',{st:'fill:#fff;font-size:13px;font-weight:700'});
+  var x2=Math.round(W/2)+4;s+='<circle cx="'+(x2+5)+'" cy="'+(yb-4)+'" r="5" fill="#FFC400"/>'+T(x2+16,yb,f0(y.tradizionali)+' tradizionali',{st:'fill:#fff;font-size:13px;font-weight:700'});
+  box.innerHTML=s+'</svg>';
+  $('led-yv').textContent=LEDY;
+  var a13=Y(A,2013),a14=Y(A,2014),a20=Y(A,2020);
+  $('t-led').textContent='Nel 2013 le lampade a LED erano zero, nel 2014 '+f0(a14.led)+', nel 2020 sono il '+f0(a20.led/a20.totale*100)+'%';
+  $('nt-led').innerHTML='Il totale non scende mai: da '+f0(A[0].totale)+' lampade nel '+A[0].anno+' a '+f0(a20.totale)+' nel 2020. I LED passano da 0 a '+f0(a14.led)+' in un solo anno: potrebbe essere l’anno in cui il Comune ha cominciato a contarli.';
+}
+
+/* ---------- 7. settori Terna ---------- */
+function terna(){
+  var Sx=D.settori.serie,box=$('ch-terna'),W=width('ch-terna'),H=310,m={l:52,r:92,t:40,b:26},n=Sx.length,pw=W-m.l-m.r,ph=H-m.t-m.b,hi=24000;
+  var X=function(i){return m.l+i*pw/(n-1)},Yv=function(v){return m.t+ph-v/hi*ph},i18=Sx.map(function(x){return x.anno}).indexOf(2018),s=svgOpen(W,H);
+  s+=L(m.l,Yv(0),W-m.r,Yv(0),C.axis);
+  Sx.forEach(function(x,i){if([2000,2010,2024].indexOf(x.anno)>=0)s+=T(X(i),H-6,x.anno,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  var xb=(X(i18)+X(i18+1))/2;
+  s+=L(xb,m.t-4,xb,m.t+ph,C.ink,1,' stroke-dasharray="3 3"')+T(xb,m.t-22,'Terna cambia',{a:'middle',c:'m',st:'fill:'+C.ink+';font-weight:600'})+T(xb,m.t-8,'le categorie',{a:'middle',c:'m',st:'fill:'+C.ink+';font-weight:600'});
+  function path(k,a,b,col,w){var d='';for(var i=a;i<=b;i++)d+=(i===a?'M':'L')+r1(X(i))+' '+r1(Yv(Sx[i][k]));return '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round"/>'}
+  var SE=[['totale','totale',C.ink,3.5,false],['industria','industria',C.bl,3,true],['servizi','servizi',C.pu,3,true],['domestico','case',C.or,3,false]];
+  SE.forEach(function(q){
+    if(q[4])s+=path(q[0],0,i18,q[2],q[3])+path(q[0],i18+1,n-1,q[2],q[3]);else s+=path(q[0],0,n-1,q[2],q[3]);
+    var e=Sx[n-1][q[0]],f=Sx[0][q[0]];
+    s+='<circle cx="'+r1(X(n-1))+'" cy="'+r1(Yv(e))+'" r="4.5" fill="'+q[2]+'" stroke="#fff" stroke-width="2"/>'+T(W-m.r+9,Yv(e)+4,q[1]+' '+f0(e),{c:'b',st:'fill:'+q[2]});
+    s+='<circle cx="'+r1(X(0))+'" cy="'+r1(Yv(f))+'" r="4" fill="'+q[2]+'" stroke="#fff" stroke-width="2"/>'+T(X(0)-9,Yv(f)+4,f0(f),{a:'end',c:'b',st:'fill:'+q[2]});
+  });
+  [['industria',C.bl],['servizi',C.pu]].forEach(function(q){s+=T(X(i18)-6,Yv(Sx[i18][q[0]])-8,f0(Sx[i18][q[0]]),{a:'end',c:'b hz',st:'fill:'+q[1]})});
+  for(var i=0;i<n;i++){var x=Sx[i];s+='<rect x="'+r1(X(i)-pw/(n-1)/2)+'" y="'+m.t+'" width="'+r1(pw/(n-1))+'" height="'+ph+'" fill="transparent"'+tip('<b>'+x.anno+'</b><br>Totale: '+f0(x.totale)+' GWh<br>'+sw(C.bl)+'Industria: '+f0(x.industria)+'<br>'+sw(C.pu)+'Servizi: '+f0(x.servizi)+'<br>'+sw(C.or)+'Case: '+f0(x.domestico))+'/>'}
+  box.innerHTML=s+'</svg>';
+  var s0=Sx[0],s18=Sx[i18];
+  $('t-terna').textContent='Dal 2000 al 2018 l’industria perde il '+f0(Math.abs((s18.industria/s0.industria-1)*100))+'% dell’elettricità, i servizi ne guadagnano il '+f0((s18.servizi/s0.servizi-1)*100)+'%';
+  $('nt-terna').innerHTML='Industria e servizi sono interrotti tra il 2018 e il 2019: Terna ha cambiato le categorie, quindi i confronti di lungo periodo arrivano solo al 2018. Il totale non dipende dalle categorie: '+f0(s0.totale)+' GWh nel 2000, massimo '+f0(Math.max.apply(null,Sx.map(function(x){return x.totale})))+', '+f0(last(Sx).totale)+' nel 2024. I dati non dicono perché.';
+}
+
+/* ---------- 8. acqua: gocce e bicchieri ---------- */
+function goccia(x,y,sz,col,extra){var k=sz/20.5;return '<path transform="translate('+r1(x)+' '+r1(y)+') scale('+Math.round(k*100)/100+')" d="M0 -10 C3 -5 7 -1 7 3.5 A7 7 0 0 1 -7 3.5 C-7 -1 -3 -5 0 -10Z" fill="'+col+'"'+(extra||'')+'/>'}
+function quad(vals,unit){var tot=vals.reduce(function(a,b){return a+b},0),n=Math.round(tot/unit),raw=vals.map(function(v){return v/unit}),fl=raw.map(Math.floor),
+  rest=n-fl.reduce(function(a,b){return a+b},0),ord=raw.map(function(v,i){return[v-Math.floor(v),i]}).sort(function(a,b){return b[0]-a[0]});
+  for(var k=0;k<rest;k++)fl[ord[k][1]]++;return fl}
+function gocce(){
+  var box=$('ch-drops'),W=width('ch-drops'),M=D.acqua.milano[3],ac=D.acqua.citta,altre=ac.filter(function(c){return c.nome!=='Milano'});
+  var casa=M.domestica_pc,altri=M.erogata_pc-M.domestica_pc,persa=M.immessa_pc-M.erogata_pc,medCasa=med(altre.map(function(c){return c.domestica_2024}));
+  var q=quad([casa,altri,persa],10),d=Math.min(24,Math.floor(W/15)),cols=Math.floor(W/d),y=0,s='';
+  var G=[{l:'Arriva nelle case',v:casa,n:q[0],col:C.bl},{l:'Arriva a uffici, negozi e altri usi',v:altri,n:q[1],col:C.te},{l:'Si perde nei tubi',v:persa,n:q[2],col:C.or}];
+  function sezione(g){
+    s+=T(0,y+14,g.l+' · '+f0(g.v)+' litri',{c:'b',st:'font-size:14px;fill:'+(g.col===C.light?C.ink2:g.col)});y+=22;
+    for(var i=0;i<g.n;i++)s+=goccia((i%cols)*d+d/2,y+Math.floor(i/cols)*d+d/2,d*0.8,g.col,tip('<b>'+g.l+'</b><br>'+f0(g.v)+' litri per abitante al giorno'));
+    y+=Math.ceil(g.n/cols)*d+14;
+  }
+  G.forEach(sezione);
+  s+=L(0,y-4,W,y-4,C.grid,1);y+=10;
+  sezione({l:'Altre 13 città, in casa (tipico)',v:medCasa,n:Math.round(medCasa/10),col:'#8b93a1'});
+  box.innerHTML=svgOpen(W,Math.ceil(y)+2)+s+'</svg>';
+  $('t-drops').textContent='Per ogni abitante entrano in rete '+f0(M.immessa_pc)+' litri di acqua al giorno: '+f0(casa)+' arrivano nelle case, circa '+f0(persa)+' si perdono';
+}
+function bicchieri(){
+  var box=$('ch-glass'),W=width('ch-glass'),R=D.acqua.citta.slice().sort(function(a,b){return a.perdite_2024-b.perdite_2024}),cols=W<460?3:W<640?4:5,cw=W/cols,gw=Math.min(66,cw-30),gh=74,rh=gh+54,rows=Math.ceil(R.length/cols),H=rows*rh+4,s=svgOpen(W,H);
+  var hw=function(f){return gw/2-(gw/2-gw*0.34)*f};
+  R.forEach(function(c,i){
+    var x0=(i%cols)*cw+cw/2,y0=Math.floor(i/cols)*rh+6,mi=c.nome==='Milano',p=c.perdite_2024,lvl=(100-p)/100,yl=y0+gh*(1-lvl),f=1-lvl;
+    var col=mi?C.mi:C.bl,hl=hw(f),hb=hw(1);
+    var P=function(a){return a.map(function(q){return r1(q[0])+','+r1(q[1])}).join(' ')};
+    var h='<b>'+c.nome+'</b><br>Perde il '+f1(p)+'% dell’acqua (nel 2018: '+f1(c.perdite_2018)+'%)<br>Messa in rete '+f0(c.immessa_2024)+' litri, consegnata '+f0(c.erogata_2024)+', alle case '+f0(c.domestica_2024)+' (per abitante, al giorno)';
+    s+='<g'+tip(h)+'>';
+    s+='<polygon points="'+P([[x0-gw/2,y0],[x0+gw/2,y0],[x0+hl,yl],[x0-hl,yl]])+'" fill="#fbd5b0"/>';
+    s+='<polygon points="'+P([[x0-hl,yl],[x0+hl,yl],[x0+hb,y0+gh],[x0-hb,y0+gh]])+'" fill="'+col+'"/>';
+    s+='<polygon points="'+P([[x0-gw/2,y0],[x0+gw/2,y0],[x0+hb,y0+gh],[x0-hb,y0+gh]])+'" fill="none" stroke="'+C.ink+'" stroke-width="2" stroke-linejoin="round"/>';
+    s+=T(x0,y0+gh+17,c.nome==='Reggio di Calabria'?'Reggio C.':c.nome,{a:'middle',c:'b',st:mi?'fill:'+C.mi:''})+T(x0,y0+gh+34,'perde '+f0(p)+'%',{a:'middle',c:'m'});
+    s+='<rect x="'+r1(x0-cw/2)+'" y="'+r1(y0-4)+'" width="'+r1(cw)+'" height="'+(rh-2)+'" fill="transparent"/></g>';
+  });
+  box.innerHTML=s+'</svg>';
+  var mi=R.filter(function(c){return c.nome==='Milano'})[0],altre=R.filter(function(c){return c.nome!=='Milano'}),md=med(altre.map(function(c){return c.perdite_2024}));
+  $('lg-glass').innerHTML='<span><i style="background:'+C.bl+'"></i>arriva a chi la usa</span><span><i style="background:'+C.mi+'"></i>Milano, arriva</span><span><i style="background:#fbd5b0"></i>si perde lungo la strada</span>';
+  $('t-glass').textContent='Milano perde '+f0(mi.perdite_2024)+' litri ogni 100 messi in rete; le altre 13 città, in mediana, '+f0(md);
+}
+function limiti(){
+  var A=D.annuale,J=A.salto_2009_2010,C0=D.caldo,g=D.giornaliero,S=A.serie,G=D.gas,Sx=D.settori.serie,L=[];
+  L.push('<b>Giorno per giorno ci sono solo il 2019 e il 2020.</b> Il Comune pubblica corrente e gas giornalieri solo per questi due anni. Non abbiamo trovato consumi per quartiere, né un dato giornaliero dell’acqua, né un dato per ora di Milano: Terna pubblica i consumi ogni 15 minuti solo per grandi zone, e la zona Nord è molto più grande di Milano.');
+  L.push('<b>Caldo e gas: legame misurato, non causa.</b> I condizionatori sono un’ipotesi non dimostrata, e i dati non dicono per che cosa si usi il gas.');
+  L.push('<b>Pochi anni.</b> Per il caldo restano '+f0(C0.n_base)+' giorni utili, solo '+f0(C0.fasce[7].n)+' con 35 °C o più ('+f0(C0.fasce[7].n2019)+' del 2019). Il 2020 è atipico anche fuori dal lockdown e non c’è un controllo sul clima degli altri anni.');
+  L.push('<b>La temperatura viene da una sola stazione</b> (Brera). Per '+f0(C0.n_vicine)+' giorni su '+f0(C0.n_base)+' è ricostruita da stazioni vicine. Massima e media sono calcolate dalle letture orarie: la massima vera è un po’ più alta.');
+  L.push('<b>Le soglie le cercano i dati.</b> L’intervallo le include, ma non è una verifica esterna, e quella del freddo è molto incerta. La pausa di agosto (5-25 agosto) è scelta guardando le mediane settimanali: non c’è un calendario ufficiale delle ferie. Il numero dipende da come si trattano le ferie (vedi «Come è fatto»).');
+  L.push('<b>Due fonti per la corrente, che non coincidono.</b> Sommando i giorni A2A si ottengono '+f1(g.somma['2019'])+' GWh nel 2019 e '+f1(g.somma['2020'])+' nel 2020; ISTAT dà '+f1(Y(S,2019).gwh)+' e '+f1(Y(S,2020).gwh)+' (A2A più alto del '+f1(A.a2a_su_istat['2019'])+'% e del '+f1(A.a2a_su_istat['2020'])+'%). Il Comune descrive il suo dato come elettricità «erogata da A2A»; ISTAT conta quella prelevata dalle reti di distribuzione, senza le utenze collegate alla rete nazionale e senza la rete ferroviaria. Le note non dicono quale differenza spieghi lo scarto. I due dati non sono mai nello stesso grafico.');
+  L.push('<b>Anche per il gas.</b> A2A conta '+f1(G.somma['2019'])+' e '+f1(G.somma['2020'])+' milioni di Smc, ISTAT '+f1(G.istat['2019'])+' e '+f1(G.istat['2020'])+' milioni di m³ ('+f1(G.a2a_su_istat['2019'])+'% e '+f1(G.a2a_su_istat['2020'])+'% in più): lo scarto c’è e non lo spieghiamo. Quattro righe del file (16-19 aprile 2020) hanno mezzi metri cubi: non sappiamo perché.');
+  L.push('<b>Un giorno isolato.</b> Il '+dataIt(g.minimo.data)+' ('+f1(g.minimo.gwh)+' GWh) è senza spiegazione: potrebbe essere un errore del dato.');
+  L.push('<b>La serie ISTAT parte dal 2015.</b> Fino al 2014 ISTAT conta i consumi fatturati, dal 2015 quelli effettivi dagli archivi Arera; il 2014 è stato rivisto ('+f1(A.gwh_2014_comune)+' GWh nel dataset del Comune, '+f1(A.gwh_2014_istat)+' nella serie ISTAT attuale). Tra il 2009 e il 2010 la serie di Milano fa un salto che non sappiamo spiegare: l’elettricità scende del '+Math.abs(J.elettricita)+'% e il gas sale del '+J.gas+'%, mentre gli usi domestici non cambiano. Tra gli altri '+f0(J.n_comuni_confrontati-1)+' capoluoghi confrontabili nessuno ha insieme un calo dell’elettricità di almeno il 10% e un aumento del gas di almeno il 20%. Per questo non mostriamo mai una tendenza che attraversa il 2009-2010 o il 2014-2015.');
+  L.push('<b>Dati stimati e provvisori.</b> ISTAT segna come stimata la quota domestica del 2023 e del 2024 e come provvisori i dati sull’acqua del 2024. L’acqua del 2018 è calcolata sui residenti prima della revisione ISTAT del 2021. Per l’acqua diamo per uguali le definizioni dei quattro anni (2018, 2020, 2022, 2024), ma non le abbiamo verificate riga per riga. Il gas ISTAT è soprattutto riscaldamento e dipende dall’inverno: non abbiamo corretto per il clima.');
+  L.push('<b>«Per abitante» divide per i residenti</b>, ma a Milano consumano anche pendolari, studenti, turisti e imprese. Sull’acqua consegnata pesa chi lavora a Milano senza abitarci, ma i dati non dicono quanto; perché anche la parte per le case sia così alta, non lo spiegano.');
+  L.push('<b>Serie non cucite.</b> Il Comune pubblica anche i consumi per abitante del 2000-2011 (nel 2011: '+f0(A.ds523.kwh_domestico)+' kWh di elettricità per uso domestico e '+f0(A.ds523.acqua_litri_giorno)+' litri d’acqua al giorno). Sono tenuti fuori dai grafici: altra fonte, altri metodi.');
+  L.push('<b>Terna per settore.</b> Licenza non indicata: mostriamo solo somme annue. È Milano più Monza e Brianza, non il comune (Terna separa Monza dal 2010; nel 2010 Milano '+f0(Y(Sx,2010).milano)+' e Monza '+f0(Y(Sx,2010).monza)+', nel 2009 Milano da sola '+f0(Y(Sx,2009).milano)+'). Terna ha riclassificato i settori e ha dichiarato una «interruzione necessaria nei dati storici» (comunicato del 5 gennaio 2021, riportato da MarketScreener): il confronto con gli anni prima è possibile solo per i grandi settori, e non del tutto. Il comunicato non dice da quale anno: tra il 2018 e il 2019 i servizi passano da '+f0(Y(Sx,2018).servizi)+' a '+f0(Y(Sx,2019).servizi)+' GWh e l’industria da '+f0(Y(Sx,2018).industria)+' a '+f0(Y(Sx,2019).industria)+', mentre le case restano circa uguali, e il numero di voci per anno nel file cambia molto. Per questo la rottura è dedotta dai dati e i confronti di lungo periodo arrivano solo al 2018. Il totale non dipende dalle categorie. Non diamo cause del calo dell’industria né della crescita dei servizi.');
+  L.push('<b>Lampade.</b> Il dato conta le lampade, non l’energia. I LED passano da 0 a '+f0(Y(D.led,2014).led)+' in un solo anno: potrebbe essere l’anno in cui il Comune ha cominciato a contarli.');
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function metodo(){
+  var C0=D.caldo,E=C0.esclusi,S=C0.sensibilita.filter(function(x){return x.col==='tmax'}),L=[];
+  L.push('<b>Giorni usati per il caldo.</b> I '+f0(C0.n_feriali)+' giorni feriali non festivi (le feste nazionali e il 7 dicembre, Sant’Ambrogio), meno '+f0(E['lockdown e riaperture 2020'])+' di lockdown e riaperture (24 febbraio-30 giugno 2020), '+f0(E['pausa di agosto'])+' della pausa di agosto (la corrente cala per le ferie anche se fa caldo) e '+f0(E['feste di fine anno'])+' delle feste di fine anno (24 dicembre-6 gennaio). Restano '+f0(C0.n_base)+' giorni ('+f0(C0.n_2019)+' del 2019 e '+f0(C0.n_2020)+' del 2020).');
+  L.push('<b>Il calcolo.</b> La corrente di ogni giorno è spiegata da: giorno della settimana, anno 2020 e due tratti di retta, uno sopra la soglia del caldo e uno sotto quella del freddo. Le soglie sono la coppia che spiega meglio i dati. Con questo modello e la temperatura massima la soglia del caldo è '+f0(C0.tmax.soglia_caldo)+' °C (tra '+f0(C0.tmax.boot_soglia_caldo[0])+' e '+f0(C0.tmax.boot_soglia_caldo[1])+') e quella del freddo '+f0(C0.tmax.soglia_freddo)+' °C. Tra le due la curva è piatta. Il modello spiega il '+f0(100*C0.tmax.r2)+'% delle differenze tra un feriale e l’altro; senza la temperatura solo il '+f0(100*C0.r2_senza_temperatura)+'%. A parità di temperatura il 2020 consuma circa '+f1(-C0.anno2020)+' GWh in meno del 2019: non sappiamo se per l’economia, per il lavoro da casa o per altro.');
+  L.push('<b>Il lato del freddo</b> è più debole: sotto '+f0(C0.tmax.soglia_freddo)+' °C la corrente sale di circa '+f2(C0.tmax.per_grado_freddo)+' GWh per grado in meno (da '+f2(C0.tmax.boot_freddo[0])+' a '+f2(C0.tmax.boot_freddo[1])+'); in inverno ci sono anche meno ore di luce, e i dati non separano il freddo dal buio. Con la temperatura media invece della massima: '+f2(C0.tmean.per_grado_caldo)+' GWh per grado sopra '+f0(C0.tmean.soglia_caldo)+' °C.');
+  L.push('<b>Gas.</b> I '+f0(D.gas.n_feriali)+' giorni feriali di tutto il periodo, lockdown compreso, e la temperatura media del giorno. Un’unica soglia, cercata su una griglia di mezzo grado, sotto la quale il gas sale in modo lineare. Non è usato nessun periodo di accensione dei riscaldamenti.');
+  L.push('<b>Intervalli.</b> Vengono da 1.000 ripetizioni del calcolo su campioni di settimane intere, estratte a caso con ripetizione.');
+  L.push('<b>Quanto è stabile il +'+f2(C0.tmax.per_grado_caldo)+'.</b> Cambiando le regole il risultato va da '+f2(Math.min.apply(null,S.map(function(x){return x.per_grado})))+' a '+f2(Math.max.apply(null,S.map(function(x){return x.per_grado})))+' GWh per grado: '+S.map(function(x){return x.nome.toLowerCase()+' '+f2(x.per_grado)}).join('; ')+'. Con la pausa di agosto dentro, la soglia sale e la pendenza anche: per questo le ferie sono tolte.');
+  L.push('<b>Valore tipico</b> = mediana dei giorni. Le percentuali di variazione sono calcolate sui valori della tabella dei dati, non sui numeri arrotondati.');
+  L.push('<b>Elettricità e gas ISTAT.</b> Dai tep con 1 GWh = '+f0(D.tep_per_gwh)+' tep e 0,819 tep ogni 1.000 m³ di gas. Per abitante: diviso per i residenti usati da ISTAT.');
+  L.push('<b>Terna.</b> Si sommano sempre Milano e Monza e Brianza. La sola provincia di Milano coincide con la tavola ISTAT 9.1 per il 2017-2024 (entro 0,4 GWh).');
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function fonti(){
+  var L=function(u,t){return '<a href="'+u+'" target="_blank" rel="noopener">'+t+'</a>'},sc=dataIt(D.data_scarico),sn=dataIt(D.data_scarico_nuovi);
+  var h='<b>Fonti e licenze.</b> <b>Comune di Milano</b>, dati.comune.milano.it, licenza CC BY. Scaricati il '+sc+': '+L('https://dati.comune.milano.it/dataset/bdfc8120-109e-4461-bb53-114d27c859a8','Energia elettrica erogata da A2A, totale giornaliero (2019-2020)')+' · '+L('https://dati.comune.milano.it/dataset/ccf1f52e-a07a-4dc5-b8bf-81d820cbad2a','Consumi di energia elettrica, serie storica (solo controllo del 2014-2018)')+' · '+L('https://dati.comune.milano.it/dataset/be9028dd-0ead-42e6-966d-cb5e34b97ce4','Consumo di acqua ed energia per abitante 2000-2011 (solo citato)')+' · '+L('https://dati.comune.milano.it/dataset/6f2c8cc0-b038-4768-b248-519b87e467c4','Acqua immessa, erogata e perdite 2018 (controllo)')+'. Scaricati il '+sn+': '+L('https://dati.comune.milano.it/dataset/376d8b11-434d-4d21-adcd-25aaab08f331','Gas erogato da A2A, totale giornaliero (2019-2020, in Smc)')+' · '+L('https://dati.comune.milano.it/dataset/e07b64f8-5bb8-46e4-8b2a-ab87050a1238','Transizione illuminazione: da tradizionale a LED (2002-2020)')+'. '
+  +'<b>ISTAT</b>, licenza CC BY 4.0, scaricati il '+sc+'. Elettricità e gas: '+L('https://www.istat.it/wp-content/uploads/2026/07/ENERGIA_serie_storiche-1.xlsx','serie storiche Energia, 2003-2024')+' (comunicato '+L('https://www.istat.it/comunicato-stampa/trasformazioni-e-innovazioni-nei-consumi-elettrici-delle-citta-capoluogo-anno-2024/','Trasformazioni e innovazioni nei consumi elettrici delle città capoluogo, anno 2024')+', con '+L('https://www.istat.it/wp-content/uploads/2026/07/Trasformazioni-e-innovazioni-nei-consumi-elettrici-delle-citta-capoluogo_Anno-2024.pdf','testo e nota metodologica')+') e '+L('https://www.istat.it/wp-content/uploads/2026/09/TAVOLE_AMBURB_2024.zip','le tavole Ambiente urbano 2024')+' (energia, tavole 6.3, 6.4 e 9.1, e acqua; comunicato '+L('https://www.istat.it/comunicato-stampa/ambiente-urbano-anno-2024/','Ambiente urbano, anno 2024')+'). Acqua, anni precedenti: '+L('https://www.istat.it/wp-content/uploads/2021/03/Tavole_GMA2021.xlsx','tavole del 2021 (dati 2018)')+', '+L('https://www.istat.it/tavole-di-dati/censimento-delle-acque-per-uso-civile-anno-2020/','Censimento delle acque per uso civile, anno 2020')+' e '+L('https://www.istat.it/wp-content/uploads/2024/03/Istat-GMA2024-Tavole.xlsx','tavole del 2024 (dati 2022)')+'. '
+  +'<b>Terna</b>, '+L('https://dati.terna.it/download-center','Download center')+', Consumi, «Energia elettrica per settore», 2000-2024, scaricato il '+sn+' senza iscrizione. Licenza non indicata: nella pagina e nei file ci sono solo somme annue per settore, con citazione. Sulla riclassificazione: comunicato di Terna del 5 gennaio 2021, riportato da '+L('https://in.marketscreener.com/quote/stock/TERNA-S-P-A-135034/news/Terna-italian-electricity-consumption-data-increasingly-accurate-up-to-date-and-detailed-32122049/','MarketScreener')+'. '
+  +'<b>ARPA Lombardia</b>, temperatura della stazione Milano v.Brera (sensore 5897), dati.lombardia.it, licenza CC0: è la serie della pagina <a href="../temperature/">Temperature</a>; qui servono i giorni 2019-2020. <b>INGV</b>: vibrazioni del suolo, solo per il rimando alla pagina <a href="../vibrazioni/">Il respiro di Milano</a>.';
+  $('fonti').innerHTML=h;
+}
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1),el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();el.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname+'#'+id)},true);
+</script></body></html>
