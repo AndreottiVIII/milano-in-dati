@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Dove va l'acqua che scarichi</title>
+<style>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;      /* Milano: rosso M1 */
+  --pulita:#0072BC;  /* acqua del rubinetto: blu M4 */
+  --pioggia:#7fb8e0; /* pioggia e falda */
+  --fogna:#8C5A32;   /* acqua di fogna: marrone */
+  --depurata:#00A19A;/* acqua depurata: verde acqua */
+  --campi:#00A651;   /* campi: verde M2 */
+  --seveso:#7B3FA0;  /* Seveso: viola M5 */
+  --persa:#9aa1ad;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.3rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+#ch-flusso svg text,#ch-linea svg text,#ch-seveso svg text{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px}
+.lg i.dot{border-radius:50%}
+.nt3{list-style:none;padding:0;margin:.3em 0;font-size:.9rem;display:flex;flex-wrap:wrap;gap:2px 16px}.nt3 li b:first-child{display:inline-flex;width:18px;height:18px;border-radius:50%;background:#0b0d12;color:#fff;font-size:.75rem;align-items:center;justify-content:center;margin-right:3px}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+/* il conto */
+.conto{background:var(--soft);padding:12px;margin:.4em 0 .8em}
+.conto label{display:block;font-weight:700;font-size:.95rem;margin-bottom:6px}
+.conto .riga{display:flex;align-items:center;gap:10px}
+.conto input[type=range]{flex:1;min-width:0;accent-color:#00A19A;height:28px}
+.conto input[type=number]{width:84px;font:inherit;font-size:16px;padding:6px 8px;border:1px solid var(--axis);border-radius:4px}
+.conto .risp{margin:.6em 0 0;font-size:1rem;line-height:1.35}
+.conto .risp b.big{font-size:1.5rem}
+.conto .hint{font-size:.82rem;color:var(--mut);margin:.4em 0 0}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+</style><script src="../menu.js" defer></script></head><body><main>
+
+<h1>Dove va l'acqua che scarichi</h1>
+<p class="lead">Dal rubinetto alle fogne, dai depuratori ai fiumi e al Po: quanta acqua, quanto viene pulita, le piene del Seveso e quanto si paga.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Fonti dei numeri: Agenzia europea dell'ambiente (depuratori, CC BY 4.0), ISTAT (acquedotto, CC BY 4.0), ARPA Lombardia (fiumi e Seveso, CC0), tariffe dei gestori. Le fonti di ogni numero sono sotto ogni grafico e in fondo alla pagina.</p>
+
+<!-- ============ 1 ============ -->
+<h2 id="viaggio">Dove finisce l'acqua</h2>
+<div class="fig">
+  <h3 id="t-flusso"></h3>
+  <p class="sub">Un anno d'acqua a Milano, il 2020, in milioni di metri cubi (un metro cubo = 1.000 litri). Lo spessore di ogni striscia è proporzionale alla quantità. Tocca una striscia per leggerla.</p>
+  <div class="ch" id="ch-flusso" role="img" aria-label="Diagramma di flusso: acqua messa in rete, rubinetti, fogne, depuratori di Nosedo e San Rocco, campi, Vettabbia, Lambro Meridionale, Lambro e Po"></div>
+  <p class="note" id="nt-flusso"></p>
+  <p class="src">Acqua messa in rete, perdite e acqua consegnata agli utenti: ISTAT, Censimento delle acque per uso civile 2020 (CC BY 4.0). Acqua trattata dai depuratori, quota riusata nei campi e fiume in cui scaricano: Agenzia europea dell'ambiente, rapporto sulle acque reflue urbane, anno 2020 (CC BY 4.0); la quota per i campi è quella dichiarata dal gestore. Chilometri di fogna: MM Spa, presentazione pubblica del giugno 2026. Schema semplificato, non in scala geografica.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="pulita">Quanto è pulita</h2>
+<div class="fig">
+  <h3 id="t-quadri"></h3>
+  <p class="sub">Nosedo e San Rocco insieme, 2022. Ogni griglia è tutto quello che entra nei depuratori in un anno: i quadretti pieni sono quello che esce ancora nell'acqua scaricata.</p>
+  <div class="ch" id="ch-quadri" role="img" aria-label="Quadretti: quota di sporco organico, azoto e fosforo che esce dai depuratori"></div>
+  <table class="kt" id="tab-quadri"></table>
+  <p class="src">Agenzia europea dell'ambiente, rapporti sulle acque reflue urbane, anni 2020 e 2022 (CC BY 4.0): tonnellate misurate in entrata e in uscita dichiarate per ogni impianto. Peschiera Borromeo tratta anche l'acqua di altri comuni.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-linea"></h3>
+  <p class="sub">La strada dell'acqua depurata verso il Po, come una linea del metrò. Ogni fermata è un punto in cui ARPA preleva l'acqua; i tre quadretti sono il giudizio del 2018, 2019 e 2020 su ossigeno, azoto e fosforo.</p>
+  <div class="lg" id="lg-classi"></div>
+  <div class="ch" id="ch-linea" role="img" aria-label="Schema a fermate del Lambro e dei suoi affluenti con la classe di qualità di ogni punto"></div>
+  <p class="note" id="nt-linea"></p>
+  <p class="src">ARPA Lombardia, «Acque superficiali (corsi d'acqua) - LIMeco», 2018-2020, e «Dati analitici corpi idrici fluviali», 2018-2021, dati.lombardia.it (CC0). Fiume in cui scarica ogni depuratore: Agenzia europea dell'ambiente (CC BY 4.0). Schema semplificato: le distanze non sono in scala.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-prima"></h3>
+  <p class="sub">Punteggio di qualità di ogni punto nel 2013 e nel 2020 (da 0, peggio, a 1, meglio). Le fasce colorate sono le cinque classi.</p>
+  <div class="ch" id="ch-prima" role="img" aria-label="Pallini collegati: punteggio di qualità dei fiumi nel 2013 e nel 2020"></div>
+  <p class="src">ARPA Lombardia, LIMeco 2013 e 2018-2020, dati.lombardia.it (CC0). Solo i punti presenti in tutti e due gli anni.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="piene">Le fogne e le piene</h2>
+<div class="fig">
+  <h3 id="t-seveso"></h3>
+  <p class="sub">Il livello del Seveso a Niguarda, dove il fiume entra in città. Ogni riga è un anno; ogni cerchio è un giorno in cui il fiume ha superato 1 metro, più grande se l'acqua è salita di più.</p>
+  <div class="ch" id="ch-seveso" role="img" aria-label="Calendario delle piene del Seveso a Niguarda, 2014-2024"></div>
+  <p class="note" id="nt-seveso"></p>
+  <p class="src">ARPA Lombardia, «Livello idrometrico dal 2011 al 2020» e «dal 2021», sensore di Milano Niguarda, misure ogni 10 minuti, solo quelle di buona qualità (CC0). Vasca del Parco Nord: Comune di Milano, ripreso dalla stampa.</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="costo">Quanto costa</h2>
+<div class="fig">
+  <h3 id="t-conto"></h3>
+  <p class="sub">Scrivi quanta acqua usi in un anno: il conto della parte «fogna» e della parte «depurazione», a Milano e nelle altre città con le tariffe del 2025.</p>
+  <div class="conto">
+    <label for="mc">Quanti metri cubi d'acqua usi in un anno?</label>
+    <div class="riga"><input type="range" id="mc-r" min="10" max="400" step="5" value="100" aria-label="Metri cubi all'anno"><input type="number" id="mc" min="1" max="2000" step="1" value="100" inputmode="numeric"><span>m³</span></div>
+    <p class="risp" id="conto-risp"></p>
+    <p class="hint" id="conto-hint"></p>
+  </div>
+  <div class="ch" id="ch-conto" role="img" aria-label="Barre: quanto costano fogna e depurazione per il consumo scelto in otto aree"></div>
+  <p class="src" id="src-conto"></p>
+</div>
+
+<div class="fig">
+  <h3 id="t-tariffa"></h3>
+  <p class="sub">Milano, prezzo di fogna e depurazione per metro cubo. La linea rossa è in euro di oggi (prezzi del 2025), quella grigia in euro di quell'anno: la fascia tra le due è l'inflazione.</p>
+  <div class="ch" id="ch-tariffa" role="img" aria-label="Linee: tariffa di fognatura e depurazione a Milano, 2020-2026"></div>
+  <p class="src">Tariffe del servizio idrico della città di Milano 2020-2026, MM Spa, pubblicate su latuaacqua.it (il 2026 è provvisorio). Prezzi: indice ISTAT FOI, 2025 = 100.</p>
+</div>
+
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul>
+<p>L'acqua del rubinetto, zona per zona: <a href="../acqua-del-sindaco/">L'acqua del sindaco</a>. Quanta pioggia cade sulla città: <a href="../pioggia/">Quanto piove a Milano</a>.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Fogna mista</dt><dd>Un solo tubo raccoglie sia gli scarichi delle case sia la pioggia delle strade. È il sistema di Milano.</dd>
+<dt>Depuratore</dt><dd>L'impianto che pulisce l'acqua di fogna prima di rimetterla in un fiume o nei canali dei campi. Milano ne ha due grandi, Nosedo e San Rocco; la parte est della città va a Peschiera Borromeo.</dd>
+<dt>Metro cubo (m³)</dt><dd>1.000 litri. Un milione di metri cubi è un miliardo di litri.</dd>
+<dt>Sporco organico</dt><dd>Quello che i batteri dell'acqua consumano respirando (in sigla BOD): avanzi di cibo, scarichi del bagno. Più ce n'è, meno ossigeno resta per i pesci.</dd>
+<dt>Azoto e fosforo</dt><dd>Nutrienti: nei fiumi fanno crescere alghe che tolgono ossigeno.</dd>
+<dt>Classe di qualità</dt><dd>Il giudizio di ARPA su ossigeno, azoto e fosforo dell'acqua di un fiume (in sigla LIMeco), in cinque classi: elevato, buono, sufficiente, scarso, cattivo. Non dice nulla su pesci, piante o sostanze chimiche.</dd>
+<dt>Riuso nei campi</dt><dd>Acqua depurata e disinfettata che invece di andare nel fiume va nei canali che irrigano i campi a sud di Milano.</dd>
+<dt>Livello del fiume</dt><dd>L'altezza dell'acqua rispetto a uno «zero» fissato vicino al fondo, misurata da uno strumento sul ponte.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati, separati da punto e virgola, con il punto per i decimali.</p>
+<ul>
+<li><a href="data/depuratori.csv">I tre depuratori</a>: acqua trattata, sostanze in entrata e in uscita, fiume di scarico, 2020 e 2022</li>
+<li><a href="data/fiumi_stazioni.csv">I punti di prelievo nei fiumi</a>: classe di qualità 2013 e 2018-2020, valori tipici di fosforo, azoto e batteri</li>
+<li><a href="data/seveso_giorni_sopra_1m.csv">Le piene del Seveso</a>: i giorni sopra 1 metro, 2013-2024</li>
+<li><a href="data/tariffe_milano.csv">Tariffe di fogna e depurazione a Milano</a> 2020-2026 e <a href="data/tariffe_citta_2025.csv">nelle altre città</a> nel 2025</li>
+<li><a href="data/riepilogo.json">Tutti i numeri di questa pagina</a></li>
+</ul></div></details>
+</div>
+
+<footer>
+<p><b>Fonti e licenze.</b> Depuratori: European Environment Agency, WISE UWWTD, «Treatment plants», «Agglomerations» e «Discharge points», rapporti 2021 (anno 2020) e 2023 (anno 2022), servizio pubblico water.discomap.eea.europa.eu, scaricati il 6 novembre 2026, CC BY 4.0. Acquedotto: ISTAT, Censimento delle acque per uso civile, anno 2020, tavole 15, 16 e 36, CC BY 4.0. Fiumi e Seveso: ARPA Lombardia su <a href="https://www.dati.lombardia.it">dati.lombardia.it</a>, CC0. Rete fognaria, riuso nei campi, bacino di Peschiera: MM Spa, presentazione al convegno sul riuso delle acque, Brescia, 16 giugno 2026 (numeri citati, senza licenza aperta). Tariffe 2025: MM Spa (latuaacqua.it), Acea Ato 2, SMAT, ABC Napoli e Regione Campania, Hera e ATERSIR, Publiacqua, IRETI e Città Metropolitana di Genova, CAP Holding (numeri citati). Prezzi: ISTAT, indice FOI.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),pulita:cv('--pulita'),pioggia:cv('--pioggia'),fogna:cv('--fogna'),depurata:cv('--depurata'),campi:cv('--campi'),seveso:cv('--seveso'),persa:cv('--persa'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#c9ced6'};
+var CLASSI=[{k:'ELEVATO',n:'elevato',c:'#0072BC',lo:0.66},{k:'BUONO',n:'buono',c:'#00A651',lo:0.50},{k:'SUFFICIENTE',n:'sufficiente',c:'#FFD500',lo:0.33},{k:'SCARSO',n:'scarso',c:'#F58220',lo:0.17},{k:'CATTIVO',n:'cattivo',c:'#E30613',lo:0}];
+function cl(k){for(var i=0;i<CLASSI.length;i++)if(CLASSI[i].k===k)return CLASSI[i];return null}
+function clv(v){for(var i=0;i<CLASSI.length;i++)if(v>=CLASSI[i].lo)return CLASSI[i];return CLASSI[4]}
+var D,RD=[];
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0?'−':'')+grp(r[0])+','+r[1]}
+function f2(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*100)/100).toFixed(2).split('.');return (x<0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function dataIt(s){var p=s.split('-');return (+p[2])+' '+MESI[+p[1]-1]+' '+p[0]}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/&[a-z]+;/g,'x')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+fetch(DATA+'riepilogo.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error('riepilogo');return r.json()}).then(function(j){
+  D=j;try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+function F(id){for(var i=0;i<D.fiumi.length;i++)if(D.fiumi[i].id===id)return D.fiumi[i]}
+function S(s,anno,imp){for(var i=0;i<D.sostanze.length;i++){var x=D.sostanze[i];if(x.sostanza===s&&x.anno===anno&&(x.impianto||'')===(imp||''))return x}}
+function TM(a){for(var i=0;i<D.tariffe_milano.length;i++)if(D.tariffe_milano[i].anno===a)return D.tariffe_milano[i]}
+function tutto(){
+  highlights();
+  draw(flusso);draw(quadri);draw(linea);draw(prima);draw(seveso);draw(conto);draw(tariffa);
+  limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+  var r=$('mc-r'),n=$('mc');
+  r.addEventListener('input',function(){n.value=r.value;conto()});
+  n.addEventListener('input',function(){var v=+n.value;if(v>0){r.value=Math.min(400,Math.max(10,v));conto()}});
+}
+function piuCare(){var m=D.tariffe_citta.filter(function(c){return c.citta==='Milano'})[0];return D.tariffe_citta.filter(function(c){return c.citta!=='Milano'&&c.totale_m3>m.totale_m3})}
+function migliorati(){return D.fiumi.filter(function(f){return f.limeco_2013!=null&&f.limeco_2020!=null}).map(function(f){return f.limeco_2020>f.limeco_2013})}
+
+/* ---------- numeri in alto ---------- */
+function highlights(){
+  var fl=D.flusso2020,bod=S('BOD',2022),o=F('orio'),t20=TM(2020),t25=TM(2025);
+  var nCatt=['2018','2019','2020'].filter(function(a){return o['classe_'+a]==='CATTIVO'}).length;
+  var top=D.seveso.giorni.slice().sort(function(a,b){return b.cm-a.cm})[0];
+  var pc=piuCare(),mig=migliorati(),nm=mig.filter(Boolean).length;
+  var reale=(t25.totale_m3_euro2025/t20.totale_m3_euro2025-1)*100,nom=(t25.totale_m3/t20.totale_m3-1)*100;
+  var Tt=[
+    {c:'#E30613',h:'t-flusso',n:f0(fl.litri_ogni_100),u:'litri',p:'arrivano ai depuratori per ogni 100 litri usciti dai rubinetti (2020): nelle fogne finisce anche la pioggia.'},
+    {c:'#FFD500',h:'t-quadri',n:f0(bod.tolto_pct),u:'%',p:'dello sporco organico tolto dall’acqua a Nosedo e San Rocco nel 2022.'},
+    {c:'#00A651',h:'t-flusso',n:f0(fl.riuso_pct_nosedo),u:'%',p:'dell’acqua pulita a Nosedo non va nel fiume ma irriga i campi a sud della città.'},
+    {c:'#0072BC',h:'t-flusso',n:grp(String(D.citati.rete_fognaria_km.v)),u:'km',p:'di fogne sotto Milano: nello stesso tubo scorrono gli scarichi e la pioggia.'},
+    {c:'#7B3FA0',h:'t-linea',n:nCatt+' su 3',u:'',p:'gli anni (2018-2020) in cui il Lambro, prima di entrare nel Po, è nella classe di qualità peggiore.'},
+    {c:'#F58220',h:'t-seveso',n:f2(top.cm/100).replace(/0$/,''),u:'m',p:'il livello più alto del Seveso a Niguarda, il '+dataIt(top.g)+'.'},
+    {c:'#00A19A',h:'t-conto',n:f2(t25.totale_m3),u:'€',p:'al metro cubo per fogna e depurazione a Milano nel 2025. In '+pc.length+' delle altre '+(D.tariffe_citta.length-1)+' aree si paga di più.'},
+    {c:'#E6007E',h:'t-tariffa',n:sg0(reale)+'%',u:'',p:'la tariffa di fogna e depurazione dal 2020 al 2025, contando l’inflazione ('+sg0(nom)+'% senza).'},
+    {c:'#8C5A32',h:'t-prima',n:nm+' su '+mig.length,u:'',p:'punti dei fiumi intorno a Milano con un punteggio di qualità migliore nel 2020 che nel 2013.'}
+  ];
+  $('hl').innerHTML=Tt.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. il viaggio: strisce ---------- */
+function rib(xa1,xa2,ya,xb1,xb2,yb,col,t){ // striscia da [xa1,xa2] a ya fino a [xb1,xb2] a yb
+  var ym=(ya+yb)/2;
+  var d='M'+r1(xa1)+' '+r1(ya)+'C'+r1(xa1)+' '+r1(ym)+' '+r1(xb1)+' '+r1(ym)+' '+r1(xb1)+' '+r1(yb)+'L'+r1(xb2)+' '+r1(yb)+'C'+r1(xb2)+' '+r1(ym)+' '+r1(xa2)+' '+r1(ym)+' '+r1(xa2)+' '+r1(ya)+'Z';
+  return '<path d="'+d+'" fill="'+col+'" fill-opacity=".9"'+(t?tip(t):'')+'/>';
+}
+function flusso(){
+  var fl=D.flusso2020,ist=D.istat2020,W=width('ch-flusso'),wide=W>=560;
+  var k=Math.min(W*0.5,330)/fl.depuratori,cx=W/2,bh=8;
+  var lpp=function(v){return f0(v/fl.immessa*ist.immessa_l_ab_g)}; // litri per abitante al giorno
+  function tt(nome,v,extra){return '<b>'+nome+'</b><br>'+f1(v)+' milioni di m³ nel 2020<br>circa '+lpp(v)+' litri al giorno per abitante'+(extra?'<br>'+extra:'')}
+  var y0=34,y1=126,y2=226,y3=318,y4=420,y5=510,y6=588,H=640;
+  var s='';
+  // riga 0: messa in rete
+  var wI=fl.immessa*k,a0=cx-fl.depuratori*k/2,aE=a0+fl.erogata*k,aP=aE+fl.perdite*k;
+  s+='<rect x="'+r1(a0)+'" y="'+y0+'" width="'+r1(wI)+'" height="'+bh+'" fill="'+C.pulita+'"'+tip(tt('Acqua messa nei tubi dell’acquedotto',fl.immessa))+'/>';
+  s+=T(a0,y0-8,'Acqua messa nei tubi: <tspan class="b">'+f0(fl.immessa)+'</tspan>',{});
+  // perdite: escono a destra
+  var pX=Math.min(W-6,aP+(wide?90:40));
+  s+=rib(aE,aP,y0+bh,pX-fl.perdite*k,pX,y1-28,C.persa,tt('Perdite della rete',fl.perdite,ist.perdite_pct.toString().replace('.',',')+'% dell’acqua messa nei tubi'));
+  if(wide)s+=T(pX+8,y1-24,'si perde: '+f0(fl.perdite)+' ('+f1(ist.perdite_pct)+'%)',{c:'m'});else s+=T(W,y1-12,'si perde: '+f0(fl.perdite),{a:'end',c:'m'})+T(W,y1+3,'('+f1(ist.perdite_pct)+'%)',{a:'end',c:'m'});
+  // rubinetti
+  s+=rib(a0,aE,y0+bh,a0,aE,y1,C.pulita,tt('Acqua consegnata agli utenti',fl.erogata,'case, uffici, negozi, servizi'));
+  s+='<rect x="'+r1(a0)+'" y="'+y1+'" width="'+r1(fl.erogata*k)+'" height="'+bh+'" fill="'+C.pulita+'"/>';
+  s+=T(a0,y1-8,'Rubinetti: <tspan class="b">'+f0(fl.erogata)+'</tspan>',{});
+  // fogne: rubinetti + pioggia/falda
+  var c0=a0,cE=c0+fl.erogata*k,cT=c0+fl.depuratori*k;
+  s+=rib(a0,aE,y1+bh,c0,cE,y2,C.fogna,tt('Dai rubinetti alle fogne',fl.erogata,'ipotesi: tutta l’acqua usata torna in fogna'));
+  var pr0=Math.min(W-6,cT+(wide?90:30));
+  if(wide)s+=T(pr0+8,y1+56,'+ '+f0(fl.in_piu)+' pioggia,',{c:'m'})+T(pr0+8,y1+71,'falda e altro',{c:'m'});else s+=T(W,y1+30,'+ '+f0(fl.in_piu)+' pioggia,',{a:'end',c:'m'})+T(W,y1+45,'falda e altro',{a:'end',c:'m'});
+  s+=rib(pr0-fl.in_piu*k,pr0,y1+54,cE,cT,y2,C.pioggia,tt('Acqua in più nelle fogne',fl.in_piu,'differenza tra l’acqua dei depuratori e quella dei rubinetti: pioggia, acqua di falda che entra nei tubi, scarichi di altri comuni. I dati non dicono quanta di ciascuna.'));
+  s+='<rect x="'+r1(c0)+'" y="'+y2+'" width="'+r1(fl.depuratori*k)+'" height="'+bh+'" fill="'+C.fogna+'"'+tip(tt('Acqua arrivata ai depuratori di Nosedo e San Rocco',fl.depuratori))+'/>';
+  s+=T(c0,y2-8,'Fogne, '+grp(String(D.citati.rete_fognaria_km.v))+' km: <tspan class="b">'+f0(fl.depuratori)+'</tspan>',{});
+  // depuratori
+  var g=wide?40:26,n0=cx-(fl.depuratori*k+g)/2,nE=n0+fl.nosedo*k,s0=nE+g,sE=s0+fl.san_rocco*k;
+  s+=rib(c0,c0+fl.nosedo*k,y2+bh,n0,nE,y3,C.fogna,tt('Al depuratore di Nosedo',fl.nosedo));
+  s+=rib(c0+fl.nosedo*k,cT,y2+bh,s0,sE,y3,C.fogna,tt('Al depuratore di San Rocco',fl.san_rocco));
+  s+='<rect x="'+r1(n0)+'" y="'+y3+'" width="'+r1(fl.nosedo*k)+'" height="'+bh+'" fill="'+C.ink+'"/><rect x="'+r1(s0)+'" y="'+y3+'" width="'+r1(fl.san_rocco*k)+'" height="'+bh+'" fill="'+C.ink+'"/>';
+  s+=T(n0,y3-8,'Nosedo <tspan class="b">'+f0(fl.nosedo)+'</tspan>',{})+T(sE,y3-8,'San Rocco <tspan class="b">'+f0(fl.san_rocco)+'</tspan>',{a:'end'});
+  // uscita: campi e fiumi
+  var nCe=n0+fl.riuso_nosedo*k,sFe=s0+fl.fiume_san_rocco*k;
+  var cN0=Math.max(2,n0-(wide?60:24)),vt0=cx-g/2-fl.fiume_nosedo*k,lm0=cx+g/2,cS0=Math.min(W-2-fl.riuso_san_rocco*k,sE+(wide?60:24));
+  s+=rib(n0,nCe,y3+bh,cN0,cN0+fl.riuso_nosedo*k,y4,C.campi,tt('Da Nosedo ai campi',fl.riuso_nosedo,'quota dichiarata: '+f0(fl.riuso_pct_nosedo)+'% dell’acqua trattata. Irrigazione da aprile a settembre.'));
+  s+=rib(nCe,nE,y3+bh,vt0,vt0+fl.fiume_nosedo*k,y4,C.depurata,tt('Da Nosedo alla Vettabbia',fl.fiume_nosedo));
+  s+=rib(s0,sFe,y3+bh,lm0,lm0+fl.fiume_san_rocco*k,y4,C.depurata,tt('Da San Rocco al Lambro Meridionale',fl.fiume_san_rocco));
+  s+=rib(sFe,sE,y3+bh,cS0,cS0+fl.riuso_san_rocco*k,y4,C.campi,tt('Da San Rocco ai campi',fl.riuso_san_rocco,'quota dichiarata: '+f1(fl.riuso_pct_san_rocco).replace(',',',')+'% dell’acqua trattata'));
+  s+='<rect x="'+r1(cN0)+'" y="'+y4+'" width="'+r1(fl.riuso_nosedo*k)+'" height="'+bh+'" fill="'+C.campi+'"/>';
+  s+='<rect x="'+r1(cS0)+'" y="'+y4+'" width="'+r1(fl.riuso_san_rocco*k)+'" height="'+bh+'" fill="'+C.campi+'"/>';
+  s+=T(cN0,y4+bh+17,'Campi',{c:'b',st:'fill:'+C.campi})+T(cN0,y4+bh+32,f0(fl.riuso_nosedo),{c:'b'});
+  s+=T(cS0+fl.riuso_san_rocco*k,y4+bh+17,'Campi',{a:'end',c:'b',st:'fill:'+C.campi})+T(cS0+fl.riuso_san_rocco*k,y4+bh+32,f0(fl.riuso_san_rocco),{a:'end',c:'b'});
+  // fiumi: Vettabbia e Lambro Meridionale, poi Lambro e Po
+  var fT=fl.fiume_nosedo+fl.fiume_san_rocco,l0=cx-fT*k/2;
+  s+=T(vt0+fl.fiume_nosedo*k,y4-8,'Vettabbia '+f0(fl.fiume_nosedo),{a:'end',c:'b',st:'font-size:12px'});
+  s+=T(lm0,y4-8,'Lambro Mer. '+f0(fl.fiume_san_rocco),{c:'b',st:'font-size:12px'});
+  s+=rib(vt0,vt0+fl.fiume_nosedo*k,y4,l0,l0+fl.fiume_nosedo*k,y5,C.depurata,tt('Vettabbia, poi Lambro',fl.fiume_nosedo));
+  s+=rib(lm0,lm0+fl.fiume_san_rocco*k,y4,l0+fl.fiume_nosedo*k,l0+fT*k,y5,C.depurata,tt('Lambro Meridionale, poi Lambro',fl.fiume_san_rocco));
+  s+='<rect x="'+r1(l0)+'" y="'+y5+'" width="'+r1(fT*k)+'" height="'+bh+'" fill="'+C.depurata+'"/>';
+  s+=T(cx,y5+bh+18,'Lambro: '+f0(fT),{a:'middle',c:'b'});
+  s+=rib(l0,l0+fT*k,y5+bh+26,l0,l0+fT*k,y6,C.depurata,tt('Nel Lambro e poi nel Po',fT,'insieme all’acqua che il fiume porta già'));
+  s+=T(cx,y6+20,'Po, poi il mare Adriatico',{a:'middle',c:'b'});
+  $('ch-flusso').innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('t-flusso').textContent='Nei depuratori arriva più acqua di quella uscita dai rubinetti: '+fl.litri_ogni_100+' litri ogni 100';
+  $('nt-flusso').innerHTML='Per ogni milanese, in un giorno del 2020: circa <b>'+ist.erogata_l_ab_g+' litri</b> consegnati dall’acquedotto e circa <b>'+lpp(fl.depuratori)+' litri</b> arrivati a Nosedo e San Rocco. Una parte della città (la zona est) scarica nel depuratore di Peschiera Borromeo, che tratta anche l’acqua di altri comuni ('+f0(fl.peschiera_trattata)+' milioni di m³ nel 2020) e non è nel disegno. Nel 2022 Nosedo e San Rocco hanno trattato '+f0(D.flusso2022.nosedo+D.flusso2022.san_rocco)+' milioni di m³.';
+}
+
+/* ---------- 2. quadretti: che cosa esce ---------- */
+function quadri(){
+  var W=width('ch-quadri'),SS=[{s:'BOD',n:'Sporco organico',col:C.fogna},{s:'N',n:'Azoto',col:C.seveso},{s:'P',n:'Fosforo',col:'#E6007E'}];
+  var gap=W>=520?40:14,cell=Math.min(18,Math.floor((W-2*gap)/30)),gw=cell*10,top=44,H=top+gw+48;
+  var x0=(W-(3*gw+2*gap))/2,s='';
+  SS.forEach(function(q,i){
+    var d=S(q.s,2022),rest=Math.round(100-d.tolto_pct),x=x0+i*(gw+gap);
+    s+=T(x,16,q.n,{c:'b'})+T(x,32,'entrano '+f0(d.entrata_t)+' t',{c:'m'});
+    for(var j=0;j<100;j++){var r=Math.floor(j/10),c=j%10,pieno=j>=100-rest;
+      s+='<rect x="'+r1(x+c*cell)+'" y="'+r1(top+r*cell)+'" width="'+(cell-2)+'" height="'+(cell-2)+'" rx="2" fill="'+(pieno?q.col:'#e6e8ec')+'"'+tip('<b>'+q.n+', 2022</b><br>entrano '+f0(d.entrata_t)+' tonnellate<br>escono '+f0(d.uscita_t)+' tonnellate<br>tolto: '+f1(d.tolto_pct)+'%')+'/>'}
+    s+=T(x,top+gw+18,'ne esce '+rest+' su 100',{c:'b'})+T(x,top+gw+34,f0(d.uscita_t)+' t',{c:'m'});
+  });
+  $('ch-quadri').innerHTML=svgOpen(W,H)+s+'</svg>';
+  var b=S('BOD',2022);
+  $('t-quadri').textContent='Su 100 chili di sporco organico che entrano nei depuratori ne escono '+Math.round(100-b.tolto_pct)+'; azoto e fosforo restano di più';
+  var h='<thead><tr><th>Tolto dall’acqua</th><th>2020</th><th>2022</th><th>Peschiera 2022</th></tr></thead><tbody>';
+  [['BOD','Sporco organico'],['COD','Sostanze ossidabili'],['N','Azoto'],['P','Fosforo']].forEach(function(z){
+    h+='<tr><td>'+z[1]+'</td><td>'+f1(S(z[0],2020).tolto_pct)+'%</td><td>'+f1(S(z[0],2022).tolto_pct)+'%</td><td>'+f1(S(z[0],2022,'Peschiera Borromeo').tolto_pct)+'%</td></tr>'});
+  $('tab-quadri').innerHTML=h+'</tbody>';
+}
+
+/* ---------- 3. la linea del Lambro ---------- */
+function linea(){
+  var W=width('ch-linea'),wide=W>=560;
+  $('lg-classi').innerHTML=CLASSI.map(function(c){return '<span><i style="background:'+c.c+'"></i>'+c.n+'</span>'}).join('')+'<span><i style="background:'+C.ink+';transform:rotate(45deg) scale(.8)"></i>depuratore</span>';
+  var xm=wide?Math.round(W*0.42):Math.round(W*0.47),xb=wide?Math.round(W*0.16):34,dy=62,s='',lw=7;
+  // fermate: [id, x, y, depuratore prima della fermata]
+  var y=30,P={};
+  P.lesmo=[xm,y];P.monza=[xm,y+dy*0.75];P.peschiera=[xm,y+dy*1.6];P.vett=[xb,y+dy*2.5];P.jv=[xm,y+dy*3.1];P.santangelo=[xm,y+dy*3.7];
+  P.locate=[xb,y+dy*4.3];P.lmsa=[xb,y+dy*5.2];P.jl=[xm,y+dy*5.8];P.orio=[xm,y+dy*6.4];P.po=[xm,y+dy*7.4];
+  var H=P.po[1]+40;
+  var LC='#0072BC';
+  function seg(a,b){return L(a[0],a[1],b[0],b[1],LC,lw,' stroke-linecap="round"')}
+  // il Lambro (linea principale) e i due rami
+  s+=seg(P.lesmo,P.orio)+seg([P.vett[0],P.vett[1]-dy*0.9],P.vett)+'<path d="M'+P.vett[0]+' '+P.vett[1]+'L'+P.vett[0]+' '+r1(P.vett[1]+dy*0.3)+'L'+P.jv[0]+' '+P.jv[1]+'" fill="none" stroke="'+LC+'" stroke-width="'+lw+'" stroke-linejoin="round"/>';
+  s+=L(P.locate[0],P.locate[1]-dy*0.8,P.lmsa[0],P.lmsa[1],LC,lw,' stroke-linecap="round"')+'<path d="M'+P.lmsa[0]+' '+P.lmsa[1]+'L'+P.lmsa[0]+' '+r1(P.lmsa[1]+dy*0.3)+'L'+P.jl[0]+' '+P.jl[1]+'" fill="none" stroke="'+LC+'" stroke-width="'+lw+'" stroke-linejoin="round"/>';
+  s+=L(P.orio[0],P.orio[1],P.po[0],P.po[1],'#0b0d12',lw,' stroke-linecap="round"');
+  // depuratori (quadrati neri)
+  function dep(x,yy,nome,dx){return '<rect x="'+(x-7)+'" y="'+(yy-7)+'" width="14" height="14" fill="'+C.ink+'" transform="rotate(45 '+x+' '+yy+')"/>'+T(x+(dx||14),yy+4,nome,{c:'m',st:'fill:'+C.ink+';font-weight:600'})}
+  s+=dep(P.monza[0],P.monza[1],'Monza');
+  s+=dep(P.peschiera[0],P.peschiera[1]-dy*0.42,'Peschiera B.');
+  s+=dep(P.vett[0],P.vett[1]-dy*0.9,'Nosedo');
+  s+=dep(P.locate[0],P.locate[1]-dy*0.8,'San Rocco');
+  // fermate
+  function stop(id,p,nome,anchorLeft){
+    var f=F(id),x=p[0],yy=p[1],c20=cl(f.classe_2020),sz=11;
+    var t='<b>'+esc(f.nome)+'</b>';['2018','2019','2020'].forEach(function(a){var c=cl(f['classe_'+a]);t+='<br>'+a+': '+(c?sw(c.c)+c.n+' ('+f2(f['limeco_'+a])+')':'n.d.')});
+    t+='<br>fosforo, valore tipico: '+f0(f.fosforo_ug_l)+' µg/l<br>batteri fecali (E. coli), valore tipico: '+f0(f.ecoli_mpn_100ml)+' ogni 100 ml';
+    var o='<circle cx="'+x+'" cy="'+yy+'" r="9" fill="#fff" stroke="'+C.ink+'" stroke-width="3"'+tip(t)+'/>';
+    var tx=anchorLeft?x-16:x+16,a=anchorLeft?'end':'start';
+    o+=T(tx,yy-2,nome,{a:a,c:'b'});
+    var bx=anchorLeft?tx-3*(sz+3):tx;
+    ['2018','2019','2020'].forEach(function(an,i){var c=cl(f['classe_'+an]);o+='<rect x="'+(bx+i*(sz+3))+'" y="'+(yy+5)+'" width="'+sz+'" height="'+sz+'" rx="2" fill="'+(c?c.c:'#e6e8ec')+'"'+tip(t)+'/>'});
+    o+=T(anchorLeft?bx-5:bx+3*(sz+3)+3,yy+15,c20?c20.n:'',{a:a,c:'m',st:'fill:'+C.ink2});
+    return o;
+  }
+  s+=stop('lesmo',P.lesmo,'Lambro a Lesmo');
+  s+=stop('peschiera',P.peschiera,'Peschiera Borromeo');
+  s+=stop('vettabbia',P.vett,'Vettabbia',false);
+  s+=stop('santangelo',P.santangelo,"Sant’Angelo Lod.");
+  s+=stop('locate',P.locate,'Lambro Meridionale',false);
+  s+=stop('lmsantangelo',P.lmsa,"a Sant’Angelo",false);
+  s+=stop('orio',P.orio,'Orio Litta, prima del Po');
+  s+=stop('po',P.po,'Po a Somaglia');
+  // Navigli, a parte
+  if(wide){
+    var nx=Math.round(W*0.78),ny=30;
+    s+=T(nx-10,ny-10,'I Navigli in città',{a:'start',c:'b'});
+    s+=L(nx,ny+10,nx,ny+10+dy*1.4,'#00A19A',lw,' stroke-linecap="round"');
+    s+=stop('martesana',[nx,ny+10],'Martesana');s+=stop('grande',[nx,ny+10+dy*0.7],'Naviglio Grande');s+=stop('pavese',[nx,ny+10+dy*1.4],'N. Pavese');
+    s+=T(nx-10,ny+dy*1.4+52,'acqua di Ticino e Adda',{c:'m'});
+  }
+  $('ch-linea').innerHTML=svgOpen(W,H)+s+'</svg>';
+  var o=F('orio'),v=F('vettabbia'),g=F('grande');
+  $('t-linea').textContent='Più il Lambro scende verso il Po, peggio sta: da «'+cl(F('lesmo').classe_2020).n+'» a Lesmo a «'+cl(o.classe_2020).n+'» a Orio Litta';
+  var nv=['martesana','grande','pavese'].map(F);
+  $('nt-linea').innerHTML=(wide?'':'I Navigli in città, che portano acqua del Ticino e dell’Adda, sono invece in classe «'+nv.map(function(f){return cl(f.classe_2020).n}).filter(function(x,i,a){return a.indexOf(x)===i}).join('» e «')+'» in tutti e tre i punti. ')+
+    'Nella Vettabbia, dove scarica Nosedo, il fosforo è circa '+f0(v.fosforo_ug_l)+' µg/l contro '+f0(g.fosforo_ug_l)+' nel Naviglio Grande; i batteri fecali invece sono pochi ('+f0(v.ecoli_mpn_100ml)+' ogni 100 ml; nel Lambro Meridionale a Locate '+f0(F('locate').ecoli_mpn_100ml)+'): Nosedo dichiara di disinfettare l’acqua per i campi. Lungo il Lambro scaricano anche altri depuratori e le fogne di altri comuni: la classe di un punto non dice da dove viene l’inquinamento.';
+}
+
+/* ---------- 4. 2013 contro 2020 ---------- */
+function prima(){
+  var W=width('ch-prima');
+  var nomi={lesmo:'Lambro a Lesmo',peschiera:'Lambro a Peschiera',santangelo:"Lambro a Sant’Angelo",orio:'Lambro a Orio Litta',vettabbia:'Vettabbia',locate:'Lambro Mer. a Locate',lmsantangelo:"Lambro Mer. a S. Angelo",pavese:'Naviglio Pavese',seveso:'Seveso a Lentate',olonaleg:'Olona a Legnano'};
+  var rows=D.fiumi.filter(function(f){return f.limeco_2013!=null&&f.limeco_2020!=null}).sort(function(a,b){return b.limeco_2020-a.limeco_2020});
+  var lw=W>=520?170:140,rw=16,rh=30,top=26,H=top+rows.length*rh+8,X=function(v){return lw+v*(W-lw-rw)};
+  var s='';
+  CLASSI.forEach(function(c,i){var hi=i===0?1:CLASSI[i-1].lo;s+='<rect x="'+r1(X(c.lo))+'" y="'+(top-6)+'" width="'+r1(X(hi)-X(c.lo))+'" height="'+(H-top)+'" fill="'+c.c+'" fill-opacity=".13"/>';
+    var lab=c.n;if(tw(lab,12)<X(hi)-X(c.lo)-4)s+=T((X(c.lo)+X(hi))/2,top-10,lab,{a:'middle',c:'m'})});
+  rows.forEach(function(f,k){
+    var y=top+k*rh+rh/2,a=f.limeco_2013,b=f.limeco_2020,up=b>a;
+    s+=T(0,y+4,nomi[f.id]||f.nome,{st:'font-size:'+(W>=520?13:12)+'px'});
+    s+=L(X(a),y,X(b),y,up?C.ink2:C.axis,2.5);
+    s+='<circle cx="'+r1(X(a))+'" cy="'+y+'" r="5" fill="#fff" stroke="'+C.ink2+'" stroke-width="2"/>';
+    s+='<circle cx="'+r1(X(b))+'" cy="'+y+'" r="6" fill="'+C.ink+'" stroke="#fff" stroke-width="2"/>';
+    s+='<rect x="0" y="'+(y-rh/2)+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+esc(f.nome)+'</b><br>2013: '+f2(a)+' ('+cl(f.classe_2013).n+')<br>2020: '+f2(b)+' ('+cl(f.classe_2020).n+')')+'/>';
+  });
+  $('ch-prima').innerHTML=svgOpen(W,H)+s+'</svg>'+'<div class="lg"><span><i class="dot" style="background:#fff;border:2px solid '+C.ink2+'"></i>2013</span><span><i class="dot" style="background:'+C.ink+'"></i>2020</span></div>';
+  var mig=migliorati(),nm=mig.filter(Boolean).length,cambi=rows.filter(function(f){return f.classe_2013!==f.classe_2020}).length;
+  $('t-prima').textContent=nm+' punti su '+mig.length+' migliorano dal 2013 al 2020, ma '+(cambi===0?'nessuno':cambi===1?'solo uno':'solo '+cambi)+' cambia classe';
+}
+
+/* ---------- 5. il Seveso ---------- */
+function seveso(){
+  var W=width('ch-seveso'),SV=D.seveso,anni=[];for(var a=2014;a<=2024;a++)anni.push(a);
+  var wide=W>=520,lw=44,rw=wide?70:30,rh=wide?40:38,top=26,H=top+anni.length*rh+6,pw=W-lw-rw;
+  var X=function(doy){return lw+doy/366*pw};
+  function doy(g){var d=new Date(g+'T12:00:00Z'),s=Date.UTC(d.getUTCFullYear(),0,1);return Math.floor((d-s)/864e5)}
+  function rad(cm){return 2.5+Math.min(1,(cm-100)/400)*(wide?11:9.5)}
+  var s='';
+  [0,90,181,273].forEach(function(dd,i){s+=T(X(dd),top-10,['gen','apr','lug','ott'][i],{c:'m'})});
+  s+=T(W,top-10,wide?'giorni >1,5 m':'>1,5 m',{a:'end',c:'m'});
+  // le tre piene più alte, a giorni lontani tra loro
+  var ord=SV.giorni.slice().sort(function(a,b){return b.cm-a.cm}),top3=[];
+  ord.forEach(function(g){if(top3.length<3&&top3.every(function(t){return Math.abs(new Date(t.g)-new Date(g.g))>3*864e5}))top3.push(g)});
+  anni.forEach(function(an,i){
+    var y=top+i*rh+rh/2,gv=SV.giorni_validi_per_anno[an]||0;
+    s+=T(0,y+(gv<300?0:4),an,{c:'b'});
+    if(gv<300)s+=T(0,y+14,gv+' gg',{c:'m'});
+    s+=L(lw,y,W-rw,y,C.grid,1);
+    s+=T(W,y+4,SV.giorni_sopra_150[an],{a:'end',c:'b'});
+    SV.giorni.filter(function(g){return +g.g.slice(0,4)===an}).sort(function(a,b){return a.cm-b.cm}).forEach(function(g){
+      s+='<circle cx="'+r1(X(doy(g.g)))+'" cy="'+y+'" r="'+r1(rad(g.cm))+'" fill="'+C.seveso+'" fill-opacity="'+(g.cm>=150?.8:.3)+'" stroke="#fff" stroke-width=".8"'+tip('<b>'+dataIt(g.g)+'</b><br>livello massimo: '+f2(g.cm/100)+' m')+'/>';
+    });
+  });
+  top3.forEach(function(g,j){var an=+g.g.slice(0,4),i=anni.indexOf(an),y=top+i*rh+rh/2,x=X(doy(g.g)),r=rad(g.cm);
+    var bx=Math.min(W-rw-4,x+r+6),by=y-r-2;
+    s+='<circle cx="'+r1(bx)+'" cy="'+r1(by)+'" r="8" fill="'+C.ink+'"/>'+T(bx,by+4,j+1,{a:'middle',c:'w',st:'stroke:none'});
+  });
+  // vasca del Parco Nord: triangolo sotto la riga del 2023
+  var vi=anni.indexOf(2023),vy=top+vi*rh+rh/2,vx=X(doy('2023-11-15'));
+  s+='<path d="M'+r1(vx)+' '+r1(vy+7)+'l6 10h-12z" fill="'+C.ink+'"/>';
+  $('ch-seveso').innerHTML=svgOpen(W,H)+s+'</svg><ol class="nt3">'+top3.map(function(g,j){return '<li><b>'+(j+1)+'</b> '+dataIt(g.g)+': <b>'+f2(g.cm/100)+' m</b></li>'}).join('')+'</ol><div class="lg"><span><i class="dot" style="background:'+C.seveso+';opacity:.3"></i>tra 1 e 1,5 m</span><span><i class="dot" style="background:'+C.seveso+'"></i>oltre 1,5 m</span><span>▲ vasca del Parco Nord, da novembre 2023</span><span>sotto l’anno: giorni con dati, se meno di 300</span></div>';
+  $('t-seveso').textContent='Nel 2014 il Seveso ha superato 1,5 metri in '+SV.giorni_sopra_150[2014]+' giorni; da allora le piene sono meno, ma non spariscono';
+  $('nt-seveso').innerHTML='Il '+dataIt(ord[0].g)+' il Seveso a Niguarda ha toccato '+f2(ord[0].cm/100)+' metri, il massimo di questa serie; ARPA lo indica come massimo storico, e ricorda che l’8 luglio 2014 (4,92 m) il fiume è esondato. Il 22 settembre 2025, fuori da questi dati, ARPA ha misurato di nuovo 4,92 m. Da novembre 2023 c’è la vasca del Parco Nord (250 mila m³), che trattiene parte della piena: le piene del 2024 ci sono ancora, ma da un solo anno non si può dire quanto la vasca abbia aiutato. Quante piene ci sono dipende soprattutto da quanto piove.';
+}
+
+/* ---------- 6. il conto ---------- */
+function conto(){
+  var mc=Math.max(1,Math.min(2000,+$('mc').value||100)),W=width('ch-conto');
+  var CT=D.tariffe_citta.slice().sort(function(a,b){return a.totale_m3-b.totale_m3}),M=CT.filter(function(c){return c.citta==='Milano'})[0],t25=TM(2025);
+  var fisso=t25.quota_fissa_fognatura+t25.quota_fissa_depurazione,var_=M.totale_m3*mc;
+  $('conto-risp').innerHTML='A Milano paghi circa <b class="big">'+f0(var_+fisso)+' €</b> l’anno di fogna e depurazione: '+f0(M.fognatura*mc)+' € di fogna, '+f0(M.depurazione*mc)+' € di depurazione e '+f0(fisso)+' € fissi per l’abitazione. Senza IVA.';
+  $('conto-hint').textContent='Per avere un’idea: a Milano l’acqua fatturata alle case è di circa '+D.istat2020.fatturata_domestica_l_ab_g+' litri al giorno per abitante, cioè '+f0(D.istat2020.fatturata_domestica_l_ab_g*365/1000)+' m³ l’anno a testa (ISTAT, 2020). Il consumo vero è scritto in bolletta.';
+  var lw=W>=520?130:112,rh=32,bh=18,top=8,H=top+CT.length*rh+4,mx=Math.max.apply(null,CT.map(function(c){return (c.totale_m3_max||c.totale_m3)*mc})),X=function(v){return lw+v/mx*(W-lw-70)};
+  var s='';
+  CT.forEach(function(c,k){
+    var y=top+k*rh,isM=c.citta==='Milano',v=c.totale_m3*mc;
+    s+=T(0,y+bh/2+5,c.citta+(c.citta==='Napoli'?' *':''),{c:isM?'b':''});
+    s+=hbar(lw,X(c.fognatura*mc),y+(rh-bh)/2-4,bh,isM?'#8a0a10':'#7d838d');
+    s+=hbar(X(c.fognatura*mc),X(v),y+(rh-bh)/2-4,bh,isM?C.mi:C.light);
+    if(c.totale_m3_max)s+=hbar(X(v),X(c.totale_m3_max*mc),y+(rh-bh)/2-4,bh,C.light,' fill-opacity=".45"');
+    var lab=f0(v)+(c.totale_m3_max?'–'+f0(c.totale_m3_max*mc):'')+' €';
+    s+=T(X(c.totale_m3_max?c.totale_m3_max*mc:v)+6,y+bh/2+5,lab,{c:'b'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+c.citta+'</b><br>fogna: '+f2(c.fognatura).replace(/,?0+$/,'')+' € al m³<br>depurazione: '+f2(c.depurazione)+' € al m³<br>per '+f0(mc)+' m³: '+f0(v)+' €'+(c.nota?'<br>'+esc(c.nota):''))+'/>';
+  });
+  $('ch-conto').innerHTML=svgOpen(W,H)+s+'</svg><div class="lg"><span><i style="background:#7d838d"></i>parte fogna</span><span><i style="background:'+C.light+'"></i>parte depurazione</span><span><i style="background:'+C.mi+'"></i>Milano</span></div>';
+  var pc=piuCare();
+  $('t-conto').textContent='Fogna e depurazione costano meno a Milano che in '+pc.length+' delle altre '+(CT.length-1)+' aree confrontate';
+  $('src-conto').innerHTML='Tariffe 2025 per le famiglie residenti, solo la parte al metro cubo, senza IVA, senza le quote fisse e senza le piccole quote nazionali: MM Spa (Milano), CAP Holding (comuni intorno a Milano), Acea Ato 2 (Roma, dal 1 luglio), SMAT (Torino), ABC Napoli, Hera (Bologna), Publiacqua (Firenze), IRETI (Genova: tre fasce secondo la zona, la barra chiara arriva alla più cara). * Napoli: la depurazione è una tariffa della Regione Campania fissata nel 2015.';
+}
+
+/* ---------- 7. la tariffa nel tempo ---------- */
+function tariffa(){
+  var W=width('ch-tariffa'),TT=D.tariffe_milano.filter(function(t){return !t.provvisoria}),P=D.tariffe_milano.filter(function(t){return t.provvisoria})[0];
+  var n=TT.length,H=230,m={l:52,r:58,t:22,b:26},lo=0.48,hi=0.73,pw=W-m.l-m.r,ph=H-m.t-m.b;
+  var X=function(i){return m.l+i*pw/n},Y=function(v){return m.t+ph-(v-lo)/(hi-lo)*ph};
+  var nom=TT.map(function(t){return t.totale_m3}),re=TT.map(function(t){return t.totale_m3_euro2025});
+  var s='';
+  [0.5,0.6,0.7].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)});
+  var area='M'+re.map(function(v,i){return r1(X(i))+' '+r1(Y(v))}).join('L')+'L'+nom.map(function(v,i){var j=n-1-i;return r1(X(j))+' '+r1(Y(nom[j]))}).join('L')+'Z';
+  s+='<path d="'+area+'" fill="'+C.mi+'" fill-opacity=".09"/>';
+  function lin(v,col,w){return '<path d="M'+v.map(function(x,i){return r1(X(i))+' '+r1(Y(x))}).join('L')+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linejoin="round"/>'}
+  s+=lin(nom,C.ink2,2)+lin(re,C.mi,3.5);
+  s+='<circle cx="'+r1(X(0))+'" cy="'+r1(Y(re[0]))+'" r="4" fill="'+C.mi+'"/><circle cx="'+r1(X(0))+'" cy="'+r1(Y(nom[0]))+'" r="4" fill="'+C.ink2+'"/><circle cx="'+r1(X(n-1))+'" cy="'+r1(Y(re[n-1]))+'" r="5" fill="'+C.mi+'"/>';
+  s+=T(X(0)-8,Y(re[0])+4,f2(re[0])+' €',{a:'end',c:'b',st:'fill:'+C.mi})+T(X(0)-8,Y(nom[0])+4,f2(nom[0])+' €',{a:'end',c:'b',st:'fill:'+C.ink2});
+  s+=T(X(n-1)+8,Y(nom[n-1])-6,f2(nom[n-1])+' €',{c:'b'});
+  // 2026 provvisorio
+  s+='<circle cx="'+r1(X(n))+'" cy="'+r1(Y(P.totale_m3))+'" r="5" fill="#fff" stroke="'+C.ink2+'" stroke-width="2"'+tip('<b>2026</b> (tariffa provvisoria)<br>'+f2(P.totale_m3)+' € al m³, come nel 2025')+'/>';
+  s+=T(X(n),Y(P.totale_m3)+20,'2026',{a:'middle',c:'m'})+T(X(n),Y(P.totale_m3)+34,'provv.',{a:'middle',c:'m'});
+  var im=1;s+=T(X(im)-10,Math.min(Y(re[1]),Y(re[2]))-14,'in euro di oggi',{c:'b',st:'fill:'+C.mi+';font-size:12px'});
+  s+=T(X(2),Y(nom[2])+22,'in euro di quell’anno',{c:'b',st:'fill:'+C.ink2+';font-size:12px'});
+  TT.forEach(function(t,i){if(i===0||i===n-1||i===2)s+=T(X(i),H-6,t.anno,{a:'middle',c:'m'});
+    s+='<rect x="'+r1(X(i)-pw/n/2)+'" y="'+m.t+'" width="'+r1(pw/n)+'" height="'+ph+'" fill="transparent"'+tip('<b>'+t.anno+'</b><br>fogna '+f2(t.fognatura)+' + depurazione '+f2(t.depurazione)+' € al m³<br>'+sw(C.mi)+'euro di oggi: '+f2(t.totale_m3_euro2025)+'<br>'+sw(C.ink2)+'euro di quell’anno: '+f2(t.totale_m3))+'/>'});
+  $('ch-tariffa').innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('t-tariffa').textContent='Dal 2020 la tariffa è salita ogni anno, anche più dei prezzi: '+sg0((re[n-1]/re[0]-1)*100)+'% contando l’inflazione';
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var L=[],SV=D.seveso,fl=D.flusso2020;
+  L.push('<b>Anni diversi.</b> Il disegno del viaggio usa tutto il 2020, l’ultimo anno in cui ci sono sia i dati dell’acquedotto (ISTAT) sia quelli dei depuratori (Agenzia europea dell’ambiente). Il 2020 è l’anno del Covid: con uffici chiusi e meno pendolari i volumi possono essere diversi dal solito. Per i depuratori c’è anche il 2022.');
+  L.push('<b>L’acqua «in più» nelle fogne non si divide.</b> I '+f0(fl.in_piu)+' milioni di m³ in più sono una differenza tra due fonti: dentro ci sono pioggia, acqua di falda che entra nei tubi, scarichi di altri comuni e la parte di città che va a Peschiera (che toglie). Abbiamo anche supposto che tutta l’acqua dei rubinetti torni in fogna, il che non è vero per giardini e fontane. I dati non dicono quanto pesa ciascuna cosa.');
+  L.push('<b>La quota per i campi è dichiarata.</b> Il '+f0(fl.riuso_pct_nosedo)+'% di Nosedo e l’'+f1(fl.riuso_pct_san_rocco)+'% di San Rocco sono le percentuali comunicate all’Europa, identiche nel rapporto 2020 e in quello 2022. MM, in una presentazione del 2026, parla di circa '+D.citati.irriguo_nosedo_mln_m3.v+' milioni di m³ l’anno da Nosedo e '+D.citati.irriguo_sanrocco_mln_m3.v+' da San Rocco, solo nella stagione delle irrigazioni.');
+  L.push('<b>Le tonnellate di sostanze sono dichiarate dal gestore</b> e misurate a campione; tra il 2020 e il 2022 lo sporco in entrata cresce molto (anche perché il 2020 è l’anno del Covid). Per questo confrontiamo le percentuali tolte, non le tonnellate.');
+  L.push('<b>La classe di qualità dei fiumi è un giudizio solo chimico.</b> Guarda ossigeno, azoto e fosforo, non pesci, piante o sostanze come i pesticidi. Lungo i fiumi scaricano anche altri depuratori, campi e fogne di altri comuni: la classe di un punto non dice chi inquina. Gli ultimi dati aperti sono del 2020 per la classe e del 2021 per le analisi; il 2013 è un file a parte, con nomi dei punti scritti in modo diverso (li abbiamo abbinati per fiume e comune).');
+  L.push('<b>Valori tipici delle analisi.</b> Per fosforo, azoto e batteri usiamo la mediana di tutti i prelievi 2018-2021 di un punto, senza i valori scritti come «sotto la soglia» o «sopra la soglia», che sono pochi.');
+  L.push('<b>Il livello del Seveso non è un elenco delle esondazioni.</b> È l’altezza dell’acqua sotto il ponte di Niguarda. A che altezza il fiume esce dagli argini dipende dal punto: per questo non contiamo le «esondazioni». Usiamo solo le misure di buona qualità; in alcuni anni ne mancano molte (per esempio '+SV.giorni_validi_per_anno[2020]+' giorni con dati nel 2020, '+SV.giorni_validi_per_anno[2023]+' nel 2023), quindi qualche piena può mancare. I dati aperti si fermano al 1 gennaio 2025.');
+  L.push('<b>Non ci sono dati aperti su età delle fogne, allagamenti delle strade e scarichi di piena.</b> Il gestore di Milano non pubblica dati aperti sulla rete fognaria; i chilometri vengono da una sua presentazione pubblica. Il sito del gestore non risponde ai programmi automatici e non abbiamo provato ad aggirarlo.');
+  L.push('<b>Le tariffe si confrontano solo in parte.</b> Mostriamo la parte al metro cubo per le famiglie residenti. Le quote fisse si pagano in modi diversi (per abitazione, per contatore o per persona) e sono piccole; l’IVA e le piccole quote nazionali si aggiungono ovunque. A Genova la tariffa cambia secondo la zona; a Napoli la depurazione è una tariffa regionale del 2015. Le città sono scelte da noi.');
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function metodo(){
+  var L=[];
+  L.push('<b>Il viaggio.</b> Acqua messa in rete, consegnata e persa: ISTAT, tavola 15 del censimento delle acque 2020. Acqua trattata da Nosedo e San Rocco: campo «acqua trattata» dei rapporti europei. Acqua ai campi = acqua trattata × quota di riuso dichiarata; il resto va nel fiume indicato per il punto di scarico (Nosedo: Vettabbia; San Rocco: Lambro Meridionale; Peschiera Borromeo: Lambro). Litri per abitante = volumi divisi per i residenti che ISTAT usa per il dato pro capite.');
+  L.push('<b>Quanto viene tolto.</b> (entrata − uscita) / entrata, sommando Nosedo e San Rocco, con le tonnellate misurate dichiarate. Nei quadretti ogni griglia è 100% e i quadretti pieni sono la quota che esce, arrotondata.');
+  L.push('<b>La linea del Lambro.</b> Classe di qualità (LIMeco) di ogni punto ARPA nel 2018, 2019 e 2020. Lo schema segue il percorso dell’acqua (Vettabbia e Lambro Meridionale finiscono nel Lambro, il Lambro nel Po) ma non le distanze.');
+  L.push('<b>Il Seveso.</b> Misure ogni 10 minuti del sensore di Milano Niguarda, solo con codice di qualità «buona» (registrato o elaborato); per ogni giorno il valore più alto. Cerchi = giorni sopra 1 metro; a destra il numero di giorni sopra 1,5 metri.');
+  L.push('<b>Il conto.</b> Metri cubi × (tariffa di fogna + tariffa di depurazione al metro cubo) di ogni gestore per il 2025; per Milano si aggiungono le due quote fisse annue per abitazione.');
+  L.push('<b>Euro di oggi.</b> Tariffa × 100 / indice dei prezzi FOI dell’anno (ISTAT, 2025 = 100).');
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+})();
+</script>
+</body></html>
