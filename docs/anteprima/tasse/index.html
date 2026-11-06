@@ -146,9 +146,8 @@ footer li{margin:.3em 0}
 <div class="fig">
   <h3 id="t-cento"></h3>
   <p class="sub" id="sub-cento"></p>
-  <div class="lg"><span><i class="dot" style="background:var(--mi)"></i>Tu</span></div>
-  <div class="ch" id="ch-cento" role="img" aria-label="Due griglie da cento: cento milanesi in fila dal reddito più basso al più alto, e cento euro di reddito dichiarato divisi tra le stesse fasce"></div>
-  <table class="kt" id="tab-cento"></table>
+  <div class="lg"><span><i style="background:#0072BC"></i>persone su 100</span><span><i style="background:#F58220"></i>euro di reddito su 100</span><span><i style="border:3px solid #E30613;background:#fff"></i>la tua fascia</span></div>
+  <div class="ch" id="ch-cento" role="img" aria-label="Per ogni fascia di reddito, quante persone su 100 e quanti euro su 100 di reddito dichiarato a Milano"></div>
   <p class="note" id="nt-cento"></p>
   <p class="src">Fonte: MEF, Dipartimento delle Finanze, redditi e principali variabili IRPEF su base comunale, anno d’imposta 2024 (CC BY 3.0). Reddito complessivo dichiarato, in euro del 2024, per i contribuenti di Milano che hanno un reddito. Dati per classi: dentro ogni fascia supponiamo che i redditi siano distribuiti in modo uniforme, quindi il tuo posto è approssimato. Per Milano i dati non danno l’imposta pagata per fascia di reddito.</p>
 </div>
@@ -445,33 +444,27 @@ function aggiorna(){
   }
   $('calc-out').innerHTML=h;
   $('t-tuo').textContent=R>0?'Con '+f0(R)+' € all’anno, l’addizionale è '+f0(add)+' € e sei più su di circa '+f0(Math.min(99,Math.floor(P.P)))+' milanesi su 100':'Scrivi quanto guadagni in un anno';
-  $('nt-tuo').innerHTML='<b>Che cosa questa stima non conta:</b> le detrazioni e i bonus, altri redditi (affitti, autonomi), i contributi, l’addizionale della Regione, la TARI e le regole che cambiano da un anno all’altro. Il reddito che scrivi vale sia come «imponibile» sia come «reddito complessivo»: nei dati ufficiali sono due voci vicine ma non uguali. Esempi di TARI pubblicati dal Comune per il 2026: '+f0(E.profili[0].voci[2].euro)+' € per una persona sola con meno di 30 anni in 52 m², '+f0(E.profili[1].voci[2].euro)+' € per tre persone in 106 m².';
+  var fr=R>0?'<b>Con '+f0(R)+' € sei nella fascia '+CL[P.k].nome+' €</b>: qui c’è il '+f1(100*CL[P.k].q)+'% dei milanesi e il '+f1(100*CL[P.k].r)+'% del reddito; dichiara meno di te circa '+f0(Math.min(99,Math.floor(P.P)))+' milanesi su 100 (<a href="#t-cento">vedi il grafico</a>).<br><br>':'';
+  $('nt-tuo').innerHTML=fr+'<b>Che cosa questa stima non conta:</b> le detrazioni e i bonus, altri redditi (affitti, autonomi), i contributi, l’addizionale della Regione, la TARI e le regole che cambiano da un anno all’altro. Il reddito che scrivi vale sia come «imponibile» sia come «reddito complessivo»: nei dati ufficiali sono due voci vicine ma non uguali. Esempi di TARI pubblicati dal Comune per il 2026: '+f0(E.profili[0].voci[2].euro)+' € per una persona sola con meno di 30 anni in 52 m², '+f0(E.profili[1].voci[2].euro)+' € per tre persone in 106 m².';
   if(window.__cento)window.__cento(R);
 }
 
 function cento(){
   var cl=CL,box=$('ch-cento'),W=width('ch-cento'),R=reddito(),P=posizione(R,cl);
-  var gap=24,cell=Math.floor((W-gap)/20),gw=cell*10,x1=0,x2=gw+gap+(W-gap-2*gw),top=44,rad=cell/2-2.5;
-  x2=W-gw;
-  var H=top+gw+4,s=svgOpen(W,H);
-  s+=T(x1,16,'100 milanesi',{c:'b'})+T(x1,32,'dal reddito più basso al più alto',{c:'m'});
-  s+=T(x2,16,'100 euro di reddito',{c:'b'})+T(x2,32,'divisi tra le stesse fasce',{c:'m'});
+  var rh=64,top=4,H=top+cl.length*rh,mx=Math.max.apply(null,cl.map(function(c){return Math.max(c.n,c.e)})),bw=W-16-84,s=svgOpen(W,H);
   cl.forEach(function(c,k){
-    var op=k===P.k?1:0.45;
-    for(var j=0;j<c.n;j++){var id=c.start+j,cx=x1+(id%10)*cell+cell/2,cy=top+Math.floor(id/10)*cell+cell/2;
-      s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+r1(rad)+'" fill="'+PUR[k]+'" fill-opacity="'+op+'"'+tip('<b>Fascia '+c.nome+' €</b><br>'+c.n+' milanesi su 100 ('+f1(100*c.q)+'%)<br>'+c.e+' euro su 100 di reddito')+'/>'}
-    for(var j2=0;j2<c.e;j2++){var id2=c.estart+j2,cx2=x2+(id2%10)*cell+cell/2,cy2=top+Math.floor(id2/10)*cell+cell/2;
-      s+='<rect x="'+r1(cx2-rad)+'" y="'+r1(cy2-rad)+'" width="'+r1(2*rad)+'" height="'+r1(2*rad)+'" rx="2" fill="'+PUR[k]+'" fill-opacity="'+op+'"'+tip('<b>Fascia '+c.nome+' €</b><br>'+c.e+' euro su 100 del reddito dichiarato<br>sono di '+c.n+' milanesi su 100')+'/>'}
+    var y=top+k*rh,me=R>0&&k===P.k;
+    if(me)s+='<rect x="1.5" y="'+(y+1.5)+'" width="'+(W-3)+'" height="'+(rh-5)+'" rx="4" fill="#fdecee" stroke="'+C.mi+'" stroke-width="2.5"/>';
+    s+=T(8,y+17,c.nome+' €',{c:'b'});
+    if(me)s+='<rect x="'+(W-46)+'" y="'+(y+5)+'" width="38" height="17" rx="3" fill="'+C.mi+'"/>'+T(W-27,y+18,'TU',{a:'middle',c:'w'});
+    var w1=Math.max(2,c.n/mx*bw),w2=Math.max(2,c.e/mx*bw);
+    s+='<rect x="8" y="'+(y+24)+'" width="'+r1(w1)+'" height="14" fill="#0072BC"'+tip('<b>'+c.nome+' €</b><br>'+c.n+' persone su 100 ('+f1(100*c.q)+'%)')+'/>'+T(8+w1+5,y+36,c.n+' persone',{c:'k'});
+    s+='<rect x="8" y="'+(y+41)+'" width="'+r1(w2)+'" height="14" fill="#F58220"'+tip('<b>'+c.nome+' €</b><br>'+c.e+' euro su 100 del reddito dichiarato')+'/>'+T(8+w2+5,y+53,c.e+' euro',{c:'k'});
   });
-  if(R>0){var mx=x1+(P.idx%10)*cell+cell/2,my=top+Math.floor(P.idx/10)*cell+cell/2;
-    s+='<circle cx="'+r1(mx)+'" cy="'+r1(my)+'" r="'+r1(rad+1.5)+'" fill="'+C.mi+'" stroke="#fff" stroke-width="2"'+tip('<b>Tu</b>, con '+f0(R)+' € (stima)')+'/>'}
   box.innerHTML=s+'</svg>';
   var top7=cl[6];
-  $('t-cento').textContent='Cinque milanesi su cento dichiarano '+top7.e+' euro su ogni 100 di reddito';
-  $('sub-cento').innerHTML='A sinistra cento contribuenti di Milano in fila per reddito (il pallino rosso sei tu). A destra cento euro di reddito dichiarato, colorati per fascia: ogni quadretto è di chi sta nella fascia dello stesso colore. La tua fascia è in evidenza.';
-  var h='<thead><tr><th>Fascia di reddito (€ l’anno)</th><th>Su 100 persone</th><th>Su 100 euro</th></tr></thead><tbody>';
-  cl.forEach(function(c,k){h+='<tr'+(R>0&&k===P.k?' class="me"':'')+'><td><i style="background:'+PUR[k]+'"></i>'+c.nome+'</td><td>'+c.n+'</td><td>'+c.e+'</td></tr>'});
-  $('tab-cento').innerHTML=h+'</tbody>';
+  $('t-cento').textContent=top7.n+' milanesi su cento dichiarano '+top7.e+' euro su ogni 100 di reddito';
+  $('sub-cento').innerHTML='Per ogni fascia di reddito (euro all’anno): la barra blu dice quante persone ci sono su 100, quella arancio quanti euro su 100 di reddito dichiarato sono loro. Se il reddito che hai scritto sopra cade in una fascia, la trovi col riquadro rosso.';
   $('nt-cento').innerHTML='La fascia sopra i 120.000 € ha il '+f1(100*top7.q)+'% dei contribuenti con un reddito e il '+f1(100*top7.r)+'% del reddito dichiarato. Reddito dichiarato non vuol dire patrimonio né reddito disponibile. Per Milano non c’è la quota di IRPEF pagata da ogni fascia, quindi non la stimiamo.';
 }
 window.__cento=function(){RD.length&&cento()};
