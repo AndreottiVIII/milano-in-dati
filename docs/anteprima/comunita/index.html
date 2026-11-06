@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="it"><head><base href="../../comunita/"><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Le comunità di Milano</title>
+<style>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri grandi */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:639px){.hl>a:last-child:nth-child(odd){grid-column:1/-1}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli e grafici */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px;border:1px solid rgba(0,0,0,.18)}
+.lg i.ln{height:3px;width:18px;border-radius:2px;border:0}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt caption{caption-side:top;text-align:left;font-size:.85rem;color:var(--mut);padding-bottom:2px}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.18)}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* scrivi il tuo quartiere */
+.find label,.find2 label{display:block;font-weight:750;margin:0 0 4px}
+.find input,.find2 select,.find2 input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus,.find2 select:focus,.find2 input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.find2{margin:10px 0 0}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris.m{border-left-color:var(--mi)}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.ris .ch{margin-top:6px}
+/* cursore */
+.sl{margin:8px 0 0;padding:8px 12px 10px;background:var(--soft);border-top:6px solid var(--m4)}
+.sl label{display:block;font-weight:750;font-size:.92rem;margin-bottom:2px}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl input[type=range]::-moz-range-thumb{height:28px;width:28px}
+.sl .ex{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+/* scelta comunità */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.chip{--c:#0b0d12;font:inherit;font-size:.9rem;font-weight:650;color:var(--ink);background:#fff;border:2px solid var(--c);padding:6px 11px;min-height:40px;border-radius:20px;cursor:pointer}
+.chip.on{background:var(--c);color:#fff}
+.chip.on.dk{color:#0b0d12}
+.chip:focus-visible{outline:3px solid var(--mi);outline-offset:1px}
+/* coppie di omini */
+.dueom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:.5em 0 .3em}
+.dueom b{display:block;font-size:.92rem;margin-bottom:2px}
+.dueom>div{min-width:0}
+.pm{margin:10px 0 0}
+.pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
+.tabwrap{max-height:340px;overflow:auto;border-top:1px solid var(--grid)}
+.tabwrap table.kt{margin:0}
+.tabwrap th{position:sticky;top:0;background:#fff}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+.altre{font-size:.92rem;color:var(--ink2);margin:1.2em 0 0}
+</style>
+<script src="../menu.js" defer></script></head>
+<body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../comunita/" style="color:#000">Pagina attuale</a></div><main>
+
+<h1>Le comunità di Milano</h1>
+<p class="lead">Quali cittadinanze hanno i milanesi stranieri, quanti sono e in quali quartieri vivono, dal 1999 al 2025. Scegli una comunità o scrivi il tuo quartiere.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Residenti per cittadinanza e quartiere al 31 dicembre, 1999-2025: anagrafe del Comune di Milano (CC BY). Acquisizioni di cittadinanza italiana: Comune di Milano (CC BY). Qui «cittadinanza» non vuol dire «origine» (vedi i limiti dei dati).</p>
+
+<!-- ============ MILANO ============ -->
+<h2 id="milano">Milano dal 1999</h2>
+
+<div class="fig">
+  <h3 id="t-serie"></h3>
+  <p class="sub">Quanti residenti su 100 hanno una cittadinanza straniera, al 31 dicembre di ogni anno. L’asse non parte da zero.</p>
+  <div class="ch" id="ch-serie" role="img" aria-label="Linea: quota di residenti stranieri a Milano dal 1999 al 2025"></div>
+  <ul class="notes" id="nt-serie"></ul>
+  <p class="src">Fonte: Comune di Milano, «Popolazione: residenti per cittadinanza e quartiere (1999-2025)» (ds27, CC BY, scaricato il 1° novembre 2026). Il registro del Comune conta più stranieri di quelli dell’ISTAT dopo il censimento permanente (vedi i limiti dei dati).</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-omini"></h3>
+  <p class="sub">Ogni omino è 1 straniero su 100. Il colore e il nome dicono la cittadinanza. Muovi il cursore: gli omini cambiano anno per anno.</p>
+  <div class="sl"><label for="yr1">Anno: <b class="yv"></b></label><input class="yrng" id="yr1" type="range" min="0" max="26" step="1" value="26" aria-label="Anno"><div class="ex"><span>1999</span><span>2025</span></div></div>
+  <div class="ch" id="ch-omini" role="img" aria-label="Cento omini colorati per cittadinanza degli stranieri residenti a Milano"></div>
+  <p class="note" id="nn-omini"></p>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza (ds27, CC BY). Gli omini sono arrotondati a numeri interi, quindi sommano 100. Le 10 cittadinanze più numerose nel 2025 hanno un colore; tutte le altre sono in grigio. Cittadinanza, non origine.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-bump"></h3>
+  <p class="sub">Le 10 cittadinanze straniere più numerose, anno per anno, dal 1999 al 2025. Una linea scende o sale quando viene sorpassata o sorpassa. Tocca una linea per seguirla.</p>
+  <div class="ch" id="ch-bump" role="img" aria-label="Classifica delle dieci cittadinanze straniere più numerose a Milano dal 1999 al 2025"></div>
+  <p class="note" id="nn-bump"></p>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza al 31 dicembre (ds27, CC BY). Posizione tra le 30 cittadinanze più numerose nel 2025, che comprendono tutte quelle entrate nei primi dieci posti. Chi prende la cittadinanza italiana esce dal conteggio; una posizione che sale o scende non dice il perché.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-nat"></h3>
+  <p class="sub">Ogni mattoncino sono 500 persone che nell’anno hanno ottenuto la cittadinanza italiana a Milano.</p>
+  <div class="ch" id="ch-nat" role="img" aria-label="Mattoncini: acquisizioni di cittadinanza italiana a Milano per anno, 2003-2024"></div>
+  <p class="note" id="nn-nat"></p>
+  <p class="src">Fonte: Comune di Milano, acquisizioni della cittadinanza italiana, ds221 (2003-2020) e ds1964 (2021-2024), CC BY, scaricati il 1° novembre 2026. Chi si naturalizza passa nel registro da «straniero» a «Italia»: una parte del calo di alcune cittadinanze è questo, e non sono partenze.</p>
+</div>
+
+<!-- ============ DOVE ============ -->
+<h2 id="dove">Dove vivono</h2>
+
+<div class="fig">
+  <h3 id="t-dove"></h3>
+  <p class="sub">Scegli una cittadinanza: la mappa mostra, quartiere per quartiere, quanti residenti su 100 la hanno. Tocca un quartiere per leggere i numeri.</p>
+  <div class="chips" id="chips"></div>
+  <div class="find2"><label for="sel-more">Un’altra cittadinanza tra le 30 più numerose</label><select id="sel-more"></select></div>
+  <div class="sl"><label for="yr2">Anno: <b class="yv"></b></label><input class="yrng" id="yr2" type="range" min="0" max="26" step="1" value="26" aria-label="Anno"><div class="ex"><span>1999</span><span>2025</span></div></div>
+  <div class="ris m" id="ris-com" aria-live="polite"></div>
+  <div class="lg" id="lg-A"></div>
+  <div class="ch" id="ch-A" role="img" aria-label="Mappa dei quartieri di Milano colorati per quota di residenti con la cittadinanza scelta"></div>
+  <p class="note" id="nn-A"></p>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza e quartiere (ds27, CC BY); confini dei quartieri (NIL): Comune di Milano (CC BY). Le quote sono sul totale dei residenti del quartiere. I colori sono gli stessi per tutti gli anni, così si vede il cambiamento. In grigio i quartieri con meno di 3.000 residenti.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-trend"></h3>
+  <p class="sub" id="s-trend"></p>
+  <div class="ch" id="ch-trend" role="img" aria-label="Linea: residenti con la cittadinanza scelta a Milano dal 1999 al 2025"></div>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza al 31 dicembre (ds27, CC BY). Il punto con il cerchio è l’anno scelto con il cursore.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-B"></h3>
+  <p class="sub">Per ogni quartiere, la cittadinanza straniera più numerosa. Cambia con il cursore degli anni.</p>
+  <div class="sl"><label for="yr3">Anno: <b class="yv"></b></label><input class="yrng" id="yr3" type="range" min="0" max="26" step="1" value="26" aria-label="Anno"><div class="ex"><span>1999</span><span>2025</span></div></div>
+  <div class="lg" id="lg-B"></div>
+  <div class="ch" id="ch-B" role="img" aria-label="Mappa dei quartieri di Milano colorati per la cittadinanza straniera più numerosa"></div>
+  <p class="note" id="nn-B"></p>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza e quartiere, tutte le voci del registro (ds27, CC BY); confini dei quartieri: Comune di Milano (CC BY). In grigio chiaro i quartieri dove la più numerosa non è tra le 10 con un colore. In bianco con il bordo grigio i quartieri con meno di 3.000 residenti o meno di 300 stranieri.</p>
+</div>
+
+<!-- ============ CERCA ============ -->
+<h2 id="cerca">Tutte le cittadinanze</h2>
+<div class="fig">
+  <h3 id="t-cerca"></h3>
+  <p class="sub">Scrivi il nome di una cittadinanza per vedere quanti residenti ha oggi e quanti ne aveva nel 1999.</p>
+  <div class="find2"><label for="q2">Cerca una cittadinanza</label><input id="q2" type="search" placeholder="per esempio: Perù" autocomplete="off" autocapitalize="words" spellcheck="false"></div>
+  <p class="note" id="n-cerca"></p>
+  <div class="tabwrap"><table class="kt" id="tab-cerca"></table></div>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza al 31 dicembre, tutte le voci del registro (ds27, CC BY). La variazione in percentuale c’è solo dove nel 1999 c’erano almeno 100 residenti. Il file non raggruppa le cittadinanze per continente e non lo facciamo noi. «Altre nazioni o n.d.» e «Apolide» non sono paesi.</p>
+</div>
+
+<!-- ============ QUARTIERE ============ -->
+<h2 id="quartiere">Il tuo quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<p class="src">Fonte: Comune di Milano, residenti per cittadinanza e quartiere (ds27, CC BY), 1999 e 2025. Il quartiere è il NIL (Nucleo di identità locale). Se il quartiere ha meno di 3.000 residenti, i confronti vanno letti con cautela. Puoi anche toccare un quartiere nelle mappe qui sopra.</p>
+
+<p class="altre">Altre pagine sulla popolazione: <a href="../censimenti/">I censimenti di Milano</a> · <a href="../divisa/">Quanto è divisa Milano</a> · <a href="../arrivi-partenze/">Chi arriva e chi lascia Milano</a> · <a href="../scuole/">Le scuole</a>.</p>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Cittadinanza</dt><dd>La cittadinanza scritta nell’anagrafe del Comune per ogni residente. Non dice da dove viene una persona né quanto sia «integrata».</dd>
+<dt>Quota</dt><dd>Quanti residenti su 100 hanno una certa cittadinanza. «Punti» è la differenza tra due quote: da 8 a 21 residenti su 100 sono 13 punti in più.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+<dt>Acquisizione di cittadinanza</dt><dd>Quando un residente straniero diventa cittadino italiano. Nel registro passa da «straniero» a «Italia».</dd>
+<dt>Registro</dt><dd>L’anagrafe del Comune: l’elenco dei residenti iscritti. Dopo il censimento permanente l’ISTAT conta meno stranieri del registro.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<ul>
+<li><a href="data/residenti_per_cittadinanza_nil.csv">Residenti per quartiere, cittadinanza e anno</a> (le 30 cittadinanze più numerose)</li>
+<li><a href="data/residenti_per_cittadinanza_citta.csv">Residenti per cittadinanza in tutta la città, anno per anno</a></li>
+<li><a href="data/cittadinanze_tutte.json">Tutte le cittadinanze della città, 1999-2025</a></li>
+<li><a href="data/anno/2025.json">Tutte le cittadinanze per quartiere</a> (un file per anno, dal 1999 al 2025)</li>
+<li><a href="data/cittadinanze.json">Le 30 cittadinanze per quartiere e anno, con i totali</a></li>
+<li><a href="data/riepilogo.json">Acquisizioni di cittadinanza italiana per anno</a></li>
+<li><a href="data/nil.geojson">Confini dei quartieri</a></li>
+</ul></div></details>
+</div>
+
+<footer>
+<p><b>Fonti e licenze.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: ds27 (residenti per cittadinanza e quartiere 1999-2025), ds74 (stranieri per cittadinanza dal 1979), ds221, ds1963, ds1964 (cittadinanza italiana acquisita), ds205 (controllo), confini dei NIL ds964; tutti Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1° novembre 2026. ISTAT, <a href="https://demo.istat.it/">demo.istat.it</a>: popolazione straniera al 1° gennaio 2026 (STRASA), CC BY 4.0, scaricato il 30 ottobre 2026. Per i censimenti 1991-2023 per quartiere vedi <a href="../censimenti/">I censimenti di Milano</a>.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+
+<script>
+(function(){
+'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e3e6eb',gry:'#9aa1ad'};
+var OTH='#d5d9df';
+/* le 10 cittadinanze con il loro colore (le stesse in tutta la pagina) */
+var PAL=[
+ {l:'Egitto',col:C.ora,adj:'egiziana'},{l:'Cina',col:C.mag},{l:'Filippine',col:C.m4},{l:'Perù',col:C.m2},{l:'Sri Lanka',col:C.m5},
+ {l:'Romania',col:C.bro},{l:'Bangladesh',col:C.teal},{l:'Ucraina',col:C.m3,map:'#E0B000'},{l:'Ecuador',col:C.ink},{l:'Marocco',col:'#7d8593'}];
+var PB={};PAL.forEach(function(p){PB[p.l]=p});
+var D,TU,GEO,RZ,AN={},ANP={};
+var Y,NY,yi=26,N=[],BY={},RD=[],sel=null,COM='*',HB=null;
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function f2(x){var r=(Math.round(Math.abs(x)*100)/100).toFixed(2).split('.');return grp(r[0])+','+r[1]}
+function fq(x){return x>=10?f0(x):x>=1?f1(x):f2(x)}
+function sg1(x){var r=Math.round(x*10)/10;return (r>0?'+':r<0?'−':'')+f1(Math.abs(r))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function pl(n,u,p){return n+' '+(n===1?u:p)}
+function r10(x){return Math.round(x*10)/10}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function spread(a,gap,lo,hi){
+  a.sort(function(p,q){return p.y-q.y});
+  for(var k=1;k<a.length;k++)if(a[k].y-a[k-1].y<gap)a[k].y=a[k-1].y+gap;
+  var b=hi;for(k=a.length-1;k>=0;k--){if(a[k].y>b)a[k].y=b;b=a[k].y-gap}
+  if(a.length&&a[0].y<lo){a[0].y=lo;for(k=1;k<a.length;k++)if(a[k].y-a[k-1].y<gap)a[k].y=a[k-1].y+gap}
+}
+function mix(hex,t){ /* t=0 colore pieno, t=1 bianco */
+  var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+  r=Math.round(r+(255-r)*t);g=Math.round(g+(255-g)*t);b=Math.round(b+(255-b)*t);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+function lum(hex){var n=parseInt(hex.slice(1),16);return (0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255))/255}
+/* etichette che non si toccano: rettangoli già occupati */
+function Placer(W,H){var rs=[];return{
+  try:function(x,y,txt,size,bold){var w=tw(txt,size,bold)+4,h=size+2,r={x0:x-w/2,x1:x+w/2,y0:y-h+3,y1:y+4};
+    if(r.x0<0){r.x1-=r.x0;r.x0=0}if(r.x1>W){r.x0-=r.x1-W;r.x1=W}
+    for(var i=0;i<rs.length;i++){var q=rs[i];if(r.x0<q.x1&&r.x1>q.x0&&r.y0<q.y1&&r.y1>q.y0)return null}
+    rs.push(r);return{x:(r.x0+r.x1)/2,y:y}},
+  add:function(r){rs.push(r)}}}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function loadAnno(y){if(!ANP[y])ANP[y]=getJ(DATA+'anno/'+y+'.json').then(function(a){AN[y]=a.n;return a.n});return ANP[y]}
+Promise.all([getJ(DATA+'cittadinanze.json'),getJ(DATA+'cittadinanze_tutte.json'),getJ(DATA+'nil.geojson'),getJ(DATA+'riepilogo.json'),loadAnno(1999),loadAnno(2025)]).then(function(r){
+  D=r[0];TU=r[1];GEO=r[2];RZ=r[3];Y=D.anni;NY=Y.length;yi=NY-1;
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+
+/* ---------- accesso ai dati ---------- */
+var CB={};   /* 30 cittadinanze per nome breve */
+function cityStr(i){return D.citta.stranieri[i]}
+function cityTot(i){return D.citta.totale[i]}
+function cnt(l,i){var c=CB[l];return c?c.c[i]:0}
+function nilCount(com,id,i){
+  if(com==='*')return D.nil[id].s[i];
+  var c=CB[com];return (c.n[id]||[])[i]||0}
+function nilQ(com,id,i){var r=D.nil[id].r[i];return r>0?nilCount(com,id,i)/r*100:0}
+var DEL={'Egitto':'dell’Egitto','Cina':'della Cina','Filippine':'delle Filippine','Perù':'del Perù','Sri Lanka':'dello Sri Lanka','Romania':'della Romania','Bangladesh':'del Bangladesh','Ucraina':'dell’Ucraina','Ecuador':'dell’Ecuador','Marocco':'del Marocco','El Salvador':'di El Salvador','Francia':'della Francia','Albania':'dell’Albania','Iran':'dell’Iran','Russia':'della Russia','Spagna':'della Spagna','Brasile':'del Brasile','Pakistan':'del Pakistan','Turchia':'della Turchia','Senegal':'del Senegal','Georgia':'della Georgia','India':'dell’India','Regno Unito':'del Regno Unito','Germania':'della Germania','Giappone':'del Giappone','Tunisia':'della Tunisia',"Stati Uniti D'America":'degli Stati Uniti','Moldova':'della Moldova','Bolivia':'della Bolivia','Colombia':'della Colombia'};
+function del_(l){return DEL[l]||'di '+l}
+function comName(c){return c==='*'?'Tutti gli stranieri':c}
+
+function prepara(){
+  D.cit.forEach(function(c){CB[c.l]=c});
+  GEO.features.forEach(function(f){var p=f.properties,o={id:p.i,n:p.n,f:f};
+    var d=D.nil[String(p.i)];o.r25=d.r[NY-1];o.r99=d.r[0];o.big=o.r25>=3000;
+    N.push(o);BY[o.id]=o});
+  var cn={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cn[o.sn]=(cn[o.sn]||0)+1});
+  N.forEach(function(o){if(cn[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+}
+
+function tutto(){
+  prepara();
+  highlights();
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});if(m.length===1)return m[0];return null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].id,true);else if(m.length>1)$('ris').className='ris',$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').className='ris',$('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true,true)});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-hb]');if(p){var v=p.getAttribute('data-hb');HB=HB===v?null:v;bump()}});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('a[data-com]');if(p){COM=p.getAttribute('data-com');sync()}});
+  [].forEach.call(document.querySelectorAll('.yrng'),function(r){r.addEventListener('input',function(){setYear(+r.value)})});
+  chips();
+  var so='';D.cit.forEach(function(c){if(!PB[c.l])so+='<option value="'+esc(c.l)+'">'+esc(c.l)+'</option>'});
+  $('sel-more').innerHTML='<option value="">— scegli —</option>'+so;
+  $('sel-more').addEventListener('change',function(){if(this.value){COM=this.value;sync()}});
+  $('q2').addEventListener('input',cerca);
+  draw(serie);draw(omini);draw(bump);draw(nat);draw(mappaA);draw(trend);draw(mappaB);draw(scheda);
+  cerca();limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+function redrawAll(){RD.forEach(function(f){f()})}
+function sync(){chipsMark();$('sel-more').value=PB[COM]?'':(COM==='*'?'':COM);mappaA();trend()}
+function setYear(i){
+  yi=i;
+  [].forEach.call(document.querySelectorAll('.yrng'),function(r){r.value=i});
+  [].forEach.call(document.querySelectorAll('.yv'),function(b){b.textContent=Y[i]});
+  omini();mappaA();trend();
+  var y=Y[i];if(!AN[y])loadAnno(y).then(function(){if(yi===i)mappaB()});else mappaB();
+}
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  mappaA();mappaB();scheda();
+}
+
+/* ---------- gruppi di 100 ---------- */
+function mkGroups(get,total){
+  var arr=PAL.map(function(p){return{l:p.l,col:p.col,v:get(p.l)||0}}),s=0;arr.forEach(function(x){s+=x.v});
+  arr.sort(function(a,b){return b.v-a.v});
+  arr.push({l:'Altre cittadinanze',col:OTH,v:Math.max(0,total-s),oth:1});
+  var q=arr.map(function(x){return total>0?x.v/total*100:0}),f=q.map(Math.floor),rest=100-f.reduce(function(a,b){return a+b},0);
+  var ord=q.map(function(v,i){return i}).sort(function(a,b){return (q[b]-f[b])-(q[a]-f[a])});
+  for(var k=0;k<rest;k++)f[ord[k]]++;
+  arr.forEach(function(x,i){x.q=f[i];x.p=q[i]});
+  return arr.filter(function(x){return x.q>0});
+}
+function cityGroups(i){return mkGroups(function(l){return cnt(l,i)},cityStr(i))}
+function nilGroups(id,y){
+  var a=AN[y][String(id)]||[],m={},tot=0;
+  a.forEach(function(z){var l=TU.cit[z[0]].l;m[l]=(m[l]||0)+z[1];tot+=z[1]});
+  return{g:mkGroups(function(l){return m[l]},tot),tot:tot};
+}
+function omino(x,y,w,h,col){
+  var cx=x+w/2,u=Math.min(w,h/1.05);
+  var s='<circle cx="'+r1(cx)+'" cy="'+r1(y+h*.2)+'" r="'+r1(u*.17)+'" fill="'+col+'"/>';
+  s+='<rect x="'+r1(cx-u*.26)+'" y="'+r1(y+h*.4)+'" width="'+r1(u*.52)+'" height="'+r1(h*.54)+'" rx="'+r1(u*.2)+'" fill="'+col+'"/>';
+  return s;
+}
+function persone(groups,x0,y0,cw,chh,tipf){
+  var s='',k=0;
+  groups.forEach(function(g){for(var j=0;j<g.q;j++,k++){
+    var cx=x0+(k%10)*cw,cy=y0+Math.floor(k/10)*chh;
+    s+='<g'+(tipf?tip(tipf(g)):'')+'><rect x="'+r1(cx)+'" y="'+r1(cy)+'" width="'+r1(cw)+'" height="'+r1(chh)+'" fill="#fff" fill-opacity="0"/>'+omino(cx+1,cy,cw-2,chh,g.col)+(g.col===C.m3?'<g opacity=".0"></g>':'')+'</g>'}});
+  return s;
+}
+
+/* ---------- numeri grandi ---------- */
+function topN(i,n){var a=D.cit.map(function(c){return{l:c.l,v:c.c[i]}}).sort(function(a,b){return b.v-a.v});return a.slice(0,n)}
+function highlights(){
+  var q99=r10(cityStr(0)/cityTot(0)*100),q25=r10(cityStr(NY-1)/cityTot(NY-1)*100);
+  var t0=topN(0,3),t1=topN(NY-1,3);
+  var sh=function(a,i){return a.reduce(function(s,x){return s+x.v},0)/cityStr(i)*100};
+  var uk=CB['Ucraina'],nat=RZ.naturalizzazioni;
+  var nb=N.filter(function(o){return o.big}),n25=nb.filter(function(o){return nilQ('*',o.id,NY-1)>=25}).length,n99=nb.filter(function(o){return nilQ('*',o.id,0)>=25&&o.r99>=3000}).length;
+  var H=[
+    {c:C.mi,h:'t-serie',n:f1(q25)+'<small>%</small>',p:'dei residenti ha una cittadinanza straniera. Nel 1999 era il '+f1(q99)+'%: '+f1(q25-q99)+' punti in più.'},
+    {c:C.m3,h:'t-bump',n:f0(t1[0].v),p:'residenti con cittadinanza '+del_(t1[0].l)+', la più numerosa. Nel 1999 la prima erano le '+t0[0].l+' ('+f0(t0[0].v)+').'},
+    {c:C.m2,h:'t-omini',n:f0(sh(t1,NY-1))+'<small> su 100</small>',p:'stranieri ha la cittadinanza '+del_(t1[0].l)+', '+del_(t1[1].l)+' o '+del_(t1[2].l)+'. Nel 1999 le prime tre ('+t0[0].l+', '+t0[1].l+', '+t0[2].l+') ne contavano '+f0(sh(t0,0))+'.'},
+    {c:C.m4,h:'t-dove',com:'Ucraina',n:f0(uk.c[NY-1]),p:'residenti con cittadinanza ucraina. Nel 1999 erano '+f0(uk.c[0])+'. Tocca per vedere dove vivono.'},
+    {c:C.m5,h:'t-nat',n:f0(nat['2024']),p:'persone hanno ottenuto la cittadinanza italiana a Milano nel 2024. Nel 2003 erano '+f0(nat['2003'])+'.'},
+    {c:C.ora,h:'t-dove',com:'*',n:n25+'<small> su '+nb.length+'</small>',p:'quartieri dove più di 1 residente su 4 è straniero. '+(n99===0?'Nel 1999 nessuno.':'Nel 1999 erano '+n99+'.')}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'"'+(t.com?' data-com="'+t.com+'"':'')+' style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. quota di stranieri: linea ---------- */
+function serie(){
+  var W=width('ch-serie'),H=250,pl_=14,pr=16,pt=26,pb=28,iw=W-pl_-pr,ih=H-pt-pb;
+  var q=Y.map(function(y,i){return cityStr(i)/cityTot(i)*100});
+  var y0=0,y1=Math.ceil(Math.max.apply(null,q)/5)*5;
+  var X=function(i){return pl_+i/(NY-1)*iw},V=function(v){return pt+ih-(v-y0)/(y1-y0)*ih};
+  var s=svgOpen(W,H);
+  for(var g=0;g<=y1;g+=5){s+=L(pl_,V(g),W-pr,V(g),C.grid)+''}
+  var pts=q.map(function(v,i){return r1(X(i))+' '+r1(V(v))});
+  for(g=5;g<y1;g+=5)s+=T(W-pr,V(g)-4,g+'%',{a:'end',c:'m'});
+  s+='<path d="M'+X(0)+' '+V(0)+'L'+pts.join('L')+'L'+X(NY-1)+' '+V(0)+'Z" fill="'+C.mi+'" fill-opacity=".10"/>';
+  s+='<path d="M'+pts.join('L')+'" fill="none" stroke="'+C.mi+'" stroke-width="3" stroke-linejoin="round"/>';
+  [1999,2005,2010,2015,2020,2025].forEach(function(a){var i=Y.indexOf(a);s+=T(X(i),H-8,a,{a:i===0?'start':i===NY-1?'end':'middle',c:'m'})+L(X(i),V(0),X(i),V(0)+4,C.axis)});
+  /* note numerate: salti del registro */
+  var nts=[];
+  [[2003,'Il totale dei residenti cala di '],[2012,'Il totale dei residenti cresce di ']].forEach(function(a){
+    var i=Y.indexOf(a[0]),d=cityTot(i)-cityTot(i-1);
+    s+='<circle cx="'+r1(X(i))+'" cy="'+r1(V(q[i]))+'" r="9" fill="'+C.ink+'"/>'+T(X(i),V(q[i])+4,nts.length+1,{a:'middle',c:'w'});
+    nts.push('Nel '+a[0]+' '+a[1].toLowerCase().replace('il totale dei residenti','il totale dei residenti')+f0(Math.abs(d))+' persone in un anno: con ogni probabilità è una revisione del registro dopo il censimento, non un vero spostamento (ipotesi non verificata).')});
+  /* valori scritti */
+  s+='<circle cx="'+r1(X(0))+'" cy="'+r1(V(q[0]))+'" r="5" fill="'+C.mi+'"/>'+T(X(0)+2,V(q[0])-12,f1(q[0])+'%',{c:'halo',st:'font-size:15px'});
+  s+='<circle cx="'+r1(X(NY-1))+'" cy="'+r1(V(q[NY-1]))+'" r="5" fill="'+C.mi+'"/>'+T(X(NY-1)-2,V(q[NY-1])-12,f1(q[NY-1])+'%',{a:'end',c:'halo',st:'font-size:15px'});
+  Y.forEach(function(y,i){var x0=i===0?pl_:X(i)-iw/(NY-1)/2,w=iw/(NY-1);
+    s+='<rect x="'+r1(x0)+'" y="'+pt+'" width="'+r1(w)+'" height="'+ih+'" fill="#fff" fill-opacity="0"'+tip('<b>'+y+'</b><br>'+f0(cityStr(i))+' stranieri su '+f0(cityTot(i))+' residenti<br>'+f1(q[i])+' su 100')+'/>'});
+  $('ch-serie').innerHTML=s+'</svg>';
+  $('t-serie').textContent='Ogni 100 milanesi, gli stranieri erano '+f0(q[0])+' nel 1999 e sono '+f0(q[NY-1])+' nel 2025: '+f1(r10(q[NY-1])-r10(q[0]))+' punti in più';
+  $('nt-serie').innerHTML='<li><b class="nb" style="background:transparent;color:var(--ink);width:auto;flex:1 1 100%;font-weight:700">In numeri: '+f0(cityStr(0))+' stranieri nel 1999, '+f0(cityStr(NY-1))+' nel 2025.</b></li>'+nts.map(function(t,i){return '<li><b class="nb">'+(i+1)+'</b><span>'+t+'</span></li>'}).join('');
+}
+
+/* ---------- 2. cento stranieri ---------- */
+function omini(){
+  var W=width('ch-omini'),cw=Math.min(32,Math.floor((W-118)/10)),chh=Math.round(cw*1.15),G=cityGroups(yi),gw=cw*10,H=chh*10+4;
+  var s=svgOpen(W,H);
+  s+=persone(G,0,2,cw,chh,function(g){return '<b>'+g.l+'</b><br>'+g.q+' su 100 stranieri nel '+Y[yi]+(g.oth?'':'<br>'+f0(cnt(g.l,yi))+' residenti')});
+  /* nomi a destra, all'altezza del gruppo */
+  var k=0,lab=[];
+  G.forEach(function(g){var a=k,b=k+g.q-1;k+=g.q;lab.push({g:g,y:2+((Math.floor(a/10)+Math.floor(b/10))/2+.5)*chh+4})});
+  spread(lab,16,14,H-4);
+  lab.forEach(function(o){var nm=o.g.oth?'Altre':o.g.l;
+    s+='<circle cx="'+(gw+12)+'" cy="'+r1(o.y-4)+'" r="5" fill="'+o.g.col+'" stroke="rgba(0,0,0,.2)" stroke-width=".8"/>'+T(gw+22,o.y,nm+' <tspan class="b">'+o.g.q+'</tspan>',{st:'font-size:13px'})});
+  $('ch-omini').innerHTML=s+'</svg>';
+  $('t-omini').textContent='Nel '+Y[yi]+', su 100 stranieri di Milano '+G[0].q+' hanno la cittadinanza '+(G[0].oth?'di altri paesi':del_(G[0].l));
+  var a=cityGroups(0).slice(0,4),b=cityGroups(NY-1).slice(0,4);
+  $('nn-omini').innerHTML='<b>Nel 1999</b>, su 100: '+a.map(function(g){return (g.oth?'altre':g.l)+' '+g.q}).join(', ')+'. <b>Nel 2025</b>: '+b.map(function(g){return (g.oth?'altre':g.l)+' '+g.q}).join(', ')+'.';
+}
+
+/* ---------- 3. classifica che cambia ---------- */
+function ranks(){
+  var R={};D.cit.forEach(function(c){R[c.l]=[]});
+  for(var i=0;i<NY;i++){D.cit.slice().sort(function(a,b){return b.c[i]-a.c[i]}).forEach(function(c,k){R[c.l][i]=k+1})}
+  return R;
+}
+function ord(n){return n+'°'}
+function bump(){
+  var R=ranks(),names=Object.keys(R).filter(function(l){return Math.min.apply(null,R[l])<=10});
+  var W=width('ch-bump'),rh=30,pt=10,pb=26,H=pt+9*rh+pb+10;
+  /* larghezza delle etichette ai lati */
+  var lw=0,rw=0;
+  names.forEach(function(l){if(R[l][0]<=10)lw=Math.max(lw,tw(l,12,true));if(R[l][NY-1]<=10)rw=Math.max(rw,tw(l,12,true))});
+  lw=Math.ceil(lw)+14;rw=Math.ceil(rw)+10;
+  var px0=lw,px1=W-rw;
+  var X=function(i){return px0+i/(NY-1)*(px1-px0)},Yp=function(r){return pt+(r-1)*rh};
+  var s=svgOpen(W,H),pl=new Placer(W,H),labs=[];
+  for(var r=1;r<=10;r++)s+=L(px0,Yp(r),px1,Yp(r),C.grid);
+  ((px1-px0)<260?[1999,2010,2025]:[1999,2005,2010,2015,2020,2025]).forEach(function(a){var i=Y.indexOf(a);s+=T(X(i),H-6,a,{a:i===0?'start':i===NY-1?'end':'middle',c:'m'})});
+  /* ordine: prima le grigie, poi le colorate, poi la scelta */
+  names.sort(function(a,b){return (PB[a]?1:0)-(PB[b]?1:0)});
+  if(HB){names=names.filter(function(l){return l!==HB});names.push(HB)}
+  var after='';
+  names.forEach(function(l){
+    var col=PB[l]?PB[l].col:C.gry,on=!HB||HB===l,wd=PB[l]?3.5:2.2;
+    var segs=[],cur=[];
+    for(var i=0;i<NY;i++){if(R[l][i]<=10)cur.push(i);else{if(cur.length)segs.push(cur);cur=[]}}
+    if(cur.length)segs.push(cur);
+    var d='';
+    segs.forEach(function(sg){
+      if(sg.length===1){var i0=sg[0];d+='M'+r1(X(i0)-.1)+' '+r1(Yp(R[l][i0]))+'h.2';return}
+      d+='M'+r1(X(sg[0]))+' '+r1(Yp(R[l][sg[0]]));
+      for(var j=1;j<sg.length;j++){var a=sg[j-1],b=sg[j],x0=X(a),x1=X(b),y0=Yp(R[l][a]),y1=Yp(R[l][b]),mx=(x0+x1)/2;
+        d+='C'+r1(mx)+' '+r1(y0)+' '+r1(mx)+' '+r1(y1)+' '+r1(x1)+' '+r1(y1)}});
+    var tp='<b>'+esc(l)+'</b><br>1999: '+(R[l][0]<=30?ord(R[l][0])+' posto, ':'')+f0(cnt(l,0))+'<br>2025: '+ord(R[l][NY-1])+' posto, '+f0(cnt(l,NY-1))+'<br>Meglio di tutti: '+ord(Math.min.apply(null,R[l]))+' posto';
+    var g='<g opacity="'+(on?1:.18)+'">'+(col===C.m3?'<path d="'+d+'" fill="none" stroke="#8a7000" stroke-width="'+(wd+1.6)+'" stroke-linecap="round" stroke-linejoin="round"/>':'')+
+      '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+wd+'" stroke-linecap="round" stroke-linejoin="round"/>';
+    /* pallini all'inizio e alla fine di ogni tratto */
+    segs.forEach(function(sg){var a=sg[0],b=last(sg);
+      g+='<circle cx="'+r1(X(a))+'" cy="'+r1(Yp(R[l][a]))+'" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
+      if(b!==a)g+='<circle cx="'+r1(X(b))+'" cy="'+r1(Yp(R[l][b]))+'" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>'});
+    g+='</g>';
+    s+=g;
+    after+='<path d="'+d+'" fill="none" stroke="#fff" stroke-opacity="0" stroke-width="16" stroke-linecap="round" data-hb="'+esc(l)+'"'+tip(tp)+'/>';
+    /* etichette */
+    var first=null,lastI=null;for(var i=0;i<NY;i++)if(R[l][i]<=10){if(first===null)first=i;lastI=i}
+    var op=on?1:.25;
+    if(first===0){labs.push({fix:1,x:px0-8,y:Yp(R[l][0])+4,a:'end',t:esc(l),op:op,col:col})}
+    if(lastI===NY-1){labs.push({fix:1,x:px1+8,y:Yp(R[l][NY-1])+4,a:'start',t:esc(l),op:op,col:col})}
+    if(first>0&&lastI<NY-1){ /* solo a metà: il nome vicino alla linea */
+      var mi=Math.round((first+lastI)/2);labs.push({fix:0,x:X(mi),y:Yp(R[l][mi])-8,a:'middle',t:esc(l),op:op,col:col,l:l})}
+  });
+  /* i nomi fissi (ai lati) per primi, poi gli altri senza toccarsi */
+  var txt='';
+  labs.sort(function(a,b){return b.fix-a.fix});
+  labs.forEach(function(o){
+    var w=tw(o.t.replace(/<[^>]*>/g,''),12,true),cx=o.a==='end'?o.x-w/2:o.a==='start'?o.x+w/2:o.x;
+    var okp=null,tries=o.fix?[0]:[0,-12,12,-24,24,-36,36];
+    for(var k=0;k<tries.length&&!okp;k++){okp=pl.try(cx,o.y+tries[k],o.t.replace(/<[^>]*>/g,''),12,true);if(okp)o.y2=o.y+tries[k]}
+    if(!okp)return;
+    var x=o.a==='end'?okp.x+w/2:o.a==='start'?okp.x-w/2:okp.x;
+    txt+='<g opacity="'+o.op+'"><text x="'+r1(x)+'" y="'+r1(o.y2)+'" text-anchor="'+o.a+'" class="halo" style="font-size:12px;fill:'+(o.col===C.m3?'#6b5600':o.col===C.gry?C.ink2:o.col)+'">'+o.t+'</text></g>'});
+  /* cornice "fuori dai primi 10" */
+  $('ch-bump').innerHTML=s+txt+after+'</svg>';
+  /* titolo e nota */
+  var p1=names.filter(function(l){return R[l][0]===1})[0],pN=names.filter(function(l){return R[l][NY-1]===1})[0];
+  var yr=null;for(var i=0;i<NY;i++)if(R[pN][i]===1){yr=Y[i];break}
+  var c2=names.filter(function(l){return R[l][NY-1]===2})[0],y2=null;
+  for(i=0;i<NY;i++)if(R[c2][i]<R[p1][i]){y2=Y[i];break}
+  var art=function(l){return l==='Egitto'?'l’Egitto':l==='Cina'?'la Cina':'le '+l};
+  $('t-bump').textContent='Il primo posto passa '+del_(p1).replace(/^di /,'da ').replace('della ','dalla ').replace('delle ','dalle ').replace('dell’','dall’').replace('del ','dal ').replace('dello ','dallo ')+' '+del_(pN).replace(/^di /,'a ').replace('della ','alla ').replace('delle ','alle ').replace('dell’','all’').replace('del ','al ').replace('dello ','allo ')+' nel '+yr+'; la Cina supera le Filippine nel '+y2;
+  var ent=names.filter(function(l){return R[l][0]>10&&R[l][NY-1]<=10}).sort(function(a,b){return R[a][NY-1]-R[b][NY-1]});
+  var usc=names.filter(function(l){return R[l][0]<=10&&R[l][NY-1]>10});
+  $('nn-bump').innerHTML='Nel 1999 non erano tra le prime dieci: '+ent.map(function(l){return esc(l)+' (oggi '+ord(R[l][NY-1])+')'}).join(', ')+'. Sono uscite dalle prime dieci: '+usc.map(esc).join(', ')+'. Le linee grigie sono cittadinanze che non hanno un colore nel resto della pagina.';
+}
+
+/* ---------- 4. mattoncini: nuovi italiani ---------- */
+function nat(){
+  var yrs=Object.keys(RZ.naturalizzazioni).map(Number).sort(),v=yrs.map(function(y){return RZ.naturalizzazioni[y]});
+  var W=width('ch-nat'),pb=22,pt=26,bh=9,gap=1.5,U=500,mx=Math.ceil(Math.max.apply(null,v)/U),H=pt+mx*(bh+gap)+pb;
+  var col=(W-8)/yrs.length,bw=Math.max(5,col-3),s=svgOpen(W,H),pl=new Placer(W,H),lab='';
+  yrs.forEach(function(y,i){var n=v[i]/U,full=Math.floor(n),fr=n-full,x=4+i*col+(col-bw)/2;
+    var tp='<b>'+y+'</b><br>'+f0(v[i])+' persone hanno ottenuto la cittadinanza italiana';
+    for(var k=0;k<full;k++)s+='<rect x="'+r1(x)+'" y="'+r1(H-pb-(k+1)*(bh+gap)+gap)+'" width="'+r1(bw)+'" height="'+bh+'" rx="1.5" fill="'+C.m5+'"'+tip(tp)+'/>';
+    if(fr>.05)s+='<rect x="'+r1(x)+'" y="'+r1(H-pb-(full+fr)*(bh+gap)+gap)+'" width="'+r1(bw)+'" height="'+r1(fr*bh)+'" rx="1.5" fill="'+C.m5+'" fill-opacity=".55"'+tip(tp)+'/>';
+    s+='<rect x="'+r1(x-1)+'" y="'+pt+'" width="'+r1(bw+2)+'" height="'+(H-pt-pb)+'" fill="#fff" fill-opacity="0"'+tip(tp)+'/>'});
+  /* valori scritti: ultimo, primo, i picchi */
+  var cand=[];yrs.forEach(function(y,i){var ok=true;for(var d=-2;d<=2;d++){var j=i+d;if(j>=0&&j<yrs.length&&v[j]>v[i])ok=false}if(ok||i===0||i===yrs.length-1||y===2020)cand.push(i)});
+  cand.sort(function(a,b){return (a===yrs.length-1?-1:0)-(b===yrs.length-1?-1:0)||v[b]-v[a]});
+  cand.forEach(function(i){var x=4+i*col+col/2,y=H-pb-(v[i]/U)*(bh+gap)-6,t=f0(v[i]),p=pl.try(x,y,t,12,true);
+    if(p)lab+=T(p.x,y,t,{a:'middle',c:'halo',st:'font-size:12px'})});
+  yrs.forEach(function(y,i){if(y===2003||y===2010||y===2015||y===2020||y===2024){var x=4+i*col+col/2;s+=T(x,H-6,y,{a:y===2003?'start':y===2024?'end':'middle',c:'m'})}});
+  $('ch-nat').innerHTML=s+lab+'</svg>';
+  var tot=v.reduce(function(a,b){return a+b},0);
+  $('t-nat').textContent='Dal 2003 al 2024 '+f0(tot)+' persone sono diventate italiane a Milano; '+f0(RZ.naturalizzazioni['2024'])+' solo nel 2024';
+  $('nn-nat').innerHTML='Chi diventa italiano esce dal conteggio degli stranieri: per questo il numero di alcune comunità può calare senza che nessuno se ne vada.';
+}
+
+/* ---------- mappe ---------- */
+function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+/* soglie di colore per la comunità scelta (uguali per tutti gli anni) */
+var BRK={};
+function breaks(com){
+  if(BRK[com])return BRK[com];
+  var b;
+  if(com==='*')b=[5,10,15,25];
+  else{
+    var vals=[];for(var i=0;i<NY;i++)N.forEach(function(o){if(D.nil[o.id].r[i]>=3000){var v=nilQ(com,o.id,i);if(v>0)vals.push(v)}});
+    vals.sort(function(a,b){return a-b});
+    var qs=[.25,.5,.75,.9].map(function(p){return vals[Math.floor(p*(vals.length-1))]||0});
+    b=[];qs.forEach(function(v){var n=nice(v);if(n>0&&(!b.length||n>last(b)))b.push(n)});
+  }
+  BRK[com]=b;return b;
+}
+function nice(v){if(v<=0)return 0;var e=Math.pow(10,Math.floor(Math.log10(v))),m=v/e,c=[1,2,3,5,10],best=c[0],bd=1e9;c.forEach(function(x){var d=Math.abs(Math.log(m/x));if(d<bd){bd=d;best=x}});return best*e}
+function klass(b,v){for(var i=0;i<b.length;i++)if(v<b[i])return i;return b.length}
+function ramp(com,n){
+  var base=com==='*'?C.ink:(PB[com]?(PB[com].map||PB[com].col):C.m4),ts=[.86,.68,.5,.28,0];
+  var out=[];for(var i=0;i<n;i++){out.push(mix(base,ts[Math.max(0,ts.length-n+i)]))}
+  return out;
+}
+function brkLabel(b,i){
+  var f=function(v){return v>=1?f0(v):f1(v)>0&&v>=.1?f1(v):f2(v)};
+  if(i===0)return 'meno di '+f(b[0])+'%';
+  if(i===b.length)return f(last(b))+'% o più';
+  return 'da '+f(b[i-1])+' a '+f(b[i])+'%';
+}
+function mappaA(){
+  var W=width('ch-A'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='';
+  var b=breaks(COM),cols=ramp(COM,b.length+1),cnts=cols.map(function(){return 0}),piccoli=0;
+  var vals=[];
+  N.forEach(function(o){var big=D.nil[o.id].r[yi]>=3000,v=nilQ(COM,o.id,yi),c=big?klass(b,v):-1,isS=o.id===sel;
+    if(c>=0)cnts[c]++;else piccoli++;
+    if(big)vals.push({o:o,v:v,n:nilCount(COM,o.id,yi)});
+    var tp='<b>'+esc(o.n)+'</b> · '+Y[yi]+'<br>'+(COM==='*'?'Stranieri':esc(comName(COM)))+': '+f0(nilCount(COM,o.id,yi))+' su '+f0(D.nil[o.id].r[yi])+' residenti'+(big?'<br>'+f1(v)+' su 100':'<br>Meno di 3.000 residenti');
+    var el='<path d="'+P.path(o.f)+'" fill="'+(c>=0?cols[c]:'#e6e8ec')+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el});
+  s+=sS;
+  /* nomi: il quartiere scelto, i 3 con la quota più alta; poi i numeri dove c'è posto */
+  var pl=new Placer(W,H),lab='',top=vals.slice().sort(function(a,b){return b.v-a.v}).slice(0,3);
+  function put(o,t,size,bold,halo){var bb=P.bb(o.f),p=pl.try(bb.x,bb.y+4,t,size,bold);if(!p)return;
+    lab+=T(p.x,p.y,esc(t),{a:'middle',c:halo?'halo':'',st:'pointer-events:none;font-size:'+size+'px;font-weight:'+(bold?800:700)+(halo?'':';fill:'+(lum(cols[klass(b,nilQ(COM,o.id,yi))])<.55?'#fff':'#0b0d12'))})}
+  if(sel){var o=BY[sel];put(o,o.sn+(D.nil[o.id].r[yi]>=3000?' '+fq(nilQ(COM,o.id,yi))+'%':''),13,1,1)}
+  top.forEach(function(x){if(x.o.id!==sel)put(x.o,x.o.sn+' '+fq(x.v)+'%',12,1,1)});
+  vals.sort(function(a,b){return P.bb(b.o.f).w*P.bb(b.o.f).h-P.bb(a.o.f).w*P.bb(a.o.f).h});
+  vals.forEach(function(x){var bb=P.bb(x.o.f);if(bb.w>=26&&bb.h>=15&&x.o.id!==sel&&top.indexOf(x)<0)put(x.o,fq(x.v),12,0,0)});
+  $('ch-A').innerHTML=s+'<g pointer-events="none">'+lab+'</g></svg>';
+  $('lg-A').innerHTML=cols.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+brkLabel(b,i)+' <b>&nbsp;'+cnts[i]+'</b></span>'}).join('')+'<span><i style="background:#e6e8ec"></i>pochi residenti <b>&nbsp;'+piccoli+'</b></span>';
+  /* scheda */
+  var nm=COM==='*'?'stranieri':'residenti con cittadinanza '+del_(COM);
+  var tot=nilCountCity(COM,yi),q=tot/cityTot(yi)*100,q0=nilCountCity(COM,0)/cityTot(0)*100;
+  var byN=vals.slice().sort(function(a,b){return b.n-a.n}).slice(0,3);
+  $('ris-com').innerHTML='<b class="big">'+(COM==='*'?'Tutti gli stranieri':esc(COM))+' nel '+Y[yi]+'</b>'+f0(tot)+' '+nm+': '+fq(q)+' su 100 milanesi. Nel 1999: '+f0(nilCountCity(COM,0))+' ('+fq(q0)+' su 100), cioè '+fq(Math.abs(q-q0))+(q>=q0?' punti in più':' punti in meno')+'.<p>Più numerosi in: '+byN.map(function(x){return '<b>'+esc(x.o.sn)+'</b> ('+f0(x.n)+')'}).join(', ')+'.</p>';
+  $('t-dove').textContent=COM==='*'?'Nel '+Y[yi]+' in '+cnts[cnts.length-1]+' quartieri su '+(N.length-piccoli)+' più di 1 residente su 4 è straniero':
+    (function(){var t=top[0];return 'Nel '+Y[yi]+' '+esc(COM)+' pesa di più in '+t.o.sn+': '+fq(t.v)+' residenti su 100'}());
+  $('nn-A').innerHTML='Il quartiere scelto ha il bordo rosso. '+(COM==='*'?'':'Le soglie dei colori sono calcolate su questa cittadinanza, quindi i colori di una cittadinanza non si confrontano con quelli di un’altra. ')+(Y[yi]<=2002?'Le serie hanno un salto tra il 2002 e il 2003 (vedi i limiti).':'');
+}
+function nilCountCity(com,i){return com==='*'?cityStr(i):CB[com].c[i]}
+
+/* ---------- linea di una comunità ---------- */
+function trend(){
+  var v=Y.map(function(y,i){return nilCountCity(COM,i)}),W=width('ch-trend'),H=210,pl_=12,pr=14,pt=32,pb=26,iw=W-pl_-pr,ih=H-pt-pb;
+  var mx=Math.max.apply(null,v),y1=nice(mx*1.15)<mx?mx*1.1:Math.ceil(mx/Math.pow(10,Math.floor(Math.log10(mx))-0)*1.1)*Math.pow(10,Math.floor(Math.log10(mx)));
+  var col=COM==='*'?C.ink:(PB[COM]?PB[COM].col:C.m4),tcol=col===C.m3?'#6b5600':col;
+  var X=function(i){return pl_+i/(NY-1)*iw},V=function(x){return pt+ih-x/y1*ih};
+  var s=svgOpen(W,H),pts=v.map(function(x,i){return r1(X(i))+' '+r1(V(x))});
+  s+=L(pl_,V(0),W-pr,V(0),C.axis);
+  s+='<path d="M'+X(0)+' '+V(0)+'L'+pts.join('L')+'L'+X(NY-1)+' '+V(0)+'Z" fill="'+col+'" fill-opacity=".14"/>';
+  s+='<path d="M'+pts.join('L')+'" fill="none" stroke="'+(col===C.m3?'#8a7000':col)+'" stroke-width="'+(col===C.m3?5:3.5)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  if(col===C.m3)s+='<path d="M'+pts.join('L')+'" fill="none" stroke="'+col+'" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>';
+  [1999,2005,2010,2015,2020,2025].forEach(function(a){var i=Y.indexOf(a);s+=T(X(i),H-8,a,{a:i===0?'start':i===NY-1?'end':'middle',c:'m'})});
+  var pk=v.indexOf(mx),pl=new Placer(W,H),lab='';
+  function mark(i,t,anchor){var x=X(i),y=V(v[i])-10,w=tw(t,13,true),cx=anchor==='start'?x+w/2:anchor==='end'?x-w/2:x;
+    var p=pl.try(cx,y,t,13,true);if(!p)return;lab+=T(anchor==='start'?p.x-w/2:anchor==='end'?p.x+w/2:p.x,y,t,{a:anchor,c:'halo',st:'font-size:13px'})}
+  function markB(i,t,anchor){var x=X(i),y=V(v[i])+24;if(y>H-pb-6)y=V(v[i])-12;var w=tw(t,13,true),cx=anchor==='start'?x+w/2:x-w/2;var p=pl.try(cx,y,t,13,true);if(!p)return;lab+=T(anchor==='start'?p.x-w/2:p.x+w/2,y,t,{a:anchor,c:'halo',st:'font-size:13px'})}
+  /* anno scelto (sempre scritto), poi inizio, fine, picco */
+  var cx=X(yi),cy=V(v[yi]);
+  mark(yi,f0(v[yi]),yi<4?'start':yi>NY-5?'end':'middle');
+  markB(0,f0(v[0]),'start');mark(NY-1,f0(v[NY-1]),'end');
+  if(pk!==0&&pk!==NY-1&&pk!==yi)mark(pk,f0(v[pk])+' ('+Y[pk]+')','middle');
+  s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="7" fill="#fff" stroke="'+(col===C.m3?'#8a7000':col)+'" stroke-width="3.5"/>';
+  Y.forEach(function(y,i){var w=iw/(NY-1);
+    s+='<rect x="'+r1(X(i)-w/2)+'" y="'+pt+'" width="'+r1(w)+'" height="'+ih+'" fill="#fff" fill-opacity="0"'+tip('<b>'+y+'</b><br>'+f0(v[i])+(COM==='*'?' stranieri':' residenti')+'<br>'+f1(v[i]/cityTot(i)*100)+' su 100 milanesi')+'/>'});
+  $('ch-trend').innerHTML=s+lab+'</svg>';
+  $('t-trend').textContent=COM==='*'?'Gli stranieri a Milano: da '+f0(v[0])+' a '+f0(v[NY-1])+' dal 1999':esc(COM)+' a Milano: da '+f0(v[0])+' a '+f0(v[NY-1])+' residenti dal 1999';
+  var extra='';
+  if(COM==='Ucraina')extra=' Il salto del 2022 coincide con l’inizio della guerra: il dato dice quanti sono iscritti, non il perché.';
+  if(COM==='Egitto'||COM==='Filippine'||COM==='Ecuador'||COM==='Perù')extra=' Una parte del calo recente è fatta di persone che hanno preso la cittadinanza italiana.';
+  $('s-trend').innerHTML='Residenti con questa cittadinanza al 31 dicembre di ogni anno, tutta la città. Il punto è l’anno del cursore.'+extra;
+}
+
+/* ---------- mappa B: la cittadinanza più numerosa ---------- */
+function mappaB(){
+  var y=Y[yi];if(!AN[y])return;
+  var W=width('ch-B'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='',A=AN[y];
+  var cc={},altre=0,gialle=0,bianchi=0,info={};
+  N.forEach(function(o){
+    var a=A[String(o.id)]||[],tot=0,top=null;a.forEach(function(z){tot+=z[1];if(!top||z[1]>top[1])top=z});
+    var r=D.nil[o.id].r[yi],ok=r>=3000&&tot>=300&&top,l=ok?TU.cit[top[0]].l:null,fill,isS=o.id===sel;
+    if(!ok){fill='#fff';bianchi++}else if(PB[l]){fill=PB[l].map||PB[l].col;cc[l]=(cc[l]||0)+1}else{fill=OTH;altre++;cc['_o']=(cc['_o']||0)+1}
+    info[o.id]={l:l,ok:ok,fill:fill};
+    var tp='<b>'+esc(o.n)+'</b> · '+y+'<br>'+(ok?'La più numerosa: '+esc(l)+' ('+f0(top[1])+' su '+f0(tot)+' stranieri, '+f0(top[1]/tot*100)+' su 100)':'Meno di 3.000 residenti o meno di 300 stranieri');
+    var el='<path d="'+P.path(o.f)+'" fill="'+fill+'" stroke="'+(isS?C.mi:ok?'#fff':'#c3c8d0')+'" stroke-width="'+(isS?3.5:ok?0.8:1)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el});
+  s+=sS;
+  var pl=new Placer(W,H),lab='',list=N.filter(function(o){return info[o.id].ok}).sort(function(a,b){var p=P.bb(a.f),q=P.bb(b.f);return q.w*q.h-p.w*p.h});
+  if(sel&&info[sel].ok)list.unshift(BY[sel]);
+  var nl={};list.forEach(function(o){var bb=P.bb(o.f),l=info[o.id].l,t=l;if(!(o.id===sel)&&(bb.w<tw(t,12,true)+10||bb.h<16||(nl[l]||0)>=2))return;nl[l]=(nl[l]||0)+1;
+    var p=pl.try(bb.x,bb.y+4,t,12,true);if(!p)return;
+    var f=info[o.id].fill,dark=lum(f)<.5;
+    lab+=T(p.x,p.y,esc(t),{a:'middle',c:'halo',st:'pointer-events:none;font-size:12px'})});
+  $('ch-B').innerHTML=s+'<g pointer-events="none">'+lab+'</g></svg>';
+  var lg=PAL.filter(function(p){return cc[p.l]}).sort(function(a,b){return cc[b.l]-cc[a.l]}).map(function(p){return '<span><i style="background:'+(p.map||p.col)+'"></i>'+p.l+' <b>&nbsp;'+cc[p.l]+'</b></span>'}).join('');
+  if(cc._o)lg+='<span><i style="background:'+OTH+'"></i>altra cittadinanza <b>&nbsp;'+cc._o+'</b></span>';
+  lg+='<span><i style="background:#fff;border-color:#c3c8d0"></i>pochi residenti o pochi stranieri <b>&nbsp;'+bianchi+'</b></span>';
+  $('lg-B').innerHTML=lg;
+  var tot=N.length-bianchi,best=Object.keys(cc).filter(function(k){return k!=='_o'}).sort(function(a,b){return cc[b]-cc[a]})[0];
+  $('t-B').textContent='Nel '+y+', in '+cc[best]+' quartieri su '+tot+' la cittadinanza straniera più numerosa è '+'quella '+del_(best);
+  var nd=Object.keys(cc).filter(function(k){return k!=='_o'}).length;
+  $('nn-B').innerHTML='Nei quartieri in cui nel '+y+' la prima non ha un colore sono '+(cc._o||0)+'. Il quartiere scelto ha il bordo rosso. Nel 1999 e nel 2002 le serie del registro sono diverse da quelle degli anni dopo il 2003 (vedi i limiti).';
+}
+
+/* ---------- il tuo quartiere ---------- */
+function pair(id,titolo,qv,cv,qcol,fmt,u){
+  var h='<div class="pm"><b>'+titolo+'</b><div class="ch" id="'+id+'"></div></div>';
+  return{h:h,draw:function(){
+    var box=$(id),W=Math.max(220,Math.floor(box.clientWidth)),mx=Math.max(qv||0,cv)*1.0,lw=54,rw=Math.ceil(tw(fmt(Math.max(qv||0,cv))+(u||''),13,true))+10,bw=W-lw-rw,s=svgOpen(W,56);
+    [{n:'Qui',v:qv,col:qcol},{n:'Milano',v:cv,col:C.mi}].forEach(function(r,i){var y=i*26+3;
+      s+=T(0,y+16,r.n,{c:'k'});
+      var w=Math.max(3,r.v/mx*bw);s+=hbar(lw,lw+w,y,20,r.col)+T(lw+w+6,y+16,fmt(r.v)+(u||''),{c:'b'})});
+    box.innerHTML=s+'</svg>'}};
+}
+function miniGrid(G,id,y){
+  var box=$(id),W=Math.floor(box.clientWidth),cw=Math.floor(W/10),chh=Math.round(cw*1.15);
+  box.innerHTML=svgOpen(W,chh*10+2)+persone(G,0,1,cw,chh,function(g){return '<b>'+g.l+'</b><br>'+g.q+' su 100 stranieri'})+'</svg>';
+}
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.className='ris';r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quartiere in una delle mappe: ti dico quanti stranieri ci sono, come sono cambiati dal 1999 e come sono divisi per cittadinanza, a confronto con Milano.';return}
+  var o=BY[sel],d=D.nil[String(sel)],r25=d.r[NY-1],s25=d.s[NY-1],r99=d.r[0],s99=d.s[0];
+  var q25=s25/r25*100,q99=r99>0?s99/r99*100:0,cq25=cityStr(NY-1)/cityTot(NY-1)*100,cq99=cityStr(0)/cityTot(0)*100;
+  var dp=r10(q25)-r10(q99),cdp=r10(cq25)-r10(cq99);
+  var h='<b class="big">'+esc(o.n)+'</b>'+f0(r25)+' residenti nel 2025, di cui '+f0(s25)+' stranieri.';
+  if(!o.big)h+='<p>Ha meno di 3.000 residenti: i confronti con gli altri quartieri vanno letti con cautela.</p>';
+  h+='<p>Dal 1999 la quota di stranieri è '+(dp>=0?'salita':'scesa')+' di <b>'+f1(Math.abs(dp))+' punti</b> (Milano: '+(cdp>=0?'salita':'scesa')+' di '+f1(Math.abs(cdp))+' punti).</p>';
+  var P=[pair('pq1','Stranieri ogni 100 residenti, nel 2025',q25,cq25,C.m4,f1),pair('pq2','Stranieri ogni 100 residenti, nel 1999',q99,cq99,C.m4,f1)];
+  h+=P.map(function(p){return p.h}).join('');
+  h+='<div class="pm"><b>Come sono divisi i 100 stranieri, nel 2025</b></div><div class="dueom"><div><b>'+esc(o.sn)+'</b><div class="ch" id="om-q"></div></div><div><b>Milano</b><div class="ch" id="om-m"></div></div></div><div id="tab-q"></div>';
+  r.className='ris m';r.innerHTML=h;
+  P.forEach(function(p){p.draw()});
+  var NG=nilGroups(sel,2025),MG=cityGroups(NY-1);
+  miniGrid(NG.g,'om-q',2025);miniGrid(MG,'om-m',2025);
+  /* tabella: le comunità, qui e a Milano */
+  var rows={};NG.g.forEach(function(g){rows[g.l]={q:g.q}});MG.forEach(function(g){(rows[g.l]=rows[g.l]||{}).m=g.q});
+  var ord_=Object.keys(rows).filter(function(l){return l!=='Altre cittadinanze'}).sort(function(a,b){return ((rows[b].q||0)+(rows[b].m||0))-((rows[a].q||0)+(rows[a].m||0))}).slice(0,6);
+  ord_.push('Altre cittadinanze');
+  var t='<table class="kt"><thead><tr><th>Su 100 stranieri</th><th>'+esc(o.sn)+'</th><th>Milano</th></tr></thead><tbody>';
+  ord_.forEach(function(l){var c=(PB[l]||{}).col||OTH,x=rows[l]||{};t+='<tr><td><i style="background:'+c+'"></i>'+esc(l)+'</td><td>'+(x.q||0)+'</td><td>'+(x.m||0)+'</td></tr>'});
+  $('tab-q').innerHTML=t+'</tbody></table><p class="note">Le cifre sono arrotondate: nel quartiere piccoli numeri possono dare salti grandi. Una cittadinanza fuori dall’elenco può restare in «Altre».</p>';
+}
+
+/* ---------- scelta della comunità ---------- */
+function chips(){
+  $('chips').innerHTML=['*'].concat(PAL.map(function(p){return p.l})).map(function(l){
+    var c=l==='*'?C.ink:PB[l].col;return '<button type="button" class="chip'+(c===C.m3?' dk':'')+'" data-c="'+esc(l)+'" style="--c:'+c+'" aria-pressed="false">'+(l==='*'?'Tutti':esc(l))+'</button>'}).join('');
+  [].forEach.call($('chips').children,function(b){b.addEventListener('click',function(){COM=b.getAttribute('data-c');sync()})});
+  chipsMark();
+}
+function chipsMark(){[].forEach.call($('chips').children,function(b){var on=b.getAttribute('data-c')===COM;b.className='chip'+(on?' on':'')+(b.style.getPropertyValue('--c')===C.m3?' dk':'');b.setAttribute('aria-pressed',on)})}
+
+/* ---------- cerca una cittadinanza ---------- */
+function cerca(){
+  var k=nz($('q2').value),rows=TU.cit.filter(function(c){return !k||nz(c.l).indexOf(k)>=0||nz(c.k).indexOf(k)>=0});
+  rows=rows.slice().sort(function(a,b){return b.c[NY-1]-a.c[NY-1]});
+  var t='<thead><tr><th>Cittadinanza</th><th>1999</th><th>2025</th><th>Variazione</th></tr></thead><tbody>';
+  rows.slice(0,k?60:40).forEach(function(c){var a=c.c[0],b=c.c[NY-1],v=a>=100?(b/a-1)*100:null;
+    t+='<tr><td>'+(PB[c.l]?'<i style="background:'+PB[c.l].col+'"></i>':'')+esc(c.l)+'</td><td>'+f0(a)+'</td><td>'+f0(b)+'</td><td>'+(v==null?(a===0&&b>0?'nuova':'–'):(v>=0?'+':'−')+f0(Math.abs(v))+'%')+'</td></tr>'});
+  $('tab-cerca').innerHTML=t+'</tbody>';
+  $('n-cerca').textContent=k?(rows.length?pl(rows.length,'cittadinanza trovata','cittadinanze trovate')+(rows.length>60?' (le prime 60)':'')+'.':'Nessuna cittadinanza con questo nome. Controlla come è scritto.'):'Le 40 più numerose nel 2025, su '+TU.distinte_senza_generiche[NY-1]+' cittadinanze diverse nel registro. Scrivi un nome per cercare le altre.';
+  $('t-cerca').textContent='Nel registro ci sono '+TU.distinte_senza_generiche[NY-1]+' cittadinanze diverse nel 2025; nel 1999 erano '+TU.distinte_senza_generiche[0];
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var nat=RZ.naturalizzazioni;
+  var L_=[
+   '<b>Cittadinanza non è origine.</b> Nel registro chi ottiene la cittadinanza italiana diventa «Italia» ('+f0(nat['2022'])+'-'+f0(nat['2024'])+' persone l’anno nel 2022-2024). I figli di stranieri nati a Milano restano, nel registro, con la cittadinanza dei genitori. Non c’è il luogo di nascita. Le voci cambiano nome: «ex Jugoslavia», «Serbia», «Montenegro», «Kosovo» sono separate; «Altre nazioni o n.d.» esiste.',
+   '<b>Il registro conta più persone dell’ISTAT.</b> Al 31/12/2025 il registro ha <b>'+f0(cityStr(NY-1))+'</b> residenti con cittadinanza non italiana, contro <b>267.986</b> per l’ISTAT al 1° gennaio 2026 (+10,4%); la quota sul totale sarebbe 21,1% contro 19,7%. Dal 2020 la differenza sul totale dei residenti è tra +1,3% e +3,4%. Nei quartieri il registro ha in media circa 3 punti di stranieri in più dei censimenti 2001 e 2011. I numeri di questa pagina sono quelli del registro.',
+   '<b>Salti nelle serie.</b> Il totale dei residenti cala di '+f0(cityTot(3)-cityTot(4))+' persone tra il 2002 e il 2003 e cresce di '+f0(cityTot(13)-cityTot(12))+' tra il 2011 e il 2012: sono con ogni probabilità revisioni del registro dopo i censimenti (ipotesi non verificata), non spostamenti. Vale anche per i singoli quartieri.',
+   '<b>Quartieri piccoli e parchi.</b> 18 quartieri su 88 hanno meno di 3.000 residenti: sono in grigio nelle mappe e fuori dai conteggi.',
+   '<b>Quartieri fuori scala.</b> A Comasina e a Monluè-Ponte Lambro le quote di stranieri sono molto alte (43,9% e 50,4% nel 2025). Il dato dice dove sono iscritti i residenti; non spiega il perché (forse residenze collettive, grandi condomini o altro: nessuna ipotesi è verificata). Un confronto con il secondo dataset del Comune (ds205) dà gli stessi numeri per Comasina.',
+   '<b>I quartieri prima del 2012.</b> I residenti del 1999-2011 sono assegnati ai quartieri di oggi; il dataset non spiega come. Il dataset ds205 del Comune, per le prime tre cittadinanze, coincide con ds27 nel 99,8% dei casi; i due casi diversi sono errori di ds205.',
+   '<b>Le comunità con colore.</b> Le 10 cittadinanze con un colore sono le più numerose nel 2025. La classifica del 1999 comprende anche Francia, Regno Unito, Germania e Giappone, che oggi sono più in basso.',
+   '<b>Niente giudizi.</b> Questa pagina non dice se una concentrazione sia «buona» o «cattiva», né se una comunità sia «integrata»: misura dove risiedono persone con una certa cittadinanza. Dove due serie stanno vicine non vuol dire che una causi l’altra.',
+   '<b>Il Covid.</b> Gli anni 2020-2021 sono trattati nella pagina <a href="../anno-covid/">L’anno del Covid</a>.'];
+  $('limiti-lista').innerHTML=L_.map(function(x){return '<li>'+x+'</li>'}).join('')+'<li>Altre pagine sullo stesso tema: <a href="../censimenti/">I censimenti di Milano</a>, <a href="../divisa/">Quanto è divisa Milano</a>, <a href="../arrivi-partenze/">Chi arriva e chi lascia Milano</a>, <a href="../scuole/">Le scuole</a>.</li>';
+}
+function metodo(){
+  var L_=[
+   '<b>Residenti.</b> Persone iscritte all’anagrafe del Comune al 31 dicembre di ogni anno, per quartiere (NIL) e per cittadinanza.',
+   '<b>Quota.</b> Residenti con la cittadinanza scelta diviso tutti i residenti del quartiere (o della città). La variazione di una quota è scritta in punti, mai in percentuale, per non avere numeri assurdi.',
+   '<b>Cento omini.</b> I residenti stranieri sono divisi per cittadinanza e riportati a 100 con arrotondamento ai numeri interi, assegnando i resti più grandi, così sommano sempre 100.',
+   '<b>Classifica.</b> Per ogni anno le 30 cittadinanze più numerose nel 2025 sono ordinate per numero di residenti; si mostrano le linee che sono state nei primi dieci posti almeno una volta.',
+   '<b>Soglie di colore.</b> Per ogni cittadinanza le classi della mappa sono calcolate su tutti i quartieri con almeno 3.000 residenti e su tutti gli anni insieme: i colori hanno lo stesso significato in ogni anno. Per «Tutti gli stranieri» le soglie sono 5, 10, 15 e 25 residenti su 100.',
+   '<b>Cittadinanza più numerosa.</b> Per ogni quartiere con almeno 3.000 residenti e almeno 300 stranieri, la voce del registro con più residenti stranieri nell’anno.',
+   '<b>Pagina costruita da un programma</b> che legge i file scaricati: ogni numero è calcolato dai dati e non scritto a mano, salvo il confronto con l’ISTAT dei limiti dei dati.'];
+  $('metodo-lista').innerHTML=L_.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1),el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();el.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname+'#'+id)},true);
+</script></body></html>
