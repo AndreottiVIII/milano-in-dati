@@ -89,6 +89,7 @@
     { path: 'indovina-quartiere/', label: 'Indovina il quartiere' },
     { path: 'attesa-fermata/', label: 'Quanto aspetti alla fermata' },
     { path: 'chilometri-duomo/', label: 'Milano per chilometri dal Duomo' },
+    { path: 'storia-centro/', label: 'Il centro cambia' },
     { path: 'nascite/', label: 'Nascite e mamme' },
     { path: 'tribunale/', label: 'Il tribunale di Milano' },
     { path: 'auto/', label: 'Le auto dei milanesi' },
