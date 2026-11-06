@@ -132,7 +132,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
   <h3 id="t-tess"></h3>
   <p class="sub" id="s-tess"></p>
   <div class="lg" id="lg-tess"></div>
-  <div class="ch" id="ch-tess" role="img" aria-label="Griglia di quadrati, uno per quartiere di Milano, colorati per residenti per medico di famiglia"></div>
+  <div class="ch" id="ch-tess" role="img" aria-label="Mappa dei quartieri di Milano colorati per residenti per medico di famiglia"></div>
   <p class="note" id="nn-tess"></p>
   <p class="src">Fonte: Comune di Milano, medici di medicina generale (29/10/2026, CC BY-NC); residenti dell’anagrafe del Comune al 31/12/2025 (CC BY). Medici con ambulatorio nel quartiere, titolari e incaricati provvisori; non sono contate le sedi di servizio dell’ospedale (vedi i limiti). Il quartiere è il NIL (Nucleo di identità locale). In grigio i quartieri con meno di 5.000 residenti.</p>
 </div>
@@ -246,8 +246,6 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 (function(){
 'use strict';
 var DATA='data/';
-/* quadrati dei quartieri: [codice del quartiere, colonna, riga], messi più o meno dove sono sulla mappa */
-var TL={cols:11,rows:10,t:[[1,6,5],[2,7,4],[3,8,4],[4,7,5],[5,7,6],[6,6,6],[7,5,5],[8,6,4],[9,7,3],[10,8,2],[11,7,2],[12,7,1],[13,8,1],[14,7,0],[15,8,0],[16,9,0],[17,10,1],[18,10,2],[19,9,1],[20,9,2],[21,8,3],[22,9,3],[23,10,3],[24,10,4],[25,9,4],[26,8,5],[27,8,6],[28,9,6],[29,9,5],[30,10,6],[31,10,5],[32,10,8],[33,10,7],[34,9,8],[35,9,7],[36,8,7],[37,7,7],[38,7,8],[39,7,9],[40,6,9],[41,5,9],[42,6,8],[43,6,7],[44,5,6],[45,5,7],[46,4,7],[47,5,8],[48,3,7],[49,3,6],[50,4,6],[51,4,5],[52,3,5],[53,2,6],[54,0,5],[55,1,5],[56,2,5],[57,3,4],[58,4,4],[59,5,3],[60,2,3],[61,2,4],[62,1,4],[63,0,2],[64,1,2],[65,2,2],[66,3,3],[67,4,3],[68,5,4],[69,6,3],[70,5,2],[71,3,2],[72,2,1],[73,1,0],[74,2,0],[75,3,1],[76,3,0],[77,4,2],[78,6,2],[79,6,1],[80,5,1],[81,4,1],[82,4,0],[83,5,0],[84,6,0],[85,8,9],[86,4,8],[87,0,6],[88,1,3]]};
 var CS=getComputedStyle(document.documentElement);
 function cv(n){return CS.getPropertyValue(n).trim()}
 var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
@@ -341,7 +339,7 @@ function tutto(){
   q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
     var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
     if(m.length===1)pick(m[0].id,true);else if(m.length>1)$('ris').className='ris',$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
-    else $('ris').className='ris',$('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quadrato della griglia.'});
+    else $('ris').className='ris',$('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
   document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true,true)});
   scheda();
   draw(tessere);draw(estremi);draw(mattoni);draw(pediatri);draw(farmSerie);draw(cambi);draw(persone);draw(mappa);
@@ -368,11 +366,8 @@ function highlights(){
     {c:C.m3,h:'t-estremi',n:sotto+'<small> su '+nb+'</small>',u:'',p:'quartieri dove i medici bastano sulla carta: 1.500 residenti per medico o meno.'},
     {c:C.m2,h:'t-pensione',n:f0(c31),u:'',p:'dei '+f0(tot)+' medici di famiglia titolari avranno compiuto 70 anni entro il 2031, cioè '+f0(c31/tot*100)+' su 100.'},
     {c:C.m4,h:'t-pediatri',n:f0(bp),u:'',p:'bambini da 0 a 13 anni per ogni pediatra di libera scelta in elenco.'},
-    {c:C.m5,h:'t-pediatri',n:zeroP+'<small> su '+nb+'</small>',u:'',p:'quartieri senza nessun pediatra con l’ambulatorio lì.'},
-    {c:C.ora,h:'t-farm-serie',n:sg0((s25.residenti_per_farmacia/s05.residenti_per_farmacia-1)*100)+'<small>%</small>',u:'',p:'residenti per farmacia dal 2005: da '+f0(s05.residenti_per_farmacia)+' a '+f0(s25.residenti_per_farmacia)+'. Le farmacie sono '+s05.farmacie_aperte+' e '+s25.farmacie_aperte+'.'},
-    {c:C.teal,h:'t-persone',n:f1(cf.mediana_min).replace('.',',')+'<small> min</small>',u:'',p:'a piedi fino alla farmacia più vicina, per un milanese su due. Per il medico di famiglia: '+f1(cd.mediana_min)+' minuti.'},
-    {c:C.mag,h:'t-mappa',n:lontane+'<small> su '+nb+'</small>',u:'',p:'quartieri dove almeno 1 residente su 10 è a più di 10 minuti a piedi da una farmacia.'},
-    {c:C.bro,h:'t-farm-cambi',n:sg0(top.v)+'<small>%</small>',u:'',p:'residenti per farmacia dal 2005 a '+esc(top.o.sn)+': da '+f0(top.o.rpf05)+' a '+f0(top.o.rpf25)+'. È il quartiere dove è cresciuto di più.'}
+    {c:C.m5,h:'t-farm-serie',n:sg0((s25.residenti_per_farmacia/s05.residenti_per_farmacia-1)*100)+'<small>%</small>',u:'',p:'residenti per farmacia dal 2005: da '+f0(s05.residenti_per_farmacia)+' a '+f0(s25.residenti_per_farmacia)+'. Le farmacie sono '+s05.farmacie_aperte+' e '+s25.farmacie_aperte+'.'},
+    {c:C.ora,h:'t-persone',n:f1(cf.mediana_min)+'<small> min</small>',u:'',p:'a piedi fino alla farmacia più vicina, per un milanese su due. Per il medico di famiglia: '+f1(cd.mediana_min)+' minuti.'}
   ];
   $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+(t.c===C.m3?';--k:#0b0d12':'')+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
@@ -391,7 +386,7 @@ function pair(id,titolo,qv,cv,qcol,fmt,vuoto,u){
 }
 function scheda(){
   var r=$('ris');
-  if(!sel){r.className='ris';r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quadrato della griglia qui sotto: ti dico quanti residenti ci sono per ogni medico, pediatra e farmacia, e quanto si cammina.';return}
+  if(!sel){r.className='ris';r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quartiere sulla mappa qui sotto: ti dico quanti residenti ci sono per ogni medico, pediatra e farmacia, e quanto si cammina.';return}
   var o=BY[sel],h='<b class="big">'+esc(o.n)+'</b>Municipio '+o.mu+' · '+f0(o.ab)+' residenti, di cui '+f0(o.b13)+' bambini da 0 a 13 anni.';
   if(!o.big){
     h+='<p>Ha meno di 5.000 residenti: i rapporti non sono confrontabili. In numeri: '+pl(o.mm,'medico di famiglia','medici di famiglia')+', '+pl(o.pl,'pediatra','pediatri')+', '+pl(o.fa,'farmacia','farmacie')+'. A piedi, la farmacia più vicina è a '+f1(o.fmin)+' minuti per metà dei residenti.</p>';
@@ -408,29 +403,34 @@ function scheda(){
   P.forEach(function(p){p.draw()});
 }
 
-/* ---------- 1. griglia dei quartieri ---------- */
+/* ---------- 1. mappa dei quartieri per medici ---------- */
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,k:k,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(p){return[1+(p[0]*k-x0)*sc,1+(y1-p[1])*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+function vtess(o){return o.mm>0?(o.rd<10000?f1(o.rd/1000):f0(o.rd/1000)):'–'}
 function tessere(){
-  var W=width('ch-tess'),cols=TL.cols,rows=TL.rows,gap=2,cs=Math.min(54,Math.floor((W-(cols-1)*gap)/cols)),H=rows*(cs+gap)+30,s=svgOpen(W,H),ox=Math.floor((W-(cols*cs+(cols-1)*gap))/2);
+  var W=width('ch-tess'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='',lab='';
   var cnt=[0,0,0,0],piccoli=0;N.forEach(function(o){var c=tcl(o);if(c>=0)cnt[c]++;else piccoli++});
-  var selT=null,fs=Math.max(12,Math.min(15,Math.round(cs*0.42)));
-  TL.t.forEach(function(t){var o=BY[t[0]],x=ox+t[1]*(cs+gap),y=t[2]*(cs+gap),c=tcl(o);
-    var col=c>=0?TC[c].col:'#e6e8ec',txt='';
+  N.forEach(function(o){var c=tcl(o),isS=o.id===sel,b=P.bb(o.f);
     var tp=c>=0?('<b>'+esc(o.n)+'</b><br>'+(o.mm>0?pl(o.mm,'medico','medici')+' · '+f0(o.rd)+' residenti di 14+ per medico':'Nessun medico con l’ambulatorio nel quartiere')+'<br>Posto '+o.rk+' su '+NB.length):('<b>'+esc(o.n)+'</b><br>Meno di 5.000 residenti ('+f0(o.ab)+'): rapporti non confrontabili');
-    if(sel===o.id){selT=[x,y,o];return}
-    if(c>=0){var v=o.mm>0?(o.rd<10000?f1(o.rd/1000):f0(o.rd/1000)):'–';txt=T(x+cs/2,y+cs/2+fs*0.35,v,{a:'middle',st:'font-size:'+fs+'px;font-weight:700;fill:'+TC[c].txt})}
-    s+='<g data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"><rect x="'+x+'" y="'+y+'" width="'+cs+'" height="'+cs+'" rx="3" fill="'+col+'"/>'+txt+'</g>'});
-  if(selT){var o2=selT[2],c2=tcl(o2),x2=selT[0],y2=selT[1];
-    s+='<g data-n="'+o2.id+'" style="cursor:pointer"><rect x="'+(x2-1)+'" y="'+(y2-1)+'" width="'+(cs+2)+'" height="'+(cs+2)+'" rx="3" fill="'+(c2>=0?TC[c2].col:'#e6e8ec')+'" stroke="'+C.ink+'" stroke-width="3.5"/>'+(c2>=0?T(x2+cs/2,y2+cs/2+fs*0.35,o2.mm>0?(o2.rd<10000?f1(o2.rd/1000):f0(o2.rd/1000)):'–',{a:'middle',st:'font-size:'+fs+'px;font-weight:800;fill:'+TC[c2].txt}):'')+'</g>'}
-  var yl=rows*(cs+gap)+18;
-  if(sel){var o3=BY[sel];s+=T(ox,yl,esc(o3.sn)+(o3.big?(o3.mm>0?': '+f0(o3.rd)+' residenti per medico':': nessun medico'):': pochi residenti'),{c:'b',st:'font-size:13px'})}
-  else s+=T(ox,yl,'Tocca un quadrato per vedere il quartiere',{c:'m'});
+    var el='<path d="'+P.path(o.f)+'" fill="'+(c>=0?TC[c].col:'#e6e8ec')+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el;
+    if(c>=0&&!isS&&b.w>=30&&b.h>=17)lab+=T(Math.min(b.x,W-12),b.y+4,vtess(o),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+TC[c].txt})});
+  s+=sS+lab;
+  if(sel){var o=BY[sel],b=P.bb(o.f),t=o.sn+(o.big?' '+vtess(o):''),w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),y=Math.max(14,Math.min(H-4,b.y-b.h/2-5));
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
   $('ch-tess').innerHTML=s+'</svg>';
   $('lg-tess').innerHTML=TC.map(function(t,i){return '<span><i style="background:'+t.col+'"></i>'+t.nome+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#e6e8ec"></i>pochi residenti <b>&nbsp;'+piccoli+'</b></span>';
-  var big=NB.filter(function(o){return o.mm>0});
-  var ncar=NB.length-big.length;
   $('t-tess').textContent='In '+cnt[0]+' quartieri su '+NB.length+' i medici bastano sulla carta; in '+cnt[3]+' ogni medico dovrebbe seguire più di 3.000 residenti';
-  $('s-tess').textContent='Ogni quadrato è un quartiere, messo più o meno dove sta sulla mappa di Milano. Il numero scritto è quanti residenti di 14 anni e più ci sono per ogni medico di famiglia, in migliaia.';
-  $('nn-tess').innerHTML='Conta dove ha l’ambulatorio il medico, non dove abitano i pazienti: nei quartieri con pochi medici molti residenti vanno da un medico del quartiere vicino. Il trattino indica che nel quartiere non c’è nessun ambulatorio.';
+  $('s-tess').textContent='Il numero scritto è quanti residenti di 14 anni e più ci sono per ogni medico di famiglia, in migliaia. Dove il quartiere è troppo piccolo il numero non c’è: tocca il quartiere per leggerlo.';
+  $('nn-tess').innerHTML='Conta dove ha l’ambulatorio il medico, non dove abitano i pazienti: nei quartieri con pochi medici molti residenti vanno da un medico del quartiere vicino. Il quartiere scelto ha il bordo rosso.';
 }
 
 /* ---------- 2. estremi ---------- */
@@ -616,7 +616,7 @@ function mappa(){
   var cnt=[0,0,0],piccoli=0;N.forEach(function(o){var c=mcl(o);if(c>=0)cnt[c]++;else piccoli++});
   var s=svgOpen(W,H),sS='';
   N.forEach(function(o){var c=mcl(o),isS=o.id===sel;
-    var el='<path d="'+path(o.f)+'" fill="'+(c>=0?MC[c].col:'#e6e8ec')+'" stroke="'+(isS?C.ink:'#fff')+'" stroke-width="'+(isS?3:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip('<b>'+esc(o.n)+'</b><br>'+(c>=0?f0(o.f10*100)+'% dei residenti a più di 10 minuti a piedi da una farmacia<br>'+pl(o.fa,'farmacia','farmacie')+' nel quartiere':'Meno di 5.000 residenti'))+' style="cursor:pointer"/>';
+    var el='<path d="'+path(o.f)+'" fill="'+(c>=0?MC[c].col:'#e6e8ec')+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip('<b>'+esc(o.n)+'</b><br>'+(c>=0?f0(o.f10*100)+'% dei residenti a più di 10 minuti a piedi da una farmacia<br>'+pl(o.fa,'farmacia','farmacie')+' nel quartiere':'Meno di 5.000 residenti'))+' style="cursor:pointer"/>';
     if(isS)sS=el;else s+=el});
   s+=sS;
   var pts=FARM.farmacie;
@@ -646,7 +646,6 @@ function limiti(){
    '<b>Farmacie nel tempo, per quartiere.</b> Si usa l’elenco di oggi e cambiano solo i residenti: le farmacie spostate da un quartiere a un altro non si vedono.',
    '<b>I minuti a piedi sono una stima.</b> Rete pedonale di OpenStreetMap, 4,5 km/h, nessuna pendenza, nessun attraversamento, residenti distribuiti in parti uguali tra i civici del quartiere. I servizi appena fuori dal confine del comune non sono contati: contarli abbassa la media di solo '+f1(R.cammino_farmacia_senza_bordo_media_min-R.cammino_farmacia_con_bordo_media_min)+' minuti. L’ambulatorio più vicino può non accettare nuovi pazienti.',
    '<b>Quartieri molto piccoli.</b> Con meno di 5.000 residenti i rapporti non sono confrontabili e restano in grigio: sono 24 quartieri su 88, tra parchi e aree quasi senza abitanti.',
-   '<b>La griglia non è una mappa.</b> I quadrati hanno tutti la stessa grandezza e sono messi solo più o meno dove sta il quartiere: servono a vedere tutti i quartieri alla pari, non le distanze.',
    '<b>Posti vacanti: un dato vecchio.</b> L’unico elenco leggibile è del 2022 (ATS Milano / Regione Lombardia): '+R.posti_carenti_2022_totale_municipi+' posti di medico di famiglia messi a bando, '+'11 nel Municipio 6, 8 nel 9, 7 nel 5 e nel 7, 5 nel 2 e nell’8, 2 nel 4, nessuno nel 1 e nel 3. Gli elenchi del 2023 sono scansioni che non abbiamo letto e di quelli più recenti non c’è traccia. Non lo usiamo nei grafici; la tabella è tra i file.',
    '<b>Licenza.</b> Gli elenchi dei medici del Comune sono CC BY-NC (uso non commerciale): ripubblichiamo solo conteggi e fasce di età per tutta la città, citando la fonte, a scopo non commerciale. Nomi, date di nascita e codici dei medici non sono ripubblicati.'
   ];
