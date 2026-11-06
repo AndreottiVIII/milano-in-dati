@@ -27,6 +27,11 @@ PL = "lapide o targa"
 d["anno"] = pd.to_numeric(d["anno posa"], errors="coerce")
 d["aperto"] = d.collocazione_dedotta.str.startswith("non indicata")
 d["persona"] = d.soggetto_tipo.isin(["persona reale", "piu' persone reali"])
+# Dal 6/11/2026 (scelta di Davide) le lapidi e le targhe stanno solo nella pagina docs/targhe/: qui si tolgono da tutti i conti e dai file.
+COL_OPERE = [c for c in pd.read_csv(os.path.join(O, "opere.csv"), nrows=0).columns]
+out_lapidi_tolte = int((d.tipo == PL).sum())
+d = d[d.tipo != PL].copy()
+s = s[s.id_opera.isin(set(d.id))].copy()
 n = len(d)
 out = {}
 out["generato"] = pd.Timestamp.now().strftime("%Y-%m-%d")
@@ -35,7 +40,7 @@ out["n"] = n
 out["tipi"] = [[k, int(v)] for k, v in d.tipo.value_counts().items()]
 out["mon"] = int(d.tipo.isin(MON).sum()); out["mon_aperto"] = int((d.tipo.isin(MON) & d.aperto).sum())
 out["statue_monumenti"] = int(d.tipo.isin(["statua", "busto", "monumento"]).sum())
-out["lapidi"] = int((d.tipo == PL).sum())
+out["lapidi_tolte"] = out_lapidi_tolte
 out["fonti"] = [[k, int(v)] for k, v in d.fonte.value_counts().items()]
 out["in_wd"] = int(d.fonte.str.contains("wikidata").sum()); out["in_osm"] = int(d.fonte.str.contains("osm").sum()); out["in_iccd"] = int(d.fonte.str.contains("iccd").sum())
 out["in_wd_e_osm"] = int((d.fonte.str.contains("wikidata") & d.fonte.str.contains("osm")).sum())
@@ -53,7 +58,7 @@ def gstat(x, nome):
     nd = int((k.genere == "donna").sum()); nn = len(k)
     lo, hi = wilson(nd, nn)
     return dict(nome=nome, donne=nd, persone=nn, quota=round(100 * nd / nn, 1) if nn else None, lo=lo, hi=hi)
-G = [gstat(sm, "Tutte le opere"), gstat(sm[sm.tipo.isin(MON)], "Statue, monumenti, sculture"), gstat(sm[sm.tipo.isin(["statua", "busto"])], "Solo statue e busti"), gstat(sm[sm.tipo == PL], "Lapidi e targhe")]
+G = [gstat(sm, "Tutte le opere"), gstat(sm[sm.tipo.isin(MON)], "Statue, monumenti, sculture"), gstat(sm[sm.tipo.isin(["statua", "busto"])], "Solo statue e busti")]
 vq = vie["donne_sicure"] / vie["persone_sicure"]
 G.append(dict(nome="Vie intitolate a persone", donne=vie["donne_sicure"], persone=vie["persone_sicure"], quota=round(100 * vq, 1), lo=wilson(vie["donne_sicure"], vie["persone_sicure"])[0], hi=wilson(vie["donne_sicure"], vie["persone_sicure"])[1]))
 out["genere"] = G
@@ -85,7 +90,7 @@ out["maria_n"] = int(mar.soggetto.str.contains(r"(?:^|\| )Maria(?: \||$)", regex
 def prof(x):
     g = x.groupby("gruppo_professione").agg(inc=("id_opera", "size"), donne=("genere", lambda z: int((z == "donna").sum()))).sort_values("inc", ascending=False).reset_index()
     return g.values.tolist()
-out["prof_mon"] = prof(sm[sm.tipo.isin(MON)]); out["prof_lap"] = prof(sm[sm.tipo == PL])
+out["prof_mon"] = prof(sm[sm.tipo.isin(MON)])
 
 # ---- tempo
 dd = d[d.anno.notna()].copy()
@@ -93,7 +98,7 @@ dd["dec"] = (dd.anno // 10 * 10).astype(int)
 dec = []
 for k in range(int(dd.dec.min()), int(dd.dec.max()) + 1, 10):
     x = dd[dd.dec == k]
-    dec.append([k, int(len(x)), int(x.tipo.isin(MON).sum()), int((x.tipo == PL).sum())])
+    dec.append([k, int(len(x)), int(x.tipo.isin(MON).sum())])
 out["decenni"] = dec
 out["n_datate"] = int(len(dd))
 EP = [("prima del 1861", 0, 1860), ("1861-1921", 1861, 1921), ("1922-1943", 1922, 1943), ("1944-1969", 1944, 1969), ("1970-1999", 1970, 1999), ("dal 2000", 2000, 3000)]
@@ -119,15 +124,21 @@ out["lag"] = dict(n=int(len(lg)), mediana=float(lg.lag.median()) if len(lg) else
 w = sm[sm.genere == "donna"].copy()
 out["donne_elenco"] = [[r.persona, r.opera, r.tipo_opera, int(r.anno) if not math.isnan(r.anno) else None, r.gruppo_professione, r.NIL, r.collocazione_dedotta, r.come_trovato] for r in w.sort_values("anno").itertuples()]
 
-# ---- lapidi
-pl = d[d.tipo == PL]
-out["lapidi_info"] = dict(n=int(len(pl)), solo_osm=int((pl.fonte == "osm").sum()), solo_wd=int((pl.fonte == "wikidata").sum()), entrambe=int(pl.fonte.str.contains("osm").mul(pl.fonte.str.contains("wikidata")).sum()),
-                          con_persona=int(pl.persona.sum()), senza_nome=int((pl.nome == "").sum()), stima=ctl["sovrapposizione_wikidata_osm"]["lapidi_e_targhe"])
+# ---- sovrapposizione delle fonti (la parte sulle lapidi serve alla pagina docs/targhe/, che la legge da qui)
 out["overlap"] = ctl["sovrapposizione_wikidata_osm"]
 
-# ---- NIL
-nl = pd.read_csv(os.path.join(O, "per_nil.csv"))
-out["nil_top"] = nl.sort_values("opere", ascending=False).head(10)[["NIL", "opere", "statue_monumenti_sculture", "lapidi_targhe"]].values.tolist()
+# ---- NIL, ricalcolati senza lapidi
+nl0 = pd.read_csv(os.path.join(O, "per_nil.csv"), dtype={"id_nil": str})
+dn = d[d.NIL != ""]
+pn = sm[sm.NIL != ""].drop_duplicates(["NIL", "qid"])
+nl = nl0[["id_nil", "NIL", "area_kmq"]].copy()
+nl["opere"] = nl.NIL.map(dn.NIL.value_counts()).fillna(0).astype(int)
+nl["statue_monumenti_sculture"] = nl.NIL.map(dn[dn.tipo.isin(MON)].NIL.value_counts()).fillna(0).astype(int)
+nl["murali"] = nl.NIL.map(dn[dn.tipo == "murale o opera decorativa"].NIL.value_counts()).fillna(0).astype(int)
+nl["persone_reali"] = nl.NIL.map(pn.NIL.value_counts()).fillna(0).astype(int)
+nl["donne"] = nl.NIL.map(pn[pn.genere == "donna"].NIL.value_counts()).fillna(0).astype(int)
+nl["opere_per_kmq"] = (nl.opere / nl.area_kmq).round(1)
+out["nil_top"] = nl.sort_values("opere", ascending=False).head(10)[["NIL", "opere", "statue_monumenti_sculture"]].values.tolist()
 out["nil_senza"] = int((nl.opere == 0).sum()); out["nil_tot"] = int(len(nl))
 out["nil_duomo_brera"] = int(nl[nl.NIL.isin(["DUOMO", "BRERA"])].opere.sum()); out["nil_opere_tot"] = int(nl.opere.sum())
 out["inventario"] = pd.read_csv(os.path.join(O, "inventario_fonti.csv"), dtype=str).fillna("").to_dict("records")
@@ -143,10 +154,18 @@ pts = [[r["id"], r["nome"], r["tipo"], float(r["lon"]), float(r["lat"]), r["sogg
 json.dump({"colonne": cols, "punti": pts}, open(os.path.join(D, "opere_mappa.json"), "w", encoding="utf8"), ensure_ascii=False, separators=(",", ":"))
 
 # ---- copie dei file pubblicabili
-for f in ["opere.csv", "soggetti.csv", "per_nil.csv", "inventario_fonti.csv", "piu_rappresentati_tutte.csv", "per_decennio.csv"]:
-    shutil.copy(os.path.join(O, f), os.path.join(D, f))
-shutil.copy(os.path.join(O, "_lavoro/ricerche_soggetti.csv"), os.path.join(D, "controllo_soggetti_per_titolo.csv"))
-shutil.copy(os.path.join(O, "_lavoro/iscrizioni_soggetti.csv"), os.path.join(D, "controllo_soggetti_da_iscrizione.csv"))
+# senza lapidi: le tabelle si filtrano o si ricalcolano (le lapidi e i loro file sono nella pagina docs/targhe/)
+ids = set(d.id)
+def scrivi(df, nome): df.to_csv(os.path.join(D, nome), index=False, encoding="utf-8-sig")
+scrivi(d[COL_OPERE], "opere.csv")
+scrivi(pd.read_csv(os.path.join(O, "soggetti.csv"), dtype=str).fillna("").query("id_opera in @ids"), "soggetti.csv")
+scrivi(nl, "per_nil.csv")
+shutil.copy(os.path.join(O, "inventario_fonti.csv"), os.path.join(D, "inventario_fonti.csv"))
+pr = sm.groupby(["qid", "persona", "genere", "gruppo_professione"]).agg(opere=("id_opera", "nunique"), tipi=("tipo_opera", lambda x: ", ".join(sorted(set(x))))).reset_index().sort_values(["opere", "persona"], ascending=[False, True])
+scrivi(pr, "piu_rappresentati_tutte.csv")
+scrivi(pd.DataFrame([dict(decennio=r[0], opere=r[1], statue_monumenti_sculture=r[2]) for r in dec]), "per_decennio.csv")
+scrivi(pd.read_csv(os.path.join(O, "_lavoro/ricerche_soggetti.csv"), dtype=str).fillna("").query("id in @ids"), "controllo_soggetti_per_titolo.csv")
+scrivi(pd.read_csv(os.path.join(O, "_lavoro/iscrizioni_soggetti.csv"), dtype=str).fillna("").query("id in @ids"), "controllo_soggetti_da_iscrizione.csv")
 shutil.copy(os.path.join(S, "scripts/soggetti_esclusi.csv"), os.path.join(D, "soggetti_esclusi_a_mano.csv"))
 open(os.path.join(D, "LICENZE.txt"), "w", encoding="utf8").write("""Milano in dati - Statue e monumenti: licenze dei file in questa cartella
 Dati scaricati il 1 novembre 2026.
@@ -160,4 +179,4 @@ Dati scaricati il 1 novembre 2026.
 - I programmi e le note sono nel repository del progetto.
 """)
 print("ok", D, len(pts), "punti")
-print(json.dumps({k: out[k] for k in ["n", "mon", "mon_aperto", "copertura", "genere", "top", "sorpresa", "lag", "figure_top", "maria_n", "lapidi_info", "come_trovato"]}, ensure_ascii=False, indent=1, default=str))
+print(json.dumps({k: out[k] for k in ["n", "mon", "mon_aperto", "copertura", "genere", "top", "sorpresa", "lag", "figure_top", "maria_n", "lapidi_tolte", "come_trovato", "nil_top"]}, ensure_ascii=False, indent=1, default=str))
