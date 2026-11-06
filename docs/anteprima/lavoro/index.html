@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="it"><head><base href="../../lavoro/"><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Il lavoro quartiere per quartiere</title>
+<style>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri grandi */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:639px){.hl>a:last-child:nth-child(odd){grid-column:1/-1}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli e grafici */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt caption{caption-side:top;text-align:left;font-size:.85rem;color:var(--mut);padding-bottom:2px}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* scrivi il tuo comune */
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris.m{border-left-color:var(--mi)}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.ris .ch{margin-top:6px}
+/* parcheggio */
+.lotwrap{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:700px){.lotwrap{grid-template-columns:1fr 1fr;gap:16px}}
+.lothead{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+.lothead b{font-size:1.8rem;line-height:1;font-weight:800}
+.lothead span{font-size:.85rem;color:var(--mut);line-height:1.2}
+.sl{margin:8px 0 0;padding:8px 12px 10px;background:var(--soft);border-top:6px solid var(--m4)}
+.sl label{display:block;font-weight:750;font-size:.92rem;margin-bottom:2px}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl input[type=range]::-moz-range-thumb{height:28px;width:28px}
+.sl .ex{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+/* piccoli grafici ripetuti */
+.mps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:.4em 0 0}
+@media(min-width:700px){.mps{grid-template-columns:repeat(5,1fr)}}
+.mp{background:var(--soft);border-top:4px solid var(--c);padding:6px 12px 6px;min-width:0}
+.mp b{display:block;font-size:.95rem;line-height:1.2;margin-bottom:2px}
+.mp svg{display:block;overflow:visible;font-family:inherit;font-size:12px}
+.mp svg text{fill:var(--ink)}
+.mp svg .m{fill:var(--mut)}
+.mp svg .b{font-weight:700}
+.mp [data-t]{cursor:pointer}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+
+/* quartiere e persone */
+.pm{margin:10px 0 0}
+.pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
+.pers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:.4em 0 .6em}
+.pers b{display:block;font-size:.95rem;margin-bottom:4px}
+.pers>div{min-width:0}
+.lg i.dot{border-radius:50%}
+.find{margin:14px 0 0}
+
+/* lavoro */
+.cento2{display:grid;grid-template-columns:1fr;gap:18px;margin-top:.4em}
+@media(min-width:700px){.cento2{grid-template-columns:1fr 1fr;gap:16px}}
+.cento2 .yr{font-size:1.6rem;font-weight:800;line-height:1;margin:0 0 6px}
+.cento2>div{min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;margin:.2em 0 .4em}
+.chips .mi{display:inline-flex;align-items:center;background:var(--mi);color:#fff;font-weight:700;padding:2px 9px;border-radius:3px}
+</style>
+<script src="../menu.js" defer></script></head><body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../lavoro/" style="color:#000">Pagina attuale</a></div><main>
+
+<h1>Il lavoro quartiere per quartiere</h1>
+<p class="lead">Chi lavora, chi cerca lavoro, chi studia, chi è in pensione e chi sta a casa tra i residenti di Milano, dal 1991 a oggi e quartiere per quartiere. Scrivi il tuo quartiere e vedi i suoi 100 abitanti.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Censimenti ISTAT 1991, 2001, 2011 e censimento permanente 2021 e 2023, dati per sezione di censimento (CC BY 4.0). Sono i residenti, non chi ha un posto di lavoro in quel quartiere. Dal 2021 il metodo di conteggio cambia: leggi i limiti dei dati in fondo.</p>
+
+<!-- ============ 1 ============ -->
+<h2 id="cento-milanesi">Cento milanesi</h2>
+<div class="fig">
+  <h3 id="t-cento"></h3>
+  <p class="sub" id="s-cento"></p>
+  <div class="cento2">
+    <div><p class="yr">1991</p><div class="ch" id="ch-c91" role="img" aria-label="Cento omini colorati per condizione: i milanesi di 15 anni e più nel 1991"></div></div>
+    <div><p class="yr">2011</p><div class="ch" id="ch-c11" role="img" aria-label="Cento omini colorati per condizione: i milanesi di 15 anni e più nel 2011"></div></div>
+  </div>
+  <p class="note" id="nn-cento"></p>
+  <p class="src">Fonte: ISTAT, censimenti 1991 e 2011, dati per sezione di censimento (CC BY 4.0), somma di tutte le sezioni di Milano. Gli omini sono arrotondati a 100; il numero accanto al nome è quello degli omini. Nel 1991 la base comprende i 14enni (circa 1 su 100): vedi i limiti.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-linee"></h3>
+  <p class="sub">Occupati ogni 100 residenti tra 15 e 64 anni, separati per uomini e donne. Il tratto tratteggiato è il passaggio al nuovo metodo di conteggio.</p>
+  <div class="ch" id="ch-linee" role="img" aria-label="Linee: uomini e donne occupati ogni 100 residenti di 15-64 anni, dal 1991 al 2023"></div>
+  <p class="note" id="nn-linee"></p>
+  <p class="src">Fonte: ISTAT, censimenti 1991, 2001, 2011 e censimento permanente 2021 e 2023 (CC BY 4.0), Milano intera. Fino al 2011 gli occupati comprendono anche chi ha 65 anni o più (circa il 2% del totale); dal 2021 no. Il grafico mostra che cosa è cambiato, non il perché.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="quartieri">Quartiere per quartiere</h2>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub" id="s-mappa"></p>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dei quartieri di Milano colorati per quanti residenti di 15-64 anni lavorano ogni 100, nel 2011"></div>
+  <p class="note" id="mapsel"></p>
+  <p class="src">Fonte: ISTAT, censimento 2011, dati per sezione di censimento (CC BY 4.0), riportati ai quartieri (NIL) con i confini del Comune di Milano (CC BY). In grigio i quartieri con pochi abitanti o con confini cambiati negli anni.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-donne"></h3>
+  <p class="sub" id="s-donne"></p>
+  <div class="lg" id="lg-donne"></div>
+  <div class="ch" id="ch-donne" role="img" aria-label="Pallini collegati: donne occupate ogni 100 donne di 15-64 anni nel 1991 e nel 2011 in alcuni quartieri"></div>
+  <p class="note" id="nn-donne"></p>
+  <p class="src">Fonte: ISTAT, censimenti 1991 e 2011 (CC BY 4.0). I 7 quartieri dove le donne che lavorano sono cresciute di più e i 7 dove sono cresciute di meno, tra i 66 con dati confrontabili; in rosso, Milano intera.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="quartiere">Il tuo quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<p class="note">Chi abita in un quartiere non sempre lavora lì: per gli spostamenti vedi <a href="../pendolari/">i pendolari</a>. Per i redditi dei quartieri vedi <a href="../redditi/">i redditi</a>; per i numeri di ogni censimento vedi <a href="../censimenti/">i censimenti</a>.</p>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Occupato</dt><dd>Chi ha dichiarato di lavorare al momento del censimento. Fino al 2011 conta tutte le età; dal 2021 solo chi ha tra 15 e 64 anni.</dd>
+<dt>In cerca di lavoro</dt><dd>Chi non ha un lavoro e lo cerca, compreso chi cerca il primo impiego. Dal 2021 il dato non c’è.</dd>
+<dt>Casalinga o casalingo</dt><dd>Chi si dichiara dedito alla casa e alla famiglia.</dd>
+<dt>In pensione</dt><dd>Chi ha dichiarato di essere ritirato dal lavoro.</dd>
+<dt>Punti</dt><dd>La differenza tra due quote. Se le donne che lavorano passano da 44 a 65 ogni 100, sono 21 punti in più.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+<dt>Censimento permanente</dt><dd>Dal 2021 l’ISTAT non passa più casa per casa ogni dieci anni: usa registri e indagini a campione ogni anno.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Sono tutti valori aggregati per quartiere o per comune.</p>
+<ul>
+<li><a href="data/nil_lavoro.csv">Tutti i numeri per quartiere e anno</a> (tabella: conteggi e indicatori, reddito 2024)</li>
+<li><a href="data/comune_lavoro.csv">Tutti i numeri per Milano intera</a> (tabella)</li>
+<li><a href="data/cento_milanesi.json">I 100 milanesi: condizione di chi ha 15 anni e più</a>, per Milano e per quartiere, 1991, 2001, 2011</li>
+<li><a href="data/dati.json">Gli indicatori usati dalla mappa</a></li>
+<li><a href="data/nil.geojson">Confini semplificati dei quartieri</a></li>
+<li><a href="data/riepilogo.json">Tutti i numeri del testo</a>, con i controlli</li>
+</ul></div></details>
+</div>
+
+<footer>
+<p><b>Fonti e licenze.</b> Condizione professionale per sezione di censimento: ISTAT, 13° censimento 1991, 14° censimento 2001, 15° censimento 2011, censimento permanente 2021 e 2023 («Dati per sezione di censimento»), licenza Creative Commons Attribution 4.0 dichiarata dall’ISTAT nelle note legali del sito, scaricati il 30 ottobre 2026 da <a href="https://www.istat.it/">istat.it</a>. Record individuali dei censimenti 1991 e 2001 (usati solo per due controlli sull’intera città): Comune di Milano, dataset ds1636 e ds1518, CC BY, scaricati il 30 ottobre 2026 da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Quartieri (NIL) e confini: Comune di Milano, ricostruiti sulle sezioni 2021 dall’ISTAT (vedi <a href="../censimenti/">Censimenti</a>). Reddito medio per contribuente, anno d’imposta 2024, per CAP: Ministero dell’Economia e delle Finanze, Dipartimento delle Finanze, CC BY 3.0, scaricato il 1 novembre 2026 e riportato ai quartieri nel lavoro «quartieri che cambiano» (qui è usato solo nel file dei numeri per quartiere).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e3e6eb',gry:'#9aa1ad'};
+var D,K,R,GEO,N=[],NB=[],BY={},RD=[],sel=null,Q91,Q11,V91,V11;
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+grp(String(Math.abs(r)))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function pl(n,u,p){return n+' '+(n===1?u:p)}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function spread(a,gap,lo,hi){
+  a.sort(function(p,q){return p.y-q.y});
+  for(var k=1;k<a.length;k++)if(a[k].y-a[k-1].y<gap)a[k].y=a[k-1].y+gap;
+  var b=hi;for(k=a.length-1;k>=0;k--){if(a[k].y>b)a[k].y=b;b=a[k].y-gap}
+  if(a.length&&a[0].y<lo){a[0].y=lo;for(k=1;k<a.length;k++)if(a[k].y-a[k-1].y<gap)a[k].y=a[k-1].y+gap}
+}
+function shortn(s,w,b){if(tw(s,13,b)<=w)return s;while(s.length>3&&tw(s+'…',13,b)>w)s=s.slice(0,-1);return s+'…'}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'dati.json'),getJ(DATA+'cento_milanesi.json'),getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson')]).then(function(r){
+  D=r[0];K=r[1];R=r[2];GEO=r[3];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function draw(f){f();RD.push(f)}
+function CM(y){return D.comune[String(y)]}
+
+/* ---------- gruppi ---------- */
+var GR=[{nome:'Lavora',col:C.m2},{nome:'Cerca lavoro',col:C.ora},{nome:'Studia',col:C.m3},{nome:'Casalinga/o',col:C.m5},{nome:'In pensione',col:C.bro},{nome:'Altro',col:C.gry}];
+function quadretti(vals,tot){
+  var raw=vals.map(function(v){return v/tot*100}),fl=raw.map(Math.floor),rest=100-fl.reduce(function(a,b){return a+b},0),
+      ord=raw.map(function(v,i){return[v-Math.floor(v),i]}).sort(function(a,b){return b[0]-a[0]});
+  for(var k=0;k<rest;k++)fl[ord[k][1]]++;return fl;
+}
+function cento(v){return quadretti(v.slice(1),v[0])}
+function omino(cx,cy,s,col){
+  return '<circle cx="'+r1(cx)+'" cy="'+r1(cy-s*0.6)+'" r="'+r1(s*0.2)+'" fill="'+col+'"/><path d="M'+r1(cx-s*0.36)+' '+r1(cy+s*0.46)+'V'+r1(cy-s*0.1)+'Q'+r1(cx-s*0.36)+' '+r1(cy-s*0.3)+' '+r1(cx)+' '+r1(cy-s*0.3)+'Q'+r1(cx+s*0.36)+' '+r1(cy-s*0.3)+' '+r1(cx+s*0.36)+' '+r1(cy-s*0.1)+'V'+r1(cy+s*0.46)+'Z" fill="'+col+'"/>';
+}
+
+/* ---------- quartieri ---------- */
+function prepara(){
+  var DI={},KI={};D.nil.forEach(function(p){DI[p.i]=p});K.nil.forEach(function(p){KI[p.i]=p});
+  GEO.features.forEach(function(f){var id=f.properties.i,p=DI[id],k=KI[id];
+    var o={id:id,n:p.n,mu:p.mun,rob:p.rob,pop:p.pop,occ:p.occ,occF:p.occ_f,occM:p.occ_m,dF:p.d_occ_f,v:{1991:k['1991'],2001:k['2001'],2011:k['2011']},f:f};
+    N.push(o);BY[o.id]=o;if(o.rob)NB.push(o)});
+  var cnt={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+  NB.sort(function(a,b){return b.occ[2]-a.occ[2]});NB.forEach(function(o,i){o.rk=i+1});
+  V91=K.milano['1991'];V11=K.milano['2011'];Q91=cento(V91);Q11=cento(V11);
+}
+
+function tutto(){
+  prepara();
+  highlights();
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});if(m.length===1)return m[0];return null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].id,true);else if(m.length>1)$('ris').className='ris',$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').className='ris',$('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true)});
+  draw(centoMilano);draw(linee);draw(mappa);draw(donne);draw(scheda);
+  limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  RD.forEach(function(f){f()});
+}
+
+/* ---------- numeri grandi ---------- */
+function highlights(){
+  var c91=CM(1991),c11=CM(2011),c23=CM(2023);
+  var H=[
+    {c:C.mi,h:'t-mappa',n:f0(c11.tasso_occ),p:'milanesi su 100, tra i 15 e i 64 anni, lavorano (nel 2011 e nel 2023). Nel 1991 erano '+f0(c91.tasso_occ)+'.'},
+    {c:C.m3,h:'t-linee',n:sg0(c11.tasso_occ_f-c91.tasso_occ_f)+'<small> punti</small>',p:'donne che lavorano ogni 100 donne di 15–64 anni dal 1991 al 2011: da '+f0(c91.tasso_occ_f)+' a '+f0(c11.tasso_occ_f)+'.'},
+    {c:C.m2,h:'t-cento',n:Q11[3],p:'milanesi su 100 di 15 anni e più sono casalinghe o casalinghi nel 2011. Nel 1991 erano '+Q91[3]+'.'},
+    {c:C.m4,h:'t-cento',n:Q11[4],p:'milanesi su 100 di 15 anni e più sono in pensione nel 2011. Nel 1991 erano '+Q91[4]+'.'},
+    {c:C.m5,h:'t-cento',n:f1(c11.tasso_disocc)+'<small>%</small>',p:'di chi lavora o cerca lavoro cerca lavoro nel 2011, primo impiego compreso. Nel 1991 era il '+f1(c91.tasso_disocc)+'%.'},
+    {c:C.ora,h:'t-linee',n:f0(c23.gap_occ_mf)+'<small> punti</small>',p:'di distanza tra uomini e donne che lavorano nel 2023. Nel 1991 erano '+f0(c91.gap_occ_mf)+'.'}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 100 omini con i nomi scritti ---------- */
+function centoDisegna(id,q,v,o){
+  var box=$(id),W=Math.max(290,Math.floor(box.clientWidth)),cell=Math.min(24,Math.floor((W-126)/10)),ch=Math.round(cell*1.12),
+      gw=cell*10,lx=gw+20,items=[],y=0;
+  q.forEach(function(n,j){if(n>0){var rows=Math.ceil(n/10);items.push({j:j,n:n,y0:y,rows:rows,yc:y+rows*ch/2});y+=rows*ch}});
+  var H=Math.ceil(y)+4,s=svgOpen(W,H),labs=[];
+  items.forEach(function(it){var g=GR[it.j],ex=v[1+it.j];
+    var t='<b>'+o.who+'</b><br>'+sw(g.col)+g.nome+': '+it.n+' su 100<br>'+f1(ex/v[0]*100)+'% esatto ('+f0(ex)+' persone su '+f0(v[0])+')';
+    for(var i=0;i<it.n;i++){var r=Math.floor(i/10),c=i%10;
+      s+='<g'+tip(t)+'>'+omino(c*cell+cell/2,it.y0+r*ch+ch/2,ch*0.86,g.col)+'<rect x="'+c*cell+'" y="'+r1(it.y0+r*ch)+'" width="'+cell+'" height="'+ch+'" fill="transparent"/></g>'}
+    labs.push({y:it.yc,it:it,x0:Math.min(it.n,10)*cell})});
+  var arr=labs.map(function(l){return{y:l.y,l:l}});spread(arr,o.l2?34:22,14,H-14);
+  arr.forEach(function(a){a.l.ly=a.y});
+  labs.forEach(function(l){var g=GR[l.it.j],two=o.l2&&o.l2(l.it.j);
+    s+='<path d="M'+r1(l.x0+3)+' '+r1(l.y)+'H'+(gw+5)+'L'+(lx-7)+' '+r1(l.ly)+'" fill="none" stroke="'+g.col+'" stroke-width="2.2" stroke-linejoin="round"/>';
+    s+=T(lx,l.ly+(two?-1:5),esc(g.nome)+' '+l.it.n,{c:'b'});
+    if(two)s+=T(lx,l.ly+14,esc(two),{c:'m'})});
+  box.innerHTML=s+'</svg>';
+}
+function centoMilano(){
+  centoDisegna('ch-c91',Q91,V91,{who:'Milano, 1991',l2:null});
+  centoDisegna('ch-c11',Q11,V11,{who:'Milano, 2011',l2:function(j){return sg0(Q11[j]-Q91[j])+' punti'}});
+  $('t-cento').textContent='Su 100 milanesi di 15 anni e più, chi lavora passa da '+Q91[0]+' a '+Q11[0]+'; chi sta a casa da '+Q91[3]+' a '+Q11[3]+'; chi è in pensione da '+Q91[4]+' a '+Q11[4];
+  $('s-cento').textContent='Ogni omino è 1 milanese su 100 che ha almeno 15 anni. Il colore dice che cosa ha dichiarato al censimento. A destra il nome, quanti omini sono e, per il 2011, quanti punti in più o in meno rispetto al 1991.';
+  var c91=CM(1991),c11=CM(2011);
+  $('nn-cento').innerHTML='Chi cerca lavoro, compreso il primo impiego, è il '+f1(c91.tasso_disocc)+'% di chi lavora o cerca lavoro nel 1991 e il '+f1(c11.tasso_disocc)+'% nel 2011 (nel 2001 il '+f1(CM(2001).tasso_disocc)+'%). Toccando un omino si vede il numero esatto di persone. Per il 2021 e il 2023 non esistono queste voci.';
+}
+
+/* ---------- linee: uomini e donne ---------- */
+function linee(){
+  var box=$('ch-linee'),W=width('ch-linee'),H=300,m={l:34,r:78,t:18,b:36},pw=W-m.l-m.r,ph=H-m.t-m.b,y0=30,y1=90,YS=[1991,2001,2011,2021,2023];
+  function X(y){return m.l+14+(y-1991)/(2023-1991)*(pw-14)}function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var men=YS.map(function(y){return CM(y).tasso_occ_m}),wom=YS.map(function(y){return CM(y).tasso_occ_f});
+  var s=svgOpen(W,H);
+  for(var v=y0;v<=y1;v+=10){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})}
+  s+='<rect x="'+r1(X(2011))+'" y="'+m.t+'" width="'+r1(X(2021)-X(2011))+'" height="'+ph+'" fill="#f4f5f7"/>';
+  s+=T((X(2011)+X(2021))/2,Y(40),'cambia il',{a:'middle',c:'m'})+T((X(2011)+X(2021))/2,Y(40)+14,'metodo',{a:'middle',c:'m'});
+  s+=L(m.l,m.t+ph,W-m.r,m.t+ph,C.axis);
+  YS.forEach(function(y){s+=L(X(y),m.t+ph,X(y),m.t+ph+4,C.axis)});
+  s+=T(X(1991),m.t+ph+19,'1991',{a:'middle',c:'m'})+T(X(2001),m.t+ph+19,'2001',{a:'middle',c:'m'})+T(X(2011),m.t+ph+19,'2011',{a:'middle',c:'m'})+T(X(2021)+2,m.t+ph+19,'2021',{a:'end',c:'m'})+T(X(2023)-2,m.t+ph+19,'2023',{a:'start',c:'m'});
+  function serie(vals,col,nome,above){
+    function pts(a,b){var o=[];for(var i=a;i<=b;i++)o.push(r1(X(YS[i]))+','+r1(Y(vals[i])));return o.join(' ')}
+    s+='<polyline fill="none" stroke="'+col+'" stroke-width="3.2" stroke-linejoin="round" points="'+pts(0,2)+'"/>'+
+       '<polyline fill="none" stroke="'+col+'" stroke-width="3.2" stroke-dasharray="2 6" stroke-linecap="round" points="'+pts(2,3)+'"/>'+
+       '<polyline fill="none" stroke="'+col+'" stroke-width="3.2" points="'+pts(3,4)+'"/>';
+    YS.forEach(function(y,i){
+      var t='<b>'+nome+', '+y+'</b><br>'+f1(vals[i])+' ogni 100 residenti di 15–64 anni'+(y>=2021?'<br>nuovo metodo di conteggio':'');
+      s+='<circle cx="'+r1(X(y))+'" cy="'+r1(Y(vals[i]))+'" r="'+(i===1?4.5:4.5)+'" fill="'+col+'" stroke="#fff" stroke-width="1.5"'+tip(t)+'/>';
+      if(i<3)s+=T(X(y),Y(vals[i])+(above?-11:21),f0(vals[i]),{a:'middle',c:'halo',st:'fill:'+col+';font-size:14px'})});
+    s+=T(X(2023)+9,Y(vals[4])+5,nome+' '+f0(vals[4]),{c:'b',st:'fill:'+col});
+  }
+  serie(men,C.m4,'Uomini',true);serie(wom,C.mag,'Donne',false);
+  box.innerHTML=s+'</svg>';
+  var c91=CM(1991),c11=CM(2011),c23=CM(2023);
+  $('t-linee').textContent='Le donne che lavorano passano da '+f0(c91.tasso_occ_f)+' a '+f0(c11.tasso_occ_f)+' ogni 100, gli uomini da '+f0(c91.tasso_occ_m)+' a '+f0(c11.tasso_occ_m)+': la distanza scende da '+f0(c91.gap_occ_mf)+' a '+f0(c11.gap_occ_mf)+' punti, e a '+f0(c23.gap_occ_mf)+' nel 2023';
+  var d=R.comune_differenze_1991_2011;
+  $('nn-linee').innerHTML='Un conto in persone: tra il 1991 e il 2011 gli occupati che abitano in città restano quasi gli stessi ('+f0(c91.occ)+' e '+f0(c11.occ)+'), mentre i residenti calano di '+f0(-d.pop)+'. Dentro c’è uno scambio: '+f0(-d.occ_m)+' uomini occupati in meno e '+f0(d.occ_f)+' donne occupate in più. Nello stesso periodo le casalinghe e i casalinghi scendono da '+f0(c91.cas)+' a '+f0(c11.cas)+'.';
+}
+
+/* ---------- mappa ---------- */
+var MCL=[{max:68,col:C.mag,txt:'#fff',nome:'meno di 68'},{max:72,col:C.ora,txt:C.ink,nome:'da 68 a 72'},{max:75,col:C.m3,txt:C.ink,nome:'da 72 a 75'},{max:1e9,col:C.m2,txt:C.ink,nome:'75 o più'}];
+function mcl(o){if(!o.rob||o.occ[2]==null)return -1;for(var i=0;i<MCL.length;i++)if(o.occ[2]<MCL[i].max)return i}
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+function mappa(){
+  var W=width('ch-mappa'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='',lab='';
+  var cnt=[0,0,0,0],piccoli=0;N.forEach(function(o){var c=mcl(o);if(c>=0)cnt[c]++;else piccoli++});
+  var c11=CM(2011);
+  N.forEach(function(o){var c=mcl(o),isS=o.id===sel,b=P.bb(o.f);
+    var tp=c>=0?('<b>'+esc(o.n)+'</b><br>'+f1(o.occ[2])+' residenti su 100 lavorano (2011)<br>Milano: '+f1(c11.tasso_occ)+'<br>Posto '+o.rk+' su '+NB.length):('<b>'+esc(o.n)+'</b><br>Pochi abitanti o confini cambiati: non confrontabile');
+    var el='<path d="'+P.path(o.f)+'" fill="'+(c>=0?MCL[c].col:'#e6e8ec')+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el;
+    if(c>=0&&!isS&&b.w>=30&&b.h>=17)lab+=T(Math.min(b.x,W-12),b.y+4,f0(o.occ[2]),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+MCL[c].txt})});
+  s+=sS+lab;
+  if(sel&&BY[sel].rob){var o=BY[sel],b=P.bb(o.f),t=o.sn+' '+f0(o.occ[2]),w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),y=Math.max(14,Math.min(H-4,b.y-b.h/2-5));
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
+  $('ch-mappa').innerHTML='<div class="chips"><span class="mi">Milano intera: '+f0(c11.tasso_occ)+'</span>'+MCL.map(function(q,i){return '<span class="lg" style="margin:0"><span><i style="background:'+q.col+'"></i>'+q.nome+' <b>&nbsp;'+cnt[i]+'</b></span></span>'}).join('')+'<span class="lg" style="margin:0"><span><i style="background:#e6e8ec"></i>non confrontabili <b>&nbsp;'+piccoli+'</b></span></span></div>'+s+'</svg>';
+  var vals=NB.map(function(o){return o.occ[2]}),mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+  $('t-mappa').textContent='A Milano lavorano '+f0(c11.tasso_occ)+' residenti su 100 tra i 15 e i 64 anni; nei quartieri si va da '+f0(mn)+' a '+f0(mx);
+  $('s-mappa').textContent='Colore e numero: quanti residenti di 15–64 anni su 100 lavorano, nel censimento 2011. Il numero accanto al colore conta i quartieri. Tocca un quartiere per leggerlo e per vedere i suoi 100 abitanti.';
+  var m=$('mapsel');
+  if(sel&&BY[sel].rob){var q=BY[sel];m.innerHTML='Hai scelto <b>'+esc(q.n)+'</b>: '+f1(q.occ[2])+' su 100 lavorano (Milano '+f1(c11.tasso_occ)+'), posto '+q.rk+' su '+NB.length+'. <a href="#quartiere">Guarda i suoi 100 abitanti ↓</a>'}
+  else if(sel){m.innerHTML='<b>'+esc(BY[sel].n)+'</b> ha pochi abitanti o confini cambiati: il confronto non è possibile.'}
+  else m.innerHTML='';
+}
+
+/* ---------- donne 1991 -> 2011 per quartiere ---------- */
+function donne(){
+  var W=width('ch-donne'),lw=134,rw=14,rh=36;
+  var ord=NB.filter(function(o){return o.dF!=null}).sort(function(a,b){return b.dF-a.dF}),top=ord.slice(0,7),bot=ord.slice(-7);
+  var c91=CM(1991),c11=CM(2011);
+  var rows=[{mi:true,a:c91.tasso_occ_f,b:c11.tasso_occ_f,sn:'Milano'},{gap:1}];
+  top.forEach(function(o){rows.push({o:o})});
+  var ins=sel&&BY[sel].rob&&BY[sel].dF!=null&&top.concat(bot).indexOf(BY[sel])<0;
+  rows.push({gap:2});
+  if(ins){rows.push({o:BY[sel],ins:true});rows.push({gap:2})}
+  bot.forEach(function(o){rows.push({o:o})});
+  var all=ord.map(function(o){return o.occF[0]}).concat(ord.map(function(o){return o.occF[2]}));
+  var x0=Math.floor(Math.min.apply(null,all)/5)*5-10,x1=Math.ceil(Math.max.apply(null,all)/5)*5+2,pw=W-lw-rw;
+  function X(v){return lw+(v-x0)/(x1-x0)*pw}
+  var s=svgOpen(W,10),y=2;
+  rows.forEach(function(r){
+    if(r.gap){if(r.gap===2)s+=T(lw,y+14,'…',{c:'m'});y+=r.gap===1?10:20;return}
+    var a=r.mi?r.a:r.o.occF[0],b=r.mi?r.b:r.o.occF[2],d=b-a,cy=y+rh/2-3,col=r.mi?C.mi:C.mag,isS=!r.mi&&r.o.id===sel,nm=r.mi?'Milano':r.o.sn;
+    s+='<g'+(r.mi?'':' data-n="'+r.o.id+'"')+tip('<b>'+esc(r.mi?'Milano':r.o.n)+'</b><br>1991: '+f1(a)+' donne occupate ogni 100<br>2011: '+f1(b)+' ('+(d>=0?'+':'−')+f1(Math.abs(d))+' punti)')+' style="cursor:pointer">';
+    s+=T(lw-8,cy-1,esc(shortn(nm,lw-10,true)),{a:'end',c:'b',st:isS?'text-decoration:underline':''})+T(lw-8,cy+14,sg0(d)+' punti',{a:'end',c:'m'});
+    s+=L(X(a),cy,X(b),cy,col,5)+'<circle cx="'+r1(X(a))+'" cy="'+r1(cy)+'" r="7" fill="#fff" stroke="'+C.ink2+'" stroke-width="2.5"/><circle cx="'+r1(X(b))+'" cy="'+r1(cy)+'" r="7.5" fill="'+col+'" stroke="'+(isS?C.ink:'#fff')+'" stroke-width="'+(isS?3:1.5)+'"/>';
+    s+=T(X(a)-12,cy+4,f0(a),{a:'end',c:'k'})+T(X(b)+12,cy+4,f0(b),{c:'k'});
+    s+='</g>';y+=rh});
+  var h=Math.ceil(y+4);
+  $('ch-donne').innerHTML=s.replace('<svg width="'+W+'" height="10" viewBox="0 0 '+W+' 10"','<svg width="'+W+'" height="'+h+'" viewBox="0 0 '+W+' '+h+'"')+'</svg>';
+  var t=top[0],u=bot[bot.length-1];
+  $('t-donne').textContent='In ognuno dei '+ord.length+' quartieri confrontabili le donne che lavorano sono aumentate: da '+sg0(u.dF)+' punti ('+u.sn+') a '+sg0(t.dF)+' ('+t.sn+')';
+  $('s-donne').textContent='Donne occupate ogni 100 donne di 15–64 anni nel 1991 (pallino bianco) e nel 2011 (pallino colorato). In alto Milano intera, poi i 7 quartieri dove sono cresciute di più, poi i 7 dove sono cresciute di meno.';
+  $('lg-donne').innerHTML='<span><i class="dot" style="background:#fff;border:2.5px solid '+C.ink2+'"></i>1991</span><span><i class="dot" style="background:'+C.mag+'"></i>2011, quartiere</span><span><i class="dot" style="background:'+C.mi+'"></i>2011, Milano</span>';
+  $('nn-donne').innerHTML='Il quartiere di mezzo guadagna '+f0(R.donne_1991_2011.mediana)+' punti, Milano intera '+f0(c11.tasso_occ_f-c91.tasso_occ_f)+'.';
+}
+
+/* ---------- il tuo quartiere ---------- */
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.className='ris';r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quartiere sulla mappa: ti mostro i suoi 100 abitanti nel 1991 e nel 2011, a confronto con Milano, e il posto in classifica.';return}
+  var o=BY[sel],c11=CM(2011),c23=CM(2023),c91=CM(1991);
+  var h='<b class="big">'+esc(o.n)+'</b>Municipio '+o.mu+' · '+f0(o.pop[4])+' residenti nel 2023.';
+  if(!o.rob){h+='<p>Ha pochi abitanti o confini troppo cambiati negli anni: i numeri dei censimenti non sono confrontabili e qui non li mostro.</p>';r.className='ris';r.innerHTML=h;return}
+  r.className='ris';
+  h+='<p><b>Posto '+o.rk+' su '+NB.length+'</b> per quanti residenti di 15–64 anni lavorano nel 2011 (il 1° è dove lavorano di più): '+f1(o.occ[2])+' su 100, Milano '+f1(c11.tasso_occ)+'. ';
+  if(o.occ[4]!=null)h+='Nel 2023, con il nuovo metodo: '+f1(o.occ[4])+' su 100, Milano '+f1(c23.tasso_occ)+'.';
+  h+='</p>';
+  h+='<p>Le donne che lavorano passano da '+f0(o.occF[0])+' a '+f0(o.occF[2])+' ogni 100 ('+sg0(o.dF)+' punti, Milano '+sg0(c11.tasso_occ_f-c91.tasso_occ_f)+').</p>';
+  h+='<div class="cento2"><div><p class="yr">1991</p><div class="ch" id="ch-q91"></div></div><div><p class="yr">2011</p><div class="ch" id="ch-q11"></div></div></div>';
+  h+='<p class="sub" style="margin-top:8px">Ogni omino è 1 abitante su 100 di 15 anni e più. Sotto il nome, quanti omini ha Milano nello stesso gruppo.</p>';
+  r.innerHTML=h;
+  var q91=cento(o.v[1991]),q11=cento(o.v[2011]);
+  centoDisegna('ch-q91',q91,o.v[1991],{who:esc(o.sn)+', 1991',l2:function(j){return 'Milano '+Q91[j]}});
+  centoDisegna('ch-q11',q11,o.v[2011],{who:esc(o.sn)+', 2011',l2:function(j){return 'Milano '+Q11[j]}});
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var Z=R.rottura_2011_2021,M=R.record_individuali,T2=Z.variazione_media_per_terzile_laureati,c1=CM(1991),c2=CM(2001);
+  var L=[
+   '<b>Dal 2021 il censimento cambia modo di contare.</b> Fino al 2011 era «porta a porta»; dal 2021 è permanente: l’ISTAT usa i registri (anagrafe, lavoro, scuola, fisco) e indagini a campione. Non abbiamo trovato nei documenti la definizione esatta di «occupato» del 2021, quindi non sappiamo dire che cosa cambi. Lo si vede però nei dati: tra 2011 e 2021, nei '+Z.n+' quartieri confrontabili, dove nel 2011 c’erano più laureati i lavoratori risultano calare (in media '+sg0(T2["piu' laureati"])+' punti nel terzo con più laureati) e dove ce n’erano meno risultano salire ('+sg0(T2["meno laureati"])+' punti). Tra 1991 e 2011 questo non succede. Per questo la mappa e la classifica usano il 2011, e <b>2011 e 2021–2023 non vanno confrontati quartiere per quartiere</b>. A livello di città il tasso sembra quasi continuo (71 e 70), ma non lo si interpreta.',
+   '<b>Per il 2021 e il 2023 mancano chi cerca lavoro, gli studenti, i pensionati e le casalinghe.</b> Nei dati per sezione di quegli anni c’è solo il numero di occupati tra 15 e 64 anni, per sesso. Per questo i 100 omini si fermano al 2011.',
+   '<b>Gli occupati 1991–2011 comprendono chi ha 65 anni o più; quelli 2021–2023 no.</b> Nei record individuali del Comune i 65 e più sono il '+f1(M['1991'].quota_occupati_65p)+'% degli occupati nel 1991 e il '+f1(M['2001'].quota_occupati_65p)+'% nel 2001; per il 2011 non c’è un dato. Il tasso di quegli anni è quindi un po’ più alto del reale.',
+   '<b>I 100 omini contano i residenti di 15 anni e più.</b> Nel 1991 il conteggio parte dai 14 anni: i 14enni sono '+f0(M['1991'].studenti_14anni)+', circa il '+f0(M['1991'].quota_studenti_14anni)+'% degli studenti, meno di 1 persona su 100 della base. Gli omini sono arrotondati a 100 (il resto va ai gruppi con la parte decimale più alta); toccando un omino si legge la quota esatta.',
+   '<b>Le definizioni cambiano anche tra 1991, 2001 e 2011.</b> Nel 1991 la condizione è quella dichiarata dalla persona; nel 2001 e nel 2011 le tabelle ISTAT classificano anche con altre risposte. Nel 2001 le tabelle per sezione danno '+f0(c2.occ)+' occupati, mentre la condizione dichiarata nei record del Comune ne dà '+f0(M['2001'].occupati)+'; gli studenti sono '+f0(c2.stu)+' contro '+f0(M['2001'].studenti_dichiarati)+'. Chi cerca lavoro comprende chi cerca il primo impiego, e il salto del 2001 (da '+f1(c1.tasso_disocc)+'% a '+f1(c2.tasso_disocc)+'%) può essere in parte un effetto delle domande (probabile, non misurato).',
+   '<b>I pensionati sono i «ritirati dal lavoro».</b> Nel 2011 l’ISTAT chiama la voce «percettori di reddito da lavoro o capitale», ma coincide al numero con i ritirati dal lavoro ottenuti per differenza, quindi la usiamo così. Casalinghi uomini: nel 1991 sono zero nei record del Comune e nelle tabelle 2001 le somme tornano senza di loro; nel 2011 ce ne sono circa '+f0(R.casalinghi_uomini_per_differenza['2011'])+' (per differenza). Il confronto tra le casalinghe e i casalinghi dei tre anni è quindi leggermente sfalsato.',
+   '<b>Quartieri piccoli.</b> '+(88-R.copertura_nil['2011'].robusti)+' quartieri su 88 hanno meno di 2.000 abitanti nel 1991 o nel 2023, o confini troppo cambiati: sono in grigio sulla mappa e fuori dalle classifiche e dai confronti nel tempo. I quartieri sono ricostruiti sulle sezioni 2021: le sezioni del 1991, 2001 e 2011 sono assegnate al quartiere con cui hanno più area in comune (è il lavoro fatto per la pagina <a href="../censimenti/">Censimenti</a>); nel 1991 il 5,8% degli abitanti sta in sezioni mezze fuori dal quartiere scelto. Le sezioni dei senza fissa dimora non stanno in nessun quartiere ma contano nei 100 omini di Milano.',
+   '<b>Residenti, non posti di lavoro.</b> Gli occupati sono quelli che abitano nel quartiere, non quelli che ci lavorano: il centro ha molti posti di lavoro ma questi dati non li contano. Per gli spostamenti casa-lavoro vedi <a href="../pendolari/">i pendolari</a>; per i redditi dei quartieri, <a href="../redditi/">i redditi</a>.',
+   '<b>Che cosa non dice.</b> Le linee degli uomini e delle donne stanno sullo stesso grafico, ma il grafico non spiega perché cambiano: nello stesso periodo cambiano anche gli studi, le nascite, l’età della pensione e il modo di contare.'
+  ];
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function metodo(){
+  var L=[
+   '<b>Dati.</b> Tabelle ISTAT per sezione di censimento (circa 6.000 sezioni a Milano per anno), sulla popolazione per età e sesso e sulla condizione professionale. Ogni sezione è assegnata a uno degli 88 quartieri con la tabella di raccordo del lavoro <a href="../censimenti/">Censimenti</a>; nessuna sezione è unita in silenzio.',
+   '<b>Occupati ogni 100 residenti di 15–64 anni</b> = occupati diviso residenti da 15 a 64 anni. 1991, 2001, 2011: occupati di ogni età; 2021 e 2023: occupati 15–64 anni. Le donne sono il totale meno gli uomini (2021 e 2023: dato diretto). I residenti 15–64 sono la somma delle classi di età da 15–19 a 60–64, per sesso.',
+   '<b>I 100 milanesi.</b> La base è chi ha 15 anni e più (nel 1991, 14): chi lavora e chi è fuori dal lavoro. I gruppi sono occupati, in cerca di lavoro (forze di lavoro meno occupati), studenti, casalinghe e casalinghi, pensionati e «altro» (il resto di chi non è nel mercato del lavoro). Si sommano alla base, controllato quartiere per quartiere. Ogni quota è portata a 100 omini col metodo del resto più alto.',
+   '<b>Chi cerca lavoro</b> = (forze di lavoro − occupati) / forze di lavoro, quindi comprende chi cerca il primo lavoro.',
+   '<b>Controllo con i record individuali</b> (1991, 2001), aggregati per età e condizione sull’intera città: nel 1991 i totali coincidono al numero con le tabelle ISTAT (occupati, casalinghe, studenti, ritirati), nel 2001 differiscono (vedi limiti).',
+   '<b>Quartieri confrontabili:</b> almeno 2.000 abitanti nel 1991 e nel 2023, differenza di assegnazione sotto il 5%; classifica e variazioni usano solo questi 66. Le classi di colore della mappa sono fisse (meno di 68, da 68 a 72, da 72 a 75, 75 o più) e si leggono sul valore con una cifra decimale.',
+   '<b>Pagina costruita da un programma</b> che legge i file scaricati e scrive i file della sezione «File». Tutti i numeri del testo sono calcolati dai dati, non scritti a mano.'
+  ];
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1),el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();el.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname+'#'+id)},true);
+</script></body></html>
