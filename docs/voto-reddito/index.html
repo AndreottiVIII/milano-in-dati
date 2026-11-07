@@ -1,470 +1,492 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · Come votano le zone ricche e povere</title>
+<title>Milano in dati · Voto e reddito</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.3em 0}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.ctl label{font-size:.85rem;color:var(--mut)}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-.pair{margin:.9em 0 .3em;font-weight:600;font-size:.95rem}
-.dist svg{display:block;width:100%;max-width:640px;height:auto;font-family:system-ui,Arial,sans-serif}
-.db{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:2px 10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:.88rem}
-.db .nm{line-height:1.25} .db .tk{position:relative;height:18px;background:#f4f4f4} .db .ln{position:absolute;top:8px;height:3px;background:#999} .db .p1,.db .p10{position:absolute;top:2px;width:14px;height:14px;border-radius:50%;margin-left:-7px}
-.db .p1{background:#fff;border:3px solid #666} .db .p10{background:var(--acc);border:3px solid var(--acc)} .db .tx{grid-column:2;font-size:.8rem;color:var(--mut)}
-.db .mid{position:absolute;left:50%;top:0;height:18px;border-left:1px dashed #aaa}
-@media(max-width:620px){.db{grid-template-columns:1fr} .db .tx{grid-column:1}}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-.btnrow button{font:inherit;border:1px solid var(--acc);background:#fff;color:var(--acc);padding:3px 10px;border-radius:14px;cursor:pointer;margin:2px 4px 2px 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-#tab-rob,#tab-var{min-width:520px}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --cs:#E30613;   /* Centrosinistra: rosso (colore convenzionale) */
+  --cd:#0072BC;   /* Centrodestra: blu (colore convenzionale) */
+  --aff:#F58220;  /* affluenza: arancio della home */
+  --ver:#00A651;  /* reddito: verde M2 */
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ex{background:var(--soft);border-left:5px solid var(--ink);padding:8px 12px;margin:.5em 0 .8em;font-size:.92rem;line-height:1.35;color:var(--ink2)}
+.ex b{color:var(--ink)}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ln{height:3px;width:18px}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+.sl{background:var(--soft);padding:10px 12px 8px;margin:.4em 0 .6em}
+.sl .cap{font-size:1.15rem;font-weight:800;text-align:center;margin:0 0 2px}
+.sl input[type=range]{width:100%;height:32px;margin:0;accent-color:var(--ink)}
+.sl .ext{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+.q{display:flex;gap:8px;flex-wrap:wrap;margin:.5em 0}
+.q input{font:inherit;font-size:1rem;padding:10px 12px;border:2px solid var(--ink);border-radius:0;flex:1 1 180px;min-width:0}
+.q button{font:inherit;font-weight:700;padding:10px 16px;border:2px solid var(--ink);background:var(--ink);color:#fff;border-radius:0;cursor:pointer}
+.res{margin:.6em 0 0}
+.res h4{margin:0;font-size:1.3rem}
+.res p{margin:.2em 0 .6em;font-size:.95rem;color:var(--ink2)}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:5px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top}
+table.kt th{font-weight:700;font-size:.82rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child{white-space:nowrap}
+table.kt td small{display:block;color:var(--mut);font-size:.8rem}
+table.kt td b{font-size:1rem}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>Come votano le zone con redditi alti e bassi</h1>
-<p>Milano ha 1.238 sezioni elettorali e 38 CAP. Per ogni sezione sappiamo quanti hanno votato e per chi; per ogni CAP sappiamo il reddito medio dichiarato. Mettiamo i due dati uno accanto all&rsquo;altro per le elezioni dal 2016 al 2026: Comunali, Politiche, Regionali, Europee e referendum. Sono <b>confronti tra zone</b>, non spiegazioni: la pagina dice come votano le zone con i redditi pi&ugrave; alti rispetto a quelle con i redditi pi&ugrave; bassi, non perch&eacute;, e non dice nulla sui singoli elettori.</p>
 
-<div class="warm" id="limiti-alto"><b>Limiti dei dati, in breve</b> (<a href="#limiti">elenco completo</a>)
+<h1>Voto e reddito</h1>
+<p class="lead">Come hanno votato le zone di Milano, dalle più povere alle più ricche, in otto elezioni dal 2016 al 2024: Centrosinistra e Centrodestra a confronto.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Voti: Comune di Milano, risultati per sezione (CC BY). Redditi: Ministero dell'Economia e delle Finanze, per CAP (CC BY 3.0). Sono confronti tra zone, non dicono come vota una persona.</p>
+
+<!-- ============ 1 ============ -->
+<h2 id="divario">Il quadro: zone ricche e zone povere</h2>
+<div class="fig">
+  <h3 id="t-div"></h3>
+  <p class="sub">Per ogni elezione: quanti punti percentuali in più prende uno schieramento nelle zone più ricche rispetto alle più povere.</p>
+  <div class="ex" id="ex-div"></div>
+  <div class="lg"><span><i class="ln" style="background:var(--cs)"></i>Centrosinistra</span><span><i class="ln" style="background:var(--cd)"></i>Centrodestra</span></div>
+  <div class="ch" id="ch-div" role="img" aria-label="Linee: differenza in punti tra zone più ricche e più povere per Centrosinistra e Centrodestra, otto elezioni dal 2016 al 2024"></div>
+  <p class="note" id="nt-div"></p>
+  <p class="src">Fonti: Comune di Milano (voti, CC BY) e Ministero dell'Economia e delle Finanze (redditi, CC BY 3.0). «Zone più ricche» = il decimo degli elettori che vive nei CAP con il reddito medio più alto; «più povere» = il decimo con il reddito più basso. Reddito e voto vanno insieme, ma questo non vuol dire che uno causi l'altro: dietro ci sono anche età, tipo di case, cittadinanza.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="cap">CAP per CAP</h2>
+<div class="fig">
+  <h3 id="t-cap"></h3>
+  <p class="sub">Ogni riga è un CAP (un codice postale), in ordine di reddito medio: in alto i più poveri, in basso i più ricchi. Il pallino rosso è la quota del Centrosinistra, quello blu del Centrodestra. Le linee tratteggiate sono i valori di tutta Milano. Muovi il cursore per cambiare elezione, tocca un CAP per sceglierlo.</p>
+  <div class="sl"><p class="cap" id="cap-nome"></p><input type="range" id="sl1" min="0" max="7" step="1" value="4" aria-label="Elezione"><div class="ext"><span>2016</span><span>2024</span></div></div>
+  <div class="lg"><span><i class="dot" style="background:var(--cs)"></i>Centrosinistra</span><span><i class="dot" style="background:var(--cd)"></i>Centrodestra</span></div>
+  <div class="ch" id="ch-cap" role="img" aria-label="Pallini: per ognuno dei 38 CAP, dal più povero al più ricco, la quota di voti di Centrosinistra e Centrodestra nell'elezione scelta"></div>
+  <p class="note" id="nt-cap"></p>
+  <p class="src">Fonti: Comune di Milano (voti, CC BY), MEF (redditi 2019-2022 in euro 2025, CC BY 3.0). Quota sui voti validi di lista. Il reddito è la media dichiarata dai contribuenti di ogni CAP, in migliaia di euro. Il resto dei voti (Centro, Movimento 5 Stelle, altri) non è in nessuno dei due schieramenti.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="mappa">Sulla mappa</h2>
+<div class="fig">
+  <h3 id="t-map"></h3>
+  <p class="sub">Le zone dei CAP sulla pianta di Milano. In alto il reddito, in basso chi ha preso più voti nell'elezione scelta. Tocca una zona per leggerla.</p>
+  <div class="sl"><p class="cap" id="cap-nome2"></p><input type="range" id="sl2" min="0" max="7" step="1" value="4" aria-label="Elezione"><div class="ext"><span>2016</span><span>2024</span></div></div>
+  <p class="mt">Quanto guadagnano: reddito medio dei contribuenti</p>
+  <div class="lg" id="lg-m1"></div>
+  <div class="ch" id="ch-m1" role="img" aria-label="Mappa dei CAP di Milano colorati per reddito medio"></div>
+  <p class="mt" id="mt-m2"></p>
+  <div class="lg" id="lg-m2"></div>
+  <div class="ch" id="ch-m2" role="img" aria-label="Mappa dei CAP di Milano colorati per lo schieramento che ha preso più voti"></div>
+  <p class="src">Confini dei CAP: ricostruiti dai civici (stradario del Comune di Milano, CC BY), come nella pagina <a href="../redditi/">Redditi</a>: sono zone approssimate, non i confini ufficiali. Il numero accanto a ogni colore conta i CAP. </p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="affluenza">Chi va a votare</h2>
+<div class="fig">
+  <h3 id="t-aff"></h3>
+  <p class="sub">Su cento iscritti alle liste elettorali, quanti votano: dieci gruppi di zone, dal decimo più povero al decimo più ricco.</p>
+  <div id="aff"></div>
+  <p class="src">Fonti: Comune di Milano (voti, CC BY), MEF (redditi, CC BY 3.0). Affluenza = votanti diviso iscritti. Nelle zone più ricche gli iscritti sono più degli adulti che ci vivono, e questo può abbassare l'affluenza che si calcola: è un'ipotesi, non provata.</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="tuo-cap">Il tuo CAP</h2>
+<div class="fig">
+  <h3>Come ha votato il tuo CAP, rispetto a tutta Milano</h3>
+  <p class="sub">Scrivi il numero del CAP (per esempio 20133) o il nome della zona (per esempio Isola).</p>
+  <form class="q" id="q" autocomplete="off"><input id="in-cap" list="dl-cap" placeholder="20133 o Città Studi" aria-label="CAP o zona"><button type="submit">Vai</button></form>
+  <datalist id="dl-cap"></datalist>
+  <div class="res" id="res"></div>
+  <p class="src">Il reddito del CAP è la media dei contribuenti che ci abitano, non di tutti: dentro lo stesso CAP vivono persone con redditi molto diversi.</p>
+</div>
+
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
+<li><b>Sono confronti tra zone.</b> Di nessuno si conosce il voto. Una zona con redditi alti non vota in un modo «per via del reddito»: dentro lo stesso CAP vivono persone con redditi diversi.</li>
+<li><b>Il reddito è dei contribuenti con domicilio fiscale nel CAP</b>, non degli elettori; conta chi presenta la dichiarazione (a Milano circa 77 contribuenti ogni 100 residenti). Gli stranieri non votano e spesso non compaiono nel reddito.</li>
+<li><b>Il reddito per CAP nasconde differenze forti</b> in alcuni quartieri, come San Siro e Giambellino. Vedi <a href="../oltre-il-reddito/">Oltre il reddito</a>.</li>
+<li><b>I CAP sono solo 38.</b> Il decimo più ricco è fatto di 4 CAP centrali (20121, 20122, 20123, 20145): quello che si vede lì può dipendere da quelle zone più che dal reddito. 20145 ha pochi contribuenti (13.855) e per 20121 e 20122 il Ministero ha cambiato l'assegnazione dei contribuenti da un anno all'altro.</li>
+<li><b>I due schieramenti sono una scelta del progetto,</b> non le coalizioni di ogni elezione. Centrosinistra: Partito Democratico, liste civiche collegate, Verdi e sinistra (anche liste che nel 2016 correvano da sole, come quella di Basilio Rizzo). Centrodestra: Forza Italia, Lega, Fratelli d'Italia e liste collegate. Il Centro (Azione, Italia Viva, +Europa, Stati Uniti d'Europa, la lista Moratti) non è in nessuno dei due: nel 2021 queste forze stavano nella lista I Riformisti, contata nel Centrosinistra; nel 2016 nessuna lista è contata nel Centro. La tabella delle liste è quella della pagina <a href="../elezioni/">Elezioni</a> e ha ancora alcune righe da rivedere.</li>
+<li><b>Per le Comunali si usano i voti alle liste del consiglio,</b> come nelle altre elezioni, non quelli al sindaco (che danno numeri vicini).</li>
+<li><b>Dati ufficiosi:</b> Politiche 2018 e 2022 e Regionali 2023. Per le Politiche si usa il voto alla lista scelta insieme al candidato del collegio.</li>
+<li><b>Il legame tra sezione e CAP è del 2020.</b> Il 16% delle sezioni ha meno dell'80% dei civici in un solo CAP: i loro voti sono divisi tra i CAP in proporzione ai civici, non agli elettori. Le sezioni senza legame valgono meno dello 0,1% dei votanti.</li>
+<li><b>Redditi e voti non sono dello stesso anno</b> (redditi 2019-2022, voti 2016-2024). L'ordine dei CAP è stabile, i livelli no.</li>
+<li><b>Elezioni di tipo diverso non sono del tutto confrontabili:</b> si vota per cose diverse e in modo diverso.</li>
+<li><b>Affluenza e iscritti.</b> Il denominatore è il registro degli elettori, non i residenti: nei quartieri più ricchi gli iscritti sono più degli adulti residenti, nei più poveri sono meno (gli stranieri non votano).</li>
+<li><b>I valori per fascia hanno un margine di incertezza</b> (si ricampionano i 38 CAP): è nei file, qui non è disegnato.</li>
+<li>I grafici sul Covid sono nella pagina <a href="../anno-covid/">L'anno del Covid</a>.</li>
+</ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>CAP</dt><dd>Il codice postale. Milano ne ha 38, da 20121 a 20162. Qui ogni CAP è una zona.</dd>
+<dt>Zone più ricche, zone più povere</dt><dd>Le sezioni elettorali sono messe in fila per reddito medio del loro CAP e divise in dieci gruppi con lo stesso numero di elettori. Il gruppo più ricco e il più povero sono i due estremi.</dd>
+<dt>Punti</dt><dd>Punti percentuali: da 40% a 45% sono 5 punti.</dd>
+<dt>Centrosinistra, Centrodestra</dt><dd>Gli schieramenti come li abbiamo contati (vedi i limiti dei dati). Il resto dei voti va al Centro, al Movimento 5 Stelle e ad altri.</dd>
+<dt>Reddito medio</dt><dd>Reddito complessivo dichiarato ai fini Irpef diviso i contribuenti del CAP, in euro 2025, media dei quattro anni d'imposta 2019-2022.</dd>
+<dt>Affluenza</dt><dd>Votanti diviso iscritti alle liste elettorali, in percento.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul>
+<li><b>Dalla sezione al CAP.</b> Lo stradario del referendum 2020 (Comune di Milano) dà a ogni civico la sua sezione e il suo CAP: 51.323 civici, 1.238 sezioni. Ogni sezione conta nei CAP dei suoi civici, in proporzione.</li>
+<li><b>Il reddito.</b> Reddito complessivo medio per contribuente del CAP, media 2019-2022 in euro 2025. Per il 2023 e il 2024 il Ministero ha cambiato l'assegnazione dei contribuenti di alcuni CAP, e prima del 2019 il confronto non regge: questa è l'unica finestra stabile.</li>
+<li><b>Dieci gruppi.</b> Le sezioni sono messe in fila per reddito (media dei CAP dei loro civici, pesata per i civici) e divise in dieci gruppi con circa lo stesso numero di elettori, con gli stessi tagli per tutte le elezioni.</li>
+<li><b>Gli schieramenti.</b> Voti di lista dei due blocchi di partiti (vedi i limiti dei dati), diviso i voti validi di lista.</li>
+<li><b>Affluenza.</b> Votanti diviso iscritti, solo sulle sezioni regolari.</li>
+<li><b>Le otto elezioni:</b> Comunali 2016 e 2021, Politiche 2018 e 2022, Regionali 2018 e 2023, Europee 2019 e 2024. Nella versione precedente della pagina c'erano anche i referendum, il Movimento 5 Stelle e il Centro, con più di venti elezioni: i file sono ancora qui sotto.</li>
+</ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati per CAP o per fascia di reddito: nessun dato di singole persone.</p>
 <ul>
-<li><b>Confronto tra zone.</b> Nessun voto individuale &egrave; noto. Una sezione &laquo;con redditi alti&raquo; non vota in un modo per questo: dentro lo stesso CAP vivono persone con redditi diversi.</li>
-<li><b>Il reddito &egrave; quello dei contribuenti con domicilio fiscale nel CAP</b> (media dichiarata ai fini Irpef), non quello degli elettori della sezione. Chi non presenta la dichiarazione non c&rsquo;&egrave;.</li>
-<li><b>I CAP sono 38.</b> La fascia pi&ugrave; ricca (D10) &egrave; fatta di soli <b>4 CAP</b> centrali: 20121, 20122, 20123, 20145. Quello che vediamo l&igrave; pu&ograve; dipendere da quelle zone pi&ugrave; che dal reddito.</li>
-<li><b>Le &laquo;famiglie&raquo; di partiti</b> sono una scelta del progetto (vedi sotto), non le coalizioni di ogni elezione.</li>
-</ul></div>
-
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
-
-<details id="famiglie"><summary>Come sono raggruppati i partiti (famiglie)</summary>
-<p>Per confrontare quindici anni di elezioni, ogni lista &egrave; messa in una famiglia (tabella completa: <a href="../elezioni/data/famiglie_partiti.csv">famiglie_partiti.csv</a>, la stessa del sito delle <a href="../elezioni/">Elezioni</a>). La scelta &egrave; nostra e si pu&ograve; discutere. Nelle elezioni del sindaco la famiglia &egrave; quella del candidato (Sala = Centrosinistra).</p>
-<ul class="m">
-<li><b>Centrosinistra</b>: Partito Democratico, le sue liste collegate e le liste civiche a sostegno di Sala.</li>
-<li><b>Sinistra</b>: Verdi, Alleanza Verdi e Sinistra, Liberi e Uguali, Unione Popolare e altre liste a sinistra del PD.</li>
-<li><b>Centro</b>: +Europa, Azione, Italia Viva, Stati Uniti d&rsquo;Europa, la lista Moratti (2023). <i>Il contenuto cambia da un&rsquo;elezione all&rsquo;altra:</i> nel 2018 &egrave; +Europa (alleata del PD), nel 2022 Azione-Italia Viva e +Europa (fuori dalla coalizione del PD). Nel 2021 Azione, Italia Viva e +Europa stavano dentro la lista I Riformisti (<span id="fam-rif"></span>), contata nel Centrosinistra, e il Centro erano solo due liste piccole (<span id="fam-c21"></span>).</li>
-<li><b>Centrodestra</b>: Forza Italia, Noi Moderati e liste collegate. <b>Lega</b> e <b>Destra</b> (Fratelli d&rsquo;Italia e liste a destra) sono separate.</li>
-<li><b>M5S</b>: Movimento 5 Stelle.</li>
-<li>Per leggere insieme pi&ugrave; famiglie: <b>Sinistra + Centrosinistra</b>, <b>Centrodestra + Lega + Destra</b>, <b>Sinistra + Centrosinistra + Centro</b>. Non sono coalizioni elettorali.</li>
-</ul></details>
-
-<h2 id="decili">Il voto, fascia di reddito per fascia di reddito</h2>
-<p>Le sezioni sono divise in <b>10 fasce di reddito</b> (decili) in base al reddito medio dei CAP dei loro civici: D1 &egrave; la fascia con i redditi pi&ugrave; bassi, D10 la pi&ugrave; alta. Ogni fascia ha circa un decimo degli elettori. Per ogni elezione e ogni famiglia si vede la quota di voti in ciascuna fascia. Le linee verticali sono l&rsquo;intervallo di confidenza al 95%: dicono quanto cambierebbe il risultato se i 38 CAP fossero stati un altro campione.</p>
-<div class="ctl"><label for="sel-e">Elezione:</label><select id="sel-e"></select></div>
-<div class="ctl" id="btn-v"></div>
-<div class="ctl" id="wrap-lista"><label for="sel-l">Oppure una singola lista:</label><select id="sel-l"></select></div>
-<div id="dec-titolo" class="pair"></div>
-<div class="ch" id="ch-dec" role="img" aria-label="Grafico a barre: quota di voti per fascia di reddito, dalla pi&ugrave; bassa D1 alla pi&ugrave; alta D10"></div>
-<div id="dec-testo" class="sub"></div>
-<p class="src">Quota sui voti validi di lista (sui candidati nelle elezioni del sindaco; sul totale di S&igrave; e No nei referendum; votanti su elettori per l&rsquo;affluenza). Sotto ogni barra: reddito medio della fascia, in migliaia di euro 2025 (media dei redditi dichiarati 2019-2022). Fonti: <a href="../elezioni/">Elezioni</a> (Comune di Milano, CC BY) e <a href="../redditi/">Redditi</a> (MEF, CC BY 3.0); legame sezione-CAP: stradario del referendum 2020 (ds939). <span id="cop-nota"></span></p>
-
-<h2 id="cap">I 38 CAP, uno per uno</h2>
-<p>Lo stesso grafico, ma con ogni CAP al suo posto: asse orizzontale il reddito medio, asse verticale la quota di voti. I punti colorati sono i CAP; i punti grigi sono le sezioni (al reddito medio dei CAP dei loro civici). La scelta di elezione e famiglia &egrave; quella di sopra.</p>
-<div class="ctl"><button type="button" id="btn-3">Togli i 3 CAP instabili (20121, 20122, 20145)</button><span class="sub" id="rho-txt"></span></div>
-<div class="ch" id="ch-sc" role="img" aria-label="Grafico a punti: reddito medio del CAP e quota di voti, 38 CAP e 1.238 sezioni"></div>
-<div class="lgd"><span><i style="background:#999;border-radius:6px;width:8px;height:8px"></i>sezioni</span><span><i id="lg-cap" style="background:#00695c;border-radius:7px;width:12px;height:12px"></i>CAP</span><span><i style="background:#fff;border:2px solid #c26a1b;border-radius:7px;width:12px;height:12px"></i>CAP instabili</span></div>
-<p class="src">Il segno &rho; &egrave; la correlazione di Spearman tra reddito e quota sui 38 CAP (da &minus;1 a +1; sposta solo l&rsquo;<i>ordine</i>, non quanto). I tre CAP instabili hanno pochi contribuenti (20145: 13.855) o cambi di assegnazione dei contribuenti da un anno all&rsquo;altro (20121, 20122): vedi la pagina <a href="../redditi/#cap">Redditi</a>. Nelle sezioni, anche dove il legame tra CAP &egrave; forte, i punti grigi si disperdono molto: il reddito del CAP descrive una parte della differenza, non tutta (vedi <a href="#metodo">Quanto spiega il reddito</a>).</p>
-
-<h2 id="strip">Il divario tra la fascia pi&ugrave; ricca e la pi&ugrave; povera, elezione per elezione</h2>
-<p>Per ogni elezione: quota nella fascia D10 meno quota nella D1, in punti percentuali. A destra dello zero la quota &egrave; pi&ugrave; alta nelle zone con redditi pi&ugrave; alti, a sinistra pi&ugrave; bassa. Le barre sottili sono l&rsquo;intervallo al 95%.</p>
-<div class="ctl" id="btn-strip"></div>
-<div class="ch" id="ch-strip" role="img" aria-label="Grafico: differenza tra la quota nella fascia pi&ugrave; ricca e nella pi&ugrave; povera, per elezione dal 2016 al 2024"></div>
-<div id="strip-testo" class="sub"></div>
-<p class="src">Fonte: stessi dati del grafico sopra (<a href="data/gradiente_per_voce.csv">gradiente_per_voce.csv</a>, campi <code>gap_D10_D1_pp</code>, <code>gap_ic_lo</code>, <code>gap_ic_hi</code>). Per le Comunali sono mostrati i candidati sindaco quando la voce esiste, altrimenti le liste del Consiglio.</p>
-
-<h2 id="affluenza">L&rsquo;affluenza, per fascia di reddito</h2>
-<div id="aff-testo"></div>
-<div class="lgd" id="lg-aff"></div>
-<div class="ch" id="ch-aff" role="img" aria-label="Grafico a linee: affluenza per fascia di reddito, elezioni politiche e altre elezioni"></div>
-<div class="warm"><b>Un&rsquo;ipotesi, non provata.</b> <span id="registro-txt"></span></div>
-<p class="src">Affluenza = votanti diviso elettori, calcolata solo sulle sezioni regolari (elettori maggiori di zero e votanti non pi&ugrave; degli elettori). Fonti: <a href="../elezioni/">Elezioni</a>; elettori delle Comunali 2021 diviso adulti residenti 2021 per quartiere (pagina <a href="../citta-15-minuti/">citt&agrave; dei 15 minuti</a>).</p>
-
-<h2 id="referendum">I referendum, a coppie</h2>
-<p>Qui non ci sono partiti: c&rsquo;&egrave; la quota di <b>S&igrave;</b> (la direzione del S&igrave; &egrave; scritta accanto a ogni quesito). Il pallino vuoto &egrave; la fascia D1 (redditi pi&ugrave; bassi), quello pieno la D10.</p>
-<div id="ref"></div>
-<p class="src">Fonte: <a href="data/gradiente_per_voce.csv">gradiente_per_voce.csv</a>, voce <code>Si</code>. Nel 2022 il Comune ha pubblicato due quesiti (Consigli giudiziari ed Elezione dei componenti togati del CSM) con numeri identici in tutte le sezioni: qui ne &egrave; tenuto uno.</p>
-
-<h2 id="m5s">Il Movimento 5 Stelle: il legame pi&ugrave; stabile</h2>
-<div id="m5s-testo"></div>
-<div class="ch" id="ch-m5s" role="img" aria-label="Grafico: differenza tra fascia pi&ugrave; ricca e fascia pi&ugrave; povera per il Movimento 5 Stelle, in tutte le elezioni"></div>
-
-<h2 id="metodo">Come &egrave; fatto</h2>
-<h3>Passaggi</h3>
-<ol class="m">
-<li><b>Dalla sezione al CAP.</b> Lo stradario del referendum del 2020 (<code>ds939</code>, Comune di Milano) d&agrave; a ogni civico la sua sezione e il suo CAP: <span id="m-civici"></span>. Una sezione pu&ograve; avere civici in pi&ugrave; CAP: ogni sezione ha un peso per CAP (quota dei suoi civici), e il CAP &ldquo;prevalente&rdquo; ha almeno l&rsquo;80% dei civici in 1.042 sezioni su 1.238. Il CAP ufficiale coincide con quello <i>stimato</i> nella pagina &laquo;citt&agrave; dei 15 minuti&raquo; nel <span id="m-stesso"></span> dei civici confrontabili.</li>
-<li><b>Il reddito.</b> Reddito complessivo medio per contribuente del CAP (MEF, Dipartimento delle Finanze), media dei redditi 2019-2022 in euro 2025. L&rsquo;ordine dei CAP cambia pochissimo con l&rsquo;anno (correlazione 0,99 con il 2015 e con il 2024). Il reddito di una sezione &egrave; la media dei redditi dei suoi CAP, pesata per i civici.</li>
-<li><b>Le fasce (decili).</b> Tagli fissi sul reddito di sezione, pesati per gli elettori delle Comunali 2021; gli stessi tagli per tutte le elezioni. Ogni fascia ha 108-137 sezioni.</li>
-<li><b>L&rsquo;incertezza.</b> Si ricampionano i 38 CAP interi (2.000 volte, seme fisso) e si ricalcola tutto; gli intervalli sono il 2,5&deg;-97,5&deg; percentile. Con pochi CAP gli intervalli sono larghi, ed &egrave; giusto cos&igrave;.</li>
-<li><b>Elezioni usate:</b> 25 tra Comunali, Politiche (Camera), Regionali, Europee e referendum, 2016-2026. Le Comunali 2026 non ci sono: si voteranno nel 2027; l&rsquo;ultimo voto &egrave; il referendum di marzo 2026. Politiche 2018 e 2022 e Regionali 2023 sono &laquo;dati ufficiosi&raquo; nel portale del Comune.</li>
-</ol>
-<div class="ctl" style="display:none"></div>
-<h3 id="decili-tab">Le dieci fasce</h3>
-<div class="scroll"><table id="tab-dec"></table></div>
-<p class="src">Reddito di sezione in euro 2025 (media 2019-22). &laquo;CAP prevalenti&raquo;: in quanti CAP diversi hanno il loro CAP prevalente le sezioni della fascia. La fascia D10 &egrave; fatta di quattro CAP: <span id="d10cap"></span>.</p>
-
-<h3>Quanto spiega il reddito</h3>
-<p>Sezione per sezione, quanta della differenza tra una sezione e l&rsquo;altra &egrave; <b>spiegata</b> da una retta sul reddito (R&sup2;), e quanta sta <b>tra CAP</b> (tra parentesi). Un R&sup2; di 0,45 vuol dire che il reddito del CAP descrive il 45% della differenza tra sezioni; il resto sta dentro i CAP o dipende da altro.</p>
-<div class="scroll"><table id="tab-var"></table></div>
-<p class="src">Fonte: <a href="data/robustezza.csv">robustezza.csv</a>, campi <code>r2_reddito</code> e <code>eta2_tra_cap</code>. Il reddito del CAP descrive bene Centro e M5S, poco la distinzione destra-sinistra, quasi niente l&rsquo;affluenza nelle amministrative.</p>
-
-<h3>Se cambia il modo di contare</h3>
-<p>Correlazione di Spearman sui CAP con tutti i 38 e senza i tre instabili; poi la pendenza tra quartieri (NIL, punti percentuali ogni +10.000 euro) senza e con il controllo della quota di stranieri e di over 65 (anno <span id="pop-anno"></span>, dalla pagina <a href="../comunita/">popolazione</a>, che qui usiamo come controllo).</p>
-<div class="scroll"><table id="tab-rob"></table></div>
-<p class="src">Fonte: <a href="data/robustezza.csv">robustezza.csv</a>. Tolti i tre CAP pi&ugrave; ricchi il Centrosinistra 2022-2024 sale ancora, ma poco: la frase giusta &egrave; &laquo;non ha pi&ugrave; la forte salita del 2016-2021&raquo;, non &laquo;nessun legame&raquo;. Con il controllo di stranieri e anziani il legame col reddito si riduce (reddito, stranieri ed et&agrave; sono intrecciati tra i quartieri), mentre Centro e M5S tengono il segno. La pendenza in punti per +10.000 euro cambia molto togliendo i CAP estremi; per questo la pagina usa le fasce e la correlazione di Spearman.</p>
-
-<h2 id="limiti">Limiti dei dati</h2>
-<ol class="m">
-<li><b>Confronto tra zone.</b> Nessun voto individuale &egrave; noto. Niente di quanto sopra dice come vota una persona con un certo reddito.</li>
-<li><b>Il reddito &egrave; dei contribuenti con domicilio fiscale nel CAP</b>, non degli elettori; copre chi presenta la dichiarazione (a Milano circa 77 contribuenti ogni 100 residenti). Gli stranieri non votano e spesso non compaiono nel reddito.</li>
-<li>Il reddito è per CAP: in alcuni quartieri, come San Siro e Giambellino, nasconde differenze forti. Vedi <a href="../oltre-il-reddito/">Oltre il reddito</a>.</li>
-<li><b>Solo 38 CAP.</b> D10 &egrave; fatta di 4 CAP; 20145 ha 13.855 contribuenti e per 20121 e 20122 il MEF ha cambiato l&rsquo;assegnazione dei contribuenti da un anno all&rsquo;altro. Il reddito di un singolo CAP &egrave; meno affidabile della media di un gruppo.</li>
-<li><b>Il legame sezione-civico-CAP &egrave; del 2020.</b> Il 16% delle sezioni ha meno dell&rsquo;80% dei civici nel CAP prevalente; i voti di una sezione mista sono divisi tra i CAP in proporzione ai civici, non agli elettori. Le sezioni senza legame (da 10 a 23 per elezione, pi&ugrave; le 11 sezioni speciali del 2025) valgono <span id="cop-range"></span> dei votanti.</li>
-<li><b>Affluenza e registro elettorale.</b> Il denominatore &egrave; il registro degli elettori, non i residenti. Vedi la nota nella sezione sull&rsquo;affluenza: &egrave; un&rsquo;ipotesi, non provata.</li>
-<li><b>Famiglie e blocchi non sono coalizioni.</b> Il Centro non &egrave; la stessa cosa in tutti gli anni. La tabella delle famiglie ha ancora righe da rivedere.</li>
-<li><b>Dati ufficiosi:</b> Politiche 2018 e 2022 e Regionali 2023. Per le Politiche si usano i voti alle liste nel collegio uninominale come voto di lista.</li>
-<li><b>Redditi e voti non sono dello stesso anno</b> (redditi 2019-2022, voti 2016-2026). L&rsquo;ordine dei CAP &egrave; stabile, i livelli no.</li>
-<li><b>I quesiti dei referendum cambiano</b> da una volta all&rsquo;altra: la quota di S&igrave; non ha una direzione fissa a sinistra o a destra.</li>
-<li><b>I controlli per quartiere</b> (stranieri, over 65) usano i dati della pagina popolazione, anno 2023: conteggi da anagrafe, pi&ugrave; alti di quelli Istat dal 2020.</li>
-</ol>
-
-<h2 id="file">File</h2>
-<p><a href="data/gradiente_per_voce.csv">gradiente_per_voce.csv</a> (una riga per elezione e voce: quota in D1 e D10, divario con intervallo, correlazione), <a href="data/decili_per_voce.csv">decili_per_voce.csv</a> (le dieci quote con intervallo), <a href="data/cap_per_voce.csv">cap_per_voce.csv</a> (quote per CAP), <a href="data/cap_reddito.csv">cap_reddito.csv</a> (reddito dei 38 CAP), <a href="data/decili_definizione.csv">decili_definizione.csv</a>, <a href="data/robustezza.csv">robustezza.csv</a> (tutte le prove di robustezza). Sono tutti valori aggregati per fascia, CAP o sezione: nessun dato di singole persone.</p>
+<li><a href="data/vr2_coalizioni.json">Centrosinistra, Centrodestra e affluenza per CAP e per fascia, otto elezioni</a> (tutti i numeri di questa pagina)</li>
+<li><a href="data/vr2_cap_mappa.geojson">Zone dei 38 CAP per la mappa</a></li>
+<li><a href="data/cap_reddito.csv">Reddito dei 38 CAP</a></li>
+<li><a href="data/cap_per_voce.csv">Quote di voto per CAP, tutte le elezioni e tutte le liste</a></li>
+<li><a href="data/decili_per_voce.csv">Quote di voto per fascia di reddito</a></li>
+<li><a href="data/gradiente_per_voce.csv">Differenza tra fascia più ricca e più povera, con margine di incertezza</a></li>
+<li><a href="data/decili_definizione.csv">Le dieci fasce di reddito</a> e <a href="data/robustezza.csv">le prove di robustezza</a></li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Voti e affluenza: Comune di Milano, open data (<a href="https://dati.comune.milano.it">dati.comune.milano.it</a>), Creative Commons Attribution; stradario del referendum 2020 (ds939) per il legame sezione-civico-CAP-NIL. Redditi: Ministero dell&rsquo;Economia e delle Finanze, Dipartimento delle Finanze, &laquo;Redditi e principali variabili IRPEF&raquo; per CAP, CC BY 3.0. Popolazione per quartiere (solo controllo): Comune di Milano, ds27, CC BY. Elaborazioni nostre: dati aggregati, nessun dato personale.</p>
-<p>Altre pagine: <a href="../elezioni/">Elezioni</a> &middot; <a href="../redditi/">Redditi dal 2000</a> &middot; <a href="../citta-15-minuti/">La citt&agrave; dei 15 minuti</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+<p><b>Fonti e licenze.</b> Voti e affluenza: Comune di Milano, open data (<a href="https://dati.comune.milano.it">dati.comune.milano.it</a>), Creative Commons Attribution; stradario del referendum 2020 per il legame tra sezione, civico e CAP. Redditi: Ministero dell'Economia e delle Finanze, Dipartimento delle Finanze, «Redditi e principali variabili IRPEF» per CAP, CC BY 3.0. Elaborazioni nostre: dati aggregati, nessun dato personale.</p>
+<p>Altre pagine: <a href="../elezioni/">Elezioni</a> &middot; <a href="../redditi/">Redditi</a> &middot; <a href="../oltre-il-reddito/">Oltre il reddito</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
+<div class="tip" id="tip"></div>
+
 <script>
 (function(){
 'use strict';
-var P=null,E=null,SZ=null,SEZC={};
-var ACC='#00695c',WARM='#c26a1b';
-var COL={'Centrosinistra':'#e0605c','Sinistra':'#b3202a','M5S':'#d9a900','Centro':'#8e7cc3','Centrodestra':'#3a8fd9','Lega':'#1e8a3c','Destra':'#333333','Altri':'#9a9a9a',
- 'Sx (Sinistra+Centrosinistra)':'#cc4a4a','Dx (Centrodestra+Lega+Destra)':'#2f6fb0','Sx+Centro (Sinistra+Centrosinistra+Centro)':'#9c4f96','AFFLUENZA':ACC,'Si':'#2e8b57'};
-var NOME={'Sx (Sinistra+Centrosinistra)':'Sinistra + Centrosinistra','Dx (Centrodestra+Lega+Destra)':'Centrodestra + Lega + Destra','Sx+Centro (Sinistra+Centrosinistra+Centro)':'Sinistra + Centrosinistra + Centro','AFFLUENZA':'Affluenza','Si':'Quota di Sì'};
-var RD=[];
-var SEL={e:'comunali_sindaco_2021-10-03',v:'Centrosinistra',no3:false};
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?1:d)}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function reg(fn){RD.push(fn);fn()}
-function ename(v){if(NOME[v])return NOME[v];if(v.indexOf('lista: ')===0)return v.slice(7);if(v.indexOf('candidato: ')===0)return 'Candidato '+v.slice(11);return v}
-function col(v){return COL[v]||'#6b6b6b'}
-function eById(id){for(var i=0;i<E.elezioni.length;i++)if(E.elezioni[i].id===id)return E.elezioni[i];return null}
-function vOf(e,n){for(var i=0;i<e.voci.length;i++)if(e.voci[i].n===n)return e.voci[i];return null}
-function gv(id,n){var e=eById(id);return e?vOf(e,n):null}
-function icTxt(v){return '('+sg(v.glo)+' / '+sg(v.ghi)+')'}
-function rank(a){var o=a.map(function(v,i){return [v,i]}).sort(function(x,y){return x[0]-y[0]}),r=new Array(a.length),i=0;while(i<o.length){var j=i;while(j+1<o.length&&o[j+1][0]===o[i][0])j++;var m=(i+j)/2+1;for(var k=i;k<=j;k++)r[o[k][1]]=m;i=j+1}return r}
-function spear(x,y){var rx=rank(x),ry=rank(y),n=x.length,mx=0,my=0,i;for(i=0;i<n;i++){mx+=rx[i];my+=ry[i]}mx/=n;my/=n;var sxy=0,sxx=0,syy=0;for(i=0;i<n;i++){sxy+=(rx[i]-mx)*(ry[i]-my);sxx+=(rx[i]-mx)*(rx[i]-mx);syy+=(ry[i]-my)*(ry[i]-my)}return sxy/Math.sqrt(sxx*syy)}
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={cs:cv('--cs'),cd:cv('--cd'),aff:cv('--aff'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#c9ced6'};
+var D,GEO,EL,CAPS,BYC={},ORD=[],SEL={e:4,cap:null},RD=[];
 
-Promise.all([J('data/pagina.json'),J('data/elezioni.json'),J('data/sezioni.json')]).then(function(a){
-  P=a[0];E=a[1];SZ=a[2];
-  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+var PAR=['zero','una','due','tre','quattro','cinque','sei','sette','otto'];
+function mila(r){return f0(r/1000)}
 
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+var HALO=' style="paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round"';
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(4,h,w/2);if(h<0.5)return '';
+  var d='M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'vr2_coalizioni.json'),getJ(DATA+'vr2_cap_mappa.geojson')]).then(function(r){
+  D=r[0];GEO=r[1];EL=D.el;CAPS=D.caps;
+  CAPS.forEach(function(c,i){c.i=i;BYC[c.c]=c});
+  ORD=CAPS.slice().sort(function(a,b){return a.r-b.r}); /* dal più povero al più ricco */
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
 function tutto(){
-  sorpresa();selettori();metodo();aff();refs();m5s();strip();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+  highlights();
+  draw(divario);draw(grafCap);draw(mappe);draw(affluenza);
+  tuoCap();aggiorna();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+function gap(e,k){return e[k].dec[9]-e[k].dec[0]}
+
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var e21=EL[4],e24=EL[7],e22=EL[5];
+  var rich=ORD[ORD.length-1],poor=ORD[0];
+  var cards=[
+    {c:'#E30613',h:'#divario',n:f1(e21.cs.dec[9])+'<small>%</small>',t:'Comunali 2021, nelle zone più ricche: voti al Centrosinistra. Nelle più povere: '+f1(e21.cs.dec[0])+'%.'},
+    {c:'#FFD500',h:'#divario',n:f1(e21.cd.dec[9])+'<small>%</small>',t:'Comunali 2021, stesse zone ricche: voti al Centrodestra. Nelle più povere: '+f1(e21.cd.dec[0])+'%.'},
+    {c:'#00A651',h:'#cap',n:Math.round(rich.r/poor.r)+' volte',t:'il reddito medio del CAP più ricco ('+rich.n+', '+mila(rich.r)+' mila €) rispetto al più povero ('+poor.n+', '+mila(poor.r)+' mila €).'},
+    {c:'#0072BC',h:'#cap',e:7,n:f1(e24.cs.dec[9])+'<small>%</small>',t:'Europee 2024, nelle zone più ricche: voti al Centrosinistra. Nelle più povere: '+f1(e24.cs.dec[0])+'%.'},
+    {c:'#7B3FA0',h:'#cap',e:7,n:f1(e24.cd.dec[9])+'<small>%</small>',t:'Europee 2024, stesse zone ricche: voti al Centrodestra. Nelle più povere: '+f1(e24.cd.dec[0])+'%.'},
+    {c:'#F58220',h:'#affluenza',n:f1(e22.af.dec[9])+'<small>%</small>',t:'Politiche 2022, nelle zone più ricche: vota questa quota degli iscritti. Nelle più povere: '+f1(e22.af.dec[0])+'%.'}
+  ];
+  $('hl').innerHTML=cards.map(function(k){return '<a href="'+k.h+'" style="--c:'+k.c+'"'+(k.e!=null?' data-e="'+k.e+'"':'')+'><span class="n">'+k.n+'</span><p>'+k.t+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+  Array.prototype.forEach.call($('hl').querySelectorAll('a[data-e]'),function(a){a.addEventListener('click',function(){setEl(+a.getAttribute('data-e'))})});
 }
 
-/* ---------- eventi per la striscia ---------- */
-var EV=[
- {l:'Comunali 2016',ids:['comunali_sindaco_2016-06-05','comunali_consiglio_2016-06-05']},
- {l:'Politiche 2018',ids:['camera_2018-03-04']},
- {l:'Regionali 2018',ids:['regionali_consiglio_2018-03-04']},
- {l:'Europee 2019',ids:['europee_2019-05-26']},
- {l:'Comunali 2021',ids:['comunali_sindaco_2021-10-03','comunali_consiglio_2021-10-03']},
- {l:'Politiche 2022',ids:['camera_2022-09-25']},
- {l:'Regionali 2023',ids:['regionali_consiglio_2023-02-12']},
- {l:'Europee 2024',ids:['europee_2024-06-08']}];
-function evVal(ev,v){for(var i=0;i<ev.ids.length;i++){var x=gv(ev.ids[i],v);if(x)return {x:x,id:ev.ids[i]}}return null}
-
-/* ---------- distanza tra zone ricche e povere: Centrosinistra e Centrodestra ---------- */
-var DS=[['comunali_consiglio_2016-06-05','Comunali','2016'],['camera_2018-03-04','Camera','2018'],['europee_2019-05-26','Europee','2019'],['comunali_consiglio_2021-10-03','Comunali','2021'],['camera_2022-09-25','Camera','2022'],['regionali_consiglio_2023-02-12','Regionali','2023'],['europee_2024-06-08','Europee','2024']];
-function listaDi(id,pre){var e=eById(id);for(var i=0;i<e.voci.length;i++)if(e.voci[i].n.indexOf(pre)===0)return e.voci[i];return null}
-function sg0(x){return Math.round(Math.abs(x)*10)===0?'0,0':sg(x,1)}
-function distanza(){
-  var cs=[],cd=[];
-  DS.forEach(function(d){cs.push(gv(d[0],'Centrosinistra').gap);cd.push(gv(d[0],'Centrodestra').gap)});
-  return {cs:cs,cd:cd};
+function testiDivario(){
+  var ncs=EL.filter(function(e){return gap(e,'cs')>=1}).length,ncd=EL.filter(function(e){return gap(e,'cd')<=-1}).length;
+  $('t-div').textContent='Il Centrodestra prende più voti nelle zone povere in '+PAR[ncd]+' elezioni su otto; il Centrosinistra nelle zone ricche in '+PAR[ncs]+' su otto';
+  var e=EL[4];
+  $('ex-div').innerHTML='<b>Un esempio, Comunali 2021.</b> Il Centrosinistra ha preso il <b>'+f1(e.cs.dec[9])+'%</b> nelle zone più ricche e il <b>'+f1(e.cs.dec[0])+'%</b> nelle più povere: la differenza, <b>'+sg1(gap(e,'cs'))+' punti</b>, è il suo pallino in quella riga. Il Centrodestra ha preso il '+f1(e.cd.dec[9])+'% e il '+f1(e.cd.dec[0])+'%: '+sg1(gap(e,'cd'))+' punti. Un valore a destra dello zero vuol dire «va meglio nelle zone ricche», a sinistra «va meglio nelle zone povere».';
+  var c22=EL[5].ce,c24=EL[7].ce;
+  $('nt-div').innerHTML='Il Centro (Azione, Italia Viva, +Europa) non è in nessuno dei due. Nel 2021 queste forze stavano nella lista I Riformisti ('+f1(D.rif)+'% dei voti), contata nel Centrosinistra; dal 2022 sono nel Centro, che nelle zone ricche va molto forte: '+f1(c22.dec[9])+'% contro '+f1(c22.dec[0])+'% nelle povere alle Politiche 2022, '+f1(c24.dec[9])+'% contro '+f1(c24.dec[0])+'% alle Europee 2024. Parte del calo del Centrosinistra nelle zone ricche dopo il 2021 dipende da come sono contate le liste. * dati ufficiosi.';
 }
-function distanzaSvg(D){
-  var W=340,H=420,X0=33,ST=47,Y0=30,Y1=330,all=D.cs.concat(D.cd);
-  var VMAX=Math.ceil(Math.max.apply(null,all))+4,VMIN=Math.floor(Math.min.apply(null,all))-3,sy=(Y1-Y0)/(VMAX-VMIN);
-  function X(i){return X0+i*ST} function Y(v){return Y0+(VMAX-v)*sy}
-  var C={cs:'#c8403c',cd:'#2f7cc4'},HALO='stroke="#fff" stroke-width="3.5" paint-order="stroke"',o=[],n=DS.length-1;
-  for(var t=5;t<VMAX;t+=5)o.push('<line x1="'+(X0-14)+'" x2="'+(X(n)+14)+'" y1="'+Y(t).toFixed(1)+'" y2="'+Y(t).toFixed(1)+'" stroke="#ddd"/><text x="'+(X0-18)+'" y="'+(Y(t)+3.5).toFixed(1)+'" font-size="11" text-anchor="end" fill="#444">'+t+'</text>');
-  var xm=(X(3)+X(4))/2;
-  o.push('<line x1="'+xm.toFixed(1)+'" x2="'+xm.toFixed(1)+'" y1="'+(Y0-4)+'" y2="'+(Y1+2)+'" stroke="#111" stroke-dasharray="3 3"/><text x="'+(xm+5).toFixed(1)+'" y="'+(Y0+4)+'" font-size="11.5" font-weight="700" fill="#111">dal 2022</text>');
-  o.push('<line x1="'+(X0-14)+'" x2="'+(X(n)+14)+'" y1="'+Y(0).toFixed(1)+'" y2="'+Y(0).toFixed(1)+'" stroke="#111" stroke-width="2.5"/><text x="'+(X0-18)+'" y="'+(Y(0)+4).toFixed(1)+'" font-size="12" font-weight="800" text-anchor="end" fill="#111">0</text>');
-  o.push('<text x="'+(X0-14)+'" y="'+(Y0-12)+'" font-size="11.5" font-weight="700" fill="#111">↑ meglio nelle zone ricche</text><text x="'+(X0-14)+'" y="'+(Y1+4)+'" font-size="11.5" font-weight="700" fill="#111">↓ meglio nelle zone povere</text>');
-  DS.forEach(function(d,i){o.push('<text x="'+X(i).toFixed(1)+'" y="'+(Y1+24)+'" font-size="10.5" text-anchor="middle" fill="#111">'+d[1]+'</text><text x="'+X(i).toFixed(1)+'" y="'+(Y1+37)+'" font-size="11.5" font-weight="700" text-anchor="middle" fill="#111">'+d[2]+'</text>')});
-  function line(vals,k){var p=[];vals.forEach(function(v,i){p.push(X(i).toFixed(1)+','+Y(v).toFixed(1))});o.push('<polyline fill="none" stroke="'+C[k]+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="'+p.join(' ')+'"/>')}
-  line(D.cs,'cs');line(D.cd,'cd');
-  /* etichetta del valore: sopra al punto per la linea più alta, sotto per l'altra */
-  function dots(vals,k,altri){vals.forEach(function(v,i){
-    o.push('<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="4.5" fill="#fff" stroke="'+C[k]+'" stroke-width="2.5"/>');
-    var su=v>altri[i]||(v===altri[i]&&k==='cs'),ty=Y(v)+(su?-10:19);
-    if(su&&v<0)ty=Y(0)-5;
-    o.push('<text x="'+X(i).toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="12.5" font-weight="800" fill="'+C[k]+'" text-anchor="middle" '+HALO+'>'+sg0(v)+'</text>')})}
-  dots(D.cs,'cs',D.cd);dots(D.cd,'cd',D.cs);
-  o.push('<text x="'+(X(1.5)).toFixed(1)+'" y="'+(Y(D.cs[2])-30).toFixed(1)+'" font-size="13" font-weight="800" text-anchor="middle" fill="'+C.cs+'" '+HALO+'>Centrosinistra</text>');
-  o.push('<text x="'+(X(1)-2).toFixed(1)+'" y="'+(Y(D.cd[1])+54).toFixed(1)+'" font-size="13" font-weight="800" text-anchor="middle" fill="'+C.cd+'" '+HALO+'>Centrodestra</text>');
-  function lab(v){return DS.map(function(d,i){return d[2]+' '+d[1]+' '+sg0(v[i])}).join(', ')}
-  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Differenza in punti percentuali tra zone ricche e zone povere, dal 2016 al 2024. Centrosinistra: '+lab(D.cs)+'. Centrodestra: '+lab(D.cd)+'.">'+o.join('')+'</svg>';
-}
-function distanzaHtml(D,rif,z22,z24){
-  var d10=P.d10_cap.map(function(c){return c.cap}).join(', ');
-  var h='<div class="dist"><div class="pair">Quanto va meglio ogni famiglia nelle zone ricche che in quelle povere (punti percentuali)</div>';
-  h+=distanzaSvg(D);
-  h+='<p class="src"><b>Il crollo del Centrosinistra nel 2022 dipende in parte da come sono contate le liste.</b> Nel 2021 I Riformisti (Azione, Italia Viva, +Europa, '+nf(rif.city,1)+'%) stanno nel Centrosinistra; dal 2022 Azione-Italia Viva e +Europa stanno nel Centro, che nelle zone ricche è molto forte ('+sg(z22.gap)+' nel 2022, '+sg(z24.gap)+' nel 2024). <b>Che cosa è il Centrodestra qui.</b> Solo Forza Italia e alleati: Lega e Fratelli d&rsquo;Italia sono contati a parte, e la Lega va sempre più forte nelle zone povere. <b>Quale voto.</b> Per le Comunali è il voto alle liste per il consiglio, non quello al sindaco. <b>Limiti dei dati.</b> Le zone più ricche sono solo 4 CAP centrali ('+d10+'). Il confronto è tra zone, non tra persone. Elezioni di tipo diverso non sono del tutto comparabili.</p></div>';
-  return h;
+/* ---------- 1: il divario, elezione per elezione (linee in verticale) ---------- */
+function divario(){
+  testiDivario();
+  var W=width('ch-div'),RH=56,top=64,H=top+EL.length*RH+10,M=44;
+  var all=[];EL.forEach(function(e){all.push(gap(e,'cs'),gap(e,'cd'))});
+  var lo=Math.floor(Math.min.apply(null,all)/5)*5-3,hi=Math.ceil(Math.max.apply(null,all)/5)*5+3;
+  function X(v){return M+(v-lo)/(hi-lo)*(W-2*M)}
+  var o=[svgOpen(W,H)];
+  /* griglia ogni 5 punti */
+  for(var g=Math.ceil(lo/5)*5;g<=hi;g+=5){if(g===0)continue;o.push(L(X(g),top-10,X(g),H-6,C.grid,1))}
+  o.push(L(X(0),top-10,X(0),H-6,C.axis,1.5));
+  o.push(T(X(0),14,'stesso risultato',{a:'middle',c:'m'}));
+  o.push(T(X(0),28,'nelle due zone',{a:'middle',c:'m'}));
+  o.push(T(X(0)-8,48,'← meglio nelle povere',{a:'end',c:'b'}));
+  o.push(T(X(0)+8,48,'meglio nelle ricche →',{a:'start',c:'b'}));
+  /* linee */
+  ['cs','cd'].forEach(function(k){
+    var p=EL.map(function(e,i){return r1(X(gap(e,k)))+','+r1(top+i*RH+30)}).join(' ');
+    o.push('<polyline fill="none" stroke="'+C[k]+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="'+p+'"/>');
+  });
+  EL.forEach(function(e,i){
+    var y=top+i*RH;
+    o.push(T(0,y+8,esc(e.l)+(e.uf?' *':''),{c:'b',st:'font-size:13px'}));
+    var a=gap(e,'cs'),b=gap(e,'cd');
+    [['cs',a,b],['cd',b,a]].forEach(function(z){
+      var k=z[0],v=z[1],w=z[2],x=X(v),right=v>w||(v===w&&k==='cs');
+      var h='<b>'+esc(e.l)+'</b><br>'+(k==='cs'?'Centrosinistra':'Centrodestra')+': '+f1(e[k].dec[9])+'% nelle zone più ricche, '+f1(e[k].dec[0])+'% nelle più povere ('+sg1(v)+' punti)';
+      o.push('<circle cx="'+r1(x)+'" cy="'+(y+30)+'" r="6" fill="#fff" stroke="'+C[k]+'" stroke-width="3"'+tip(h)+'/>');
+      var lab=sg1(v),wl=tw(lab,13,true),x0z=X(0),ancora=right?'start':'end',lx=x+(right?11:-11),ly=y+35;
+      var a1=right?x+5:x-11-wl-3,a2=right?x+11+wl+3:x-5;
+      o.push('<text x="'+r1(lx)+'" y="'+ly+'" text-anchor="'+ancora+'" font-size="13" font-weight="800" fill="'+C[k]+'"'+HALO+'>'+lab+'</text>');
+    });
+  });
+  o.push('</svg>');
+  $('ch-div').innerHTML=o.join('');
 }
 
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var D=distanza(),cs=D.cs,cd=D.cd,
-      z21=gv('comunali_consiglio_2021-10-03','Centro'),z22=gv('camera_2022-09-25','Centro'),z24=gv('europee_2024-06-08','Centro'),
-      ex=gv('comunali_consiglio_2021-10-03','Centrosinistra'),
-      p22=P.robustezza.filter(function(r){return r.e==='Politiche - Camera 2022'&&r.v==='Centrosinistra'})[0],
-      rif=listaDi('comunali_consiglio_2021-10-03','lista: I RIFORMISTI');
-  setH('fam-rif','Azione, Italia Viva e +Europa insieme ad altri gruppi civici, '+nf(rif.city,1)+'% dei voti');setH('fam-c21',nf(z21.city,1)+'% dei voti');
-  var h='<p><b>Nel 2021 il Centrosinistra è molto più forte nelle zone ricche ('+sg(cs[3])+' punti); dal 2022 non più ('+sg0(cs[4])+', '+sg0(cs[5])+', '+sg0(cs[6])+'). Il Centrodestra è vicino a zero dal 2021 al 2023 e nel 2024 torna a '+sg0(cd[6])+'.</b></p>';
-  h+='<p><b>Come si legge.</b> Prendiamo le zone di Milano più ricche e quelle più povere e guardiamo quanto prende una famiglia di partiti in ciascuna. Esempio, Comunali 2021: il Centrosinistra ha preso il <b>'+nf(ex.dec[9],1)+'%</b> nelle zone più ricche e il <b>'+nf(ex.dec[0],1)+'%</b> nelle più povere. La differenza, <b>'+sg(ex.gap)+' punti</b>, è il punto del Centrosinistra sul grafico nel 2021. Il grafico mostra questa differenza, elezione per elezione.</p>';
-  h+='<p><b>Sopra lo zero</b> la famiglia va meglio nelle zone ricche; <b>sotto lo zero</b> va meglio nelle zone povere; <b>sullo zero</b> prende lo stesso nelle une e nelle altre.</p>';
-  h+=distanzaHtml(D,rif,z22,z24);
-  h+='<p class="sub">Nelle stesse elezioni le liste di Centro vanno dal '+nf(z22.dec[0],0)+'% al '+nf(z22.dec[9],0)+'% tra la fascia più bassa e la più alta (Politiche 2022). Nel 2021 il Centro erano solo due liste, '+nf(z21.city,1)+'% dei voti, e le liste cambiano da un’elezione all’altra: il Centro del 2022 non è lo stesso del 2021.</p>';
-  h+='<p class="sub">Una precisazione: togliendo i tre CAP pi&ugrave; ricchi, il Centrosinistra 2022-2024 sale ancora un poco con il reddito (correlazione di Spearman '+nf(p22.sp3,2)+' contro '+nf(p22.sp,2)+' con tutti i 38 CAP per le Politiche 2022). Sono confronti tra zone, non spiegazioni.</p>';
-  h+='<p class="btnrow"><button type="button" data-e="comunali_sindaco_2021-10-03" data-v="Centrosinistra">Vedi Sala 2021</button><button type="button" data-e="camera_2022-09-25" data-v="Centrosinistra">Vedi il PD 2022</button><button type="button" data-e="camera_2022-09-25" data-v="Centro">Vedi il Centro 2022</button></p>';
-  setH('sorpresa',h);
-  Array.prototype.forEach.call(el('sorpresa').querySelectorAll('button[data-e]'),function(b){b.addEventListener('click',function(){SEL.e=b.getAttribute('data-e');SEL.v=b.getAttribute('data-v');el('sel-e').value=SEL.e;rebuildVoci();drawDec();el('decili').scrollIntoView({behavior:'smooth'})})});
+/* ---------- 2: CAP per CAP, il grafico firma ---------- */
+function setEl(i){SEL.e=i;aggiorna()}
+function selCap(c){SEL.cap=c;aggiorna();$('in-cap').value=c+' '+BYC[c].n}
+function aggiorna(){
+  var e=EL[SEL.e];
+  $('sl1').value=SEL.e;$('sl2').value=SEL.e;
+  $('cap-nome').textContent=e.l+(e.uf?' (dati ufficiosi)':'');$('cap-nome2').textContent=$('cap-nome').textContent;
+  $('t-cap').textContent=e.l+': a Milano il Centrosinistra ha preso il '+f1(e.cs.city)+'% e il Centrodestra il '+f1(e.cd.city)+'%. Ecco CAP per CAP.';
+  $('t-map').textContent=e.l+': dove ha preso più voti l'+"'"+'uno e dove l'+"'"+'altro';
+  grafCap();mappe();risultato();
+}
+var SHORT={'Quarto Oggiaro':'Q. Oggiaro','Porta Magenta':'Magenta','Porta Romana':'P. Romana','Porta Venezia':'P. Venezia','Gallaratese':'Gallaratese'};
+function etich(c){return c.c+' '+(SHORT[c.n]||c.n)}
+function grafCap(){
+  var e=EL[SEL.e],W=width('ch-cap'),RH=22,top=64,N=ORD.length,H=top+N*RH+34;
+  var LW=0;ORD.forEach(function(c){LW=Math.max(LW,tw(etich(c),12.5))});LW=Math.ceil(LW)+10;var RC=100,x0=LW+4,x1=W-RC-4,dlo=20,dhi=70;
+  function X(v){return x0+(v-dlo)/(dhi-dlo)*(x1-x0)}
+  var o=[svgOpen(W,H)];
+  [20,30,40,50,60,70].forEach(function(g){o.push(L(X(g),top,X(g),top+N*RH,C.grid,1));if(g%20===0)o.push(T(X(g),top+N*RH+16,g+'%',{a:'middle',c:'m'}))});
+  /* Milano */
+  var mc=e.cs.city,md=e.cd.city;
+  [['cs',mc,md,12,'Milano '+f1(mc)+'%'],['cd',md,mc,28,'Milano '+f1(md)+'%']].forEach(function(z){
+    var k=z[0],x=X(z[1]),lab=z[4],wd=tw(lab,13,true),left=z[1]<z[2];
+    if(left&&x-wd<2)left=false;if(!left&&x+wd>W-2)left=true;
+    o.push(L(x,z[3]+4,x,top+N*RH,C[k],2,' stroke-dasharray="5 4"'));
+    o.push('<text x="'+r1(x+(left?-5:5))+'" y="'+z[3]+'" text-anchor="'+(left?'end':'start')+'" font-size="13" font-weight="800" fill="'+C[k]+'">'+lab+'</text>');
+  });
+  o.push(T(0,48,'redditi più bassi ↓',{c:'m'}));
+  o.push(T(W-RC+24,48,'mila €',{a:'end',c:'m'}));
+  o.push('<circle cx="'+(W-RC+47)+'" cy="44" r="5" fill="'+C.cs+'"/><circle cx="'+(W-RC+85)+'" cy="44" r="5" fill="'+C.cd+'"/>');
+  ORD.forEach(function(c,i){
+    var y=top+i*RH,cy=y+RH/2,a=e.cs.cap[c.i],b=e.cd.cap[c.i],sel=SEL.cap===c.c;
+    var h='<b>'+c.c+' '+esc(c.n)+'</b> · reddito '+mila(c.r)+' mila €<br>Centrosinistra '+f1(a)+'%<br>Centrodestra '+f1(b)+'%';
+    if(sel)o.push('<rect x="0" y="'+y+'" width="'+W+'" height="'+RH+'" fill="#fff2cc"/>');
+    o.push(L(X(Math.min(a,b)),cy,X(Math.max(a,b)),cy,C.light,3));
+    o.push('<circle cx="'+r1(X(a))+'" cy="'+cy+'" r="5.5" fill="'+C.cs+'" stroke="#fff" stroke-width="1.5"/>');
+    o.push('<circle cx="'+r1(X(b))+'" cy="'+cy+'" r="5.5" fill="'+C.cd+'" stroke="#fff" stroke-width="1.5"/>');
+    o.push(T(0,cy+4.5,etich(c),{c:sel?'b':'',st:'font-size:12.5px'+(sel?'':';fill:#2f3440')}));
+    o.push('<text x="'+(W-RC+22)+'" y="'+(cy+4.5)+'" text-anchor="end" font-size="12" fill="#2f3440">'+mila(c.r)+'</text>');
+    o.push('<text x="'+(W-RC+60)+'" y="'+(cy+4.5)+'" text-anchor="end" font-size="12" font-weight="700" fill="'+C.cs+'">'+f1(a).replace('.',',')+'</text>');
+    o.push('<text x="'+(W-RC+96)+'" y="'+(cy+4.5)+'" text-anchor="end" font-size="12" font-weight="700" fill="'+C.cd+'">'+f1(b)+'</text>');
+    o.push('<rect x="0" y="'+y+'" width="'+W+'" height="'+RH+'" fill="transparent" data-cap="'+c.c+'"'+tip(h)+'/>');
+  });
+  o.push(T(0,top+N*RH+16,'redditi più alti ↑',{c:'m'}));
+  o.push('</svg>');
+  $('ch-cap').innerHTML=o.join('');
+  Array.prototype.forEach.call($('ch-cap').querySelectorAll('[data-cap]'),function(r){r.addEventListener('click',function(){selCap(+r.getAttribute('data-cap'))})});
+  /* nota sotto: i cinque CAP più poveri e i cinque più ricchi, in media */
+  function med(arr,k){var s=0;arr.forEach(function(c){s+=e[k].cap[c.i]});return s/arr.length}
+  var P=ORD.slice(0,5),R=ORD.slice(-5);
+  $('nt-cap').innerHTML='In media, nei cinque CAP più poveri il Centrosinistra prende il '+f1(med(P,'cs'))+'% e il Centrodestra il '+f1(med(P,'cd'))+'%; nei cinque più ricchi il '+f1(med(R,'cs'))+'% e il '+f1(med(R,'cd'))+'%.'+(e.uf?' Questi dati sono ufficiosi.':'');
 }
 
-/* ---------- selettori ---------- */
-var TIPI=[['politiche','Politiche (Camera)'],['europee','Europee'],['regionali','Regionali'],['comunali','Comunali'],['referendum','Referendum']];
-function selettori(){
-  var h='';TIPI.forEach(function(t){h+='<optgroup label="'+t[1]+'">';E.elezioni.filter(function(e){return e.tipo===t[0]}).forEach(function(e){h+='<option value="'+e.id+'">'+esc(e.label)+(e.ufficiose?' (dati ufficiosi)':'')+'</option>'});h+='</optgroup>'});
-  setH('sel-e',h);el('sel-e').value=SEL.e;
-  el('sel-e').addEventListener('change',function(){SEL.e=this.value;rebuildVoci();drawDec()});
-  el('sel-l').addEventListener('change',function(){if(this.value){SEL.v=this.value;markBtn();drawDec()}});
-  el('btn-3').addEventListener('click',function(){SEL.no3=!SEL.no3;this.classList.toggle('on',SEL.no3);drawSc()});
-  rebuildVoci();
-  var cr=P.cop_min;
-  setH('cop-nota','Copertura: dal '+nf(P.cop_min,1)+'% al '+nf(P.cop_max,1)+'% dei votanti (sezioni con legame).');
-  reg(drawDec);reg(drawSc);
+/* ---------- 3: le mappe ---------- */
+var PRJ=null;
+function proiezione(){
+  var mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9;
+  GEO.features.forEach(function(f){rings(f).forEach(function(r){r.forEach(function(p){if(p[0]<mnx)mnx=p[0];if(p[0]>mxx)mxx=p[0];if(p[1]<mny)mny=p[1];if(p[1]>mxy)mxy=p[1]})})});
+  var k=Math.cos((mny+mxy)/2*Math.PI/180);
+  PRJ={mnx:mnx,mny:mny,mxy:mxy,k:k,w:(mxx-mnx)*k,h:mxy-mny};
 }
-function rebuildVoci(){
-  var e=eById(SEL.e),fam=[],blo=[],lis=[],ot=[];
-  e.voci.forEach(function(v){if(v.tp==='famiglia')fam.push(v);else if(v.tp==='blocco')blo.push(v);else if(v.tp==='lista')lis.push(v);else ot.push(v)});
-  if(!vOf(e,SEL.v)){SEL.v=(e.gruppo==='referendum')?'Si':(vOf(e,'Centrosinistra')?'Centrosinistra':e.voci[0].n)}
-  var h='';
-  ot.concat(fam,blo).forEach(function(v){if(v.n==='AFFLUENZA')return;h+='<button type="button" data-v="'+esc(v.n)+'" style="border-left:6px solid '+col(v.n)+'">'+esc(ename(v.n))+'</button>'});
-  var a=vOf(e,'AFFLUENZA');if(a)h+='<button type="button" data-v="AFFLUENZA" style="border-left:6px solid '+ACC+'">Affluenza</button>';
-  setH('btn-v',h);
-  Array.prototype.forEach.call(el('btn-v').querySelectorAll('button'),function(b){b.addEventListener('click',function(){SEL.v=b.getAttribute('data-v');markBtn();drawDec()})});
-  var sl='<option value="">&mdash; scegli &mdash;</option>';lis.forEach(function(v){sl+='<option value="'+esc(v.n)+'">'+esc(ename(v.n))+' ('+nf(v.city,1)+'%)</option>'});
-  setH('sel-l',sl);el('wrap-lista').style.display=lis.length?'':'none';
-  markBtn();
+function rings(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+function pathOf(f,s,ox,oy){
+  var d='';rings(f).forEach(function(r){r.forEach(function(p,i){d+=(i?'L':'M')+r1(ox+(p[0]-PRJ.mnx)*PRJ.k*s)+' '+r1(oy+(PRJ.mxy-p[1])*s)});d+='Z'});
+  return d;
 }
-function markBtn(){
-  Array.prototype.forEach.call(el('btn-v').querySelectorAll('button'),function(b){b.classList.toggle('on',b.getAttribute('data-v')===SEL.v)});
-  var sl=el('sel-l');var found=false;for(var i=0;i<sl.options.length;i++)if(sl.options[i].value===SEL.v){sl.selectedIndex=i;found=true}if(!found)sl.selectedIndex=0;
+function centro(f,s){var r=rings(f)[0],sx=0,sy=0;r.forEach(function(p){sx+=p[0];sy+=p[1]});return[(sx/r.length-PRJ.mnx)*PRJ.k*s,(PRJ.mxy-sy/r.length)*s]}
+var VER=['#cfeedd','#8bd1a8','#2fa866','#00632f'],RC=[[30000,'meno di 30 mila €'],[45000,'da 30 a 45 mila €'],[65000,'da 45 a 65 mila €'],[1e9,'oltre 65 mila €']];
+function classeRed(r){for(var i=0;i<RC.length;i++)if(r<RC[i][0])return i}
+var MC=[['#E30613','Centrosinistra avanti di oltre 20 punti'],['#EF6A73','Centrosinistra avanti di 10-20 punti'],['#F7B7BB','Centrosinistra avanti di 3-10 punti'],['#c9ced6','Alla pari (meno di 3 punti)'],['#AFD3EE','Centrodestra avanti di 3-10 punti'],['#5AA3D6','Centrodestra avanti di 10-20 punti'],['#0072BC','Centrodestra avanti di oltre 20 punti']];
+function classeVoto(d){return d>=20?0:d>=10?1:d>=3?2:d>-3?3:d>-10?4:d>-20?5:6}
+function mappe(){
+  if(!PRJ)proiezione();
+  var e=EL[SEL.e],W=width('ch-m1'),s=(W-4)/PRJ.w,H=Math.ceil(PRJ.h*s)+4;
+  var cnt1=[0,0,0,0],cnt2=[0,0,0,0,0,0,0];
+  var m1=[svgOpen(W,H)],m2=[svgOpen(W,H)],sel1='',sel2='';
+  GEO.features.forEach(function(f){
+    var c=+f.properties.cap,cp=BYC[c];if(!cp)return;
+    var a=e.cs.cap[cp.i],b=e.cd.cap[cp.i],k1=classeRed(cp.r),k2=classeVoto(a-b);cnt1[k1]++;cnt2[k2]++;
+    var d=pathOf(f,s,2,2),isel=SEL.cap===c;
+    var h='<b>'+c+' '+esc(cp.n)+'</b><br>Reddito medio '+mila(cp.r)+' mila €<br>'+esc(e.l)+': Centrosinistra '+f1(a)+'%, Centrodestra '+f1(b)+'%';
+    m1.push('<path d="'+d+'" fill="'+VER[k1]+'" stroke="#fff" stroke-width="1.2" data-cap="'+c+'"'+tip(h)+'/>');
+    m2.push('<path d="'+d+'" fill="'+MC[k2][0]+'" stroke="#fff" stroke-width="1.2" data-cap="'+c+'"'+tip(h)+'/>');
+    if(isel){var q=centro(f,s);
+      sel1='<path d="'+d+'" fill="none" stroke="#111" stroke-width="3"/>'+'<text x="'+r1(q[0]+2)+'" y="'+r1(q[1]+2)+'" text-anchor="middle" font-size="13" font-weight="800"'+HALO+'>'+c+'</text>';
+      sel2=sel1;}
+  });
+  m1.push(sel1,'</svg>');m2.push(sel2,'</svg>');
+  $('ch-m1').innerHTML=m1.join('');$('ch-m2').innerHTML=m2.join('');
+  $('lg-m1').innerHTML=RC.map(function(r,i){return '<span><i style="background:'+VER[i]+'"></i>'+r[1]+' · '+cnt1[i]+'</span>'}).join('');
+  $('mt-m2').textContent='Chi ha preso più voti: '+e.l;
+  $('lg-m2').innerHTML=MC.map(function(r,i){return '<span><i style="background:'+r[0]+'"></i>'+r[1]+' · '+cnt2[i]+'</span>'}).join('');
+  ['ch-m1','ch-m2'].forEach(function(id){Array.prototype.forEach.call($(id).querySelectorAll('[data-cap]'),function(p){p.addEventListener('click',function(){selCap(+p.getAttribute('data-cap'))})})});
 }
 
-/* ---------- barre per decile ---------- */
-function drawDec(){
-  var e=eById(SEL.e),v=vOf(e,SEL.v);if(!v)return;
-  var box=el('ch-dec'),W=box.clientWidth||320,H=310,m={l:40,r:8,t:16,b:54},pw=W-m.l-m.r,ph=H-m.t-m.b;
-  var top=Math.max.apply(null,v.hi.concat([v.city]))*1.08,st=niceStep(top/5),ymax=Math.ceil(top/st)*st;
-  function Y(x){return m.t+ph-x/ymax*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var t=0;t<=ymax+st/2;t+=st)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+nf(t,0)+'%</text>';
-  var bw=pw/10,c=col(v.n);
-  for(var d=0;d<10;d++){
-    var x=m.l+d*bw+bw*.15,w=bw*.7,y=Y(v.dec[d]);
-    s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(m.t+ph-y)+'" fill="'+c+'" opacity="'+(d===9?'.75':'.9')+'"'+(d===9?' stroke="#111" stroke-dasharray="3 2"':'')+'><title>D'+(d+1)+': '+nf(v.dec[d],1)+'% (intervallo '+nf(v.lo[d],1)+' - '+nf(v.hi[d],1)+')</title></rect>';
-    var cx=x+w/2;s+='<line x1="'+cx+'" x2="'+cx+'" y1="'+Y(v.lo[d])+'" y2="'+Y(v.hi[d])+'" stroke="#111" stroke-width="1.5"/><line x1="'+(cx-4)+'" x2="'+(cx+4)+'" y1="'+Y(v.lo[d])+'" y2="'+Y(v.lo[d])+'" stroke="#111"/><line x1="'+(cx-4)+'" x2="'+(cx+4)+'" y1="'+Y(v.hi[d])+'" y2="'+Y(v.hi[d])+'" stroke="#111"/>';
-    s+='<text x="'+cx+'" y="'+(Y(v.hi[d])-3)+'" text-anchor="middle" style="font-size:'+(W<420?9:11)+'px">'+nf(v.dec[d],W<420?0:1)+'</text>';
-    s+='<text x="'+cx+'" y="'+(m.t+ph+14)+'" text-anchor="middle" style="font-weight:600">D'+(d+1)+'</text><text class="mu" x="'+cx+'" y="'+(m.t+ph+27)+'" text-anchor="middle" style="font-size:'+(W<420?9:10)+'px">'+nf(P.decili[d].rmed/1000,0)+'k</text>';
+/* ---------- 4: affluenza per fascia di reddito ---------- */
+function affluenza(){
+  var W=width('aff'),pick=[5,4,7],Hh=150,top=22,bot=34,hb=Hh-top-bot,gapx=4,bw=(W-gapx*9)/10;
+  var dr=D.dec,html='';
+  function X(i){return i*(bw+gapx)}
+  function Y(v){return top+hb-v/80*hb}
+  var txt=[];
+  pick.forEach(function(ix){
+    var e=EL[ix],a=e.af.dec,o=[svgOpen(W,Hh)];
+    o.push(L(0,Y(0),W,Y(0),C.ink,1.5));
+    a.forEach(function(v,i){
+      var h='<b>'+esc(e.l)+'</b><br>Fascia '+(i+1)+' di 10 (reddito medio '+mila(dr[i].rmed)+' mila €)<br>Vota il '+f1(v)+'% degli iscritti';
+      o.push(vbar(X(i),bw,Y(0),Y(v),C.aff,tip(h)));
+      o.push(T(X(i)+bw/2,Y(v)-4,f0(v),{a:'middle',c:'b',st:'font-size:12.5px'}));
+    });
+    o.push(T(0,Hh-14,'più poveri ('+mila(dr[0].rmed)+' mila €)',{c:'m'}));
+    o.push(T(W,Hh-14,'più ricchi ('+mila(dr[9].rmed)+' mila €)',{a:'end',c:'m'}));
+    o.push('</svg>');
+    html+='<p class="mt">'+esc(e.l)+': vota il '+f1(a[0])+'% nelle zone più povere, il '+f1(a[9])+'% nelle più ricche</p><div class="ch" role="img" aria-label="Barre: affluenza per fascia di reddito, '+esc(e.l)+'">'+o.join('')+'</div>';
+  });
+  $('aff').innerHTML=html;
+  var e22=EL[5],e21=EL[4];
+  $('t-aff').textContent='Alle Politiche 2022 votano di più le zone ricche ('+f1(e22.af.dec[9])+'% contro '+f1(e22.af.dec[0])+'%); alle Comunali 2021 quasi uguale ('+f1(e21.af.dec[9])+'% contro '+f1(e21.af.dec[0])+'%)';
+}
+
+/* ---------- 5: il tuo CAP ---------- */
+function trova(q){
+  q=q.trim().toLowerCase();if(!q)return null;
+  var m=q.replace(/\D/g,'');
+  if(m.length>=3&&m.length<=5){
+    var code=m.length===5?m:m.length===3?'20'+m:null;
+    var hit=CAPS.filter(function(c){return code?String(c.c)===code:String(c.c).indexOf(m)===0});
+    if(hit.length)return hit[0];
   }
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v.city)+'" y2="'+Y(v.city)+'" stroke="'+WARM+'" stroke-dasharray="5 3" stroke-width="1.5"/><text x="'+(m.l+3)+'" y="'+(Y(v.city)-4)+'" text-anchor="start" style="fill:#8a4a10">città '+nf(v.city,1)+'%</text>';
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+(W<520?'D1 = redditi più bassi, D10 = più alti · k = migliaia di euro':'fascia di reddito (D1 = redditi più bassi, D10 = più alti, 4 CAP) · reddito medio in migliaia di euro')+'</text></svg>';
-  box.innerHTML=s;
-  setH('dec-titolo',esc(e.label)+' · '+esc(ename(v.n)));
-  var sp='';if(v.tp!=='lista'&&v.sp!=null)sp=' Correlazione di Spearman sui 38 CAP: '+nf(v.sp,2)+' (intervallo '+nf(v.splo,2)+' / '+nf(v.sphi,2)+').';
-  setH('dec-testo','Fascia più ricca meno fascia più povera: <b>'+sg(v.gap)+' punti</b> (intervallo '+sg(v.glo)+' / '+sg(v.ghi)+'). Fascia D9 meno D1: '+sg(v.gap9)+'.'+sp+(e.ufficiose?' <b>Dati ufficiosi.</b>':''));
-  drawSc();
+  var nm=q.replace(/[0-9\s]+/g,' ').trim();
+  if(nm){var h2=CAPS.filter(function(c){return c.n.toLowerCase()===nm})[0]||CAPS.filter(function(c){return c.n.toLowerCase().indexOf(nm)>=0})[0];if(h2)return h2}
+  return null;
 }
-
-/* ---------- dispersione CAP ---------- */
-function loadSez(id){
-  if(SEZC[id])return Promise.resolve(SEZC[id]);
-  return J('data/sez/'+id+'.json').then(function(d){SEZC[id]=d;return d}).catch(function(){SEZC[id]={};return {}});
+function tuoCap(){
+  $('dl-cap').innerHTML=CAPS.map(function(c){return '<option value="'+c.c+' '+esc(c.n)+'"></option>'}).join('');
+  $('q').addEventListener('submit',function(ev){ev.preventDefault();cerca()});
+  $('in-cap').addEventListener('input',function(){var c=trova(this.value);if(c&&(/^\d{5}$/.test(this.value.trim())||this.value.indexOf(' ')>0)){SEL.cap=c.c;aggiorna()}});
+  $('sl1').addEventListener('input',function(){setEl(+this.value)});
+  $('sl2').addEventListener('input',function(){setEl(+this.value)});
+  risultato();
 }
-function drawSc(){
-  var e=eById(SEL.e),v=vOf(e,SEL.v);if(!v)return;
-  var box=el('ch-sc');
-  if(!v.cap){box.innerHTML='<p class="sub">Per le singole liste il grafico per CAP non c&rsquo;&egrave;: scegli una famiglia.</p>';el('rho-txt').textContent='';return}
-  var id=SEL.e,vn=SEL.v;
-  loadSez(id).then(function(sd){
-    if(id!==SEL.e||vn!==SEL.v)return;
-    var W=box.clientWidth||320,H=340,m={l:40,r:10,t:12,b:40},pw=W-m.l-m.r,ph=H-m.t-m.b;
-    var xs=[],ys=[];P.cap.forEach(function(c,i){if(v.cap[i]!=null){xs.push(c.red/1000);ys.push(v.cap[i])}});
-    var sv=sd[vn]||[];var sy=[];sv.forEach(function(q){if(q!=null)sy.push(q)});
-    var ymax=Math.max.apply(null,ys.concat(sy.length?[Math.min(Math.max.apply(null,sy),100)]:[]))*1.05,ymin=Math.min.apply(null,ys.concat(sy.length?[Math.max(Math.min.apply(null,sy),0)]:[]));
-    var st=niceStep((ymax-ymin)/5);ymax=Math.ceil(ymax/st)*st;ymin=Math.floor(ymin/st)*st;
-    var x0=15,x1=120;
-    function X(k){return m.l+(k-x0)/(x1-x0)*pw} function Y(q){return m.t+ph-(q-ymin)/(ymax-ymin)*ph}
-    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-    for(var t=ymin;t<=ymax+st/2;t+=st)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+nf(t,0)+'%</text>';
-    for(var k=20;k<=120;k+=20)s+='<line x1="'+X(k)+'" x2="'+X(k)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+X(k)+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+k+'k</text>';
-    s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-    var inst=P.cap_instabili,c=col(vn);
-    // sezioni (grigio)
-    for(var i=0;i<SZ.sez.length;i++){var q=sv[i];if(q==null||q>ymax||q<ymin)continue;var off=SEL.no3&&inst.indexOf(SZ.cap[i])>=0;
-      s+='<circle cx="'+X(SZ.inc[i]/1000).toFixed(1)+'" cy="'+Y(q).toFixed(1)+'" r="2" fill="'+(off?'#ddd':'#999')+'" opacity="'+(off?'.4':'.45')+'"/>'}
-    // CAP
-    var px=[],py=[];
-    P.cap.forEach(function(cc,i){var q=v.cap[i];if(q==null)return;var off=SEL.no3&&inst.indexOf(cc.cap)>=0,ins=inst.indexOf(cc.cap)>=0;
-      s+='<circle cx="'+X(cc.red/1000).toFixed(1)+'" cy="'+Y(q).toFixed(1)+'" r="'+(ins?6:5)+'" fill="'+(off?'#fff':c)+'" stroke="'+(ins?WARM:'#111')+'" stroke-width="'+(ins?2.5:.8)+'" opacity="'+(off?.6:1)+'"><title>CAP '+cc.cap+': reddito medio '+f0(cc.red)+' euro, quota '+nf(q,1)+'%</title></circle>';
-      if(!off){px.push(cc.red);py.push(q)}});
-    s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-4)+'" text-anchor="middle">reddito medio del CAP, euro 2025 (2019-22)</text></svg>';
-    box.innerHTML=s;el('lg-cap').style.background=c;
-    var rho=spear(px,py),all=spear(xs,ys);
-    el('rho-txt').innerHTML=SEL.no3?'&rho; con i '+px.length+' CAP rimasti: <b>'+nf(rho,2)+'</b> (con tutti i 38: '+nf(all,2)+')':'&rho; con tutti i 38 CAP: <b>'+nf(all,2)+'</b>';
-  });
+function cerca(){
+  var q=$('in-cap').value,c=trova(q);
+  if(!c){SEL.cap=null;aggiorna();$('res').innerHTML='<p>Non trovo «'+esc(q)+'». I CAP di Milano vanno da 20121 a 20162.</p>';return}
+  SEL.cap=c.c;aggiorna();
 }
-
-/* ---------- striscia del divario ---------- */
-var SV='Centrosinistra';
-function strip(){
-  var vs=['Centrosinistra','Centro','Sx (Sinistra+Centrosinistra)','Sx+Centro (Sinistra+Centrosinistra+Centro)','Dx (Centrodestra+Lega+Destra)','M5S','AFFLUENZA'];
-  var h='';vs.forEach(function(v){h+='<button type="button" data-v="'+esc(v)+'"'+(v===SV?' class="on"':'')+' style="border-left:6px solid '+col(v)+'">'+esc(ename(v))+'</button>'});
-  setH('btn-strip',h);
-  Array.prototype.forEach.call(el('btn-strip').querySelectorAll('button'),function(b){b.addEventListener('click',function(){SV=b.getAttribute('data-v');Array.prototype.forEach.call(el('btn-strip').querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});drawStrip()})});
-  reg(drawStrip);
+function risultato(){
+  var box=$('res');
+  if(SEL.cap==null){if(!box.innerHTML)box.innerHTML='<p>Scegli un CAP per vedere come ha votato in ogni elezione.</p>';return}
+  var c=BYC[SEL.cap],n=CAPS.length,pos=n-ORD.indexOf(c);
+  var rows=EL.map(function(e,i){
+    var a=e.cs.cap[c.i],b=e.cd.cap[c.i];
+    return '<tr'+(i===SEL.e?' style="background:#fff2cc"':'')+'><td>'+esc(e.l)+(e.uf?' *':'')+'</td><td><b style="color:var(--cs)">'+f1(a)+'%</b><small>Milano '+f1(e.cs.city)+'%</small><small>'+sg1(a-e.cs.city)+' punti</small></td><td><b style="color:var(--cd)">'+f1(b)+'%</b><small>Milano '+f1(e.cd.city)+'%</small><small>'+sg1(b-e.cd.city)+' punti</small></td></tr>';
+  }).join('');
+  /* striscia dei 38 CAP in ordine di reddito */
+  var W=width('res'),bw=(W-2*(n-1))/n,o=[svgOpen(W,50)];
+  ORD.forEach(function(x,i){var s=x===c;o.push('<rect x="'+r1(i*(bw+2))+'" y="'+(s?18:26)+'" width="'+r1(bw)+'" height="'+(s?22:14)+'" fill="'+(s?'#111':'#c9ced6')+'"/>')});
+  var px=(n-pos)*(bw+2)+bw/2;
+  o.push('<text x="'+r1(Math.min(Math.max(px,60),W-60))+'" y="12" text-anchor="middle" font-size="13" font-weight="800">'+c.c+'</text>');
+  o.push('</svg>');
+  box.innerHTML='<h4>'+c.c+' · '+esc(c.n)+'</h4><p>Reddito medio dei contribuenti: <b>'+mila(c.r)+' mila €</b> l'+"'"+'anno. È il <b>'+pos+'°</b> CAP più ricco su 38'+(pos===1?' (il più ricco)':pos===n?' (il più povero)':'')+'.</p>'
+   +'<div class="ch" role="img" aria-label="Posizione del CAP tra i 38, dal più povero al più ricco">'+o.join('')+'<div class="sub" style="display:flex;justify-content:space-between;margin:2px 0 0"><span>più poveri</span><span>più ricchi</span></div></div>'
+   +'<table class="kt"><tr><th>Elezione</th><th style="color:var(--cs)">Centrosinistra</th><th style="color:var(--cd)">Centrodestra</th></tr>'+rows+'</table>'
+   +'<p class="note">Sotto ogni valore: quanto prende tutta Milano e la differenza del CAP in punti. * dati ufficiosi. La riga evidenziata è l'+"'"+'elezione scelta nei cursori.</p>';
 }
-function stripSvg(box,rows,color,opt){
-  var W=box.clientWidth||320,rh=36,H=rows.length*rh+26+(opt&&opt.brk!=null?18:0),m={l:8,r:8,t:20};
-  var mx=0;rows.forEach(function(r){if(r.v){mx=Math.max(mx,Math.abs(r.v.glo),Math.abs(r.v.ghi),Math.abs(r.v.gap))}});
-  var st=niceStep(mx/3);mx=Math.ceil(mx/st)*st;
-  var pw=W-m.l-m.r;function X(q){return m.l+(q+mx)/(2*mx)*pw}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var t=-mx;t<=mx+1e-9;t+=st){s+='<line x1="'+X(t)+'" x2="'+X(t)+'" y1="'+m.t+'" y2="'+(H-4)+'" stroke="'+(Math.abs(t)<1e-9?'#111':'#e6e6e6')+'"/><text class="mu" x="'+X(t)+'" y="12" text-anchor="middle">'+(t>0?'+':'')+nf(t,0)+'</text>'}
-  var y=m.t+4;
-  rows.forEach(function(r,i){
-    if(opt&&opt.brk===i){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(y+2)+'" y2="'+(y+2)+'" stroke="'+WARM+'" stroke-dasharray="5 3" stroke-width="1.5"/><text x="'+(W-m.r)+'" y="'+(y+14)+'" text-anchor="end" style="fill:#8a4a10;font-size:10px">'+opt.brkt+'</text>';y+=18}
-    if(!r.v){s+='<text class="mu" x="'+m.l+'" y="'+(y+14)+'">'+esc(r.l)+': non presente</text>'}
-    else{var v=r.v,x0=X(0),x1=X(v.gap);
-      s+='<text x="'+m.l+'" y="'+(y+11)+'" style="font-size:11.5px"><tspan style="font-weight:600">'+esc(r.l)+'</tspan><tspan class="mu"> · '+sg(v.gap)+' ('+sg(v.glo)+' / '+sg(v.ghi)+') · &rho; '+nf(v.sp,2)+'</tspan></text>';
-      s+='<rect x="'+Math.min(x0,x1)+'" y="'+(y+16)+'" width="'+Math.max(1,Math.abs(x1-x0))+'" height="10" fill="'+color+'" opacity=".85"><title>'+esc(r.l)+': '+sg(v.gap)+' punti</title></rect>';
-      s+='<line x1="'+X(v.glo)+'" x2="'+X(v.ghi)+'" y1="'+(y+21)+'" y2="'+(y+21)+'" stroke="#111" stroke-width="1.5"/><line x1="'+X(v.glo)+'" x2="'+X(v.glo)+'" y1="'+(y+17)+'" y2="'+(y+25)+'" stroke="#111"/><line x1="'+X(v.ghi)+'" x2="'+X(v.ghi)+'" y1="'+(y+17)+'" y2="'+(y+25)+'" stroke="#111"/>'}
-    y+=rh;
-  });
-  box.innerHTML=s+'</svg>';
-}
-function drawStrip(){
-  var rows=EV.map(function(ev){var r=evVal(ev,SV);var suf='';if(r&&ev.ids.length>1)suf=r.id.indexOf('sindaco')>=0?' (sindaco)':' (liste del Consiglio)';return {l:ev.l+suf,v:r?r.x:null}});
-  stripSvg(el('ch-strip'),rows,col(SV),{brk:5,brkt:'dal 2022 ↓'});
-  var t='';
-  if(SV==='Centrosinistra')t='Fino al 2021 la quota del Centrosinistra è più alta nelle zone con i redditi più alti, di 9-15 punti. Dal 2022 il divario non è più distinguibile da zero.';
-  else if(SV==='Centro')t='Il Centro ha sempre il segno positivo; il divario cresce nel 2022 (Azione-Italia Viva, +Europa) e resta alto nel 2023 e nel 2024. Il contenuto della famiglia cambia: vedi &laquo;Come sono raggruppati i partiti&raquo;.';
-  else if(SV==='Sx+Centro (Sinistra+Centrosinistra+Centro)')t='Sommate, le tre famiglie hanno un divario positivo tra +13 e +20 punti dal 2018 al 2023 (nelle Comunali il Centro è assente o piccolo, quindi il dato coincide quasi con Sinistra + Centrosinistra); nel 2024 scende a circa +8.';
-  else if(SV==='M5S')t='Sempre negativo: il M5S ha una quota più alta nelle zone con i redditi più bassi, in tutte le elezioni in cui si presenta.';
-  else if(SV==='AFFLUENZA')t='Nelle Politiche la differenza è positiva; nelle amministrative è vicina allo zero o negativa. Vedi la sezione sull&rsquo;affluenza.';
-  else if(SV.indexOf('Dx')===0)t='La famiglia ha quote più basse nelle zone con redditi più alti alle Regionali 2018, alle Europee 2019, alle Comunali 2021, alle Politiche 2022 e alle Regionali 2023; alle Comunali 2016, alle Politiche 2018 e alle Europee 2024 il divario non è distinguibile da zero.';
-  else t='';
-  setH('strip-testo',t);
-}
-
-/* ---------- affluenza ---------- */
-var AFFS=[['camera_2018-03-04','Politiche 2018','#0b3d91',0],['camera_2022-09-25','Politiche 2022','#1d6fb8',0],['referendum_2026-03-22_ds2975','Referendum 2026','#4aa3df',1],
- ['comunali_sindaco_2016-06-05','Comunali 2016','#c26a1b',0],['comunali_sindaco_2021-10-03','Comunali 2021','#e09a4f',0],['regionali_consiglio_2023-02-12','Regionali 2023','#8a4a10',1],
- ['europee_2024-06-08','Europee 2024','#b23a48',1],['referendum_2025-06-08_ds2930','Referendum 2025 (lavoro)','#6a4c93',1]];
-function aff(){
-  var a22=gv('camera_2022-09-25','AFFLUENZA'),c16=gv('comunali_sindaco_2016-06-05','AFFLUENZA'),c21=gv('comunali_sindaco_2021-10-03','AFFLUENZA'),r25=gv('referendum_2025-06-08_ds2930','AFFLUENZA');
-  setH('aff-testo','<p>Nelle <b>Politiche</b> (e nel referendum 2026) l&rsquo;affluenza sale con il reddito: nel 2022 vota il '+nf(a22.dec[0],1)+'% nella fascia D1 e il '+nf(a22.dec[9],1)+'% nella D10 ('+sg(a22.gap)+' punti). Nelle <b>amministrative</b> il quadro &egrave; piatto o rovesciato: alle Comunali 2016 '+nf(c16.dec[0],1)+'% in D1 e '+nf(c16.dec[9],1)+'% in D10; alle Comunali 2021 '+nf(c21.dec[0],1)+'% e '+nf(c21.dec[9],1)+'%. Nel referendum 2025 sul lavoro e sulla cittadinanza ha votato di pi&ugrave; la fascia D1 ('+nf(r25.dec[0],1)+'%) che la D10 ('+nf(r25.dec[9],1)+'%).</p><p>In molte elezioni <b>la fascia D10 ha un&rsquo;affluenza pi&ugrave; bassa della D9</b> (per esempio Comunali 2021: '+nf(c21.dec[8],1)+'% contro '+nf(c21.dec[9],1)+'%).</p>');
-  setH('lg-aff',AFFS.map(function(a){return '<span><i class="ln'+(a[3]?' d':'')+'" style="border-top-color:'+a[2]+'"></i>'+a[1]+'</span>'}).join(''));
-  var q=P.registro.quinti;
-  setH('registro-txt','Perch&eacute; la fascia pi&ugrave; ricca vota meno della seconda? Una possibilit&agrave;: il registro degli elettori &egrave; pi&ugrave; grande della popolazione che vive l&igrave;. Tra i quartieri, il quinto con i redditi pi&ugrave; alti ha in media (mediana) <b>'+nf(q[4].mediana,2)+' elettori per ogni adulto residente</b>, gli altri quattro quinti da '+nf(q[1].mediana,2)+' a '+nf(q[3].mediana,2)+' (correlazione di Spearman con il reddito: '+nf(P.registro.rho,2)+'). Se &egrave; cos&igrave;, l&rsquo;affluenza di D10 &egrave; bassa perch&eacute; il denominatore &egrave; gonfiato, non perch&eacute; gli abitanti votino meno. <b>Non &egrave; dimostrato:</b> &egrave; coerente con i dati, che non dicono chi sono gli elettori iscritti e non residenti. Nei quartieri con meno redditi accade l&rsquo;opposto: gli adulti stranieri risiedono ma non votano.');
-  reg(drawAff);
-}
-function drawAff(){
-  var box=el('ch-aff'),W=box.clientWidth||320,H=320,m={l:40,r:10,t:12,b:40},pw=W-m.l-m.r,ph=H-m.t-m.b;
-  var ser=AFFS.map(function(a){var v=gv(a[0],'AFFLUENZA');return {n:a[1],c:a[2],d:a[3],y:v.dec}});
-  var lo=1e9,hi=0;ser.forEach(function(s){s.y.forEach(function(v){lo=Math.min(lo,v);hi=Math.max(hi,v)})});
-  var st=niceStep((hi-lo)/5),y0=Math.floor(lo/st)*st-st,y1=Math.ceil(hi/st)*st;if(y0<0)y0=0;
-  function X(d){return m.l+(d-1)/9*pw} function Y(q){return m.t+ph-(q-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var t=y0;t<=y1+st/2;t+=st)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+nf(t,0)+'%</text>';
-  for(var d=1;d<=10;d++)s+='<text class="mu" x="'+X(d)+'" y="'+(m.t+ph+16)+'" text-anchor="middle">D'+d+'</text>';
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  ser.forEach(function(se){var p='';se.y.forEach(function(v,i){p+=(i?'L':'M')+X(i+1).toFixed(1)+' '+Y(v).toFixed(1)});s+='<path d="'+p+'" fill="none" stroke="'+se.c+'" stroke-width="2.2" '+(se.d?'stroke-dasharray="6 4"':'')+' stroke-linejoin="round"/>'});
-  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,d=Math.max(1,Math.min(10,Math.round((px-m.l)/pw*9)+1));
-    cur.setAttribute('x1',X(d));cur.setAttribute('x2',X(d));cur.style.display='';
-    var h='<b>Fascia D'+d+'</b>';ser.forEach(function(se){h+='<br><span style="color:'+se.c+'">&#9632;</span> '+esc(se.n)+': '+nf(se.y[d-1],1)+'%'});
-    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=X(d)/k+10;if(left+tw>r.width)left=X(d)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
-  function hide(){tip.style.display='none';cur.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-}
-
-/* ---------- referendum ---------- */
-var REFG=[
- ['Riforme costituzionali: 2016 e 2020',[['referendum_2016-12-04_ds1370','Costituzionale 2016 (Sì = riforma Renzi-Boschi)'],['referendum_2020-09-20_ds1461','Taglio dei parlamentari 2020 (Sì = taglio)']]],
- ['Lavoro e cittadinanza, 2025',[['referendum_2025-06-08_ds2930','Licenziamenti illegittimi (Sì = abrogare)'],['referendum_2025-06-08_ds2931','Indennità nelle piccole imprese (Sì = abrogare)'],['referendum_2025-06-08_ds2932','Contratti a termine (Sì = abrogare)'],['referendum_2025-06-08_ds2933','Responsabilità negli appalti (Sì = abrogare)'],['referendum_2025-06-08_ds2934','Cittadinanza (Sì = 5 anni invece di 10)']]],
- ['Giustizia: 2022 e 2026',[['referendum_2022-06-12_ds1889','2022 · Incandidabilità (Sì = abrogare)'],['referendum_2022-06-12_ds1890','2022 · Misure cautelari (Sì = abrogare)'],['referendum_2022-06-12_ds1891','2022 · Separazione delle funzioni (Sì = abrogare)'],['referendum_2022-06-12_ds1892','2022 · Consigli giudiziari (Sì = abrogare)'],['referendum_2026-03-22_ds2975','2026 · Separazione delle carriere (Sì = confermare)']]],
- ['Senza un legame chiaro col reddito',[['referendum_2016-04-17_ds1369','Trivellazioni 2016 (Sì = fermare)'],['referendum_2017-10-22_ds1371','Autonomia della Lombardia 2017 (Sì = più autonomia)']]]];
-function refs(){
-  var h='';
-  REFG.forEach(function(g){h+='<div class="pair">'+g[0]+'</div>';
-    g[1].forEach(function(r){var v=gv(r[0],'Si');if(!v)return;
-      h+='<div class="db"><div class="nm">'+esc(r[1])+'</div><div class="tk"><span class="mid"></span><span class="ln" style="left:'+Math.min(v.dec[0],v.dec[9])+'%;width:'+Math.abs(v.dec[9]-v.dec[0])+'%"></span><span class="p1" style="left:'+v.dec[0]+'%" title="D1"></span><span class="p10" style="left:'+v.dec[9]+'%" title="D10"></span></div><div class="tx">D1 '+nf(v.dec[0],1)+'% · D10 '+nf(v.dec[9],1)+'% · differenza '+sg(v.gap)+' punti ('+sg(v.glo)+' / '+sg(v.ghi)+')</div></div>'})});
-  setH('ref',h+'<p class="sub">La scala va da 0% a 100% di S&igrave;; la linea tratteggiata &egrave; il 50%.</p>');
-}
-
-/* ---------- M5S ---------- */
-function m5s(){
-  var rows=[];E.elezioni.forEach(function(e){var v=vOf(e,'M5S');if(v&&e.gruppo!=='comunali_ballottaggio')rows.push({l:e.label,v:v})});
-  var sp=rows.map(function(r){return r.v.sp}),mn=Math.min.apply(null,sp),mx=Math.max.apply(null,sp);
-  var a=gv('camera_2018-03-04','M5S'),b=gv('europee_2024-06-08','M5S');
-  setH('m5s-testo','<p>Il Movimento 5 Stelle ha lo stesso segno in tutte le <b>'+rows.length+' elezioni</b> in cui presenta una lista o un candidato: la sua quota &egrave; pi&ugrave; alta nelle zone con i redditi pi&ugrave; bassi. La correlazione di Spearman sui 38 CAP va da '+nf(mn,2)+' a '+nf(mx,2)+'. Succede mentre la sua quota in citt&agrave; scende dal '+nf(a.city,0)+'% (Politiche 2018) al '+nf(b.city,0)+'% (Europee 2024): &egrave; il legame con il reddito che cambia meno nel tempo. Come sempre, &egrave; un confronto tra zone, non una spiegazione.</p>');
-  reg(function(){stripSvg(el('ch-m5s'),rows,col('M5S'),{})});
-}
-
-/* ---------- metodo ---------- */
-function metodo(){
-  setH('m-civici',f0(P.civici)+' civici, di cui '+P.civici_esclusi+' esclusi perch&eacute; con un CAP senza dati sul reddito (CAP generico 20100 e un civico di un altro CAP)');
-  setH('m-stesso',nf(P.stesso_cap_pct,1)+'%');
-  setH('pop-anno',P.popolazione_anno);
-  setH('cop-range',nf(100-P.cop_max,2)+'-'+nf(100-P.cop_min,1)+'%');
-  setH('d10cap',P.d10_cap.map(function(c){return c.cap+' ('+nf(c.quota*100,0)+'% degli elettori della fascia, reddito '+f0(c.red)+' euro)'}).join('; '));
-  table('tab-dec',['Fascia','Sezioni','Quota elettori 2021','Reddito di sezione, da','a','Medio','CAP prevalenti'],P.decili.map(function(d){return ['D'+d.d,d.sezioni,nf(d.quota*100,1)+'%',f0(d.rmin),f0(d.rmax),f0(d.rmed),d.ncap]}));
-  var cols=[['Sx (Sinistra+Centrosinistra)','Sinistra + Centrosinistra'],['Centro','Centro'],['M5S','M5S'],['Dx (Centrodestra+Lega+Destra)','Centrodestra + Lega + Destra'],['AFFLUENZA','Affluenza']];
-  var els=['Comunali - Sindaco 2021','Politiche - Camera 2018','Politiche - Camera 2022','Regionali - Consiglio 2023','Europee 2024'];
-  table('tab-var',['R² (tra CAP)'].concat(cols.map(function(c){return c[1]})),els.map(function(en){return [en].concat(cols.map(function(c){var r=P.varianza.filter(function(x){return x.e===en&&x.v===c[0]})[0];return r?nf(r.r2,2)+' ('+nf(r.eta2,2)+')':'–'}))}));
-  var rr=[['Comunali - Sindaco 2021','Sx (Sinistra+Centrosinistra)'],['Politiche - Camera 2018','Sx (Sinistra+Centrosinistra)'],['Politiche - Camera 2022','Centrosinistra'],['Regionali - Consiglio 2023','Centrosinistra'],['Europee 2024','Centrosinistra'],['Politiche - Camera 2022','Centro'],['Europee 2024','Centro'],['Politiche - Camera 2018','M5S'],['Politiche - Camera 2022','M5S'],['Politiche - Camera 2022','AFFLUENZA'],['Comunali - Sindaco 2021','AFFLUENZA']];
-  table('tab-rob',['Elezione · voce','ρ 38 CAP','ρ senza 3 CAP','Quartieri: pendenza','con controlli (intervallo)'],rr.map(function(k){var r=P.robustezza.filter(function(x){return x.e===k[0]&&x.v===k[1]})[0];if(!r)return [k[0],'','','',''];
-    return [esc(k[0])+' · '+esc(ename(k[1])),nf(r.sp,2),nf(r.sp3,2),sg(r.nil_pend,1),sg(r.nil_ctrl,1)+' ('+sg(r.nil_ctrl_lo,1)+' / '+sg(r.nil_ctrl_hi,1)+')']}));
-}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
 })();
 </script>
 </body></html>
