@@ -90,3 +90,24 @@ for nid, gr in cv.groupby("ID_NIL"):
 w = csv.DictWriter(open(os.path.join(DOCS, "nil_parco_vicino.csv"), "w", encoding="utf8", newline=""), fieldnames=list(rows[0].keys()), delimiter=";")
 w.writeheader(); w.writerows(rows)
 print("nil con parco vicino:", len(rows))
+
+# --- 3) distribuzione dei minuti a piedi dal parco (per il grafico a punti: 1 punto = 1 abitante su 100)
+cm = pd.read_csv(os.path.join(R, "citta-15-minuti", "out", "civici_tempi.csv"), usecols=["RESIDENZIALE", "ID_NIL", "min_parchi"])
+cm = cm[(cm.RESIDENZIALE > 0) & cm.ID_NIL.notna()].copy()
+cm["ID_NIL"] = cm.ID_NIL.astype(int)
+G = json.load(open(os.path.join(DOCS, "nil.geojson"), encoding="utf8"))
+ab = {f["properties"]["i"]: f["properties"]["ab"] for f in G["features"]}
+NB = 31  # minuti 0..29 e "30 e oltre" (senza tempo = oltre il limite)
+b = np.where(cm.min_parchi.isna(), NB - 1, np.minimum(np.floor(cm.min_parchi.fillna(99)), NB - 1)).astype(int)
+cm["bin"] = b
+n_civ = cm.groupby("ID_NIL").size()
+cm["w"] = cm.ID_NIL.map(lambda i: ab.get(i, 0) / n_civ[i])
+def quote(df):
+    v = np.zeros(NB)
+    for k, w in zip(df.bin, df.w):
+        v[k] += w
+    return [round(100 * x / v.sum(), 3) for x in v] if v.sum() > 0 else [0] * NB
+ris = {"minuti_per_colonna": 1, "colonne": NB, "nota": "quota di residenti (su 100) per minuto a piedi dal parco piu' vicino; ultima colonna = 30 minuti e oltre o senza tempo",
+       "citta": quote(cm), "nil": {str(i): quote(g) for i, g in cm.groupby("ID_NIL")}}
+json.dump(ris, open(os.path.join(DOCS, "minuti_parco_distribuzione.json"), "w", encoding="utf8"), separators=(",", ":"))
+print("distribuzione: oltre15 citta %.1f" % sum(ris["citta"][15:]))

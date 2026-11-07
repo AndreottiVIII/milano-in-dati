@@ -1,376 +1,670 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · Incroci e incidenti</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-:root{--acc:#9c2f12;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#fbeee8;--warm:#8a4a10;--warmbg:#fbf0e2;--ped:#0072B2;--bici:#009E73;--moto:#D55E00;--auto:#6b6b6b;--monop:#CC79A7}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.5em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.25em 0}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.1) contrast(.8)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.ctl label.ck{font-size:.9rem;cursor:pointer}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.pair{display:grid;grid-template-columns:minmax(110px,30%) 1fr;gap:6px;align-items:center;font-size:.88rem;padding:5px 0;border-bottom:1px solid var(--line)}
-.pair .tr{background:#f1f1f1;height:10px;position:relative;margin:2px 0} .pair .fill{display:block;height:10px}
-.pair .t{font-size:.8rem;color:var(--mut)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} }
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.nmk{width:22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;border:2px solid #fff;font:700 11px/18px system-ui,Arial,sans-serif;text-align:center;box-shadow:0 0 2px rgba(0,0,0,.6)}
-.btnmap{font:inherit;font-size:.8rem;border:1px solid var(--line);background:#fff;border-radius:10px;padding:1px 8px;cursor:pointer;color:var(--acc)}
-#tab-inc{min-width:640px} #tab-trat{min-width:420px} #tab-z30{min-width:520px}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --m1:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;--ora:#F58220;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg.cut{overflow:hidden}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;font-weight:700}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+/* i 20 incroci */
+ol.top{list-style:none;margin:.6em 0 0;padding:0}
+ol.top li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--grid)}
+ol.top .rk{flex:0 0 22px;font-weight:800;font-size:1rem;text-align:right}
+ol.top .tx{flex:1 1 auto;min-width:0;line-height:1.25}
+ol.top .tx b{display:block;font-size:.95rem}
+ol.top .tx span{font-size:.82rem;color:var(--mut)}
+ol.top svg{flex:0 0 auto;display:block;overflow:visible}
+/* scrivi il tuo */
+.find{margin:.8em 0 0;position:relative}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--m1);outline-offset:1px}
+.sug{display:flex;flex-direction:column;border:2px solid var(--ink);border-top:0;margin:0}
+.sug:empty{display:none}
+.sug button,.chips button{font:inherit;font-size:.92rem;text-align:left;background:#fff;border:0;border-bottom:1px solid var(--grid);padding:10px 12px;cursor:pointer;color:var(--ink);min-height:44px}
+.sug button:last-child{border-bottom:0}
+.sug button:hover,.sug button:focus-visible{background:var(--soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.chips button{border:2px solid var(--ink);padding:6px 10px;min-height:40px;font-size:.88rem}
+.chips button:hover{background:var(--soft)}
+.ris{background:var(--soft);border-left:6px solid var(--m1);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:.6em 0 0}
+.kv div{background:#fff;padding:6px 8px;min-width:0}
+.kv b{display:block;font-size:1.25rem;line-height:1.1}
+.kv span{font-size:.78rem;color:var(--mut);line-height:1.2;display:block}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>Gli incroci di Milano con più incidenti</h1>
-<p>Dal 2010 al 2024 la Polizia Locale e le altre forze dell’ordine hanno registrato a Milano <b id="n-tot">131.435</b> incidenti stradali con feriti o morti. Qui li guardiamo <b>per luogo</b>: quali incroci e quali vie ne contano di più, chi è coinvolto (pedoni, bici, moto, auto), in che mesi e a che ora succedono, e come sono cambiati. La parte sulle bici è già nella pagina <a href="../bici-auto-mezzi/">Bici, auto o mezzi</a>: qui non la ripetiamo.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+<h1>Incroci e incidenti</h1>
+<p class="lead">Dove si fanno male le persone sulle strade di Milano, incrocio per incrocio, dal 2010 al 2024.</p>
 
-<div class="warm"><b>Prima di leggere.</b> Questi numeri dicono <b>dove si concentrano</b> gli incidenti, non dove è più pericoloso passare: non abbiamo dati su quante auto, moto, bici e persone attraversano ogni incrocio, quindi un incrocio molto trafficato conta di più di uno quasi vuoto. Gli incidenti sono solo quelli <b>con feriti o morti</b> registrati dalle forze dell’ordine. Il luogo è stato ricostruito dall’indirizzo scritto a mano nel verbale (<a href="#limiti">vedi i limiti</a>). Nessun dato riguarda le persone coinvolte.</div>
+<div class="hl" id="hl"></div>
+<p class="src">Tutti i numeri: incidenti con feriti o morti, microdati Istat pubblicati da Regione Lombardia (CC BY 4.0) e conteggi del Comune di Milano (CC BY). Dicono dove si concentrano gli incidenti, non dove è più pericoloso passare: non ci sono dati su quanta gente passa da ogni incrocio.</p>
 
-<h2 id="mappa">La mappa</h2>
-<p>Ogni quadrato è largo 100 metri; più è scuro, più incidenti ci sono stati lì. I cerchi numerati sono i 20 incroci con più incidenti. Scegli che cosa mostrare. Passa sopra un quadrato (o toccalo) per vedere i numeri.</p>
-<div class="ctl" id="b-mappa"></div>
-<div class="ctl"><label class="ck"><input type="checkbox" id="ck-top" checked> i 20 incroci con più incidenti</label></div>
-<div id="map" class="map" role="img" aria-label="Mappa di Milano con gli incidenti stradali per quadrati di 100 metri"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src" id="map-src"></p>
+<!-- ============ ANNO PER ANNO ============ -->
+<h2 id="anno">Anno per anno</h2>
+<div class="fig">
+  <h3 id="t-anni"></h3>
+  <p class="sub">Incidenti stradali con feriti o morti a Milano ogni anno, dal 2001 al 2025.</p>
+  <div class="ch" id="ch-anni" role="img" aria-label="Linea: incidenti con feriti o morti a Milano per anno, 2001-2025"></div>
+  <ol class="notes" id="nt-anni"></ol>
+  <p class="src">Fonte: Comune di Milano, Polizia Locale (CC BY). I morti si contano a 30 giorni: il 2025 è provvisorio.</p>
+</div>
 
-<h2 id="incroci">Gli incroci con più incidenti</h2>
-<div id="inc-testo"></div>
-<div class="ctl" id="b-inc"></div>
-<div class="scroll"><table id="tab-inc"></table></div>
-<p class="src">Incidenti con feriti o morti, 2010–2024, agganciati a un incrocio di OpenStreetMap. Il nome dell’incrocio è la coppia di vie scritta più spesso nei verbali. Feriti e morti sono di tutto l’incidente (non solo di chi è nella colonna). «Con pedoni» = incidenti in cui almeno un pedone è stato ferito o investito; «con bici» e «con moto» = almeno un veicolo di quel tipo. Un incidente può stare in più colonne. Morti entro 30 giorni. Fonte: microdati Istat / Regione Lombardia (CC BY 4.0); incroci: © OpenStreetMap contributors (ODbL).</p>
+<div class="fig">
+  <h3 id="t-chi"></h3>
+  <p class="sub">Su 100 incidenti con feriti, in quanti c’è questo mezzo: nel 2010 (cerchio vuoto) e nel 2024 (cerchio pieno). In fondo, su 100 morti, quanti erano pedoni.</p>
+  <div class="ch" id="ch-chi" role="img" aria-label="Pallini collegati: quota di incidenti con auto, moto, pedoni e bici nel 2010 e nel 2024; omini: su 100 morti, quanti pedoni"></div>
+  <p class="note" id="nt-chi"></p>
+  <p class="src">Fonte: Istat / Regione Lombardia (CC BY 4.0). Un incidente con due mezzi diversi conta in due righe, quindi le righe non sommano 100. Per i morti: pedoni morti sul totale dei morti, a 30 giorni. Le pagine <a href="../bici/">Bici</a> e <a href="../auto/">Auto</a> guardano da vicino chi va in bici e chi va in auto.</p>
+</div>
 
-<h3>I peggiori di dieci anni fa lo sono ancora?</h3>
-<div id="pers-testo"></div>
-<div class="scroll"><table id="tab-pers" style="min-width:460px"></table></div>
-<p class="src">I 15 incroci con più incidenti nel 2010–2014 e quanti ne hanno avuti dopo. «Posto nel 2020–24» = posizione in classifica tra tutti gli incroci nel 2020–2024. Stesse fonti della tabella sopra.</p>
+<div class="fig">
+  <h3 id="t-mesi"></h3>
+  <p class="sub">Incidenti di ogni mese, dal 2010 al 2024. Ogni riga è un anno, ogni colonna un mese.</p>
+  <div class="lg" id="lg-mesi"></div>
+  <div class="ch" id="ch-mesi" role="img" aria-label="Calendario a quadretti: incidenti per mese e per anno, 2010-2024"></div>
+  <ol class="notes" id="nt-mesi"></ol>
+  <p class="note" id="nt-ore"></p>
+  <p class="src">Fonte: Istat / Regione Lombardia (CC BY 4.0). Nei dati recenti c’è solo il mese: né il giorno né l’ora. Per l’ora esiste solo l’ultimo dato, fino al 2011 (Regione Lombardia, CC0).</p>
+</div>
 
-<h2 id="vie">Le vie</h2>
-<div id="vie-testo"></div>
-<div class="grid2"><div><h3>Più incidenti in tutto</h3><div class="bars" id="b-vie"></div></div>
-<div><h3>Più incidenti per chilometro</h3><div class="bars" id="b-viekm"></div></div></div>
-<p class="src">Incidenti con feriti o morti 2010–2024 su vie lunghe almeno 1 km; un incidente a un incrocio conta per tutte e due le vie. A destra: incidenti ogni km di strada ogni anno, vie con almeno 150 incidenti. La lunghezza è quella delle strade con quel nome in OpenStreetMap (le due carreggiate di un viale contano una volta). Fonti: Istat / Regione Lombardia, OpenStreetMap.</p>
-<h3>Tratti lontani dagli incroci</h3>
-<div id="trat-testo"></div>
-<div class="scroll"><table id="tab-trat"></table></div>
-<p class="src">Quadrati di 100 m con almeno 8 incidenti registrati «non in intersezione» (rettilineo, curva…), 2010–2024. Spesso sono incroci scritti con il numero civico invece che con le due vie: il verbale non permette di distinguerli sempre.</p>
+<!-- ============ DOVE ============ -->
+<h2 id="dove">Dove succedono</h2>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub">I 20 incroci con più incidenti dal 2010 al 2024. Più è grande il cerchio, più incidenti. Tocca un cerchio per leggere il nome. Il quadratino nero è il Duomo.</p>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa di Milano con i 20 incroci con più incidenti, numerati"></div>
+  <p class="src">Incidenti con feriti o morti 2010-2024 agganciati a un incrocio. Il nome è la coppia di vie scritta più spesso nei verbali. Fonti: Istat / Regione Lombardia (CC BY 4.0); incroci: © OpenStreetMap contributors (ODbL); confini dei quartieri: Comune di Milano (CC BY).</p>
+</div>
 
-<h2 id="chi">Chi è coinvolto</h2>
-<div id="chi-testo"></div>
-<div class="scroll"><table id="tab-chi" style="min-width:520px"></table></div>
-<p class="src">Incidenti con feriti o morti a Milano, 2010–2024. Un incidente con due veicoli di tipo diverso compare in più righe, quindi le righe non si sommano. I morti della riga sono quelli di tutto l’incidente, tranne «pedoni», dove sono i pedoni morti. Fonte: Istat / Regione Lombardia (CC BY 4.0).</p>
-<h3>Come sono cambiati, 2010 = 100</h3>
-<div class="ch" id="ch-chi" role="img" aria-label="Grafico: incidenti per tipo di mezzo coinvolto, 2010 uguale a 100"></div>
-<div class="lgd" id="lg-chi"></div>
-<p class="src">Numero di incidenti in cui compare quel tipo di mezzo (o almeno un pedone ferito), diviso per il valore del 2010. Il monopattino elettrico compare nei dati dal 2020 e non è nel grafico.</p>
+<div class="fig">
+  <h3 id="t-top">I 20 peggiori incroci, uno per uno</h3>
+  <p class="sub">A destra, un incrocio per riga: ogni colonnina è un anno, da 2010 a 2024. Il cerchio rosso è grande quanto gli incidenti.</p>
+  <ol class="top" id="lista-top"></ol>
+  <p class="src">«Feriti» e «morti» sono di tutto l’incidente, morti entro 30 giorni. Le colonnine hanno tutte la stessa scala. Fonte: Istat / Regione Lombardia (CC BY 4.0).</p>
+</div>
 
-<h2 id="quando">Quando succedono</h2>
-<div id="mesi-testo"></div>
-<h3>Mese per mese</h3>
-<div class="ch" id="ch-mesi" role="img" aria-label="Grafico: incidenti per mese, media 2010-2019, 2020 e 2024"></div>
-<div class="lgd" id="lg-mesi"></div>
-<p class="src">Incidenti con feriti o morti per mese a Milano. Fonte: microdati Istat / Regione Lombardia. Il file dà solo il mese, non il giorno né l’ora.</p>
-<h3>Ora del giorno e fine settimana</h3>
-<div id="ore-testo"></div>
-<div id="ore-box"></div>
-<p class="src" id="ore-src"></p>
+<div class="fig">
+  <h3 id="t-conc"></h3>
+  <p class="sub">Ogni quadretto è un incidente ogni 100 agganciati a un incrocio. In rosso, quelli che avvengono nei primi incroci della classifica.</p>
+  <div class="ch" id="ch-conc" role="img" aria-label="Quattro griglie da 100 quadretti: quota di incidenti nei primi 10, 100, 487 e 1.000 incroci"></div>
+  <p class="note" id="nt-conc"></p>
+  <p class="src">Fonte: Istat / Regione Lombardia (CC BY 4.0), incroci OpenStreetMap. Solo gli incidenti con due vie nel verbale: circa uno su due.</p>
+</div>
 
-<h2 id="tempo">Come sono cambiati</h2>
-<div id="tempo-testo"></div>
-<div class="grid2"><div><h3>Incidenti per anno</h3><div class="ch" id="ch-anni" role="img" aria-label="Grafico: incidenti con feriti a Milano per anno dal 2001 al 2025"></div></div>
-<div><h3>Morti per anno</h3><div class="ch" id="ch-morti" role="img" aria-label="Grafico: morti in incidenti stradali a Milano per anno dal 2001 al 2025"></div></div></div>
-<p class="src" id="src-anni"></p>
-<h3>Area C</h3>
-<div id="areac-testo"></div>
-<div class="ch" id="ch-areac" role="img" aria-label="Grafico: incidenti dentro e fuori Area C, indice 2010-2011 uguale a 100"></div>
-<div class="lgd" id="lg-areac"></div>
-<p class="src" id="areac-src"></p>
-<h3>Le zone a 30 km/h (e meno)</h3>
-<div id="z30-testo"></div>
-<div class="scroll"><table id="tab-z30"></table></div>
-<p class="src" id="z30-src"></p>
+<div class="fig">
+  <h3 id="t-pers"></h3>
+  <p class="sub">I 20 incroci con più incidenti nel 2010-2014 e dove sono finiti nel 2020-2024. In rosso, quelli che sono ancora tra i primi 20.</p>
+  <div class="ch" id="ch-pers" role="img" aria-label="Linee che collegano il posto in classifica nel 2010-2014 e nel 2020-2024 per i 20 peggiori incroci"></div>
+  <p class="note" id="nt-pers"></p>
+  <p class="src">Fonte: Istat / Regione Lombardia (CC BY 4.0). Il posto è la classifica per incidenti tra tutti i 4.159 incroci con almeno un incidente; a parità di incidenti, lo stesso posto.</p>
+</div>
 
-<h2 id="limiti">Limiti dei dati</h2>
-<div class="warm"><ul id="limiti-lista"></ul></div>
+<div class="fig">
+  <h3 id="t-vie"></h3>
+  <p class="sub">Le 10 vie con più incidenti, dal 2010 al 2024. Sotto il nome, la lunghezza e quanti incidenti ogni chilometro, ogni anno.</p>
+  <div class="ch" id="ch-vie" role="img" aria-label="Barre: le 10 vie di Milano con più incidenti"></div>
+  <p class="src">Incidenti con feriti o morti 2010-2024; un incidente a un incrocio conta per tutte e due le vie. La lunghezza è quella delle strade con quel nome in OpenStreetMap (ODbL). Fonte incidenti: Istat / Regione Lombardia (CC BY 4.0).</p>
+</div>
 
-<h2 id="metodo">Come è fatto</h2>
-<ul class="m" id="metodo-lista"></ul>
+<div class="fig">
+  <h3 id="t-areac"></h3>
+  <p class="sub">Incidenti con luogo trovato, dentro Area C, nel resto di Area B e fuori. Indice: media 2010-2011 = 100.</p>
+  <div class="lg" id="lg-areac"></div>
+  <div class="ch" id="ch-areac" role="img" aria-label="Linee: incidenti dentro Area C, nel resto di Area B e fuori, indice 2010-2011 uguale a 100"></div>
+  <p class="note" id="nt-areac"></p>
+  <p class="src">Fonte: Istat / Regione Lombardia (CC BY 4.0); poligoni di Area C e Area B: Comune di Milano (CC BY). Vedi anche la pagina <a href="../area-c/">Area C</a>.</p>
+</div>
 
-<h2 id="fonti-dati">Le fonti che ho cercato</h2>
-<div class="scroll"><table id="tab-fonti" style="min-width:640px"></table></div>
+<!-- ============ SCEGLI TU ============ -->
+<h2 id="scegli">Scegli il tuo incrocio, la tua via, il tuo quartiere</h2>
 
-<h2 id="download">File</h2>
-<p><a href="data/incroci_classifica.csv">incroci_classifica.csv</a> (tutti gli incroci con almeno un incidente: coordinate, incidenti per periodo, feriti, morti, pedoni, bici, moto), <a href="data/vie_classifica.csv">vie_classifica.csv</a> (tutte le vie con lunghezza), <a href="data/serie_annuale.csv">serie_annuale.csv</a> (per anno e per tipo di mezzo), <a href="data/tratti_lontani_da_incroci.csv">tratti_lontani_da_incroci.csv</a>, <a href="data/quando_lombardia_2000_2011.csv">quando_lombardia_2000_2011.csv</a> (ore di punta, notte, fine settimana), <a href="data/zone30_prima_dopo.csv">zone30_prima_dopo.csv</a>, <a href="data/aree_b_c.csv">aree_b_c.csv</a>. Sono tabelle aggregate: nessuna riga riguarda un singolo incidente o una persona.</p>
+<div class="fig">
+  <h3 id="t-tuoinc">Il tuo incrocio</h3>
+  <div class="find">
+    <label for="q-inc">Scrivi una via dell’incrocio</label>
+    <input id="q-inc" type="text" placeholder="per esempio: Loreto" autocomplete="off" autocapitalize="off" spellcheck="false" list="dl-inc">
+    <datalist id="dl-inc"></datalist>
+    
+  </div>
+  <div class="chips" id="c-inc"></div>
+  <div class="ris" id="r-inc" aria-live="polite"></div>
+  <p class="src">Gli incroci con almeno 10 incidenti in 15 anni (1.696 su 4.159). Fonte: Istat / Regione Lombardia (CC BY 4.0); © OpenStreetMap contributors (ODbL).</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-tuavia">La tua via</h3>
+  <div class="find">
+    <label for="q-via">Scrivi il nome della tua via</label>
+    <input id="q-via" type="text" placeholder="per esempio: via Padova" autocomplete="off" autocapitalize="off" spellcheck="false" list="dl-via">
+    <datalist id="dl-via"></datalist>
+    
+  </div>
+  <div class="chips" id="c-via"></div>
+  <div class="ris" id="r-via" aria-live="polite"></div>
+  <p class="src">Le vie lunghe almeno mezzo chilometro con almeno 60 incidenti in 15 anni. Un incidente a un incrocio conta per tutte e due le vie. Fonte: Istat / Regione Lombardia (CC BY 4.0).</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-tuoq">Il tuo quartiere</h3>
+  <div class="find">
+    <label for="q-q">Scrivi il tuo quartiere</label>
+    <input id="q-q" type="text" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="off" spellcheck="false" list="dl-q">
+    <datalist id="dl-q"></datalist>
+    
+  </div>
+  <div class="chips" id="c-q"></div>
+  <div class="ris" id="r-q" aria-live="polite"></div>
+  <div class="lg" id="lg-q"></div>
+  <div class="ch" id="ch-q" role="img" aria-label="Mappa dei quartieri di Milano colorati per incidenti ogni chilometro quadrato"></div>
+  <p class="note">Il colore dice quanti incidenti ci sono per chilometro quadrato. Il centro è denso di strade e di gente di passaggio: non vuol dire che chi ci abita rischi di più.</p>
+  <p class="src">Incidenti con luogo trovato (80% del totale) dentro i confini dei quartieri. Fonte: Istat / Regione Lombardia (CC BY 4.0); quartieri e residenti: Comune di Milano (CC BY).</p>
+</div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Incidente con feriti</dt><dd>Un incidente stradale in cui almeno una persona si è fatta male o è morta, registrato dalle forze dell’ordine. Gli incidenti con soli danni alle auto non ci sono.</dd>
+<dt>Incrocio</dt><dd>Un punto dove si toccano almeno tre tratti di strade con nome e almeno due nomi diversi. Gli slarghi grandi sono un solo incrocio.</dd>
+<dt>Posto</dt><dd>La posizione in classifica per numero di incidenti: il posto 1 è l’incrocio con più incidenti.</dd>
+<dt>Morti</dt><dd>Chi muore sul posto o entro 30 giorni per le ferite.</dd>
+<dt>Area C e Area B</dt><dd>Le zone del centro e della città con limiti al traffico, dove si paga o non si può entrare con certi veicoli.</dd>
+<dt>Indice 100</dt><dd>Il valore di partenza, la media 2010-2011. Un indice 70 vuol dire il 30% in meno.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Tabelle di conteggi per incrocio, via, quartiere e anno, separate da virgola. Nessuna riga riguarda un singolo incidente o una persona.</p>
+<ul>
+<li><a href="data/incroci_classifica.csv">Tutti gli incroci con almeno un incidente</a>: coordinate, incidenti per periodo, feriti, morti, pedoni, bici, moto</li>
+<li><a href="data/incroci_anni.json">Gli incroci con almeno 10 incidenti, anno per anno</a> e <a href="data/incroci_persistenza.json">i 20 del 2010-2014</a></li>
+<li><a href="data/vie_classifica.csv">Tutte le vie con la lunghezza</a> e <a href="data/vie_anni.json">le vie principali anno per anno</a></li>
+<li><a href="data/quartieri_incidenti.json">Incidenti per quartiere e per anno</a></li>
+<li><a href="data/mesi_anni.json">Incidenti per mese e per anno</a></li>
+<li><a href="data/serie_annuale.csv">Incidenti per anno e per tipo di mezzo</a></li>
+<li><a href="data/quando_lombardia_2000_2011.csv">Ore di punta, notte e fine settimana, 2000-2011</a></li>
+<li><a href="data/zone30_prima_dopo.csv">Zone a 30 km/h, prima e dopo</a> e <a href="data/aree_b_c.csv">Area C e Area B</a></li>
+<li><a href="data/riepilogo.json">Tutti i numeri di questa pagina</a></li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Incidenti 2010–2024: Istat, rilevazione «Incidenti stradali con lesioni a persone», nella versione per comune pubblicata da Regione Lombardia / PoliS-Lombardia («Incidenti Stradali – Microdati – Anno AAAA», CC BY 4.0), scaricati il 29 ottobre 2026 dal portale <a href="https://www.dati.lombardia.it/">dati.lombardia.it</a>. Totali mensili e per anno 2001–2025: Comune di Milano / Polizia Locale, schede ds175 e ds177 (CC BY), <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Ore di punta, notte e fine settimana 2000–2011: Regione Lombardia, «Incidenti stradali nel Comune di Milano» (CC0). Zone a velocità limitata: Comune di Milano, «Aree a velocità limitata» (ds1438, CC BY). Area C e confine della città: Comune di Milano (CC BY). Numeri civici: registro dei civici del Comune di Milano (CC BY). Strade e incroci, mappa di sfondo: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (ODbL), estratto del 29 ottobre 2026. Chi riusa le tabelle derivate da OpenStreetMap le deve ripubblicare con la stessa licenza (ODbL).</p>
+<p><b>Fonti e licenze.</b> Incidenti 2010-2024: Istat, rilevazione «Incidenti stradali con lesioni a persone», nella versione per comune pubblicata da Regione Lombardia / PoliS-Lombardia («Incidenti Stradali - Microdati - Anno AAAA», CC BY 4.0), scaricati il 29 ottobre 2026 dal portale <a href="https://www.dati.lombardia.it/">dati.lombardia.it</a>. Totali mensili e per anno 2001-2025: Comune di Milano, Polizia Locale, schede ds175 e ds177 (CC BY), <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>. Ore di punta, notte e fine settimana 2000-2011: Regione Lombardia, «Incidenti stradali nel Comune di Milano» (CC0). Zone a velocità limitata: Comune di Milano, «Aree a velocità limitata» (ds1438, CC BY). Area C, Area B e confini dei quartieri: Comune di Milano (CC BY). Numeri civici: registro dei civici del Comune di Milano (CC BY). Strade e incroci: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (ODbL), estratto del 29 ottobre 2026. Chi riusa le tabelle derivate da OpenStreetMap le deve ripubblicare con la stessa licenza (ODbL).</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,IN=null,VI=null,CE=null,TR=null,RD=[];
-var ACC='#9c2f12',WARM='#c26a1b';
-var SEQ=['#fde3d3','#f9b99a','#ee8159','#d3502d','#9c2f12','#5a1507'];
-var COL={ped:'#0072B2',bici:'#009E73',moto:'#D55E00',auto:'#6b6b6b',monop:'#CC79A7'};
-var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
-function sgp(x,d){return sg(x,d==null?0:d)+'%'}
-function pct(a,b,d){return nf(100*a/b,d==null?0:d)+'%'}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
+var DATA='data/';
+var C={m1:'#E30613',m2:'#00A651',m3:'#FFD500',m4:'#0072BC',m5:'#7B3FA0',ora:'#F58220',ink:'#0b0d12',ink2:'#2f3440',mut:'#5f6673',grid:'#e6e8ec',axis:'#9aa1ad',soft:'#f4f5f7',base:'#eceef1'};
+var R,IA,PE,VA,QI,MA,GEO;
+var RD=[];
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
 function sum(a){return a.reduce(function(x,y){return x+y},0)}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function barsPlain(id,rows,max,col){
-  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+function pl(n,s,p){return f0(n)+' '+(n===1?s:p)}
+function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H,cl){return '<svg'+(cl?' class="'+cl+'"':'')+' width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function shortn(s,maxw,bold,size){s=String(s);if(tw(s,size||12,bold)<=maxw)return s;while(s.length>3&&tw(s+'…',size||12,bold)>maxw)s=s.slice(0,-1);return s+'…'}
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(3,h,w/2);if(h<0.5)return '';
+  return '<path d="M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z" fill="'+col+'"'+(extra||'')+'/>';
 }
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function lgd(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
-
-/* ---------- grafico a linee ---------- */
-function lineChart(box,o){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=o.h||260,m={l:46,r:12,t:12,b:26};
-  var xs=o.x,all=[];o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});
-  var y0=o.y0!=null?o.y0:0,y1=Math.max.apply(null,all);var sy=niceStep((y1-y0)/5);y1=Math.ceil(y1/sy)*sy;
-  var pw=W-m.l-m.r,ph=H-m.t-m.b,n=xs.length;
-  function X(i){return m.l+(n===1?pw/2:i/(n-1)*pw)} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
-  var last=-99;for(var i=0;i<n;i++){var xx=X(i);if(xx-last>(o.gap||34)){last=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(xs[i])+'</text>'}}
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  if(o.hline!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.hline)+'" y2="'+Y(o.hline)+'" stroke="#999" stroke-dasharray="4 4"/>';
-  (o.marks||[]).forEach(function(mk){var k=xs.indexOf(mk.x);if(k<0)return;s+='<line x1="'+X(k)+'" x2="'+X(k)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="3 3"/><text x="'+(X(k)+3)+'" y="'+(m.t+10)+'" style="fill:#8a4a10">'+mk.t+'</text>'});
-  o.series.forEach(function(se){var d='',pen=false;se.v.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
-    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2.2)+'"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
-    if(o.dots)se.v.forEach(function(v,i){if(v!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="2.6" fill="'+se.color+'"/>'})});
-  s+='<line id="vl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,vl=svg.querySelector('#vl'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k;
-    var i=Math.round((px-m.l)/pw*(n-1));i=Math.max(0,Math.min(n-1,i));vl.setAttribute('x1',X(i));vl.setAttribute('x2',X(i));vl.style.display='';
-    tip.innerHTML='<b>'+o.xf(xs[i],true)+'</b>'+o.series.map(function(se){return se.v[i]==null?'':'<br><span style="color:'+se.color+'">&#9632;</span> '+se.n+': <b>'+(o.vf?o.vf(se.v[i]):f0(se.v[i]))+'</b>'}).join('');
-    tip.style.display='';var tw=tip.offsetWidth,left=X(i)/k+10;if(left+tw>r.width)left=X(i)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
-  function hide(){tip.style.display='none';vl.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+function hbar(x0,x1,y,h,col,extra){
+  var w=x1-x0,rr=Math.min(4,w,h/2);if(w<0.5)return '';
+  return '<path d="M'+r1(x0)+' '+r1(y)+'H'+r1(x1-rr)+'Q'+r1(x1)+' '+r1(y)+' '+r1(x1)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(x1)+' '+r1(y+h)+' '+r1(x1-rr)+' '+r1(y+h)+'H'+r1(x0)+'Z" fill="'+col+'"'+(extra||'')+'/>';
 }
-function draw(id,fn){var b=el(id);fn();RD.push(fn)}
+/* crocetta (un incidente) e omino */
+function croce(x,y,s,col,extra){var a=s*0.34,o=(s-a)/2;return '<path d="M'+r1(x+o)+' '+r1(y)+'h'+r1(a)+'v'+r1(o)+'h'+r1(o)+'v'+r1(a)+'h'+r1(-o)+'v'+r1(o)+'h'+r1(-a)+'v'+r1(-o)+'h'+r1(-o)+'v'+r1(-a)+'h'+r1(o)+'Z" fill="'+col+'"'+(extra||'')+'/>'}
+function omino(x,y,s,col){var cx=x+s/2,hr=s*0.17;return '<circle cx="'+r1(cx)+'" cy="'+r1(y+hr+0.5)+'" r="'+r1(hr)+'" fill="'+col+'"/><path d="M'+r1(cx-s*0.27)+' '+r1(y+s)+'V'+r1(y+s*0.58)+'Q'+r1(cx-s*0.27)+' '+r1(y+s*0.4)+' '+r1(cx)+' '+r1(y+s*0.4)+'Q'+r1(cx+s*0.27)+' '+r1(y+s*0.4)+' '+r1(cx+s*0.27)+' '+r1(y+s*0.58)+'V'+r1(y+s)+'Z" fill="'+col+'"/>'}
 
-Promise.all([J('data/riepilogo.json'),J('data/incroci.json'),J('data/vie.json'),J('data/celle.json'),J('data/tratti.json')]).then(function(a){
-  D=a[0];IN=a[1];VI=a[2];CE=a[3];TR=a[4];
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
 
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'incroci_anni.json'),getJ(DATA+'incroci_persistenza.json'),getJ(DATA+'vie_anni.json'),getJ(DATA+'quartieri_incidenti.json'),getJ(DATA+'mesi_anni.json'),getJ('../medici-farmacie/data/nil.geojson')]).then(function(r){
+  R=r[0];IA=r[1];PE=r[2];VA=r[3];QI=r[4];MA=r[5];GEO=r[6];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
 function tutto(){
-  el('n-tot').textContent=f0(D.totali.righe);
-  sorpresa();mappa();incroci();persistenza();vie();tratti();chi();quando();tempo();limiti();metodo();fonti();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
-}
-function inc(i){for(var k=0;k<IN.incroci.length;k++)if(IN.incroci[k].id===i)return IN.incroci[k];return null}
-function nomeInc(c){return esc(c.nome)}
-
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var C=D.concentrazione,P=D.persistenza,S=D.serie,t=D.totali,top=IN.incroci.filter(function(c){return c.rank===1})[0];
-  var pedInc=t.ped/t.righe,mor=D.morti_dove;
-  var h='<p><b>Non esiste un incrocio che spicca sugli altri.</b> Il primo, '+nomeInc(top)+', ha '+f0(top.inc)+' incidenti con feriti in 15 anni, circa '+f0(top.inc/15)+' all’anno: lo '+pct(top.inc,C.agganciati,1)+' di tutti quelli che si riescono a mettere su un incrocio ('+f0(C.agganciati)+'). I dieci primi insieme valgono il '+nf(C.top10_pct,1)+'%. Per arrivare a metà degli incidenti serve sommare '+f0(C.n_per_meta_incidenti)+' incroci.</p>';
-  h+='<p><b>Ma i peggiori restano gli stessi, e non migliorano più degli altri.</b> '+P.top20_2010_14_ancora_top20_2020_24+' dei 20 incroci con più incidenti nel 2010–2014 sono ancora tra i primi 20 nel 2020–2024, e tutti e '+(P.top20_2010_14_ancora_top100_2020_24===20?'20':P.top20_2010_14_ancora_top100_2020_24)+' sono tra i primi 100. I loro incidenti sono scesi da '+f0(P.top20_2010_14_inc_p1)+' a '+f0(P.top20_2010_14_inc_p3)+' ('+sgp(100*(P.top20_2010_14_inc_p3/P.top20_2010_14_inc_p1-1))+'), quasi come quelli di tutti gli incroci ('+sgp(100*(P.tutti_inc_p3/P.tutti_inc_p1-1))+').</p>';
-  h+='<p><b>I pedoni sono un incidente su sette, ma quasi quattro mortali su dieci.</b> Un pedone è coinvolto nel '+pct(t.ped,t.righe,0)+' degli incidenti con feriti e nel '+nf(mor.con_pedone_pct,0)+'% di quelli in cui qualcuno è morto; '+f0(t.ped_morti)+' dei '+f0(t.morti)+' morti 2010–2024 sono pedoni.</p>';
-  h+='<p class="src">Incidenti con feriti o morti a Milano 2010–2024 (Istat / Regione Lombardia, CC BY 4.0) agganciati agli incroci di OpenStreetMap. Il confronto tra i due periodi è su 5 anni ciascuno; non sappiamo se qualcuno sia intervenuto su questi incroci (<a href="#incroci">dettagli</a>).</p>';
-  setH('sorpresa',h);
+  prepara();
+  highlights();
+  draw(anni);draw(chi);draw(mesi);draw(mappa);listaTop();draw(conc);draw(pers);draw(vie);draw(areac);
+  strumenti();limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
 }
 
-/* ---------- mappa ---------- */
-var MAP=null,CL=null,TL=null,TOPK='n',LAYERS=[['n','Tutti, 2010–2024'],['p3','Tutti, 2020–2024'],['ped','Con pedoni'],['bici','Con bici'],['moto','Con moto o motorino']];
-var LNAME={n:'incidenti di ogni tipo, 2010–2024',p3:'incidenti di ogni tipo, 2020–2024',ped:'incidenti con almeno un pedone ferito, 2010–2024',bici:'incidenti con almeno una bici, 2010–2024',moto:'incidenti con almeno una moto o un motorino, 2010–2024'};
-function classe(v,so){for(var i=0;i<so.length;i++)if(v<=so[i])return i;return so.length}
-function mappa(){
-  var c=el('b-mappa');
-  LAYERS.forEach(function(l){var b=document.createElement('button');b.type='button';b.textContent=l[1];b.className=l[0]===TOPK?'on':'';b.addEventListener('click',function(){TOPK=l[0];Array.prototype.forEach.call(c.children,function(x){x.className=''});b.className='on';colora()});c.appendChild(b)});
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:true}).setView([45.4655,9.19],12);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  TL=L.layerGroup(IN.incroci.filter(function(i){return i.rank<=20}).map(function(i){
-    var m=L.marker([i.lat,i.lon],{icon:L.divIcon({className:'',html:'<div class="nmk">'+i.rank+'</div>',iconSize:[22,22],iconAnchor:[11,11]}),keyboard:false});
-    m.bindTooltip(i.rank+'. '+esc(i.nome)+': '+f0(i.inc)+' incidenti');return m})).addTo(MAP);
-  el('ck-top').addEventListener('change',function(){if(this.checked)TL.addTo(MAP);else MAP.removeLayer(TL)});
-  colora();
-  el('map-src').innerHTML='Quadrati di 100 m con almeno 2 incidenti ('+f0(CE.n_celle)+' su '+f0(CE.n_celle_tutte)+' con almeno uno; quelli con un solo incidente non sono disegnati). Sono mappati i '+f0(D.totali.posizionati)+' incidenti ('+nf(D.qualita.posizionati,0)+'%) di cui si è potuto trovare il luogo; gli altri non si vedono. Mappa © OpenStreetMap contributors; incidenti: Istat / Regione Lombardia (CC BY 4.0).';
-}
-function colora(){
-  var k=TOPK,so=CE.soglie[k],cl=so.length+1,cols=[],i,n=CE.lon.length,arr=CE[k];
-  for(i=0;i<cl;i++)cols.push(SEQ[Math.round(i*5/Math.max(1,cl-1))]);
-  if(CL)MAP.removeLayer(CL);
-  CL=L.layerGroup();var cv=L.canvas({padding:.3});
-  for(i=0;i<n;i++){
-    var v=arr[i];if(!v)continue;
-    var la=CE.lat[i],lo=CE.lon[i],dl=50/110570,dn=50/(111320*Math.cos(la*Math.PI/180));
-    var r=L.rectangle([[la-dl,lo-dn],[la+dl,lo+dn]],{weight:0,fillColor:cols[classe(v,so)],fillOpacity:.85,renderer:cv});
-    (function(r,i){r.bindTooltip('',{sticky:true});r.on('mouseover',function(){r.setTooltipContent('<b>'+CE.n[i]+'</b> incidenti in tutto (2010–2024), di cui '+CE.p3[i]+' dal 2020 · con pedoni '+CE.ped[i]+' · con bici '+CE.bici[i]+' · con moto '+CE.moto[i]+(CE.morti[i]?' · con morti '+CE.morti[i]:''))})})(r,i);
-    r.addTo(CL);
-  }
-  CL.addTo(MAP);if(TL&&MAP.hasLayer(TL)){MAP.removeLayer(TL);TL.addTo(MAP)}
-  var lab=[];for(i=0;i<cl;i++){var a=i===0?(k==='n'?2:1):so[i-1]+1,b=i<so.length?so[i]:null;lab.push(b==null?(a+' o più'):(a===b?''+a:a+'–'+b))}
-  setH('lg-map','<span class="sub">Quadrato di 100 m, '+LNAME[k]+':</span>'+lab.map(function(t,i){return '<span><i style="background:'+cols[i]+'"></i>'+t+'</span>'}).join('')+'<span><i style="background:#fff"></i>meno di 2 (o luogo non preciso)</span>');
-}
-function vaiA(id){var c=inc(id);if(!c)return;MAP.setView([c.lat,c.lon],17);L.popup().setLatLng([c.lat,c.lon]).setContent('<b>'+esc(c.nome)+'</b><br>'+f0(c.inc)+' incidenti, '+f0(c.feriti)+' feriti, '+c.morti+' morti (2010–2024)').openOn(MAP);el('map').scrollIntoView({behavior:'smooth',block:'center'})}
-
-/* ---------- incroci ---------- */
-var KEY='inc',KEYS=[['inc','Incidenti'],['p3','Incidenti 2020–2024'],['feriti','Feriti'],['morti','Morti'],['ped','Con pedoni'],['bici','Con bici'],['moto','Con moto']];
-var KMAP={inc:'inc',p3:'p3',feriti:'feriti',morti:'morti',ped:'ped',bici:'bici',moto:'moto'};
-function incroci(){
-  var C=D.concentrazione,O=D.incroci_osm,A=D.aggancio;
-  setH('inc-testo','<p>In Milano abbiamo contato <b>'+f0(O.incroci)+'</b> incroci tra due o più vie con nome (incroci di OpenStreetMap, vicini tra loro riuniti in uno); '+f0(O.con_incidenti)+' hanno avuto almeno un incidente con feriti in 15 anni. Di questi, '+f0(C.incroci_con_almeno_10)+' ne hanno avuti 10 o più e '+f0(C.incroci_con_almeno_50)+' almeno 50. Gli incidenti agganciati a un incrocio sono '+f0(A.totale_agganciati)+' ('+pct(A.totale_agganciati,D.totali.righe,0)+' del totale): sono quelli in cui il verbale indica due vie.</p>');
-  var c=el('b-inc');
-  KEYS.forEach(function(k){var b=document.createElement('button');b.type='button';b.textContent=k[1];b.className=k[0]===KEY?'on':'';b.addEventListener('click',function(){KEY=k[0];Array.prototype.forEach.call(c.children,function(x){x.className=''});b.className='on';tabInc()});c.appendChild(b)});
-  tabInc();
-}
-function tabInc(){
-  var lista=KEY==='inc'?IN.liste.inc:KEY==='p3'?IN.liste.p3:IN.liste[KEY];
-  var rows=lista.slice(0,25).map(function(id,n){var c=inc(id);
-    return [n+1,'<span style="text-align:left;display:inline-block;white-space:normal;min-width:200px">'+nomeInc(c)+'</span>',f0(c.inc),f0(c.p1),f0(c.p2),f0(c.p3),f0(c.feriti),c.morti,c.ped,c.bici,c.moto,'<button type="button" class="btnmap" data-id="'+c.id+'">mappa</button>']});
-  table('tab-inc',['#','Incrocio','Incidenti 2010–24','2010–14','2015–19','2020–24','Feriti','Morti','Con pedoni','Con bici','Con moto',''],rows);
-  var th=el('tab-inc').querySelectorAll('th');th[1].className='';
-  Array.prototype.forEach.call(el('tab-inc').querySelectorAll('td:nth-child(2)'),function(td){td.className=''});
-  Array.prototype.forEach.call(el('tab-inc').querySelectorAll('.btnmap'),function(b){b.addEventListener('click',function(){vaiA(parseInt(b.getAttribute('data-id'),10))})});
-}
-function persistenza(){
-  var P=D.persistenza;
-  setH('pers-testo','<p>Se i punti con più incidenti fossero solo sfortuna, nel periodo dopo tornerebbero nella media. Non è così: l’ordine degli incroci nel 2010–2014 e quello nel 2020–2024 si somigliano molto (correlazione di rango '+nf(P.corr_p1_p3_spearman,2)+'), e dei primi 15 del 2010–2014 qui sotto la maggior parte è ancora in alto (nessuno è sceso sotto il 63° posto). Ma in cinque anni di dati ogni incrocio ha pochi incidenti per anno e il caso conta: non si può dire che uno sia migliorato o peggiorato.</p>');
-  var rows=IN.liste.p1.map(function(id){var c=inc(id);return ['<span style="white-space:normal">'+nomeInc(c)+'</span>',f0(c.p1),f0(c.p2),f0(c.p3),sgp(100*(c.p3/c.p1-1)),f0(c.rank_p3)]});
-  table('tab-pers',['Incrocio','2010–14','2015–19','2020–24','Variazione','Posto nel 2020–24'],rows);
-  el('tab-pers').querySelectorAll('th')[0].className='';Array.prototype.forEach.call(el('tab-pers').querySelectorAll('td:first-child'),function(td){td.className=''});
+/* ---------- dati derivati ---------- */
+var IC={},NIL=[],NB={};
+function prepara(){
+  IA.c=IA.c.map(function(a){return{id:a[0],n:a[1],lon:a[2],lat:a[3],inc:a[4],fe:a[5],mo:a[6],pe:a[7],bi:a[8],mt:a[9],pos:a[10],p1:a[11],p3:a[12],y:a[13],k:norm(a[1])}});
+  IA.c.forEach(function(x){IC[x.id]=x});
+  VA.v=VA.v.map(function(a){return{n:a[0],km:a[1],inc:a[2],fe:a[3],mo:a[4],pe:a[5],bi:a[6],mt:a[7],kma:a[8],pos:a[9],posk:a[10],y:a[11],k:norm(a[0])}});
+  QI.q=QI.q.map(function(a){return{id:a[0],n:a[1],ab:a[2],km2:a[3],inc:a[4],fe:a[5],mo:a[6],pe:a[7],bi:a[8],mt:a[9],y:a[10],k:norm(a[1])}});
+  QI.q.forEach(function(x){x.dens=x.inc/x.km2/15;NB[x.id]=x});
+  var by=QI.q.slice().sort(function(a,b){return b.inc-a.inc});by.forEach(function(x,i){x.posInc=i+1});
+  by=QI.q.slice().sort(function(a,b){return b.dens-a.dens});by.forEach(function(x,i){x.posDens=i+1});
+  GEO.features.forEach(function(f){var q=NB[f.properties.i];if(q)q.f=f});
 }
 
-/* ---------- vie ---------- */
-function vie(){
-  var q=D.qualita;
-  setH('vie-testo','<p>Le vie con più incidenti sono quelle lunghe e trafficate, soprattutto le grandi arterie. Contare per chilometro dà un’idea più giusta per le vie corte: salgono corso Venezia, viale Tibaldi e viale Marche. Resta il limite di sempre: non sappiamo quanto traffico passa su ciascuna.</p>');
-  var a=VI.per_incidenti.slice(0,15),mx=a[0].inc;
-  barsPlain('b-vie',a.map(function(v){return {nm:v.nome,v:v.inc,txt:f0(v.inc)+' <span class="sub">('+nf(v.km,1)+' km)</span>'}}),mx);
-  var b=VI.per_km.slice(0,15),m2=b[0].km_anno;
-  barsPlain('b-viekm',b.map(function(v){return {nm:v.nome,v:v.km_anno,txt:f1(v.km_anno)+' <span class="sub">/km/anno</span>'}}),m2);
-}
-function tratti(){
-  setH('trat-testo','<p>I tratti di strada lontani dagli incroci con più incidenti sono pochi e il dato è fragile: molti verbali scrivono un incrocio come «via X, 33». Li mostriamo per completezza.</p>');
-  table('tab-trat',['Via (nome più frequente nel quadrato)','Incidenti','Feriti','Morti','Con pedoni','Con moto','Con bici'],TR.slice(0,10).map(function(t){return ['<span style="white-space:normal">'+esc(t.via)+'</span>',f0(t.inc),f0(t.feriti),t.morti,t.ped,t.moto,t.bici]}));
-  el('tab-trat').querySelectorAll('th')[0].className='';Array.prototype.forEach.call(el('tab-trat').querySelectorAll('td:first-child'),function(td){td.className=''});
+/* ---------- mappe ---------- */
+var KX=Math.cos(45.46*Math.PI/180);
+function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+function boxOf(feats,pts){var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  if(feats)feats.forEach(function(f){anelli(f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*KX,y=p[1];x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)})})});
+  if(pts)pts.forEach(function(p){var x=p[0]*KX,y=p[1];x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)});
+  return{x0:x0,x1:x1,y0:y0,y1:y1}}
+function mkproj(W,b){var sc=(W-2)/(b.x1-b.x0);
+  return{H:Math.ceil((b.y1-b.y0)*sc)+2,sc:sc,
+    pt:function(lon,lat){return[1+(lon*KX-b.x0)*sc,1+(b.y1-lat)*sc]},
+    path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*KX-b.x0)*sc)+' '+r1(1+(b.y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+    bb:function(f){var a=1e9,c=-1e9,d=1e9,e=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*KX-b.x0)*sc,y=1+(b.y1-q[1])*sc;a=Math.min(a,x);c=Math.max(c,x);d=Math.min(d,y);e=Math.max(e,y)})});return{x:(a+c)/2,y:(d+e)/2,w:c-a,h:e-d}}}}
+var CITY=null;
+function city(){if(!CITY)CITY=boxOf(GEO.features);return CITY}
+
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var S=R.serie,i24=S.anno.length-1,ca=R.cons||R.concentrazione,P=R.persistenza,top=IA.c[0];
+  var var1=(S.incidenti[i24]/S.incidenti[0]-1)*100;
+  var mm=R.mesi.media_2010_19,oth=(sum(mm)-mm[7])/11,ago=(mm[7]/oth-1)*100;
+  var pedSh=R.totali.ped_morti/R.totali.morti*100;
+  var H=[
+    {c:C.m1,h:'t-mappa',n:f0(top.inc),u:'',p:'incidenti in 15 anni a '+esc(top.n)+', l’incrocio con più incidenti: uno ogni '+f0(15*365/top.inc)+' giorni.'},
+    {c:C.m3,h:'t-conc',n:f0(ca.n_per_meta_incidenti),u:'',p:'incroci su '+f0(R.incroci_osm.incroci)+' ('+f0(ca.pct_incroci_per_meta_incidenti)+'%) bastano per fare metà degli incidenti.'},
+    {c:C.m2,h:'t-anni',n:sg0(var1)+'%',u:'',p:'incidenti dal 2010 al 2024: da '+f0(S.incidenti[0])+' a '+f0(S.incidenti[i24])+' all’anno.'},
+    {c:C.m4,h:'t-chi',n:f0(pedSh),u:'%',p:'dei morti in strada erano a piedi: '+f0(R.totali.ped_morti)+' su '+f0(R.totali.morti)+', ma i pedoni sono solo 1 incidente su 7.'},
+    {c:C.m5,h:'t-pers',n:P.top20_2010_14_ancora_top20_2020_24+' su 20',u:'',p:'dei peggiori incroci del 2010-2014 sono ancora tra i primi 20 dieci anni dopo.'},
+    {c:C.ora,h:'t-mesi',n:sg0(ago)+'%',u:'',p:'incidenti ad agosto rispetto agli altri mesi: la città si svuota, le strade pure.'}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
-/* ---------- chi ---------- */
+/* ---------- 1. anno per anno: linea ---------- */
+function anni(){
+  var A=R.comune_annuale,W=width('ch-anni'),H=270,m={l:42,r:46,t:28,b:26},n=A.anno.length,pw=W-m.l-m.r,ph=H-m.t-m.b,hi=18000;
+  var X=function(i){return m.l+i*pw/(n-1)},Y=function(v){return m.t+ph-v/hi*ph};
+  var s=svgOpen(W,H);
+  [0,6000,12000,18000].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,v===0?'0':f0(v/1000)+' mila',{a:'end',c:'m'})});
+  var d=A.inc.map(function(v,i){return (i?'L':'M')+r1(X(i))+' '+r1(Y(v))}).join('');
+  s+='<path d="'+d+'L'+r1(X(n-1))+' '+r1(Y(0))+'L'+r1(X(0))+' '+r1(Y(0))+'Z" fill="'+C.m2+'" opacity=".12"/>';
+  s+='<path d="'+d+'" fill="none" stroke="'+C.m2+'" stroke-width="3" stroke-linejoin="round"/>';
+  A.anno.forEach(function(a,i){s+='<circle cx="'+r1(X(i))+'" cy="'+r1(Y(A.inc[i]))+'" r="'+((a===2001||a===2010||a===2020||a===2025)?5:2.5)+'" fill="'+C.m2+'" stroke="#fff" stroke-width="1.5"'+tip('<b>'+a+'</b><br>'+f0(A.inc[i])+' incidenti<br>'+A.morti[i]+' morti, '+f0(A.feriti[i])+' feriti')+'/>'});
+  function lab(a,pos){var i=A.anno.indexOf(a),v=A.inc[i];
+    if(pos==='r')s+=T(X(i)+9,Y(v)+4,f0(v),{c:'b'});
+    else if(pos==='b')s+=T(X(i),Y(v)+20,f0(v),{a:'middle',c:'b'});
+    else s+=T(X(i),Y(v)-10,f0(v),{a:i===0?'start':'middle',c:'b'})}
+  lab(2001,'t');lab(2010,'t');lab(2020,'b');lab(2025,'r');
+  [2001,2010,2020,2025].forEach(function(a){var i=A.anno.indexOf(a);s+=T(X(i),H-6,a,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  $('ch-anni').innerHTML=s+'</svg>';
+  var i1=A.anno.indexOf(2001),i19=A.anno.indexOf(2019),i25=n-1;
+  $('t-anni').textContent='Gli incidenti si sono più che dimezzati dal 2001: da '+f0(A.inc[i1])+' a '+f0(A.inc[i25])+' l’anno, e i morti da '+A.morti[i1]+' a '+A.morti[i25];
+  $('nt-anni').innerHTML='<li><b class="nb">1</b><span>Nel 2020 il Covid ha chiuso la città per mesi e gli incidenti sono scesi a '+f0(A.inc[A.anno.indexOf(2020)])+'. Nel 2019 erano '+f0(A.inc[i19])+'. Il resto del Covid è nella pagina <a href="../anno-covid/">L’anno del Covid</a>.</span></li><li><b class="nb">2</b><span>Dal 2014 il calo si è fermato: da dieci anni sono tra gli 8 e i 9 mila l’anno, 2025 compreso.</span></li>';
+}
+
+/* ---------- 2. chi è coinvolto: pallini collegati + omini ---------- */
 function chi(){
-  var S=D.serie,t=D.totali,N=S.anno.length,tot=t.righe,mo=t.morti;
-  var righe=[['Pedoni','ped',sum(S.ped_inc),t.ped_morti],['Biciclette (anche elettriche)','bici',sum(S.bici_inc),sum(S.bici_morti)],['Moto e motorini','moto',sum(S.moto_inc),sum(S.moto_morti)],['Automobili','auto',sum(S.auto_inc),sum(S.auto_morti)],['Monopattini elettrici (dal 2020)','monop',sum(S.monop_inc),null]];
-  setH('chi-testo','<p>Su '+f0(tot)+' incidenti, '+f0(sum(S.auto_inc))+' ('+pct(sum(S.auto_inc),tot,0)+') hanno un’auto, '+f0(sum(S.moto_inc))+' ('+pct(sum(S.moto_inc),tot,0)+') una moto o un motorino, '+f0(t.ped)+' ('+pct(t.ped,tot,0)+') un pedone, '+f0(sum(S.bici_inc))+' ('+pct(sum(S.bici_inc),tot,0)+') una bici. I pedoni pesano molto di più tra i morti ('+pct(t.ped_morti,mo,0)+') che tra gli incidenti ('+pct(t.ped,tot,0)+'); le bici no. I dati non dicono chi, dentro l’incidente, si è fatto male (tranne per i pedoni): le colonne «morti» sono di tutto l’incidente.</p>');
-  table('tab-chi',['Coinvolto','Incidenti','% del totale','Morti','% dei morti'],righe.map(function(r){return ['<span style="color:'+COL[r[1]]+'">&#9632;</span> '+r[0],f0(r[2]),pct(r[2],tot,1),r[3]==null?'–':f0(r[3]),r[3]==null?'':pct(r[3],mo,0)]}));
-  el('tab-chi').querySelectorAll('th')[0].className='';Array.prototype.forEach.call(el('tab-chi').querySelectorAll('td:first-child'),function(td){td.className=''});
-  var idx=function(a){return a.map(function(v){return 100*v/a[0]})};
-  draw('ch-chi',function(){lineChart(el('ch-chi'),{x:S.anno,y0:0,h:260,xf:function(v){return v},hline:100,vf:function(v){return f0(v)},series:[
-    {n:'Pedoni',color:COL.ped,v:idx(S.ped_inc)},{n:'Bici',color:COL.bici,v:idx(S.bici_inc)},{n:'Moto e motorini',color:COL.moto,v:idx(S.moto_inc)},{n:'Automobili',color:COL.auto,v:idx(S.auto_inc)}],marks:[{x:2020,t:'Covid'}]})});
-  setH('lg-chi',lgd([{color:COL.ped,t:'Pedoni'},{color:COL.bici,t:'Bici'},{color:COL.moto,t:'Moto e motorini'},{color:COL.auto,t:'Automobili'}]));
+  var S=R.serie,W=width('ch-chi'),m={l:4,r:40,t:30},rh=52,hi=80,pw=W-m.l-m.r;
+  var X=function(v){return m.l+v/hi*pw};
+  var cats=[{k:'auto_inc',n:'Auto',col:C.m4},{k:'moto_inc',n:'Moto e motorini',col:C.ora},{k:'ped_inc',n:'Pedoni feriti',col:C.m5},{k:'bici_inc',n:'Bici',col:C.m2}];
+  var s='',out=[];
+  s+=T(m.l,12,'○ nel 2010',{c:'m'})+T(m.l+90,12,'● nel 2024',{c:'m'});
+  [0,20,40,60,80].forEach(function(v){s+=L(X(v),m.t-4,X(v),m.t+cats.length*rh-8,C.grid)+T(X(v),m.t+cats.length*rh+8,v+'%',{a:v===0?'start':v===80?'end':'middle',c:'m'})});
+  cats.forEach(function(ct,i){
+    var a=S[ct.k][0]/S.incidenti[0]*100,b=S[ct.k][14]/S.incidenti[14]*100,y=m.t+i*rh+30;
+    out.push([ct.n,Math.round(a),Math.round(b)]);
+    var up=b>a,xa=X(a),xb=X(b);
+    s+=T(m.l,y-22,ct.n,{c:'b',st:'font-size:14px'});
+    s+=L(xa,y,xb,y,ct.col,4);
+    s+='<g'+tip('<b>'+ct.n+'</b><br>2010: '+f1(a)+' incidenti su 100<br>2024: '+f1(b)+' su 100')+'><circle cx="'+r1(xb)+'" cy="'+y+'" r="6" fill="'+ct.col+'"/><circle cx="'+r1(xa)+'" cy="'+y+'" r="10" fill="none" stroke="'+ct.col+'" stroke-width="3"/></g>';
+    s+=T(xa+(up?-16:16),y+4,Math.round(a),{a:up?'end':'start',c:'m',st:'font-size:13px;font-weight:700;fill:'+C.ink});
+    s+=T(xb+(up?14:-14),y+4,Math.round(b),{a:up?'start':'end',st:'font-size:14px;font-weight:800;fill:'+C.ink})});
+  var y=m.t+cats.length*rh+34;
+  s+=T(m.l,y,'Su 100 morti in strada, quanti a piedi?',{c:'b',st:'font-size:14px'});y+=12;
+  var M=S.morti,P=S.ped_morti,cell=14,gw=cell*10;
+  [['2010-2014',0,5],['2020-2024',10,15]].forEach(function(pp){
+    var sh=sum(P.slice(pp[1],pp[2]))/sum(M.slice(pp[1],pp[2]))*100,k=Math.round(sh);
+    s+=T(m.l,y+12,pp[0],{c:'b'});
+    var gx=m.l,gy=y+20,q='';
+    for(var j=0;j<100;j++){var r=Math.floor(j/10),c=j%10;q+=omino(gx+c*cell+1,gy+r*cell+1,cell-2,j<k?C.m5:'#dfe2e7')}
+    s+='<g'+tip('<b>'+pp[0]+'</b><br>Pedoni: '+f1(sh)+' morti ogni 100')+'>'+q+'</g>';
+    var tx=gx+gw+14;
+    s+=T(tx,gy+34,k,{st:'font-size:34px;font-weight:800;fill:'+C.m5})+T(tx,gy+54,'a piedi',{c:'b',st:'font-size:14px;fill:'+C.m5});
+    s+=T(tx,gy+86,100-k,{st:'font-size:24px;font-weight:800;fill:#6b7280'})+T(tx,gy+104,'in auto, moto o bici',{c:'m'});
+    y=gy+gw+16});
+  $('ch-chi').innerHTML=svgOpen(W,y)+s+'</svg>';
+  var ped=out[2],a2=sum(P.slice(10,15))/sum(M.slice(10,15))*100;
+  $('t-chi').textContent='Un incidente su '+Math.round(100/ped[2])+' coinvolge un pedone, ma un morto su '+Math.round(100/Math.round(a2))+' è a piedi';
+  $('nt-chi').innerHTML='Le moto e i motorini sono in '+out[1][1]+' incidenti su 100 nel 2010 e in '+out[1][2]+' nel 2024. Le bici sono passate da '+out[3][1]+' a '+out[3][2]+'.';
 }
 
-/* ---------- quando ---------- */
-function quando(){
-  var M=D.mesi,C=D.comune_mesi_covid,m=M.media_2010_19;
-  var ago=m[7],altri=(sum(m)-ago)/11;
-  setH('mesi-testo','<p>Ad <b>agosto</b> gli incidenti sono la metà degli altri mesi: in media '+f0(ago)+' contro '+f0(altri)+' (2010–2019), cioè '+sgp(100*(ago/altri-1))+'. Il 2020 ha il segno del Covid: ad <b>aprile 2020</b> sono stati '+f0(M.anno_2020[3])+' contro '+f0(M.anno_2019[3])+' di aprile 2019 ('+sgp(100*(M.anno_2020[3]/M.anno_2019[3]-1))+'). Il 2024 ha lo stesso disegno di prima, un po’ più basso.</p>');
-  draw('ch-mesi',function(){lineChart(el('ch-mesi'),{x:[0,1,2,3,4,5,6,7,8,9,10,11],y0:0,h:250,xf:function(v){return MESI[v]},gap:30,dots:true,series:[
-    {n:'Media 2010–2019',color:'#888',v:m,dash:true},{n:'2020',color:WARM,v:M.anno_2020},{n:'2024',color:ACC,v:M.anno_2024}]})});
-  setH('lg-mesi',lgd([{color:'#888',dash:true,t:'media 2010–2019'},{color:WARM,t:'2020'},{color:ACC,t:'2024'}]));
-  var Q=D.quando.sintesi_2007_2011,n=Q.inc;
-  var ore=[['Ore di punta del mattino (7–9)',Q.punta_7_9,Q.morti_punta_7_9,2/24],['Ore di punta della sera (17–19)',Q.punta_17_19,Q.morti_punta_17_19,2/24],['Di notte',Q.notte,Q.morti_notte,null],['Sabato e domenica',Q.weekend,Q.morti_weekend,2/7]];
-  setH('ore-testo','<p>Nei file più recenti l’ora non c’è, ma la Regione Lombardia ha pubblicato fino al 2011 i totali di Milano per fascia. Nel 2007–2011: tra le <b>17 e le 19</b> succede un incidente su cinque ('+pct(Q.punta_17_19,n,0)+') in sole due ore del giorno, cioè 2,4 volte la media oraria; al mattino (7–9) il '+pct(Q.punta_7_9,n,0)+'. <b>Di notte</b> gli incidenti sono meno ('+pct(Q.notte,n,0)+') ma i morti sono molti di più ('+pct(Q.morti_notte,Q.morti,0)+' dei morti). Nel fine settimana ('+pct(Q.weekend,n,0)+' degli incidenti, per 2 giorni su 7) i morti sono il '+pct(Q.morti_weekend,Q.morti,0)+'.</p>');
-  var h='';
-  ore.forEach(function(o){
-    var a=100*o[1]/n,b=o[2]==null?null:100*o[2]/Q.morti;
-    h+='<div class="pair"><div>'+o[0]+'</div><div><div class="tr"><span class="fill" style="width:'+Math.min(100,a*2)+'%;background:'+ACC+'"></span></div><div class="t"><b style="color:'+ACC+'">'+nf(a,0)+'%</b> degli incidenti</div>'+
-      (b==null?'<div class="t">morti per fascia: non indicati</div>':'<div class="tr"><span class="fill" style="width:'+Math.min(100,b*2)+'%;background:#555"></span></div><div class="t"><b>'+nf(b,0)+'%</b> dei morti</div>')+'</div></div>';
-  });
-  setH('ore-box',h);
-  setH('ore-src','Milano, somma 2007–2011: '+f0(n)+' incidenti e '+f0(Q.morti)+' morti. Fonte: Regione Lombardia, «Incidenti stradali nel Comune di Milano» (CC0, dati Istat). «Notte» e «ore di punta» sono le fasce del file; la definizione precisa della notte non è riportata. Le barre sono scalate al doppio della percentuale per leggerle meglio.');
+/* ---------- 3. calendario: mesi x anni ---------- */
+var MES=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+var CALS=[{lo:0,col:'#d7e9f6',tx:C.ink},{lo:300,col:'#8fc2e4',tx:C.ink},{lo:500,col:'#3b95cc',tx:'#fff'},{lo:700,col:'#0072BC',tx:'#fff'},{lo:850,col:'#00406e',tx:'#fff'}];
+function cls(v){var k=0;CALS.forEach(function(c,i){if(v>=c.lo)k=i});return k}
+function mesi(){
+  var W=width('ch-mesi'),m={l:38,r:24,t:22,b:4},rh=22,cw=Math.floor((W-m.l-m.r)/12),H=m.t+rh*15+m.b;
+  var s=svgOpen(W,H),cnt=CALS.map(function(){return 0});
+  var short=cw<24;
+  MES.forEach(function(nm,j){s+=T(m.l+j*cw+cw/2,14,short?nm[0]:nm,{a:'middle',c:j===7?'b':'m',st:j===7?'fill:'+C.ink:''})});
+  MA.anni.forEach(function(a,i){
+    s+=T(m.l-6,m.t+i*rh+rh/2+4,a,{a:'end',c:'m'});
+    MA.mesi[i].forEach(function(v,j){var k=cls(v);cnt[k]++;
+      s+='<rect x="'+(m.l+j*cw+1)+'" y="'+(m.t+i*rh+1)+'" width="'+(cw-2)+'" height="'+(rh-2)+'" rx="2" fill="'+CALS[k].col+'"'+tip('<b>'+MES[j]+' '+a+'</b><br>'+f0(v)+' incidenti')+'/>';
+      if(cw>=24)s+=T(m.l+j*cw+cw/2,m.t+i*rh+rh/2+4,v,{a:'middle',st:'font-size:12px;font-weight:600;pointer-events:none;fill:'+CALS[k].tx})})});
+  s+='<rect x="'+(m.l+7*cw)+'" y="'+(m.t-2)+'" width="'+cw+'" height="'+(rh*15+4)+'" fill="none" stroke="'+C.ink+'" stroke-width="2"/>';
+  var i20=MA.anni.indexOf(2020);
+  s+='<rect x="'+(m.l+3*cw)+'" y="'+(m.t+i20*rh)+'" width="'+cw+'" height="'+rh+'" fill="none" stroke="'+C.m1+'" stroke-width="2.5"/>';
+  s+='<circle cx="'+(W-m.r/2-2)+'" cy="'+(m.t+i20*rh+rh/2)+'" r="9" fill="'+C.ink+'"/>'+T(W-m.r/2-2,m.t+i20*rh+rh/2+4,'1',{a:'middle',c:'w'});
+  $('ch-mesi').innerHTML=s+'</svg>';
+  $('lg-mesi').innerHTML=CALS.map(function(c,i){var nx=i<CALS.length-1?CALS[i+1].lo-1:null;return '<span><i style="background:'+c.col+'"></i>'+(i===0?'meno di '+CALS[1].lo:nx==null?CALS[i].lo+' o più':c.lo+'-'+nx)+' <b>&nbsp;('+cnt[i]+')</b></span>'}).join('');
+  var mm=R.mesi.media_2010_19,oth=(sum(mm)-mm[7])/11;
+  $('t-mesi').textContent='Ad agosto gli incidenti calano di '+f0(Math.abs((mm[7]/oth-1)*100))+'% rispetto agli altri mesi: la città è vuota';
+  var a19=MA.mesi[MA.anni.indexOf(2019)][3],a20=MA.mesi[i20][3];
+  $('nt-mesi').innerHTML='<li><b class="nb">1</b><span>Aprile 2020: '+f0(a20)+' incidenti, contro '+f0(a19)+' di aprile 2019. Era il blocco per il Covid (vedi <a href="../anno-covid/">L’anno del Covid</a>).</span></li><li><b class="nb" style="background:#fff;border:2px solid #000"></b><span>La colonna con il bordo nero è agosto.</span></li>';
+  var Q=R.quando.sintesi_2007_2011;
+  $('nt-ore').innerHTML='L’ora del giorno non c’è nei dati recenti. Fino al 2011 si sa che la sera, tra le 17 e le 19, succedeva '+f0(Q.punta_17_19/Q.inc*100)+' incidente su 100, e che di notte succedevano '+f0(Q.notte/Q.inc*100)+' incidenti su 100 ma '+f0(Q.morti_notte/Q.morti*100)+' morti su 100 (media 2007-2011).';
 }
 
-/* ---------- come sono cambiati ---------- */
-function tempo(){
-  var C=D.comune_annuale,a=C.anno,i10=a.indexOf(2010),i24=a.indexOf(2024),i25=a.indexOf(2025),c25=D.comune_2025;
-  setH('tempo-testo','<p>Dal 2001 gli incidenti con feriti a Milano sono scesi da '+f0(C.inc[0])+' a '+f0(C.inc[i24])+' nel 2024 ('+sgp(100*(C.inc[i24]/C.inc[0]-1))+'). Il 2020 (Covid) ne ha avuti '+f0(C.inc[a.indexOf(2020)])+'; dopo il 2020 sono risaliti e nel 2025 ('+f0(c25.inc)+') sono vicini al 2019 ('+f0(C.inc[a.indexOf(2019)])+'). I morti sono passati da '+f0(C.morti[0])+' a '+f0(C.morti[i24])+'. Il 2025, secondo il Comune, ha '+f0(c25.morti)+' morti: <b>il dato dei morti del 2025 va preso con prudenza</b>, perché i morti sono contati fino a 30 giorni dopo e le cifre dell’ultimo anno vengono di solito corrette in seguito.</p>');
-  draw('ch-anni',function(){lineChart(el('ch-anni'),{x:a,y0:0,h:240,xf:function(v){return v},gap:38,series:[{n:'Incidenti',color:ACC,v:C.inc}],marks:[{x:2020,t:'Covid'}]})});
-  draw('ch-morti',function(){lineChart(el('ch-morti'),{x:a,y0:0,h:240,xf:function(v){return v},gap:38,series:[{n:'Morti',color:'#444',v:C.morti}],marks:[{x:2020,t:'Covid'}]})});
-  el('src-anni').innerHTML='Incidenti = incidenti mortali + incidenti con soli feriti. Fonte: Comune di Milano, Polizia Locale, scheda ds175 (CC BY), dati aggiornati al 13 ottobre 2026. I totali del Comune differiscono di pochi punti percentuali da quelli dei microdati Istat usati sopra (2024: '+f0(C.inc[i24])+' contro '+f0(D.serie.incidenti[14])+').';
-  /* Area C */
-  var A=D.aree,ix=function(v){var b=(v[0]+v[1])/2;return v.map(function(x){return 100*x/b})};
-  var dc=A.dentro_areaC,fb=A.areaB_fuori_C,fu=A.fuori_areaB;
-  var cal=function(v){return 100*(v[3]/((v[0]+v[1])/2)-1)};
-  setH('areac-testo','<p>Area C è la zona a pagamento del centro ('+nf(A.km2_areaC,1)+' km²), avviata all’inizio del 2012 (la data è da confermare con il Comune: non è nei dati che ho usato). Dopo il 2011 gli incidenti dentro Area C sono scesi più in fretta che nel resto della città: nel 2013, rispetto alla media 2010–2011, <b>'+sgp(cal(dc))+'</b> dentro Area C, '+sgp(cal(fb))+' nel resto di Area B e '+sgp(cal(fu))+' fuori. Nel 2019 le tre zone sono a '+sgp(100*(dc[9]/((dc[0]+dc[1])/2)-1))+', '+sgp(100*(fb[9]/((fb[0]+fb[1])/2)-1))+' e '+sgp(100*(fu[9]/((fu[0]+fu[1])/2)-1))+'. È un confronto, non una prova: nello stesso periodo sono cambiate molte cose (traffico, metropolitane, controlli).</p>');
-  draw('ch-areac',function(){lineChart(el('ch-areac'),{x:D.serie.anno,y0:0,h:240,xf:function(v){return v},gap:38,hline:100,vf:function(v){return f0(v)},series:[{n:'Dentro Area C',color:ACC,v:ix(dc)},{n:'Resto di Area B',color:'#555',v:ix(fb)},{n:'Fuori Area B',color:'#aaa',v:ix(fu),dash:true}],marks:[{x:2020,t:'Covid'}]})});
-  setH('lg-areac',lgd([{color:ACC,t:'dentro Area C'},{color:'#555',t:'resto di Area B'},{color:'#aaa',dash:true,t:'fuori Area B'}]));
-  el('areac-src').textContent='Indice: media 2010–2011 = 100. Incidenti con luogo trovato ('+f0(sum(dc))+' dentro Area C, '+f0(sum(fb))+' nel resto di Area B, '+f0(sum(fu))+' fuori, in 15 anni). Poligoni di Area C e Area B: Comune di Milano (CC BY). Area B copre '+f0(A.km2_areaB)+' km² (quasi tutta la città).';
-  /* zone 30 */
-  var Z=D.zone30,Wd=D.zone30_finestre;
-  setH('z30-testo','<p>Il Comune pubblica la mappa delle aree a velocità limitata (zone 30, strade 30, zone residenziali) con la data dell’ordinanza. Abbiamo confrontato, per ogni anno di istituzione tra il 2013 e il 2021, gli incidenti nei tre anni prima e nei tre anni dopo con quelli avvenuti nello stesso periodo fuori da queste aree. Risultato complessivo: nelle zone gli incidenti sono passati da '+f0(Z.tutti.prima)+' a '+f0(Z.tutti.dopo)+' ('+sgp(100*(Z.tutti.rapporto_dopo_prima_zona-1))+'); fuori dalle zone la stessa variazione avrebbe dato '+f0(Z.tutti.atteso_se_come_altrove)+' ('+sgp(100*(Z.tutti.rapporto_atteso-1))+'). Per i pedoni: da '+f0(Z.pedoni.prima)+' a '+f0(Z.pedoni.dopo)+' ('+sgp(100*(Z.pedoni.rapporto_dopo_prima_zona-1))+'), contro '+sgp(100*(Z.pedoni.rapporto_atteso-1))+' atteso. Le zone del 2014 (le più numerose) hanno '+sgp(100*(Wd[1].zona_dopo/Wd[1].zona_prima-1))+' contro '+sgp(100*(Wd[1].altrove_dopo/Wd[1].altrove_prima-1))+' fuori; quelle del 2020 '+sgp(100*(Wd[7].zona_dopo/Wd[7].zona_prima-1))+' contro '+sgp(100*(Wd[7].altrove_dopo/Wd[7].altrove_prima-1))+'. <b>Nel complesso la differenza è piccola e cambia da un anno all’altro</b>: queste cifre non permettono di dire se le zone 30 funzionino. Le strade scelte per le zone di solito sono quelle dove c’erano problemi, il periodo include il Covid e l’ultima estensione del limite di 30 km/h non è in questo dato.</p>');
-  table('tab-z30',['Anno della zona','Incidenti in zona: 3 anni prima','3 anni dopo','Variazione','Fuori dalle zone, stessi anni'],Wd.map(function(w){return [w.anno_zona,f0(w.zona_prima),f0(w.zona_dopo),w.zona_prima?sgp(100*(w.zona_dopo/w.zona_prima-1)):'–',sgp(100*(w.altrove_dopo/w.altrove_prima-1))]}));
-  el('z30-src').textContent='Incidenti con luogo trovato entro 15 m da un’area a velocità limitata nata in quell’anno (la prima per ogni punto). Il 2014 e il 2020 sono gli anni con più aree istituite ('+Z.per_anno_zona['2014']+' e '+Z.per_anno_zona['2020']+'). Nel 2020 i tre anni dopo sono 2021–2023. Fonte: Comune di Milano, «Aree a velocità limitata» (ds1438, CC BY, aggiornato 8 maggio 2026); incidenti: Istat / Regione Lombardia.';
+/* ---------- 4. la mappa dei 20 incroci ---------- */
+function rad(inc,mx){return 8+3*Math.sqrt(inc/mx)}
+function mappa(){
+  var W=width('ch-mappa'),T20=IA.c.slice(0,20),mx=T20[0].inc;
+  var bx=boxOf(null,T20.map(function(c){return[c.lon,c.lat]}));
+  var px=(bx.x1-bx.x0)*0.16,py=(bx.y1-bx.y0)*0.07;
+  var P=mkproj(W,{x0:bx.x0-px,x1:bx.x1+px,y0:bx.y0-py,y1:bx.y1+py});
+  var s=svgOpen(W,P.H,'cut');
+  GEO.features.forEach(function(f){s+='<path d="'+P.path(f)+'" fill="'+C.base+'" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>'});
+  var du=P.pt(9.19,45.4641),ok=du[0]>0&&du[0]<W&&du[1]>0&&du[1]<P.H;
+  var lab='';
+  var pos=T20.map(function(c){var p=P.pt(c.lon,c.lat);return{x:p[0],y:p[1],x0:p[0],y0:p[1],r:rad(c.inc,mx)}});
+  for(var it=0;it<80;it++)for(var a=0;a<pos.length;a++)for(var b=a+1;b<pos.length;b++){var dx=pos[b].x-pos[a].x,dy=pos[b].y-pos[a].y,d=Math.sqrt(dx*dx+dy*dy)||0.1,mn=pos[a].r+pos[b].r+2;
+    if(d<mn){var k=(mn-d)/2/d;pos[a].x-=dx*k;pos[a].y-=dy*k;pos[b].x+=dx*k;pos[b].y+=dy*k}}
+  pos.forEach(function(q){if(Math.abs(q.x-q.x0)+Math.abs(q.y-q.y0)>1)s+=L(q.x0,q.y0,q.x,q.y,C.ink,1.5)+'<circle cx="'+r1(q.x0)+'" cy="'+r1(q.y0)+'" r="2.5" fill="'+C.ink+'"/>'});
+  T20.forEach(function(c,i){var p=[pos[i].x,pos[i].y],r=pos[i].r;
+    lab+='<g'+tip('<b>'+(i+1)+'. '+esc(c.n)+'</b><br>'+f0(c.inc)+' incidenti, '+f0(c.fe)+' feriti, '+pl(c.mo,'morto','morti'))+'><circle cx="'+r1(p[0])+'" cy="'+r1(p[1])+'" r="'+r1(r)+'" fill="'+C.m1+'" fill-opacity=".88" stroke="#fff" stroke-width="2"/>'+T(p[0],p[1]+4,i+1,{a:'middle',c:'w'})+'</g>'});
+  if(ok){s+='<rect x="'+r1(du[0]-4)+'" y="'+r1(du[1]-4)+'" width="8" height="8" fill="'+C.ink+'" stroke="#fff" stroke-width="1.5"/>'}
+  s+=lab;
+  // nome del primo, scritto sul grafico
+  var c0=T20[0],p0=[pos[0].x,pos[0].y],t0=c0.n,w0=tw(t0,12,true);
+  var tx=Math.min(Math.max(p0[0]-w0/2,4),W-w0-4);
+  s+=T(tx,p0[1]-rad(c0.inc,mx)-8,esc(t0),{c:'halo',st:'font-size:12px'});
+  $('ch-mappa').innerHTML=s+'</svg>';
+  $('t-mappa').textContent='Il peggiore è '+c0.n+': '+f0(c0.inc)+' incidenti in 15 anni, uno ogni '+f0(15*365/c0.inc)+' giorni';
 }
 
-/* ---------- limiti, metodo, fonti ---------- */
+/* ---------- 5. i 20, uno per uno ---------- */
+function listaTop(){
+  var T20=IA.c.slice(0,20),mx=T20[0].inc,ymax=Math.max.apply(null,[].concat.apply([],T20.map(function(c){return c.y})));
+  $('lista-top').innerHTML=T20.map(function(c,i){
+    var r=4+11*Math.sqrt(c.inc/mx);
+    var g='<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="12.5" y="0" width="7" height="32" rx="2" fill="#c9ced6"/><rect x="0" y="12.5" width="32" height="7" rx="2" fill="#c9ced6"/><circle cx="16" cy="16" r="'+r1(r)+'" fill="'+C.m1+'" stroke="#fff" stroke-width="1.5"/></svg>';
+    var bw=5,gap=1.5,sh=30,sp='<svg width="'+(15*(bw+gap)-gap)+'" height="'+sh+'" viewBox="0 0 '+(15*(bw+gap)-gap)+' '+sh+'" aria-hidden="true">';
+    c.y.forEach(function(v,k){var h=Math.max(1,v/ymax*sh);sp+='<rect x="'+k*(bw+gap)+'" y="'+r1(sh-h)+'" width="'+bw+'" height="'+r1(h)+'" fill="'+(k===10?'#9aa1ad':C.ink2)+'" data-t="'+esc('<b>'+esc(c.n)+'</b><br>'+(2010+k)+': '+v+' incidenti')+'"/>'});
+    sp+='</svg>';
+    return '<li><span class="rk">'+(i+1)+'</span>'+g+'<div class="tx"><b>'+esc(c.n)+'</b><span>'+f0(c.inc)+' incidenti · '+f0(c.fe)+' feriti · '+pl(c.mo,'morto','morti')+'</span></div>'+sp+'</li>'}).join('');
+}
+
+/* ---------- 6. quanti incroci per metà degli incidenti: quadretti ---------- */
+function conc(){
+  var K=R.concentrazione,W=width('ch-conc'),n4=W>=560,cols=n4?4:2,gw=(W-(cols-1)*14)/cols,cell=Math.min(15,Math.floor(gw/10)),sz=cell*10;
+  var D=[[10,K.top10_pct],[100,K.top100_pct],[K.n_per_meta_incidenti,50],[1000,K.top1000_pct]];
+  var rowH=sz+58,H=rowH*Math.ceil(4/cols),s=svgOpen(W,H);
+  D.forEach(function(d,i){
+    var cx=i%cols,ry=Math.floor(i/cols),x0=cx*(gw+14)+(gw-sz)/2,y0=ry*rowH,k=Math.round(d[1]);
+    s+=T(x0,y0+16,f0(d[0])+' incroci',{c:'b',st:'font-size:15px'});
+    for(var j=0;j<100;j++){var r=Math.floor(j/10),c=j%10;
+      s+='<rect x="'+r1(x0+c*cell)+'" y="'+r1(y0+24+r*cell)+'" width="'+(cell-2)+'" height="'+(cell-2)+'" rx="2" fill="'+(j<k?C.m1:'#e6e8ec')+'"/>'}
+    s+=T(x0,y0+24+sz+14,f0(k)+' incidenti su 100',{c:'m'})});
+  $('ch-conc').innerHTML=s+'</svg>';
+  $('t-conc').textContent='Per fare metà degli incidenti servono '+f0(K.n_per_meta_incidenti)+' incroci, ma i primi 10 ne fanno solo '+f0(K.top10_pct)+' su 100';
+  $('nt-conc').innerHTML='Non c’è un incrocio «killer»: il peggiore pesa lo '+f1(IA.c[0].inc/K.agganciati*100)+'% del totale. Gli incidenti sono sparsi su molti incroci, e '+f0(K.incroci_con_almeno_50)+' incroci con almeno 50 incidenti ne fanno più di uno su tre ('+f0(K.incidenti_in_incroci_con_almeno_50_pct)+'%).';
+}
+
+/* ---------- 7. i peggiori di dieci anni fa: pallini collegati ---------- */
+function pers(){
+  var W=width('ch-pers'),rows=PE.c.map(function(a){return{id:a[0],n:a[1],i1:a[2],i3:a[3],r1:a[4],r3:a[5]}});
+  var rh=28,top=34,lw=Math.min(180,Math.round(W*0.5)),rw=70,xL=lw+6,xR=W-rw-4;
+  var yL=function(i){return top+i*rh+rh/2};
+  var ord=rows.map(function(r,i){return i}).sort(function(a,b){return rows[a].r3-rows[b].r3||rows[b].i3-rows[a].i3});
+  var yR={},step=15,inside=ord.filter(function(i){return rows[i].r3<=20}),outside=ord.filter(function(i){return rows[i].r3>20});
+  inside.forEach(function(i,k){yR[i]=top+8+k*step*1.2});
+  var yo=top+8+inside.length*step*1.2+36;
+  outside.forEach(function(i,k){yR[i]=yo+k*step});
+  var H=Math.max(yL(19)+rh/2,yR[outside[outside.length-1]]+14)+4,s=svgOpen(W,H);
+  s+=T(0,14,'2010-2014',{c:'b'})+T(0,28,'incidenti in 5 anni',{c:'m'})+T(W-4,14,'2020-2024',{a:'end',c:'b'})+T(W-4,28,'posto · incidenti',{a:'end',c:'m'});
+  var sepY=yo-15;
+  s+=L(xR-6,sepY,W-4,sepY,C.axis,1,' stroke-dasharray="4 3"')+T(W-4,sepY-4,'fuori dai primi 20',{a:'end',c:'m'});
+  rows.forEach(function(r,i){
+    var dentro=r.r3<=20,col=dentro?C.m1:'#9aa1ad',yl=yL(i),yr=yR[i];
+    var parts=r.n.split(' / '),a=shortn(parts[0],lw-26,true),b=shortn(parts[1]||'',lw-26,false);
+    s+=L(xL,yl,xR,yr,col,dentro?2.5:1.5)+'<circle cx="'+xL+'" cy="'+r1(yl)+'" r="4.5" fill="'+col+'"/><circle cx="'+xR+'" cy="'+r1(yr)+'" r="4.5" fill="'+col+'"/>';
+    s+='<g'+tip('<b>'+esc(r.n)+'</b><br>2010-2014: posto '+r.r1+', '+r.i1+' incidenti<br>2020-2024: posto '+r.r3+', '+r.i3+' incidenti')+'>'+T(0,yl-1,esc(a),{c:'b',st:'font-size:12px'})+T(0,yl+12,esc(b),{c:'m'})+'<rect x="0" y="'+r1(yl-rh/2)+'" width="'+lw+'" height="'+rh+'" fill="transparent"/></g>';
+    s+=T(xR+10,yr+4,'<tspan style="font-weight:700;fill:'+(dentro?C.m1:C.ink)+'">'+r.r3+'°</tspan> · '+r.i3,{st:'font-size:12px'})});
+  $('ch-pers').innerHTML=s+'</svg>';
+  var P=R.persistenza;
+  $('t-pers').textContent=P.top20_2010_14_ancora_top20_2020_24+' dei 20 peggiori incroci di dieci anni fa sono ancora tra i primi 20';
+  $('nt-pers').innerHTML='Tutti e 20 sono ancora tra i primi '+(P.top20_2010_14_ancora_top100_2020_24===20?'100':'altri')+'. I loro incidenti sono calati del '+f0(Math.abs((P.top20_2010_14_inc_p3/P.top20_2010_14_inc_p1-1)*100))+'%, come quelli di tutti gli incroci ('+f0(Math.abs((P.tutti_inc_p3/P.tutti_inc_p1-1)*100))+'%). Con questi dati non si sa se sia sfortuna o strade che restano difficili.';
+}
+
+/* ---------- 8. le vie: barre ---------- */
+function vie(){
+  var W=width('ch-vie'),V=VA.v.slice(0,10),lw=Math.min(150,Math.round(W*0.42)),bw=W-lw-46,rh=38,mx=V[0].inc,H=V.length*rh+4,s=svgOpen(W,H);
+  V.forEach(function(v,i){var y=i*rh+4;
+    s+='<g'+tip('<b>'+esc(v.n)+'</b><br>'+f0(v.inc)+' incidenti, '+f0(v.fe)+' feriti, '+pl(v.mo,'morto','morti')+'<br>'+f1(v.kma)+' incidenti per km all’anno')+'>'+T(0,y+15,esc(v.n),{c:'b'})+T(0,y+30,f1(v.km)+' km · '+f1(v.kma)+' a km/anno',{c:'m'});
+    s+=hbar(lw,lw+Math.max(6,v.inc/mx*bw),y+4,26,v.kma>=25?C.m5:'#6b7280')+T(lw+Math.max(6,v.inc/mx*bw)+6,y+22,f0(v.inc),{c:'b'})+'</g>'});
+  $('ch-vie').innerHTML=s+'</svg>';
+  $('t-vie').textContent='La via con più incidenti è '+V[0].n+' ('+f0(V[0].inc)+'), poi '+V[1].n+' e '+V[2].n;
+}
+
+/* ---------- 9. Area C: linee ---------- */
+function areac(){
+  var A=R.aree,W=width('ch-areac'),H=270,m={l:38,r:64,t:20,b:26},n=15,pw=W-m.l-m.r,ph=H-m.t-m.b,lo=30,hi=110;
+  var ser=[{n:'dentro Area C',v:A.dentro_areaC,col:C.m4},{n:'resto di Area B',v:A.areaB_fuori_C,col:C.m2},{n:'fuori Area B',v:A.fuori_areaB,col:C.mut}];
+  ser.forEach(function(q){var b=(q.v[0]+q.v[1])/2;q.ix=q.v.map(function(v){return v/b*100})});
+  var X=function(i){return m.l+i*pw/(n-1)},Y=function(v){return m.t+ph-(v-lo)/(hi-lo)*ph};
+  var s=svgOpen(W,H);
+  [40,60,80,100].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v===100?C.axis:C.grid)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})});
+  ser.forEach(function(q){s+='<path d="'+q.ix.map(function(v,i){return (i?'L':'M')+r1(X(i))+' '+r1(Y(v))}).join('')+'" fill="none" stroke="'+q.col+'" stroke-width="3" stroke-linejoin="round"/>'});
+  // etichette finali senza sovrapposizione
+  var ends=ser.map(function(q,k){return{k:k,y:Y(last(q.ix))}}).sort(function(a,b){return a.y-b.y});
+  for(var i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<15)ends[i].y=ends[i-1].y+15;
+  ends.forEach(function(e){var q=ser[e.k];s+='<circle cx="'+r1(X(n-1))+'" cy="'+r1(Y(last(q.ix)))+'" r="4.5" fill="'+q.col+'"/>'+T(W-m.r+8,e.y+4,'<tspan style="font-weight:700;fill:'+(q.col===C.mut?C.ink:q.col)+'">'+f0(last(q.ix))+'</tspan>',{st:'font-size:13px'})});
+  [2010,2015,2020,2024].forEach(function(a){var i=a-2010;s+=T(X(i),H-6,a,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  $('lg-areac').innerHTML=ser.map(function(q){return '<span><i class="ln" style="background:'+q.col+'"></i>'+q.n+'</span>'}).join('');
+  $('ch-areac').innerHTML=s+'</svg>';
+  var z=R.zone30;
+  $('t-areac').textContent='Dentro Area C gli incidenti sono calati del '+f0(100-last(ser[0].ix))+'%, fuori Area B del '+f0(100-last(ser[2].ix))+'%';
+  $('nt-areac').innerHTML='Il calo c’è dappertutto: Area C parte prima, ma non si può dire che sia merito suo. Lo stesso vale per le zone a 30 km/h: dove sono nate gli incidenti sono calati del '+f0((1-z.tutti.rapporto_dopo_prima_zona)*100)+'% in tre anni, contro un calo del '+f0((1-z.tutti.rapporto_atteso)*100)+'% nel resto della città. Con questi dati non si vede un effetto chiaro. Due linee sullo stesso grafico non dicono che una cosa causi l’altra.';
+}
+
+/* ---------- strumenti: scrivi il tuo ---------- */
+function ybars(W,vals,col,nome){
+  var H=130,m={l:6,r:6,t:22,b:22},n=vals.length,pw=W-m.l-m.r,bw=pw/n,mx=Math.max.apply(null,vals)||1,ph=H-m.t-m.b;
+  var s=svgOpen(W,H),im=vals.indexOf(Math.max.apply(null,vals));
+  vals.forEach(function(v,i){var h=Math.max(v?2:0,v/mx*ph);s+=vbar(m.l+i*bw+1.5,bw-3,H-m.b,H-m.b-h,col,tip('<b>'+(2010+i)+'</b><br>'+f0(v)+' '+nome))});
+  function lb(i){return T(m.l+i*bw+bw/2,H-m.b-vals[i]/mx*ph-5,f0(vals[i]),{a:i===0?'start':i===n-1?'end':'middle',c:'b',st:'font-size:12px'})}
+  var show=[0,n-1];if(im>1&&im<n-2)show.push(im);show.forEach(function(i){s+=lb(i)});
+  [2010,2015,2020,2024].forEach(function(a){var i=a-2010;s+=T(m.l+i*bw+bw/2,H-6,a,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  return s+'</svg>';
+}
+function suggest(o){ // input con datalist: scegli dall'elenco o scrivi il nome intero
+  var inp=$(o.input),dl=$(o.dl),by={};
+  dl.innerHTML=o.lista.map(function(x){by[x.n]=x;return '<option value="'+esc(o.nomeFn(x))+'"></option>'}).join('');
+  function cerca(){var v=inp.value.trim();if(by[v]){o.pick(by[v]);return true}
+    var k=norm(v);if(k.length<3)return false;var m=o.lista.filter(function(x){return x.k===k})[0];if(m){o.pick(m);return true}return false}
+  inp.addEventListener('input',cerca);inp.addEventListener('change',cerca);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!cerca()){var k=norm(inp.value).split(' '),m=o.lista.filter(function(x){return k.every(function(t){return x.k.indexOf(t)>=0})})[0];if(m){inp.value=m.n;o.pick(m)}}});
+  $(o.chips).innerHTML='<span style="font-size:.85rem;color:var(--mut);align-self:center">Prova con:</span>'+o.esempi.map(function(x,i){return '<button type="button" data-e="'+i+'">'+esc(o.nomeFn(x))+'</button>'}).join('');
+  Array.prototype.forEach.call($(o.chips).querySelectorAll('button[data-e]'),function(b){b.addEventListener('click',function(){var x=o.esempi[+b.getAttribute('data-e')];inp.value=o.nomeFn(x);o.pick(x)})});
+  o.pick(o.esempi[0]);
+}
+function kv(a){return '<div class="kv">'+a.map(function(x){return '<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join('')+'</div>'}
+function trova(lista,t){var q=norm(t);return lista.filter(function(x){return x.k.indexOf(q)>=0})[0]}
+
+var SEL={inc:null,via:null,q:null};
+function strumenti(){
+  var ex1=[IA.c[0],trova(IA.c,'loreto'),trova(IA.c,'lodi'),trova(IA.c,'duomo')].filter(Boolean);
+  suggest({input:'q-inc',dl:'dl-inc',chips:'c-inc',lista:IA.c,nomeFn:function(x){return x.n},esempi:ex1,pick:function(it){SEL.inc=it;ris_inc()}});
+  var ex2=[trova(VA.v,'padova'),VA.v[0],trova(VA.v,'buenos aires'),trova(VA.v,'ripamonti')].filter(Boolean);
+  suggest({input:'q-via',dl:'dl-via',chips:'c-via',lista:VA.v,nomeFn:function(x){return x.n},esempi:ex2,pick:function(it){SEL.via=it;ris_via()}});
+  var ex3=[trova(QI.q,'isola'),trova(QI.q,'navigli'),trova(QI.q,'duomo'),trova(QI.q,'lambrate')].filter(Boolean);
+  suggest({input:'q-q',dl:'dl-q',chips:'c-q',lista:QI.q,nomeFn:function(x){return x.n},esempi:ex3,pick:function(it){SEL.q=it;ris_q();mappaq()}});
+  RD.push(function(){ris_inc();ris_via();ris_q();mappaq()});
+}
+function ris_inc(){
+  var x=SEL.inc;if(!x)return;var W=Math.max(280,$('r-inc').clientWidth-24-0),tot=IA.n_tutti;
+  var mini=(function(){var w=Math.min(240,W),P=mkproj(w,city()),s=svgOpen(w,P.H,'cut');
+    GEO.features.forEach(function(f){s+='<path d="'+P.path(f)+'" fill="'+C.base+'" stroke="#fff" stroke-width="1"/>'});
+    var p=P.pt(x.lon,x.lat);s+='<circle cx="'+r1(p[0])+'" cy="'+r1(p[1])+'" r="12" fill="none" stroke="'+C.m1+'" stroke-width="2.5"/><circle cx="'+r1(p[0])+'" cy="'+r1(p[1])+'" r="5" fill="'+C.m1+'"/>';
+    return '<div class="ch" style="width:'+w+'px">'+s+'</svg></div>'})();
+  var h='<b class="big">'+esc(x.n)+'</b><p><b>Posto '+f0(x.pos)+'</b> su '+f0(tot)+' incroci con almeno un incidente. In 15 anni: <b>'+pl(x.inc,'incidente','incidenti')+'</b>, uno ogni '+f0(15*365/x.inc)+' giorni.</p>';
+  h+='<div class="ch">'+ybars(W,x.y,C.m1,'incidenti')+'</div>';
+  h+=kv([[f0(x.fe),'feriti'],[f0(x.mo),x.mo===1?'morto':'morti'],[f0(x.pe),'incidenti con un pedone'],[f0(x.bi),'incidenti con una bici'],[f0(x.mt),'incidenti con una moto'],[f0(sum(x.y.slice(10,15)))+' nel 2020-24','posto '+f0(x.p3)+' (nel 2010-14: '+f0(x.p1)+')']]);
+  h+='<p style="margin-top:.8em"><b>Dove si trova.</b></p>'+mini;
+  $('r-inc').innerHTML=h;
+}
+function ris_via(){
+  var x=SEL.via;if(!x)return;var W=Math.max(280,$('r-via').clientWidth-24);
+  var h='<b class="big">'+esc(x.n)+'</b><p><b>Posto '+f0(x.pos)+'</b> su '+f0(VA.n_vie)+' vie per numero di incidenti: <b>'+f0(x.inc)+'</b> in 15 anni. Per chilometro è al <b>posto '+f0(x.posk)+'</b>: '+f1(x.kma)+' incidenti per km ogni anno ('+f1(x.km)+' km di strada).</p>';
+  h+='<div class="ch">'+ybars(W,x.y,C.m5,'incidenti')+'</div>';
+  h+=kv([[f0(x.fe),'feriti'],[f0(x.mo),x.mo===1?'morto':'morti'],[f0(x.pe),'incidenti con un pedone'],[f0(x.bi),'incidenti con una bici'],[f0(x.mt),'incidenti con una moto'],[sg0((x.y[14]/x.y[0]-1)*100)+'%','dal 2010 al 2024']]);
+  $('r-via').innerHTML=h;
+}
+function ris_q(){
+  var x=SEL.q;if(!x)return;var W=Math.max(280,$('r-q').clientWidth-24);
+  var h='<b class="big">'+esc(x.n)+'</b><p><b>'+f0(x.inc)+' incidenti</b> in 15 anni: posto '+f0(x.posInc)+' su '+QI.q.length+' quartieri. Per chilometro quadrato, <b>posto '+f0(x.posDens)+'</b> ('+f0(x.dens)+' incidenti per km² ogni anno). Ogni 1.000 residenti: '+f0(x.inc/x.ab*1000/15)+' l’anno.</p>';
+  h+='<div class="ch">'+ybars(W,x.y,C.m4,'incidenti')+'</div>';
+  h+=kv([[f0(x.fe),'feriti'],[f0(x.mo),x.mo===1?'morto':'morti'],[f0(x.pe),'incidenti con un pedone'],[f0(x.bi),'incidenti con una bici'],[f0(x.mt),'incidenti con una moto'],[f0(x.ab),'residenti']]);
+  $('r-q').innerHTML=h;
+}
+var QC=[{col:'#fdebd6'},{col:'#fbc78e'},{col:'#f79f4b'},{col:'#e0690f'},{col:'#8f3d00'}];
+function mappaq(){
+  var W=width('ch-q'),P=mkproj(W,city()),d=QI.q.map(function(q){return q.dens}).sort(function(a,b){return a-b}),cut=[1,2,3,4].map(function(i){return d[Math.floor(i*d.length/5)]});
+  function cl(v){var k=0;cut.forEach(function(c,i){if(v>=c)k=i+1});return k}
+  var cnt=[0,0,0,0,0],s=svgOpen(W,P.H,'cut'),sel='',lab='';
+  QI.q.forEach(function(q){var k=cl(q.dens),on=SEL.q&&SEL.q.id===q.id;cnt[k]++;
+    var el='<path d="'+P.path(q.f)+'" fill="'+QC[k].col+'" stroke="'+(on?C.ink:'#fff')+'" stroke-width="'+(on?3:0.8)+'" stroke-linejoin="round" data-t="'+esc('<b>'+q.n+'</b><br>'+f0(q.inc)+' incidenti in 15 anni<br>'+f0(q.dens)+' per km² ogni anno')+'"/>';
+    if(on)sel=el;else s+=el});
+  s+=sel;
+  if(SEL.q){var b=P.bb(SEL.q.f),t=SEL.q.n,w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+3),W-w/2-3),y=Math.max(16,Math.min(P.H-6,b.y-b.h/2-6));
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
+  $('ch-q').innerHTML=s+'</svg>';
+  var nm=['meno di '+f0(cut[0]),f0(cut[0])+'-'+f0(cut[1]-1),f0(cut[1])+'-'+f0(cut[2]-1),f0(cut[2])+'-'+f0(cut[3]-1),f0(cut[3])+' o più'];
+  $('lg-q').innerHTML=nm.map(function(t,i){return '<span><i style="background:'+QC[i].col+'"></i>'+t+' <b>&nbsp;('+cnt[i]+')</b></span>'}).join('')+'<span style="width:100%;font-size:.8rem;color:var(--mut)">incidenti per km² ogni anno · tra parentesi i quartieri</span>';
+}
+
+/* ---------- limiti, metodo ---------- */
 function limiti(){
-  var q=D.qualita,A=D.aggancio;
-  var L=['<b>Solo incidenti con feriti o morti</b>, registrati dalle forze dell’ordine. Gli incidenti con soli danni, le cadute da soli e gli urti lievi spesso non ci sono: i numeri sono un minimo.',
-   '<b>Il luogo è ricostruito.</b> Il file non ha coordinate: c’è solo il testo scritto nel verbale («via Monte Rosa, 57», «via Valtellina incrocio viale Jenner»). Abbiamo trovato il luogo per il '+nf(q.posizionati,0)+'% dei casi; il '+nf(q.strada,0)+'% ha solo la via (spesso «palo luce n.») e il '+nf(q.nessuna,0)+'% nessun luogo (autostrade, tangenziali, nomi non riconosciuti). Gli incroci delle classifiche sono i casi in cui il verbale cita due vie: gli incidenti con un numero civico sono sulla mappa a quadrati ma non nella classifica degli incroci. Un incrocio può quindi avere più incidenti di quelli contati.',
-   '<b>L’incrocio dipende da come lo ha scritto chi ha compilato il verbale.</b> Per i grandi slarghi (piazzale Loreto, piazzale Lodi, viale Isonzo / piazza Trento…) lo stesso luogo si scrive in modi diversi: abbiamo riunito i nodi vicini, ma qualche incidente può finire in un incrocio accanto. '+f0(A.scartati_stessa_via_o_senza_via)+' righe con la stessa via scritta due volte o una via non riconosciuta sono state escluse dalle classifiche.',
-   '<b>Niente traffico, niente persone.</b> Non esistono dati aperti su quante persone, auto, moto e bici passano da ogni incrocio. Per questo non si può parlare di «incrocio più pericoloso» ma solo di incrocio dove si concentrano gli incidenti.',
-   '<b>Feriti e morti sono di tutto l’incidente.</b> Il file conta i feriti dell’incidente nel suo insieme e solo per i pedoni dà un conteggio a parte: non si sa quanti ciclisti, motociclisti o automobilisti si siano fatti male.',
-   '<b>L’ora e il giorno non ci sono</b> nei microdati 2010–2024 (solo il mese). I dati per fascia oraria sono i totali di Milano fino al 2011, senza luogo. I microdati Istat con coordinate esistono (dai dati 2022) ma sono riservati ai ricercatori. I file pubblici «micro.STAT» dell’Istat non ho potuto aprirli: i link sono caricati da JavaScript e non li ho trovati, quindi non so se abbiano comune e ora.',
-   '<b>I morti sono quelli entro 30 giorni</b> (somma di chi muore entro 24 ore e di chi muore dopo, fino a 30 giorni). Il 2025 del Comune è un dato recente e provvisorio. Il Comune e l’Istat contano in modo un po’ diverso, per cui i totali non coincidono del tutto.',
+  var q=R.qualita,A=R.aggancio;
+  var Ls=['<b>Solo incidenti con feriti o morti</b>, registrati dalle forze dell’ordine. Gli incidenti con soli danni, le cadute da soli e gli urti lievi spesso non ci sono: i numeri sono un minimo.',
+   '<b>Il luogo è ricostruito.</b> I dati non hanno coordinate: c’è solo il testo scritto nel verbale («via Monte Rosa, 57», «via Valtellina incrocio viale Jenner»). Il luogo è stato trovato per il '+f0(q.posizionati)+'% dei casi; il '+f0(q.strada)+'% ha solo la via e il '+f0(q.nessuna)+'% nessun luogo (autostrade, tangenziali, nomi non riconosciuti). Gli incroci delle classifiche sono i casi in cui il verbale cita due vie: gli incidenti con un numero civico sono nei quartieri e nelle vie ma non nella classifica degli incroci. Un incrocio può quindi avere più incidenti di quelli contati.',
+   '<b>L’incrocio dipende da come lo ha scritto chi ha compilato il verbale.</b> Per i grandi slarghi (piazzale Loreto, piazzale Lodi, viale Isonzo / piazza Trento…) lo stesso luogo si scrive in modi diversi: i punti vicini sono stati riuniti, ma qualche incidente può finire in un incrocio accanto. '+f0(A.scartati_stessa_via_o_senza_via)+' casi con la stessa via scritta due volte o una via non riconosciuta sono esclusi dalle classifiche.',
+   '<b>Niente traffico, niente persone.</b> Non esistono dati aperti su quante persone, auto, moto e bici passano da ogni incrocio. Per questo non si può parlare di «incrocio più pericoloso» ma solo di incrocio dove si concentrano gli incidenti. Per lo stesso motivo il colore dei quartieri non dice dove è più rischioso abitare.',
+   '<b>Feriti e morti sono di tutto l’incidente.</b> I dati contano i feriti dell’incidente nel suo insieme e solo per i pedoni danno un conteggio a parte: non si sa quanti ciclisti, motociclisti o automobilisti si siano fatti male. Le percentuali «su 100 incidenti» contano gli incidenti in cui compare quel mezzo, non le persone.',
+   '<b>L’ora e il giorno della settimana non ci sono</b> nei dati 2012-2024 (solo il mese). Per questo non c’è un grafico per ora e per giorno. I dati per fascia oraria sono i totali di Milano fino al 2011, senza luogo. I dati con le coordinate esatte esistono ma sono riservati ai ricercatori.',
+   '<b>I morti sono quelli entro 30 giorni</b> (chi muore entro 24 ore più chi muore dopo, fino a 30 giorni). Il 2025 del Comune è un dato recente e provvisorio. Il Comune e l’Istat contano in modo un po’ diverso, per cui i totali non coincidono del tutto (1-2%).',
    '<b>Zone 30 e Area C: confronti, non prove.</b> Nessun dato dice quando e dove i limiti siano stati davvero rispettati, e ogni zona nasce in un contesto diverso. La data di avvio di Area C non è nei dati usati: è da confermare. Il limite di 30 km/h esteso a gran parte della città non è nella mappa delle aree a velocità limitata, e comunque i dati degli incidenti finiscono al 2024.',
-   '<b>OpenStreetMap è di ottobre 2026</b>, gli incidenti sono del 2010–2024: strade cambiate nel frattempo (rotatorie, piazze, sensi unici) possono non corrispondere.'];
-  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+   '<b>Quartieri: '+f0(QI.fuori)+' incidenti con luogo trovato cadono fuori dai confini</b> (in strade di confine o fuori città) e non sono contati nei quartieri.',
+   '<b>OpenStreetMap è di ottobre 2026</b>, gli incidenti sono del 2010-2024: strade cambiate nel frattempo (rotatorie, piazze, sensi unici) possono non corrispondere.'];
+  $('limiti-lista').innerHTML=Ls.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 function metodo(){
-  var A=D.aggancio,O=D.incroci_osm,q=D.qualita;
-  var M=['Gli incidenti con feriti o morti di Milano 2010–2024 vengono dai microdati Istat nella versione per comune di Regione Lombardia (15 file, uno per anno, '+f0(D.totali.righe)+' righe in tutto). Il campo «nome della strada» è un testo libero: lo abbiamo trasformato in un punto sulla mappa con un programma, usando il registro dei numeri civici del Comune e le strade di OpenStreetMap (lo stesso lavoro della pagina <a href="../bici-auto-mezzi/">Bici, auto o mezzi</a>).',
+  var A=R.aggancio,O=R.incroci_osm;
+  var M=['Gli incidenti con feriti o morti di Milano 2010-2024 vengono dai dati Istat nella versione per comune di Regione Lombardia (15 file, uno per anno, '+f0(R.totali.righe)+' righe in tutto). Il campo «nome della strada» è un testo libero: è stato trasformato in un punto sulla mappa con un programma, usando il registro dei numeri civici del Comune e le strade di OpenStreetMap (lo stesso lavoro della pagina <a href="../bici-auto-mezzi/">Bici, auto o mezzi</a>).',
    'Un <b>incrocio</b> è un punto di OpenStreetMap dove si toccano almeno tre tratti di strade con nome e almeno due nomi diversi (strade di servizio, piste e percorsi pedonali esclusi). I punti a meno di 25 m uno dall’altro, o a meno di 90 m con almeno due nomi in comune (le due carreggiate dello stesso incrocio), sono riuniti in un solo incrocio: '+f0(O.incroci_ritaglio)+' nel ritaglio di mappa, '+f0(O.incroci)+' dentro il confine del Comune.',
-   'Un incidente è <b>agganciato a un incrocio</b> se il verbale indica due vie diverse e il punto trovato è a meno di 60 m da un incrocio ('+f0(A.agganciati_da_incrocio)+' casi; distanza mediana '+nf(A.distanza_mediana_m,0)+' m, il 90% entro '+nf(A.distanza_p90_m,0)+' m), oppure se il verbale dice «intersezione» ma indica un numero civico ('+f0(A.agganciati_da_civico)+' casi, entro 40 m). Gli altri non sono nella classifica.',
-   '<b>Classifiche</b>: per incidenti, feriti, morti e per tipo di mezzo coinvolto, su 2010–2024; i tre periodi di cinque anni servono per vedere se il posto in classifica resta. <b>Vie</b>: un incidente conta per ciascuna delle vie nominate; la lunghezza è quella delle strade OSM con quel nome. <b>Mappa</b>: quadrati di 100 m, tutti gli incidenti con luogo trovato.',
-   '<b>Zone 30</b>: per ogni anno di istituzione tra il 2013 e il 2021, incidenti con luogo entro 15 m dall’area nei 3 anni prima e nei 3 dopo, confrontati con il resto della città negli stessi anni (punti mai dentro nessuna area). <b>Area C</b>: incidenti con luogo dentro il poligono, per anno, in indice (media 2010–2011 = 100).',
-   'Tutto si rifà con i programmi del progetto, che ha anche le sue note. Nessun dato riguarda le persone coinvolte; le età dei conducenti presenti nei microdati non sono state usate.'];
-  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
-}
-function fonti(){
-  var R=[['Comune di Milano, Polizia Locale (ds175, ds176, ds177, ds179)','Conteggi mensili: incidenti, feriti, morti (2001–2025), per natura, per municipio, per numero di veicoli','CC BY','Nessun luogo preciso; usato per i totali annuali e il Covid'],
-   ['Istat, via Regione Lombardia / PoliS-Lombardia: «Incidenti Stradali – Microdati – Anno 2010…2024»','Ogni incidente con feriti: mese, strada (testo), tipo di strada e di intersezione, natura, tipi di veicolo, pedoni, feriti, morti','CC BY 4.0','Niente coordinate, ora e giorno; è la fonte principale'],
-   ['Regione Lombardia: «Incidenti stradali nel Comune di Milano» (2000–2011)','Totali annuali per ore di punta, notte, fine settimana, intersezione, tipo di veicolo','CC0','Solo fino al 2011; nessun luogo'],
-   ['Istat: microdati per la ricerca (con coordinate) e file standard 2000–2009','Coordinate degli incidenti (dai dati 2022), ora e giorno','Riservati: ricercatori o registrazione','Non usati: non sono aperti'],
-   ['Istat: file pubblici micro.STAT (dal 2010)','Incidenti di tutta Italia, tutti i record dal 2014','Uso pubblico','Non verificato: link non raggiungibili dai programmi; non so se ci sia il comune'],
-   ['Città/Comuni lombardi (Monza, Bergamo, ecc.)','Elenchi con coordinate per altri comuni','vari','Nessuno è Milano'],
-   ['OpenStreetMap (estratto del 29/10/2026)','Strade, nomi, incroci','ODbL','Aggiornato a oggi, gli incidenti no'],
-   ['Comune di Milano: ds1438 (aree a velocità limitata), Area C / Area B (ds51), registro dei civici (ds634)','Zone 30 con data, poligoni, numeri civici','CC BY','']];
-  table('tab-fonti',['Fonte','Che cosa contiene','Licenza','Che cosa manca'],R.map(function(r){return r.map(function(c){return '<span style="white-space:normal;text-align:left;display:inline-block">'+c+'</span>'})}));
-  Array.prototype.forEach.call(el('tab-fonti').querySelectorAll('th,td'),function(c){c.className=''});
+   'Un incidente è <b>agganciato a un incrocio</b> se il verbale indica due vie diverse e il punto trovato è a meno di 60 m da un incrocio ('+f0(A.agganciati_da_incrocio)+' casi), oppure se il verbale dice «intersezione» ma indica un numero civico ('+f0(A.agganciati_da_civico)+' casi, entro 40 m). Gli altri non sono nella classifica degli incroci.',
+   '<b>Posti in classifica</b>: per numero di incidenti nei 15 anni; i due periodi di cinque anni (2010-2014 e 2020-2024) servono per vedere se il posto resta. <b>Vie</b>: un incidente conta per ciascuna delle vie nominate; la lunghezza è quella delle strade OpenStreetMap con quel nome. <b>Quartieri</b>: incidenti con luogo trovato dentro i confini dei 88 quartieri del Comune; incidenti per km² = incidenti diviso area diviso 15 anni.',
+   '<b>Percentuali e omini</b>: per ogni anno, la quota di incidenti con quel mezzo sul totale degli incidenti, arrotondata a numeri interi. I morti sono quelli dei 5 anni 2010-2014 e 2020-2024.',
+   '<b>Zone 30</b>: per ogni anno di istituzione tra il 2013 e il 2021, incidenti entro 15 m dall’area nei 3 anni prima e nei 3 dopo, confrontati con il resto della città negli stessi anni. <b>Area C</b>: incidenti con luogo dentro il poligono, per anno, in indice (media 2010-2011 = 100).',
+   'Tutti i numeri della pagina sono calcolati dalle tabelle aggregate scaricabili in fondo. Nessun dato riguarda le persone coinvolte; le età dei conducenti presenti nei dati non sono state usate.'];
+  $('metodo-lista').innerHTML=M.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 })();
 </script>

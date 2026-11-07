@@ -90,9 +90,9 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <h2 id="storia">Milano dal 1861</h2>
 <div class="fig">
   <h3 id="t-scala"></h3>
-  <p class="sub">Un omino sono 100.000 abitanti, contati ad ogni censimento dentro i confini di allora. I contorni chiari sono gli abitanti che mancano rispetto al massimo.</p>
+  <p class="sub">Ogni pallino è un censimento, contato dentro i confini di allora. I tratti a puntini sono i salti dovuti all’ampliamento dei confini.</p>
   <div class="lg" id="lg-scala"></div>
-  <div class="ch" id="ch-scala" role="img" aria-label="Scala di omini: abitanti di Milano a ogni censimento dal 1861 al 2023"></div>
+  <div class="ch" id="ch-scala" role="img" aria-label="Linea: abitanti di Milano a ogni censimento dal 1861 al 2023"></div>
   <ul class="notes" id="nt-scala"></ul>
   <p class="src">Fonte: Comune di Milano, popolazione ai censimenti 1861-2011 (CC BY, dati ISTAT); 2021 e 2023: somma delle sezioni di censimento ISTAT (CC BY 4.0). Mancano il 1891 (censimento non fatto) e il 1941 (guerra). Annessioni: Regio decreto 8 giugno 1873, n. 1413, e Regio decreto 2 settembre 1923, n. 1912, letti su Normattiva.</p>
 </div>
@@ -101,9 +101,9 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <h2 id="famiglie">Stessi abitanti, altre famiglie</h2>
 <div class="fig">
   <h3 id="t-fam"></h3>
-  <p class="sub">Ogni quadretto sono 5.000 famiglie. In blu le famiglie di una sola persona, in grigio tutte le altre.</p>
+  <p class="sub">Ogni barra è l’insieme delle famiglie di Milano, lunga quanto il loro numero. In blu quelle di una sola persona, in grigio tutte le altre.</p>
   <div class="lg" id="lg-fam"></div>
-  <div class="ch" id="ch-fam" role="img" aria-label="Quadretti: famiglie di Milano nel 1991 e nel 2023, divise tra una persona sola e più persone"></div>
+  <div class="ch" id="ch-fam" role="img" aria-label="Barre: famiglie di Milano nel 1991 e nel 2023, divise tra una persona sola e più persone"></div>
   <p class="note" id="nn-fam"></p>
   <p class="src">Fonte: ISTAT, censimento 1991 e censimento permanente 2023 (CC BY 4.0), somma delle sezioni di Milano. Le famiglie del 2023 sono stimate con i registri: il confronto è tra due metodi diversi.</p>
 </div>
@@ -163,7 +163,6 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <li><b>Le sezioni cambiano da un censimento all’altro.</b> Il codice di una sezione viene riutilizzato con confini diversi (tra 1991 e 2001, dei 5.509 codici in comune solo 14 hanno la stessa popolazione): non si possono confrontare per codice. Per confrontare nel tempo si usa la geografia più stabile, gli 88 quartieri del 2021.</li>
 <li><b>Come sono collegate le sezioni ai quartieri.</b> I contorni dei quartieri sono ottenuti unendo le sezioni 2021. Ogni sezione del 1991, 2001 e 2011 va al quartiere con cui ha più area in comune; dove il Comune o ISTAT hanno già un’assegnazione ufficiale (quartiere 2001, municipio 1991 e 2001, quartiere 2021 e 2023) è usata quella. Il municipio ottenuto per sovrapposizione coincide con quello ufficiale per il 99,97% degli abitanti nel 1991 e il 100% nel 2001; il quartiere coincide con quello del Comune per il 99,91% nel 2001. Ripartendo le sezioni per area invece di assegnarle intere, la popolazione di un quartiere cambia di una mediana dell’1,4% nel 1991, dello 0,2% nel 2001 e dello 0,01% nel 2011.</li>
 <li><b>Quartieri confrontabili.</b> 66 quartieri hanno almeno 2.000 residenti nel 1991 e nel 2023 e meno del 5% di differenza tra i due modi di assegnare le sezioni. Gli altri 22 restano in grigio.</li>
-<li><b>Omini e quadretti.</b> Gli omini sono arrotondati a un decimo di omino; i quadretti all’intero. I numeri esatti sono nel riquadro che compare al tocco.</li>
 <li>I programmi per rifare tutto sono nel progetto, con le note su ogni passaggio.</li>
 </ul></div></details>
 <details id="download"><summary>File</summary><div class="in">
@@ -291,71 +290,52 @@ function highlights(){
   $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
-/* ---------- 1. scala di omini ---------- */
-function omino(x,y,w,h,fill,clip){
-  var s='<g'+(clip?' clip-path="url(#'+clip+')"':'')+'><g transform="translate('+r1(x)+' '+r1(y)+') scale('+(w/10).toFixed(3)+' '+(h/14).toFixed(3)+')" fill="'+fill+'"><circle cx="5" cy="2.6" r="2.4"/><path d="M1.2 14V8.6Q1.2 5.9 3.9 5.9H6.1Q8.8 5.9 8.8 8.6V14Z"/></g></g>';
-  return s;
-}
+/* ---------- 1. linea della popolazione ---------- */
 function scala(){
-  var W=width('ch-scala'),n=STO.length,U=100000,pitch=W/n,iw=Math.min(pitch-4,18),ih=iw*1.4,p=ih+2;
+  var W=width('ch-scala'),n=STO.length,ml=10,mr=12,mt=22,mb=30,H=Math.round(Math.min(340,W*0.9)),pw=W-ml-mr,ph=H-mt-mb;
   var pk=0;STO.forEach(function(s,i){if(s.v>STO[pk].v)pk=i});
   var mn=pk+1;for(var i=pk+1;i<n;i++)if(STO[i].v<STO[mn].v)mn=i;
-  var slots=Math.ceil(STO[pk].v/U),T0=112,Hb=T0+slots*p,H=Hb+46;
-  var s=svgOpen(W,H),defs='',cols='',top=[];
-  function topOf(count){var f=Math.floor(count),fr=count-f;return fr>0.03?Hb-f*p-ih*Math.max(fr,.25):Hb-(f-1)*p-ih}
-  function pile(i,x,count,fill,tag){
-    var f=Math.floor(count),fr=count-f,o='';
-    for(var k=0;k<f;k++)o+=omino(x,Hb-k*p-ih,iw,ih,fill);
-    if(fr>0.03){var id='cl'+tag+i,fr2=Math.max(fr,.25);defs+='<clipPath id="'+id+'"><rect x="'+r1(x)+'" y="'+r1(Hb-f*p-ih*fr2)+'" width="'+r1(iw)+'" height="'+r1(ih*fr2)+'"/></clipPath>';o+=omino(x,Hb-f*p-ih,iw,ih,fill,id)}
-    return o}
-  var NT=[{i:STO.findIndex(function(a){return a.y===1881}),t:'Nel 1873 Milano si unisce al comune dei Corpi Santi: la città passa da 9,7 a 72,9 chilometri quadrati. La salita del 1881 è in gran parte territorio nuovo.'},
-          {i:STO.findIndex(function(a){return a.y===1931}),t:'Nel 1923 undici comuni vengono uniti a Milano (Affori, Baggio, Chiaravalle, Crescenzago, Gorla-Precotto, Greco, Lambrate, Musocco, Niguarda, Trenno, Vigentino): da 76,3 a 187,2 chilometri quadrati.'},
-          {i:pk,t:'Il massimo: '+f0(STO[pk].v)+' abitanti nel '+STO[pk].y+'.'},
-          {i:mn,t:'Il minimo tra i censimenti: '+f0(STO[mn].v)+' abitanti nel '+STO[mn].y+'. Da qui la città risale.'},
-          {i:n-1,t:'Nel '+STO[n-1].y+' gli abitanti sono '+f0(STO[n-1].v)+': quasi come nel 1991 ('+f0(D.comune.pop[0])+'), ma in quartieri e famiglie diversi.'}];
-  var noteIdx={};NT.forEach(function(t,k){if(t.i>=0)noteIdx[t.i]=k+1});
-  var pkTop=topOf(STO[pk].v/U),circles='';
-  STO.forEach(function(st,i){
-    var cx=i*pitch+pitch/2,x=cx-iw/2,count=st.v/U,fill=C.gry;
-    if(st.y===1881||st.y===1931)fill=C.ora;if(i===pk)fill=C.mi;if(st.y===1991||st.y===2023)fill=C.ink;
-    var col='';
-    if(i>pk)col+=pile(i,x,STO[pk].v/U,'#e7e9ee','g');
-    col+=pile(i,x,count,fill,'s');
-    var tp=i>pk?pkTop:topOf(count);top[i]=tp;
-    var tipt='<b>'+st.y+'</b><br>'+f0(st.v)+' abitanti'+(i>0&&STO[i-1]?'<br>'+sg1(pct(st.v,STO[i-1].v))+'% rispetto al censimento prima':'')+(st.k?'<br>Confini di allora: '+f1(st.k).replace('.',',')+' km²':'');
-    cols+='<g'+tip(tipt)+'>'+col+'<rect x="'+r1(cx-pitch/2)+'" y="0" width="'+r1(pitch)+'" height="'+Hb+'" fill="transparent"/></g>';
-    var ly=tp-3;
-    cols+=T(cx+4,ly,f2(st.v/1e6),{c:'m',tr:'rotate(-90 '+r1(cx+4)+' '+r1(ly)+')'});
-    if(noteIdx[i]){var cy=ly-24-13;circles+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="9.5" fill="'+C.ink+'"/>'+T(cx,cy+4,noteIdx[i],{a:'middle',c:'w'})}
-    var yy=Hb+8;cols+=T(cx+4,yy,st.y,{c:noteIdx[i]?'k':'m',tr:'rotate(-90 '+r1(cx+4)+' '+r1(yy)+')',a:'end'});
-  });
-  /* parentesi sulla discesa */
-  var xa=pk*pitch+pitch/2,xb=mn*pitch+pitch/2,bY=44,mid=(xa+xb)/2,loss=STO[pk].v-STO[mn].v,anni=STO[mn].y-STO[pk].y;
-  var br=L(xa,bY,xb,bY,C.ink,1.5)+L(xa,bY,xa,bY+6,C.ink,1.5)+L(xb,bY,xb,bY+6,C.ink,1.5)+
-    T(mid,bY-22,'−'+f0(loss)+' abitanti',{a:'middle',c:'k',st:'font-size:13px'})+T(mid,bY-7,'in '+anni+' anni ('+sg0(pct(STO[mn].v,STO[pk].v))+'%)',{a:'middle',c:'k',st:'font-size:13px'});
-  s+='<defs>'+defs+'</defs>'+br+cols+circles+L(0,Hb+1,W,Hb+1,C.axis,1)+'</svg>';
-  $('ch-scala').innerHTML=s;
-  $('lg-scala').innerHTML='<span><i style="background:'+C.mi+'"></i>il massimo</span><span><i style="background:'+C.ora+'"></i>dopo l’ampliamento dei confini</span><span><i style="background:'+C.ink+'"></i>1991 e 2023</span><span><i style="background:#e7e9ee"></i>abitanti persi dal massimo</span>';
-  $('nt-scala').innerHTML=NT.filter(function(t){return t.i>=0}).map(function(t){return '<li><b class="nb">'+noteIdx[t.i]+'</b><span>'+t.t+'</span></li>'}).join('');
-  $('t-scala').textContent='Milano arriva a '+f2(STO[pk].v/1e6)+' milioni di abitanti nel '+STO[pk].y+', ne perde '+f0(loss)+' in '+anni+' anni e nel '+STO[n-1].y+' torna a '+f2(STO[n-1].v/1e6)+' milioni';
+  var y0=STO[0].y,y1=STO[n-1].y,vmax=1900000;
+  function X(y){return ml+(y-y0)/(y1-y0)*pw}function Y(v){return mt+ph-v/vmax*ph}
+  var s=svgOpen(W,H);
+  [0,500000,1000000,1500000].forEach(function(v){s+=L(ml,Y(v),ml+pw,Y(v),v===0?C.axis:C.grid,1)+(v>0?T(ml,Y(v)-4,(v/1e6).toString().replace('.',',')+(v===1000000?' milione':' milioni'),{c:'m'}):'')});
+  [1861,1900,1950].forEach(function(y){s+=T(X(y),H-10,y,{a:y===1861?'start':'middle',c:'m'})});
+  s+=T(X(2023),H-10,2023,{a:'end',c:'m'});
+  var idx=function(y){return STO.findIndex(function(a){return a.y===y})};
+  var jumps=[[idx(1871),idx(1881)],[idx(1921),idx(1931)]];
+  for(var i=1;i<n;i++){var j=jumps.some(function(q){return q[0]===i-1&&q[1]===i});
+    s+=L(X(STO[i-1].y),Y(STO[i-1].v),X(STO[i].y),Y(STO[i].v),C.ink,3,j?' stroke-dasharray="2 5" stroke-linecap="round"':' stroke-linecap="round"')}
+  var NT=[{i:idx(1881),t:'Nel 1873 Milano si unisce al comune dei Corpi Santi: la città passa da 9,7 a 72,9 chilometri quadrati. La salita del 1881 è in gran parte territorio nuovo.'},
+          {i:idx(1931),t:'Nel 1923 undici comuni vengono uniti a Milano (Affori, Baggio, Chiaravalle, Crescenzago, Gorla-Precotto, Greco, Lambrate, Musocco, Niguarda, Trenno, Vigentino): da 76,3 a 187,2 chilometri quadrati.'}];
+  var dots='',circ='';
+  STO.forEach(function(st,i){var x=X(st.y),y=Y(st.v),big=(i===pk||i===mn||i===0||i===n-1);
+    dots+='<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="'+(i===pk?7:big?5.5:4)+'" fill="'+(i===pk?C.mi:C.ink)+'" stroke="#fff" stroke-width="1.5"/>'+
+      '<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="11" fill="transparent"'+tip('<b>'+st.y+'</b><br>'+f0(st.v)+' abitanti'+(i>0?'<br>'+sg1(pct(st.v,STO[i-1].v))+'% rispetto al censimento prima':'')+(st.k?'<br>Confini di allora: '+f1(st.k)+' km²':''))+'/>'});
+  NT.forEach(function(t,k){var x=X(STO[t.i].y),y=Y(STO[t.i].v);circ+='<circle cx="'+r1(x-14)+'" cy="'+r1(y-15)+'" r="9.5" fill="'+C.ink+'"/>'+T(x-14,y-11,k+1,{a:'middle',c:'w'})});
+  var lab='';
+  lab+=T(X(STO[0].y),Y(STO[0].v)+18,f0(STO[0].v)+' nel '+STO[0].y,{c:'k',st:'font-size:13px'});
+  lab+=T(X(STO[pk].y),Y(STO[pk].v)-12,f0(STO[pk].v)+' nel '+STO[pk].y,{a:'middle',c:'k',st:'font-size:13px;fill:'+C.mi});
+  lab+=T(X(STO[mn].y)+8,Y(STO[mn].v)+22,f0(STO[mn].v)+' nel '+STO[mn].y,{a:'end',c:'k',st:'font-size:13px'});
+  lab+=T(X(STO[n-1].y)+4,Y(STO[n-1].v)-26,f0(STO[n-1].v),{a:'end',c:'k',st:'font-size:13px'})+T(X(STO[n-1].y)+4,Y(STO[n-1].v)-13,'nel '+STO[n-1].y,{a:'end',c:'k',st:'font-size:13px'});
+  var loss=STO[pk].v-STO[mn].v,anni=STO[mn].y-STO[pk].y;
+  $('ch-scala').innerHTML=s+circ+dots+lab+'</svg>';
+  $('lg-scala').innerHTML='';
+  $('nt-scala').innerHTML=NT.map(function(t,k){return '<li><b class="nb">'+(k+1)+'</b><span>'+t.t+'</span></li>'}).join('');
+  $('t-scala').textContent='Milano arriva a '+f2(STO[pk].v/1e6)+' milioni di abitanti nel '+STO[pk].y+', ne perde '+f0(loss)+' in '+anni+' anni ('+sg0(pct(STO[mn].v,STO[pk].v))+'%) e nel '+STO[n-1].y+' torna a '+f2(STO[n-1].v/1e6)+' milioni';
 }
 
-/* ---------- 2. quadretti delle famiglie ---------- */
+/* ---------- 2. barre delle famiglie ---------- */
 function famiglie(){
-  var c=CM(),W=width('ch-fam'),q=14,g=3,pt=q+g,cols=Math.max(8,Math.min(30,Math.floor((W+g)/pt)));
-  var A=[{y:1991,f:c.fam[0],s:c.fam1[0],p:c.pop[0]},{y:2023,f:c.fam[4],s:c.fam1[4],p:c.pop[4]}],U=5000,y=0,s='',H=0;
-  var out='';
+  var c=CM(),W=width('ch-fam'),bh=56,A=[{y:1991,f:c.fam[0],s:c.fam1[0],p:c.pop[0]},{y:2023,f:c.fam[4],s:c.fam1[4],p:c.pop[4]}],mx=Math.max(A[0].f,A[1].f),out='',y=0;
   A.forEach(function(a,bi){
-    var tot=Math.round(a.f/U),sol=Math.round(a.s/U),alt=tot-sol,t1=a.y+': '+f0(a.p)+' abitanti, '+f0(a.f)+' famiglie';
-    out+=T(0,y+14,t1,{c:'k',st:'font-size:13px'});y+=24;
-    for(var k=0;k<tot;k++){var r=Math.floor(k/cols),cc=k%cols,isS=k<sol;
-      out+='<rect x="'+(cc*pt)+'" y="'+(y+r*pt)+'" width="'+q+'" height="'+q+'" rx="2" fill="'+(isS?C.m4:'#c3c8d0')+'"/>'}
-    var rows=Math.ceil(tot/cols);y+=rows*pt+14;
-    out+=T(0,y,'<tspan fill="'+C.m4+'" font-weight="800">'+f0(a.s)+' di una persona</tspan> ('+f1(a.s/a.f*100)+'%) · '+f0(a.f-a.s)+' di più persone',{c:'m',st:'font-size:12px'});
-    y+=bi===0?34:8;
+    var w=a.f/mx*W,ws=a.s/a.f*w;
+    out+=T(0,y+14,a.y+': '+f0(a.p)+' abitanti, '+f0(a.f)+' famiglie',{c:'k',st:'font-size:13px'});y+=22;
+    out+='<rect x="0" y="'+y+'" width="'+r1(ws)+'" height="'+bh+'" fill="'+C.m4+'"/><rect x="'+r1(ws)+'" y="'+y+'" width="'+r1(w-ws)+'" height="'+bh+'" fill="#c3c8d0"/>';
+    out+=T(8,y+23,f0(a.s),{c:'w',st:'font-size:15px'})+T(8,y+43,f1(a.s/a.f*100)+'%',{c:'w'});
+    out+=T(ws+8,y+23,f0(a.f-a.s),{c:'k',st:'font-size:15px'})+T(ws+8,y+43,f1((a.f-a.s)/a.f*100)+'%',{c:'k'});
+    y+=bh+(bi===0?28:0);
   });
-  H=y;
-  $('ch-fam').innerHTML=svgOpen(W,H)+out+'</svg>';
+  $('ch-fam').innerHTML=svgOpen(W,y)+out+'</svg>';
   var d1=c.fam1[4]-c.fam1[0],d2=(c.fam[4]-c.fam1[4])-(c.fam[0]-c.fam1[0]);
   $('lg-fam').innerHTML='<span><i style="background:'+C.m4+'"></i>una persona sola</span><span><i style="background:#c3c8d0"></i>due o più persone</span>';
   $('t-fam').textContent='Con gli stessi abitanti, le famiglie di una persona passano da '+f0(c.fam1[0])+' a '+f0(c.fam1[4])+', quelle con più persone scendono da '+f0(c.fam[0]-c.fam1[0])+' a '+f0(c.fam[4]-c.fam1[4]);

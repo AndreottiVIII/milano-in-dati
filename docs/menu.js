@@ -497,4 +497,104 @@
         .catch(function () { /* niente blocco, pagina intatta */ });
     }
   } catch (e1) { /* niente blocco, pagina intatta */ }
+
+  // ---- Menu a tendina per i campi "scrivi il tuo quartiere / comune / via" (Davide, 7/11/2026):
+  // ogni <input list="..."> della pagina mostra sotto di sé l'elenco delle scelte, filtrato mentre si scrive.
+  // Le scelte si leggono dal <datalist> ogni volta (alcune pagine lo riempiono dopo).
+  try {
+    var st2 = document.createElement('style');
+    st2.textContent =
+      '.mid-tendina{position:absolute;z-index:1600;background:#fff;border:1.5px solid #000;border-top:0;max-height:264px;overflow-y:auto;' +
+      'font:15px/1.3 system-ui,"Segoe UI",Arial,sans-serif;color:#000;box-shadow:0 6px 14px rgba(0,0,0,.18);-webkit-overflow-scrolling:touch}' +
+      '.mid-tendina[hidden]{display:none}' +
+      '.mid-tendina button{display:block;width:100%;text-align:left;font:inherit;color:#000;background:#fff;border:0;border-top:1px solid #eee;' +
+      'padding:10px 12px;margin:0;cursor:pointer;min-height:44px}' +
+      '.mid-tendina button:hover,.mid-tendina button.on{background:#ffe1d6}' +
+      '.mid-tendina .mid-vuota{padding:10px 12px;color:#555}';
+    document.head.appendChild(st2);
+    var tend = document.createElement('div');
+    tend.className = 'mid-tendina';
+    tend.hidden = true;
+    tend.setAttribute('role', 'listbox');
+    document.body.appendChild(tend);
+    var attivo = null, scelte = [], evid = -1;
+    var normT = function (x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').trim(); };
+    function opzioni(inp) {
+      var dl = document.getElementById(inp.getAttribute('data-mid-list') || '');
+      if (!dl) return [];
+      var out = [];
+      Array.prototype.forEach.call(dl.querySelectorAll('option'), function (o) {
+        var v = o.value || o.textContent; if (v) out.push({ v: v, t: o.label && o.label !== v ? v + ' · ' + o.label : v });
+      });
+      return out;
+    }
+    function posiziona() {
+      if (!attivo) return;
+      var r = attivo.getBoundingClientRect();
+      tend.style.left = (r.left + window.scrollX) + 'px';
+      tend.style.top = (r.bottom + window.scrollY) + 'px';
+      tend.style.width = Math.max(200, r.width) + 'px';
+    }
+    function apri(inp) {
+      attivo = inp;
+      var q = normT(inp.value), tutte = opzioni(inp);
+      scelte = tutte.filter(function (o) { return !q || normT(o.v).indexOf(q) !== -1 || normT(o.t).indexOf(q) !== -1; });
+      // prima quelle che cominciano con quanto scritto
+      if (q) scelte.sort(function (a, b) { return (normT(a.v).indexOf(q) === 0 ? 0 : 1) - (normT(b.v).indexOf(q) === 0 ? 0 : 1); });
+      if (!tutte.length) { chiudi(); return; }
+      if (scelte.length === 1 && normT(scelte[0].v) === q) { chiudi(); return; }
+      tend.innerHTML = '';
+      evid = -1;
+      if (!scelte.length) {
+        var vv = document.createElement('div'); vv.className = 'mid-vuota'; vv.textContent = 'Nessun risultato'; tend.appendChild(vv);
+      }
+      scelte.slice(0, 200).forEach(function (o) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('role', 'option'); b.textContent = o.t;
+        b.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+        b.addEventListener('click', function () { scegli(o.v); });
+        tend.appendChild(b);
+      });
+      posiziona();
+      tend.hidden = false;
+    }
+    function chiudi() { tend.hidden = true; evid = -1; }
+    function scegli(v) {
+      if (!attivo) return;
+      var inp = attivo;
+      inp.value = v;
+      chiudi();
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      try { inp.blur(); } catch (e5) { /* niente */ }
+    }
+    function aggancia(inp) {
+      if (inp.getAttribute('data-mid-list')) return;
+      var id = inp.getAttribute('list');
+      if (!id) return;
+      inp.setAttribute('data-mid-list', id);
+      inp.removeAttribute('list'); // niente doppio elenco del browser
+      inp.setAttribute('autocomplete', 'off');
+      inp.addEventListener('focus', function () { apri(inp); });
+      inp.addEventListener('input', function () { if (document.activeElement === inp) apri(inp); });
+      inp.addEventListener('blur', function () { setTimeout(function () { if (attivo === inp) chiudi(); }, 150); });
+      inp.addEventListener('keydown', function (e) {
+        if (tend.hidden) return;
+        var bs = tend.querySelectorAll('button');
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          evid = Math.max(0, Math.min(bs.length - 1, evid + (e.key === 'ArrowDown' ? 1 : -1)));
+          Array.prototype.forEach.call(bs, function (b, i) { b.classList.toggle('on', i === evid); });
+          if (bs[evid]) bs[evid].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter' && evid >= 0 && scelte[evid]) { e.preventDefault(); scegli(scelte[evid].v); }
+        else if (e.key === 'Escape') chiudi();
+      });
+    }
+    function cercaCampi() { Array.prototype.forEach.call(document.querySelectorAll('input[list]'), aggancia); }
+    cercaCampi();
+    window.addEventListener('load', cercaCampi);
+    setTimeout(cercaCampi, 2500);
+    window.addEventListener('resize', posiziona);
+    window.addEventListener('scroll', function () { if (!tend.hidden) posiziona(); }, { passive: true });
+  } catch (e6) { /* senza tendina, i campi restano come erano */ }
 })();

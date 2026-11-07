@@ -112,9 +112,9 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 
 <div class="fig">
   <h3 id="t-omini"></h3>
-  <p class="sub">Ogni omino è 1 milanese su 100. Il colore dice quanti minuti a piedi ci mette da casa al parco più vicino.</p>
+  <p class="sub">Ogni pallino è 1 milanese su 100, messo sopra i minuti a piedi che servono da casa al parco più vicino. Più il pallino è a destra, più è lontano.</p>
   <div class="lg" id="lg-omini"></div>
-  <div class="ch" id="ch-omini" role="img" aria-label="Cento omini colorati per minuti a piedi dal parco più vicino"></div>
+  <div class="ch" id="ch-omini" role="img" aria-label="Cento pallini, uno per ogni 100 milanesi, sopra l'asse dei minuti a piedi dal parco più vicino"></div>
   <p class="src">Stima su 46.895 civici residenziali, con i residenti distribuiti in parti uguali tra i civici di ogni quartiere; 153 civici senza un tempo contano come «oltre il limite». Fonte come sopra.</p>
 </div>
 
@@ -186,7 +186,7 @@ var CS=getComputedStyle(document.documentElement);
 function cv(n){return CS.getPropertyValue(n).trim()}
 var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
   grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),gry:'#c9ced6'};
-var D,GEO,FORME,PV={},N=[],NB=[],BY={},RD=[],sel=null;
+var D,GEO,FORME,DIS,PV={},N=[],NB=[],BY={},RD=[],sel=null;
 
 /* ---------- formattazione ---------- */
 function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
@@ -231,8 +231,8 @@ window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!mat
 /* ---------- dati ---------- */
 function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
 function getT(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()})}
-Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson'),getJ(DATA+'parchi_grandi_forma.json'),getT(DATA+'nil_parco_vicino.csv')]).then(function(r){
-  D=r[0];GEO=r[1];FORME=r[2];
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson'),getJ(DATA+'parchi_grandi_forma.json'),getT(DATA+'nil_parco_vicino.csv'),getJ(DATA+'minuti_parco_distribuzione.json')]).then(function(r){
+  D=r[0];GEO=r[1];FORME=r[2];DIS=r[4];
   r[3].replace(/\r/g,'').split('\n').filter(Boolean).slice(1).forEach(function(l){var v=l.split(';');PV[+v[0]]={nome:v[2],ha:+v[3],q:+v[4],m:+v[5]}});
   try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
 }).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
@@ -400,23 +400,44 @@ function mappaMin(){
   $('t-min').textContent='Metà dei milanesi arriva a un parco in '+f1(D.citta.distanza.minuti_mediana_residenti)+' minuti, ma in '+lont+' quartieri su '+NB.length+' ci vogliono 12 minuti o più';
 }
 
-/* ---------- 100 omini ---------- */
-var OMINO='M8 .8a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2zM3 11.5h10a2 2 0 0 1 2 2V21h-2.6v7h-2.2v-7H8.8v7H6.6v-7H3v-7.5a2 2 0 0 1 2-2z';
-function personeSvg(W,counts,cols,nomi,sc){
-  var cw=W/10,ch=sc||30,k=Math.min((cw-4)/16,(ch-3)/29),s='',i=0;
-  counts.forEach(function(n,g){for(var j=0;j<n;j++){var r=Math.floor(i/10),c=i%10;
-    s+='<path d="'+OMINO+'" transform="translate('+r1(c*cw+(cw-16*k)/2)+' '+r1(r*ch+1)+') scale('+r1(k*100)/100+')" fill="'+cols[g]+'"'+tip(nomi[g])+'/>';i++}});
-  return svgOpen(W,Math.ceil(i/10)*ch+2)+s+'</svg>';
-}
-function dividi(a,b,c){
-  var v=[a,b-a,c-b,100-c].map(function(x){return Math.round(x)});
-  var d=100-v.reduce(function(s,x){return s+x},0);v[3]+=d;return v;
-}
+/* ---------- punti sull'asse dei minuti ---------- */
 var NM=['fino a 5 minuti','da 5 a 10 minuti','da 10 a 15 minuti','oltre 15 minuti'],CO=[C.teal,C.m4,C.m5,C.bro];
+function banda(k){return k<5?0:k<10?1:k<15?2:3}
+function lrm(q,tot){var f=q.map(Math.floor),r=tot-f.reduce(function(a,b){return a+b},0);
+  q.map(function(x,i){return{i:i,d:x-Math.floor(x)}}).sort(function(a,b){return b.d-a.d}).slice(0,r).forEach(function(o){f[o.i]++});return f}
+function cento(sh){ /* 100 punti: prima le 4 fasce, poi i minuti dentro ogni fascia */
+  var tot=sh.reduce(function(a,b){return a+b},0),bs=[0,0,0,0];sh.forEach(function(x,k){bs[banda(k)]+=x/tot*100});
+  var bt=lrm(bs,100),out=sh.map(function(){return 0});
+  for(var g=0;g<4;g++){var idx=[];sh.forEach(function(x,k){if(banda(k)===g)idx.push(k)});
+    var q=idx.map(function(k){return bs[g]>0?sh[k]/tot*100/bs[g]*bt[g]:0}),f=lrm(q,bt[g]);idx.forEach(function(k,i){out[k]=f[i]})}
+  return out;
+}
+function bande(cnt){var v=[0,0,0,0];cnt.forEach(function(n,k){v[banda(k)]+=n});return v}
 function legOm(id,v){$(id).innerHTML=NM.map(function(n,i){return '<span><i style="background:'+CO[i]+'"></i>'+n+' <b>&nbsp;'+v[i]+'</b></span>'}).join('')}
+/* marks: [{x:minuti,t:testo,dash:bool}] */
+function puntiMinuti(id,sh,marks){
+  var W=Math.min(width(id),640),cnt=cento(sh),NBN=cnt.length,m={l:6,r:6,t:72,b:30},pw=W-m.l-m.r,bw=pw/NBN,mx=Math.max.apply(null,cnt);
+  var d=Math.min(bw-1.4,170/mx),ph=mx*(d+1.2)+4,H=m.t+ph+m.b,base=m.t+ph,v=bande(cnt);
+  function X(min){return m.l+min*bw}
+  var s=svgOpen(W,H);
+  s+=L(X(15),m.t-8,X(15),base,C.ink,1.5,' stroke-dasharray="5 4"');
+  (marks||[]).forEach(function(k){s+=L(X(k.x),m.t-8,X(k.x),base,k.col||C.ink,k.dash?1.5:2.5,k.dash?' stroke-dasharray="3 3"':'')});
+  cnt.forEach(function(n,k){var col=CO[banda(k)],cx=X(k)+bw/2;
+    for(var j=0;j<n;j++)s+='<circle cx="'+r1(cx)+'" cy="'+r1(base-(j+.5)*(d+1.2))+'" r="'+r1(d/2)+'" fill="'+col+'"'+tip('<b>'+(k===NBN-1?'30 minuti e oltre':k+'–'+(k+1)+' minuti')+'</b><br>'+n+' abitanti su 100')+'/>'});
+  s+=L(m.l,base,W-m.r,base,C.axis);
+  [0,5,10,15,20].forEach(function(t){s+=T(X(t),base+16,String(t),{a:t===0?'start':'middle',c:'m'})});
+  s+=T(W-m.r,base+16,'30 e oltre',{a:'end',c:'m'});
+  s+=T(X(15)+8,m.t+8,'<tspan style="font-size:17px;font-weight:800">'+v[3]+' su 100</tspan>',{c:'b'})+T(X(15)+8,m.t+26,'oltre i 15 minuti',{c:'b'});
+  var mk=(marks||[]).slice().sort(function(a,b){return a.x-b.x});
+  mk.forEach(function(k,i){var w=tw(k.t,12,true),right=(i===mk.length-1);var x=right?X(k.x)+5:X(k.x)-5;
+    if(right&&x+w>W-m.r)x=W-m.r-w;
+    s+=T(x,m.t-12,esc(k.t),{a:right?'start':'end',c:'halo',st:'font-size:12px'})});
+  $(id).innerHTML=s+'</svg>';
+  return v;
+}
+function medianaCitta(){return D.citta.distanza.minuti_mediana_residenti}
 function omini(){
-  var dd=D.citta.distanza,v=dividi(dd.entro5_pct,dd.entro10_pct,dd.entro15_pct),W=Math.min(width('ch-omini'),480);
-  $('ch-omini').innerHTML=personeSvg(W,v,CO,NM.map(function(n,i){return v[i]+' milanesi su 100: '+n+' dal parco'}),30);
+  var v=puntiMinuti('ch-omini',DIS.citta,[{x:medianaCitta(),t:'metà dei milanesi: '+f1(medianaCitta())+' min',dash:0}]);
   legOm('lg-omini',v);
   $('t-omini').textContent='Su 100 milanesi, '+v[3]+' hanno il parco a più di un quarto d’ora a piedi';
 }
@@ -506,8 +527,10 @@ function scheda(){
   }
   if(o.min!=null){
     h+='<p>Per metà dei residenti il parco più vicino è a <b>'+f1(o.min)+' minuti a piedi</b> (circa '+f0(o.mt)+' metri).'+(p?' Per la maggior parte delle case il parco disegnato più vicino, in linea d’aria, è <b>'+esc(p.nome)+'</b> ('+nf(p.ha,1)+' ettari), a circa '+f0(p.m)+' metri.':'')+(o.pk?' Nel quartiere il parco disegnato più grande è '+esc(o.pk)+'.':'')+'</p>';
-    var v=dividi(o.q5,o.q10,o.q15);
-    P.push({h:'<div class="pm"><b>100 abitanti del quartiere: minuti a piedi dal parco</b><div class="lg" id="lg-pm-om"></div><div class="ch" id="pm-om"></div></div>',draw:function(){var W=Math.min(Math.max(240,Math.floor($('pm-om').clientWidth)),360);$('pm-om').innerHTML=personeSvg(W,v,CO,NM.map(function(n,i){return v[i]+' su 100: '+n}),22);legOm('lg-pm-om',v)}});
+    var dv=DIS.nil[String(o.id)];
+    if(dv)P.push({h:'<div class="pm"><b>100 abitanti del quartiere: minuti a piedi dal parco, con Milano a confronto</b><div class="lg" id="lg-pm-om"></div><div class="ch" id="pm-om"></div></div>',draw:function(){
+      var mm=[{x:medianaCitta(),t:'Milano '+f1(medianaCitta()),dash:1,col:C.mi},{x:o.min,t:'Qui '+f1(o.min),dash:0}];
+      legOm('lg-pm-om',puntiMinuti('pm-om',dv,mm))}});
   }else h+='<p>Per questo quartiere non c’è un tempo a piedi calcolato.</p>';
   var nota='<p class="note">Alberi del Comune ogni 1.000 residenti: '+f0(o.alb)+' (<a href="../alberi/">alberi</a>). Suolo consumato: '+nf(o.suolo,1)+'% (<a href="../suolo/">suolo</a>). Esposizione al caldo da satellite, luglio 2024: '+nf(o.cal,2)+' (<a href="../caldo/">caldo</a>).</p>';
   r.innerHTML=h+P.map(function(x){return x.h}).join('')+nota;
