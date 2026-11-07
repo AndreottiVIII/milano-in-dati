@@ -1,275 +1,572 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · Chi arriva e chi lascia Milano</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.map{height:62vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.ctl input[type=range]{flex:1 1 200px;min-width:140px;max-width:100%}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 92px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.bars.dv .tr .fill{position:absolute;top:0} .bars.dv .tr:after{content:"";position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} }
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.tabmax{max-height:340px;overflow:auto}
-@media(max-width:760px){.bars .row{grid-template-columns:minmax(80px,32%) 1fr auto} .bars .v{white-space:normal;max-width:150px}} .bars .row>*{min-width:0}
-.nav3{font-size:.9rem;margin:.2em 0 .8em} .nav3 a{margin-right:12px}
-
-</style><script src="../menu.js" defer></script></head><body><main>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri grandi */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:639px){.hl>a:last-child:nth-child(odd){grid-column:1/-1}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli e grafici */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt caption{caption-side:top;text-align:left;font-size:.85rem;color:var(--mut);padding-bottom:2px}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0;border-top:2px solid var(--ink)}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* scrivi il tuo quartiere */
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.ris .ch{margin-top:6px}
+.pm{margin:10px 0 0}
+.pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
+.find{margin:14px 0 0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+</style>
+<script src="../menu.js" defer></script></head><body><main>
 
 <h1>Chi arriva e chi lascia Milano</h1>
-<p class="nav3"><b>Le tre pagine sulla popolazione:</b> <b>Chi arriva e chi lascia</b> &middot; <a href="../comunita/">Le comunità quartiere per quartiere</a> &middot; <a href="../eta/">Età e centenari</a> &middot; <a href="../censimenti/">I censimenti di Milano</a></p>
-<p>Ogni volta che qualcuno cambia residenza, l’anagrafe del Comune scrive una <b>iscrizione</b> (chi arriva) o una <b>cancellazione</b> (chi parte). Qui guardiamo il <b>saldo</b>, cioè iscrizioni meno cancellazioni, dal 2002 al 2025: con gli altri comuni italiani e con l’estero. Sono cambi di residenza registrati, non le persone che «ci sono davvero» (vedi <a href="#limiti">i limiti dei dati</a>). I dati dicono <i>quanti</i> e <i>da dove</i>, non <i>perché</i>.</p>
+<p class="lead">Ogni anno decine di migliaia di persone cambiano residenza per venire a Milano o per andarsene: chi sono, da dove vengono, dove vanno. Scrivi il tuo quartiere e vedi dove sei.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+<div class="hl" id="hl"></div>
+<p class="src">Cambi di residenza registrati in anagrafe, 2002-2025: ISTAT, bilancio demografico (CC BY 4.0); Comune di Milano, iscrizioni e cancellazioni per luogo, età e quartiere, 2020-2024 (CC BY). Sono registrazioni, non persone «che ci sono davvero»: vedi i limiti dei dati in fondo.</p>
 
-<div class="warm"><b>Prima di leggere.</b> Esistono tre conteggi dello stesso fenomeno (ISTAT, il bilancio storico del Comune, il Comune per data dell’evento) e non coincidono; qui si usa ISTAT per la serie lunga e il Comune per i dettagli. L’età dei migranti c’è solo per la città intera e solo dal 2020; per i quartieri non esiste. Dettagli in <a href="#limiti">limiti dei dati</a>.</div>
+<!-- ============ 1 ============ -->
+<h2 id="anni">Milano, anno per anno</h2>
+<div class="fig">
+  <h3 id="t-porta"></h3>
+  <p class="sub">Per ogni anno, a sinistra chi lascia Milano e a destra chi ci arriva. In fondo la differenza: quante persone in più, o in meno, alla fine dell’anno.</p>
+  <div class="lg" id="lg-porta"></div>
+  <div class="ch" id="ch-porta" role="img" aria-label="Omini: persone che arrivano a Milano e persone che partono, anno per anno dal 2002 al 2025"></div>
+  <ul class="notes" id="nt-porta"></ul>
+  <p class="src">Fonte: ISTAT, bilancio demografico del comune di Milano: ricostruzione 2001-2018, mensile 2019-2024 e bilancio 2025 (CC BY 4.0), scaricati tra il 30 ottobre e il 1° novembre 2026. Arrivi = iscrizioni da altri comuni e dall’estero; partenze = cancellazioni per altri comuni e per l’estero. Non sono conteggiate le cancellazioni d’ufficio («altro»).</p>
+</div>
 
-<h2 id="anni">Anno per anno, dal 2002</h2>
-<div class="ctl"><span class="sub">Fonte:</span>
-<button type="button" data-f="istat" class="on">ISTAT, 2002–2025</button><button type="button" data-f="ev">Comune, per data dell’evento, 2004–2024</button></div>
-<div class="lgd" id="lg-anni"></div>
-<div class="ch" id="ch-anni" role="img" aria-label="Saldo di residenti con il resto d'Italia e con l'estero, anno per anno"></div>
-<p class="sub" id="anni-desc"></p>
-<div id="anni-testo"></div>
-<div class="scroll"><table id="tab-fasi"></table></div>
-<p class="src">Saldo = iscrizioni meno cancellazioni. «Italia» = da/per altri comuni italiani. Fonti: ISTAT, bilancio demografico (RBD 2001-2018, mensile 2019-2024, 2025; CC BY 4.0) per la serie ISTAT; Comune di Milano, iscrizioni e cancellazioni per data dell’evento (ds1596/1600/1954/1956, CC BY) per l’altra. Scaricati il 30 ottobre e il 1° novembre 2026. Nel 2001 ISTAT conta solo il 22/10–31/12 e non è mostrato.</p>
+<div class="fig">
+  <h3 id="t-linee"></h3>
+  <p class="sub">Arrivi meno partenze, anno per anno. Sopra lo zero Milano guadagna persone, sotto ne perde. Ogni barra è fatta di due parti: lo scambio con l’estero (verde) e con il resto d’Italia (viola). Il tratto nero è il totale.</p>
+  <div class="lg" id="lg-linee"></div>
+  <div class="ch" id="ch-linee" role="img" aria-label="Barre: differenza tra arrivi e partenze con l’Italia e con l’estero, dal 2002 al 2025"></div>
+  <ul class="notes" id="nt-linee"></ul>
+  <p class="src">Fonte: ISTAT, bilancio demografico del comune di Milano (CC BY 4.0). Il 2020 è l’anno del Covid: gli arrivi sono calati, le partenze molto meno; il quadro completo è in <a href="../anno-covid/">L’anno del Covid</a>.</p>
+</div>
 
-<h2 id="dove">Da dove arrivano e dove vanno (2020-2024)</h2>
-<div id="dove-testo"></div>
-<p class="sub">Saldo di residenti per zona, somma dei cinque anni 2020-2024 (iscrizioni meno cancellazioni):</p>
-<div class="bars dv" id="b-zone"></div>
-<div class="ctl"><span class="sub">Anno:</span><select id="sel-dove" aria-label="Scegli l'anno"></select></div>
-<div class="scroll"><table id="tab-zone"></table></div>
-<details><summary>Saldo regione per regione (2020-2024)</summary><div class="scroll tabmax"><table id="tab-reg"></table></div></details>
-<p class="src">Fonte: Comune di Milano, iscrizioni per luogo di provenienza e cancellazioni per luogo di destinazione (ds1959 e ds1960, CC BY), per anno dell’evento, scaricati il 1° novembre 2026. «Provincia di Milano» = voce «Prov. MI», «Resto della Lombardia» = «Altre prov. Lombardia»; le altre zone sono somme di regioni fatte da noi (Sud e isole = Abruzzo, Molise, Campania, Puglia, Basilicata, Calabria, Sicilia, Sardegna). «Luogo non indicato» = «n.d.» nel file. I dati non dicono il comune: la provincia di Milano è un blocco unico.</p>
+<!-- ============ 2 ============ -->
+<h2 id="dove">Da dove arrivano, dove vanno</h2>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub">Le frecce partono da Milano (il puntino rosso). Blu: chi arriva. Arancio: chi parte. Più è larga la freccia, più sono le persone. Somma dei cinque anni 2020-2024.</p>
+  <div class="lg" id="lg-mappa"></div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dell’Italia con frecce da e per Milano, per area: provincia di Milano, resto della Lombardia, Nord, Centro, Sud e isole, estero"></div>
+  <table class="kt" id="tab-mappa"></table>
+  <p class="src">Fonte: Comune di Milano, iscrizioni per luogo di provenienza e cancellazioni per luogo di destinazione (ds1959 e ds1960, CC BY), per anno dell’evento, scaricati il 1° novembre 2026. Le aree sono somme di regioni fatte da noi (vedi «Parole usate»). Confini delle regioni: ISTAT, limiti amministrativi (CC BY 4.0), semplificati.</p>
+</div>
 
-<h2 id="eta">Chi arriva e chi parte, per età</h2>
-<div id="eta-testo"></div>
-<div class="ctl"><span class="sub">Anno:</span><select id="sel-eta" aria-label="Scegli l'anno"></select></div>
-<p class="sub">Saldo per classe di età: a destra si guadagna, a sinistra si perde.</p>
-<div class="bars dv" id="b-eta"></div>
-<div class="scroll"><table id="tab-eta"></table></div>
-<p class="src">Fonte: Comune di Milano, iscrizioni e cancellazioni per classi di età (ds1957 e ds1958, CC BY), per anno dell’evento, scaricati il 1° novembre 2026. L’età non è incrociata con il luogo: non si può dire quanti bambini vanno in provincia, solo che i bambini escono più di quanti entrino e che la provincia è la destinazione più frequente di chi lascia Milano. Il dato per età esiste solo per la città intera.</p>
+<div class="fig">
+  <h3 id="t-prov"></h3>
+  <p class="sub" id="s-prov"></p>
+  <div class="ch" id="ch-prov" role="img" aria-label="Mappa dei comuni della provincia di Milano con Milano in rosso e le frecce di arrivi e partenze"></div>
+  <p class="note">I dati dicono solo «provincia di Milano», non il comune: per vedere i comuni uno per uno (quanti vanno a Milano ogni giorno per lavoro, quanti ci abitano) c’è la pagina <a href="../hinterland/">Hinterland</a>; per chi entra solo per lavoro, <a href="../pendolari/">Pendolari</a>.</p>
+  <p class="src">Fonte: Comune di Milano, ds1959 e ds1960 (CC BY), 2020-2024. Confini dei comuni: ISTAT al 1/1/2021 (CC BY 4.0), semplificati. Provincia di Milano senza Monza e Brianza.</p>
+</div>
 
-<h2 id="mappa">Quartiere per quartiere</h2>
-<p>Saldo medio all’anno ogni 1.000 residenti: iscrizioni meno cancellazioni da/per altri comuni e estero, voce «altro» esclusa. Clic su un quartiere per la scheda.</p>
-<div class="ctl"><span class="sub">Periodo:</span><button type="button" data-p="a">2012–2019</button><button type="button" data-p="b" class="on">2020–2024</button></div>
-<div class="ctl"><span class="sub">Saldo:</span><button type="button" data-c="2" class="on">Totale</button><button type="button" data-c="0">Con il resto d’Italia</button><button type="button" data-c="1">Con l’estero</button></div>
-<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
-<p class="sub" id="map-desc"></p>
-<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per saldo di residenti"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Mappa © OpenStreetMap contributors. Dati: Comune di Milano, iscrizioni e cancellazioni per quartiere (ds1596/1600 per il 2012-2019, ds1954/1956 per il 2020-2024, CC BY). In grigio i quartieri con meno di 3.000 residenti (parchi e aree quasi senza abitanti): pochi abitanti fanno percentuali instabili. I residenti usati sono la media del periodo (ds27, CC BY).</p>
-<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall’elenco.</span></div>
-<div id="nil-testo"></div>
-<div class="grid2"><div><p class="sub"><b>Saldo totale più basso</b> (per 1.000 residenti all’anno)</p><div class="bars dv" id="b-peggio"></div></div>
-<div><p class="sub"><b>Saldo totale più alto</b></p><div class="bars dv" id="b-meglio"></div></div></div>
+<div class="fig">
+  <h3 id="t-eta"></h3>
+  <p class="sub">Per ogni età: quante persone arrivano (blu) e quante partono (arancio), somma 2020-2024. A destra la differenza.</p>
+  <div class="lg" id="lg-eta"></div>
+  <div class="ch" id="ch-eta" role="img" aria-label="Barre doppie: persone che arrivano e che partono per classe di età, 2020-2024"></div>
+  <p class="note" id="nn-eta"></p>
+  <p class="src">Fonte: Comune di Milano, iscrizioni e cancellazioni per classi di età (ds1957 e ds1958, CC BY), per anno dell’evento, scaricati il 1° novembre 2026. L’età non è incrociata con il luogo: non si può dire quanti bambini vanno in provincia, solo che i bambini escono più di quanti entrino. Esiste solo per tutta la città. Altre pagine: <a href="../eta/">Età e centenari</a>, <a href="../comunita/">Le comunità quartiere per quartiere</a>.</p>
+</div>
 
-<h2 id="covid">Il Covid</h2>
-<div id="covid-testo"></div>
-<div class="lgd" id="lg-covid"></div>
-<div class="ch" id="ch-covid" role="img" aria-label="Iscrizioni e cancellazioni mensili 2019-2022"></div>
-<p class="src">Fonte: ISTAT, bilancio demografico mensile (D7B, riga «Totale», comune di Milano), 2019-2022, CC BY 4.0, scaricato il 30 ottobre 2026. Dati mensili per data di registrazione. Linea tratteggiata: marzo 2020 (primo lockdown).</p>
+<!-- ============ 3 ============ -->
+<h2 id="quartieri">Il tuo quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<div class="fig">
+  <h3 id="t-quart"></h3>
+  <p class="sub" id="s-quart"></p>
+  <div class="lg" id="lg-quart"></div>
+  <div class="ch" id="ch-quart" role="img" aria-label="Mappa dei quartieri di Milano colorati per differenza tra arrivi e partenze dal resto d’Italia"></div>
+  <p class="note" id="nn-quart"></p>
+  <p class="src">Fonte: Comune di Milano, iscrizioni e cancellazioni per quartiere (ds1954 e ds1956, CC BY), media 2020-2024 ogni 1.000 residenti (residenti: ds27, CC BY). In grigio i quartieri con meno di 3.000 residenti (parchi e aree quasi senza abitanti): pochi abitanti fanno percentuali instabili. Confini dei quartieri: ds964, Comune di Milano (CC BY).</p>
+</div>
 
-<h2 id="limiti">I limiti dei dati</h2>
-<div class="warm"><ul>
-<li><b>Sono registrazioni, non persone.</b> Il saldo conta cambi di residenza scritti in anagrafe. Chi lascia Milano senza avvisare non compare come partenza finché il Comune non lo cancella (la voce «altro»); chi arriva può registrarsi mesi dopo. Il registro del Comune ha dal 2020 più residenti di quanti ne conti ISTAT (+2,7% a fine 2025; per gli stranieri +10,4%).</li>
-<li><b>Tre contabilità diverse.</b> Per il 2018: immigrati totali 52.879 (ISTAT), 47.559 (bilancio storico del Comune), 49.794 (Comune per data dell’evento). ISTAT conta più iscritti da altri comuni (+5-10 mila l’anno nel 2012-2019). Il segno dei saldi è lo stesso, la dimensione no: nel 2012-2019 il saldo con il resto d’Italia è +64.579 per ISTAT e circa +24.700 per il Comune.</li>
-<li><b>Anni strani.</b> Nel 2004 ISTAT ha un saldo estero di +34.062 e nel bilancio storico del Comune gli immigrati sono 92.263 nel 2003 e 109.249 nel 2013: sono probabilmente registrazioni accumulate, non arrivi di quell’anno (causa non verificata). Le cancellazioni «altro» sono 23.663 nel 2013 e 25.118 nel 2014 contro 0,8-6,4 mila negli altri anni (forse una pulizia del registro dopo il censimento 2011: ipotesi non verificata).</li>
-<li><b>Il 2024 è incompleto per le uscite all’estero</b> nei dati per evento (2.990 contro 6.479 di ISTAT): le cancellazioni per l’estero arrivano in ritardo. Gli stranieri che se ne vanno dall’Italia sono pochi nel registro (342-1.243 l’anno): chi parte senza dirlo finisce in «altro».</li>
-<li><b>Niente comune di origine o destinazione, niente età per quartiere.</b> La matrice ISTAT dei trasferimenti tra comuni è sul sito IstatData, che non ha risposto quando l’abbiamo provato (nessun tentativo di aggirarlo). «Luogo non indicato» pesa da 1.842 a 6.422 cancellazioni l’anno.</li>
-<li><b>Quartieri fuori scala.</b> Maggiore-Musocco-Certosa e Monluè-Ponte Lambro hanno saldi molto alti: forse residenze collettive o nuove costruzioni (ipotesi, non verificata). Nei quartieri con meno di 3.000 residenti il saldo ogni 1.000 abitanti è instabile e non è mostrato.</li>
-<li><b>Il saldo non dice il perché.</b> Un saldo negativo verso la provincia non dice se chi parte lo fa per il prezzo delle case, per i figli o per altro. La lettura «famiglie con bambini verso l’hinterland» è plausibile ma non misurata, perché l’età e la destinazione non sono incrociate.</li>
-</ul></div>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul>
+<p>Altre pagine sullo stesso tema: <a href="../pendolari/">Pendolari</a>, <a href="../hinterland/">Hinterland</a>, <a href="../comunita/">Le comunità quartiere per quartiere</a>, <a href="../eta/">Età e centenari</a>, <a href="../censimenti/">I censimenti di Milano</a>.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Arrivo e partenza</dt><dd>Ogni volta che qualcuno cambia residenza, l’anagrafe del Comune scrive un’<b>iscrizione</b> (chi arriva) o una <b>cancellazione</b> (chi parte). Qui si dice «arriva» e «parte».</dd>
+<dt>Differenza</dt><dd>Arrivi meno partenze. Se è più, Milano guadagna persone; se è meno, ne perde. Gli statistici la chiamano «saldo».</dd>
+<dt>Provincia di Milano</dt><dd>I comuni intorno a Milano (la vecchia provincia, oggi città metropolitana), esclusa Monza e Brianza. Nelle altre pagine si chiama anche «hinterland».</dd>
+<dt>Resto della Lombardia</dt><dd>Tutta la Lombardia fuori dalla provincia di Milano.</dd>
+<dt>Nord, Centro, Sud e isole</dt><dd>Aree fatte da noi. Nord: Piemonte, Valle d’Aosta, Liguria, Trentino-Alto Adige, Veneto, Friuli-Venezia Giulia, Emilia-Romagna. Centro: Toscana, Umbria, Marche, Lazio. Sud e isole: Abruzzo, Molise, Campania, Puglia, Basilicata, Calabria, Sicilia, Sardegna.</dd>
+<dt>Luogo non indicato</dt><dd>Cambi di residenza per cui l’anagrafe non scrive da dove si arriva o dove si va.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Sono valori aggregati.</p>
+<ul>
+<li><a href="data/saldi_anno.csv">Arrivi e partenze anno per anno</a>, 2002-2025 (tabella, punto e virgola come separatore)</li>
+<li><a href="data/destinazioni_2020_2024.csv">Arrivi e partenze per luogo</a>, 2020-2024</li>
+<li><a href="data/eta_saldi_2020_2024.csv">Arrivi e partenze per età</a>, 2020-2024</li>
+<li><a href="data/nil_flussi_2020_2024.csv">Arrivi e partenze per quartiere</a>, ogni 1.000 residenti, 2020-2024</li>
+<li><a href="data/nil_saldi.csv">Differenza per quartiere</a>, 2012-2019 e 2020-2024</li>
+<li><a href="data/nil.geojson">Confini dei quartieri</a> con gli stessi valori</li>
+<li><a href="data/mappa_aree_italia.json">Confini delle aree d’Italia</a> e <a href="data/comuni_provincia_milano.json">dei comuni della provincia di Milano</a> (semplificati)</li>
+<li><a href="data/riepilogo.json">Tutti i numeri della pagina precedente</a>, con l’origine di ciascuno</li>
+</ul></div></details>
+</div>
 
-<h2 id="file">Fonti e file</h2>
-<p><b>Fonti e licenze.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: ds27 (residenti per quartiere), ds71 (movimento storico), ds1596, ds1600, ds1954, ds1956 (iscrizioni e cancellazioni per quartiere), ds1957, ds1958 (per età), ds1959, ds1960 (per provenienza/destinazione), tutti licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1° novembre 2026. ISTAT, <a href="https://demo.istat.it/">demo.istat.it</a>: ricostruzione del bilancio demografico 2001-2018 e bilancio 2025 (scaricati il 1° novembre 2026), bilancio mensile 2019-2024 (30 ottobre 2026), CC BY 4.0. Confini dei quartieri (NIL): ds964, Comune di Milano, CC BY. Mappa: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL.</p>
-<p>File: <a href="data/saldi_anno.csv">saldi_anno.csv</a>, <a href="data/destinazioni_2020_2024.csv">destinazioni_2020_2024.csv</a>, <a href="data/eta_saldi_2020_2024.csv">eta_saldi_2020_2024.csv</a>, <a href="data/nil_saldi.csv">nil_saldi.csv</a>, <a href="data/nil.geojson">nil.geojson</a>, <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina, con l’origine). Sono valori aggregati.</p>
-<footer><p>Altre pagine: <a href="../comunita/">Le comunità quartiere per quartiere</a> · <a href="../eta/">Età e centenari</a> · <a href="../censimenti/">I censimenti di Milano</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p></footer>
+<footer>
+<p><b>Fonti e licenze.</b> Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>: ds27 (residenti per quartiere), ds71 (movimento storico), ds1596, ds1600, ds1954, ds1956 (iscrizioni e cancellazioni per quartiere), ds1957, ds1958 (per età), ds1959, ds1960 (per provenienza e destinazione), tutti con licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1° novembre 2026. ISTAT, <a href="https://demo.istat.it/">demo.istat.it</a>: ricostruzione del bilancio demografico 2001-2018 e bilancio 2025 (scaricati il 1° novembre 2026), bilancio mensile 2019-2024 (30 ottobre 2026), CC BY 4.0. Confini dei quartieri (NIL): ds964, Comune di Milano, CC BY. Confini di regioni e comuni: ISTAT, limiti delle unità amministrative, CC BY 4.0 (le regioni nella versione <a href="https://github.com/openpolis/geojson-italy">openpolis</a>), semplificati da noi.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e3e6eb',gry:'#9aa1ad'};
+var IN=C.m4,OUT=C.ora;
+var S,DEST,ETA,NF,GEO,AREE,COM,N=[],NB=[],BY={},RD=[],sel=null,CIT={};
 
-var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
-var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
-var DIVC=['#a8540f','#d98a43','#eeeeee','#bfe0d8','#7dbdb0','#2b8a7d','#0b4f45'];
-var RD=[];
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)}
-function sg(x,d){if(x==null)return '';var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function sum(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i]||0;return s}
-function lgd(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
-function lgdBox(items){return items.map(function(it){return '<span><i style="background:'+it.c+'"></i>'+it.t+'</span>'}).join('')}
-/* barre orizzontali (anche divergenti) */
-function hbars(id,rows,o){o=o||{};var mx=o.max||Math.max.apply(null,rows.map(function(r){return Math.abs(r.v)}))||1;
-  setH(id,rows.map(function(r){var col=r.c||(o.dv&&r.v<0?WARM:ACC);var w=Math.abs(r.v)/mx*(o.dv?50:100);
-    return '<div class="row"><span class="nm" title="'+esc(r.t||r.nm)+'">'+(r.nmh||esc(r.nm))+'</span><span class="tr"><span class="fill" style="width:'+w+'%;background:'+col+(o.dv?(';'+(r.v<0?'right:50%':'left:50%')):'')+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''))}
-/* grafico SVG: tooltip e guida */
-function mkSvg(box,W,H){box.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img"></svg><div class="tip" style="display:none"></div>';return box.firstChild}
-function S(tag,at,txt){var e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(var k in at)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;return e}
-function yTicks(lo,hi,n){var st=niceStep((hi-lo)/(n||5)),t=[],v=Math.ceil(lo/st)*st;for(;v<=hi+1e-9;v+=st)t.push(Math.round(v*1e6)/1e6);return t}
-/* grafico a linee. o: series[{n,c,dash,pts:[[x,y]],w}], xmin,xmax,ymin,ymax,yf,xf,h,marks[{x,t}],xt */
-function lineChart(boxId,o){var box=el(boxId);var W=Math.max(300,box.clientWidth),H=o.h||300,m={l:o.ml||50,r:12,t:12,b:26};
-  var ymin=o.ymin,ymax=o.ymax;if(ymin==null||ymax==null){var a=[];o.series.forEach(function(s){s.pts.forEach(function(p){if(p[1]!=null)a.push(p[1])})});ymin=ymin==null?Math.min(0,Math.min.apply(null,a)):ymin;ymax=ymax==null?Math.max.apply(null,a):ymax;ymax+= (ymax-ymin)*.04}
-  var yt=yTicks(ymin,ymax,5);var xs=function(x){return m.l+(x-o.xmin)/(o.xmax-o.xmin)*(W-m.l-m.r)},ys=function(y){return H-m.b-(y-ymin)/(ymax-ymin)*(H-m.t-m.b)};
-  var svg=mkSvg(box,W,H);
-  yt.forEach(function(v){svg.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:ys(v),y2:ys(v),stroke:v===0?'#666':'#e4e4e4'}));svg.appendChild(S('text',{x:m.l-6,y:ys(v)+4,'text-anchor':'end',class:'mu'},(o.yf||f0)(v)))});
-  (o.xt||[]).forEach(function(v){svg.appendChild(S('text',{x:xs(v),y:H-8,'text-anchor':'middle',class:'mu'},(o.xf||String)(v)))});
-  (o.marks||[]).forEach(function(mk){var x=xs(mk.x);svg.appendChild(S('line',{x1:x,x2:x,y1:m.t,y2:H-m.b,stroke:'#c26a1b','stroke-dasharray':'3 3'}));svg.appendChild(S('text',{x:x+3,y:m.t+9,class:'mu'},mk.t))});
-  o.series.forEach(function(s){var d='',pen=false;s.pts.forEach(function(p){if(p[1]==null){pen=false;return}d+=(pen?'L':'M')+xs(p[0]).toFixed(1)+' '+ys(p[1]).toFixed(1);pen=true});
-    svg.appendChild(S('path',{d:d,fill:'none',stroke:s.c,'stroke-width':s.w||2,'stroke-dasharray':s.dash?'5 4':'none','stroke-linejoin':'round'}))});
-  var gl=S('line',{y1:m.t,y2:H-m.b,stroke:'#555',display:'none'});svg.appendChild(gl);var rect=S('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'});svg.appendChild(rect);var tip=box.lastChild;
-  function show(ev){var r=svg.getBoundingClientRect(),k=W/r.width,t=ev.touches?ev.touches[0]:ev,mx=(t.clientX-r.left)*k;var x=Math.round(o.xmin+(mx-m.l)/(W-m.l-m.r)*(o.xmax-o.xmin));if(o.xstep)x=Math.round(x/o.xstep)*o.xstep;x=Math.max(o.xmin,Math.min(o.xmax,x));
-    var h='<b>'+(o.xtip?o.xtip(x):x)+'</b>';o.series.forEach(function(s){var p=null;for(var i=0;i<s.pts.length;i++)if(s.pts[i][0]===x)p=s.pts[i];if(p&&p[1]!=null)h+='<br><span style="color:'+s.c+'">■</span> '+esc(s.n)+': '+(o.tf||o.yf||f0)(p[1])});
-    gl.setAttribute('x1',xs(x));gl.setAttribute('x2',xs(x));gl.removeAttribute('display');tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=xs(x)/k+10;if(left+tw>r.width)left=xs(x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
-  function hide(){tip.style.display='none';gl.setAttribute('display','none')}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-  box._f=function(){lineChart(boxId,o)};if(RD.indexOf(box)<0)RD.push(box);
-}
-/* istogramma a colonne raggruppate con valori negativi. o: cats[], series[{n,c,v[]}], yf,h,bands[{i0,i1,t}], tf */
-function colChart(boxId,o){var box=el(boxId);var W=Math.max(300,box.clientWidth),H=o.h||300,m={l:o.ml||50,r:10,t:o.bands?26:12,b:26};
-  var all=[];o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});var lo=Math.min(0,Math.min.apply(null,all)),hi=Math.max(0,Math.max.apply(null,all));hi+=(hi-lo)*.04;lo-= (hi-lo)*.02;
-  var n=o.cats.length,pw=(W-m.l-m.r)/n,ys=function(y){return H-m.b-(y-lo)/(hi-lo)*(H-m.t-m.b)};var svg=mkSvg(box,W,H);
-  (o.bands||[]).forEach(function(b,k){svg.appendChild(S('rect',{x:m.l+b.i0*pw,y:m.t,width:(b.i1-b.i0+1)*pw,height:H-m.t-m.b,fill:k%2?'#f6f6f6':'#fff'}));svg.appendChild(S('text',{x:m.l+b.i0*pw+3,y:m.t-8,class:'mu'},b.t))});
-  yTicks(lo,hi,5).forEach(function(v){svg.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:ys(v),y2:ys(v),stroke:v===0?'#333':'#e4e4e4'}));svg.appendChild(S('text',{x:m.l-6,y:ys(v)+4,'text-anchor':'end',class:'mu'},(o.yf||f0)(v)))});
-  var ns=o.series.length,bw=Math.max(1.5,pw*.8/ns);
-  o.cats.forEach(function(c,i){o.series.forEach(function(s,k){var v=s.v[i];if(v==null)return;var x=m.l+i*pw+pw*.1+k*bw,y0=ys(0),y1=ys(v);svg.appendChild(S('rect',{x:x,y:Math.min(y0,y1),width:bw-.5,height:Math.max(.5,Math.abs(y1-y0)),fill:s.c}))});
-    if(i%(o.step||(pw<16?3:1))===0)svg.appendChild(S('text',{x:m.l+i*pw+pw/2,y:H-8,'text-anchor':'middle',class:'mu'},String(c).length>4?String(c):(pw<16?String(c).slice(2):c)))});
-  var rect=S('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'});svg.appendChild(rect);var tip=box.lastChild;
-  function show(ev){var r=svg.getBoundingClientRect(),k=W/r.width,t=ev.touches?ev.touches[0]:ev,i=Math.floor(((t.clientX-r.left)*k-m.l)/pw);if(i<0||i>=n){tip.style.display='none';return}
-    var h='<b>'+o.cats[i]+'</b>';o.series.forEach(function(s){if(s.v[i]!=null)h+='<br><span style="color:'+s.c+'">■</span> '+esc(s.n)+': '+(o.tf||o.yf||f0)(s.v[i])});if(o.extra)h+=o.extra(i);
-    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=(m.l+i*pw+pw/2)/k+10;if(left+tw>r.width)left=(m.l+i*pw+pw/2)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',function(){tip.style.display='none'});rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-  box._f=function(){colChart(boxId,o)};if(RD.indexOf(box)<0)RD.push(box);
-}
-window.addEventListener('resize',(function(){var t;return function(){clearTimeout(t);t=setTimeout(function(){RD.forEach(function(b){b._f()})},200)}})());
-/* mappa a quartieri */
-function baseMap(id){var M=L.map(id,{scrollWheelZoom:false,preferCanvas:true}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(M);
-  window.addEventListener('resize',function(){M.invalidateSize()});return M}
-function cls(v,br){var i=0;while(i<br.length&&v>=br[i])i++;return i}
-function qbreaks(vals,k){var s=vals.filter(function(v){return v!=null&&isFinite(v)}).sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(s[Math.floor(i*s.length/k)]);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
-function nearestInt(v){return Math.round(v)}
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+grp(String(Math.abs(r)))}
+function sg1(x){var r=Math.round(x*10)/10;return (r>0?'+':r<0?'−':'')+f1(Math.abs(r))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function sum(a,f){return a.reduce(function(s,x){return s+(f?f(x):x)},0)}
 
-var D=null,NF=null,FONTE='istat',PER='b',COMP=2,SEL=null,LAY=null,MAP=null;
-Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){D=a[0];NF=a[1];
-  try{sorpresa();anni();dove();eta();mappa();covid()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
-function sal(d,k){return d['isc_'+k]-d['canc_'+k]}
-function sorpresa(){var Z=D.destinazioni.zone_tot,pm=Z['Provincia di Milano (hinterland)'],es=Z['Estero'],su=Z['Sud e isole (+Abruzzo, Molise)'];
-  var z=D.destinazioni.zone['Provincia di Milano (hinterland)'];var e=D.eta.gruppi;
-  var h='<p><b>Dal 2020 Milano perde ogni anno residenti verso la sua stessa provincia: '+sg(pm.saldo)+' in cinque anni (2020-2024), '+sg(z['2020'].saldo)+' nel 2020 e '+sg(z['2024'].saldo)+' nel 2024.</b> Li compensa con l’estero ('+sg(es.saldo)+') e con il Sud e le isole ('+sg(su.saldo)+').</p>';
-  h+='<p>È il contrario del 2012-2019, quando il saldo con il resto d’Italia era positivo ogni anno (+64.579 in otto anni secondo ISTAT). Per età, nei dati 2020-2024 guadagnano i 20-34 anni ('+sg(e['20-34'].saldo)+'); perdono i bambini fino a 14 anni ('+sg(e['0-14'].saldo)+') e chi ha più di 50 anni ('+sg(e['50-64'].saldo+e['65+'].saldo)+').</p>';
-  h+='<p class="src">Saldi = iscrizioni meno cancellazioni di residenza. Fonti: Comune di Milano ds1959/ds1960 (luogo), ds1957/ds1958 (età), ISTAT bilancio demografico (2012-2019). Sono registrazioni all’anagrafe (<a href="#limiti">limiti dei dati</a>).</p>';
-  setH('sorpresa',h)}
-/* ---- anni ---- */
-function serieF(){return D.serie.filter(function(d){return FONTE==='istat'?true:d.ev_isc_i!=null})}
-function anni(){
-  Array.prototype.forEach.call(document.querySelectorAll('button[data-f]'),function(b){b.addEventListener('click',function(){FONTE=b.getAttribute('data-f');Array.prototype.forEach.call(document.querySelectorAll('button[data-f]'),function(x){x.classList.toggle('on',x===b)});disegnaAnni()})});
-  disegnaAnni()}
-function disegnaAnni(){var s=serieF(),ist=FONTE==='istat';
-  var vi=s.map(function(d){return ist?sal(d,'i'):d.ev_isc_i-d.ev_canc_i}),ve=s.map(function(d){return ist?sal(d,'e'):d.ev_isc_e-d.ev_canc_e});
-  var bands=ist?[{i0:0,i1:8,t:'2002-2010'},{i0:9,i1:17,t:'2011-2019'},{i0:18,i1:23,t:'2020-2025'}]:[{i0:0,i1:6,t:'2004-2010'},{i0:7,i1:15,t:'2011-2019'},{i0:16,i1:20,t:'2020-2024'}];
-  setH('lg-anni',lgdBox([{c:WARM,t:'Con il resto d’Italia'},{c:ACC,t:'Con l’estero'}]));
-  colChart('ch-anni',{cats:s.map(function(d){return d.a}),series:[{n:'Resto d’Italia',c:WARM,v:vi},{n:'Estero',c:ACC,v:ve}],bands:bands,h:320,yf:function(v){return sg(v)},extra:function(i){return '<br>Totale: '+sg(vi[i]+ve[i])}});
-  setH('anni-desc',ist?'ISTAT, per data di registrazione. Saldo = iscritti meno cancellati.':'Comune di Milano, per data dell’evento (esclusa la voce «altro»). Il 2024 ha le cancellazioni per l’estero incomplete.');
-  var ph=ist?[[2002,2010],[2011,2019],[2020,2025]]:[[2004,2010],[2011,2019],[2020,2024]];
-  table('tab-fasi',['Fase','Resto d’Italia','Estero','Totale'],ph.map(function(p){var a=0,b=0;s.forEach(function(d,i){if(d.a>=p[0]&&d.a<=p[1]){a+=vi[i];b+=ve[i]}});return [p[0]+'–'+p[1],sg(a),sg(b),'<b>'+sg(a+b)+'</b>']}).concat([['Tutto il periodo',sg(sum(vi)),sg(sum(ve)),'<b>'+sg(sum(vi)+sum(ve))+'</b>']]));
-  var t='<p>';
-  if(ist){t+='<b>Tre fasi.</b> Nel <b>2002-2010</b> Milano perdeva residenti verso il resto d’Italia (−105.273 in nove anni, fino a −18.131 nel 2006) e ne guadagnava dall’estero (+124.099). Nel <b>2011-2019</b> il saldo con il resto d’Italia diventa positivo ogni anno (+65.850; +12.357 nel 2013, +10.624 nel 2017) e quello con l’estero resta forte (+101.662). Dal <b>2020</b> torna negativo (−34.195 fino al 2025, −10.222 nel 2024, −11.484 nel 2025) mentre l’estero porta +74.726.</p><p>Nel 2002-2025 il saldo totale è +226.869: −73.618 con il resto d’Italia, +300.487 con l’estero. Nello stesso periodo il saldo naturale (nati meno morti) è negativo, quindi la crescita della popolazione viene dalle migrazioni.</p>'}
-  else{t+='Con il conteggio per data dell’evento il segno è lo stesso ma l’ampiezza cambia: il saldo con il resto d’Italia passa da −11.675 (2004) a +307 (2011), +4.408 (2016), −3.825 (2020) e −11.326 (2024); l’estero da +20.133 (2004) a +5.872 (2020), +20.973 (2023) e +16.765 (2024, incompleto).</p>'}
-  setH('anni-testo',t)}
-/* ---- dove ---- */
-function dove(){var Z=D.destinazioni;var ord=['Provincia di Milano (hinterland)','Resto della Lombardia','Nord (fuori Lombardia)','Centro (Lazio, Toscana, Umbria, Marche)','Sud e isole (+Abruzzo, Molise)','Estero','Luogo non indicato'];
-  var nm={'Provincia di Milano (hinterland)':'Provincia di Milano','Resto della Lombardia':'Resto della Lombardia','Nord (fuori Lombardia)':'Nord, fuori Lombardia','Centro (Lazio, Toscana, Umbria, Marche)':'Centro','Sud e isole (+Abruzzo, Molise)':'Sud e isole','Estero':'Estero','Luogo non indicato':'Luogo non indicato'};
-  var q=Z.quota_cancellazioni_italia,h='<p>Delle cancellazioni verso altri comuni italiani nel 2020-2024, il <b>'+nf(100*q['Prov. MI'],1)+'%</b> va nella provincia di Milano e il <b>'+nf(100*q['Altre prov. Lombardia'],1)+'%</b> nel resto della Lombardia: due su tre restano in Lombardia (le altre destinazioni valgono poco: Piemonte '+nf(100*q['Piemonte'],1)+'%, Emilia-Romagna '+nf(100*q['Emilia Romagna'],1)+'%, Lazio '+nf(100*q['Lazio'],1)+'%). Dall’altra parte, <b>dal Sud e dalle isole arrivano '+f0(Z.zone_tot['Sud e isole (+Abruzzo, Molise)'].isc)+' persone e ne partono '+f0(Z.zone_tot['Sud e isole (+Abruzzo, Molise)'].canc)+'</b> (+24.788). Il saldo con il Nord fuori Lombardia è praticamente zero ('+sg(Z.zone_tot['Nord (fuori Lombardia)'].saldo)+').</p>';
-  setH('dove-testo',h);
-  var rows=ord.map(function(k){var v=Z.zone_tot[k].saldo;return {nm:nm[k],v:v,txt:sg(v),c:v<0?WARM:ACC}});
-  hbars('b-zone',rows,{dv:1});
-  var sel=el('sel-dove');sel.innerHTML='<option value="tot">tutti, 2020-2024</option>'+[2020,2021,2022,2023,2024].map(function(y){return '<option value="'+y+'">'+y+'</option>'}).join('');
-  function tab(){var y=sel.value;table('tab-zone',['Zona','Arrivano','Partono','Saldo'],ord.map(function(k){var v=y==='tot'?Z.zone_tot[k]:Z.zone[k][y];return [nm[k],f0(v.isc),f0(v.canc),'<b>'+sg(v.saldo)+'</b>']}))}
-  sel.addEventListener('change',tab);tab();
-  var rg=Z.regioni_saldo,keys=Object.keys(rg).sort(function(a,b){return rg[a]-rg[b]});table('tab-reg',['Regione / zona','Saldo 2020-2024'],keys.map(function(k){return [esc(k==='Prov. MI'?'Provincia di Milano':k==='Altre prov. Lombardia'?'Resto della Lombardia':k==='n.d.'?'Luogo non indicato':k),sg(rg[k])]}))}
-/* ---- eta ---- */
-function eta(){var E=D.eta,g=E.gruppi;
-  var h='<p>Nei cinque anni 2020-2024 sono arrivate 247.271 persone e ne sono partite 216.730 (saldo +30.541). La differenza è tutta tra i giovani adulti: <b>i 20-34 anni sono '+f0(g['20-34'].isc)+' in arrivo contro '+f0(g['20-34'].canc)+' in partenza ('+sg(g['20-34'].saldo)+')</b>; la classe più forte è 25-29 anni (+26.989 in cinque anni). I bambini fino a 14 anni hanno saldo negativo ogni anno ('+sg(g['0-14'].saldo)+'), i 50-64enni '+sg(g['50-64'].saldo)+', gli over 65 '+sg(g['65+'].saldo)+'. I 35-49enni sono in equilibrio ('+sg(g['35-49'].saldo)+'): positivi solo nel 2022 e 2023 (+910 e +1.770).</p><p>Messi insieme, i dati sono compatibili con l’idea di giovani che arrivano per studio e lavoro e di famiglie con figli che si spostano fuori città, ma <b>l’età e la destinazione non sono incrociate</b>: è una lettura, non una misura.</p>';
-  setH('eta-testo',h);
-  var sel=el('sel-eta');sel.innerHTML='<option value="tot">tutti, 2020-2024</option>'+E.anni.map(function(y){return '<option value="'+y+'">'+y+'</option>'}).join('');
-  function draw(){var y=sel.value,v=E.classi.map(function(c,i){return y==='tot'?E.anni.reduce(function(s,a){return s+E.saldo[a][i]},0):E.saldo[y][i]});
-    var mx=Math.max.apply(null,v.map(Math.abs));hbars('b-eta',E.classi.map(function(c,i){return {nm:c.replace(' anni',''),v:v[i],txt:sg(v[i]),c:v[i]<0?WARM:ACC}}),{dv:1,max:mx});
-    var gr=[['0-14',0,3],['15-19',3,4],['20-34',4,7],['35-49',7,10],['50-64',10,13],['65 e più',13,18]];
-    table('tab-eta',['Età','Arrivano','Partono','Saldo'],gr.map(function(r){var a=0,b=0;for(var i=r[1];i<r[2];i++){a+=y==='tot'?E.anni.reduce(function(s,k){return s+E.isc[k][i]},0):E.isc[y][i];b+=y==='tot'?E.anni.reduce(function(s,k){return s+E.canc[k][i]},0):E.canc[y][i]}return [r[0],f0(a),f0(b),'<b>'+sg(a-b)+'</b>']}))}
-  sel.addEventListener('change',draw);draw()}
-/* ---- mappa ---- */
-var BR=[-4,-1.5,1.5,5,10,15];
-function val(p){var a=p[PER];return a&&a[COMP]!=null&&p.cl===1&&(PER==='b'?p.b[3]>=3000:true)?a[COMP]:null}
-function stile(f){var p=f.properties,v=val(p),sel=SEL===p.i;return {fillColor:v==null?'#bdbdbd':DIVC[cls(v,BR)],fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:1}}
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(3,w,h/2);
+  if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function omino(cx,cy,s,col){
+  return '<circle cx="'+r1(cx)+'" cy="'+r1(cy-s*0.6)+'" r="'+r1(s*0.2)+'" fill="'+col+'"/><path d="M'+r1(cx-s*0.36)+' '+r1(cy+s*0.46)+'V'+r1(cy-s*0.1)+'Q'+r1(cx-s*0.36)+' '+r1(cy-s*0.3)+' '+r1(cx)+' '+r1(cy-s*0.3)+'Q'+r1(cx+s*0.36)+' '+r1(cy-s*0.3)+' '+r1(cx+s*0.36)+' '+r1(cy-s*0.1)+'V'+r1(cy+s*0.46)+'Z" fill="'+col+'"/>';
+}
+function nbadge(x,y,n){return '<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="8" fill="'+C.ink+'"/>'+T(x,y+4,n,{a:'middle',st:'fill:#fff;font-size:12px;font-weight:700'})}
+function dot(x,y,col){return '<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="4.5" fill="'+col+'"/>'}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getT(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()})}
+function csv(t){var l=t.replace(/\r/g,'').split('\n').filter(Boolean),h=l[0].split(';');
+  return l.slice(1).map(function(r){var v=r.split(';'),o={};h.forEach(function(k,i){o[k]=v[i]===''||v[i]==null?null:(isNaN(+v[i])?v[i]:+v[i])});return o})}
+Promise.all([getT(DATA+'saldi_anno.csv'),getT(DATA+'destinazioni_2020_2024.csv'),getT(DATA+'eta_saldi_2020_2024.csv'),getT(DATA+'nil_flussi_2020_2024.csv'),
+  getJ(DATA+'nil.geojson'),getJ(DATA+'mappa_aree_italia.json'),getJ(DATA+'comuni_provincia_milano.json')]).then(function(r){
+  S=csv(r[0]).map(function(x){return{a:x.a,ai:x.isc_i,ci:x.canc_i,ae:x.isc_e,ce:x.canc_e,A:x.isc_i+x.isc_e,P:x.canc_i+x.canc_e}});
+  DEST=csv(r[1]);ETA=csv(r[2]);NF=csv(r[3]);GEO=r[4];AREE=r[5];COM=r[6];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function draw(f){f();RD.push(f)}
+
+/* ---------- aree ---------- */
+var AREA_DEF=[
+ {k:'hint',n:'Provincia di Milano',l:['Prov. MI']},
+ {k:'resto',n:'Resto della Lombardia',l:['Altre prov. Lombardia']},
+ {k:'nord',n:'Nord fuori Lombardia',sh:'Resto del Nord',l:['Piemonte','Valle d\'Aosta','Liguria','Trentino Alto Adige','Veneto','Friuli Venezia Giulia','Emilia Romagna']},
+ {k:'centro',n:'Centro',l:['Lazio','Toscana','Umbria','Marche']},
+ {k:'sud',n:'Sud e isole',l:['Abruzzo','Molise','Campania','Puglia','Basilicata','Calabria','Sicilia','Sardegna']},
+ {k:'est',n:'Estero',l:['Estero']},
+ {k:'nd',n:'Luogo non indicato',l:['n.d.']}];
+var AR={};
+function aree(){
+  AREA_DEF.forEach(function(a){
+    var rows=DEST.filter(function(d){return a.l.indexOf(d.luogo)>=0});
+    a.isc=sum(rows,function(d){return d.isc});a.canc=sum(rows,function(d){return d.canc});a.sal=a.isc-a.canc;AR[a.k]=a});
+}
+
+/* ---------- quartieri ---------- */
+function prepara(){
+  var byId={};NF.forEach(function(r){byId[r.id]=r});
+  GEO.features.forEach(function(f){var p=f.properties,r=byId[p.i]||{};
+    var o={id:p.i,n:p.n,f:f,res:r.res_medi,big:r.abbastanza_grande===1,arr:r.arrivi_x1000,par:r.partenze_x1000,si:r.saldo_italia_x1000,se:r.saldo_estero_x1000,st:r.saldo_totale_x1000};
+    N.push(o);BY[o.id]=o;if(o.big)NB.push(o)});
+  var cnt={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+  NB.slice().sort(function(a,b){return b.st-a.st}).forEach(function(o,i){o.rk=i+1});
+  var tr=sum(NF,function(r){return r.res_medi});
+  CIT.arr=sum(NF,function(r){return r.arrivi_x1000*r.res_medi})/tr;CIT.par=sum(NF,function(r){return r.partenze_x1000*r.res_medi})/tr;
+}
+
+function tutto(){
+  aree();prepara();highlights();
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});return m.length===1?m[0]:null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].id,true);else if(m.length>1)$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true)});
+  scheda();
+  draw(porta);draw(linee);draw(mappa);draw(prov);draw(eta);draw(mappaQ);
+  limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()});scheda()},150)});
+}
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  scheda();mappaQ();
+}
+
+/* ---------- numeri grandi ---------- */
+function etaSomme(){
+  var cl=[];
+  ETA.forEach(function(r){var c=cl.filter(function(x){return x.n===r.eta})[0];if(!c){c={n:r.eta,i:0,c:0};cl.push(c)}c.i+=r.n_isc;c.c+=r.n_canc});
+  cl.forEach(function(c){c.s=c.i-c.c});return cl;
+}
+function highlights(){
+  var tot=sum(S,function(x){return x.A-x.P}),y24=S.filter(function(x){return x.a===2024})[0];
+  var h=AR.hint,e=AR.est,cl=etaSomme(),best=cl.slice().sort(function(a,b){return b.s-a.s})[0];
+  var perde=NB.filter(function(o){return o.si<0}).length,estero=NB.filter(function(o){return o.se>0}).length;
+  var pos=cl.filter(function(c){return c.s>0}),un=cl.slice(0,cl.indexOf(pos[0])),
+      gioc=best.n.replace(' anni','').replace('-','–');
+  var H=[
+   {c:C.mi,h:'t-porta',n:sg0(tot/1000)+'<small> mila</small>',p:'persone in più dal 2002 al 2025, tra chi è arrivato a Milano e chi se n’è andato.'},
+   {c:C.m3,h:'t-porta',n:f0((y24.A)/366),p:'persone arrivano a Milano ogni giorno (nel 2024). Ne partono '+f0(y24.P/366)+'.'},
+   {c:C.m2,h:'t-prov',n:f1(h.canc/h.isc)+'<small> a 1</small>',p:'verso i comuni della provincia di Milano partono '+f0(h.canc)+' persone e ne arrivano '+f0(h.isc)+' (2020-2024).'},
+   {c:C.m4,h:'t-mappa',n:sg0(e.sal/1000)+'<small> mila</small>',p:'persone in più dall’estero in cinque anni: ne arrivano '+f0(e.isc/1000)+' mila e ne partono '+f0(e.canc/1000)+' mila.'},
+   {c:C.m5,h:'t-eta',n:gioc.replace(' ','&nbsp;'),p:'anni: è l’età in cui Milano guadagna più persone (+'+f0(best.s/1000)+' mila in cinque anni). Sotto i 15 anni si parte più di quanto si arrivi.'},
+   {c:C.ora,h:'t-quart',n:perde+'<small> su '+NB.length+'</small>',p:'quartieri perdono abitanti nello scambio con il resto d’Italia. Dall’estero invece ne guadagnano '+(estero===NB.length?'tutti e '+estero:estero)+'.'}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. la porta girevole ---------- */
+function porta(){
+  var box=$('ch-porta'),W=width('ch-porta'),U=3000,yw=36,nw=72,rh=15.5,hd=34,
+      nL=S.map(function(x){return Math.round(x.P/U)}),nR=S.map(function(x){return Math.round(x.A/U)}),
+      mL=Math.max.apply(null,nL),mR=Math.max.apply(null,nR),
+      step=Math.min(8,(W-yw-nw-14)/(mL+mR)),sz=Math.min(10,step*1.45),xc=yw+mL*step+7,H=hd+S.length*rh+6,s=svgOpen(W,H);
+  s+=T(xc-5,12,'← partono',{a:'end',st:'fill:'+C.ora+';font-weight:800;font-size:13px'})+T(xc+5,12,'arrivano →',{st:'fill:'+C.m4+';font-weight:800;font-size:13px'})+T(W,12,'differenza',{a:'end',c:'m b'});
+  s+=L(xc,hd-8,xc,H-3,C.axis,1);
+  S.forEach(function(x,i){var y=hd+i*rh,cy=y+rh/2+1,net=x.A-x.P,t='<b>'+x.a+'</b><br>'+sw(IN)+'arrivano '+f0(x.A)+'<br>'+sw(OUT)+'partono '+f0(x.P)+'<br><b>'+sg0(net)+'</b> alla fine dell’anno';
+    if(i%2===0)s+='<rect x="0" y="'+r1(y)+'" width="'+W+'" height="'+rh+'" fill="#f4f5f7"/>';
+    s+=T(0,cy+4,x.a,{c:'b',st:'font-size:13px'});
+    for(var k=0;k<nL[i];k++)s+=omino(xc-4-(k+.5)*step,cy,sz,OUT);
+    for(k=0;k<nR[i];k++)s+=omino(xc+4+(k+.5)*step,cy,sz,IN);
+    var nt=x.a===2004?1:x.a===2020?2:0;
+    s+=T(W-(nt?20:0),cy+4,sg0(net),{a:'end',c:'b',st:'font-size:13px'});
+    if(nt)s+=nbadge(W-8,cy,nt);
+    s+='<rect x="0" y="'+r1(y)+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip(t)+'/>'});
+  box.innerHTML=s+'</svg>';
+  $('lg-porta').innerHTML='<span><i class="dot" style="background:'+IN+'"></i>un omino = 3.000 persone che arrivano</span><span><i class="dot" style="background:'+OUT+'"></i>3.000 che partono</span>';
+  var a=S[0],b=S[S.length-1],neg=S.filter(function(x){return x.A<x.P}),pos=S.filter(function(x){return x.A>=x.P});
+  var min=S.slice().sort(function(p,q){return (p.A-p.P)-(q.A-q.P)})[0],max=S.slice().sort(function(p,q){return (q.A-q.P)-(p.A-p.P)})[0];
+  $('t-porta').textContent='Fino al 2010 Milano perdeva persone quasi ogni anno; dal 2011 ne guadagna, e dal 2020 gli arrivi dall’estero tengono a galla la città';
+  $('nt-porta').innerHTML='<li><b class="nb">1</b><span>2004: arrivano '+f0(S[2].ae)+' persone dall’estero in un anno, molte più degli anni vicini. Probabilmente registrazioni accumulate, non arrivi di quell’anno (causa non verificata).</span></li><li><b class="nb">2</b><span>2020: Covid. Gli arrivi calano del '+f0((1-S[18].A/S[17].A)*100)+'%, le partenze del '+f0((1-S[18].P/S[17].P)*100)+'%.</span></li>';
+}
+
+/* ---------- 2. le due linee ---------- */
+function linee(){
+  var box=$('ch-linee'),W=width('ch-linee'),H=270,ml=50,mr=6,mt=22,mb=24,pw=W-ml-mr,ph=H-mt-mb,n=S.length,
+      it=S.map(function(x){return x.ai-x.ci}),es=S.map(function(x){return x.ae-x.ce}),
+      lo=-24000,hi=44000,bw=pw/n,X=function(i){return ml+i*bw},Y=function(v){return mt+(hi-v)/(hi-lo)*ph},s=svgOpen(W,H);
+  [-20000,20000,40000].forEach(function(v){s+=L(ml,Y(v),W-mr,Y(v),C.grid,1)+T(ml-5,Y(v)+4,sg0(v/1000)+' mila',{a:'end',c:'m'})});
+  S.forEach(function(x,i){
+    var pi=Math.max(it[i],0),ni=Math.min(it[i],0),pe=Math.max(es[i],0),ne=Math.min(es[i],0),w=bw*0.74,x0=X(i)+(bw-w)/2,up=0,dn=0,tot=it[i]+es[i];
+    var t='<b>'+x.a+'</b><br>'+sw(C.m2)+'con l’estero '+sg0(es[i])+'<br>'+sw(C.m5)+'con il resto d’Italia '+sg0(it[i])+'<br><b>Totale '+sg0(tot)+'</b>';
+    [[es[i],C.m2],[it[i],C.m5]].forEach(function(q){var v=q[0],y1,y2;if(v>=0){y1=Y(up+v);y2=Y(up);up+=v}else{y1=Y(dn);y2=Y(dn+v);dn+=v}
+      s+='<rect x="'+r1(x0)+'" y="'+r1(y1)+'" width="'+r1(w)+'" height="'+r1(Math.max(0.5,y2-y1))+'" fill="'+q[1]+'"/>'});
+    s+='<rect x="'+r1(X(i))+'" y="'+mt+'" width="'+r1(bw)+'" height="'+ph+'" fill="transparent"'+tip(t)+'/>';
+    s+='<rect x="'+r1(x0-1)+'" y="'+r1(Y(tot)-2)+'" width="'+r1(w+2)+'" height="4" fill="'+C.ink+'" stroke="#fff" stroke-width=".8" pointer-events="none"/>'});
+  s+=L(ml,Y(0),W-mr,Y(0),C.ink,2)+T(ml-5,Y(0)+4,'0',{a:'end',c:'b'});
+  [2002,2008,2014,2020,2025].forEach(function(a){s+=T(X(a-2002)+bw/2,H-6,a,{a:'middle',c:'m'})});
+  /* totali scritti per gli anni chiave */
+  [[2004,'m',null],[2010,'e',null],[2011,'m',32000],[2020,'m',-12500],[2025,'e',-18000]].forEach(function(k){var i=k[0]-2002,tot=it[i]+es[i],top=Math.max(it[i],0)+Math.max(es[i],0),bot=Math.min(it[i],0)+Math.min(es[i],0),
+      cx=X(i)+bw/2,x=cx+(k[1]==='e'?bw/2:0),a=k[1]==='m'?'middle':'end',by=k[2]==null?Y(top)-6:Y(k[2]);
+    if(k[2]!=null){var y0=k[2]>0?Y(top)-3:Y(bot)+3,y1=k[2]>0?by+3:by-12;s+=L(cx,y0,cx,y1,C.ink,1,' stroke-dasharray="2 2"')}
+    s+=T(x,by,sg0(tot),{a:a,c:'halo',st:'font-size:13px'})});
+  box.innerHTML=s+'</svg>';
+  $('lg-linee').innerHTML='<span><i style="background:'+C.m2+'"></i>con l’estero</span><span><i style="background:'+C.m5+'"></i>con il resto d’Italia</span><span><i style="background:'+C.ink+';height:4px;margin-top:4px"></i>totale dell’anno</span>';
+  var pos=[];it.forEach(function(v,i){if(v>0)pos.push(S[i].a)});
+  $('t-linee').textContent='Dall’estero Milano guadagna persone ogni anno; dal resto d’Italia solo dal '+pos[0]+' al '+pos[pos.length-1]+', e nel 2025 ne perde '+f0(-it[n-1]);
+  $('nt-linee').innerHTML='<li><span>Sopra lo zero Milano guadagna, sotto perde. Il 2004 ha un picco di arrivi dall’estero (probabilmente registrazioni accumulate, causa non verificata); il 2020 è l’anno del Covid.</span></li>';
+}
+
+/* ---------- 3. mappa d’Italia con le frecce ---------- */
+var LON0=6.5,LON1=18.7,LAT0=36.3,LAT1=47.1;
+function arrow(x1,y1,x2,y2,w,col,t){
+  var dx=x2-x1,dy=y2-y1,Ln=Math.hypot(dx,dy),ux=dx/Ln,uy=dy/Ln,nx=-uy,ny=ux,hl=Math.min(Ln*0.6,Math.max(8,w*0.9+5)),hw=w/2+Math.max(3,w*0.28),bx=x2-ux*hl,by=y2-uy*hl,h2=w/2;
+  var p=[[x1+nx*h2,y1+ny*h2],[bx+nx*h2,by+ny*h2],[bx+nx*hw,by+ny*hw],[x2,y2],[bx-nx*hw,by-ny*hw],[bx-nx*h2,by-ny*h2],[x1-nx*h2,y1-ny*h2]];
+  return '<path d="M'+p.map(function(q){return r1(q[0])+' '+r1(q[1])}).join('L')+'Z" fill="'+col+'" stroke="#fff" stroke-width=".8"'+(t?tip(t):'')+'/>';
+}
+function flowpair(M,tip2,gap,a,wf){
+  var dx=tip2[0]-M[0],dy=tip2[1]-M[1],Ln=Math.hypot(dx,dy),ux=dx/Ln,uy=dy/Ln,nx=-uy,ny=ux,wi=Math.max(1.8,a.isc*wf),wo=Math.max(1.8,a.canc*wf),
+      oi=wi/2+0.9,oo=wo/2+0.9,sx=M[0]+ux*gap,sy=M[1]+uy*gap;
+  var ti='<b>'+a.n+'</b><br>'+sw(IN)+f0(a.isc)+' arrivano a Milano<br>'+sw(OUT)+f0(a.canc)+' partono da Milano<br><b>'+sg0(a.sal)+'</b> alla fine';
+  return arrow(tip2[0]+nx*oi,tip2[1]+ny*oi,sx+nx*oi,sy+ny*oi,wi,IN,ti)+arrow(sx-nx*oo,sy-ny*oo,tip2[0]-nx*oo,tip2[1]-ny*oo,wo,OUT,ti);
+}
+function lab(x,y,anchor,a,col){
+  /* blocco di 4 righe, con alone bianco */
+  var xo=anchor==='end'?x:x,s='<g pointer-events="none">';
+  s+=T(x,y+11,a.sh||a.n,{a:anchor,c:'halo',st:'font-size:13px'});
+  s+=T(x,y+26,'arrivano '+f0(a.isc),{a:anchor,c:'halo',st:'font-size:12px;fill:'+C.m4});
+  s+=T(x,y+40,'partono '+f0(a.canc),{a:anchor,c:'halo',st:'font-size:12px;fill:#b85a00'});
+  s+=T(x,y+55,sg0(a.sal)+' in tutto',{a:anchor,c:'halo',st:'font-size:12px'});
+  return s+'</g>';
+}
 function mappa(){
-  MAP=baseMap('map');
-  LAY=L.geoJSON(NF,{style:stile,onEachFeature:function(f,l){l.bindTooltip(function(){var p=f.properties,v=val(p);return '<b>'+esc(p.n)+'</b><br>'+(v==null?'meno di 3.000 residenti: non confrontabile':sg(v,1)+' ogni 1.000 residenti all’anno')},{sticky:true});l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
-  MAP.fitBounds(LAY.getBounds());setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(LAY.getBounds())},500);
-  var sel=el('sel-nil');sel.innerHTML='<option value="">— scegli —</option>'+NF.features.map(function(f){return f.properties}).sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(p){return '<option value="'+p.i+'">'+esc(p.n)+'</option>'}).join('');
-  sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
-  Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(b){b.addEventListener('click',function(){PER=b.getAttribute('data-p');Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'),function(x){x.classList.toggle('on',x===b)});ric()})});
-  Array.prototype.forEach.call(document.querySelectorAll('button[data-c]'),function(b){b.addEventListener('click',function(){COMP=parseInt(b.getAttribute('data-c'),10);Array.prototype.forEach.call(document.querySelectorAll('button[data-c]'),function(x){x.classList.toggle('on',x===b)});ric()})});
-  ric()}
-function props(){return NF.features.map(function(f){return f.properties})}
-function ric(){LAY.setStyle(stile);
-  var T=['meno di −4','da −4 a −1,5','da −1,5 a +1,5','da +1,5 a +5','da +5 a +10','da +10 a +15','oltre +15'];
-  setH('lg-map',DIVC.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+T[i]+'</span>'}).join('')+'<span><i style="background:#bdbdbd"></i>meno di 3.000 residenti</span>');
-  var nome=['con il resto d’Italia','con l’estero','totale'][COMP],per=PER==='a'?'2012-2019':'2020-2024';
-  setH('map-desc','Saldo '+nome+', '+per+', per 1.000 residenti all’anno. Verde = più iscrizioni che cancellazioni; arancione = più cancellazioni.');
-  var ok=props().filter(function(p){return val(p)!=null}).sort(function(a,b){return val(a)-val(b)});
-  hbars('b-peggio',ok.slice(0,8).map(function(p){return {nm:p.n,v:val(p),txt:sg(val(p),1),c:val(p)<0?WARM:ACC}}),{dv:1,max:Math.max(30,Math.abs(val(ok[0])))});
-  hbars('b-meglio',ok.slice(-8).reverse().map(function(p){return {nm:p.n,v:val(p),txt:sg(val(p),1),c:val(p)<0?WARM:ACC}}),{dv:1,max:Math.max(30,Math.abs(val(ok[0])))});
-  var C=D.nil_conteggi;
-  setH('nil-testo','<p>'+(PER==='b'?'<b>Nel 2020-2024 tutti i '+C.periodo_2020_2024.nil_70+' quartieri con almeno 3.000 residenti hanno un saldo positivo con l’estero e '+C.periodo_2020_2024.saldo_italia_negativo+' su '+C.periodo_2020_2024.nil_70+' un saldo negativo con il resto d’Italia.</b> Perdono di più i quartieri periferici e di case degli anni ’60 (Muggiano, Bruzzano, Barona, Quinto Romano, Gratosoglio); guadagnano di più Maggiore-Musocco-Certosa e Monluè-Ponte Lambro (due valori fuori scala, vedi i limiti), Porta Garibaldi-Porta Nuova, Porta Ticinese e Brera.':'Nel 2012-2019 solo '+C.periodo_2012_2019.saldo_tot_negativo+' quartieri su '+C.periodo_2012_2019.nil_70+' (con almeno 3.000 residenti) avevano un saldo totale negativo. Guadagnavano di più Stazione Centrale-Ponte Seveso (+24,4), Porta Garibaldi, Scalo Romana, Bicocca; perdevano Quarto Oggiaro-Vialba-Musocco, Barona, Quinto Romano, Gratosoglio.')+'</p>');
-  if(SEL)scheda(SEL)}
-function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(stile);LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})}});scheda(i)}
-function scheda(i){var p=props().filter(function(q){return q.i===i})[0];
-  function r(k){var a=p[k];return a[2]==null?'<span class="sub">n.d.</span>':'<b>'+sg(a[2],1)+'</b> <span class="sub">(Italia '+sg(a[0],1)+', estero '+sg(a[1],1)+')</span>'}
-  setH('scheda','<h3>'+esc(p.n)+'</h3><div class="scroll"><table><tbody><tr><td>Residenti medi 2020-2024</td><td class="r">'+f0(p.b[3])+'</td></tr><tr><td>Saldo 2012-2019, per 1.000 residenti all’anno</td><td class="r">'+r('a')+'</td></tr><tr><td>Saldo 2020-2024, per 1.000 residenti all’anno</td><td class="r">'+r('b')+'</td></tr><tr><td>Persone in più/meno 2020-2024 (somma)</td><td class="r">Italia '+sg(p.b[4])+', estero '+sg(p.b[5])+'</td></tr></tbody></table></div>'+(p.cl!==1?'<p class="sub">Meno di 3.000 residenti: il dato per 1.000 abitanti è instabile.</p>':''))}
-/* ---- covid ---- */
-function covid(){var C=D.covid;
-  var x=function(d){return d.a+(d.m-1)/12};
-  var ser=[{n:'Arrivi da altri comuni',c:ACC,pts:C.map(function(d){return [Math.round(x(d)*12),d.isc_i]})},{n:'Partenze per altri comuni',c:WARM,pts:C.map(function(d){return [Math.round(x(d)*12),d.canc_i]})},{n:'Arrivi dall’estero',c:'#0b4f45',dash:1,pts:C.map(function(d){return [Math.round(x(d)*12),d.isc_e]})}];
-  setH('lg-covid',lgd(ser.map(function(s){return {c:s.c,t:s.n,dash:s.dash}})));
-  var mesi=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-  lineChart('ch-covid',{series:ser,xmin:2019*12,xmax:2022*12+11,ymin:0,ymax:5000,xt:[2019*12,2020*12,2021*12,2022*12],xf:function(v){return Math.round(v/12)},xtip:function(v){return mesi[v%12]+' '+Math.floor(v/12)},h:300,xstep:1,marks:[{x:2020*12+2,t:'marzo 2020'}]});
-  var y=function(a,k){return sum(C.filter(function(d){return d.a===a}).map(function(d){return d[k]}))};
-  var p=function(k){return Math.round(100*(y(2020,k)/y(2019,k)-1))};
-  setH('covid-testo','<p><b>Nel 2020 Milano non si è svuotata: sono mancati soprattutto gli arrivi.</b> Rispetto al 2019 gli arrivi dall’estero sono scesi del '+Math.abs(p('isc_e'))+'% ('+f0(y(2020,'isc_e'))+' contro '+f0(y(2019,'isc_e'))+'), gli arrivi da altri comuni del '+Math.abs(p('isc_i'))+'% ('+f0(y(2020,'isc_i'))+' contro '+f0(y(2019,'isc_i'))+'), le partenze per altri comuni solo del '+Math.abs(p('canc_i'))+'% ('+f0(y(2020,'canc_i'))+' contro '+f0(y(2019,'canc_i'))+'). Ad aprile 2020 gli arrivi dall’estero sono 384 (580 a marzo, 1.276 a gennaio). Il saldo totale (Italia più estero) è +3.794 nel 2020 contro +14.261 nel 2019.</p><p>Nello stesso anno i morti sono 18.520 contro 13.835 del 2019, e la popolazione «calcolata» del Comune cala di 31.660 persone (1.406.242 → 1.374.582); <b>20.728 di questo calo è un «aggiustamento statistico»</b> (campo «saldo censuario» del bilancio storico, ds71), cioè una correzione di conteggio e non persone partite. Nel 2022-2023 gli arrivi dall’estero tornano sopra i livelli pre-Covid (+14.262 e +19.887 di saldo).</p>')}
+  var box=$('ch-mappa'),W=width('ch-mappa'),k=Math.cos(41.3*Math.PI/180),sc=(W-2)/((LON1-LON0)*k),TP=70,BT=8,H=Math.ceil(TP+(LAT1-LAT0)*sc+BT);
+  function pp(lo,la){return[1+(lo-LON0)*k*sc,TP+(LAT1-la)*sc]}
+  function path(g){var P=g.type==='Polygon'?[g.coordinates]:g.coordinates;return P.map(function(po){return po.map(function(rg){return 'M'+rg.map(function(p){var q=pp(p[0],p[1]);return r1(q[0])+' '+r1(q[1])}).join('L')+'Z'}).join('')}).join('')}
+  var FILL={nord:'#dde1e7',centro:'#eceef2',sud:'#dde1e7',resto_lombardia:'#c8cdd5',hinterland:'#9aa1ad',milano:C.mi};
+  var s=svgOpen(W,H);
+  AREE.features.forEach(function(f){var a=f.properties.a;if(a==='hinterland'||a==='milano')return;s+='<path d="'+path(f.geometry)+'" fill="'+FILL[a]+'" stroke="#fff" stroke-width="1" stroke-linejoin="round"/>'});
+  AREE.features.forEach(function(f){var a=f.properties.a;if(a==='hinterland')s+='<path d="'+path(f.geometry)+'" fill="'+FILL[a]+'" stroke="#fff" stroke-width=".6"/>'});
+  var M=pp(9.19,45.46),mx=Math.max.apply(null,AREA_DEF.map(function(a){return Math.max(a.isc,a.canc)})),wf=14/mx;
+  /* frecce */
+  var G=[
+   {a:AR.est,tip:[M[0]-34,M[1]-62],g:9},
+   {a:AR.resto,tip:[M[0]+56,M[1]-12],g:8},
+   {a:AR.hint,tip:[M[0]-20,M[1]+40],g:7},
+   {a:AR.nord,tip:pp(11.1,44.55),g:8},
+   {a:AR.centro,tip:pp(11.0,43.45),g:8},
+   {a:AR.sud,tip:pp(15.4,40.55),g:8}];
+  G.forEach(function(g){s+=flowpair(M,g.tip,g.g,g.a,wf)});
+  s+='<circle cx="'+r1(M[0])+'" cy="'+r1(M[1])+'" r="6.5" fill="'+C.mi+'" stroke="#fff" stroke-width="2"/>';
+  /* etichette */
+  var xr=Math.round(W*0.5);
+  s+=lab(4,2,'start',AR.est);
+  s+=lab(M[0]+66,M[1]-60,'start',AR.resto);
+  var hy=M[1]+84;s+=lab(4,hy,'start',AR.hint)+L(G[2].tip[0],G[2].tip[1]+6,26,hy-2,C.axis,1,' stroke-dasharray="2 3"');
+  var ny=M[1]+12;
+  s+=lab(Math.round(W*0.62),ny,'start',AR.nord)+L(G[3].tip[0],G[3].tip[1],Math.round(W*0.62)-4,ny+30,C.axis,1,' stroke-dasharray="2 3"');
+  var cy=ny+66;
+  s+=lab(Math.round(W*0.64),cy,'start',AR.centro)+L(G[4].tip[0],G[4].tip[1],Math.round(W*0.64)-4,cy+30,C.axis,1,' stroke-dasharray="2 3"');
+  var sy=G[5].tip[1]+8;
+  s+=lab(G[5].tip[0]-12,sy,'end',AR.sud);
+  var ndy=TP+(LAT1-38.7)*sc+10;s+=lab(4,ndy,'start',AR.nd);
+  
+  box.innerHTML=s+'</svg>';
+  $('lg-mappa').innerHTML='<span><i style="background:'+IN+'"></i>arrivano a Milano</span><span><i style="background:'+OUT+'"></i>partono da Milano</span><span><i class="dot" style="background:'+C.mi+'"></i>Milano</span>';
+  var tI=sum(AREA_DEF,function(a){return a.isc}),tC=sum(AREA_DEF,function(a){return a.canc});
+  var h='<caption>Le stesse cifre in tabella: sommate, danno il totale di Milano</caption><thead><tr><th>Area</th><th>Arrivano</th><th>Partono</th><th>Differenza</th></tr></thead><tbody>';
+  AREA_DEF.forEach(function(a){h+='<tr><td>'+a.n+'</td><td>'+f0(a.isc)+'</td><td>'+f0(a.canc)+'</td><td>'+sg0(a.sal)+'</td></tr>'});
+  h+='<tr class="tot"><td>Tutte le aree</td><td>'+f0(tI)+'</td><td>'+f0(tC)+'</td><td>'+sg0(tI-tC)+'</td></tr></tbody>';
+  $('tab-mappa').innerHTML=h;
+  var e=AR.est,hh=AR.hint;
+  $('t-mappa').textContent='Milano perde persone verso la provincia ('+sg0(hh.sal)+') e la Lombardia ('+sg0(AR.resto.sal)+'), e ne guadagna dall’estero ('+sg0(e.sal)+') e dal Sud ('+sg0(AR.sud.sal)+')';
+}
 
+/* ---------- 3b. la provincia comune per comune ---------- */
+function prov(){
+  var box=$('ch-prov'),W=Math.min(width('ch-prov'),520),k=Math.cos(45.4*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(g){return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  COM.features.forEach(function(f){anelli(f.geometry).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)})})});
+  var sc=(W-2)/(x1-x0),H=Math.ceil((y1-y0)*sc)+2;
+  function pt(lo,la){return[1+(lo*k-x0)*sc,1+(y1-la)*sc]}
+  function path(g){var P=g.type==='Polygon'?[g.coordinates]:g.coordinates;return P.map(function(po){return po.map(function(rg){return 'M'+rg.map(function(p){var q=pt(p[0],p[1]);return r1(q[0])+' '+r1(q[1])}).join('L')+'Z'}).join('')}).join('')}
+  var s=svgOpen(W,H),mil=null,m;
+  COM.features.forEach(function(f){var mi=f.properties.g==='MILANO';if(mi){mil=f;return}
+    s+='<path d="'+path(f.geometry)+'" fill="#c8cdd5" stroke="#fff" stroke-width=".8" stroke-linejoin="round"'+tip('<b>'+esc(f.properties.n)+'</b><br>comune della provincia di Milano')+'/>'});
+  s+='<path d="'+path(mil.geometry)+'" fill="'+C.mi+'" stroke="#fff" stroke-width="1" stroke-linejoin="round"'+tip('<b>Milano</b>')+'/>';
+  /* centro di Milano e frecce verso est e ovest, nelle zone libere della provincia */
+  var bb=[1e9,-1e9,1e9,-1e9];anelli(mil.geometry).forEach(function(rg){rg.forEach(function(p){var q=pt(p[0],p[1]);bb=[Math.min(bb[0],q[0]),Math.max(bb[1],q[0]),Math.min(bb[2],q[1]),Math.max(bb[3],q[1])]})});
+  var M=[(bb[0]+bb[1])/2,(bb[2]+bb[3])/2],h=AR.hint,wf=15/Math.max(h.isc,h.canc),
+      tipP=[Math.min(W-30,M[0]+W*0.34),M[1]+H*0.30];
+  s+=flowpair(M,tipP,6,h,wf);
+  s+='<g pointer-events="none">'+T(tipP[0]+2,tipP[1]+26,'arrivano '+f0(h.isc),{a:'end',c:'halo',st:'font-size:12px;fill:'+C.m4})+T(tipP[0]+2,tipP[1]+41,'partono '+f0(h.canc),{a:'end',c:'halo',st:'font-size:12px;fill:#b85a00'})+T(M[0]-6,bb[2]-5,'Milano',{a:'middle',c:'halo',st:'font-size:13px'})+'</g>';
+  box.innerHTML=s+'</svg>';
+  $('t-prov').textContent='Verso i comuni intorno a Milano vanno a vivere '+f0(h.canc)+' persone in cinque anni, e da lì ne arrivano '+f0(h.isc)+': '+f1(h.canc/h.isc)+' partenze per ogni arrivo';
+  $('s-prov').textContent='I '+(COM.features.length-1)+' comuni della provincia di Milano (grigio) con Milano in rosso. Le frecce dicono quante persone vanno e vengono tra Milano e tutti gli altri comuni della provincia, 2020-2024: i dati non dicono quali.';
+}
+
+/* ---------- 4. per età ---------- */
+function eta(){
+  var cl=etaSomme(),box=$('ch-eta'),W=width('ch-eta'),lw=40,nw=58,vw=44,rh=27,hd=22,bw=W-lw-vw-nw-6,mx=Math.max.apply(null,cl.map(function(c){return Math.max(c.i,c.c)})),H=hd+cl.length*rh+4,s=svgOpen(W,H);
+  s+=T(0,12,'età',{c:'m b'})+T(W,12,'differenza',{a:'end',c:'m b'});
+  var best=cl.slice().sort(function(a,b){return b.s-a.s})[0];
+  cl.forEach(function(c,i){var y=hd+i*rh,nm=c.n.replace(' anni e più','+').replace(' anni',''),t='<b>'+c.n+'</b><br>'+sw(IN)+f0(c.i)+' arrivano<br>'+sw(OUT)+f0(c.c)+' partono<br><b>'+sg0(c.s)+'</b> in cinque anni';
+    if(c===best)s+='<rect x="0" y="'+(y-2)+'" width="'+W+'" height="'+(rh)+'" fill="#fff4d6"/>';
+    s+=T(0,y+16,nm,{c:'b',st:'font-size:13px'});
+    var wi=c.i/mx*bw,wo=c.c/mx*bw;
+    s+=hbar(lw,lw+wi,y,10,IN)+T(lw+wi+4,y+9,f0(c.i),{c:'k',st:'fill:'+C.m4})+hbar(lw,lw+wo,y+11,10,OUT)+T(lw+wo+4,y+20,f0(c.c),{c:'k',st:'fill:#b85a00'});
+    s+=T(W,y+16,sg0(c.s),{a:'end',c:'b',st:'font-size:13px;fill:'+(c.s>0?C.m4:'#b85a00')});
+    s+='<rect x="0" y="'+(y-2)+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip(t)+'/>'});
+  box.innerHTML=s+'</svg>';
+  $('lg-eta').innerHTML='<span><i style="background:'+IN+'"></i>arrivano</span><span><i style="background:'+OUT+'"></i>partono</span>';
+  var pos=cl.filter(function(c){return c.s>0}),a=pos[0].n.split('-')[0],b=pos[pos.length-1].n.replace(' anni','').split('-')[1],
+      sp=sum(pos,function(c){return c.s}),m15=sum(cl.slice(0,3),function(c){return c.s}),o50=sum(cl.filter(function(c){return parseInt(c.n,10)>=50}),function(c){return c.s});
+  $('t-eta').textContent='Dai '+a+' ai '+b+' anni arrivano a Milano '+f0(sp/1000)+' mila persone in più di quante partano; sotto i 15 e sopra i 50 si perde';
+  $('nn-eta').textContent='Sotto i 15 anni la differenza è '+sg0(m15)+' e dai 50 anni in su '+sg0(o50)+'. Sono numeri di città intera: non dicono dove vanno i bambini. La lettura «famiglie con figli verso la provincia» è plausibile ma non misurata.';
+}
+
+/* ---------- 5. il tuo quartiere ---------- */
+function pair(id,titolo,qv,cv,qcol,u){
+  var h='<div class="pm"><b>'+titolo+'</b><div class="ch" id="'+id+'"></div></div>';
+  return {h:h,draw:function(){
+    var box=$(id),W=Math.max(220,Math.floor(box.clientWidth)),mx=Math.max(qv,cv),lw=54,rw=Math.ceil(tw(f1(mx),13,true))+10,bw=W-lw-rw,s=svgOpen(W,56);
+    [{n:'Qui',v:qv,col:qcol},{n:'Milano',v:cv,col:C.ink2}].forEach(function(r,i){var y=i*26+3,w=Math.max(3,r.v/mx*bw);
+      s+=T(0,y+16,r.n,{c:'k'})+hbar(lw,lw+w,y,20,r.col)+T(lw+w+6,y+16,f1(r.v),{c:'b'})});
+    box.innerHTML=s+'</svg>'}};
+}
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quartiere sulla mappa qui sotto: ti dico quante persone arrivano e quante partono ogni anno, ogni 1.000 residenti.';return}
+  var o=BY[sel],h='<b class="big">'+esc(o.n)+'</b>In media '+f0(o.res)+' residenti nel 2020-2024.';
+  if(!o.big){r.innerHTML=h+'<p>Ha meno di 3.000 residenti: i numeri ogni 1.000 abitanti cambiano troppo da un anno all’altro per essere confrontati.</p>';return}
+  h+='<p>Ogni anno, ogni 1.000 residenti: <b>'+f1(o.arr)+'</b> arrivano e <b>'+f1(o.par)+'</b> partono. Differenza: <b>'+sg1(o.st)+'</b> ('+sg1(o.si)+' con il resto d’Italia, '+sg1(o.se)+' con l’estero).</p><p>Posto <b>'+o.rk+' su '+NB.length+'</b> per differenza: il 1° è il quartiere che cresce di più con arrivi e partenze.</p>';
+  var P=[pair('pm1','Arrivano ogni 1.000 residenti, in un anno',o.arr,CIT.arr,IN),pair('pm2','Partono ogni 1.000 residenti, in un anno',o.par,CIT.par,OUT)];
+  r.innerHTML=h+P.map(function(p){return p.h}).join('');
+  P.forEach(function(p){p.draw()});
+}
+var QC=[{max:-5,col:C.ora,nome:'perde più di 5',txt:C.ink},{max:0,col:C.m3,nome:'perde fino a 5',txt:C.ink},{max:5,col:C.teal,nome:'guadagna fino a 5',txt:'#fff'},{max:1e9,col:C.m4,nome:'guadagna più di 5',txt:'#fff'}];
+function qcl(o){if(!o.big)return -1;for(var i=0;i<QC.length;i++)if(o.si<=QC[i].max)return i;return 3}
+function ok2(){return NB.slice().sort(function(a,b){return a.si-b.si}).filter(function(o){return !/Monlu|Maggiore/.test(o.sn)})}
+function mappaQ(){
+  var box=$('ch-quart'),W=width('ch-quart'),k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)})})});
+  var sc=(W-2)/(x1-x0),H=Math.ceil((y1-y0)*sc)+2;
+  function path(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')}
+  function bb(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,t:c,b:d}}
+  var cnt=[0,0,0,0],piccoli=0;N.forEach(function(o){var c=qcl(o);if(c>=0)cnt[c]++;else piccoli++});
+  var s=svgOpen(W,H),sS='';
+  N.forEach(function(o){var c=qcl(o),isS=o.id===sel;
+    var t=c>=0?'<b>'+esc(o.n)+'</b><br>'+sw(IN)+f1(o.arr)+' arrivano, '+sw(OUT)+f1(o.par)+' partono<br>con il resto d’Italia <b>'+sg1(o.si)+'</b>, con l’estero <b>'+sg1(o.se)+'</b> (ogni 1.000 residenti, all’anno)':'<b>'+esc(o.n)+'</b><br>Meno di 3.000 residenti';
+    var el='<path d="'+path(o.f)+'" fill="'+(c>=0?QC[c].col:'#e6e8ec')+'" stroke="'+(isS?C.ink:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(t)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el});
+  s+=sS;
+  var srt=NB.slice().sort(function(a,b){return a.si-b.si}),ok=srt.filter(function(o){return !/Monlu|Maggiore/.test(o.sn)}),lab2=ok.slice(0,2).concat(ok.slice(-2));
+  if(sel&&BY[sel].big&&lab2.indexOf(BY[sel])<0)lab2.push(BY[sel]);
+  var used=[];
+  lab2.forEach(function(o){var b=bb(o.f),t=o.sn+' '+sg1(o.si),w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),y=b.y+4,tries=0;
+    while(tries<6&&used.some(function(u){return Math.abs(u.y-y)<15&&Math.abs(u.x-x)<(u.w+w)/2+4})){y+=(tries%2?-1:1)*15*(tries+1);tries++}
+    y=Math.max(14,Math.min(H-4,y));used.push({x:x,y:y,w:w});
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'});
+  box.innerHTML=s+'</svg>';
+  $('lg-quart').innerHTML=QC.map(function(q,i){return '<span><i style="background:'+q.col+'"></i>'+q.nome+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#e6e8ec"></i>pochi residenti <b>&nbsp;'+piccoli+'</b></span>';
+  $('t-quart').textContent='In '+(cnt[0]+cnt[1])+' quartieri su '+NB.length+' il resto d’Italia porta via più persone di quante ne porti; i più colpiti sono '+ok2()[0].sn+' e '+ok2()[1].sn;
+  $('s-quart').textContent='Colore: arrivi meno partenze con il resto d’Italia (l’estero non è contato), ogni 1.000 residenti, in media ogni anno del 2020-2024. Il numero accanto al colore conta i quartieri. Il quartiere scelto ha il bordo nero.';
+  $('nn-quart').textContent='Dall’estero invece arrivano più persone di quante ne partano in tutti i '+NB.length+' quartieri: la differenza totale è positiva ovunque tranne in '+NB.filter(function(o){return o.st<0}).length+' quartieri.';
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var L=[
+   '<b>Sono registrazioni, non persone.</b> Il conto è di cambi di residenza scritti in anagrafe. Chi lascia Milano senza avvisare non compare come partenza finché il Comune non lo cancella (la voce «altro», che qui non è contata); chi arriva può registrarsi mesi dopo. Il registro del Comune ha dal 2020 più residenti di quanti ne conti ISTAT (+2,7% a fine 2025; per gli stranieri +10,4%).',
+   '<b>Tre contabilità diverse.</b> Per il 2018: immigrati totali 52.879 (ISTAT), 47.559 (bilancio storico del Comune), 49.794 (Comune per data dell’evento). ISTAT conta più iscritti da altri comuni (+5-10 mila l’anno nel 2012-2019). Il segno della differenza è lo stesso, la dimensione no. Qui si usa ISTAT per la serie lunga e il Comune per luogo, età e quartiere.',
+   '<b>Anni strani.</b> Nel 2004 ISTAT ha una differenza con l’estero di +34.062 e nel bilancio storico del Comune gli immigrati sono 92.263 nel 2003 e 109.249 nel 2013: sono probabilmente registrazioni accumulate, non arrivi di quell’anno (causa non verificata). Le cancellazioni «altro» sono 23.663 nel 2013 e 25.118 nel 2014 contro 0,8-6,4 mila negli altri anni (forse una pulizia del registro dopo il censimento 2011: ipotesi non verificata).',
+   '<b>Il 2024 è incompleto per le uscite all’estero</b> nei dati per evento (2.990 contro 6.479 di ISTAT): le cancellazioni per l’estero arrivano in ritardo. Gli stranieri che se ne vanno dall’Italia sono pochi nel registro (342-1.243 l’anno): chi parte senza dirlo finisce in «altro».',
+   '<b>Niente comune di origine o destinazione, niente età per quartiere.</b> La matrice ISTAT dei trasferimenti tra comuni è sul sito IstatData, che non ha risposto quando l’abbiamo provato (nessun tentativo di aggirarlo). Per questo la provincia di Milano è un blocco unico. «Luogo non indicato» pesa da 1.842 a 6.422 cancellazioni l’anno: sono incluse nei totali ma non hanno una freccia.',
+   '<b>Quartieri fuori scala.</b> Maggiore-Musocco-Certosa e Monluè-Ponte Lambro hanno differenze molto alte: forse residenze collettive o nuove costruzioni (ipotesi, non verificata). Nei quartieri con meno di 3.000 residenti i numeri ogni 1.000 abitanti sono instabili e non sono mostrati.',
+   '<b>La differenza non dice il perché.</b> Una differenza negativa verso la provincia non dice se chi parte lo fa per il prezzo delle case, per i figli o per altro. L’età e la destinazione non sono incrociate. Quando due grafici stanno vicini, non vuol dire che uno causi l’altro.',
+   '<b>Le frecce sono schemi.</b> Servono a confrontare le aree, non a dire per quale strada si va. La lunghezza non è una distanza.'];
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function metodo(){
+  var M=[
+   'Anno per anno (2002-2025): ISTAT, bilancio demografico del comune di Milano. Arrivi = iscrizioni da altri comuni più dall’estero; partenze = cancellazioni per altri comuni più per l’estero. Un omino = 3.000 persone, arrotondato all’omino più vicino; la differenza scritta è esatta.',
+   'Per luogo ed età (2020-2024): Comune di Milano, iscrizioni e cancellazioni per anno dell’evento, sommate sui cinque anni. Le aree Nord, Centro e Sud e isole sono somme di regioni fatte da noi.',
+   'Per quartiere: iscrizioni e cancellazioni dell’anagrafe del Comune, esclusa la voce «altro», divise per i residenti di ogni anno e riportate a 1.000 residenti, in media sui cinque anni. Solo quartieri con almeno 3.000 residenti (70 su 88). Il posto in classifica è per la differenza totale (Italia più estero).',
+   'Le mappe usano i confini veri: quartieri del Comune di Milano, comuni e regioni dell’ISTAT, semplificati per tenere le pagine leggere. Le frecce sono disegnate da noi.'];
+  $('metodo-lista').innerHTML=M.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
 })();
 </script>
 </body></html>

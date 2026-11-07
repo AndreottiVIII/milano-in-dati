@@ -3018,3 +3018,8 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-07 — Turisti rifatta e pubblicata (approvata da Davide: «top»): mappa per aree che conta tutti i turisti, barre italiani/stranieri, omini, calendario dei mesi, scrivi un paese.
 - 2026-11-07 — Impianti sportivi rifatta e pubblicata (approvata da Davide): 100 milanesi a piedi da piscina e palestra, tre mappe, piscine solo per iscritti a parte (15 in più, 65% invece di 62%).
 - 2026-11-07 — Voto e reddito rifatta e pubblicata (approvata da Davide): Centrosinistra e Centrodestra larghi (scelta di Davide), 38 CAP in fila con cursore sulle elezioni, mappe dei CAP, affluenza per reddito, scrivi il tuo CAP.
+- 2026-11-07 — Chi arriva e chi lascia rifatta e pubblicata (ritocco di Davide: il saldo anno per anno in barre sopra e sotto lo zero, divise tra estero e resto d'Italia).
+- 2026-11-07 — Le comunità rifatta e pubblicata (ritocco di Davide: mappa degli stranieri per quartiere prima delle comunità).
+- 2026-11-07 — Quanto è divisa Milano rifatta e pubblicata (ritocco di Davide: spiegata meglio con l'esempio dei 100 stranieri, mappe «com'è oggi / come sarebbe», tolta una mappa dei redditi).
+- 2026-11-07 — Oltre il reddito rifatta e pubblicata (ritocco di Davide: il grafico «più si vota, meno morti» per primo).
+- 2026-11-07 — Scuole di domani rifatta e pubblicata (ritocco di Davide: la prova sul passato tolta dai grafici e messa nelle note).
