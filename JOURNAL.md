@@ -3014,3 +3014,6 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-07 — Censimenti rifatta e pubblicata (ritocchi di Davide: Milano dal 1861 come linea semplice, famiglie in due barre 1991-2023).
 - 2026-11-07 — Età e centenari rifatta e pubblicata (ritocchi di Davide: uomini blu e donne rosa #F06EAA, generazioni con il loro nome in linee, i coetanei spiegati a parole).
 - 2026-11-07 — Nascite e mamme rifatta e pubblicata (ritocchi di Davide: blu e rosa solo per maschi e femmine, nuovo grafico dei nati per sesso, mamme italiane in verde acqua).
+- 2026-11-07 — Quanto si vive rifatta e pubblicata (approvata da Davide: «ottimo»): la speranza di vita lungo la M3, mappa dei quartieri, scrivi il tuo quartiere; uomini blu e donne rosa.
+- 2026-11-07 — Turisti rifatta e pubblicata (approvata da Davide: «top»): mappa per aree che conta tutti i turisti, barre italiani/stranieri, omini, calendario dei mesi, scrivi un paese.
+- 2026-11-07 — Impianti sportivi rifatta e pubblicata (approvata da Davide): 100 milanesi a piedi da piscina e palestra, tre mappe, piscine solo per iscritti a parte (15 in più, 65% invece di 62%).
