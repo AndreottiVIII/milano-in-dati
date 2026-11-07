@@ -100,10 +100,13 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <h2 id="anno">Milano, anno per anno</h2>
 <div class="fig">
   <h3 id="t-aula"></h3>
-  <p class="sub">Ogni riga è un anno. Ogni figurina è un gruppo di 500 bambini nati da madri che abitano a Milano, nella parte colorata di blu se la mamma ha la cittadinanza italiana, di arancione se è straniera.</p>
+  <p class="sub">Ogni riga è un anno. Ogni figurina è un gruppo di 500 bambini nati da madri che abitano a Milano, nella parte di colore verde acqua se la mamma ha la cittadinanza italiana, arancione se è straniera.</p>
   <div class="lg" id="lg-aula"></div>
   <div class="ch" id="ch-aula" role="img" aria-label="Una riga di figurine per ogni anno dal 2003 al 2024: le righe diventano più corte"></div>
   <p class="note" id="nn-aula"></p>
+  <h3 id="t-sesso" style="margin-top:1.2em;font-size:1rem"></h3>
+  <div class="ch" id="ch-sesso" role="img" aria-label="Cento figurine: maschi in blu e femmine in rosa"></div>
+  <p class="src">Fonte: Comune di Milano, nati vivi da madri residenti per genere (CC BY). Ogni figurina è 1 nato su 100, arrotondato.</p>
   <p class="src">Fonte: Comune di Milano, nati vivi da madri residenti, per quartiere e cittadinanza della madre (CC BY). I pochi nati senza cittadinanza indicata (7-10 l’anno dal 2021) sono nel totale ma non hanno colore.</p>
 </div>
 
@@ -197,6 +200,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <li><a href="data/nil_anno.csv">Nati per quartiere e per anno</a>, con donne di 15-49 anni, residenti e cittadinanza della madre (punto e virgola come separatore)</li>
 <li><a href="data/nil_2022_2024.csv">Riepilogo per quartiere</a>, 2022-2024 e 2003-2005</li>
 <li><a href="data/nil.geojson">Confini semplificati dei quartieri</a> con le serie annuali</li>
+<li><a href="data/nati_per_genere_citta.csv">Nati per genere</a>, anno per anno</li>
 <li><a href="data/citta_anno.csv">La città anno per anno</a></li>
 <li><a href="data/fecondita_per_eta_provincia_milano.csv">Nati ogni 1.000 donne per età della madre</a>, provincia di Milano, 2000-2025</li>
 <li><a href="data/tfr_eta_madre_istat.csv">Figli per donna ed età media delle madri</a>, ISTAT, Italia, Lombardia e provincia di Milano</li>
@@ -220,7 +224,7 @@ function cv(n){return CS.getPropertyValue(n).trim()}
 var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),
   grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e6e8ec',gry:'#9aa1ad'};
 var R,GEO,ASFR,TFR,N=[],BY={},RD=[],sel=null,A=[],CT={};
-var NA=22;
+var NA=22,SX={};
 
 function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
@@ -271,9 +275,10 @@ window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!mat
 function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
 function getT(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()})}
 function csv(t){return t.replace(/\r/g,'').split('\n').filter(Boolean).slice(1).map(function(l){return l.split(',')})}
-Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson'),getT(DATA+'fecondita_per_eta_provincia_milano.csv'),getT(DATA+'tfr_eta_madre_istat.csv')]).then(function(r){
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson'),getT(DATA+'fecondita_per_eta_provincia_milano.csv'),getT(DATA+'tfr_eta_madre_istat.csv'),getT(DATA+'nati_per_genere_citta.csv')]).then(function(r){
   R=r[0];GEO=r[1];A=R.anni;
   ASFR={};csv(r[2]).forEach(function(v){(ASFR[v[0]]=ASFR[v[0]]||{})[+v[1]]=+v[2]});
+  SX={maschi:[],femmine:[]};csv(r[4]).forEach(function(v){SX.maschi.push(+v[1]);SX.femmine.push(+v[2])});
   TFR={};csv(r[3]).forEach(function(v){if(v[1]!=='tutte')return;var k=v[0];(TFR[k]=TFR[k]||{})[+v[2]]={t:+v[3],e:+v[4]}});
   try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
 }).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
@@ -361,11 +366,11 @@ function aula(){
       var lo=i*per,hi=lo+per,x=ml+i*iwe+(iwe-10*s)/2;
       var fa=seg(lo,hi,tot,0,ita),fs=seg(lo,hi,tot,ita,ita+str),fn=seg(lo,hi,tot,ita+str,tot);
       var fill;
-      if(fa>=0.999)fill=C.m4;else if(fs>=0.999)fill=C.ora;
+      if(fa>=0.999)fill=C.teal;else if(fs>=0.999)fill=C.ora;
       else{
         var id='g'+(gi++),st='',p0=0;
         function add(f,col){if(f<=0)return;st+='<stop offset="'+r1(p0*100)+'%" stop-color="'+col+'"/><stop offset="'+r1((p0+f)*100)+'%" stop-color="'+col+'"/>';p0+=f}
-        add(fa,C.m4);add(fs,C.ora);add(fn,C.gry);add(Math.max(0,1-p0),C.light);
+        add(fa,C.teal);add(fs,C.ora);add(fn,C.gry);add(Math.max(0,1-p0),C.light);
         defs+='<linearGradient id="'+id+'" gradientUnits="userSpaceOnUse" x1="'+r1(x)+'" x2="'+r1(x+10*s)+'" y1="0" y2="0">'+st+'</linearGradient>';
         fill='url(#'+id+')';
       }
@@ -375,14 +380,22 @@ function aula(){
     g+=T(ml-6,y+ih*0.82,A[r],{a:'end',c:bold?'k':'m'})+T(tx,y+ih*0.82,f0(tot),{c:bold?'k':'m'});
     g+='<rect x="0" y="'+r1(y-1)+'" width="'+W+'" height="'+r1(rowh)+'" fill="transparent"'+tip('<b>'+A[r]+'</b>: '+f0(tot)+' nati<br>mamma italiana: '+f0(ita)+'<br>mamma straniera: '+f0(str)+' ('+f0(str/tot*100)+'%)')+'/>';
   }
+  sesso();
   box.innerHTML=svgOpen(W,H)+'<defs>'+defs+'</defs>'+g+'</svg>';
   var ic=function(col){var s2=1.1;return '<svg width="12" height="16" viewBox="0 0 11 15"><circle cx="5.5" cy="3.4" r="3.1" fill="'+col+'"/><rect x="0.9" y="7.4" width="9.2" height="7.4" rx="3.4" fill="'+col+'"/></svg>'};
-  $('lg-aula').innerHTML='<span>'+ic(C.m4)+'mamma italiana</span><span>'+ic(C.ora)+'mamma straniera</span><span>una figurina = 500 bambini</span>';
+  $('lg-aula').innerHTML='<span>'+ic(C.teal)+'mamma italiana</span><span>'+ic(C.ora)+'mamma straniera</span><span>una figurina = 500 bambini</span>';
   var n08=CT.nati[yi(2008)],n24=CT.nati[NA-1],mxi=CT.nati.indexOf(mx);
   $('t-aula').textContent='Nel 2024 sono nati a Milano '+f0(n24)+' bambini: '+f0(n08-n24)+' in meno che nel 2008';
   $('nn-aula').innerHTML='Il massimo è nel '+A[mxi]+' ('+f0(mx)+' nati). Dal 2008 al 2024 i nati calano del '+f0((1-n24/n08)*100)+'%; la quota di mamme straniere sale dal '+f0(CT.str[0]/CT.nati[0]*100)+'% (2003) al '+f0(CT.str[yi(2013)]/CT.nati[yi(2013)]*100)+'% (2013) e scende al '+f0(CT.str[NA-1]/n24*100)+'% (2024).';
 }
 
+function sesso(){
+  var box=$('ch-sesso'),W=width('ch-sesso'),M=SX.maschi[NA-1],F=SX.femmine[NA-1],t=M+F,m=Math.round(M/t*100),cols=25,cw=Math.min(W/cols,20),s=svgOpen(W,Math.ceil(100/cols)*(cw*1.15)+4);
+  for(var i=0;i<100;i++){var x=(i%cols)*cw+cw/2,y=Math.floor(i/cols)*cw*1.15+cw*0.5,col=i<m?'#0072BC':'#E6007E',r=cw*0.36;
+    s+='<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="'+r1(r)+'" fill="'+col+'"/><rect x="'+r1(x-r*0.9)+'" y="'+r1(y+r*0.9)+'" width="'+r1(r*1.8)+'" height="'+r1(r*1.1)+'" rx="'+r1(r*0.5)+'" fill="'+col+'"/>'}
+  box.innerHTML=s+'<rect x="0" y="0" width="'+W+'" height="100%" fill="transparent"'+tip(m+' maschi e '+(100-m)+' femmine ogni 100 nati nel 2024 ('+f0(M)+' e '+f0(F)+')')+'/></svg>';
+  $('t-sesso').innerHTML='Su 100 nati nel 2024, <span style="color:#0072BC">'+m+' maschi</span> e <span style="color:#c4006a">'+(100-m)+' femmine</span>';
+}
 /* ---------- 2. nati e donne, in proporzione ---------- */
 function indice(){
   var box=$('ch-indice'),W=width('ch-indice'),H=W<500?250:300,ml=34,mr=W<500?92:100,mt=14,mb=26,pw=W-ml-mr,ph=H-mt-mb,y0=70,y1=110,x0=A[0],x1=A[NA-1];
@@ -394,10 +407,10 @@ function indice(){
   [2003,2008,2013,2018,2024].forEach(function(y){s+=T(sx(yi(y)),H-6,y,{a:'middle',c:'m'})});
   s+=L(sx(b),mt,sx(b),mt+ph,C.axis,1,' stroke-dasharray="3 3"');
   function path(a,col){return '<path d="'+a.map(function(v,i){return (i?'L':'M')+r1(sx(i))+' '+r1(sy(v))}).join('')+'" fill="none" stroke="'+col+'" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>'}
-  s+=path(sD,C.m2)+path(sN,C.ink);
-  var lab=[{y:sy(sN[NA-1])+4,t:'nati '+sg0(sN[NA-1]-100)+'%',c:C.ink},{y:sy(sD[NA-1])+4,t:'donne '+sg0(sD[NA-1]-100)+'%',c:C.m2}];
+  s+=path(sD,'#E6007E')+path(sN,C.ink);
+  var lab=[{y:sy(sN[NA-1])+4,t:'nati '+sg0(sN[NA-1]-100)+'%',c:C.ink},{y:sy(sD[NA-1])+4,t:'donne '+sg0(sD[NA-1]-100)+'%',c:'#E6007E'}];
   spread(lab,16,mt+8,mt+ph);
-  lab.forEach(function(l){s+=T(W-mr+6,l.y,esc(l.t),{c:'halo',st:'fill:'+(l.c===C.m2?'#007a3b':C.ink)+';font-size:13px'})});
+  lab.forEach(function(l){s+=T(W-mr+6,l.y,esc(l.t),{c:'halo',st:'fill:'+(l.c==='#E6007E'?'#c4006a':C.ink)+';font-size:13px'})});
   s+=T(sx(b)+4,mt+12,'2008 = 100',{c:'m'});
   for(var i=0;i<NA;i++){var xl=i?(sx(i)+sx(i-1))/2:sx(0),xr=i<NA-1?(sx(i)+sx(i+1))/2:sx(i);
     s+='<rect x="'+r1(xl)+'" y="'+mt+'" width="'+r1(xr-xl)+'" height="'+ph+'" fill="transparent"'+tip('<b>'+A[i]+'</b><br>nati: '+f0(CT.nati[i])+' ('+sg0(sN[i]-100)+'% sul 2008)<br>donne di 15-49 anni: '+f0(CT.donne[i])+' ('+sg0(sD[i]-100)+'%)')+'/>'}
@@ -408,7 +421,7 @@ function indice(){
 /* ---------- 3. prima e dopo, per cittadinanza ---------- */
 function citt(){
   var box=$('ch-citt'),W=width('ch-citt'),lw=W<500?104:150,H=170,rows=[
-    {n:'Mamme italiane',sub:'',a:1000*CT.ita[0]/CT.dI[0],b:1000*CT.ita[NA-1]/CT.dI[NA-1],col:C.m4},
+    {n:'Mamme italiane',sub:'',a:1000*CT.ita[0]/CT.dI[0],b:1000*CT.ita[NA-1]/CT.dI[NA-1],col:C.teal},
     {n:'Mamme straniere',sub:'',a:1000*CT.str[0]/CT.dS[0],b:1000*CT.str[NA-1]/CT.dS[NA-1],col:C.ora},
     {n:'Tutte le mamme',sub:'',a:1000*CT.nati[0]/CT.donne[0],b:1000*CT.nati[NA-1]/CT.donne[NA-1],col:C.ink}];
   var xa=lw+36,xb=W-40,vmin=20,vmax=80;function sx(v){return xa+(xb-xa)*(v-vmin)/(vmax-vmin)}
@@ -429,10 +442,10 @@ function citt(){
 /* ---------- 4. età delle mamme: due distribuzioni affiancate ---------- */
 function eta(){
   var box=$('ch-eta'),W=width('ch-eta'),cw=34,half=(W-cw)/2-4,rh=13.5,a0=17,a1=45,top=26,H=top+(a1-a0+1)*rh+4;
-  var y1=2004,y2=2024,c1=C.m5,c2=C.teal,mx=105;
+  var y1=2004,y2=2024,c1=C.m5,c2=C.m2,mx=105;
   function px(v){return v/mx*half}
   var s=svgOpen(W,H),xl=half,xr=half+cw+8;
-  s+=T(xl,16,y1,{a:'end',st:'font-size:15px;font-weight:800;fill:'+c1})+T(xr,16,y2,{st:'font-size:15px;font-weight:800;fill:#007f7a'});
+  s+=T(xl,16,y1,{a:'end',st:'font-size:15px;font-weight:800;fill:'+c1})+T(xr,16,y2,{st:'font-size:15px;font-weight:800;fill:#007a3b'});
   var p1=peak(y1),p2=peak(y2),ticks=[20,25,30,40,45];
   function show(a){return a===p1||a===p2||(ticks.indexOf(a)>=0&&Math.abs(a-p1)>1&&Math.abs(a-p2)>1)}
   for(var a=a0;a<=a1;a++){
@@ -508,7 +521,7 @@ function bolle(){
   var order=N.slice().sort(function(a,b){return b.nm-a.nm}),dots='';
   order.slice().reverse().forEach(function(o){var c=P.cen(o.f),r=Math.sqrt(o.nm)*kk,isS=o.id===sel;
     var isL=order.indexOf(o)<4;
-    dots+='<circle cx="'+r1(c[0])+'" cy="'+r1(c[1])+'" r="'+r1(r)+'" fill="'+C.mag+'" fill-opacity=".72" stroke="'+(isS||isL?C.ink:'#fff')+'" stroke-width="'+(isS?2.5:isL?2:1)+'" data-n="'+o.id+'"'+tip('<b>'+esc(o.n)+'</b><br>'+f0(o.nm)+' nati l’anno (media '+per(NA-1)+')<br>'+f1(o.r)+' ogni 1.000 abitanti')+'/>'});
+    dots+='<circle cx="'+r1(c[0])+'" cy="'+r1(c[1])+'" r="'+r1(r)+'" fill="'+C.m5+'" fill-opacity=".72" stroke="'+(isS||isL?C.ink:'#fff')+'" stroke-width="'+(isS?2.5:isL?2:1)+'" data-n="'+o.id+'"'+tip('<b>'+esc(o.n)+'</b><br>'+f0(o.nm)+' nati l’anno (media '+per(NA-1)+')<br>'+f1(o.r)+' ogni 1.000 abitanti')+'/>'});
   s+=dots;
   var lab=order.slice(0,4);if(sel&&lab.indexOf(BY[sel])<0)lab.push(BY[sel]);
   var used=lab.map(function(o){var c=P.cen(o.f),r=Math.sqrt(o.nm)*kk;return {o:o,x0:c[0]-r,x1:c[0]+r,y0:c[1]-r,y1:c[1]+r}});
@@ -521,7 +534,7 @@ function bolle(){
     used.push(best[2]);best[2].o=null;var dd=Math.hypot(best[0]-c[0],best[1]-4-c[1]);if(dd>r+24)s+=L(c[0],c[1],best[0],best[1]-4,C.ink,1.5,' pointer-events="none"');s+='<g pointer-events="none">'+T(best[0],best[1],esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'});
   box.innerHTML=s+'</svg>';
   var r50=Math.sqrt(50)*kk,r150=Math.sqrt(150)*kk;
-  $('lg-bolle').innerHTML='<span><svg width="'+(r50*2+2)+'" height="'+(r50*2+2)+'"><circle cx="'+(r50+1)+'" cy="'+(r50+1)+'" r="'+r50+'" fill="'+C.mag+'" fill-opacity=".72"/></svg>50 nati l’anno</span><span><svg width="'+(r150*2+2)+'" height="'+(r150*2+2)+'"><circle cx="'+(r150+1)+'" cy="'+(r150+1)+'" r="'+r150+'" fill="'+C.mag+'" fill-opacity=".72"/></svg>150 nati l’anno</span>';
+  $('lg-bolle').innerHTML='<span><svg width="'+(r50*2+2)+'" height="'+(r50*2+2)+'"><circle cx="'+(r50+1)+'" cy="'+(r50+1)+'" r="'+r50+'" fill="'+C.m5+'" fill-opacity=".72"/></svg>50 nati l’anno</span><span><svg width="'+(r150*2+2)+'" height="'+(r150*2+2)+'"><circle cx="'+(r150+1)+'" cy="'+(r150+1)+'" r="'+r150+'" fill="'+C.m5+'" fill-opacity=".72"/></svg>150 nati l’anno</span>';
   var top=order[0],tot=sum(CT.nati,NA-3,NA-1)/3;
   $('t-bolle').textContent='Nei quartieri più grandi nascono oltre 140 bambini l’anno; in '+order.filter(function(o){return o.nm<20}).length+' quartieri meno di 20';
   $('s-bolle').textContent='Il cerchio è grande quanto il numero di bambini nati in un anno (media '+per(NA-1)+'), in tutto '+f0(tot)+' l’anno. Sono scritti i quattro quartieri con più nati.';
