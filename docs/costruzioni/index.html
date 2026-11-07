@@ -1,384 +1,602 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · Dove si costruisce</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.tabw{min-width:640px} .pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-ol.tl{padding-left:1.2em} ol.tl li{margin:.4em 0}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.find{margin:14px 0 0}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.pm{margin:10px 0 0}
+.pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+.tl{padding-left:1.2em;margin:.4em 0;font-size:.9rem;color:var(--ink2)} .tl li{margin:.4em 0}
+.fig,h2{scroll-margin-top:12px}
+.ctl{background:var(--soft);border-top:6px solid var(--mi);padding:10px 12px 12px;margin:6px 0 8px}
+.ctl .rd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ctl .yy{font-size:2.6rem;line-height:1;font-weight:800;letter-spacing:-.02em;color:var(--mi)}
+.ctl .tt{font-size:.98rem;line-height:1.3;color:var(--ink);flex:1 1 180px}
+.ctl .tt b{font-size:1.25rem}
+.ctl .row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.ctl button{flex:none;font:inherit;font-weight:750;font-size:15px;background:var(--ink);color:#fff;border:0;padding:0 14px;min-height:48px;cursor:pointer}
+.ctl button:focus-visible{outline:3px solid var(--mi);outline-offset:2px}
+.ctl input[type=range]{flex:1;min-width:0;height:48px;accent-color:#E30613;margin:0}
+.ctl .ax{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut);margin:-4px 0 0 0}
+.ctl .ax.pad{padding-left:0}
+.lg2{font-size:.85rem;color:var(--ink2);margin:.3em 0 0}
 </style><script src="../menu.js" defer></script></head><body><main>
+
 <h1>Dove si costruisce a Milano</h1>
-<p>Ogni volta che a Milano si costruisce un edificio nuovo o si allarga uno esistente, il Comune registra un modulo statistico (lo stesso che manda all&rsquo;ISTAT) con indirizzo, tipo di titolo, abitazioni e volume. Il Comune ne pubblica i dati <b>dal 2014 al 2024</b>: in tutto <b id="n-tot">1.315</b> moduli. Qui li guardiamo per anno, per titolo e per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale).</p>
+<p class="lead">Le case nei palazzi nuovi dal 2014 al 2024: dove sono comparse, anno per anno, con quale permesso, e che cosa è successo nel 2024.</p>
 
-<div class="warm"><b>Che cosa c&rsquo;&egrave; e che cosa no.</b> Ci sono i <b>nuovi edifici</b> (compresi quelli costruiti dopo una demolizione) e gli <b>ampliamenti</b>. Le <b>ristrutturazioni</b>, le CILA e le demolizioni che non portano a un nuovo edificio <b>non sono nei dati aperti e non si possono misurare</b>: non si pu&ograve; dire quanto a Milano si costruisce &laquo;nuovo&raquo; rispetto a quanto si ristruttura (<a href="#nonsi">vedi sotto</a>). Sono inoltre <i>titoli</i>, non cantieri: non sappiamo se e quando l&rsquo;edificio &egrave; stato finito.</div>
+<div class="hl" id="hl"></div>
+<p class="src">Fonte: Comune di Milano, moduli statistici dell’edilizia (nuovi edifici e ampliamenti, 2014-2024, CC BY); residenti dei quartieri: Comune di Milano (CC BY). Sono permessi e comunicazioni di inizio lavori, non cantieri finiti: vedi i limiti dei dati.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<h2 id="dove">Dove e quando: la città che cresce</h2>
+<div class="fig" id="f-citta">
+  <h3 id="t-citta"></h3>
+  <p class="sub">Ogni bolla rossa è un quartiere: più è grande, più abitazioni nuove ci sono state dal 2014 all’anno scelto. Muovi il cursore, o premi il pulsante, e guarda la città riempirsi.</p>
+  <div class="ctl">
+    <div class="rd"><span class="yy" id="rd-y">2024</span><span class="tt" id="rd-t"></span></div>
+    <div class="row"><button type="button" id="play">▶ Parti</button><input type="range" id="yr" min="2014" max="2024" step="1" value="2024" aria-label="Anno fino a cui contare le abitazioni nuove"></div>
+    <div class="ax"><span>2014</span><span>2019</span><span>2024</span></div>
+  </div>
+  <div class="ch" id="ch-citta" role="img" aria-label="Mappa dei quartieri di Milano con una bolla rossa per quartiere, grande quanto le abitazioni nuove dal 2014 all’anno scelto"></div>
+  <p class="note" id="nn-citta"></p>
+  <p class="src">Fonte: Comune di Milano, titoli edilizi 2014-2024 e confini dei quartieri (NIL, Nuclei di identità locale; CC BY). L’anno è quello di ritiro del titolo. 1.169 abitazioni (47 edifici) non hanno un quartiere perché mancano le coordinate e l’indirizzo non basta: non sono nelle bolle. Le bolle crescono come la superficie: una bolla grande il doppio ha il quadruplo delle abitazioni.</p>
+</div>
 
-<h2 id="anni">Gli anni: quanto si costruisce</h2>
-<div id="anni-testo"></div>
-<div class="grid2"><div><h3>Abitazioni nei nuovi edifici, per anno</h3><div class="ch" id="ch-ab" role="img" aria-label="Grafico a linea: abitazioni nei nuovi edifici per anno, 2014-2024"></div></div>
-<div><h3>Nuovi edifici, per anno</h3><div class="ch" id="ch-ed" role="img" aria-label="Grafico a linea: nuovi edifici per anno, residenziali e non residenziali"></div></div></div>
-<div class="lgd" id="lg-ed"></div>
-<p class="src">Anno = anno di ritiro del titolo edilizio, come scritto nel file. Il 2024 pu&ograve; essere incompleto. Fonte: Comune di Milano, serie &laquo;Edilizia&raquo; (ds270, ds2984, ds2983; CC BY), elaborazione nostra.</p>
-<h3>E gli abitanti?</h3>
-<div id="pop-testo"></div>
-<div class="ch" id="ch-pop" role="img" aria-label="Grafico a colonne: variazione annua dei residenti di Milano, 2015-2024"></div>
-<p class="src">Residenti: somma dei 88 NIL, Comune di Milano (ds205, CC BY). Variazione = differenza con l&rsquo;anno prima, quindi la prima colonna &egrave; il 2015.</p>
-<div class="warn"><b>Un conteggio lordo, non un bilancio.</b> Le abitazioni sono quelle dei <i>nuovi</i> edifici: i dati non dicono quante abitazioni sono state demolite, n&eacute; quante ne sono nate da ristrutturazioni o cambi d&rsquo;uso. E i residenti in pi&ugrave; possono vivere in case gi&agrave; esistenti. Per questo &laquo;46 abitazioni ogni 100 residenti in pi&ugrave;&raquo; &egrave; un ordine di grandezza, non un rapporto tra offerta e bisogno. Tre edifici (via Giovenale, via Durando due volte) hanno meno di 100 m&sup3; per abitazione: probabilmente alloggi piccolissimi o residenze per studenti contate come abitazioni (1.084 abitazioni, il 4% del totale).</div>
+<div class="find" id="f-trova">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Lambrate" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
 
-<h2 id="titolo">Permesso di costruire o SCIA?</h2>
-<div id="titolo-testo"></div>
-<div class="ch" id="ch-scia" role="img" aria-label="Grafico a linea: quota di nuovi edifici realizzati con SCIA, per anno"></div>
-<div class="scroll"><table id="tab-titoli"></table></div>
-<p class="src">Nuovi edifici di ogni uso. Per i confronti nel tempo la SCIA e la SCIA alternativa sono <b>sommate</b>: nel file le due etichette si scambiano di ruolo tra il 2017 e il 2020 (la &laquo;alternativa&raquo; &egrave; il 37&ndash;49% dei casi fino al 2017, l&rsquo;1&ndash;2% nel 2018&ndash;2019, il 60&ndash;71% nel 2021&ndash;2022), probabilmente per come venivano compilati i moduli, non per un cambio di comportamento. Fonte: Comune di Milano (ds270, ds2984, ds2983; CC BY).</p>
+<h2 id="anni">Gli anni: su e giù</h2>
+<div class="fig" id="f-anni">
+  <h3 id="t-anni"></h3>
+  <p class="sub">Le abitazioni dei nuovi edifici di cui è stato ritirato il titolo edilizio in ogni anno, in migliaia. Passa il dito o il mouse sui punti per il numero esatto.</p>
+  <div class="ch" id="ch-anni" role="img" aria-label="Linea: abitazioni nei nuovi edifici di Milano per anno, 2014-2024, con il crollo del 2024"></div>
+  <ul class="notes" id="nt-anni"></ul>
+  <p class="note" id="nn-anni"></p>
+  <p class="src">Anno = anno di ritiro del titolo edilizio, come scritto nel file. Fonte: Comune di Milano, «Edilizia: nuovi fabbricati» (CC BY); residenti: somma degli 88 quartieri, Comune di Milano (CC BY). Elaborazione nostra.</p>
+</div>
 
-<h2 id="mappa">Dove: la mappa dei quartieri</h2>
-<p>Scegli che cosa mostrare. Clic su un quartiere, o sceglilo dall&rsquo;elenco, per la scheda.</p>
-<div class="ctl"><span class="sub">Mostra:</span>
-<button type="button" data-m="nd" class="on">Abitazioni nuove 2014&ndash;2024</button><button type="button" data-m="p1000">Ogni 1.000 residenti</button><button type="button" data-m="dnet">Volume costruito, dall&rsquo;alto (2006&rarr;2020)</button></div>
-<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
-<p class="sub" id="map-desc"></p>
-<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per abitazioni nuove"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Mappa &copy; OpenStreetMap contributors; titoli, quartieri e residenti: Comune di Milano (CC BY). Abitazioni nei nuovi edifici (di ogni uso) con titolo 2014&ndash;2024; 1.169 abitazioni (47 edifici) non hanno un quartiere perch&eacute; mancano le coordinate e l&rsquo;indirizzo non basta. I quartieri con meno di 5.000 residenti (parchi, aree quasi disabitate) sono in grigio nella mappa &laquo;ogni 1.000 residenti&raquo;.</p>
-<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
-<h3>Dove si concentrano</h3>
-<div id="conc-testo"></div>
-<div class="bars" id="b-top"></div>
-<p class="src">Abitazioni nei nuovi edifici 2014&ndash;2024 per quartiere e, tra parentesi, ogni 1.000 residenti (residenti 2024). Fonte: Comune di Milano; <a href="data/nil.csv">tutti i quartieri</a>.</p>
+<div class="fig" id="f-titoli">
+  <h3 id="t-titoli"></h3>
+  <p class="sub">Per ogni anno, quanti nuovi edifici sono partiti con il permesso di costruire (a sinistra, blu) e quanti con la SCIA (a destra, arancio). Il numero è scritto in fondo a ogni barra.</p>
+  <div class="ch" id="ch-titoli" role="img" aria-label="Barre a farfalla: nuovi edifici con permesso di costruire a sinistra e con SCIA a destra, per anno"></div>
+  <p class="note" id="nn-titoli"></p>
+  <p class="src">Nuovi edifici di ogni uso. SCIA e SCIA alternativa sono sommate: nei moduli le due etichette si scambiano di ruolo tra il 2017 e il 2020, probabilmente per come venivano compilati, non per un cambio di comportamento. Fonte: Comune di Milano (CC BY).</p>
+</div>
 
-<h2 id="alto">Un secondo sguardo: dall&rsquo;alto, 2006&rarr;2020</h2>
-<div id="alto-testo"></div>
-<div class="warm"><b>Avvertenze, tutte importanti.</b><ul id="alto-avv"></ul></div>
-<div id="alto-nil"></div>
-<p class="src">Fonte: Comune di Milano, Database Topografico 2012 e 2020 (ds2892, ds2889; CC BY), unit&agrave; volumetriche fuori terra con altezza. Elaborazione nostra con regole nostre (<a href="#metodo">metodo</a>). Valori per quartiere: <a href="data/nil.csv">nil.csv</a>.</p>
+<div class="fig" id="f-ricostr">
+  <h3 id="t-ricostr"></h3>
+  <p class="sub">I nuovi edifici residenziali del 2022-2024 seguiti dall’alto al basso: prima si divide chi prende il posto di un edificio demolito e chi no, poi come sono partiti i lavori. La larghezza di ogni fascia è il numero di edifici.</p>
+  <div class="lg" id="lg-ricostr"></div>
+  <div class="ch" id="ch-ricostr" role="img" aria-label="Flusso: nuovi edifici residenziali 2022-2024 divisi tra chi sostituisce un edificio demolito e chi no, e per titolo usato"></div>
+  <p class="note" id="nn-ricostr"></p>
+  <p class="src">Fonte: Comune di Milano, nuovi fabbricati residenziali 2022-2024 (CC BY). Il campo «abbattimento e ricostruzione» è completo solo dal 2022: prima di quell’anno è vuoto o a metà.</p>
+</div>
 
-<h2 id="grandi">I pi&ugrave; grandi interventi</h2>
-<div id="grandi-testo"></div>
-<h3>I 15 pi&ugrave; grandi per volume</h3>
-<div class="scroll"><table id="tab-vol" class="tabw"></table></div>
-<h3>I 10 con pi&ugrave; abitazioni (residenziali)</h3>
-<div class="scroll"><table id="tab-ab" class="tabw"></table></div>
-<p class="src">Nuovi edifici con titolo 2014&ndash;2024, raggruppati per indirizzo e anno. L&rsquo;indirizzo &egrave; scritto come nel file del Comune, errori di battitura compresi. Volume vuoto per pieno, in m&sup3;. Fonte: Comune di Milano (ds270, ds2984; CC BY); <a href="data/grandi_interventi.csv">grandi_interventi.csv</a>.</p>
+<h2 id="grandi">I più grandi</h2>
+<div class="fig" id="f-sky">
+  <h3 id="t-sky"></h3>
+  <p class="sub">I 10 interventi con più abitazioni, disegnati con la stessa scala: l’altezza è il numero di abitazioni, non i piani. Sotto, via e anno del titolo; al tocco, il quartiere.</p>
+  <div class="lg" id="lg-sky"></div>
+  <div class="ch" id="ch-sky" role="img" aria-label="Dieci sagome di edifici, alte quanto le abitazioni dell’intervento"></div>
+  <p class="note" id="nn-sky"></p>
+  <p class="src">Interventi con titolo 2014-2024, raggruppati per indirizzo e anno; solo titolari imprese, cooperative ed enti pubblici (gli interventi di persone fisiche e di titolari non classificati non si mostrano). L’indirizzo è scritto come nel file del Comune. Il Comune non indica il nome dei progetti. Fonte: Comune di Milano, «Edilizia» (CC BY).</p>
+</div>
 
-<h2 id="2024">Il 2024 e gli anni dell&rsquo;inchiesta</h2>
-<div id="q-testo"></div>
-<div class="ch" id="ch-q" role="img" aria-label="Grafico a colonne: nuovi edifici per trimestre, 2021-2024"></div>
-<div class="lgd" id="lg-q"></div>
-<h3>Il Comune e l&rsquo;ISTAT a confronto</h3>
-<div class="scroll"><table id="tab-cmp"></table></div>
-<div class="warm"><b>Un confronto di date e numeri, non una spiegazione.</b> <span id="q-avv"></span></div>
-<h3>Che cosa &egrave; successo (fonti giornalistiche)</h3>
-<ol class="tl" id="cronologia"></ol>
-<p class="src">Le date sono quelle riportate dalle fonti indicate; non le abbiamo incrociate con i dati per cercare cause.</p>
+<h2 id="inchiesta">Il 2024 e gli anni dell’inchiesta</h2>
+<div class="fig" id="f-trim">
+  <h3 id="t-trim"></h3>
+  <p class="sub">Una colonna per trimestre, dal 2021 al 2024: i nuovi edifici con titolo noto, divisi tra permesso di costruire (blu) e SCIA (arancio). La fascia gialla è il 2024.</p>
+  <div class="lg" id="lg-trim"></div>
+  <div class="ch" id="ch-trim" role="img" aria-label="Colonne: nuovi edifici per trimestre dal 2021 al 2024, con permesso di costruire e SCIA"></div>
+  <ul class="notes" id="nt-trim"></ul>
+  <p class="note" id="nn-trim"></p>
+  <p class="mt">Che cosa è successo, secondo la stampa</p>
+  <ol class="tl" id="cronologia"></ol>
+  <p class="src">Le date sono quelle riportate dalle fonti indicate; non le abbiamo incrociate con i dati per cercare cause. Il calo e l’inchiesta nello stesso capitolo sono due fatti vicini nel tempo, non una prova che uno dipenda dall’altro. Fonte dei numeri: Comune di Milano (CC BY); confronto: ISTAT, permessi di costruire (CC BY 4.0).</p>
+</div>
 
-<h2 id="nonsi">Che cosa non si pu&ograve; sapere</h2>
-<div class="warm"><ul id="nonsi-lista"></ul></div>
-
-<h2 id="metodo">Come &egrave; fatto</h2>
-<ul class="m" id="metodo-lista"></ul>
-
-<h2 id="limiti">Limiti dei dati</h2>
-<div class="warm"><ul id="limiti-lista"></ul></div>
-
-<h2 id="download">File</h2>
-<p><a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina, con l&rsquo;origine), <a href="data/serie_annuale.csv">serie_annuale.csv</a>, <a href="data/titoli_per_anno.csv">titoli_per_anno.csv</a>, <a href="data/trimestri_2021_2024.csv">trimestri_2021_2024.csv</a>, <a href="data/nil.csv">nil.csv</a>, <a href="data/nil.geojson">nil.geojson</a> (confini dei quartieri semplificati, con gli stessi valori) e <a href="data/grandi_interventi.csv">grandi_interventi.csv</a>. Sono valori aggregati: i 1.315 moduli uno per uno non sono ripubblicati qui (ci sono indirizzi di privati). Per i prezzi delle case, nello stesso periodo: <a href="../prezzi-case/">prezzi delle case a Milano</a>.</p>
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul>
+<p>Altre pagine sullo stesso tema: <a href="../suolo/">Quanto suolo si consuma</a>, <a href="../rigenerazione/">I progetti di rigenerazione</a>, <a href="../palazzi/">Quanto sono vecchi i palazzi</a>, <a href="../prezzi-case/">Prezzi delle case</a>.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Titolo edilizio</dt><dd>Il documento con cui si può costruire: il permesso di costruire (il Comune lo rilascia dopo aver controllato il progetto) oppure la SCIA (chi costruisce presenta i documenti e comincia, il Comune controlla dopo).</dd>
+<dt>SCIA alternativa</dt><dd>Una SCIA usata al posto del permesso di costruire, per alcuni tipi di intervento. Qui è sommata alla SCIA.</dd>
+<dt>Nuovo edificio</dt><dd>Un edificio costruito da zero, compreso quello che prende il posto di uno demolito. Le ristrutturazioni non ci sono.</dd>
+<dt>Ampliamento</dt><dd>Una parte aggiunta a un edificio che c’è già. Non è contata tra i nuovi edifici di questa pagina.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+<dt>Trimestre</dt><dd>Tre mesi: gennaio-marzo, aprile-giugno, luglio-settembre, ottobre-dicembre.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Sono valori aggregati: i 1.315 moduli uno per uno non sono ripubblicati (ci sono indirizzi di privati).</p>
+<ul>
+<li><a href="data/nil.csv">Tutti i numeri per quartiere</a> (tabella, punto e virgola come separatore)</li>
+<li><a href="data/nil_anni.csv">Abitazioni nuove per quartiere e per anno</a>, 2014-2024</li>
+<li><a href="data/nil.geojson">Confini semplificati dei quartieri</a> con gli stessi valori</li>
+<li><a href="data/serie_annuale.csv">Nuovi edifici e abitazioni, anno per anno</a></li>
+<li><a href="data/titoli_per_anno.csv">Permessi e SCIA, anno per anno</a></li>
+<li><a href="data/trimestri_2021_2024.csv">Nuovi edifici per trimestre</a> e <a href="data/titoli_trimestri_2021_2024.csv">titoli per trimestre</a>, 2021-2024</li>
+<li><a href="data/grandi_interventi.csv">I più grandi interventi</a></li>
+<li><a href="data/riepilogo.json">Tutti i numeri di questa pagina</a>, con l’origine di ciascuno</li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Edilizia (nuovi fabbricati, ampliamenti, collettivit&agrave;; ds270, ds2984, ds271, ds2985, ds2983): Comune di Milano, licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026. Database Topografico 2012 e 2020 (ds2892, ds2889): Comune di Milano, CC BY, scaricati il 1 novembre 2026 da gisportal.comune.milano.it. Residenti per quartiere (ds205) e confini dei NIL (ds964): Comune di Milano, CC BY. Permessi di costruire per Citt&agrave; metropolitana e per classe di comune: <a href="https://www.istat.it/tavole-di-dati/statistiche-sui-permessi-di-costruire-anno-2025/">ISTAT</a> (IstatData), licenza dichiarata CC BY 4.0, scaricati il 1 novembre 2026. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p><b>Fonti e licenze.</b> Edilizia (nuovi fabbricati, ampliamenti, collettività): Comune di Milano, licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026. Residenti per quartiere e confini dei NIL: Comune di Milano, CC BY. Permessi di costruire per Città metropolitana e per classe di comune: <a href="https://www.istat.it/tavole-di-dati/statistiche-sui-permessi-di-costruire-anno-2025/">ISTAT</a> (IstatData), licenza dichiarata CC BY 4.0, scaricati il 1 novembre 2026.</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,NF=null,NIL=[],RD=[];
-var ACC='#00695c',GRY='#8a8a8a',WARM='#c26a1b';
-var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
-/* ---------- formati ---------- */
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
-function sgp(x,d){return sg(x,d==null?1:d)+'%'}
-function mm(x){return nf(x/1e6,2)}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function table2(id,head,rows,left){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(left.indexOf(i)<0?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(left.indexOf(i)<0?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
-function lgdBox(items){return items.map(function(it){return '<span><i style="background:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),gry:'#9aa1ad'};
+var D,GEO,GR=[],TT={},N=[],NB=[],BY={},RD=[],sel=null,MIL=0;
 
-Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
-  D=a[0];NF=a[1];
-  NIL=NF.features.map(function(f){return f.properties});
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+grp(String(Math.abs(r)))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function pl(n,u,p){return n+' '+(n===1?u:p)}
 
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function nbadge(x,y,n){return '<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="9.5" fill="'+C.ink+'"/>'+T(x,y+4.2,n,{a:'middle',c:'w'})}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getT(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()})}
+function rows(t){return t.replace(/\r/g,'').split('\n').filter(Boolean).slice(1).map(function(l){return l.split(';')})}
+var NA={},YR=2024,MP=null,timer=null,AUTO=false;
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson'),getT(DATA+'grandi_interventi.csv'),getT(DATA+'titoli_trimestri_2021_2024.csv'),getT(DATA+'nil_anni.csv')]).then(function(r){
+  D=r[0];GEO=r[1];
+  rows(r[2]).forEach(function(v){if(v[9]==='per abitazioni')GR.push({anno:+v[0],ind:v[1],q:v[2],ed:+v[4],ab:+v[5],vol:+v[6],tit:v[7],cat:v[8]})});
+  rows(r[3]).forEach(function(v){TT[v[0]]={pdc:+v[1],scia:+v[2]+(+v[3]),tot:+v[4]}});
+  rows(r[4]).forEach(function(v){NA[+v[0]]=v.slice(2).map(Number)});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function draw(f){f();RD.push(f)}
+
+/* ---------- quartieri ---------- */
+function prepara(){
+  var sa=0,sb=0;
+  GEO.features.forEach(function(f){var p=f.properties;
+    var o={id:p.i,n:p.n,ab:p.ab,nd:p.nd,nd1:p.nd1,nd2:p.nd2,nfr:p.nfr,nfn:p.nfn,p:p.p1000,q:p.q,big:p.cl===1,f:f,a:NA[p.i]||[0,0,0,0,0,0,0,0,0,0,0]};
+    var c=0;o.cum=o.a.map(function(v){c+=v;return c});
+    N.push(o);BY[o.id]=o;if(o.big)NB.push(o);sa+=p.nd;sb+=p.ab});
+  MIL=sa/sb*1000;
+  var cnt={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+  NB.sort(function(a,b){return b.p-a.p});NB.forEach(function(o,i){o.rk=i+1});
+  N.slice().sort(function(a,b){return b.nd-a.nd}).forEach(function(o,i){o.ra=i+1});
+}
 function tutto(){
-  sorpresa();anni();titolo();mappa();alto();grandi();trimestri();testi();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+  prepara();
+  highlights();
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});if(m.length===1)return m[0];return null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].id,true);else if(m.length>1)$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true)});
+  $('yr').addEventListener('input',function(){stop();AUTO=true;YR=+this.value;bolle()});
+  $('play').addEventListener('click',function(){AUTO=true;if(timer){stop();return}go()});
+  scheda();
+  draw(mappa);draw(anni);draw(titoli);draw(ricostr);draw(sky);draw(trim);
+  cronologia();testi();
+  if('IntersectionObserver' in window&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&!AUTO){AUTO=true;io.disconnect();go()}})},{threshold:.6});
+    io.observe($('ch-citta'));
+  }
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()});scheda()},150)});
 }
-function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
-
-/* ---------- grafici ---------- */
-function frame(box,o){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=o.h||260,m={l:o.ml||46,r:12,t:14,b:o.mb||30};
-  var y0=o.y0,y1=o.y1,sy=niceStep((y1-y0)/4);y1=Math.ceil(y1/sy)*sy;if(y0<0)y0=Math.floor(y0/sy)*sy;
-  var pw=W-m.l-m.r,ph=H-m.t-m.b;
-  function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+(v===0&&y0<0?'#888':'#e3e3e3')+'"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>';
-  return {W:W,H:H,m:m,pw:pw,ph:ph,Y:Y,s:s,y0:y0,y1:y1};
+function stop(){if(timer){clearInterval(timer);timer=null}$('play').textContent='▶ Parti'}
+function go(){
+  stop();YR=2014;$('yr').value=YR;bolle();$('play').textContent='❚❚ Ferma';
+  timer=setInterval(function(){if(YR>=2024){stop();return}YR++;$('yr').value=YR;bolle()},800);
 }
-function tipHandlers(box,svgEl,o,F,X){
-  box.insertAdjacentHTML('beforeend','<div class="tip" style="display:none"></div>');
-  var tip=box.lastChild,rect=svgEl.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svgEl.getBoundingClientRect(),k=F.W/r.width,px=(t.clientX-r.left)*k,bi=-1,bd=1e9;
-    o.xs.forEach(function(x,i){var d=Math.abs(X(i)-px);if(d<bd){bd=d;bi=i}});
-    if(bi<0){tip.style.display='none';return}
-    tip.innerHTML=o.tip(bi);tip.style.display='';var tw=tip.offsetWidth,left=X(bi)/k+10;if(left+tw>r.width)left=X(bi)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
-  function hide(){tip.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-}
-function lines(box,o){
-  var all=[];o.series.forEach(function(s){s.v.forEach(function(v){if(v!=null)all.push(v)})});
-  var F=frame(box,{h:o.h,y0:0,y1:Math.max.apply(null,all)*1.08,yf:o.yf});
-  var n=o.xs.length,m=F.m;function X(i){return m.l+(n===1?F.pw/2:i/(n-1)*F.pw)}
-  var s=F.s;
-  o.xs.forEach(function(x,i){if(n<=11||i%2===0)s+='<text class="mu" x="'+X(i)+'" y="'+(F.H-10)+'" text-anchor="middle">'+x+'</text>'});
-  o.series.forEach(function(se){
-    var d='',on=false;se.v.forEach(function(v,i){if(v==null){on=false;return}d+=(on?'L':'M')+X(i).toFixed(1)+' '+F.Y(v).toFixed(1);on=true});
-    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2.4"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
-    se.v.forEach(function(v,i){if(v!=null)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+F.Y(v).toFixed(1)+'" r="3.4" fill="'+se.color+'" stroke="#fff" stroke-width="1"/>'});
-  });
-  (o.marks||[]).forEach(function(mk){var v=o.series[mk.s].v[mk.i];s+='<text x="'+X(mk.i)+'" y="'+(F.Y(v)-9)+'" text-anchor="'+(mk.a||'middle')+'" style="fill:#8a4a10;font-weight:700">'+mk.t+'</text>'});
-  s+='<rect x="'+m.l+'" y="'+m.t+'" width="'+F.pw+'" height="'+F.ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s;tipHandlers(box,box.firstChild,o,F,X);
-}
-function cols(box,o){
-  var mx=0,mn=0;o.v.forEach(function(v){if(v!=null){mx=Math.max(mx,v);mn=Math.min(mn,v)}});
-  var F=frame(box,{h:o.h,y0:mn,y1:Math.max(mx*1.1,1),yf:o.yf,mb:o.mb||34});
-  var n=o.xs.length,m=F.m,bw=F.pw/n;function X(i){return m.l+(i+.5)*bw}
-  var s=F.s;
-  var stp=n<=12?1:(F.W<500?4:2);o.xs.forEach(function(x,i){if(i%stp===0)s+='<text class="mu" x="'+X(i)+'" y="'+(F.H-(o.mb?16:12))+'" text-anchor="middle">'+x+'</text>'});
-  o.v.forEach(function(v,i){if(v==null)return;var y=F.Y(Math.max(v,0)),h=Math.abs(F.Y(v)-F.Y(0));
-    s+='<rect x="'+(X(i)-bw*.36).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+(bw*.72).toFixed(1)+'" height="'+Math.max(h,1).toFixed(1)+'" fill="'+(o.col?o.col(i,v):ACC)+'"/>'});
-  s+='<rect x="'+m.l+'" y="'+m.t+'" width="'+F.pw+'" height="'+F.ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s;tipHandlers(box,box.firstChild,o,F,X);
-}
-function onResize(f){RD.push(f);f()}
-
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var r=D.ricostruzioni;
-  el('n-tot').textContent=f0(D.totali.record_totali);
-  var h='<p><b>Dal 2022, anno in cui il campo &laquo;abbattimento e ricostruzione&raquo; &egrave; compilato per tutti, met&agrave; dei nuovi edifici residenziali ne sostituisce uno demolito:</b> '+r.ricostruzioni+' su '+r.edifici+'. Portano '+f0(r.abitazioni_ricostruzioni)+' abitazioni e '+mm(r.volume_ricostruzioni_m3)+' milioni di m&sup3; di volume; gli altri '+r.non_sostitutivi+' edifici, '+f0(r.abitazioni_non_sostitutivi)+' abitazioni e '+mm(r.volume_non_sostitutivi_m3)+' milioni di m&sup3;.</p>';
-  h+='<p><b>Due ricostruzioni su tre passano con la SCIA alternativa</b> ('+r.scia_alt_ricostruzioni+' su '+r.ricostruzioni+', il '+r.quota_scia_alt_ricostruzioni_pct+'%), contro il '+r.quota_scia_alt_non_sostitutivi_pct+'% degli altri nuovi edifici ('+r.scia_alt_non_sostitutivi+' su '+r.non_sostitutivi+'). Anno per anno: '+r.per_anno.map(function(e){return e.si+' su '+e.tot+' nel '+e.anno}).join(', ')+'.</p>';
-  h+='<p class="src">Nuovi edifici residenziali 2022&ndash;2024, campo &laquo;abbattimento e ricostruzione&raquo; del modulo. Il campo esiste dal 2021 ma quell&rsquo;anno &egrave; compilato solo per '+r.campo_2021.compilati+' edifici su '+r.campo_2021.edifici+'; prima &egrave; vuoto. Le abitazioni sono quelle del nuovo edificio, senza sottrarre le demolite. &laquo;Nuovo&raquo; non vuol dire &laquo;su un terreno libero&raquo;. Fonte: Comune di Milano, ds270 (CC BY).</p>';
-  setH('sorpresa',h);
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  scheda();bolle();
 }
 
-/* ---------- gli anni ---------- */
-function anni(){
-  var A=D.anni,T=D.totali;
-  var mx=A.slice().sort(function(a,b){return b.abitazioni-a.abitazioni})[0],mnn=A.slice().sort(function(a,b){return a.abitazioni-b.abitazioni})[0];
-  var e22=A.filter(function(a){return a.anno===2022})[0],e24=A.filter(function(a){return a.anno===2024})[0];
-  setH('anni-testo','<p>Dal 2014 al 2024 il Comune ha registrato <b>'+f0(T.nuovi_res)+' nuovi edifici residenziali</b>, '+f0(T.nuovi_nonres)+' non residenziali e '+T.nuovi_coll+' per collettivit&agrave; (case di riposo, residenze per comunit&agrave;), con in tutto <b>'+f0(T.abitazioni_nuovi)+' abitazioni</b> e '+mm(T.volume_nuovi_m3)+' milioni di m&sup3; di volume. A questi si aggiungono '+T.ampliamenti+' ampliamenti: '+f0(T.abitazioni_ampliamenti)+' abitazioni e '+nf(T.volume_ampliamenti_m3/1e6,2)+' milioni di m&sup3;, quindi poco.</p><p>Il <b>2022</b> &egrave; l&rsquo;anno pi&ugrave; alto: '+e22.tot+' nuovi edifici e '+f0(e22.abitazioni)+' abitazioni (il picco &egrave; nel secondo trimestre, vedi <a href="#2024">pi&ugrave; sotto</a>). Il <b>2024</b> &egrave; il pi&ugrave; basso: '+e24.tot+' e '+f0(e24.abitazioni)+' <span class="pill">potrebbe essere incompleto</span>. Pochi casi grandi spostano un anno intero: un solo edificio da 695 abitazioni (via Frigia, 2020) vale il 23% di quell&rsquo;anno.</p>');
-  var xs=A.map(function(a){return a.anno});
-  onResize(function(){
-    lines(el('ch-ab'),{xs:xs,h:250,series:[{name:'Abitazioni',color:ACC,v:A.map(function(a){return a.abitazioni})}],
-      marks:[{s:0,i:8,t:'2022'},{s:0,i:10,t:'2024',a:'end'}],
-      tip:function(i){return '<b>'+xs[i]+'</b><br>'+f0(A[i].abitazioni)+' abitazioni<br>'+A[i].tot+' nuovi edifici'+(xs[i]===2024?'<br>(2024 potrebbe essere incompleto)':'')}});
-    lines(el('ch-ed'),{xs:xs,h:250,series:[{name:'Residenziali',color:ACC,v:A.map(function(a){return a.res})},{name:'Non residenziali',color:WARM,v:A.map(function(a){return a.nonres})}],
-      tip:function(i){return '<b>'+xs[i]+'</b><br>'+A[i].res+' residenziali<br>'+A[i].nonres+' non residenziali<br>'+A[i].coll+' per collettività'}});
-  });
-  setH('lg-ed',lgdLine([{color:ACC,t:'residenziali'},{color:WARM,t:'non residenziali'}]));
-  var pv=A.slice(1);
-  setH('pop-testo','<p>Nello stesso periodo i residenti sono passati da <b>'+f0(T.pop_2014)+'</b> (2014) a <b>'+f0(T.pop_2024)+'</b> (2024): <b>'+sg(T.var_pop)+'</b>. Le '+f0(T.abitazioni_nuovi)+' abitazioni dei nuovi edifici sono <b>'+T.abitazioni_per_100_residenti+' ogni 100 residenti in pi&ugrave;</b> (circa una ogni due). Anno per anno il rapporto non regge: i residenti salgono e scendono (da '+sg(Math.min.apply(null,pv.map(function(a){return a.var_pop})))+' nel 2020 a '+sg(Math.max.apply(null,pv.map(function(a){return a.var_pop})))+' nel 2023) mentre i permessi seguono un altro ritmo.</p>');
-  onResize(function(){
-    cols(el('ch-pop'),{xs:pv.map(function(a){return a.anno}),v:pv.map(function(a){return a.var_pop}),h:210,col:function(i,v){return v<0?WARM:ACC},
-      tip:function(i){return '<b>'+pv[i].anno+'</b><br>residenti '+sg(pv[i].var_pop)+'<br>abitazioni nuove (titoli): '+f0(pv[i].abitazioni)}});
-  });
+/* ---------- numeri grandi ---------- */
+function Y(a){return D.anni.filter(function(x){return x.anno===a})[0]}
+function TY(a){return D.titoli.filter(function(x){return x.anno===a})[0]}
+function highlights(){
+  var t=D.totali,a22=Y(2022),a24=Y(2024),var24=(a24.abitazioni/a22.abitazioni-1)*100;
+  var rc=D.ricostruzioni,top=NB[0],g=GR[0];
+  var H=[
+    {c:C.mi,h:'f-citta',n:f0(t.abitazioni_nuovi),p:'abitazioni nei nuovi edifici dal 2014 al 2024. I milanesi sono aumentati di '+f0(t.var_pop)+': 46 case nuove ogni 100 abitanti in più.'},
+    {c:C.m3,h:'f-anni',n:sg0(var24)+'<small>%</small>',p:'abitazioni nei nuovi edifici nel 2024 rispetto al 2022: da '+f0(a22.abitazioni)+' a '+f0(a24.abitazioni)+'.'},
+    {c:C.m2,h:'f-titoli',n:f0(TY(2022).quota_scia_pct)+'<small>%</small>',p:'dei nuovi edifici del 2022 è partito con la SCIA e non con il permesso di costruire. Nel 2018 era il '+f0(TY(2018).quota_scia_pct)+'%.'},
+    {c:C.m4,h:'f-ricostr',n:'1 su 2',p:'nuovi edifici residenziali dal 2022 prende il posto di uno demolito: '+rc.ricostruzioni+' su '+rc.edifici+'.'},
+    {c:C.m5,h:'f-trova',n:f0(top.p),p:'nuove abitazioni ogni 1.000 residenti in '+esc(top.sn)+'. In tutta Milano sono '+f0(MIL)+'.'},
+    {c:C.ora,h:'f-sky',n:f0(g.ab),p:'abitazioni in un solo intervento, il più grande: '+esc(sname(g.ind))+', titolo del '+g.anno+'.'}
+  ];
+  $('hl').innerHTML=H.map(function(x){return '<a href="#'+x.h+'" style="--c:'+x.c+'"><b class="n">'+x.n+'</b><p>'+x.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
-/* ---------- permesso o SCIA ---------- */
-function titolo(){
-  var T=D.titoli,xs=T.map(function(t){return t.anno});
-  var t18=T.filter(function(t){return t.anno===2018})[0],t22=T.filter(function(t){return t.anno===2022})[0],t24=T.filter(function(t){return t.anno===2024})[0];
-  setH('titolo-testo','<p>Un nuovo edificio si pu&ograve; costruire con un <b>permesso di costruire</b> (il Comune autorizza prima) o con una <b>SCIA</b> (segnalazione certificata di inizio attivit&agrave;: si presenta il progetto e si comincia, il Comune controlla dopo). La &laquo;SCIA alternativa&raquo; &egrave; la SCIA usata al posto del permesso di costruire. Sommando le due, la quota di nuovi edifici fatti con la SCIA era del '+nf(t18.quota_scia_pct,0)+'% nel 2018, ha toccato il <b>'+nf(t22.quota_scia_pct,0)+'% nel 2022</b> ('+t22.scia_tutte+' edifici su '+t22.tot+') ed &egrave; il '+nf(t24.quota_scia_pct,0)+'% nel 2024.</p>');
-  onResize(function(){
-    lines(el('ch-scia'),{xs:xs,h:230,yf:function(v){return v+'%'},series:[{name:'SCIA',color:ACC,v:T.map(function(t){return t.quota_scia_pct})}],
-      tip:function(i){return '<b>'+xs[i]+'</b><br>'+nf(T[i].quota_scia_pct,0)+'% con SCIA ('+T[i].scia_tutte+' su '+T[i].tot+')'}});
-  });
-  table2('tab-titoli',['Anno','Permesso di costruire','SCIA','SCIA alternativa','SCIA in tutto','Quota SCIA'],T.map(function(t){return [t.anno,t.pdc,t.scia,t.scia_alt,t.scia_tutte,nf(t.quota_scia_pct,0)+'%']}),[0]);
+/* ---------- 1. mappa con bolle e cursore degli anni (grafico firma) ---------- */
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  function X(p){return 1+(p[0]*k-x0)*sc}function Yy(p){return 1+(y1-p[1])*sc}
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(X(p))+' '+r1(Yy(p))}).join('L')+'Z'}).join('')},
+   cen:function(f){var best=null,ba=-1;
+     anelli(f).forEach(function(rg){var a=0,cx=0,cy=0,n=rg.length;
+       for(var i=0;i<n;i++){var p=rg[i],q=rg[(i+1)%n],x1_=X(p),y1_=Yy(p),x2=X(q),y2=Yy(q),c=x1_*y2-x2*y1_;a+=c;cx+=(x1_+x2)*c;cy+=(y1_+y2)*c}
+       a=a/2;if(Math.abs(a)>ba&&a!==0){ba=Math.abs(a);best={x:cx/(6*a),y:cy/(6*a)}}});
+     return best||{x:0,y:0}}};
 }
-
-/* ---------- mappa ---------- */
-var MAP=null,LAY=null,CUR='nd',SEL=null,MET={};
-function colore(v,m){if(v==null)return '#bdbdbd';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
 function mappa(){
-  MET={
-   nd:{k:'nd',b:[25,100,200,400,800],c:SEQ,u:' abitazioni nuove',t:'Abitazioni nei nuovi edifici (di ogni uso) con titolo dal 2014 al 2024, per quartiere. Dice dove sono i titoli, non quanto il quartiere sia cambiato: un quartiere grande ha pi&ugrave; spazio. I primi cinque quartieri hanno il '+D.nil_quota_top5_pct+'% delle abitazioni nuove, i primi dieci il '+D.nil_quota_top10_pct+'%; '+D.nil_senza_abitazioni+' quartieri su 88 non ne hanno nessuna.'},
-   p1000:{k:'p1000',b:[10,25,50,100,150],c:SEQ,u:' ogni 1.000 residenti',grey:true,t:'Abitazioni nuove 2014&ndash;2024 ogni 1.000 residenti del 2024. Il rapporto &egrave; alto dove si &egrave; costruito molto in zone poco abitate prima: i residenti del 2024 includono anche chi abita nelle case nuove. In grigio i quartieri con meno di 5.000 residenti (non confrontabili).'},
-   dnet:{k:'dnet',b:[-100000,0,100000,250000,400000],c:['#a8540f','#e0a96d','#d7ece7','#62b0a4','#136459','#052e29'],u:' migliaia di m³',art:true,t:'Dal confronto tra il Database Topografico 2012 (per il 96% rilevato nel 2006) e quello del 2020: volume delle unit&agrave; nuove, pi&ugrave; quello aggiunto sopraelevando, meno quello delle unit&agrave; sparite. &Egrave; una stima fatta con regole nostre. <b>Stadio&ndash;Ippodromi in grigio: dato non affidabile</b> (vedi sotto &laquo;Un secondo sguardo&raquo;).'}
-  };
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:true}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
-    l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});
-    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
-  MAP.fitBounds(LAY.getBounds());
-  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
-  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
-  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
-  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
-    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
-  ricolora();
-  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
-  window.addEventListener('resize',function(){MAP.invalidateSize()});
-  /* classifica */
-  var top=D.nil_top10,mx=top[0].nd;
-  setH('conc-testo','<p>I dieci quartieri con pi&ugrave; abitazioni nuove (titoli 2014&ndash;2024). <b>Maggiore&ndash;Musocco&ndash;Certosa</b> ne ha '+f0(top[0].nd)+' ('+nf(top[0].quota,1)+'% della citt&agrave;): vi sono nate case dove prima c&rsquo;erano pochi abitanti (i residenti del quartiere sono quasi raddoppiati, da 4.921 a 9.930). Tra i quartieri, abitazioni nuove e variazione dei residenti vanno insieme in modo medio (correlazione di Spearman '+nf(D.spearman.abitazioni_vs_variazione_popolazione.rho,2)+', 88 quartieri): una tendenza, non una regola.</p>');
-  setH('b-top',top.map(function(t){return '<div class="row"><span class="nm">'+esc(t.n)+'</span><span class="tr"><span class="fill" style="width:'+(t.nd/mx*100)+'%"></span></span><span class="v">'+f0(t.nd)+' <span class="sub">('+f0(t.p1000)+')</span></span></div>'}).join(''));
+  var W=width('ch-citta'),P=proj(W),H=P.H,s=svgOpen(W,H);
+  var mx=Math.max.apply(null,N.map(function(o){return o.nd})),rmax=Math.min(34,W*.085);
+  MP={W:W,H:H,paths:{},cen:{},rmax:rmax,mx:mx};
+  N.forEach(function(o){var d=P.path(o.f);MP.paths[o.id]=d;MP.cen[o.id]=P.cen(o.f);
+    s+='<path d="'+d+'" fill="#EEF0F3" stroke="#fff" stroke-width="1" stroke-linejoin="round" data-n="'+o.id+'" style="cursor:pointer"/>'});
+  s+='<g id="bub"></g></svg>';
+  $('ch-citta').innerHTML=s;
+  bolle();
+  var t=D.totali;
+  var top3=N.slice().sort(function(a,b){return b.nd-a.nd}).slice(0,3),q3=top3.reduce(function(a,o){return a+o.nd},0);
+  var tt=N.reduce(function(a,o){return a+o.nd},0);
+  $('t-citta').textContent='Dal 2014 al 2024 '+f0(tt)+' abitazioni nuove nei quartieri: il '+f0(q3/tt*100)+'% in tre soli, '+top3.map(function(o){return o.sn}).join(', ');
+  var pk=top3.map(function(o){var im=o.a.indexOf(Math.max.apply(null,o.a));return o.sn+' ha il suo anno più forte nel '+(2014+im)+' ('+f0(o.a[im])+' abitazioni)'}).join('; ');
+  $('nn-citta').innerHTML=pk+'. Il 2024 potrebbe essere incompleto: il Comune pubblica con ritardo. '+D.nil_senza_abitazioni+' quartieri non hanno nessuna abitazione nuova. La mappa conta abitazioni, non residenti: scrivendo il tuo quartiere sotto, vedi anche il rapporto con i residenti.';
 }
-function tipNil(p){
-  if(CUR==='dnet'){if(p.art)return '<b>'+esc(p.n)+'</b><br>dato non affidabile (vedi note)';return '<b>'+esc(p.n)+'</b><br>volume netto '+sg(p.dnet/1000)+' migliaia di m³'}
-  if(CUR==='p1000'&&p.cl!==1)return '<b>'+esc(p.n)+'</b><br>'+f0(p.nd)+' abitazioni nuove, '+f0(p.ab)+' residenti<br>meno di 5.000 residenti: non confrontabile';
-  return '<b>'+esc(p.n)+'</b><br>'+(CUR==='nd'?f0(p.nd)+' abitazioni nuove':nf(p.p1000,1)+' ogni 1.000 residenti')}
-function sty(f){var p=f.properties,m=MET[CUR],sel=SEL===p.i,v=p[m.k];
-  if(CUR==='p1000'&&p.cl!==1)v=null;if(CUR==='dnet'&&p.art)v=null;
-  return {fillColor:colore(v,m),fillOpacity:.82,color:sel?'#000':'#fff',weight:sel?3:1}}
-function ricolora(){
-  var m=MET[CUR];LAY.setStyle(sty);if(SEL)LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()});
-  var h='';
-  m.c.forEach(function(c,i){var t;
-    if(CUR==='dnet'){var B=[-100,0,100,250,400];t=i===0?'meno di −100':i===m.b.length?B[i-1]+' o più':(i===1?'da −100 a 0':B[i-1]+' – '+B[i])}
-    else{t=i===0?'meno di '+f0(m.b[0]):i===m.b.length?f0(m.b[i-1])+' o più':f0(m.b[i-1])+' – '+f0(m.b[i])}
-    h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
-  if(m.grey)h+='<span><i style="background:#bdbdbd"></i>meno di 5.000 residenti</span>';
-  if(m.art)h+='<span><i style="background:#bdbdbd"></i>dato non affidabile</span>';
-  setH('lg-map',h);setH('map-desc',m.t+(CUR==='dnet'?' <span class="sub">(legenda in migliaia di m³)</span>':''));
-}
-function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);
-  LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})}});
-  var p=nilById(i);if(!p)return;
-  var h='<h3>'+esc(p.n)+'</h3><table><tbody>'+
-   '<tr><td>Residenti 2024</td><td class="r">'+f0(p.ab)+'</td></tr>'+
-   '<tr><td>Variazione residenti 2014&ndash;2024</td><td class="r">'+sg(p.dp)+' ('+sgp(p.dpp,1)+')</td></tr>'+
-   '<tr><td>Nuovi edifici 2014&ndash;2024</td><td class="r">'+p.nfr+' residenziali, '+p.nfn+' non residenziali</td></tr>'+
-   '<tr><td>Abitazioni nei nuovi edifici</td><td class="r"><b>'+f0(p.nd)+'</b> ('+f0(p.nd1)+' nel 2014&ndash;19, '+f0(p.nd2)+' nel 2020&ndash;24)</td></tr>'+
-   '<tr><td>Ogni 1.000 residenti</td><td class="r">'+(p.p1000==null?'&ndash;':nf(p.p1000,1))+(p.cl!==1?' <span class="pill">pochi residenti</span>':'')+'</td></tr>'+
-   '<tr><td>Quota delle abitazioni nuove della citt&agrave;</td><td class="r">'+nf(p.q,1)+'%</td></tr>'+
-   '<tr><td>Volume dei nuovi edifici (titoli)</td><td class="r">'+f0(p.vol/1000)+' migliaia di m&sup3;</td></tr>'+
-   (p.art?'<tr><td>Dall&rsquo;alto 2006&rarr;2020</td><td class="r">dato non affidabile</td></tr>':'<tr><td>Dall&rsquo;alto 2006&rarr;2020</td><td class="r">nuovo '+f0(p.dn/1000)+' + sopraelevazioni '+f0(p.dso/1000)+' &minus; sparito '+f0(p.ds/1000)+' = <b>'+sg(p.dnet/1000)+'</b> migliaia di m&sup3;</td></tr>')+
-   '</tbody></table><p class="sub">Titoli e popolazione: Comune di Milano. I numeri sono piccoli: un solo cantiere pu&ograve; spostare un quartiere.</p>';
-  setH('scheda',h);
-}
-
-/* ---------- dall'alto ---------- */
-function alto(){
-  var B=D.dbt;
-  setH('alto-testo','<p>Il Comune pubblica due fotografie della citt&agrave; dall&rsquo;alto, il Database Topografico del 2012 e quello del 2020, con la forma e l&rsquo;altezza di ogni corpo di fabbrica. Confrontandole si vede dove sono comparsi e scomparsi edifici, anche senza leggere i titoli edilizi. Tra le due fotografie sono comparse circa <b>'+f0(B.nuove_n)+' unit&agrave; nuove</b> ('+nf(B.nuove_milioni_m3,1)+' milioni di m&sup3;) e ne sono sparite circa <b>'+f0(B.sparite_n)+'</b> ('+nf(B.sparite_milioni_m3,1)+' milioni di m&sup3;); altre '+f0(B.sopraelevate_n)+' sono state sopraelevate (+'+nf(B.sopraelevate_milioni_m3,1)+' milioni di m&sup3;). Se si guardano solo le unit&agrave; grandi (oltre 300 m&sup2; di base) le nuove sono '+f0(B.grandi_nuove_n)+' ('+nf(B.grandi_nuove_milioni_m3,1)+' milioni di m&sup3;) e quelle sparite '+f0(B.grandi_sparite_n)+' ('+nf(B.grandi_sparite_milioni_m3,1)+'): <b>quasi pari</b>. Il volume di tutta la citt&agrave; passa da '+nf(B.volume_totale_milioni_m3['2012'],0)+' a '+nf(B.volume_totale_milioni_m3['2020'],0)+' milioni di m&sup3;, un calo del 2% che sta dentro il rumore del metodo: <b>non dice che Milano abbia costruito meno</b>.</p>');
-  var av=[
-   '<b>Non &egrave; il 2012.</b> Il '+B.quota_2006_pct+'% delle unit&agrave; del &laquo;2012&raquo; ('+f0(B.origine_2012.MI_2006)+' su '+f0(B.origine_2012.MI_2006+B.origine_2012.MI_2012)+') risulta rilevato nel 2006 (campo <code>ID_ZRIL</code>) e solo '+f0(B.origine_2012.MI_2012)+' nel 2012. Il confronto &egrave; in pratica 2006&rarr;2020: quattordici anni, non otto.',
-   '<b>Una stima con regole nostre.</b> Un&rsquo;unit&agrave; del 2020 &egrave; &laquo;nuova&raquo; se meno del 20% della sua base era coperta da una unit&agrave; del 2012; &laquo;sparita&raquo; l&rsquo;analoga del 2012; &laquo;sopraelevata&raquo; se pi&ugrave; alta di almeno 3 metri. Ignorate le unit&agrave; sotto i '+B.soglia_m2+' m&sup2;. Le regole non sono state verificate sui titoli, n&eacute; a vista sulle foto.',
-   '<b>Un errore noto: Stadio&ndash;Ippodromi.</b> Il quartiere risulta con '+sg(D.dbt_artefatto.net/1e6,2)+' milioni di m&sup3;, ma sono le tribune dello stadio, alte 54 metri, che nel 2020 sono codificate in un altro modo e quindi risultano &laquo;sparite&raquo;. Nella mappa &egrave; in grigio. Altri valori molto negativi (Bovisasca '+sg(D.dbt_ultimi3_netto[2].net/1000)+', Farini '+sg(D.dbt_ultimi3_netto[1].net/1000)+' migliaia di m&sup3;) non li abbiamo verificati: leggili con cautela.',
-   '<b>Niente anni, niente usi.</b> Non sappiamo quando un edificio &egrave; stato costruito, n&eacute; a che cosa serva, n&eacute; quante abitazioni abbia. Non si vedono le ristrutturazioni che non cambiano forma e altezza.',
-   'L&rsquo;accordo con i titoli &egrave; medio: tra quartieri, abitazioni nuove dei titoli e volume nuovo dall&rsquo;alto hanno correlazione di Spearman '+nf(D.spearman.abitazioni_vs_volume_nuovo_dbt.rho,2)+' (88 quartieri).'];
-  setH('alto-avv',av.map(function(x){return '<li>'+x+'</li>'}).join(''));
-  var tp=D.dbt_top5_netto;
-  setH('alto-nil','<p><b>Dove il volume netto &egrave; pi&ugrave; alto</b> (unit&agrave; nuove pi&ugrave; sopraelevazioni meno sparite, in migliaia di m&sup3;): '+tp.map(function(t){return esc(t.n)+' '+sg(t.net/1000)}).join('; ')+'. Sono quartieri di grandi trasformazioni, ma attenzione: il segno e la dimensione di ogni quartiere dipendono dalle regole di cui sopra.</p>');
-}
-
-/* ---------- grandi interventi ---------- */
-function grandi(){
-  var G=D.grandi;
-  setH('grandi-testo','<p>I dati danno l&rsquo;<b>indirizzo</b>, la categoria di chi ha chiesto il titolo e le dimensioni, <b>non il nome del progetto</b>: qui non ne diamo, perch&eacute; sarebbero nostre ipotesi. Un solo intervento pu&ograve; valere molto: i primi dieci per volume pesano il 27% di tutto il volume dei nuovi edifici 2014&ndash;2024, e il 28% delle abitazioni sta in soli 49 edifici con almeno cento abitazioni. Sono mostrati solo i titoli chiesti da imprese o societ&agrave;, cooperative ed enti pubblici; esclusi persone fisiche, la categoria &laquo;Altro&raquo; e i piccoli ampliamenti, i cui indirizzi non vengono pubblicati.</p>');
-  var head=['Anno','Indirizzo','Quartiere','Uso','Edifici','Abitazioni','Volume (m&sup3;)','Titolo','Chi lo ha chiesto'];
-  function row(g){return [g.anno,esc(g.indirizzo),esc(g.quartiere||'–'),esc(g.uso),g.edifici,g.abitazioni?f0(g.abitazioni):'–',f0(g.volume_m3),esc(g.titoli),esc(g.categoria_titolare)]}
-  table2('tab-vol',head,G.per_volume.map(row),[1,2,3,7,8]);
-  table2('tab-ab',head,G.per_abitazioni.map(row),[1,2,3,7,8]);
-}
-
-/* ---------- 2024 ---------- */
-function trimestri(){
-  var Q=D.trimestri,C=D.confronto_2024,V=C.var_pct;
-  var q24=Q.filter(function(q){return q.t.indexOf('2024')===0}).map(function(q){return q.nuovi});
-  setH('q-testo','<p>Nuovi edifici di ogni uso, per trimestre del titolo. Nel 2022 il picco &egrave; nel secondo trimestre (61 nuovi edifici e '+f0(Q.filter(function(q){return q.t==='2022-T2'})[0].abitazioni)+' abitazioni, il 65% di quelle dell&rsquo;anno): in quei tre mesi, tra aprile e giugno, <b>53 nuovi edifici su 61</b> sono passati con la SCIA alternativa e solo 8 con un permesso. Nel <b>2024</b> i trimestri scendono uno dopo l&rsquo;altro: '+q24.join(', ')+' nuovi edifici <span class="pill">2024 potrebbe essere incompleto</span>.</p>');
-  onResize(function(){
-    cols(el('ch-q'),{xs:Q.map(function(q){return q.t.replace('-T','/')}),v:Q.map(function(q){return q.nuovi}),h:230,mb:36,col:function(i){return Q[i].t.indexOf('2024')===0?WARM:(Q[i].t==='2022-T2'?'#136459':ACC)},
-      tip:function(i){return '<b>'+Q[i].t.replace('-T',' trimestre ')+'</b><br>'+Q[i].nuovi+' nuovi edifici<br>'+f0(Q[i].abitazioni)+' abitazioni'}});
+function bolle(){
+  var g=document.getElementById('bub');if(!g||!MP)return;
+  var i=YR-2014,W=MP.W,s='',tot=0,lab=[];
+  var v=N.map(function(o){var x=o.cum[i];tot+=x;return{o:o,v:x}}).sort(function(a,b){return b.v-a.v});
+  if(sel&&MP.paths[sel])s+='<path d="'+MP.paths[sel]+'" fill="#fff" fill-opacity=".0" stroke="'+C.ink+'" stroke-width="3" stroke-linejoin="round" pointer-events="none"/>';
+  v.forEach(function(e,j){if(e.v<=0)return;var o=e.o,c=MP.cen[o.id],r=Math.max(2.2,MP.rmax*Math.sqrt(e.v/MP.mx)),isS=o.id===sel;
+    var tp='<b>'+esc(o.n)+'</b><br>Dal 2014 al '+YR+': '+f0(e.v)+' abitazioni nuove<br>Nel '+YR+': '+f0(o.a[i])+(o.big?'<br>Alla fine (2024): '+f0(o.p)+' ogni 1.000 residenti':'');
+    s+='<circle cx="'+r1(c.x)+'" cy="'+r1(c.y)+'" r="'+r1(r)+'" fill="'+C.mi+'" fill-opacity=".45" stroke="'+(isS?C.ink:C.mi)+'" stroke-width="'+(isS?3:1.4)+'" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(j<5&&e.v>=250)lab.push({o:o,c:c,r:r,v:e.v});
   });
-  setH('lg-q',lgdBox([{color:ACC,t:'2021&ndash;2023'},{color:'#136459',t:'2022, secondo trimestre'},{color:WARM,t:'2024 (potrebbe essere incompleto)'}]));
-  function r(a){return a==null?'':sgp(a,0)}
-  table2('tab-cmp',['','2022','2023','2024','2023&rarr;2024','2022&rarr;2024'],[
-    ['Comune: nuovi edifici residenziali',C.comune_fabbricati_res['2022'],C.comune_fabbricati_res['2023'],C.comune_fabbricati_res['2024'],r(V['2023->2024'].comune_nuovi_fabbricati_res_var_pct),r(V['2022->2024'].comune_nuovi_fabbricati_res_var_pct)],
-    ['Comune: abitazioni nei nuovi edifici',f0(C.comune_abitazioni['2022']),f0(C.comune_abitazioni['2023']),f0(C.comune_abitazioni['2024']),r(V['2023->2024'].comune_nuove_abitazioni_var_pct),r(V['2022->2024'].comune_nuove_abitazioni_var_pct)],
-    ['ISTAT, Città metropolitana: nuovi edifici residenziali',C.istat_prov_fabbricati_res['2022'],C.istat_prov_fabbricati_res['2023'],C.istat_prov_fabbricati_res['2024'],r(V['2023->2024'].istat_provincia_fabbricati_var_pct),r(V['2022->2024'].istat_provincia_fabbricati_var_pct)],
-    ['ISTAT, Città metropolitana: abitazioni',f0(C.istat_prov_abitazioni['2022']),f0(C.istat_prov_abitazioni['2023']),f0(C.istat_prov_abitazioni['2024']),r(V['2023->2024'].istat_provincia_abitazioni_var_pct),r(V['2022->2024'].istat_provincia_abitazioni_var_pct)],
-    ['ISTAT, capoluoghi oltre 500.000 abitanti: abitazioni','','','',r(V['2023->2024'].istat_capoluoghi_oltre500k_abitazioni_var_pct),r(V['2022->2024'].istat_capoluoghi_oltre500k_abitazioni_var_pct)]],[0]);
-  setH('q-avv','Il calo del Comune di Milano nel 2024 (nuovi edifici residenziali '+sgp(V['2023->2024'].comune_nuovi_fabbricati_res_var_pct,0)+' sul 2023) &egrave; pi&ugrave; forte di quello della Citt&agrave; metropolitana ('+sgp(V['2023->2024'].istat_provincia_fabbricati_var_pct,0)+'). Ma <b>il 2024 potrebbe essere incompleto</b> (il Comune pubblica con ritardo), il 2022 era un picco dovuto a poche settimane di SCIA, e le serie hanno pochi casi. L&rsquo;ISTAT ha anche il 2025, ma solo per la provincia: '+f0(C.istat_2025_provincia.abitazioni)+' abitazioni ('+sgp(100*(C.istat_2025_provincia.abitazioni/C.istat_prov_abitazioni['2024']-1),0)+' sul 2024) e '+C.istat_2025_provincia.fabbricati_res+' edifici residenziali; per il solo comune non c&rsquo;&egrave; ancora. <b>Non possiamo dire che il calo dipenda dall&rsquo;inchiesta o dal blocco dei cantieri.</b>');
-  setH('cronologia',D.cronologia.map(function(c){return '<li><b>'+esc(c.quando)+'.</b> '+esc(c.cosa)+' <span class="sub">(<a href="'+esc(c.fonte)+'">'+esc(c.fonte_nome)+'</a>)</span></li>'}).join(''));
+  lab.forEach(function(l){var t=l.o.sn.length>16?l.o.sn.slice(0,15)+'…':l.o.sn,w=tw(t,12,true),x=Math.min(Math.max(l.c.x,w/2+2),W-w/2-2),y=l.c.y-l.r-5;
+    if(y<14)y=l.c.y+l.r+14;
+    s+='<g pointer-events="none">'+T(x,y,esc(t)+' '+f0(l.v),{a:'middle',c:'halo',st:'font-size:12px'})+'</g>'});
+  if(sel&&!lab.some(function(l){return l.o.id===sel})&&MP.cen[sel]){var o=BY[sel],c=MP.cen[sel],w=tw(o.sn,12,true),x=Math.min(Math.max(c.x,w/2+2),W-w/2-2);
+    s+='<g pointer-events="none">'+T(x,Math.max(14,c.y-8),esc(o.sn),{a:'middle',c:'halo',st:'font-size:12px'})+'</g>'}
+  g.innerHTML=s;
+  $('rd-y').textContent=YR;
+  $('rd-t').innerHTML='<b>'+f0(tot)+'</b> abitazioni nuove dal 2014 al '+YR+'<br>nel solo '+YR+': '+f0(N.reduce(function(a,o){return a+o.a[i]},0))+' nei quartieri';
+}
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca una bolla sulla mappa: ti dico quante case nuove ci sono, che posto ha e come è andata anno per anno.';return}
+  var o=BY[sel],h='<b class="big">'+esc(o.n)+'</b>'+f0(o.ab)+' residenti nel 2024. Dal 2014 al 2024: '+pl(f0(o.nd),'nuova abitazione','nuove abitazioni')+' in '+pl(o.nfr+o.nfn,'nuovo edificio','nuovi edifici')+' ('+o.nfr+' residenziali).';
+  h+='<p><b>Posto '+o.ra+' su '+N.length+'</b> per numero di abitazioni nuove ('+f1(o.q)+'% di tutte quelle dei quartieri).</p>';
+  if(o.big)h+='<p><b>Posto '+o.rk+' su '+NB.length+'</b> ogni 1.000 residenti: '+f0(o.p)+', contro '+f0(MIL)+' di tutta Milano (il 1° è dove si è costruito di più).</p>';
+  else h+='<p>Ha meno di 5.000 residenti: il rapporto con i residenti non è confrontabile e non entra nella classifica.</p>';
+  h+='<div class="pm"><b>Abitazioni nuove, anno per anno</b><div class="ch" id="sp"></div></div>';
+  r.innerHTML=h;
+  var box=$('sp'),W=Math.max(220,Math.floor(box.clientWidth)),H=96,m={t:20,b:20},ph=H-m.t-m.b,sl=W/11,bw=Math.min(sl-4,24),mx=Math.max.apply(null,o.a)||1,imax=o.a.indexOf(mx),s=svgOpen(W,H);
+  o.a.forEach(function(v,i){var cx=sl*(i+.5),h2=v/mx*ph,y=m.t+ph-h2;
+    s+='<g'+tip('<b>'+(2014+i)+'</b><br>'+f0(v)+' abitazioni nuove')+'><rect x="'+r1(cx-bw/2)+'" y="'+r1(y)+'" width="'+bw+'" height="'+r1(Math.max(h2,v>0?2:0))+'" fill="'+C.mi+'"/><rect x="'+r1(cx-sl/2)+'" y="'+m.t+'" width="'+r1(sl)+'" height="'+(ph+m.b)+'" fill="transparent"/></g>';
+    if(i===imax&&mx>1)s+=T(Math.min(Math.max(cx,14),W-14),y-5,f0(v),{a:'middle',c:'b'});
+    if(i===0||i===5||i===10)s+=T(i===0?0:i===10?W:cx,H-4,2014+i,{a:i===0?'start':i===10?'end':'middle',c:'m'});
+  });
+  s+=L(0,m.t+ph,W,m.t+ph,C.ink,1.5);
+  box.innerHTML=s+'</svg>';
 }
 
-/* ---------- testi finali ---------- */
+/* ---------- 2. anni: la linea e il crollo ---------- */
+function anni(){
+  var A=D.anni,n=A.length,W=width('ch-anni'),H=270,m={l:16,r:56,t:46,b:28},pw=W-m.l-m.r,ph=H-m.t-m.b,mx=4500;
+  var X=function(i){return m.l+i/(n-1)*pw},Yv=function(v){return m.t+ph-v/mx*ph};
+  var s=svgOpen(W,H);
+  s+='<rect x="'+r1(X(9)+(X(10)-X(9))*.5)+'" y="'+m.t*.5+'" width="'+r1(W-m.r-X(9)-(X(10)-X(9))*.5+14)+'" height="'+r1(m.t*.5+ph)+'" fill="#FFF2A8"/>';
+  s+=T(W-m.r+14,13,'2024:',{a:'end',c:'b',st:'font-size:12px'})+T(W-m.r+14,26,'inchiesta',{a:'end',c:'b',st:'font-size:12px'});
+  [1000,2000,3000,4000].forEach(function(v){s+=L(m.l,Yv(v),W-m.r,Yv(v),C.grid,1)});
+  var d='M'+r1(X(0))+' '+r1(Yv(0));A.forEach(function(a,i){d+='L'+r1(X(i))+' '+r1(Yv(a.abitazioni))});d+='L'+r1(X(n-1))+' '+r1(Yv(0))+'Z';
+  s+='<path d="'+d+'" fill="#FAC9CD"/>';
+  var ln='';A.slice(0,10).forEach(function(a,i){ln+=(i?'L':'M')+r1(X(i))+' '+r1(Yv(a.abitazioni))});
+  s+='<path d="'+ln+'" fill="none" stroke="'+C.mi+'" stroke-width="3.5" stroke-linejoin="round"/>';
+  s+='<path d="M'+r1(X(9))+' '+r1(Yv(A[9].abitazioni))+'L'+r1(X(10))+' '+r1(Yv(A[10].abitazioni))+'" fill="none" stroke="'+C.mi+'" stroke-width="3.5" stroke-dasharray="6 4"/>';
+  /* il salto dal 2022 al 2024 */
+  var a22=A[8],a24=A[10],xa=X(10)+10,y22=Yv(a22.abitazioni),y24=Yv(a24.abitazioni),v24=(a24.abitazioni/a22.abitazioni-1)*100;
+  s+=L(X(8),y22,xa+4,y22,C.ink,1.5,' stroke-dasharray="3 3"');
+  s+=L(xa,y22,xa,y24-5,C.ink,2.5)+'<path d="M'+(xa-6)+' '+(y24-9)+'L'+xa+' '+y24+'L'+(xa+6)+' '+(y24-9)+'Z" fill="'+C.ink+'"/>';
+  s+=T(xa+8,(y22+y24)/2+5,sg0(v24)+'%',{c:'b',st:'font-size:16px'});
+  A.forEach(function(a,i){
+    var big=a.anno===2022||a.anno===2024,last=a.anno===2024;
+    var tp='<b>'+a.anno+'</b><br>'+f0(a.abitazioni)+' abitazioni<br>'+pl(a.tot,'nuovo edificio','nuovi edifici')+' ('+a.res+' residenziali)'+(last?'<br>Il 2024 potrebbe essere incompleto':'');
+    s+='<circle cx="'+r1(X(i))+'" cy="'+r1(Yv(a.abitazioni))+'" r="'+(big?6:4.5)+'" fill="#fff" stroke="'+C.mi+'" stroke-width="2.5"/>';
+    s+='<rect x="'+r1(X(i)-pw/(n-1)/2)+'" y="'+m.t+'" width="'+r1(pw/(n-1))+'" height="'+ph+'" fill="transparent"'+tip(tp)+'/>';
+    var ty=Yv(a.abitazioni)-10;
+    if(a.anno===2022){s+=T(X(i),ty,f0(a.abitazioni),{a:'middle',c:'b',st:'font-size:14px'});s+=nbadge(X(i),ty-25,1)}
+    else if(last){s+=T(X(i)-4,Yv(a.abitazioni)-12,f0(a.abitazioni),{a:'end',c:'b',st:'font-size:14px'});s+=nbadge(X(i)-4-tw(f0(a.abitazioni),14,true)-14,Yv(a.abitazioni)-16,2)}
+    else s+=T(X(i),ty,f1(a.abitazioni/1000),{a:'middle',c:'m',st:'font-size:12px'});
+    if(a.anno%2===0)s+=T(X(i),H-8,a.anno,{a:'middle',c:'m'});
+    else s+=T(X(i),H-8,'’'+String(a.anno).slice(2),{a:'middle',c:'m'});
+  });
+  s+=L(m.l,m.t+ph,W-m.r+14,m.t+ph,C.ink,1.5);
+  $('ch-anni').innerHTML=s+'</svg>';
+  var a14=A[0];
+  $('t-anni').textContent='Dalle '+f0(a14.abitazioni)+' abitazioni nuove del 2014 al picco di '+f0(a22.abitazioni)+' nel 2022, poi il crollo a '+f0(a24.abitazioni)+' nel 2024';
+  var q2=D.trimestri.filter(function(q){return q.t==='2022-T2'})[0];
+  $('nt-anni').innerHTML='<li><b class="nb">1</b><span>2022, il picco: '+a22.tot+' nuovi edifici. Solo tra aprile e giugno ne sono partiti '+q2.nuovi+' (vedi l’ultimo capitolo).</span></li>'
+   +'<li><b class="nb">2</b><span>2024, il più basso: '+a24.tot+' nuovi edifici, il '+f0(Math.abs(v24))+'% di abitazioni in meno del 2022. Il Comune pubblica con ritardo: il 2024 potrebbe essere incompleto.</span></li>';
+  $('nn-anni').innerHTML='Nei 10 anni dal 2014 al 2024 i residenti sono passati da '+f0(D.totali.pop_2014)+' a '+f0(D.totali.pop_2024)+'. È un conteggio lordo: non si tolgono le case demolite, e i nuovi residenti possono abitare in case che c’erano già. Il numero di abitazioni a volte conta alloggi piccolissimi o residenze per studenti.';
+}
+
+/* ---------- 3. titoli: barre a farfalla ---------- */
+function titoli(){
+  var A=D.titoli,W=width('ch-titoli'),rh=27,top=30,H=top+A.length*rh+4,cw=40,half=(W-cw)/2,mxv=Math.max.apply(null,A.map(function(a){return Math.max(a.pdc,a.scia_tutte)})),bwmax=half-30;
+  var s=svgOpen(W,H),cx=W/2;
+  s+=T(cx-cw/2-2,16,'Permesso di costruire',{a:'end',st:'font-size:13px;font-weight:800;fill:'+C.m4});
+  s+=T(cx+cw/2+2,16,'SCIA',{st:'font-size:13px;font-weight:800;fill:#C45F00'});
+  A.forEach(function(a,i){
+    var y=top+i*rh,hot=a.quota_scia_pct>=60;
+    var tp='<b>'+a.anno+'</b><br>'+pl(a.tot,'nuovo edificio con titolo noto','nuovi edifici con titolo noto')+'<br>'+a.pdc+' con permesso di costruire<br>'+a.scia_tutte+' con SCIA ('+f0(a.quota_scia_pct)+'%)';
+    if(hot)s+='<rect x="0" y="'+(y-1)+'" width="'+W+'" height="'+(rh-2)+'" fill="#FFF2A8"/>';
+    var lw=a.pdc/mxv*bwmax,rw=a.scia_tutte/mxv*bwmax;
+    s+='<g'+tip(tp)+'>'+hbar(cx-cw/2,cx-cw/2-lw,y+3,rh-8,C.m4)+hbar(cx+cw/2,cx+cw/2+rw,y+3,rh-8,C.ora);
+    s+=T(cx-cw/2-lw-4,y+rh/2+4,a.pdc,{a:'end',c:'b'})+T(cx+cw/2+rw+4,y+rh/2+4,a.scia_tutte,{c:'b'});
+    s+=T(cx,y+rh/2+4,a.anno,{a:'middle',c:'b',st:'font-size:12px'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"/></g>';
+    if(a.anno===2022)s+=nbadge(12,y+rh/2,1);
+  });
+  $('ch-titoli').innerHTML=s+'</svg>';
+  var q18=TY(2018).quota_scia_pct,q22=TY(2022).quota_scia_pct;
+  $('t-titoli').textContent='Nel 2022 sette nuovi edifici su dieci sono partiti con la SCIA; nel 2018 meno di quattro su dieci';
+  $('nn-titoli').innerHTML='La fascia gialla segna gli anni in cui la SCIA supera il 60%. La quota di SCIA è '+f0(q18)+'% nel 2018 e '+f0(TY(2019).quota_scia_pct)+'% nel 2019, poi sale a '+f0(TY(2021).quota_scia_pct)+'% nel 2021 e '+f0(q22)+'% nel 2022 (n. 1). Nel 2024 i casi sono pochi ('+TY(2024).tot+' edifici con titolo noto): ogni edificio pesa tre punti. Qui si dice come sono partiti i lavori, non se erano in regola.';
+}
+
+/* ---------- 4. ricostruzioni: il flusso ---------- */
+function ribbon(xs0,xs1,ya,xt0,xt1,yb,col,tp){
+  var ym=(ya+yb)/2;
+  return '<path d="M'+r1(xs0)+' '+r1(ya)+'C'+r1(xs0)+' '+r1(ym)+' '+r1(xt0)+' '+r1(ym)+' '+r1(xt0)+' '+r1(yb)+'L'+r1(xt1)+' '+r1(yb)+'C'+r1(xt1)+' '+r1(ym)+' '+r1(xs1)+' '+r1(ym)+' '+r1(xs1)+' '+r1(ya)+'Z" fill="'+col+'" fill-opacity=".38"'+(tp?tip(tp):'')+'/>';
+}
+function ricostr(){
+  var rc=D.ricostruzioni,tot=rc.edifici,W=width('ch-ricostr'),m=3,g2=18,g3=5;
+  var a=rc.ricostruzioni,b=rc.non_sostitutivi,a1=rc.scia_alt_ricostruzioni,a2=a-a1,b1=rc.scia_alt_non_sostitutivi,b2=b-b1;
+  var k=(W-2*m-g2-2*g3)/tot,BR='#8C5A32',VI=C.m5,BL=C.m4;
+  var x1=(W-tot*k)/2,xL=m,xR=m+a*k+g3+g2;
+  var yA=0,hA=32,yB=hA+60,hB=58,yC=yB+hB+60,hC=34;
+  var s='';
+  var nomi={a:'prendono il posto di un edificio demolito',b:'non sostituiscono nessun edificio'};
+  /* fasce */
+  s+=ribbon(x1,x1+a*k,yA+hA,xL+g3/2,xL+g3/2+a*k,yB,BR,'<b>'+a+' edifici</b> '+nomi.a);
+  s+=ribbon(x1+a*k,x1+tot*k,yA+hA,xR+g3/2,xR+g3/2+b*k,yB,VI,'<b>'+b+' edifici</b> '+nomi.b);
+  s+=ribbon(xL+g3/2,xL+g3/2+a1*k,yB+hB,xL,xL+a1*k,yC,C.ora);
+  s+=ribbon(xL+g3/2+a1*k,xL+g3/2+a*k,yB+hB,xL+a1*k+g3,xL+a*k+g3,yC,BL);
+  s+=ribbon(xR+g3/2,xR+g3/2+b1*k,yB+hB,xR,xR+b1*k,yC,C.ora);
+  s+=ribbon(xR+g3/2+b1*k,xR+g3/2+b*k,yB+hB,xR+b1*k+g3,xR+b*k+g3,yC,BL);
+  /* nodi */
+  s+='<rect x="'+r1(x1)+'" y="'+yA+'" width="'+r1(tot*k)+'" height="'+hA+'" fill="'+C.ink2+'"/>'+T(W/2,yA+21,tot+' nuovi edifici residenziali, 2022-2024',{a:'middle',st:'font-size:14px;font-weight:800;fill:#fff'});
+  function nodo2(x,w,col,n,l1,l2,ab){
+    var out='<g'+tip('<b>'+n+' edifici su '+tot+'</b><br>'+l1+' '+l2+'<br>'+f0(ab)+' abitazioni')+'><rect x="'+r1(x)+'" y="'+yB+'" width="'+r1(w)+'" height="'+hB+'" fill="'+col+'"/>';
+    out+=T(x+w/2,yB+19,n+' edifici',{a:'middle',st:'font-size:14px;font-weight:800;fill:#fff'});
+    var ln=wrap(l1+' '+l2,w-10,false),yy=yB+34;
+    ln.slice(0,2).forEach(function(t){out+=T(x+w/2,yy,t,{a:'middle',st:'font-size:12px;fill:#fff'});yy+=13});
+    return out+'</g>';
+  }
+  s+=nodo2(xL+g3/2,a*k,BR,a,'al posto di','un edificio demolito',rc.abitazioni_ricostruzioni);
+  s+=nodo2(xR+g3/2,b*k,VI,b,'su un’area','senza demolizione',rc.abitazioni_non_sostitutivi);
+  function nodo3(x,w,col,tc,n,tp){return '<g'+tip(tp)+'><rect x="'+r1(x)+'" y="'+yC+'" width="'+r1(w)+'" height="'+hC+'" fill="'+col+'"/>'+T(x+w/2,yC+22,n,{a:'middle',st:'font-size:15px;font-weight:800;fill:'+tc})+'</g>'}
+  s+=nodo3(xL,a1*k,C.ora,C.ink,a1,'<b>'+a1+' edifici</b>: al posto di uno demolito, con SCIA alternativa');
+  s+=nodo3(xL+a1*k+g3,a2*k,BL,'#fff',a2,'<b>'+a2+' edifici</b>: al posto di uno demolito, con altro titolo');
+  s+=nodo3(xR,b1*k,C.ora,C.ink,b1,'<b>'+b1+' edifici</b>: su un’area senza demolizione, con SCIA alternativa');
+  s+=nodo3(xR+b1*k+g3,b2*k,BL,'#fff',b2,'<b>'+b2+' edifici</b>: su un’area senza demolizione, con altro titolo');
+  var H=yC+hC+4;
+  $('ch-ricostr').innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('lg-ricostr').innerHTML='<span><i style="background:'+C.ora+'"></i>SCIA alternativa</span><span><i style="background:'+BL+'"></i>permesso di costruire o SCIA semplice</span>';
+  $('t-ricostr').textContent='Dal 2022 un nuovo edificio residenziale su due prende il posto di uno demolito';
+  var pa=rc.per_anno.map(function(x){return x.anno+': '+x.si+' su '+x.tot}).join('; ');
+  $('nn-ricostr').innerHTML='Per anno, edifici che sostituiscono uno demolito: '+pa+'. Le ricostruzioni portano '+f0(rc.abitazioni_ricostruzioni)+' abitazioni, gli altri edifici '+f0(rc.abitazioni_non_sostitutivi)+'. La SCIA alternativa è il '+rc.quota_scia_alt_ricostruzioni_pct+'% tra le ricostruzioni e il '+rc.quota_scia_alt_non_sostitutivi_pct+'% tra gli altri. «Nuovo» nei dati non vuol dire su terreno libero.';
+}
+
+/* ---------- 5. i 10 più grandi: la skyline in scala ---------- */
+function sname(a){
+  a=String(a).replace(/,?\s*snc$/i,'').replace(/^(Via|Viale)\s+/i,'').trim();
+  var m=a.match(/^(.*?),\s*([\d\-]+)$/);if(m)a=m[1]+' '+m[2];
+  return a.charAt(0).toUpperCase()+a.slice(1);
+}
+function wrap(s,w,b){var ws=s.split(' '),ln=[],cur='';ws.forEach(function(x){var t=cur?cur+' '+x:x;if(!cur||tw(t,12,b)<=w)cur=t;else{ln.push(cur);cur=x}});ln.push(cur);return ln}
+function sky(){
+  var W=width('ch-sky'),per=5,slot=W/per,bw=Math.min(54,slot-12),k=170/GR[0].ab;
+  var y=0,out='';
+  var defs='<defs><pattern id="win" width="7" height="8" patternUnits="userSpaceOnUse"><rect x="1.5" y="2" width="3.5" height="4" fill="#fff" opacity=".55"/></pattern><linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DDEEFA"/><stop offset="1" stop-color="#F6FAFD"/></linearGradient></defs>';
+  for(var r=0;r<2;r++){
+    var it=GR.slice(r*per,r*per+per),mxh=Math.max.apply(null,it.map(function(g){return g.ab*k})),base=y+30+mxh,maxL=0;
+    out+='<rect x="0" y="'+r1(y)+'" width="'+W+'" height="'+r1(base-y)+'" fill="url(#cielo)"/>';
+    it.forEach(function(g,i){
+      var cx=slot*(i+.5),x=cx-bw/2,h=g.ab*k,col=g.tit.indexOf('Permesso')===0?C.m4:C.ora,vm=g.vol/g.ab,flag=vm<100;
+      var tp='<b>'+esc(sname(g.ind))+'</b> ('+esc(g.q)+')<br>'+f0(g.ab)+' abitazioni in '+pl(g.ed,'edificio','edifici')+'<br>Titolo del '+g.anno+': '+esc(g.tit)+'<br>'+f0(vm)+' m³ per abitazione'+(flag?': pochissimo, forse alloggi molto piccoli o residenze per studenti':'');
+      out+='<g'+tip(tp)+'><rect x="'+r1(x)+'" y="'+r1(base-h)+'" width="'+r1(bw)+'" height="'+r1(h)+'" fill="'+col+'"/><rect x="'+r1(x)+'" y="'+r1(base-h)+'" width="'+r1(bw)+'" height="'+r1(h)+'" fill="url(#win)"/><rect x="'+r1(x-2)+'" y="'+r1(base-h-3)+'" width="'+r1(bw+4)+'" height="3" fill="'+C.ink+'"/>'
+        +'<rect x="'+r1(cx-slot/2)+'" y="'+r1(base-h-30)+'" width="'+r1(slot)+'" height="'+r1(h+30+80)+'" fill="transparent"/></g>';
+      out+=T(cx,base-h-8,f0(g.ab)+(flag?'*':''),{a:'middle',c:'b',st:'font-size:14px'});
+      var ln=wrap(sname(g.ind),slot-6,true),yy=base+16;
+      ln.forEach(function(t){out+=T(cx,yy,esc(t),{a:'middle',c:'k'});yy+=14});
+      out+=T(cx,yy,g.anno,{a:'middle',c:'m'});yy+=14;
+      if(g.ed>1){out+=T(cx,yy,g.ed+' edifici',{a:'middle',c:'m'});yy+=14}
+      maxL=Math.max(maxL,yy-base);
+    });
+    out+='<rect x="0" y="'+r1(base)+'" width="'+W+'" height="4" fill="'+C.ink+'"/>';
+    y=base+maxL+10;
+  }
+  var kh=100*k;
+  out+='<rect x="2" y="'+r1(y)+'" width="8" height="'+r1(kh)+'" fill="'+C.ink+'"/>'+T(16,y+kh/2+4.5,'= 100 abitazioni (stessa scala per tutte)',{c:'m'});
+  y+=kh+8;
+  $('ch-sky').innerHTML=svgOpen(W,Math.ceil(y))+defs+out+'</svg>';
+  $('lg-sky').innerHTML='<span><i style="background:'+C.m4+'"></i>permesso di costruire</span><span><i style="background:'+C.ora+'"></i>SCIA o SCIA alternativa</span>';
+  var g=GR[0],tot=GR.reduce(function(a,b){return a+b.ab},0);
+  $('t-sky').textContent='Il più grande ha '+f0(g.ab)+' abitazioni, in un solo edificio; i dieci più grandi ne hanno '+f0(tot);
+  var fl=GR.filter(function(x){return x.vol/x.ab<100});
+  $('nn-sky').innerHTML='Quanto pesano: '+f0(tot)+' abitazioni su '+f0(D.totali.abitazioni_nuovi)+', il '+f0(tot/D.totali.abitazioni_nuovi*100)+'% di tutte quelle dei nuovi edifici. '+(fl.length?'L’asterisco segna un intervento con meno di 100 m³ per abitazione: probabilmente alloggi molto piccoli o residenze per studenti contati come abitazioni. ':'')+'Dove gli edifici sono più di uno (per esempio a '+esc(sname(GR[1].ind))+') il disegno è un solo blocco.';
+}
+
+/* ---------- 6. trimestri: la rottura del 2024 ---------- */
+function trim(){
+  var Q=D.trimestri,n=Q.length,W=width('ch-trim'),H=262,m={l:2,r:2,t:40,b:48},pw=W-m.l-m.r,ph=H-m.t-m.b,sl=pw/n,bw=Math.min(sl-4,26),mx=66;
+  var Yv=function(v){return m.t+ph-v/mx*ph},base=m.t+ph;
+  var s=svgOpen(W,H);
+  var xb=m.l+12*sl;
+  s+='<rect x="'+r1(xb)+'" y="4" width="'+r1(4*sl)+'" height="'+r1(base-4)+'" fill="#FFF2A8"/>';
+  s+=T(xb+2*sl,16,'2024:',{a:'middle',c:'b',st:'font-size:12px'})+T(xb+2*sl,29,'inchiesta',{a:'middle',c:'b',st:'font-size:12px'});
+  var xl=m.l+(14+24/92)*sl;
+  s+=L(xl,m.t+22,xl,base,C.ink,1.5,' stroke-dasharray="4 3"')+nbadge(xl,m.t+12,2);
+  Q.forEach(function(q,i){
+    var ti=TT[q.t],cx=m.l+sl*(i+.5),x=cx-bw/2,hp=ti.pdc/mx*ph,hs=ti.scia/mx*ph,tot=ti.pdc+ti.scia;
+    var tp='<b>'+q.t.slice(0,4)+', trimestre '+q.t.slice(6)+'</b><br>'+pl(q.nuovi,'nuovo edificio','nuovi edifici')+'<br>'+f0(q.abitazioni)+' abitazioni<br>'+ti.pdc+' con permesso di costruire, '+ti.scia+' con SCIA'+(q.t.indexOf('2024')===0?'<br>Il 2024 potrebbe essere incompleto':'');
+    s+='<g'+tip(tp)+'><rect x="'+r1(x)+'" y="'+r1(base-hp)+'" width="'+bw+'" height="'+r1(hp)+'" fill="'+C.m4+'"/><rect x="'+r1(x)+'" y="'+r1(base-hp-hs)+'" width="'+bw+'" height="'+r1(hs)+'" fill="'+C.ora+'"/><rect x="'+r1(m.l+sl*i)+'" y="'+m.t+'" width="'+r1(sl)+'" height="'+(ph+m.b)+'" fill="transparent"/></g>';
+    s+=T(cx,base-hp-hs-5,tot,{a:'middle',c:'b',st:'font-size:12px'});
+    s+=T(cx,base+14,'T'+q.t.slice(6),{a:'middle',c:'m'});
+    if(q.t==='2022-T2')s+=nbadge(cx,base-hp-hs-24,1);
+  });
+  [2021,2022,2023,2024].forEach(function(a,j){
+    s+=T(m.l+sl*(4*j+2),base+32,a,{a:'middle',c:'b'});
+    if(j)s+=L(m.l+4*j*sl,base+3,m.l+4*j*sl,base+38,C.axis,1);
+  });
+  s+=L(m.l,base,W-m.r,base,C.ink,1.5);
+  $('ch-trim').innerHTML=s+'</svg>';
+  $('lg-trim').innerHTML='<span><i style="background:'+C.m4+'"></i>permesso di costruire</span><span><i style="background:'+C.ora+'"></i>SCIA o SCIA alternativa</span><span><i style="background:#FFF2A8;border:1px solid #d8c64a"></i>2024</span>';
+  var q2=Q.filter(function(q){return q.t==='2022-T2'})[0],t2=TT['2022-T2'],a22=Y(2022),q24=Q.filter(function(q){return q.t.indexOf('2024')===0});
+  $('t-trim').textContent='In tre mesi del 2022, da aprile a giugno, '+q2.nuovi+' nuovi edifici; nel 2024 tra '+Math.max.apply(null,q24.map(function(q){return q.nuovi}))+' e '+Math.min.apply(null,q24.map(function(q){return q.nuovi}))+' a trimestre';
+  $('nt-trim').innerHTML='<li><b class="nb">1</b><span>Aprile-giugno 2022: '+q2.nuovi+' nuovi edifici e '+f0(q2.abitazioni)+' abitazioni, il '+f0(q2.abitazioni/a22.abitazioni*100)+'% di quelle dell’anno. Di quegli edifici '+t2.scia+' sono partiti con la SCIA e '+t2.pdc+' con il permesso di costruire.</span></li>'
+   +'<li><b class="nb">2</b><span>25 luglio 2024: gli emendamenti «Salva Milano» vengono ritirati. Dal 2024 i trimestri scendono: '+q24.map(function(q){return q.nuovi}).join(', ')+' nuovi edifici; la SCIA alternativa, che nel 2022 aveva portato 53 edifici in un trimestre, negli ultimi due trimestri è a zero. Il 2024 potrebbe essere incompleto.</span></li>';
+  var C2=D.confronto_2024,V=C2.var_pct['2022->2024'];
+  $('nn-trim').innerHTML='Nello stesso periodo, dal 2022 al 2024, le abitazioni nei nuovi edifici cambiano del '+sg0(V.comune_nuove_abitazioni_var_pct)+'% a Milano (dati del Comune), del '+sg0(V.istat_provincia_abitazioni_var_pct)+'% nella Città metropolitana e del '+sg0(V.istat_capoluoghi_oltre500k_abitazioni_var_pct)+'% nei capoluoghi con più di 500.000 abitanti (dati ISTAT). Il calo di Milano è più forte, ma il 2022 era un picco di poche settimane, il 2024 può essere incompleto e i casi sono pochi. <b>Non si può dire che il calo dipenda dall’inchiesta o dai cantieri fermati.</b>';
+}
+function cronologia(){
+  $('cronologia').innerHTML=D.cronologia.map(function(c){return '<li><b>'+esc(c.quando)+'.</b> '+esc(c.cosa)+' (<a href="'+esc(c.fonte)+'">'+esc(c.fonte_nome)+'</a>)</li>'}).join('');
+}
+
+/* ---------- testi in fondo ---------- */
+function li(a){return a.map(function(x){return '<li>'+x+'</li>'}).join('')}
 function testi(){
-  var ns=[
-   '<b>Nuovo contro ristrutturazione.</b> Le ristrutturazioni (CILA, SCIA senza nuovo volume), i cambi d&rsquo;uso e i recuperi dei sottotetti non sono nei dati aperti: il Comune non pubblica i conteggi e l&rsquo;ISTAT rileva solo nuovi edifici e ampliamenti. Non si pu&ograve; dire quanta parte del costruire sia nuova.',
-   '<b>Demolizioni.</b> Si conoscono solo quelle seguite da un nuovo edificio (dal 2021). Le demolizioni senza ricostruzione, e quante abitazioni sono state demolite, non ci sono.',
-   '<b>Cantieri.</b> I dati sono titoli: non dicono se i lavori sono cominciati o finiti, n&eacute; se un cantiere &egrave; stato fermato o sequestrato.',
-   '<b>Chi costruisce.</b> C&rsquo;&egrave; solo la categoria del titolare (impresa, cooperativa, ente pubblico, persona fisica, altro), mai un nome; e i nomi dei progetti non ci sono.',
-   '<b>Il comune da solo secondo l&rsquo;ISTAT.</b> L&rsquo;ISTAT pubblica i permessi per Citt&agrave; metropolitana e per classe di comune, non per Milano comune: il confronto con i dati del Comune &egrave; approssimato.'];
-  setH('nonsi-lista',ns.map(function(x){return '<li>'+x+'</li>'}).join(''));
-  var L=[
-   'I titoli sono <b>poche centinaia di moduli</b> (1.306 tra 2014 e 2024): un solo grande intervento sposta un anno o un quartiere.',
-   'L&rsquo;<b>anno</b> &egrave; quello di ritiro del titolo, come scritto nel campo &laquo;Anno Ritiro&raquo;; il Comune non lo spiega. Il <b>2024 potrebbe essere incompleto</b>.',
+  $('limiti-lista').innerHTML=li([
+   '<b>Nuovo contro ristrutturazione.</b> Le ristrutturazioni, i cambi d’uso, i recuperi dei sottotetti e le demolizioni senza un nuovo edificio non sono nei dati aperti: non si può dire quanta parte del costruire sia nuova.',
+   '<b>Permessi, non cantieri.</b> I dati sono titoli: non dicono se i lavori sono cominciati o finiti, né se un cantiere è stato fermato o sequestrato.',
+   'Sono <b>poche centinaia di moduli</b> ('+f0(D.totali.record_serie)+' tra 2014 e 2024): un solo grande intervento sposta un anno o un quartiere.',
+   'L’<b>anno</b> è quello di ritiro del titolo, come scritto nel campo «Anno Ritiro»; il Comune non lo spiega. Il <b>2024 potrebbe essere incompleto</b>: il Comune pubblica con ritardo.',
    '<b>SCIA e SCIA alternativa</b> si scambiano di ruolo nei moduli tra il 2017 e il 2020: per questo sono sommate.',
-   'Il campo <b>abbattimento e ricostruzione</b> &egrave; vuoto prima del 2021 e a met&agrave; nel 2021: lo usiamo solo dal 2022.',
-   'Le <b>abitazioni</b> sono lorde (nessuna demolita sottratta) e alcune sono alloggi piccolissimi.',
-   '<b>Quartieri</b>: 1.169 abitazioni (47 edifici) senza quartiere; 46 moduli senza coordinate sono collocati solo per via (se almeno l&rsquo;80% dei civici della via sta in un quartiere), 4 per civico.',
-   'Il <b>confronto dall&rsquo;alto</b> &egrave; in gran parte 2006&rarr;2020, ha regole nostre e un errore noto (Stadio&ndash;Ippodromi).',
-   '<b>Indirizzi</b>: i 310 moduli di persone fisiche o di piccoli ampliamenti residenziali non sono mostrati.'];
-  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
-  var M=[
-   '<b>Moduli.</b> Cinque dataset del Comune (nuovi edifici residenziali e non residenziali, ampliamenti residenziali e non residenziali, edifici per collettivit&agrave;): 1.315 righe, unite in una tabella; il testo salvato due volte (&laquo;Societ&Atilde;&raquo;) &egrave; stato sistemato. Si tengono i 1.306 con anno 2014&ndash;2024.',
-   '<b>Quartieri.</b> Punto in poligono con gli 88 NIL: il quartiere calcolato coincide con quello scritto nel file in tutti i 1.211 casi in cui c&rsquo;&egrave;. Residenti dal file ds205, somma dei quartieri.',
-   '<b>SCIA.</b> SCIA e SCIA alternativa sommate; il permesso di costruire &egrave; l&rsquo;altra voce.',
-   '<b>Dall&rsquo;alto.</b> Unit&agrave; volumetriche fuori terra di almeno '+D.dbt.soglia_m2+' m&sup2; dei due Database Topografici, nello stesso sistema di coordinate; copertura calcolata sovrapponendo le basi; volume = base &times; altezza. La differenza di altezza sulle unit&agrave; rimaste ha mediana zero (nessun errore sistematico evidente).',
-   '<b>ISTAT.</b> Dataflow IstatData sui fabbricati residenziali e non residenziali nuovi, Citt&agrave; metropolitana di Milano (codice ITC45) e classe dei capoluoghi oltre 500.000 abitanti.',
-   '<b>Pagina costruita da un programma</b> che legge le tabelle pulite e scrive i file di <code>data/</code>; i controlli interni confrontano i numeri con quelli della fase di raccolta. Note complete: <code>costruzioni/NOTE.md</code> nel repository.'];
-  setH('metodo-lista',M.map(function(x){return '<li>'+x+'</li>'}).join(''));
+   'Il campo <b>abbattimento e ricostruzione</b> è vuoto prima del 2021 e a metà nel 2021: lo usiamo solo dal 2022. Le ricostruzioni sono dichiarate da chi compila il modulo.',
+   'Le <b>abitazioni</b> sono lorde: nessuna demolita è sottratta, e alcune sono alloggi piccolissimi o residenze per studenti.',
+   '<b>Quartieri</b>: '+f0(D.totali.senza_nil_abitazioni)+' abitazioni (47 edifici) non hanno un quartiere; 46 moduli senza coordinate sono collocati solo per via, 4 per civico.',
+   '<b>Chi costruisce.</b> C’è solo la categoria del titolare (impresa, cooperativa, ente pubblico, persona fisica, altro), mai un nome; i nomi dei progetti non ci sono. Gli indirizzi di persone fisiche e dei piccoli ampliamenti non sono mostrati.',
+   '<b>Il comune da solo secondo l’ISTAT.</b> L’ISTAT pubblica i permessi per Città metropolitana e per classe di comune, non per Milano: il confronto è approssimato.',
+   'Sono confronti e coincidenze di date, non spiegazioni: la pagina non dice perché i numeri cambiano.']);
+  $('metodo-lista').innerHTML=li([
+   '<b>Moduli.</b> Cinque elenchi del Comune (nuovi edifici residenziali e non residenziali, ampliamenti residenziali e non residenziali, edifici per collettività): '+f0(D.totali.record_totali)+' righe unite in una tabella. Si tengono i '+f0(D.totali.record_serie)+' con anno 2014-2024.',
+   '<b>Quartieri.</b> Ogni modulo è assegnato al quartiere in cui cade il punto; il quartiere così calcolato coincide con quello scritto nel file in tutti i 1.211 casi in cui c’è. Residenti: somma per quartiere, Comune di Milano.',
+   '<b>Bolle della mappa.</b> Ogni bolla è nel centro del quartiere; la sua superficie è proporzionale alle abitazioni nuove dal 2014 all’anno scelto, con la stessa scala per tutti gli anni. Il rapporto con i residenti (posto in classifica) si calcola solo per i quartieri con almeno 5.000 residenti.',
+   '<b>SCIA.</b> SCIA e SCIA alternativa sono sommate; il permesso di costruire è l’altra voce.',
+   '<b>I più grandi.</b> Gli edifici dello stesso indirizzo e anno sono sommati. Si contano le abitazioni;',
+   '<b>ISTAT.</b> Dati IstatData sui nuovi fabbricati, Città metropolitana di Milano e classe dei capoluoghi oltre 500.000 abitanti.']);
 }
 })();
 </script>

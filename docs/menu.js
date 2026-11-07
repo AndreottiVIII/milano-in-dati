@@ -71,7 +71,7 @@
     { path: 'permettersi/', label: 'Chi può permettersi dove' },
     { path: 'viaggio-linea/', label: 'Un viaggio in tram' },
     { path: 'speranza-vita/', label: 'Quanto si vive' },
-    { path: 'case-vuote/', label: 'Le case vuote' },
+    { path: 'case-vuote/', label: 'Case senza residenti' },
     { path: 'fondi-quartieri/', label: 'Soldi per i quartieri popolari' },
     { path: 'quartiere-ideale/', label: 'Il mio quartiere ideale' },
     { path: 'divisa/', label: 'Quanto è divisa Milano' },

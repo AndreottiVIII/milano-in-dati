@@ -3025,3 +3025,10 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-07 — Scuole di domani rifatta e pubblicata (ritocco di Davide: la prova sul passato tolta dai grafici e messa nelle note).
 - 2026-11-07 — Redditi rifatta e pubblicata (ritocchi di Davide: le città 2006-2024 come linee in euro di oggi con Milano rossa, la scala dei redditi con i gradini scritti a parole e persone/soldi spiegati). I confini dei CAP sono ricostruiti, detto in pagina.
 - 2026-11-07 — Il lavoro per quartiere rifatta e pubblicata (ritocchi di Davide: barre appaiate 1991-2011 al posto degli omini, mappa con classi bilanciate e senza rosso/verde, nuova mappa delle donne che lavorano in rosa).
+- 2026-11-07 — prezzi-case: pubblicata definitiva nel nuovo schema (mattoncini 2014/oggi, zone, anni di reddito, comprare o affittare), ok di Davide.
+- 2026-11-07 — affitti-brevi: pubblicata definitiva nel nuovo schema; tolta la griglia da 100 (host/annunci in barre), riquadro col legame con le case senza residenti.
+- 2026-11-07 — case-popolari: pubblicata definitiva; la griglia da 100 degli alloggi ALER vuoti diventa una linea per motivo 2018-2025 (Davide).
+- 2026-11-07 — case-vuote: pubblicata definitiva come «Case senza residenti»; nuovo grafico a punti con Airbnb (69 quartieri, legame forte, debole oltre 4 km dal Duomo, non causale); griglia da 100 sostituita da barre.
+- 2026-11-07 — sfratti: pubblicata definitiva; «Perché si viene sfrattati» passa dalle griglie da 100 a linee 2013-2025, Milano piena e Italia tratteggiata (Davide).
+- 2026-11-07 — costruzioni: rifatta da capo su richiesta di Davide ("noiosa") e pubblicata: mappa con bolle che crescono anno per anno, linea col crollo 2024, barre a farfalla permesso/SCIA, demolito vs nuovo, skyline dei 10 più grandi, trimestri.
+- 2026-11-07 — palazzi: pubblicata definitiva; le epoche di costruzione su un asse vero degli anni (Davide: "sposta su asse x").

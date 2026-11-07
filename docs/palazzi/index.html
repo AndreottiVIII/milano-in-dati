@@ -1,364 +1,529 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · Quanto sono vecchi i palazzi</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · Età dei palazzi</title>
 <style>
-:root{--acc:#9a3b1a;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#f8ece6;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,38%) 1fr 108px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.two .row{display:grid;grid-template-columns:104px 1fr 116px;gap:6px;align-items:center;font-size:.88rem;padding:3px 0}
-.two .tr{display:flex;flex-direction:column;gap:2px} .two .fill{display:block;height:9px} .two .fa{background:var(--acc)} .two .fb{background:#555}
-.two .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.3em 0} .key i{display:inline-block;width:14px;height:9px;margin-right:4px}
-.mini .row{display:grid;grid-template-columns:96px 1fr 84px;gap:6px;align-items:center;font-size:.8rem;padding:1px 0} .mini .tr{background:#f1f1f1;height:8px} .mini .fill{display:block;height:8px} .mini .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} }
-@media(max-width:600px){.card tr{display:block;border-bottom:1px solid var(--line);padding:3px 0} .card td{display:block;border:0;padding:1px 4px} .card td.r{text-align:left;white-space:normal} .card .scroll{overflow-x:visible}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.tabmax{max-height:340px;overflow:auto}
-#tab-nil{min-width:640px} #tab-mun{min-width:480px} #tab-nuove{min-width:420px} #tab-prezzi{min-width:420px}
-</style><script src="../menu.js" defer></script></head><body><main>
-<h1>Quanto sono vecchi i palazzi di Milano</h1>
-<p>Quando sono stati costruiti i palazzi in cui vivono i milanesi? Il censimento del 2011 ha chiesto l&rsquo;epoca di costruzione di ogni edificio residenziale: <b id="n-ed">42.980</b> edifici, dall&rsquo;Ottocento a oggi. Qui li guardiamo per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale), con le abitazioni che contengono, i prezzi e le costruzioni pi&ugrave; recenti. &laquo;Palazzo&raquo; qui vuol dire <b>edificio ad uso residenziale</b>, anche una villetta: il <span id="n-vill">21</span>% ha uno o due interni, il resto sono condomini.</p>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.2rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t],[data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px;border:1px solid rgba(0,0,0,.25)}
+.lg i.dot{border-radius:50%}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.25)}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.find{margin:14px 0 0}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--mi);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.duo{display:grid;grid-template-columns:1fr;gap:6px;margin:.6em 0 .6em}
+.duo>div{min-width:0}
+.duo b{display:block;font-size:.92rem;line-height:1.2;margin-bottom:3px}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+</style>
+<script src="../menu.js" defer></script></head><body><main>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<h1>Età dei palazzi</h1>
+<p class="lead">Quando sono state costruite le case di Milano, quartiere per quartiere, e che cosa cambia nel prezzo e nei consumi di energia. Scrivi il tuo quartiere e vedi i suoi 100 palazzi.</p>
 
-<div class="warm"><b>Prima di leggere.</b> Il dato &egrave; del <b>2011</b>: nei dati per sezione del censimento 2021 l&rsquo;epoca di costruzione non c&rsquo;&egrave;, e non abbiamo un altro dato aperto, per edificio, con l&rsquo;anno di costruzione. Le quote per quartiere contano <b>edifici</b>, non abitazioni (un palazzo da 100 appartamenti conta uno, come una villetta). Per i quartieri con meno di 100 edifici le quote non sono colorate. Dettagli in <a href="#limiti">Che cosa non dice questo dato</a>.</div>
+<div class="hl" id="hl"></div>
+<p class="src">Censimento ISTAT 2011 (palazzi) e Comune di Milano (case occupate, permessi 2014–2024, certificati energetici). Prezzi: Agenzia delle Entrate, primo semestre 2026. L’età dei palazzi è quella dichiarata nel censimento del 2011: per gli anni dopo non c’è un dato per quartiere (vedi i limiti dei dati).</p>
 
-<h2 id="mappa">La mappa</h2>
-<p>Scegli che cosa mostrare. Clic su un quartiere per la scheda, oppure scegli il quartiere dall&rsquo;elenco. Edifici residenziali, censimento 2011.</p>
-<div class="ctl"><span class="sub">Mostra:</span>
-<button type="button" data-m="dom" class="on">Epoca pi&ugrave; frequente</button><button type="button" data-m="p46">Prima del 1946</button><button type="button" data-m="b">1946&ndash;1970</button><button type="button" data-m="p80">Dopo il 1980</button><button type="button" data-m="pz">Prezzo (&euro;/m&sup2;)</button></div>
-<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
-<p class="sub" id="map-desc"></p>
-<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per epoca di costruzione dei palazzi"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Fonte: ISTAT, censimento 2011, edifici ad uso residenziale per epoca di costruzione (variabili E3, E8&ndash;E16), sezioni di censimento raggruppate negli 88 NIL del Comune; prezzi: Agenzia delle Entrate &ndash; OMI, 1&deg; semestre 2026. Mappa &copy; OpenStreetMap contributors. In grigio i quartieri con meno di 100 edifici residenziali (e, per i prezzi, quelli senza zona OMI).</p>
-<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<h2 id="quando">Quando è stata costruita la città</h2>
+<div class="fig">
+  <h3 id="t-cento"></h3>
+  <p class="sub" id="s-cento"></p>
+  <div class="ch" id="ch-cento" role="img" aria-label="Casette impilate sopra una linea del tempo: quanti palazzi su 100 sono stati costruiti in ogni epoca, dal prima del 1919 al 2011"></div>
+  <p class="note" id="nn-cento"></p>
+  <p class="src">Fonte: ISTAT, censimento 2011, palazzi ad uso residenziale per epoca (CC BY 4.0); case occupate per epoca: Comune di Milano, censimento 2011 (CC BY). Le casette sono arrotondate al numero intero: i valori esatti compaiono al tocco.</p>
+</div>
+<div class="fig">
+  <h3 id="t-boom"></h3>
+  <p class="sub" id="s-boom"></p>
+  <div class="ch" id="ch-boom" role="img" aria-label="Palazzi costruiti ogni anno, per epoca, dal 1919 al 2011"></div>
+  <p class="note" id="nn-boom"></p>
+  <p class="src">Fonte: ISTAT, censimento 2011, palazzi ad uso residenziale per epoca di costruzione (CC BY 4.0). I palazzi di prima del 1919 non sono nel grafico perché non sappiamo da quanti anni vengono. L’ultima colonna conta i sei anni dal 2006 al 2011.</p>
+</div>
 
-<h2 id="citta">La citt&agrave; intera</h2>
-<div id="citta-testo"></div>
-<div class="key"><span><i style="background:#9a3b1a"></i>quota degli edifici</span><span><i style="background:#555"></i>quota delle abitazioni occupate</span></div>
-<div class="bars two" id="b-citta"></div>
-<p class="src">Edifici residenziali: ISTAT, censimento 2011, sezioni di censimento (E8&ndash;E16). Abitazioni occupate da residenti per epoca dell&rsquo;edificio: Comune di Milano, ds1456 (censimento 2011, somma dei 9 municipi); sono 468 le abitazioni in edifici non residenziali, escluse dalle quote.</p>
-<h3>Per municipio (abitazioni)</h3>
-<div id="mun-testo"></div>
-<div class="scroll"><table id="tab-mun"></table></div>
-<p class="src">Abitazioni occupate da residenti, per epoca di costruzione dell&rsquo;edificio, Comune di Milano ds1456 (CC BY).</p>
+<h2 id="quartieri">Quartiere per quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub" id="s-mappa"></p>
+  <div class="lg" id="lg-mappa"></div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dei quartieri di Milano colorati per quota di palazzi costruiti prima del 1946"></div>
+  <p class="note" id="nn-mappa"></p>
+  <p class="src">Fonte: ISTAT, censimento 2011, palazzi ad uso residenziale per epoca (CC BY 4.0), sezioni raggruppate negli 88 quartieri (NIL) del Comune di Milano (CC BY). In grigio i quartieri con meno di 100 palazzi.</p>
+</div>
 
-<h2 id="classifica">Pi&ugrave; vecchi, pi&ugrave; nuovi, il boom</h2>
-<div id="class-testo"></div>
-<div class="grid2"><div><h3>Pi&ugrave; edifici costruiti prima del 1946</h3><div class="bars" id="b-vecchi"></div></div>
-<div><h3>Pi&ugrave; edifici costruiti dopo il 1980</h3><div class="bars" id="b-nuovi"></div></div></div>
-<h3 id="boom">Il boom del dopoguerra</h3>
-<div id="boom-testo"></div>
-<div class="bars" id="b-boom"></div>
-<p class="src">Quota degli edifici residenziali costruiti nel periodo, tra i quartieri con almeno 200 edifici (<span id="n-class">62</span> su 88); tra parentesi il numero di edifici. Fonte: ISTAT, censimento 2011.</p>
-<details><summary>Tutti i quartieri</summary><div class="scroll tabmax"><table id="tab-nil"></table></div></details>
-
-<h2 id="dopo">Dopo il 2011: dove si &egrave; costruito</h2>
-<div id="dopo-testo"></div>
-<div class="scroll"><table id="tab-nuove"></table></div>
-<p class="src">Fonte: Comune di Milano, nuovi fabbricati 2014&ndash;2024 (permessi di costruire, SCIA; dati raccolti nella pagina <a href="../costruzioni/">Dove si costruisce</a>) e abitazioni occupate del censimento 2011.</p>
-<div class="warn"><b>Non sono &laquo;case in pi&ugrave;&raquo;.</b> I permessi contano le abitazioni dei nuovi fabbricati, comprese quelle ricostruite dopo una demolizione (dal 2022, un nuovo edificio residenziale su due sostituisce uno demolito): le abitazioni demolite non sono sottratte.</div>
+<h2 id="dopo">Dopo il 2011</h2>
+<div class="fig">
+  <h3 id="t-nuove"></h3>
+  <p class="sub" id="s-nuove"></p>
+  <div class="ch" id="ch-nuove" role="img" aria-label="Barre: case nuove dei permessi 2014-2024 ogni 100 case del 2011, nei quartieri dove sono di più"></div>
+  <p class="note" id="nn-nuove"></p>
+  <p class="src">Fonte: Comune di Milano, nuovi fabbricati 2014–2024 (permessi di costruire e SCIA, CC BY; i dati sono nella pagina <a href="../costruzioni/">Dove si costruisce</a>) e case occupate del censimento 2011. Solo quartieri con almeno 1.000 case nel 2011.</p>
+</div>
 
 <h2 id="prezzi">Vecchio e caro, nuovo e meno caro</h2>
-<div id="prezzi-testo"></div>
-<div class="ch" id="ch-p46" role="img" aria-label="Grafico: quota di edifici costruiti prima del 1946 e prezzo di mercato per quartiere"></div>
-<p class="src">Ogni punto &egrave; un quartiere con almeno 100 edifici e prezzo disponibile. Orizzontale: quota degli edifici costruiti prima del 1946. Verticale: valore OMI medio delle abitazioni civili (centro tra minimo e massimo), 1&deg; semestre 2026. Il colore &egrave; l&rsquo;epoca pi&ugrave; frequente (vedi la legenda della mappa).</p>
-<div class="ch" id="ch-p80" role="img" aria-label="Grafico: quota di edifici costruiti dopo il 1980 e prezzo di mercato per quartiere"></div>
-<p class="src">Come sopra, con la quota di edifici costruiti dopo il 1980 sull&rsquo;asse orizzontale. Linea tratteggiata: mediana dei quartieri.</p>
-<h3>Prezzo mediano per epoca pi&ugrave; frequente</h3>
-<div class="scroll"><table id="tab-prezzi"></table></div>
-<div class="warn" id="prezzi-avviso"></div>
+<div class="fig">
+  <h3 id="t-prezzi"></h3>
+  <p class="sub" id="s-prezzi"></p>
+  <div class="lg" id="lg-prezzi"></div>
+  <div class="ch" id="ch-prezzi" role="img" aria-label="Punti: quota di palazzi di prima del 1946 e prezzo al metro quadro in ogni quartiere"></div>
+  <p class="note" id="nn-prezzi"></p>
+  <p class="src">Fonte: ISTAT, censimento 2011 (palazzi, CC BY 4.0); Agenzia delle Entrate, Osservatorio del Mercato Immobiliare, prezzi di vendita delle abitazioni civili, primo semestre 2026 (CC BY 4.0), pagina <a href="../prezzi-case/">Prezzi delle case</a>. Solo quartieri con almeno 100 palazzi e prezzo noto.</p>
+</div>
 
-<h2 id="energia">E la classe energetica?</h2>
-<p>In questa pagina <b>non c&rsquo;&egrave;</b>. Nel catalogo del Comune ci sono i dataset sulla certificazione energetica degli edifici (CENED, ds604 e ds623), ma non li abbiamo scaricati n&eacute; letti: non sappiamo se coprono tutti i palazzi o solo quelli certificati, e quindi non facciamo collegamenti con l&rsquo;et&agrave; degli edifici.</p>
+<h2 id="energia">Classe energetica</h2>
+<div class="fig">
+  <h3 id="t-energia"></h3>
+  <p class="sub" id="s-energia"></p>
+  <div class="ch" id="ch-energia" role="img" aria-label="Tabella colorata: per ogni epoca di costruzione, quanti certificati per classe energetica da A a G"></div>
+  <p class="note" id="nn-energia"></p>
+  <p class="src">Fonte: Comune di Milano, certificati energetici delle case (CENED+2), 2016–2026 (CC0). Solo case di Milano, una volta ciascuna. Le epoche sono quelle dei certificati, diverse da quelle del censimento.</p>
+</div>
 
-<h2 id="limiti">Che cosa non dice questo dato</h2>
-<div class="warm"><ul id="limiti-lista"></ul></div>
-
-<h2 id="metodo">Come &egrave; fatto</h2>
-<ul class="m" id="metodo-lista"></ul>
-
-<h2 id="download">File</h2>
-<p><a href="data/nil.csv">nil.csv</a> (per ognuno dei 88 quartieri: edifici per epoca, quote, abitazioni 2011 e 1991, prezzo, abitazioni nuove 2014&ndash;2024), <a href="data/nil.geojson">nil.geojson</a> (i confini dei quartieri, semplificati, con gli stessi valori), <a href="data/epoche_citta_municipi.csv">epoche_citta_municipi.csv</a> (citt&agrave; e 9 municipi: edifici e abitazioni per epoca) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno). Sono tutti valori aggregati: nessun edificio singolo.</p>
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul>
+<p>Altre pagine sullo stesso tema: <a href="../costruzioni/">Dove si costruisce</a>, <a href="../prezzi-case/">Prezzi delle case</a>, <a href="../censimenti/">I censimenti</a>.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Palazzo</dt><dd>Un edificio ad uso residenziale, come lo conta il censimento: può essere un condominio o una villetta. Il 21% ha uno o due appartamenti.</dd>
+<dt>Casa</dt><dd>Un’abitazione dove abita qualcuno (un appartamento o una villetta). Un palazzo ne contiene molte.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+<dt>Epoca</dt><dd>Il periodo in cui è stato costruito il palazzo, nelle nove fasce del censimento 2011.</dd>
+<dt>Classe energetica</dt><dd>La pagella dei consumi di una casa, dalla A (consuma poco) alla G (consuma molto), scritta nel certificato energetico.</dd>
+<dt>Prezzo al metro quadro</dt><dd>La stima dell’Agenzia delle Entrate per le zone della città, a metà tra il minimo e il massimo: non è il prezzo a cui si è venduto.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Solo numeri aggregati: nessun palazzo e nessun certificato singolo.</p>
+<ul>
+<li><a href="data/nil.csv">Tutti i numeri per quartiere</a> (palazzi per epoca, case, prezzo, case nuove)</li>
+<li><a href="data/nil.geojson">Confini semplificati dei quartieri</a> con gli stessi valori</li>
+<li><a href="data/epoche_citta_municipi.csv">Città e nove municipi</a>: palazzi e case per epoca</li>
+<li><a href="data/energia_classi_per_epoca.csv">Certificati energetici per epoca e classe</a>, tutta la città</li>
+<li><a href="data/riepilogo.json">Tutti i numeri della pagina</a>, con l’origine di ciascuno, e <a href="data/energia_riepilogo.json">quelli dell’energia</a></li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Edifici e abitazioni 2011 e 1991 per sezione di censimento (e totali del 2001 e 2021, usati come controllo): ISTAT, censimenti della popolazione e delle abitazioni, licenza CC BY 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>), scaricati il 30 ottobre 2026. Abitazioni occupate per epoca e per municipio: Comune di Milano, dataset ds1456 (CC BY). Confini dei quartieri (NIL) e permessi di costruire 2014&ndash;2024: Comune di Milano (CC BY). Prezzi: Agenzia delle Entrate &ndash; Osservatorio del Mercato Immobiliare (OMI), CC BY 4.0, 1&deg; semestre 2026. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
-<p><b>Pagine collegate.</b> <a href="../costruzioni/">Dove si costruisce</a> (permessi di costruire e confronto del database topografico 2006&ndash;2020), <a href="../censimenti/">I censimenti</a> (popolazione, famiglie, abitazioni dal 1861), <a href="../suolo/">Quanto suolo si consuma</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+<p><b>Fonti e licenze.</b> Palazzi e case per sezione di censimento (2011; 2001 e 2021 come controllo): ISTAT, censimenti della popolazione e delle abitazioni, licenza CC BY 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>), scaricati il 30 ottobre 2026. Case occupate per epoca e per municipio: Comune di Milano, dataset ds1456 (CC BY). Confini dei quartieri (NIL) e permessi di costruire 2014–2024: Comune di Milano (CC BY). Prezzi: Agenzia delle Entrate – Osservatorio del Mercato Immobiliare (OMI), CC BY 4.0, primo semestre 2026. Certificati energetici: Comune di Milano, dataset ds623 «Database CENED+2» (Regione Lombardia, licenza CC0), scaricato il 7 novembre 2026.</p>
+<p><b>Pagine collegate.</b> <a href="../costruzioni/">Dove si costruisce</a>, <a href="../prezzi-case/">Prezzi delle case</a>, <a href="../censimenti/">I censimenti</a>, <a href="../suolo/">Quanto suolo si consuma</a>. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,NF=null,NIL=[],RD=[],EP=[];
-var ACC='#9a3b1a',WARM='#c26a1b';
-var ERA=['#4a1d0a','#8c4a14','#c98a2e','#ecc65a','#bfe0a0','#7cc0a6','#3d94a6','#2a64a0','#1f3b7a'];
-var ERAS=['prima del 1919','1919–1945','1946–1960','1961–1970','1971–1980','1981–1990','1991–2000','2001–2005','dopo il 2005'];
-var SEQ=['#f6e3da','#eab9a3','#d98a68','#bf5d37','#9a3b1a','#5e200b'];
-/* ---------- formati ---------- */
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+(d?nf(v,d):f0(v))}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function pc(x){return nf(x,1)+'%'}
-function eraName(k){return ERAS[k]}
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),gry:'#9aa1ad'};
+/* le nove epoche: dal viola scuro (il più antico) al giallo (il più nuovo) */
+var ERA=['#440154','#472d7b','#3b528b','#2c728e','#21908d','#27ad81','#5cc863','#aadc32','#fde725'];
+var ENAME=[],D,GEO,EN,N=[],NB=[],BY={},RD=[],sel=null,MIL={};
 
-Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
-  D=a[0];NF=a[1];NIL=NF.features.map(function(f){return f.properties});
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(280,Math.floor($(id).clientWidth))}
+function shortn(s,w,b){if(tw(s,13,b)<=w)return s;while(s.length>3&&tw(s+'…',13,b)>w)s=s.slice(0,-1);return s+'…'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  return '<path d="M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z" fill="'+col+'"'+(extra||'')+'/>';
+}
+/* una casetta: tetto e muri in un solo disegno */
+function house(x,y,s,col){
+  return '<path d="M'+r1(x+s/2)+' '+r1(y)+'L'+r1(x+s)+' '+r1(y+s*.46)+'H'+r1(x+s*.88)+'V'+r1(y+s)+'H'+r1(x+s*.12)+'V'+r1(y+s*.46)+'H'+r1(x)+'Z" fill="'+col+'" stroke="rgba(0,0,0,.28)" stroke-width=".8" stroke-linejoin="round"/>';
+}
+/* 100 unità divise in modo che la somma torni 100 */
+function cento(v){
+  var t=v.reduce(function(a,b){return a+b},0),ex=v.map(function(x){return x/t*100}),fl=ex.map(Math.floor),re=100-fl.reduce(function(a,b){return a+b},0);
+  ex.map(function(x,i){return{i:i,r:x-fl[i]}}).sort(function(a,b){return b.r-a.r}).slice(0,re).forEach(function(o){fl[o.i]++});
+  return fl;
+}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson'),getJ(DATA+'energia_riepilogo.json')]).then(function(r){
+  D=r[0];GEO=r[1];EN=r[2];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function draw(f){f();RD.push(f)}
+
+function prepara(){
+  ENAME=D.meta.epoche.map(function(s){return s.replace('-','–')});
+  GEO.features.forEach(function(f){var p=f.properties;
+    var o={id:p.i,n:p.n,mu:p.m,E:p.E,T:p.T,rb:!!p.rb,p46:p.p46,p80:p.p80,ab:p.ab,pz:p.pz,pzc:p.pzc,nw:p.nw,d:p.d,f:f};
+    o.pr=(o.rb&&o.pz&&o.pzc>=80)?o.pz:null;
+    N.push(o);BY[o.id]=o;if(o.rb)NB.push(o)});
+  var cnt={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+  var pr=N.filter(function(o){return o.pr}),sw=0,s=0;pr.forEach(function(o){sw+=o.ab;s+=o.pr*o.ab});
+  MIL.pz=s/sw;MIL.p46=D.citta.edifici_pre46_pct;
+}
 
 function tutto(){
-  sorpresa();mappa();citta();classifica();dopo();prezzi();limiti();metodo();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+  prepara();
+  highlights();
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});return m.length===1?m[0]:null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].id,true);
+    else if(m.length>1)$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true)});
+  draw(centoCase);draw(boom);draw(scheda);draw(mappa);draw(nuove);draw(prezzi);draw(energia);
+  limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
 }
-function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
-function sh(p,k){return 100*p.E[k]/p.T}
-function cityMedian(){var c=0,E=D.citta.per_epoca_pct;for(var k=0;k<E.length;k++){c+=E[k];if(c>=50)return k}return 8}
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  RD.forEach(function(f){f()});
+}
 
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var C=D.citta,P=D.prezzi;
-  el('n-ed').textContent=f0(C.edifici);el('n-vill').textContent=Math.round(C.edifici_1_2_interni_pct);
-  var h='<p><b>Milano &egrave; una citt&agrave; del dopoguerra.</b> Nel 2011 pi&ugrave; di una abitazione su due (<b>'+pc(C.abitazioni_4670_pct)+'</b>) stava in un palazzo costruito tra il 1946 e il 1970: venticinque anni. Prima del 1946 era stato costruito il '+pc(C.abitazioni_pre46_pct)+' delle abitazioni, dopo il 1990 solo il <b>'+pc(C.abitazioni_dopo90_pct)+'</b>; quasi nove su dieci (<b>'+pc(C.abitazioni_fino80_pct)+'</b>) sono di prima del 1981.</p>';
-  h+='<p>Contando gli <i>edifici</i> invece delle abitazioni il quadro cambia: il 1961&ndash;1970 &egrave; il '+pc(C.per_epoca_pct[3])+' degli edifici ma il '+pc(C.abitazioni_per_epoca_pct[3])+' delle abitazioni, perch&eacute; i palazzi del boom sono grandi; i palazzi di prima del 1919 sono il '+pc(C.per_epoca_pct[0])+' degli edifici e solo l&rsquo;'+pc(C.abitazioni_per_epoca_pct[0])+' delle abitazioni.</p>';
-  h+='<p>E c&rsquo;&egrave; un rovescio dei prezzi: i quartieri con pi&ugrave; palazzi antichi sono quelli pi&ugrave; cari (correlazione di Spearman <b>'+sg(P.spearman_pre46[0],2)+'</b> tra quota di edifici prima del 1946 e prezzo), quelli con pi&ugrave; palazzi recenti (dopo il 1980) i meno cari (<b>'+sg(P.spearman_post80[0],2)+'</b>). Un confronto, non una spiegazione (<a href="#prezzi">vedi sotto</a>).</p>';
-  h+='<p class="src">Censimento ISTAT 2011 (edifici, sezioni di censimento) e Comune di Milano ds1456 (abitazioni occupate per epoca, 9 municipi); prezzi Agenzia delle Entrate &ndash; OMI, 1&deg; semestre 2026.</p>';
-  setH('sorpresa',h);
+/* ---------- numeri grandi ---------- */
+function bigOnes(){return NB.filter(function(o){return o.T>=200})}
+function highlights(){
+  var c=D.citta,P=D.prezzi.per_epoca_dominante,big=bigOnes().slice().sort(function(a,b){return b.p46-a.p46})[0],
+      e=c.per_epoca,rate=e[3]/10,dopo90=Math.max(e[6]/10,e[7]/5,e[8]/6),
+      nw=D.dopo_il_2011.abitazioni_nuove_2014_2024,nw100=nw/c.abitazioni_occupate*100,
+      fg=EN.quota_FG_pct,nuovi=EN.conteggi[6],nuoviFG=(nuovi[5]+nuovi[6])/nuovi.reduce(function(a,b){return a+b},0)*100;
+  var H=[
+    {c:C.mi,h:'t-cento',n:f1(c.edifici_4670_pct)+'<small>%</small>',p:'dei palazzi di Milano è stato costruito in soli 25 anni, tra il 1946 e il 1970.'},
+    {c:C.m3,h:'t-boom',n:f0(rate),p:'palazzi costruiti ogni anno tra il 1961 e il 1970. Dopo il 1990, meno di '+f0(Math.ceil(dopo90/10)*10)+' all’anno.'},
+    {c:C.m2,h:'t-mappa',n:f1(big.p46)+'<small>%</small>',p:'dei palazzi di '+esc(big.sn)+' è di prima del 1946: il quartiere più antico, tra quelli con almeno 200 palazzi.'},
+    {c:C.m4,h:'t-nuove',n:f0(nw),p:'case nuove nei permessi 2014–2024: '+f0(Math.round(nw100))+' ogni 100 case che c’erano nel 2011, comprese quelle al posto di case demolite.'},
+    {c:C.m5,h:'t-prezzi',n:f0(P[0].prezzo_mediano)+'<small> €/m²</small>',p:'prezzo mediano dove domina il palazzo di prima del 1919. Dove domina quello degli anni Sessanta: '+f0(P[3].prezzo_mediano)+'.'},
+    {c:C.ora,h:'t-energia',n:f0(fg)+'<small>%</small>',p:'dei certificati energetici delle case di Milano è in classe F o G, le due più basse. Per le case costruite dopo il 2006: '+f0(nuoviFG)+'%.'}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. i palazzi sulla linea del tempo (firma) ---------- */
+/* casette impilate sopra gli anni veri: la larghezza di ogni epoca è la sua durata; «prima del 1919» ha uno spazio solo indicativo */
+var SPN=[[1895,1918],[1919,1945],[1946,1960],[1961,1970],[1971,1980],[1981,1990],[1991,2000],[2001,2005],[2006,2011]];
+function asseCase(vals,W,o){
+  o=o||{};
+  var ml=6,mr=6,pw=W-ml-mr,x0=1895,x1=2012,X=function(y){return ml+(y-x0)/(x1-x0)*pw};
+  var cell=Math.max(8,Math.min(o.cell||13,Math.floor(5*pw/(x1-x0)))),h=cento(vals),hs=cell-1.5;
+  var cols=SPN.map(function(sp){return Math.max(1,Math.floor((X(sp[1]+1)-X(sp[0]))/cell))});
+  var rows=h.map(function(n,i){return Math.ceil(n/cols[i])}),mr2=Math.max.apply(null,rows);
+  var mt=o.boom?46:20,ph=mr2*cell,yA=mt+ph,H=yA+44,s=svgOpen(W,H);
+  if(o.boom){var bx0=X(1946),bx1=X(1971);
+    s+='<rect x="'+r1(bx0)+'" y="22" width="'+r1(bx1-bx0)+'" height="'+(yA-22)+'" fill="#f4f5f7"/>';
+    var nb=h[2]+h[3];
+    s+=L(bx0,19,bx1-1,19,C.ink,2)+L(bx0,19,bx0,25,C.ink,2)+L(bx1-1,19,bx1-1,25,C.ink,2)+T((bx0+bx1)/2,12,'il boom: '+nb+' su 100',{a:'middle',c:'b'})}
+  s+=L(ml,yA,X(1919),yA,C.axis,1.5,' stroke-dasharray="3 3"')+L(X(1919),yA,W-mr,yA,C.ink,1.5);
+  var tot=vals.reduce(function(a,b){return a+b},0);
+  h.forEach(function(n,i){
+    var sp=SPN[i],a=X(sp[0]),w=X(sp[1]+1)-a,c=cols[i],gx=a+(w-c*cell)/2,yrs=sp[1]-sp[0]+1;
+    var t='<b>'+ENAME[i]+'</b><br>'+f1(vals[i]/tot*100)+' palazzi ogni 100 ('+f0(vals[i])+' palazzi)'+(i>0?'<br>In '+yrs+' anni: '+f0(vals[i]/yrs)+' all’anno':'');
+    if(o.extra)t+=o.extra(i);
+    s+='<g'+tip(t)+'>';
+    for(var k=0;k<n;k++)s+=house(gx+(k%c)*cell+.75,yA-(Math.floor(k/c)+1)*cell+.75,hs,ERA[i]);
+    s+='<rect x="'+r1(a)+'" y="'+mt+'" width="'+r1(w)+'" height="'+ph+'" fill="transparent"/>';
+    if(n>0)s+=T(a+w/2,yA-rows[i]*cell-4,n,{a:'middle',c:'k'});
+    s+='</g>';
+  });
+  [1946,1961,1971,1981,1991,2001,2006].forEach(function(y){s+=L(X(y),yA,X(y),yA+5,C.axis,1)});
+  s+=L(X(1919),yA,X(1919),yA+9,C.axis,1);
+  [[1919,'middle'],[1946,'middle'],[1971,'middle'],[1991,'middle']].forEach(function(k){s+=T(X(k[0]),yA+23,k[0],{a:k[1],c:'m'})});
+  s+=T(W-mr,yA+23,'2011',{a:'end',c:'m'})+T(ml,yA+23,'prima',{c:'m'});
+  return s+'</svg>';
+}
+function centoCase(){
+  var c=D.citta,W=width('ch-cento');
+  $('ch-cento').innerHTML=asseCase(c.per_epoca,W,{boom:1,extra:function(i){return '<br>Case occupate: '+f1(c.abitazioni_per_epoca_pct[i])+' ogni 100'}});
+  $('t-cento').textContent=f1(c.edifici_4670_pct)+' palazzi su 100 sono stati costruiti tra il 1946 e il 1970';
+  $('s-cento').textContent='Ogni casetta è un palazzo su 100 di Milano, messa sopra gli anni in cui fu costruito. Più una colonna è larga, più anni dura l’epoca; il numero sopra è quante casette ci sono. Per «prima del 1919» non si sa da quando: lo spazio è solo indicativo.';
+  $('nn-cento').innerHTML='Dopo il 1980 sono arrivati soltanto '+f1(c.edifici_dopo80_pct)+' palazzi su 100. Le case sono più dei palazzi: negli anni Sessanta si sono costruiti molti palazzi alti, e per questo il 1961–1970 pesa il '+f1(c.abitazioni_per_epoca_pct[3])+'% delle case ma il '+f1(c.per_epoca_pct[3])+'% dei palazzi. Contando le case, il 1946–1970 vale il '+f1(c.abitazioni_4670_pct)+'%.';
+}
+
+/* ---------- 2. quanti palazzi all'anno ---------- */
+function boom(){
+  var c=D.citta,SP=[[1919,1945],[1946,1960],[1961,1970],[1971,1980],[1981,1990],[1991,2000],[2001,2005],[2006,2011]];
+  var W=width('ch-boom'),H=250,m={l:6,r:6,t:24,b:52},pw=W-m.l-m.r,ph=H-m.t-m.b,x0=1919,x1=2012;
+  var R=SP.map(function(sp,k){var yrs=sp[1]-sp[0]+1;return{a:sp[0],b:sp[1],yrs:yrs,n:c.per_epoca[k+1],r:c.per_epoca[k+1]/yrs,i:k+1}});
+  var mx=Math.max.apply(null,R.map(function(r){return r.r}))*1.12;
+  var X=function(y){return m.l+(y-x0)/(x1-x0)*pw},Y=function(v){return m.t+ph-v/mx*ph};
+  var s=svgOpen(W,H);
+  s+=L(m.l,Y(0),W-m.r,Y(0),C.ink,1.5);
+  var lab=[];
+  R.forEach(function(r){
+    var t='<b>'+ENAME[r.i]+'</b><br>'+f0(r.n)+' palazzi in '+r.yrs+' anni<br>'+f0(r.r)+' palazzi all’anno';
+    s+='<g'+tip(t)+'><rect x="'+r1(X(r.a))+'" y="'+r1(Y(r.r))+'" width="'+r1(X(r.b+1)-X(r.a)-1)+'" height="'+r1(Y(0)-Y(r.r))+'" fill="'+ERA[r.i]+'" stroke="rgba(0,0,0,.28)" stroke-width=".8"/><rect x="'+r1(X(r.a))+'" y="'+m.t+'" width="'+r1(X(r.b+1)-X(r.a))+'" height="'+ph+'" fill="transparent"/></g>';
+    var cx=(X(r.a)+X(r.b+1))/2;lab.push({x:cx,w:tw(f0(r.r),13,true),top:Y(r.r),v:f0(r.r),lv:0});
+  });
+  lab.forEach(function(l,i){var again=true,g=0;while(again&&g<4){again=false;for(var j=0;j<i;j++){var o=lab[j];if(o.lv===l.lv&&Math.abs(o.x-l.x)<(o.w+l.w)/2+4){l.lv++;again=true}}g++}});
+  lab.forEach(function(l){var y=l.top-5-l.lv*16;if(l.lv>0)s+=L(l.x,l.top-1,l.x,y+3,C.ink2,1);s+=T(l.x,y,l.v,{a:'middle',c:'halo'})});
+  var tk=[[1919,0],[1946,1],[1961,0],[1971,1],[1981,0],[1991,1],[2001,0],[2006,1]];
+  tk.forEach(function(k){var yy=Y(0),ln=k[1]?24:8;s+=L(X(k[0]),yy,X(k[0]),yy+ln-3,C.axis,1)+T(X(k[0]),yy+ln+11,k[0],{a:k[0]===1919?'start':'middle',c:'m'})});
+  s+=T(W-m.r,H-3,'2011',{a:'end',c:'m'});
+  $('ch-boom').innerHTML=s+'</svg>';
+  var top=R[2],dopo=R.slice(5);
+  $('t-boom').textContent='Tra il 1961 e il 1970 si costruivano '+f0(top.r)+' palazzi all’anno; dopo il 1990, meno di '+f0(Math.ceil(Math.max.apply(null,dopo.map(function(r){return r.r}))/10)*10);
+  $('s-boom').textContent='Ogni colonna è un’epoca: la larghezza sono gli anni, l’altezza i palazzi costruiti in media ogni anno. Il numero sopra la colonna dice quanti.';
+  $('nn-boom').innerHTML='Dal 1946 al 1970 si è costruito più del doppio rispetto al periodo tra le due guerre ('+f0(R[0].r)+' all’anno). Poi il ritmo cala: '+f0(R[3].r)+' negli anni Settanta, '+f0(R[4].r)+' negli Ottanta.';
+}
+
+/* ---------- 3. i 100 palazzi del tuo quartiere ---------- */
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quartiere sulla mappa: ti mostro i suoi 100 palazzi sulla linea del tempo, ognuno nel colore della sua epoca, sopra quelli di Milano.';return}
+  var o=BY[sel],c=D.citta,tot=o.E.reduce(function(a,b){return a+b},0),h=cento(o.E),hm=cento(c.per_epoca);
+  var dom=0;o.E.forEach(function(v,i){if(v>o.E[dom])dom=i});
+  var html='<b class="big">'+esc(o.n)+'</b>Municipio '+o.mu+' · '+f0(tot)+' palazzi residenziali.';
+  if(!o.rb)html+='<p>Ha meno di 100 palazzi: le quote ballano, vanno prese con cautela.</p>';
+  html+='<p>Ogni casetta è un palazzo su 100, messa sopra gli anni in cui fu costruito. Qui il più frequente è quello del '+ENAME[dom]+' ('+f0(h[dom])+' su 100); a Milano è quello del 1946–1960 ('+f0(hm[2])+' su 100).</p>';
+  var cl=bigOnes().slice().sort(function(a,b){return b.p46-a.p46}),k=cl.indexOf(o);
+  if(k>=0)html+='<p>Palazzi di prima del 1946: '+f1(o.p46)+' su 100 (Milano: '+f1(c.edifici_pre46_pct)+'). Posto '+(k+1)+' su '+cl.length+' per palazzi antichi (il 1° è il più antico).</p>';
+  html+='<div class="duo"><div><b>'+esc(o.sn)+'</b><div class="ch" id="g-q"></div></div><div><b>Milano</b><div class="ch" id="g-m"></div></div></div>';
+  html+='<table class="kt"><thead><tr><th>Epoca</th><th>Qui</th><th>Milano</th></tr></thead><tbody>'+ENAME.map(function(n,i){return '<tr><td><i style="background:'+ERA[i]+'"></i>'+n+'</td><td>'+f0(h[i])+'</td><td>'+f0(hm[i])+'</td></tr>'}).join('')+'</tbody></table>';
+  html+='<p style="font-size:.85rem;color:var(--mut)">Palazzi su 100, arrotondati. Il censimento è del 2011.</p>';
+  r.innerHTML=html;
+  var w=width('g-q');
+  $('g-q').innerHTML=asseCase(o.E,w,{cell:11});$('g-m').innerHTML=asseCase(c.per_epoca,w,{cell:11});
 }
 
 /* ---------- mappa ---------- */
-var MAP=null,LAY=null,CUR='dom',SEL=null,MET={};
-function qbreaks(vals,k,step){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]/step)*step);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
-function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
-function cls(v,m){var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
-function valore(p,m){
-  if(m.k==='pz'){return (p.pz!=null&&p.pzc>=80)?p.pz:null}
-  return p.rb===1?p[m.k]:null;
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
 }
-function colore(p){
-  if(CUR==='dom')return p.rb===1?ERA[p.d]:'#bdbdbd';
-  var m=MET[CUR],v=valore(p,m);return v==null?'#bdbdbd':cls(v,m);
+var MC=['#FFE3C2','#FDBA74','#F58220','#9A4A00'],MT=['#0b0d12','#0b0d12','#0b0d12','#fff'];
+function mapCut(){
+  var v=NB.map(function(o){return Math.round(o.p46)}).sort(function(a,b){return a-b}),n=v.length;
+  return[v[Math.floor(n*.25)],v[Math.floor(n*.5)],v[Math.floor(n*.75)]];
 }
 function mappa(){
-  var ok=NIL.filter(function(p){return p.rb===1});
-  var bp=qbreaks(ok.map(function(p){return p.p46}),6,5),bb=qbreaks(ok.map(function(p){return p.b}),6,5),b8=qbreaks(ok.map(function(p){return p.p80}),6,2),
-      bz=qbreaks(NIL.filter(function(p){return p.pz!=null&&p.pzc>=80}).map(function(p){return p.pz}),6,250);
-  MET={
-   p46:{k:'p46',b:bp,c:pick(bp.length+1),f:pc,t:'Quota degli edifici residenziali costruiti prima del 1946 (prima del 1919 e 1919–1945 insieme). La media della città è '+pc(D.citta.edifici_pre46_pct)+'. Più scuro = più edifici antichi.'},
-   b:{k:'b',b:bb,c:pick(bb.length+1),f:pc,t:'Quota degli edifici residenziali costruiti tra il 1946 e il 1970 (boom del dopoguerra). La media della città è '+pc(D.citta.edifici_4670_pct)+'. Più scuro = più edifici di quegli anni.'},
-   p80:{k:'p80',b:b8,c:pick(b8.length+1),f:pc,t:'Quota degli edifici residenziali costruiti dopo il 1980. La media della città è '+pc(D.citta.edifici_dopo80_pct)+'. Il censimento è del 2011: i palazzi degli ultimi quindici anni non ci sono (vedi “Dopo il 2011”).'},
-   pz:{k:'pz',b:bz,c:pick(bz.length+1),f:function(v){return f0(v)+' €'},t:'Prezzo di mercato delle abitazioni civili nelle zone OMI, 1° semestre 2026, in euro al metro quadro (centro tra minimo e massimo, media dei quartieri pesata sulle abitazioni). È una stima dell’Agenzia delle Entrate, non un prezzo di vendite reali. In grigio i quartieri senza zone OMI o coperti per meno dell’80%.'},
-   dom:{t:'L’epoca di costruzione più frequente tra gli edifici residenziali di ogni quartiere. Su '+D.citta.nil_robusti+' quartieri con almeno 100 edifici: '+Object.keys(D.citta.nil_per_epoca_dominante).map(function(k){return D.citta.nil_per_epoca_dominante[k]+' '+eraName(+k)}).join(', ')+'. In grigio i quartieri con meno di 100 edifici.'}
-  };
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:true}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
-    l.bindTooltip(function(){return tip(f.properties)},{sticky:true});
-    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
-  MAP.fitBounds(LAY.getBounds());
-  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
-  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
-  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
-  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){
-    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
-  ricolora();
-  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
-  window.addEventListener('resize',function(){MAP.invalidateSize()});
-}
-function tip(p){
-  var h='<b>'+esc(p.n)+'</b><br>'+f0(p.T)+' edifici residenziali';
-  if(CUR==='pz')return h+'<br>'+(p.pz!=null&&p.pzc>=80?f0(p.pz)+' €/m² (OMI 2026)':'prezzo non disponibile');
-  if(p.rb!==1)return h+'<br>meno di 100 edifici: quote non confrontabili';
-  if(CUR==='dom')return h+'<br>più frequente: '+eraName(p.d)+' ('+pc(sh(p,p.d))+')';
-  return h+'<br>'+pc(p[MET[CUR].k]);
-}
-function sty(f){var p=f.properties,sel=SEL===p.i;
-  return {fillColor:colore(p),fillOpacity:.84,color:sel?'#000':'#fff',weight:sel?3:1}}
-function ricolora(){
-  var m=MET[CUR];LAY.setStyle(sty);if(SEL)bringSel();
-  var h='';
-  if(CUR==='dom'){
-    Object.keys(D.citta.nil_per_epoca_dominante).forEach(function(k){h+='<span><i style="background:'+ERA[+k]+'"></i>'+eraName(+k)+'</span>'});
-  }else{
-    m.c.forEach(function(c,i){var t;
-      if(m.k==='pz')t=i===0?'meno di '+f0(m.b[0])+' €':i===m.b.length?f0(m.b[i-1])+' € o più':f0(m.b[i-1])+' – '+f0(m.b[i])+' €';
-      else t=i===0?'meno di '+m.b[0]+'%':i===m.b.length?m.b[i-1]+'% o più':m.b[i-1]+' – '+m.b[i]+'%';
-      h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
-  }
-  h+='<span><i style="background:#bdbdbd"></i>non disponibile / pochi edifici</span>';
-  setH('lg-map',h);setH('map-desc',m.t);
-}
-function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
-function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);bringSel();
-  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}
-  scheda(i)}
-function scheda(i){
-  var p=nilById(i);if(!p)return;
-  var C=D.citta,h='<h3>'+esc(p.n)+'</h3>';
-  h+='<p class="sub">Municipio '+p.m+' &middot; '+f0(p.r)+' residenti (2011) &middot; <b>'+f0(p.T)+'</b> edifici residenziali'+(p.rb===1?'':' &middot; <b>meno di 100: le quote qui sotto sono solo indicative</b>')+'</p>';
-  h+='<div class="mini">'+ERAS.map(function(e,k){var v=p.T?sh(p,k):0;return '<div class="row"><span>'+e+'</span><span class="tr"><span class="fill" style="width:'+Math.min(100,v*100/60)+'%;background:'+ERA[k]+'"></span></span><span class="v">'+pc(v)+' <span class="sub">('+f0(p.E[k])+')</span></span></div>'}).join('')+'</div>';
-  h+='<p class="sub" style="margin:.2em 0">Le barre arrivano al 60%; tra parentesi il numero di edifici.</p>';
-  h+='<div class="scroll"><table><tbody>';
-  h+='<tr><td>Epoca più frequente</td><td class="r"><b>'+eraName(p.d)+'</b></td></tr>';
-  h+='<tr><td>Metà degli edifici è stata costruita entro il</td><td class="r"><b>'+(['1919','1945','1960','1970','1980','1990','2000','2005','…'][p.em])+'</b> <span class="sub">(città: '+['1919','1945','1960','1970','1980','1990','2000','2005','…'][cityMedian()]+')</span></td></tr>';
-  h+='<tr><td>Prima del 1946 / 1946–1970 / dopo il 1980</td><td class="r"><b>'+pc(p.p46)+'</b> / <b>'+pc(p.b)+'</b> / <b>'+pc(p.p80)+'</b><br><span class="sub">città: '+pc(C.edifici_pre46_pct)+' / '+pc(C.edifici_4670_pct)+' / '+pc(C.edifici_dopo80_pct)+'</span></td></tr>';
-  h+='<tr><td>Interni per edificio (in media)</td><td class="r">'+f1(p.ipe)+' <span class="sub">(città: '+f1(C.interni_per_edificio)+')</span></td></tr>';
-  h+='<tr><td>Abitazioni occupate (2011)</td><td class="r">'+f0(p.ab)+'</td></tr>';
-  h+='<tr><td>Abitazioni occupate nel 1991 costruite prima del 1946</td><td class="r">'+(p.a91p46!=null&&p.a91t>=300?pc(p.a91p46):'<span class="sub">poche abitazioni</span>')+'</td></tr>';
-  h+='<tr><td>Prezzo OMI 2026 (€/m²)</td><td class="r">'+(p.pz!=null&&p.pzc>=80?'<b>'+f0(p.pz)+'</b>':'<span class="sub">non disponibile</span>')+'</td></tr>';
-  h+='<tr><td>Abitazioni nei nuovi fabbricati 2014–2024</td><td class="r"><b>'+f0(p.nw)+'</b>'+(p.nw100!=null&&p.ab>0?' <span class="sub">('+nf(p.nw100,1)+' ogni 100 abitazioni del 2011)</span>':'')+'</td></tr>';
-  h+='</tbody></table></div><p class="sub">Edifici: ISTAT 2011. Abitazioni 1991: ISTAT 1991, assegnate al quartiere per sovrapposizione. Prezzi: OMI. Nuove abitazioni: permessi del Comune (lorde, comprese le ricostruzioni).</p>';
-  setH('scheda',h);
+  var W=width('ch-mappa'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='',lab='',cut=mapCut();
+  function cl(o){if(!o.rb)return -1;var r=Math.round(o.p46);return r<=cut[0]?0:r<=cut[1]?1:r<=cut[2]?2:3}
+  var cnt=[0,0,0,0],piccoli=0;
+  N.forEach(function(o){var c=cl(o),isS=o.id===sel,b=P.bb(o.f);if(c>=0)cnt[c]++;else piccoli++;
+    var tp='<b>'+esc(o.n)+'</b><br>'+(c>=0?f1(o.p46)+' palazzi su 100 sono di prima del 1946<br>'+f0(o.T)+' palazzi in tutto':'Meno di 100 palazzi: quota non affidabile');
+    var el='<path d="'+P.path(o.f)+'" fill="'+(c>=0?MC[c]:'#e6e8ec')+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el;
+    if(c>=0&&!isS&&b.w>=30&&b.h>=17)lab+=T(Math.min(b.x,W-12),b.y+4,Math.round(o.p46),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+MT[c]})});
+  s+=sS+lab;
+  if(sel){var o=BY[sel],b=P.bb(o.f),t=o.sn+(o.rb?' '+Math.round(o.p46):''),w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),y=Math.max(14,Math.min(H-4,b.y-b.h/2-5));
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
+  $('ch-mappa').innerHTML=s+'</svg>';
+  var names=['fino a '+cut[0]+'%','da '+(cut[0]+1)+' a '+cut[1]+'%','da '+(cut[1]+1)+' a '+cut[2]+'%',(cut[2]+1)+'% o più'];
+  $('lg-mappa').innerHTML=MC.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+names[i]+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#e6e8ec"></i>pochi palazzi <b>&nbsp;'+piccoli+'</b></span>';
+  var B=bigOnes().slice().sort(function(a,b){return b.p46-a.p46}),a=B[0],z=B[B.length-1];
+  $('t-mappa').textContent='Da '+f0(a.p46)+' palazzi su 100 di prima del 1946 a '+a.sn+', a '+f0(z.p46)+' a '+z.sn;
+  $('s-mappa').textContent='Il numero scritto è quanti palazzi su 100 sono stati costruiti prima del 1946. I colori dividono i '+NB.length+' quartieri con almeno 100 palazzi in quattro gruppi di grandezza simile (il numero accanto a ogni gruppo). Tocca un quartiere per leggerlo.';
+  $('nn-mappa').innerHTML='I quartieri più antichi sono attorno al centro; più si va verso la periferia, più i palazzi sono recenti. Il quartiere scelto ha il bordo rosso.';
 }
 
-/* ---------- la citta' ---------- */
-function citta(){
-  var C=D.citta,E=C.per_epoca_pct,A=C.abitazioni_per_epoca_pct;
-  var h='<p>Il censimento 2011 ha contato <b>'+f0(C.edifici)+'</b> edifici residenziali e <b>'+f0(C.abitazioni_occupate)+'</b> abitazioni occupate da residenti. L&rsquo;epoca pi&ugrave; frequente tra gli edifici &egrave; il <b>1946&ndash;1960</b> ('+pc(E[2])+'), poi il 1919&ndash;1945 ('+pc(E[1])+') e il 1961&ndash;1970 ('+pc(E[3])+'). Per le abitazioni la prima &egrave; il <b>1961&ndash;1970</b> ('+pc(A[3])+'), seguita dal 1946&ndash;1960 ('+pc(A[2])+').</p>';
-  h+='<p>Gli edifici costruiti tra il 1946 e il 1970 sono il '+pc(C.edifici_4670_pct)+' del totale ma contengono il '+pc(C.abitazioni_4670_pct)+' delle abitazioni. Dopo il 1980 &egrave; stato costruito l&rsquo;'+pc(C.edifici_dopo80_pct)+' degli edifici (e il '+pc(C.abitazioni_dopo80_pct)+' delle abitazioni); dopo il 1990 solo il '+pc(C.edifici_dopo90_pct)+' degli edifici. Il '+pc(C.edifici_9piu_interni_pct)+' degli edifici ha 9 o pi&ugrave; interni (appartamenti, ma anche negozi e uffici), e ce ne sono '+f0(C.edifici_16piu_interni)+' con 16 o pi&ugrave;.</p>';
-  setH('citta-testo',h);
-  var mx=Math.max.apply(null,E.concat(A));
-  setH('b-citta',ERAS.map(function(e,k){return '<div class="row"><span class="nm">'+e+'</span><span class="tr"><span class="fill fa" style="width:'+(E[k]/mx*100)+'%"></span><span class="fill fb" style="width:'+(A[k]/mx*100)+'%"></span></span><span class="v">'+pc(E[k])+' &middot; '+pc(A[k])+'</span></div>'}).join(''));
-  /* municipi */
-  var M=D.municipi.abitazioni,rows=[],ks=Object.keys(M).sort(function(a,b){return a-b});
-  function q(a,i,j){var t=0,s=0;for(var k=0;k<9;k++){t+=a[k];if(k>=i&&k<=j)s+=a[k]}return 100*s/t}
-  ks.forEach(function(k){var a=M[k],t=0;for(var j=0;j<9;j++)t+=a[j];rows.push([k,t,q(a,0,1),q(a,2,3),q(a,4,5),q(a,6,8)])});
-  var oldest=rows.slice().sort(function(a,b){return b[2]-a[2]})[0],boomest=rows.slice().sort(function(a,b){return b[3]-a[3]})[0],newest=rows.slice().sort(function(a,b){return b[5]-a[5]})[0];
-  setH('mun-testo','<p>Il Municipio '+oldest[0]+' ha la quota pi&ugrave; alta di abitazioni in palazzi di prima del 1946 ('+pc(oldest[2])+'); il Municipio '+boomest[0]+' quella pi&ugrave; alta di abitazioni del 1946&ndash;1970 ('+pc(boomest[3])+'). Dopo il 1990 la quota pi&ugrave; alta &egrave; nel Municipio '+newest[0]+' ('+pc(newest[5])+'): anche l&igrave; &egrave; una minoranza.</p>');
-  table('tab-mun',['Municipio','Abitazioni occupate','Prima del 1946','1946&ndash;1970','1971&ndash;1990','Dopo il 1990'],rows.map(function(r){return ['Municipio '+r[0],f0(r[1]),pc(r[2]),pc(r[3]),pc(r[4]),pc(r[5])]}));
+/* ---------- 4. case nuove dopo il 2011 ---------- */
+function nuove(){
+  var W=width('ch-nuove'),ok=N.filter(function(o){return o.ab>=1000}).map(function(o){return{o:o,v:o.nw/o.ab*100}}).sort(function(a,b){return b.v-a.v}),top=ok.slice(0,8);
+  var nw=D.dopo_il_2011.abitazioni_nuove_2014_2024,mv=nw/D.citta.abitazioni_occupate*100;
+  var rows=top.slice();
+  var ins=sel&&BY[sel].ab>=1000&&!top.some(function(x){return x.o.id===sel});
+  if(ins)rows.push({o:BY[sel],v:BY[sel].nw/BY[sel].ab*100,gap:1});
+  rows.push({m:1,v:mv});
+  var rh=42,top0=4,H=top0+rows.length*rh+(ins?24:0)+4;
+  var lw=Math.ceil(Math.max.apply(null,rows.filter(function(r){return r.o}).map(function(r){return tw(shortn(r.o.sn,120,true),13,true)})))+8,rw=44,bw=W-lw-rw,mx=Math.max.apply(null,rows.map(function(r){return r.v}));
+  var s=svgOpen(W,H),y=top0;
+  rows.forEach(function(r){
+    if(r.gap){s+=T(lw,y+14,'…il tuo quartiere…',{c:'m'});y+=24}
+    var w=Math.max(3,r.v/mx*bw);
+    if(r.m){s+=T(lw-8,y+14,'Milano',{a:'end',c:'b',st:'fill:'+C.mi})+T(lw-8,y+30,f0(nw)+' case',{a:'end',c:'m'});
+      s+='<g'+tip('<b>Milano</b><br>'+f0(nw)+' case nuove nei permessi 2014–2024<br>'+f1(mv)+' ogni 100 case del 2011')+'>'+hbar(lw,lw+w,y+5,26,C.mi)+'</g>'+T(lw+w+6,y+23,f1(mv),{c:'halo'});y+=rh;return}
+    var o=r.o,sl=o.id===sel;
+    s+='<g data-n="'+o.id+'"'+tip('<b>'+esc(o.n)+'</b><br>'+f0(o.nw)+' case nuove nei permessi 2014–2024<br>'+f1(r.v)+' ogni 100 case del 2011 ('+f0(o.ab)+')')+' style="cursor:pointer">';
+    s+=T(lw-8,y+14,esc(shortn(o.sn,120,true)),{a:'end',c:'b',st:sl?'text-decoration:underline':''})+T(lw-8,y+30,f0(o.nw)+' case',{a:'end',c:'m'});
+    s+=hbar(lw,lw+w,y+5,26,C.gry,sl?' stroke="'+C.ink+'" stroke-width="2.5"':'')+T(lw+w+6,y+23,f1(r.v),{c:'halo'})+'</g>';
+    y+=rh});
+  $('ch-nuove').innerHTML=s+'</svg>';
+  var a=top[0];
+  $('t-nuove').textContent='A '+a.o.sn+' i permessi 2014–2024 contano '+f0(a.v)+' case nuove ogni 100 che c’erano nel 2011; a Milano, '+f0(mv);
+  $('s-nuove').textContent='Case dei nuovi palazzi autorizzati tra il 2014 e il 2024, ogni 100 case occupate nel 2011. I 8 quartieri con più case nuove in proporzione, tra quelli con almeno 1.000 case. Barra rossa: tutta Milano.';
+  $('nn-nuove').innerHTML='Non sono «case in più»: nei permessi ci sono anche le case costruite dopo una demolizione, e le case demolite non sono tolte. '+esc(a.o.sn)+' partiva da poche case occupate ('+f0(a.o.ab)+' nel 2011), per questo il rapporto è così alto. Altre '+f0(D.dopo_il_2011.senza_nil)+' case nuove non sono assegnate a un quartiere.';
 }
 
-/* ---------- classifiche ---------- */
-function barsPlain(id,rows,max,col){
-  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
-}
-function rowsOf(a){return a.map(function(r){return {nm:r[1],v:r[2],txt:pc(r[2])+' <span class="sub">('+f0(r[3])+')</span>'}})}
-function classifica(){
-  var K=D.classifiche,C=D.citta;
-  el('n-class').textContent=D.meta.nil_in_classifica;
-  var v=K.piu_vecchi,n=K.piu_nuovi,o=K.piu_ottocento;
-  setH('class-testo','<p>I quartieri pi&ugrave; antichi sono quelli intorno al centro: <b>'+esc(v[0][1])+'</b> ('+pc(v[0][2])+' degli edifici costruiti prima del 1946), '+esc(v[1][1])+' ('+pc(v[1][2])+') e '+esc(v[2][1])+' ('+pc(v[2][2])+'). Il pi&ugrave; &laquo;ottocentesco&raquo; &egrave; '+esc(o[0][1])+': il '+pc(o[0][2])+' dei suoi edifici &egrave; di prima del 1919 (in citt&agrave;: '+pc(C.per_epoca_pct[0])+'). I pi&ugrave; recenti, tra quelli con almeno 200 edifici, sono <b>'+esc(n[0][1])+'</b> ('+pc(n[0][2])+' dopo il 1980), '+esc(n[1][1])+' ('+pc(n[1][2])+') e '+esc(n[2][1])+' ('+pc(n[2][2])+'). Il massimo &egrave; il '+pc(n[0][2])+': per il censimento 2011 anche i quartieri pi&ugrave; &laquo;nuovi&raquo; sono fatti soprattutto di palazzi pi&ugrave; vecchi.</p>');
-  barsPlain('b-vecchi',rowsOf(v),100);barsPlain('b-nuovi',rowsOf(n),100,'#3d94a6');
-  var b=K.boom,mb=K.meno_boom;
-  setH('boom-testo','<p>I quartieri con la quota pi&ugrave; alta di edifici del 1946&ndash;1970 sono fuori dal centro storico: <b>'+esc(b[0][1])+'</b> ha l&rsquo;'+pc(b[0][2])+' degli edifici di quegli anni, '+esc(b[1][1])+' l&rsquo;'+pc(b[1][2])+', '+esc(b[2][1])+' il '+pc(b[2][2])+'. Le quote pi&ugrave; basse sono a '+esc(mb[0][1])+' ('+pc(mb[0][2])+') e '+esc(mb[1][1])+' ('+pc(mb[1][2])+'): quartieri pi&ugrave; antichi o pi&ugrave; recenti di quegli anni. Qui &ldquo;boom&rdquo; &egrave; il nome che diamo a queste quote alte, non una misura dei cantieri di allora: il censimento non dice quanti ne furono aperti ogni anno.</p>');
-  barsPlain('b-boom',rowsOf(b),100);
-  var rows=NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(p){return [esc(p.n)+(p.rb===1?'':' <span class="sub">*</span>'),f0(p.T),p.T?pc(p.p46):'',p.T?pc(p.b):'',p.T?pc(p.p80):'',p.T?eraName(p.d):'',(p.pz!=null&&p.pzc>=80)?f0(p.pz):'']});
-  table('tab-nil',['Quartiere','Edifici','Prima del 1946','1946&ndash;1970','Dopo il 1980','Epoca pi&ugrave; frequente','&euro;/m&sup2;'],rows);
-  el('tab-nil').insertAdjacentHTML('afterend','<p class="sub">* meno di 100 edifici residenziali: le quote sono indicative.</p>');
-}
-
-/* ---------- dopo il 2011 ---------- */
-function dopo(){
-  var N=D.dopo_il_2011,C=D.citta,tot=N.abitazioni_nuove_2014_2024+N.senza_nil;
-  setH('dopo-testo','<p>Il censimento si ferma al 2011. Per quello che viene dopo ci sono i permessi del Comune: tra il 2014 e il 2024 i nuovi fabbricati contano <b>'+f0(tot)+'</b> abitazioni (<b>'+f0(N.abitazioni_nuove_2014_2024)+'</b> assegnate a un quartiere), pari al '+pc(100*tot/C.abitazioni_occupate)+' delle abitazioni occupate nel 2011. Per confronto, nel 2011 le abitazioni occupate in palazzi costruiti dopo il 2000 erano <b>'+f0(C.abitazioni_per_epoca[7]+C.abitazioni_per_epoca[8])+'</b> (due conteggi diversi, non si sommano). La costruzione recente &egrave; concentrata in pochi quartieri: i primi 8 della tabella hanno il '+pc(100*N.top.reduce(function(a,r){return a+r[2]},0)/N.abitazioni_nuove_2014_2024)+' delle abitazioni assegnate a un quartiere, e '+N.nil_senza_nuove+' quartieri su 88 non ne hanno nei permessi.</p>');
-  table('tab-nuove',['Quartiere','Abitazioni nuove 2014&ndash;2024','Ogni 100 abitazioni del 2011'],N.top.map(function(r){return [esc(r[1]),f0(r[2]),nf(r[3],1)]}));
-  el('tab-nuove').insertAdjacentHTML('afterend','<p class="sub">I 8 quartieri con pi&ugrave; abitazioni nuove. '+esc(N.top[0][1])+' parte da una base piccola (circa '+f0(N.top[0][2]*100/N.top[0][3])+' abitazioni occupate nel 2011): per questo l&rsquo;indice &egrave; cos&igrave; alto.</p>');
-}
-
-/* ---------- grafico a punti ---------- */
-function scatter(box,o){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=o.h||300,m={l:52,r:12,t:14,b:42};
-  var xs=o.pts.map(function(p){return p.x}),ys=o.pts.map(function(p){return p.y});
-  var x0=0,x1=Math.max.apply(null,xs),y0=0,y1=Math.max.apply(null,ys.concat([o.hline||0]));
-  var sx=niceStep((x1-x0)/5),sy=niceStep((y1-y0)/5);x1=Math.ceil(x1/sx)*sx;y1=Math.ceil(y1/sy)*sy;
-  var pw=W-m.l-m.r,ph=H-m.t-m.b;
-  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
-  var lastx=-99;
-  for(v=x0;v<=x1+sx/2;v+=sx){var xx=X(v);if(xx-lastx>40){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(v)+'</text>'}}
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  if(o.hline!=null)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.hline)+'" y2="'+Y(o.hline)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(W-m.r-2)+'" y="'+(Y(o.hline)-4)+'" text-anchor="end" style="fill:#8a4a10">'+o.hl+'</text>';
-  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+o.xl+'</text><text class="mu" x="'+m.l+'" y="'+(m.t-3)+'" text-anchor="start">'+o.yl+'</text>';
-  o.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.6" fill="'+p.c+'" fill-opacity=".85" stroke="#fff" stroke-width="1"/>'});
-  s+='<circle id="ring" r="7.5" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tp=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
-    o.pts.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
-    if(bi<0||bd>900){tp.style.display='none';ring.style.display='none';return}
-    var p=o.pts[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
-    tp.innerHTML=p.t;tp.style.display='';var tw=tp.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tp.style.left=left+'px';tp.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
-  function hide(){tp.style.display='none';ring.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-}
-
-/* ---------- prezzi ---------- */
+/* ---------- 5. vecchio e caro ---------- */
 function prezzi(){
-  var P=D.prezzi,pts=NIL.filter(function(p){return p.rb===1&&p.pz!=null&&p.pzc>=80});
-  var r1=P.spearman_pre46,r2=P.spearman_boom4670,r3=P.spearman_post80;
-  setH('prezzi-testo','<p>Il prezzo delle abitazioni cambia molto da un quartiere all&rsquo;altro, e va di pari passo con l&rsquo;et&agrave; dei palazzi. Su '+P.n_nil+' quartieri (almeno 100 edifici e prezzo disponibile), la correlazione di Spearman tra la quota di edifici costruiti <b>prima del 1946</b> e il prezzo al metro quadro &egrave; <b>'+sg(r1[0],2)+'</b> (intervallo di confidenza al 95%: da '+sg(r1[1][0],2)+' a '+sg(r1[1][1],2)+'). Con la quota <b>dopo il 1980</b> &egrave; <b>'+sg(r3[0],2)+'</b> (da '+sg(r3[1][0],2)+' a '+sg(r3[1][1],2)+'); con la quota del <b>boom 1946&ndash;1970</b> &egrave; debole: '+sg(r2[0],2)+' (da '+sg(r2[1][0],2)+' a '+sg(r2[1][1],2)+'). In parole semplici: in media, dove ci sono pi&ugrave; palazzi antichi si paga di pi&ugrave;; dove ce ne sono di recenti, di meno. Il prezzo mediano dei quartieri &egrave; '+f0(P.prezzo_mediano_nil_robusti)+' &euro;/m&sup2;.</p>');
-  function mk(kx){return pts.map(function(p){return {x:p[kx],y:p.pz,c:ERA[p.d],t:'<b>'+esc(p.n)+'</b><br>'+pc(p[kx])+' degli edifici<br>'+f0(p.pz)+' €/m²<br>epoca più frequente: '+eraName(p.d)}})}
-  var a=mk('p46'),b=mk('p80');
-  function draw(){
-    scatter(el('ch-p46'),{pts:a,h:300,xl:'quota di edifici costruiti prima del 1946 (%)',yl:'euro al metro quadro (OMI, 2026)',xf:function(v){return f0(v)},hline:P.prezzo_mediano_nil_robusti,hl:'mediana '+f0(P.prezzo_mediano_nil_robusti)});
-    scatter(el('ch-p80'),{pts:b,h:300,xl:'quota di edifici costruiti dopo il 1980 (%)',yl:'euro al metro quadro (OMI, 2026)',xf:function(v){return f0(v)},hline:P.prezzo_mediano_nil_robusti,hl:'mediana '+f0(P.prezzo_mediano_nil_robusti)});
-  }
-  draw();RD.push(draw);
-  table('tab-prezzi',['Epoca pi&ugrave; frequente','Quartieri','Prezzo mediano (&euro;/m&sup2;)','Da &ndash; a'],P.per_epoca_dominante.map(function(g){return [eraName(g.epoca),g.n,f0(g.prezzo_mediano),f0(g.min)+' &ndash; '+f0(g.max)]}));
-  setH('prezzi-avviso','<b>Un confronto, non una prova.</b> I palazzi antichi sono quasi tutti al centro, e il centro costa di pi&ugrave; per mille altri motivi (servizi, trasporti, uffici): il dato non dice che &laquo;l&rsquo;et&agrave; fa il prezzo&raquo;. I prezzi OMI sono stime per zona dell&rsquo;Agenzia delle Entrate, e le zone non coincidono con i quartieri (vedi il <a href="#metodo">metodo</a>). Epoche con 1&ndash;4 quartieri (1971&ndash;1980, 1981&ndash;1990) sono troppo poche per un giudizio.');
+  var W=width('ch-prezzi'),H=Math.min(400,Math.round(W*1.0)),m={l:44,r:12,t:16,b:40},pw=W-m.l-m.r,ph=H-m.t-m.b;
+  var pts=N.filter(function(o){return o.pr}),xm=80,y0=2000,y1=9000;
+  var X=function(v){return m.l+v/xm*pw},Y=function(v){return m.t+ph-(v-y0)/(y1-y0)*ph};
+  var s=svgOpen(W,H);
+  for(var v=2000;v<=9000;v+=1000){s+=L(m.l,Y(v),W-m.r,Y(v),v===y0?C.ink:C.grid,v===y0?1.5:1);if(v%2000===0)s+=T(m.l-6,Y(v)+4,f0(v),{a:'end',c:'m'})}
+  for(v=0;v<=xm;v+=20)s+=L(X(v),m.t,X(v),m.t+ph,C.grid)+T(X(v),m.t+ph+16,v+'%',{a:v===0?'start':v===xm?'end':'middle',c:'m'});
+  s+=T(m.l+4,m.t+10,'euro al metro quadro ↑',{c:'m'})+T(W-m.r,H-4,'palazzi costruiti prima del 1946 →',{a:'end',c:'m'});
+  pts.slice().sort(function(a,b){return (a.id===sel)-(b.id===sel)}).forEach(function(o){var sl=o.id===sel;
+    s+='<circle data-n="'+o.id+'" cx="'+r1(X(o.p46))+'" cy="'+r1(Y(o.pr))+'" r="'+(sl?8:6)+'" fill="'+ERA[o.d]+'" stroke="'+(sl?C.ink:'#fff')+'" stroke-width="'+(sl?3:1.5)+'"'+tip('<b>'+esc(o.n)+'</b><br>'+f1(o.p46)+' palazzi su 100 di prima del 1946<br>'+f0(o.pr)+' € al metro quadro')+'/>'});
+  var mx=X(MIL.p46),my=Y(MIL.pz);
+  s+='<circle cx="'+r1(mx)+'" cy="'+r1(my)+'" r="9" fill="'+C.mi+'" stroke="#fff" stroke-width="2.5"'+tip('<b>Milano</b><br>'+f1(MIL.p46)+' palazzi su 100 di prima del 1946<br>'+f0(MIL.pz)+' € al metro quadro, media dei quartieri pesata sulle case')+'/>';
+  var used=pts.map(function(o){return{x0:X(o.p46)-8,x1:X(o.p46)+8,y0:Y(o.pr)-8,y1:Y(o.pr)+8}});used.push({x0:mx-10,x1:mx+10,y0:my-10,y1:my+10});
+  function libero(r){if(r.x0<m.l-2||r.x1>W-2||r.y0<m.t-12||r.y1>m.t+ph)return false;return !used.some(function(u){return u.x1>r.x0&&u.x0<r.x1&&u.y1>r.y0&&u.y0<r.y1})}
+  var byP=pts.slice().sort(function(a,b){return b.pr-a.pr}),byO=pts.slice().sort(function(a,b){return b.p46-a.p46}),byN=pts.slice().sort(function(a,b){return b.p80-a.p80});
+  var want=[{t:'Milano',x:mx,y:my,first:1}];
+  var vic=Math.abs(X(byP[0].p46)-X(byP[1].p46))<14&&Math.abs(Y(byP[0].pr)-Y(byP[1].pr))<14;
+  if(vic)want.push({t:byP[0].sn+' e '+byP[1].sn,x:X(byP[0].p46),y:Y(byP[0].pr),o:byP[0]});
+  [byP[0],byP[1],byO[0],byO[1],byN[0],byP[byP.length-1]].forEach(function(o,i){if(vic&&i<2)return;if(want.every(function(w){return w.o!==o}))want.push({t:o.sn,x:X(o.p46),y:Y(o.pr),o:o})});
+  if(sel&&BY[sel].pr&&want.every(function(w){return w.o!==BY[sel]}))want.push({t:BY[sel].sn,x:X(BY[sel].p46),y:Y(BY[sel].pr),o:BY[sel]});
+  want.forEach(function(l){
+    var w=tw(l.t,13,true),done=false;
+    for(var lv=0;lv<8&&!done;lv++)[1,-1].forEach(function(sd){if(done)return;
+      var y=l.y-(lv===0?-4:12+lv*16),x0=sd>0?l.x+11:l.x-11-w,r={x0:x0-2,x1:x0+w+2,y0:y-12,y1:y+5};
+      if(libero(r)){done=true;used.push(r);if(lv>0)s+=L(l.x,l.y-6,sd>0?x0-2:x0+w+2,y-4,C.ink2,1);
+        s+=T(x0,y,esc(l.t),{c:'halo',st:'font-size:13px'+(l.first?';fill:'+C.mi:'')})}});
+  });
+  $('ch-prezzi').innerHTML=s+'</svg>';
+  var cnt=[0,0,0,0,0,0,0,0,0];pts.forEach(function(o){cnt[o.d]++});
+  var eu=[];cnt.forEach(function(n,i){if(n)eu.push(i)});
+  $('lg-prezzi').innerHTML=eu.map(function(i){return '<span><i class="dot" style="background:'+ERA[i]+'"></i>'+ENAME[i]+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i class="dot" style="background:'+C.mi+'"></i>Milano</span>';
+  var P=D.prezzi.per_epoca_dominante;
+  $('t-prezzi').textContent='Dove domina il palazzo di prima del 1919 il prezzo mediano è '+f0(P[0].prezzo_mediano)+' € al metro quadro; dove domina quello degli anni Sessanta, '+f0(P[3].prezzo_mediano);
+  $('s-prezzi').textContent='Ogni punto è un quartiere, nel colore dell’epoca più frequente dei suoi palazzi (come sopra; il numero accanto è quanti quartieri). Più a destra, più palazzi antichi; più in alto, più si paga.';
+  $('nn-prezzi').innerHTML='È un confronto, non una causa: i palazzi antichi sono quasi tutti vicino al centro, e il centro costa di più per mille altri motivi. Il prezzo non dice quanto vale il palazzo, ma la zona. Il punto rosso è Milano. Il quartiere scelto ha il bordo nero.';
 }
 
-/* ---------- limiti ---------- */
+/* ---------- 6. classe energetica ---------- */
+function energia(){
+  var W=width('ch-energia'),B=EN.bande.map(function(s){return s.replace('-','–')}),K=EN.classi,M=EN.conteggi,lw=Math.min(112,Math.max(88,Math.floor(W*.3))),cw=Math.floor((W-lw)/7),hh=28,rh=44,H=hh+B.length*rh+4;
+  var s=svgOpen(W,H);
+  K.forEach(function(k,j){s+=T(lw+j*cw+cw/2,18,k,{a:'middle',c:'b'})});
+  s+=T(1,18,'epoca',{c:'m'});
+  B.forEach(function(b,i){
+    var tot=M[i].reduce(function(a,c){return a+c},0),y=hh+i*rh;
+    s+=T(1,y+19,b,{c:'k'})+T(1,y+35,f0(tot)+' certificati',{c:'m'});
+    M[i].forEach(function(n,j){var p=n/tot*100,al=Math.max(.05,Math.min(1,p/60)),tx=al>.55?'#fff':'#0b0d12';
+      var t='<b>'+b+'</b>, classe '+K[j]+'<br>'+f1(p)+' certificati su 100 ('+f0(n)+')';
+      s+='<g'+tip(t)+'><rect x="'+(lw+j*cw+1)+'" y="'+(y+2)+'" width="'+(cw-2)+'" height="'+(rh-4)+'" fill="rgba(0,114,188,'+al.toFixed(2)+')"/>'+T(lw+j*cw+cw/2,y+rh/2+4,f0(p),{a:'middle',st:'font-size:13px;font-weight:700;pointer-events:none;fill:'+tx})+'</g>'});
+  });
+  $('ch-energia').innerHTML=s+'</svg>';
+  var tt=function(i){return M[i].reduce(function(a,c){return a+c},0)},a=function(i){return M[i][0]/tt(i)*100};
+  $('t-energia').textContent='Nelle case costruite dopo il 2006 '+f0(a(6))+' certificati su 100 sono in classe A; in quelle del 1961–1976, '+f0(a(3));
+  $('s-energia').textContent='Ogni riga è un’epoca di costruzione, ogni colonna una classe, da A (consuma poco) a G (consuma molto). Il numero è quanti certificati su 100 di quell’epoca stanno in quella classe: più è scuro, più sono.';
+  $('nn-energia').innerHTML='In tutto, '+f0(EN.quota_FG_pct)+' certificati su 100 sono in classe F o G. Il certificato si fa quando una casa si vende, si affitta, si costruisce o si ristruttura: non sono tutte le case di Milano, e non sappiamo di quale quartiere sono (per questo qui non c’è la mappa). Una casa antica in classe A è di solito una casa rifatta: il certificato misura com’è oggi, non quando è nata.';
+}
+
+/* ---------- testi in fondo ---------- */
 function limiti(){
-  var K=D.controlli,C=D.citta,S=K.sensibilita_area,c1=K.censimento_2001,e1=c1.per_epoca_1;
-  var pre01=e1[0]+e1[1],pre11=C.per_epoca[0]+C.per_epoca[1];
+  var K=D.controlli,C0=D.citta;
   var L=[
-   '<b>Il dato è del 2011.</b> Sono passati quindici anni. Nei dati per sezione del censimento 2021 (permanente) non c’è l’epoca di costruzione: contano '+f0(K.censimento_2021.edifici_residenziali)+' edifici residenziali, contro i '+f0(C.edifici)+' del 2011, ma con un metodo diverso (il censimento permanente usa registri e campioni), quindi la differenza ('+sg(K.censimento_2021.edifici_residenziali-C.edifici)+') non è un conteggio di edifici nuovi. Gli edifici costruiti dopo il 2011 sono nella sezione “Dopo il 2011” solo come abitazioni dei permessi.',
-   '<b>Si contano edifici, non abitazioni.</b> Per i quartieri abbiamo solo il numero di edifici per epoca: un condominio da 100 appartamenti pesa come una villetta. Le abitazioni per epoca esistono per i 9 municipi (2011) e per i quartieri solo nel 1991 (abitazioni occupate, con altre epoche): le usiamo solo come controllo (i due ordinamenti, edifici 2011 e abitazioni 1991 con costruzione prima del 1946, vanno d’accordo: Spearman '+sg(K.spearman_edifici_2011_vs_abitazioni_1991_pre46[0],2)+' su '+K.spearman_edifici_2011_vs_abitazioni_1991_pre46[1]+' quartieri).',
-   '<b>L’epoca è quella scritta nel censimento.</b> Non l’abbiamo confrontata con altre fonti. Un palazzo ricostruito o ristrutturato a fondo può essere registrato con l’epoca originale (nostra lettura, non verificata); i dati non dicono quando sono state fatte le case di oggi.',
-   '<b>Solo edifici ad uso residenziale.</b> Uffici, capannoni, scuole, ospedali non ci sono. '+f0(C.abitazioni_non_in_edifici_residenziali)+' abitazioni occupate sono in edifici non residenziali e sono escluse dalle quote del Comune.',
-   '<b>Quartieri con pochi edifici.</b> '+D.meta.nil_con_pochi_edifici+' quartieri su 88 hanno meno di 100 edifici residenziali (parchi, aree industriali o appena nate): le loro quote ballano, e sono in grigio sulla mappa. Le classifiche usano solo i '+D.meta.nil_in_classifica+' quartieri con almeno 200 edifici.',
-   '<b>Dalla sezione al quartiere.</b> Le sezioni di censimento sono assegnate al quartiere con cui hanno più area in comune; qualche sezione a cavallo di due quartieri finisce tutta in uno. Prova: dividendo ogni sezione per quote di area, la quota di un quartiere cambia al massimo di '+nf(S.differenza_max_massima_punti,1)+' punti e nessun quartiere cambia epoca più frequente.',
-   '<b>Prezzi e zone OMI.</b> Le zone dell’Agenzia delle Entrate (42) non coincidono con i quartieri: il prezzo di un quartiere è una media dei prezzi delle zone che lo coprono, pesata sulle abitazioni occupate delle sezioni. Per 3 quartieri (Chiaravalle, Quintosole, Ronchetto delle Rane) non c’è nessuna zona OMI, per uno (Parco delle Abbazie) solo il 40%. I valori sono stime (centro tra minimo e massimo), non prezzi di vendite.',
-   '<b>Classe energetica, altezze, volumi.</b> Non ci sono qui: la classe energetica non è stata scaricata (vedi sopra); il database topografico del Comune (usato in <a href="../costruzioni/">Dove si costruisce</a>) ha altezze e impronte ma non l’anno di costruzione, e i suoi edifici non si collegano a quelli del censimento. Non si può misurare l’età con la loro altezza.',
-   '<b>Coerenza con il censimento 2001.</b> Gli edifici costruiti prima del 1946 erano '+f0(pre01)+' nel 2001 e sono '+f0(pre11)+' nel 2011 ('+sg(pre11-pre01)+'): la direzione è quella attesa (alcuni demoliti), ma non sappiamo la causa; le epoche del 2001 hanno tagli diversi e non si confrontano una per una.'
+   '<b>L’età dei palazzi è del 2011.</b> Sono passati quindici anni. Nei dati per sezione del censimento 2021 l’epoca di costruzione non c’è, e non abbiamo un altro dato aperto, per ogni edificio, con l’anno di costruzione. Gli edifici costruiti dopo il 2011 sono nel capitolo «Dopo il 2011» solo come case dei permessi.',
+   '<b>Si contano palazzi, non case.</b> Per i quartieri abbiamo solo il numero di palazzi per epoca: un condominio da 100 appartamenti pesa come una villetta. Le case per epoca ci sono per tutta Milano e per i nove municipi, non per i quartieri.',
+   '<b>L’epoca è quella scritta nel censimento.</b> Un palazzo ricostruito o ristrutturato a fondo può essere registrato con l’epoca originale (nostra lettura, non verificata).',
+   '<b>Solo palazzi ad uso residenziale.</b> Uffici, capannoni, scuole e ospedali non ci sono. '+f0(C0.abitazioni_non_in_edifici_residenziali)+' case occupate sono in edifici non residenziali e restano fuori dalle quote.',
+   '<b>Quartieri con pochi palazzi.</b> '+D.meta.nil_con_pochi_edifici+' quartieri su 88 hanno meno di 100 palazzi residenziali (parchi, aree industriali o nate da poco): le loro quote ballano e sono in grigio sulla mappa.',
+   '<b>Dalla sezione al quartiere.</b> Ogni sezione di censimento è assegnata al quartiere con cui ha più area in comune; qualche sezione a cavallo di due quartieri finisce tutta in uno. Dividendo le sezioni in proporzione all’area, la quota di un quartiere cambia al massimo di '+f1(K.sensibilita_area.differenza_max_massima_punti)+' punti.',
+   '<b>Case nuove.</b> I permessi contano le case dei nuovi palazzi, comprese quelle costruite dopo una demolizione; le case demolite non sono tolte. Non dicono quante case si siano davvero aggiunte.',
+   '<b>Prezzi.</b> Le zone dell’Agenzia delle Entrate (42) non coincidono con i quartieri: il prezzo di un quartiere è una media dei prezzi delle zone che lo coprono. Per 4 quartieri non c’è prezzo o ne copre meno dell’80%. Sono stime tra minimo e massimo, non prezzi di vendite. Vecchio e caro stanno insieme perché stanno insieme vicino al centro: è un confronto, non una causa.',
+   '<b>Classe energetica.</b> I certificati ('+f0(EN.usati)+', dal '+EN.anni_inserimento[0]+') si fanno quando una casa si vende, si affitta, si costruisce o si ristruttura: non coprono tutte le case, e le case nuove sono più presenti perché hanno bisogno di un certificato. Non c’è il quartiere, solo la città; le epoche sono quelle del certificato, non quelle del censimento. '+f0(EN.scartati_senza_epoca_o_classe)+' certificati senza epoca o classe sono esclusi.',
+   '<b>Coerenza con il censimento 2001.</b> I palazzi costruiti prima del 1946 erano '+f0(K.censimento_2001.per_epoca_1[0]+K.censimento_2001.per_epoca_1[1])+' nel 2001 e sono '+f0(C0.per_epoca[0]+C0.per_epoca[1])+' nel 2011: la direzione è quella attesa (alcuni demoliti), ma non sappiamo la causa.'
   ];
-  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
-
-/* ---------- metodo ---------- */
 function metodo(){
-  var K=D.controlli,L=[
-   '<b>Che cosa è un palazzo qui.</b> Un edificio ad uso residenziale del censimento ISTAT 2011 (variabile E3), assegnato a una delle nove epoche (E8–E16: prima del 1919, 1919–1945, 1946–1960, 1961–1970, 1971–1980, 1981–1990, 1991–2000, 2001–2005, dopo il 2005). Le nove epoche sommano a E3 in tutte le 6.017 sezioni con dati.',
-   '<b>Quartieri.</b> I 88 NIL; ogni sezione 2011 va al NIL con cui ha più area in comune (stessa assegnazione della pagina <a href="../censimenti/">I censimenti</a>; nelle sezioni con edifici l’area dentro il NIL scelto è almeno il '+Math.round(100*K.purezza_nil_min_sezioni_con_edifici)+'%). I confini sulla mappa sono semplificati (circa 4 metri).',
-   '<b>Epoca più frequente.</b> L’epoca con la quota più alta di edifici nel quartiere; <b>“metà degli edifici entro il…”</b> è l’epoca in cui la quota cumulata supera il 50%. Le quote “prima del 1946”, “1946–1970” e “dopo il 1980” sommano le epoche 1+2, 3+4 e 6+7+8+9 (le epoche 1981–1990 e successive).',
-   '<b>Abitazioni.</b> Per epoca e municipio: Comune di Milano, ds1456 (somma dei 9 municipi = '+f0(D.citta.abitazioni_occupate)+' abitazioni occupate, più '+f0(D.citta.abitazioni_non_in_edifici_residenziali)+' in edifici non residenziali: il totale coincide a meno di 10 unità con le abitazioni occupate delle sezioni). Per quartiere, 1991: abitazioni occupate per epoca (ISTAT, A11–A16) assegnate ai quartieri per sovrapposizione.',
-   '<b>Prezzi.</b> Quotazioni OMI di vendita delle abitazioni civili, stato prevalente, centro tra minimo e massimo, 1° semestre 2026 (42 zone, perimetri come nella pagina <a href="../prezzi-case/">Prezzi delle case</a>). Ogni sezione 2011 prende la media dei prezzi delle zone che la coprono, pesata sull’area; il quartiere prende la media delle sue sezioni pesata sulle abitazioni occupate. Spearman: correlazione tra le posizioni in classifica, intervalli di confidenza al 95% con 5.000 ricampionamenti. Il confronto usa i '+D.prezzi.n_nil+' quartieri con almeno 100 edifici e prezzo su almeno l’80% delle abitazioni.',
-   '<b>Dopo il 2011.</b> Abitazioni dei nuovi fabbricati 2014–2024 per quartiere: pagina <a href="../costruzioni/">Dove si costruisce</a> (permessi di costruire e SCIA del Comune). L’indice “ogni 100 abitazioni del 2011” divide per le abitazioni occupate del censimento 2011.',
-   '<b>Pagina costruita da un programma</b> che legge le tabelle già pulite e scrive i file di <code>data/</code>; controlla che i totali tornino (42.980 edifici, 604.507 abitazioni occupate, 576.777 nel 1991, 26.174 abitazioni nuove). Ogni numero ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a> (campo <code>origine</code>). Dati del '+esc(D.meta.data_dati)+'.'
+  var L=[
+   '<b>Che cosa è un palazzo qui.</b> Un edificio ad uso residenziale del censimento ISTAT 2011, assegnato a una delle nove epoche: prima del 1919, 1919–1945, 1946–1960, 1961–1970, 1971–1980, 1981–1990, 1991–2000, 2001–2005, dopo il 2005. Le nove epoche sommano al totale in tutte le 6.017 sezioni con dati: '+f0(D.citta.edifici)+' palazzi.',
+   '<b>Le 100 casette.</b> Ogni casetta è un palazzo su 100: i palazzi di ogni epoca divisi per il totale, arrotondati in modo che la somma faccia 100. Le case occupate per epoca (al tocco e nella nota) sono del Comune di Milano (somma dei nove municipi: '+f0(D.citta.abitazioni_occupate)+'). Sull’asse, la larghezza di un’epoca è la sua durata in anni; per «prima del 1919» non si conosce l’inizio e lo spazio è indicativo.',
+   '<b>Quanti palazzi all’anno.</b> Palazzi dell’epoca divisi per gli anni dell’epoca (27, 15, 10, 10, 10, 10, 5 e 6). L’epoca «dopo il 2005» arriva fino al 2011, anno del censimento.',
+   '<b>Mappa.</b> Quota dei palazzi di prima del 1946 (prima del 1919 più 1919–1945). I quattro colori dividono i quartieri con almeno 100 palazzi in gruppi di circa 18, con tagli sui numeri interi.',
+   '<b>Case nuove.</b> Case dei nuovi fabbricati 2014–2024 per quartiere (permessi di costruire e SCIA, pagina «Dove si costruisce»), divise per le case occupate del censimento 2011. Solo quartieri con almeno 1.000 case.',
+   '<b>Prezzi.</b> Quotazioni di vendita delle abitazioni civili, stato prevalente, centro tra minimo e massimo, primo semestre 2026. Ogni sezione prende la media delle zone che la coprono (pesata sull’area), il quartiere la media delle sue sezioni (pesata sulle case). Il punto rosso è la media dei quartieri, pesata sulle case. Il confronto usa i '+D.prezzi.n_nil+' quartieri con almeno 100 palazzi e prezzo noto per almeno l’80% delle case.',
+   '<b>Classe energetica.</b> Certificati di Milano con uso residenziale, senza doppioni. Le epoche scritte come anno singolo sono messe nella fascia che le contiene (prima del 1930, 1930–1945, 1946–1960, 1961–1976, 1977–1992, 1993–2006, dopo il 2006); le classi A1–A4 sono unite in A.',
+   '<b>Pagina costruita da un programma</b> che legge le tabelle già pulite e controlla che i totali tornino. Dati del '+esc(D.meta.data_dati)+'; certificati del 7 novembre 2026.'
   ];
-  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 })();
 </script>
