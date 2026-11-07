@@ -3023,3 +3023,4 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-07 — Quanto è divisa Milano rifatta e pubblicata (ritocco di Davide: spiegata meglio con l'esempio dei 100 stranieri, mappe «com'è oggi / come sarebbe», tolta una mappa dei redditi).
 - 2026-11-07 — Oltre il reddito rifatta e pubblicata (ritocco di Davide: il grafico «più si vota, meno morti» per primo).
 - 2026-11-07 — Scuole di domani rifatta e pubblicata (ritocco di Davide: la prova sul passato tolta dai grafici e messa nelle note).
+- 2026-11-07 — Redditi rifatta e pubblicata (ritocchi di Davide: le città 2006-2024 come linee in euro di oggi con Milano rossa, la scala dei redditi con i gradini scritti a parole e persone/soldi spiegati). I confini dei CAP sono ricostruiti, detto in pagina.
