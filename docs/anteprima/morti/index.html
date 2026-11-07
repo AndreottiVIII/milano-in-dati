@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="it"><head><base href="../../morti/"><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Morti giorno per giorno</title>
+<style>
+
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --it:#0b0d12;     /* Italia */
+  --hint:#0072BC;   /* comuni intorno: blu M4 */
+  --tur:#F58220;    /* turisti: arancio della home */
+  --ind:#4b5563;--umi:#00A651;--car:#0072BC;--vpm:#FFD500;--alt:#7B3FA0; /* tipi di rifiuto: grigio, verde M2, blu M4, giallo M3, viola M5 */
+  --pos:#F58220;--neg:#0072BC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* highlights */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* sections */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+
+.sx{display:flex;align-items:center;gap:8px;margin:.4em 0 .2em}
+.sx input[type=range]{flex:1;min-height:48px;accent-color:#0b0d12}
+.sx output{font-size:1.6rem;font-weight:800;min-width:3.2ch;text-align:right}
+.pick{display:flex;gap:8px;align-items:center;margin:.8em 0 .6em;flex-wrap:wrap}
+.pick button{font:inherit;font-size:1.3rem;line-height:1;min-width:48px;min-height:48px;border:2px solid var(--ink);background:#fff;color:var(--ink);border-radius:6px;cursor:pointer}
+.pick button:disabled{opacity:.35;cursor:default}
+.pick input{font:inherit;font-size:1.05rem;min-height:48px;padding:6px 10px;border:2px solid var(--ink);border-radius:6px;background:#fff;color:var(--ink);flex:1 1 170px;max-width:240px}
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:.6em 0}
+.tri>div{border-top:6px solid var(--c);background:var(--soft);padding:8px 10px 10px}
+.tri span{display:block;font-size:.85rem;color:var(--ink2);line-height:1.25}
+.tri b{display:block;font-size:2rem;line-height:1.05;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.gd{font-size:1.15rem;font-weight:800;margin:.4em 0 0}
+.gfr{margin:.5em 0;font-size:.95rem}
+.avv{font-size:.9rem;color:var(--ink2)}
+.sc{overflow-x:auto}
+</style><script src="../menu.js" defer></script></head><body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../morti/" style="color:#000">Pagina attuale</a></div><main>
+
+<h1>Morti giorno per giorno, a Milano</h1>
+<p class="lead">Quanti milanesi muoiono ogni giorno e quando sono più o meno del normale: caldo, inverni, Covid. Dal 2011 al giugno 2026.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Tutti i numeri: ISTAT, decessi giornalieri per comune di residenza (CC BY 4.0). Si contano i morti residenti a Milano, anche se sono morti altrove.</p>
+
+<!-- ============ 1 ============ -->
+<h2 id="anni">Anno per anno, mese per mese</h2>
+<div class="fig">
+  <h3 id="t-tab"></h3>
+  <p class="sub">Ogni quadretto è un mese: quanti morti ci sono stati rispetto al normale di quel mese. Arancio: più morti del normale. Verde acqua: meno. Più il colore è scuro, più la differenza è grande.</p>
+  <div class="lg" id="lg-tab"></div>
+  <div class="ch" id="ch-tab" role="img" aria-label="Tabella a colori: morti di ogni mese dal 2014 al 2026 rispetto al normale"></div>
+  <p class="note" id="nt-tab"></p>
+  <p class="src">Fonte: ISTAT (CC BY 4.0), elaborazione Milano in dati. Normale = la media dello stesso giorno nei cinque anni prima, senza il 2020 e il 2021. Per il 2011, il 2012 e il 2013 il normale non si può calcolare. La storia del Covid è nella pagina <a href="../anno-covid/">L’anno del Covid</a>.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-anni"></h3>
+  <p class="sub">Morti di residenti a Milano in ogni anno, dal 2011 al 2025. Come leggerlo: più la linea è alta, più morti. Il 2026 manca perché l’anno non è finito.</p>
+  <div class="ch" id="ch-anni" role="img" aria-label="Linea: morti di ogni anno a Milano, 2011-2025"></div>
+  <p class="src">Fonte: ISTAT (CC BY 4.0). Per capire il 2020 vedi <a href="../anno-covid/">L’anno del Covid</a>; per quanto si vive oggi, <a href="../speranza-vita/">Speranza di vita</a>.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="caldo">Il caldo</h2>
+<div class="fig">
+  <h3 id="t-caldo"></h3>
+  <p class="sub">Ogni punto è un giorno di giugno, luglio o agosto dal 2014 al 2025. A destra i giorni più caldi, in alto quelli con più morti del normale. In arancio i giorni dentro un’ondata di caldo. Tocca un punto per leggerlo.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--axis)"></i>giorno qualsiasi</span><span><i class="dot" style="background:var(--tur)"></i>dentro un’ondata di caldo</span><span><i class="ring"></i>giorno con il nome</span></div>
+  <div class="ch" id="ch-caldo" role="img" aria-label="Grafico a punti: massima del giorno e morti in più o in meno del normale, estati 2014-2025"></div>
+  <table class="kt" id="tab-caldo"></table>
+  <p class="note">Due misure sullo stesso grafico non dicono che una causi l’altra. Ogni giorno ha circa 39 morti e il caso conta: un punto solo non dimostra niente, conta la nuvola. Il caldo da solo non spiega tutto: contano anche la durata, le notti afose e l’età di chi vive in città.</p>
+  <p class="src">Fonte: ISTAT (CC BY 4.0) per i morti; temperature: Milano Brera, dalla pagina <a href="../temperature/">Temperature</a>. Un’ondata di caldo è per noi almeno 3 giorni di fila con 33 °C o più di massima.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-estati"></h3>
+  <p class="sub">Estate (giugno-agosto) di ogni anno: quanti morti in più o in meno del normale, e quanti giorni con almeno 33 °C. Come leggerlo: a destra l’arancio è più morti del normale, a sinistra il verde acqua è meno.</p>
+  <div class="ch" id="ch-estati" role="img" aria-label="Barre: morti delle estati 2014-2025 rispetto al normale, con i giorni caldi"></div>
+  <p class="src">Fonte: ISTAT (CC BY 4.0), temperature di Brera. Il 2026 non c’è: i morti arrivano al 30 giugno, le temperature a ottobre. Le estati del 2020 e 2021 sono confrontate con un normale senza quegli anni.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="chi">Chi muore</h2>
+<div class="fig">
+  <h3 id="t-eta"></h3>
+  <p class="sub">Morti di ogni anno per fascia d’età: uomini a sinistra, donne a destra. Muovi il cursore per cambiare anno. Le barre restano nella stessa scala, così si vedono crescere e calare.</p>
+  <div class="sx"><input type="range" id="rg-eta" min="2011" max="2025" step="1" value="2025" aria-label="Anno"><output id="o-eta" for="rg-eta">2025</output></div>
+  <div class="ch" id="ch-eta" role="img" aria-label="Piramide: morti per fascia d’età, uomini a sinistra e donne a destra, anno a scelta"></div>
+  <p class="note" id="nt-eta"></p>
+  <p class="src">Fonte: ISTAT (CC BY 4.0), residenti a Milano. Le donne sono più dei maschi tra i morti perché tra gli anziani sono più numerose. Per quanto si vive in media: <a href="../speranza-vita/">Speranza di vita</a>.</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="giorno">Un giorno a scelta</h2>
+<p class="sub" style="font-size:.9rem;color:var(--mut);margin:.3em 0 0">Scegli una data: quanti morti ci sono stati quel giorno, rispetto al normale per quella data e agli stessi giorni degli altri anni.</p>
+<div class="pick">
+  <button type="button" id="u-prec" aria-label="Giorno prima">‹</button>
+  <input type="date" id="u-data" aria-label="Data">
+  <button type="button" id="u-succ" aria-label="Giorno dopo">›</button>
+</div>
+<div id="u-scheda" aria-live="polite"></div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Normale</dt><dd>Quanti morti ci si aspetta in un giorno, in un mese o in un anno. Per ogni giorno è la media dello stesso giorno dei cinque anni prima, senza il 2020 e il 2021, un po’ levigata sui giorni vicini.</dd>
+<dt>Morti in più</dt><dd>La differenza tra i morti contati e il normale. Non dice di cosa si è morti.</dd>
+<dt>Residenti</dt><dd>Si contano le persone che abitano a Milano, anche se muoiono in un altro comune. Chi viene da fuori e muore in un ospedale di Milano non è nel conto.</dd>
+<dt>Ondata di caldo</dt><dd>Per noi: almeno 3 giorni di fila con una massima di 33 °C o più a Brera. Nei grafici si guardano i giorni dell’ondata e i 3 giorni dopo.</dd>
+<dt>Massima</dt><dd>La temperatura più alta della giornata.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>File con il punto per i decimali. Sono totali per Milano, calcolati da noi: le tabelle dei singoli comuni non sono ripubblicate.</p>
+<ul>
+<li><a href="data/tabella_mesi_anni.json">Mese per mese</a>, dal 2011: morti, normale, differenza, ondate di caldo</li>
+<li><a href="data/eta_sesso_anno.json">Morti per anno, fascia d’età e sesso</a></li>
+<li><a href="data/caldo_giorni_estate.json">Giorni d’estate</a>: massima, morti e normale, 2014-2025</li>
+<li><a href="data/milano_giorno.csv">Giorno per giorno</a>, dal 2014: morti, normale, temperature</li>
+<li><a href="data/annuale.csv">Anno per anno</a>, con le altre aree</li>
+<li><a href="data/estati_confronto.csv">Le estati a confronto</a></li>
+<li><a href="data/ondate_caldo.csv">Le ondate di caldo</a>, una per una</li>
+<li><a href="data/milano_composizione_per_anno.csv">Chi muore, anno per anno</a>: quota di over 85</li>
+</ul></div></details>
+</div>
+
+<footer>
+<p><b>Fonte e licenza.</b> ISTAT, «Decessi e cause di morte: dati giornalieri comunali» (decessi comunali giornalieri provvisori), release del 25 agosto 2026, dati dal 1 gennaio 2011 al 30 giugno 2026, scaricati da <a href="https://www.istat.it/it/archivio/240401">istat.it</a> il 1 novembre 2026. Licenza Creative Commons Attribuzione 4.0 (<a href="https://www.istat.it/note-legali/">note legali ISTAT</a>). Qui sono pubblicati solo totali per Milano, Lombardia e Italia (per giorno o per settimana), calcolati da noi: le tabelle comunali di ISTAT non sono ripubblicate. Abbiamo anche rielaborato i dati (normale, differenze, ondate): sono «elaborazione Milano in dati», non cifre ufficiali ISTAT. Temperature: Milano Brera (vedi la pagina <a href="../temperature/">Temperature</a>). Popolazione per età: ISTAT, demo.istat.it (al 1 gennaio, 2019-2026).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),ink:cv('--ink'),ink2:cv('--ink2'),mut:cv('--mut'),grid:cv('--grid'),axis:cv('--axis'),tur:cv('--tur'),
+  up:'#F58220',upD:'#7A2E00',dn:'#00A19A',men:'#0072BC',wom:'#F06EAA'};
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+var MI=['G','F','M','A','M','G','L','A','S','O','N','D'];
+var D={},RD=[];
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+grp(String(Math.abs(r)))}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function dlung(iso){return (+iso.slice(8,10))+' '+MESI[+iso.slice(5,7)-1]+' '+iso.slice(0,4)}
+function dbreve(iso){return (+iso.slice(8,10))+' '+MESI[+iso.slice(5,7)-1].slice(0,3)+' '+iso.slice(0,4)}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d=x1>=x0?
+    'M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z':
+    'M'+r1(r)+' '+r1(y)+'H'+r1(l+rr)+'Q'+r1(l)+' '+r1(y)+' '+r1(l)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(l)+' '+r1(y+h)+' '+r1(l+rr)+' '+r1(y+h)+'H'+r1(r)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+/* colore di un mese: verde acqua sotto il normale, arancio sopra, scuro quando è molto sopra */
+function hex(c){return[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)]}
+function mix(a,b,t){var A=hex(a),B=hex(b);return 'rgb('+A.map(function(v,i){return Math.round(v+(B[i]-v)*t)}).join(',')+')'}
+function scala(p){
+  if(p<0)return mix('#ffffff',C.dn,Math.min(1,-p/20));
+  if(p<=20)return mix('#ffffff',C.up,p/20);
+  return mix(C.up,C.upD,Math.min(1,(p-20)/90));
+}
+function scuro(p){return p>=45||p<=-60}
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getCSV(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){
+  var L=t.replace(/\r/g,'').split('\n').filter(Boolean),h=L[0].split(',');
+  return L.slice(1).map(function(l){var v=l.split(','),o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
+Promise.all([getJ(DATA+'tabella_mesi_anni.json'),getJ(DATA+'eta_sesso_anno.json'),getJ(DATA+'caldo_giorni_estate.json'),getJ(DATA+'milano_giorno.json'),
+  getJ(DATA+'annuale.json'),getCSV(DATA+'estati_confronto.csv'),getCSV(DATA+'milano_composizione_per_anno.csv'),getCSV(DATA+'ondate_caldo.csv')]).then(function(r){
+  D.mesi=r[0].mesi;D.eta=r[1];D.caldo=r[2];D.g=r[3];D.ann=r[4];D.est=r[5];D.comp=r[6];D.ond=r[7];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+function tutto(){
+  highlights();
+  draw(tabella);draw(anni);draw(caldo);draw(estati);
+  eta();giorno();limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()});etaDisegna();giornoDisegna()},150)});
+}
+
+/* ---------- in alto: i numeri ---------- */
+function ann(y){return D.ann.milano.filter(function(a){return a.anno===y})[0]}
+function highlights(){
+  var a20=ann(2020),altri=D.ann.milano.filter(function(a){return a.anno!==2020&&a.anno<=2025}).map(function(a){return a.morti});
+  var tutti=D.ann.morti_2011_2025,mn=tutti.slice().sort(function(a,b){return a.morti-b.morti})[0];
+  var oMax=D.ond.slice().sort(function(a,b){return +b.eccesso_B-+a.eccesso_B})[0];
+  var cl=last(D.caldo.classi);
+  var cm=D.comp.filter(function(c){return c.anno==='2025'})[0],c11=D.comp.filter(function(c){return c.anno==='2011'})[0];
+  var v=normaliGiorni();
+  var T_=[
+    {c:'#E30613',h:'t-tab',n:f0(a20.morti),u:'',p:'morti nel 2020: '+f0(a20.eccesso_B)+' in più del normale ('+sg0(a20.pct_B)+'%). Negli altri anni da '+f0(Math.min.apply(null,altri))+' a '+f0(Math.max.apply(null,altri))+'.'},
+    {c:'#FFD500',h:'t-anni',n:f0(mn.morti),u:'',p:'morti nel '+mn.anno+': il numero più basso dal 2011, anche se i più anziani sono di più.'},
+    {c:'#00A651',h:'t-caldo',n:sg0(+oMax.eccesso_B),u:'',p:'morti in più nell’ondata di caldo del '+(+oMax.inizio.slice(8,10))+'-'+dlung(oMax.fine).replace(/^\d+ /,'')+' ('+sg0(+oMax.pct_B)+'% sul normale).'},
+    {c:'#0072BC',h:'t-caldo',n:sg0((cl.rapporto-1)*100)+'%',u:'',p:'di morti nei '+cl.giorni+' giorni d’estate con più di 36 °C, rispetto al normale di quei giorni.'},
+    {c:'#7B3FA0',h:'t-eta',n:f1(+cm.quota_85p),u:'%',p:'dei morti del 2025 aveva 85 anni o più. Nel 2011 era il '+f1(+c11.quota_85p)+'%.'},
+    {c:'#F58220',h:'giorno',n:f0(v.media),u:'',p:'morti in un giorno normale. Nove giorni su dieci ne hanno da '+v.p5+' a '+v.p95+'.'}
+  ];
+  $('hl').innerHTML=T_.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+function normaliGiorni(){
+  var m=D.g.morti,out=[],y;
+  for(var i=0;i<m.length;i++){y=+addDays(D.g.inizio,i).slice(0,4);if(y!==2020&&y!==2021&&y<=2025)out.push(m[i])}
+  out.sort(function(a,b){return a-b});
+  var s=0;out.forEach(function(v){s+=v});
+  return{media:s/out.length,p5:out[Math.floor(out.length*0.05)],p95:out[Math.floor(out.length*0.95)]};
+}
+function addDays(iso,k){var d=new Date(Date.UTC(+iso.slice(0,4),+iso.slice(5,7)-1,+iso.slice(8,10))+k*864e5);return d.toISOString().slice(0,10)}
+function diffDays(a,b){return Math.round((Date.UTC(+b.slice(0,4),+b.slice(5,7)-1,+b.slice(8,10))-Date.UTC(+a.slice(0,4),+a.slice(5,7)-1,+a.slice(8,10)))/864e5)}
+
+/* ---------- 1. FIRMA: tabella mesi per anni ---------- */
+function tabella(){
+  var box=$('ch-tab'),W=width('ch-tab'),yrs=[],M={};
+  D.mesi.forEach(function(x){if(x.anno>=2014){M[x.anno+'-'+x.mese]=x;if(yrs.indexOf(x.anno)<0)yrs.push(x.anno)}});
+  var lw=38,tw_=50,gap=2,cw=(W-lw-tw_-6)/12,rh=Math.max(24,Math.min(30,Math.round(cw)+2)),top=24,H=top+yrs.length*rh+6;
+  var s=svgOpen(W,H);
+  MI.forEach(function(m,i){s+=T(lw+i*cw+cw/2,14,m,{a:'middle',c:'m',st:'font-weight:700'})});
+  s+=T(W-tw_/2,14,'anno',{a:'middle',c:'m',st:'font-weight:700'});
+  yrs.forEach(function(y,r){
+    var yy=top+r*rh,mo=0,no=0;
+    s+=T(0,yy+rh/2+4,y,{c:'b'});
+    for(var m=1;m<=12;m++){
+      var x=M[y+'-'+m],cx=lw+(m-1)*cw;
+      if(!x){s+='<rect x="'+r1(cx)+'" y="'+yy+'" width="'+r1(cw-gap)+'" height="'+(rh-gap)+'" fill="#fff" stroke="'+C.grid+'"/>';continue}
+      mo+=x.morti;no+=x.normale;
+      var cap='<b>'+MESI[m-1]+' '+y+'</b><br>Morti: <b>'+f0(x.morti)+'</b><br>Normale: '+f0(x.normale)+'<br>Differenza: <b>'+sg1(x.pct)+'%</b>';
+      if(x.ondate)x.ondate.forEach(function(o){cap+='<br>Ondata di caldo '+dbreve(o.inizio).replace(/ \d{4}$/,'')+' - '+dbreve(o.fine).replace(/ \d{4}$/,'')+': '+sg0(o.eccesso)+' morti rispetto al normale'});
+      s+='<rect x="'+r1(cx)+'" y="'+yy+'" width="'+r1(cw-gap)+'" height="'+(rh-gap)+'" rx="3" fill="'+scala(x.pct)+'"'+tip(cap)+'/>';
+      if(x.pct>=40)s+=T(cx+(cw-gap)/2,yy+rh/2+3,Math.round(x.pct),{a:'middle',c:'w'});
+      if(x.ondate&&x.ondate.some(function(o){return o.eccesso>=50}))s+='<circle cx="'+r1(cx+(cw-gap)/2)+'" cy="'+r1(yy+rh-gap-6)+'" r="3.3" fill="'+C.ink+'" stroke="#fff" stroke-width="1" pointer-events="none"/>';
+    }
+    var pa=(mo/no-1)*100,lab=y===2026?'6 mesi':'';
+    s+='<rect x="'+r1(W-tw_)+'" y="'+yy+'" width="'+(tw_-4)+'" height="'+(rh-gap)+'" rx="3" fill="'+scala(pa)+'"'+tip('<b>'+(y===2026?'gennaio-giugno 2026':'anno '+y)+'</b><br>Morti: '+f0(mo)+'<br>Normale: '+f0(no)+'<br>Differenza: <b>'+sg1(pa)+'%</b>')+'/>';
+    s+=T(W-tw_+(tw_-4)/2,yy+rh/2+4,sg0(pa)+'%',{a:'middle',c:scuro(pa)?'w':'k'});
+  });
+  // bordo nero: Covid (marzo-maggio e ottobre-dicembre 2020)
+  var r20=yrs.indexOf(2020);
+  if(r20>=0){
+    function box_(m0,m1){return '<rect x="'+r1(lw+(m0-1)*cw-1)+'" y="'+(top+r20*rh-1)+'" width="'+r1((m1-m0+1)*cw-gap+2)+'" height="'+(rh-gap+2)+'" rx="4" fill="none" stroke="'+C.ink+'" stroke-width="2.5" pointer-events="none"/>'}
+    s+=box_(3,5)+box_(10,12);
+  }
+  box.innerHTML=s+'</svg>';
+  // legenda
+  var sc=[[-20,'−20%'],[0,'0'],[20,'+20%'],[60,'+60%'],[120,'+120%']];
+  $('lg-tab').innerHTML=sc.map(function(p){return '<span>'+sw(scala(p[0])).replace('<i ','<i style="border:1px solid #d5d8de;" data-x ').replace('style="border:1px solid #d5d8de;" data-x style="','style="border:1px solid #d5d8de;')+p[1]+'</span>'}).join('')+
+    '<span><i style="background:#fff;border:2.5px solid '+C.ink+'"></i>Covid, 2020</span><span><i class="dot" style="background:'+C.ink+'"></i>ondata di caldo con almeno 50 morti in più</span>';
+  var c=Object.keys(M).map(function(k){return M[k]}),n=c.length,den=c.filter(function(x){return Math.abs(x.pct)<=10}).length;
+  var top2=c.slice().sort(function(a,b){return b.pct-a.pct}).slice(0,2);
+  $('t-tab').textContent='Su '+n+' mesi, '+den+' restano entro il 10% dal normale: gli altri '+(n-den)+' sono soprattutto il Covid del 2020 e il caldo del 2015 e del 2022';
+  var j=M['2015-7'],l=M['2022-7'],ge=M['2017-1'];
+  $('nt-tab').innerHTML='Il mese più alto è aprile 2020 ('+sg0(top2[0].pct)+'%), poi marzo 2020 ('+sg0(top2[1].pct)+'%). Senza Covid i mesi più alti sono luglio 2015 ('+sg0(j.pct)+'%), gennaio 2017 ('+sg0(ge.pct)+'%) e luglio 2022 ('+sg0(l.pct)+'%). Negli ultimi tre anni quasi tutti i mesi sono sotto il normale. Gli ultimi due mesi del 2026 possono salire: i dati più recenti si completano con ritardo (vedi i limiti dei dati).';
+}
+
+/* ---------- 2. anni: una linea ---------- */
+function anni(){
+  var box=$('ch-anni'),W=width('ch-anni'),H=280,m={l:42,r:14,t:26,b:24},A=D.ann.morti_2011_2025,n=A.length;
+  var pw=W-m.l-m.r,ph=H-m.t-m.b,lo=13000,hi=19000,X=function(i){return m.l+i*pw/(n-1)},Y=function(v){return m.t+ph-(v-lo)/(hi-lo)*ph};
+  var s=svgOpen(W,H);
+  [13000,15000,17000,19000].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,f0(v),{a:'end',c:'m'})});
+  s+=L(m.l,m.t+ph,W-m.r,m.t+ph,C.axis);
+  [2011,2015,2020,2025].forEach(function(y){var i=y-2011;s+=T(X(i),m.t+ph+17,y,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  var d='M'+A.map(function(a,i){return r1(X(i))+' '+r1(Y(a.morti))}).join('L');
+  s+='<path d="'+d+'" fill="none" stroke="'+C.ink+'" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+  A.forEach(function(a,i){s+='<circle cx="'+r1(X(i))+'" cy="'+r1(Y(a.morti))+'" r="3.2" fill="'+(a.anno===2020?C.mi:C.ink)+'" stroke="#fff" stroke-width="1.5"/>'});
+  function lab(i,t,dy,al){var a=A[i];s+=T(X(i)+(al==='end'?4:al==='start'?-4:0),Y(a.morti)+dy,t,{a:al||'middle',c:'b'})}
+  lab(0,f0(A[0].morti),22,'start');
+  var imax=0;A.forEach(function(a,i){if(a.anno!==2020&&a.morti>A[imax].morti&&a.anno!==2020)imax=i});
+  if(A[0].anno===2011&&imax===0)imax=1;
+  s+=T(X(9),Y(A[9].morti)-10,f0(A[9].morti),{a:'middle',c:'b',st:'fill:'+C.mi});
+  s+=T(X(9)+8,Y(A[9].morti)+8,'2020',{a:'start',c:'m'});
+  lab(6,f0(A[6].morti),-9);
+  lab(14,f0(A[14].morti),20,'end');
+  for(var i=0;i<n;i++){var a=A[i];s+='<rect x="'+r1(X(i)-pw/(n-1)/2)+'" y="'+m.t+'" width="'+r1(pw/(n-1))+'" height="'+ph+'" fill="transparent"'+tip('<b>'+a.anno+'</b><br>Morti: '+f0(a.morti)+'<br>Uomini: '+f0(a.maschi)+' · Donne: '+f0(a.femmine))+'/>'}
+  box.innerHTML=s+'</svg>';
+  var mm=A.filter(function(a){return a.anno!==2020}),mx=Math.max.apply(null,mm.map(function(a){return a.morti})),mnn=Math.min.apply(null,A.map(function(a){return a.morti}));
+  $('t-anni').textContent='Senza il 2020 i morti stanno tra '+f0(mnn)+' e '+f0(mx)+' l’anno, e dal 2022 scendono';
+}
+
+/* ---------- 3. caldo: ogni giorno è un punto ---------- */
+function caldo(){
+  var box=$('ch-caldo'),W=width('ch-caldo'),H=Math.round(Math.min(380,W*1.05)),m={l:36,r:10,t:12,b:36};
+  var P=D.caldo.giorni,pw=W-m.l-m.r,ph=H-m.t-m.b,x0=14,x1=40,y0=-25,y1=45;
+  var X=function(v){return m.l+(v-x0)/(x1-x0)*pw},Y=function(v){return m.t+ph-(v-y0)/(y1-y0)*ph};
+  var s=svgOpen(W,H);
+  s+='<rect x="'+r1(X(36))+'" y="'+m.t+'" width="'+r1(X(x1)-X(36))+'" height="'+ph+'" fill="'+C.up+'" fill-opacity=".09"/>';
+  [-20,0,20,40].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v===0?C.ink:C.grid,v===0?1.5:1)+T(m.l-6,Y(v)+4,v>0?'+'+v:v<0?'−'+(-v):'0',{a:'end',c:'m'})});
+  [15,20,25,30,35,40].forEach(function(v){s+=L(X(v),m.t+ph,X(v),m.t+ph+4,C.axis)+T(X(v),m.t+ph+19,v+(v===40?'':''),{a:v===40?'end':'middle',c:'m'})});
+  s+=T(X(x1)-3,m.t+ph-6,'sopra 36 °C',{a:'end',c:'m',st:'font-weight:700;fill:'+C.ink});
+  s+=T(m.l+pw/2,H-3,'massima del giorno, in °C',{a:'middle',c:'m'});
+  // ordine: grigi sotto, arancio sopra
+  var nomi={'2017-08-04':1,'2023-08-24':1,'2019-06-28':1,'2015-07-22':1,'2022-07-26':1,'2022-07-22':1};
+  [0,1].forEach(function(w){P.forEach(function(p){
+    if(p[4]!==w||nomi[p[0]])return;var ec=p[2]-p[3];
+    s+='<circle cx="'+r1(X(p[1]))+'" cy="'+r1(Y(ec))+'" r="'+(w?3.4:3)+'" fill="'+(w?C.tur:C.axis)+'" fill-opacity="'+(w?.8:.55)+'"'+tip('<b>'+dlung(p[0])+'</b><br>Massima: '+f1(p[1])+' °C<br>Morti: '+p[2]+' · normale '+f0(p[3])+'<br>Differenza: <b>'+sg0(ec)+'</b>'+(w?'<br>dentro un’ondata di caldo':''))+'/>'})});
+  var placed=[],dots=[];
+  var nm=Object.keys(nomi).map(function(k){return P.filter(function(p){return p[0]===k})[0]});
+  nm.forEach(function(p){dots.push({x:X(p[1]),y:Y(p[2]-p[3])})});
+  var lbl='';
+  nm.forEach(function(p){
+    var cx=X(p[1]),cy=Y(p[2]-p[3]),t=dbreve(p[0]),w_=tw(t,12,true)+4,h_=14;
+    var cand=[[-8,-10,'end'],[8,-10,'start'],[-8,16,'end'],[8,16,'start'],[-30,-26,'end'],[30,-26,'start'],[-30,32,'end'],[30,34,'start'],[-6,-44,'end'],[6,-44,'start']],ok=null;
+    for(var k=0;k<cand.length&&!ok;k++){
+      var c=cand[k],lx=cx+c[0],ly=cy+c[1],rx=c[2]==='end'?lx-w_:lx,ry=ly-11;
+      if(rx<m.l||rx+w_>W-2||ry<m.t-2||ry+h_>m.t+ph)continue;
+      var hit=placed.some(function(q){return rx<q[0]+q[2]&&rx+w_>q[0]&&ry<q[1]+q[3]&&ry+h_>q[1]})||dots.some(function(d){return d.x>rx-5&&d.x<rx+w_+5&&d.y>ry-5&&d.y<ry+h_+5&&!(Math.abs(d.x-cx)<.1&&Math.abs(d.y-cy)<.1)});
+      if(!hit)ok={lx:lx,ly:ly,a:c[2],rx:rx,ry:ry,far:Math.abs(c[0])>10||Math.abs(c[1])>16}
+    }
+    if(!ok)ok={lx:cx+8,ly:cy-10,a:'start',rx:cx+8,ry:cy-21,far:false};
+    placed.push([ok.rx,ok.ry,w_,h_]);
+    lbl+=L(cx,cy,ok.a==='end'?ok.lx+3:ok.lx-3,ok.ly-4,C.ink,1);
+    lbl+=T(ok.lx,ok.ly,t,{a:ok.a,c:'b'});
+  });
+  nm.forEach(function(p){var ec=p[2]-p[3];
+    s+='<circle cx="'+r1(X(p[1]))+'" cy="'+r1(Y(ec))+'" r="4.6" fill="'+(p[4]?C.tur:C.axis)+'" stroke="'+C.ink+'" stroke-width="2"'+tip('<b>'+dlung(p[0])+'</b><br>Massima: '+f1(p[1])+' °C<br>Morti: '+p[2]+' · normale '+f0(p[3])+'<br>Differenza: <b>'+sg0(ec)+'</b>')+'/>'});
+  box.innerHTML=s+lbl+'</svg>';
+  // tabella delle classi e dei giorni con il nome
+  var h='<thead><tr><th>Massima del giorno</th><th>Giorni</th><th>Morti per giorno</th><th>Normale</th><th>Differenza</th></tr></thead><tbody>';
+  D.caldo.classi.forEach(function(c){h+='<tr><td>'+esc(c.nome.replace('sopra 36','sopra 36'))+' °C</td><td>'+c.giorni+'</td><td>'+f1(c.morti/c.giorni)+'</td><td>'+f1(c.normale/c.giorni)+'</td><td><b>'+sg1((c.rapporto-1)*100)+'%</b></td></tr>'});
+  $('tab-caldo').innerHTML=h+'</tbody>';
+  var cl=last(D.caldo.classi),e=nm.filter(function(p){return p[0]==='2017-08-04'})[0];
+  $('t-caldo').textContent='Sopra i 36 °C i morti salgono del '+f0((cl.rapporto-1)*100)+'%, ma il giorno più caldo di tutti ('+dbreve(e[0])+', '+f1(e[1])+' °C) ne ebbe '+e[2]+' contro '+f0(e[3])+' normali';
+}
+
+/* ---------- 4. estati: barre ---------- */
+function estati(){
+  var box=$('ch-estati'),W=width('ch-estati'),E=D.est.map(function(x){return{a:+x.anno,g:+x.giorni_tx_ge33,p:+x.pct_B,m:+x.morti,n:+x.attesi_B}}).filter(function(x){return x.a<=2025});
+  E.sort(function(a,b){return b.p-a.p});
+  var rh=28,top=34,lw=40,rw=76,H=top+E.length*rh+4,lo=-16,hi=18,pw=W-lw-rw-30;
+  var X=function(v){return lw+(v-lo)/(hi-lo)*pw},s=svgOpen(W,H);
+  s+=T(lw,14,'meno',{c:'m'})+T(X(0)+0,14,'normale',{a:'middle',c:'m'})+T(X(hi)+0,14,'più',{a:'end',c:'m'})+T(W-2,14,'giorni da',{a:'end',c:'m'})+T(W-2,28,'33 °C o più',{a:'end',c:'m'});
+  E.forEach(function(x,i){var y=top+i*rh,col=x.p>=0?C.up:C.dn;
+    s+=T(0,y+rh/2+4,x.a,{c:'b'});
+    s+=hbar(X(0),X(x.p),y+3,rh-8,col,tip('<b>Estate '+x.a+'</b><br>Morti: '+f0(x.m)+'<br>Normale: '+f0(x.n)+'<br>Differenza: <b>'+sg1(x.p)+'%</b><br>Giorni da 33 °C o più: '+x.g));
+    var t=sg0(x.p)+'%';
+    if(x.p>=0)s+=T(X(x.p)+5,y+rh/2+4,t,{c:'b'});else s+=T(X(x.p)-5,y+rh/2+4,t,{a:'end',c:'b'});
+    s+=T(W-2,y+rh/2+4,x.g,{a:'end',c:'b'});
+  });
+  s+=L(X(0),top-4,X(0),H-4,C.ink,1.5);
+  box.innerHTML=s+'</svg>';
+  var a22=E.filter(function(x){return x.a===2022})[0],a24=E.filter(function(x){return x.a===2024})[0];
+  $('t-estati').textContent='Estati ugualmente calde, risultati opposti: il 2022 ha avuto '+sg0(a22.p)+'% di morti con '+a22.g+' giorni da 33 °C, il 2024 '+sg0(a24.p)+'% con '+a24.g;
+}
+
+/* ---------- 5. chi muore: piramide con cursore ---------- */
+var ETA_MAX=0;
+function eta(){
+  var E=D.eta.anni;Object.keys(E).forEach(function(y){['M','F'].forEach(function(s){E[y][s].forEach(function(v){if(v>ETA_MAX)ETA_MAX=v})})});
+  var rg=$('rg-eta');rg.addEventListener('input',etaDisegna);rg.addEventListener('change',etaDisegna);
+  etaDisegna();
+}
+function etaDisegna(){
+  var y=$('rg-eta').value;$('o-eta').textContent=y;
+  var E=D.eta.anni[y],F=D.eta.fasce,box=$('ch-eta'),W=width('ch-eta'),lab=64,hw=(W-lab)/2,rh=34,top=44,H=top+F.length*rh+4;
+  var sc=hw/(Math.ceil(ETA_MAX/500)*500),cx=W/2;
+  var totM=E.M.reduce(function(a,b){return a+b},0),totF=E.F.reduce(function(a,b){return a+b},0);
+  var s=svgOpen(W,H);
+  s+=T(0,16,'Uomini',{c:'b',st:'font-size:15px;fill:'+C.men})+T(0,34,f0(totM),{c:'b',st:'font-size:16px'});
+  s+=T(W,16,'Donne',{a:'end',c:'b',st:'font-size:15px;fill:#c2377f'})+T(W,34,f0(totF),{a:'end',c:'b',st:'font-size:16px'});
+  for(var i=F.length-1;i>=0;i--){
+    var r=F.length-1-i,yy=top+r*rh,vm=E.M[i],vf=E.F[i],wm=vm*sc,wf=vf*sc;
+    var nm=F[i];
+    s+=T(cx,yy+rh/2+4,nm.replace(' e più','+'),{a:'middle',c:'b',st:'font-size:12px'});
+    s+=hbar(cx-lab/2-3,cx-lab/2-3-wm,yy+4,rh-10,C.men,tip('<b>'+nm+' anni, uomini, '+y+'</b><br>'+f0(vm)+' morti'));
+    s+=hbar(cx+lab/2+3,cx+lab/2+3+wf,yy+4,rh-10,C.wom,tip('<b>'+nm+' anni, donne, '+y+'</b><br>'+f0(vf)+' morti'));
+    var t1=f0(vm),t2=f0(vf),w1=tw(t1,12,true),w2=tw(t2,12,true);
+    if(wm>w1+10)s+=T(cx-lab/2-3-wm+6,yy+rh/2+4,t1,{c:'w'});else s+=T(cx-lab/2-3-wm-4,yy+rh/2+4,t1,{a:'end',c:'k'});
+    if(wf>w2+10)s+=T(cx+lab/2+3+wf-6,yy+rh/2+4,t2,{a:'end',c:'k'});else s+=T(cx+lab/2+3+wf+4,yy+rh/2+4,t2,{c:'k'});
+  }
+  box.innerHTML=s+'</svg>';
+  var cm=D.comp.filter(function(c){return c.anno===String(y)})[0];
+  $('nt-eta').innerHTML='Nel '+y+': '+f0(totM+totF)+' morti. Tra loro il '+f1(+cm.quota_85p)+'% aveva 85 anni o più e il '+f1(+cm.quota_under65)+'% meno di 65.'+(+y===2020?' Per il Covid vedi <a href="../anno-covid/">L’anno del Covid</a>.':'');
+  var c25=D.comp.filter(function(c){return c.anno==='2025'})[0],c11=D.comp.filter(function(c){return c.anno==='2011'})[0];
+  $('t-eta').textContent='Chi muore è sempre più anziano: gli over 85 sono il '+f1(+c25.quota_85p)+'% dei morti, nel 2011 erano il '+f1(+c11.quota_85p)+'%';
+}
+
+/* ---------- 6. un giorno a scelta ---------- */
+var UG={tok:0};
+function giorno(){
+  var g=D.g,primo=g.inizio,ultimo=g.fine,inp=$('u-data');
+  inp.min=primo;inp.max=ultimo;
+  var h=(location.hash||'').match(/(\d{4}-\d{2}-\d{2})/);
+  inp.value=h&&h[1]>=primo&&h[1]<=ultimo?h[1]:'2022-07-26';
+  if(h&&h[1]>=primo&&h[1]<=ultimo)setTimeout(function(){$('giorno').scrollIntoView()},600);
+  function bott(){var v=inp.value;$('u-prec').disabled=!valida(v)||v<=primo;$('u-succ').disabled=!valida(v)||v>=ultimo}
+  inp.addEventListener('input',giornoDisegna);inp.addEventListener('change',giornoDisegna);
+  $('u-prec').addEventListener('click',function(){inp.value=addDays(inp.value,-1);giornoDisegna()});
+  $('u-succ').addEventListener('click',function(){inp.value=addDays(inp.value,1);giornoDisegna()});
+  UG.bott=bott;giornoDisegna();
+}
+function valida(v){return /^\d{4}-\d{2}-\d{2}$/.test(v)&&!isNaN(Date.parse(v+'T00:00:00Z'))&&new Date(v+'T00:00:00Z').toISOString().slice(0,10)===v}
+function giornoDisegna(){
+  var g=D.g,v=$('u-data').value,el=$('u-scheda');UG.bott();
+  if(!valida(v)){el.innerHTML='<p class="avv">Data non valida: scrivila come anno-mese-giorno, per esempio 2022-07-26.</p>';return}
+  if(v<g.inizio||v>g.fine){el.innerHTML='<p class="avv">Per il '+esc(dlung(v))+' non ci sono dati: si va dal '+dlung(g.inizio)+' al '+dlung(g.fine)+'.</p>';return}
+  var i=diffDays(g.inizio,v),mo=g.morti[i],at=g.attesi[i],tx=g.tx[i],d=mo-at;
+  var h='<p class="gd">'+esc(dlung(v))+'</p><div class="tri"><div style="--c:'+C.mi+'"><span>Morti quel giorno</span><b>'+f0(mo)+'</b></div><div style="--c:'+C.ink+'"><span>Normale per la data</span><b>'+f0(at)+'</b></div><div style="--c:'+(d>=0?C.up:C.dn)+'"><span>Differenza</span><b>'+sg0(d)+'</b></div></div>';
+  // 7 giorni intorno
+  var a=Math.max(0,i-3),b=Math.min(g.morti.length-1,i+3),sm=0,sa=0;for(var k=a;k<=b;k++){sm+=g.morti[k];sa+=g.attesi[k]}
+  var fr=Math.abs(d)<=12?'Un giorno solo oscilla molto: da una parte e dall’altra del normale ci sono anche 10 o 15 morti senza che sia successo niente di particolare.':(d>12?'È un giorno con molti più morti del normale.':'È un giorno con molti meno morti del normale.');
+  h+='<p class="gfr">'+fr+' Nei 7 giorni intorno: <b>'+f0(sm)+'</b> morti contro '+f0(sa)+' normali ('+sg1((sm/sa-1)*100)+'%).'+(tx!=null?' La massima a Brera era di '+f1(tx)+' °C.':'')+'</p>';
+  var nome=(+v.slice(8,10))+' '+MESI[+v.slice(5,7)-1];
+  h+='<p class="mt">Tutti i '+nome+' dal '+g.inizio.slice(0,4)+'</p><p class="note" style="margin:0 0 .4em">Ogni riga è un anno: il pallino dice quanti morti ci sono stati quel giorno. In rosso l’anno scelto. La linea tratteggiata è il normale di quest’anno per questa data.</p><div class="ch" id="ch-giorno" role="img" aria-label="Pallini: morti di tutti i '+nome+' dal '+g.inizio.slice(0,4)+', uno per anno"></div>';
+  el.innerHTML=h;
+  var yrs=[],y0=+g.inizio.slice(0,4),y1=+g.fine.slice(0,4),sel=+v.slice(0,4);
+  for(var y=y0;y<=y1;y++){var iso=y+v.slice(4);if(!valida(iso)||iso<g.inizio||iso>g.fine)continue;var j=diffDays(g.inizio,iso);yrs.push({y:y,m:g.morti[j],n:g.attesi[j],tx:g.tx[j],iso:iso})}
+  var W=width('ch-giorno'),rh=24,top=22,lw=40,H=top+yrs.length*rh+6,mx=Math.max.apply(null,yrs.map(function(r){return Math.max(r.m,r.n)})),xm=Math.ceil(mx*1.12/10)*10;
+  var X=function(q){return lw+q/xm*(W-lw-34)},s=svgOpen(W,H);
+  var step=xm>100?50:xm>60?20:10;
+  for(var q=0;q<=xm;q+=step){s+=L(X(q),top-4,X(q),H-6,C.grid)+T(X(q),12,q,{a:'middle',c:'m'})}
+  yrs.forEach(function(r,k){var yy=top+k*rh+rh/2,on=r.y===sel,col=on?C.mi:C.mut;
+    s+=T(0,yy+4,r.y,{c:on?'b':'m',st:on?'fill:'+C.mi:''});
+    s+=L(X(0),yy,X(r.m),yy,on?C.mi:'#c9ced6',on?3:2);
+    s+='<circle cx="'+r1(X(r.m))+'" cy="'+r1(yy)+'" r="'+(on?6:4.5)+'" fill="'+(on?C.mi:'#4b5563')+'"'+tip('<b>'+dlung(r.iso)+'</b><br>Morti: '+f0(r.m)+' · normale '+f0(r.n))+'/>';
+    s+=T(X(r.m)+(on?10:8),yy+4,f0(r.m),{c:'b',st:on?'fill:'+C.mi:''});
+  });
+  var sy=yrs.filter(function(r){return r.y===sel})[0];
+  if(sy)s+=L(X(sy.n),top-2,X(sy.n),H-6,C.ink,1.5,' stroke-dasharray="4 3"');
+  $('ch-giorno').innerHTML=s+'</svg>';
+}
+
+/* ---------- testi in fondo ---------- */
+function limiti(){
+  var L_=[
+    'Si contano i morti per comune di <b>residenza</b>, non di luogo del decesso: i milanesi morti altrove ci sono, i non residenti morti negli ospedali di Milano no. Non sono i morti «avvenuti a Milano».',
+    'I dati si chiamano «provvisori». Gli anni fino al 2025 sono stabili, ma gli ultimi mesi si completano con ritardo: il maggio e il giugno 2026 sono forse sottostimati di qualche punto. Per il 2026 conviene guardare gennaio-aprile.',
+    'Il <b>normale</b> è una nostra scelta: la media dello stesso giorno nei cinque anni prima, senza il 2020 e il 2021. Se si tenesse il 2020, dal 2021 il normale sarebbe troppo alto e quasi tutti i mesi sembrerebbero «sotto». Il normale non segue l’invecchiamento: per Milano, dove i morti stanno tra 14.000 e 14.600 l’anno prima del Covid, funziona bene.',
+    'Prima del 2014 il normale non si può calcolare: per il 2011, il 2012 e il 2013 ci sono solo i numeri dei morti.',
+    'In un giorno ci sono circa 39 morti e il caso conta: sotto i 10-15 di scarto da una data all’altra non c’è un segnale. Per questo i mesi e le estati dicono più dei singoli giorni.',
+    'La temperatura è quella di Milano Brera. Tra il 2008 e il 2016 quel sensore misura circa 0,65 °C più caldo di oggi: le ondate di caldo dei primi anni sono un po’ sovrastimate.',
+    'Le ondate di caldo sono definite da noi (almeno 3 giorni di fila con 33 °C o più; si guardano anche i 3 giorni dopo). Con altre soglie gli elenchi cambierebbero.',
+    'L’estate 2026 non è coperta: i morti arrivano al 30 giugno, le temperature a fine ottobre. L’estate 2003, la più nota, è prima dell’inizio dei dati.',
+    'Le percentuali dicono quanto i morti si discostano dal normale, non di cosa si muore: per le cause servono altri dati. Il Covid ha una pagina sua: <a href="../anno-covid/">L’anno del Covid</a>.'
+  ];
+  $('limiti-lista').innerHTML=L_.map(function(t){return '<li>'+t+'</li>'}).join('')+'<li>Altre pagine sul tema: <a href="../temperature/">Temperature</a>, <a href="../speranza-vita/">Speranza di vita</a>, <a href="../anno-covid/">L’anno del Covid</a>.</li>';
+}
+function metodo(){
+  var M_=[
+    'I morti di ogni giorno sono quelli dei residenti di Milano, dal 1 gennaio 2011 al 30 giugno 2026, sommati da tutte le fasce d’età.',
+    'Il normale di un giorno è la media dello stesso giorno nei cinque anni prima, senza il 2020 e il 2021, poi levigata su 15 giorni intorno. Il normale di un mese o di un anno è la somma dei suoi giorni.',
+    'La tabella colora ogni mese con la differenza in percento tra morti e normale. L’ultima colonna è la stessa differenza per l’anno intero.',
+    'Nel grafico del caldo ogni punto è un giorno di giugno, luglio o agosto del 2014-2025 con la massima di Brera. Le classi di temperatura confrontano la somma dei morti con la somma dei normali.',
+    'Per le estati si sommano i 92 giorni di giugno, luglio e agosto.',
+    'Le fasce d’età sono di dieci anni e sommano le classi del dato originale. Per ogni anno si sommano maschi e femmine di tutti i giorni.',
+    'Il confronto «morti contro normale» non cura l’età della popolazione: va letto come un ordine di grandezza.'
+  ];
+  $('metodo-lista').innerHTML=M_.map(function(t){return '<li>'+t+'</li>'}).join('');
+}
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1),el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();el.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname+'#'+id)},true);
+</script></body></html>
