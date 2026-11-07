@@ -1,274 +1,537 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · Il quartiere più caldo</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · Isola di calore</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.map{height:62vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:3px;margin-right:4px}
-.lgd i.sq{width:14px;height:14px;border:1px solid #666;border-radius:7px;vertical-align:-2px}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;min-width:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.2rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.6em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
 .scroll{overflow-x:auto}
-.bars .row{display:grid;grid-template-columns:minmax(100px,30%) 1fr 90px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:#d9611c}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-@media(max-width:760px){th,td{padding:5px 4px;font-size:.88rem}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-#tab-staz{min-width:760px} #tab-alb{min-width:560px}
-.sw{display:inline-block;width:10px;height:10px;border-radius:5px;margin-right:4px;vertical-align:-1px}
-</style><script src="../menu.js" defer></script></head><body><main>
-<h1>Il quartiere più caldo</h1>
-<p>Milano è più calda della campagna intorno? Di quanto, a che ora e in quali quartieri? Lo guardiamo con i termometri di <b>ARPA Lombardia</b> nelle estati (giugno–agosto), confrontando 6 stazioni dentro Milano con stazioni di campagna a oltre 12 km. Per le temperature di Brera dal 1763 vedi <a href="../temperature/">Temperature</a>; per gli alberi del Comune vedi <a href="../alberi/">Alberi</a>; per la pioggia con la stessa fonte vedi <a href="../pioggia/">Quanto piove a Milano</a>.</p>
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--mi);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.5em 0 0}
+.pm{margin:10px 0 0}
+.pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+</style>
+<script src="../menu.js" defer></script></head><body><main>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento…</p></div>
+<h1>Isola di calore</h1>
+<p class="lead">Di notte Milano è più calda della campagna intorno, ma non dappertutto allo stesso modo. Guardiamo le ore del giorno, le estati, i quartieri. Poi scrivi il tuo.</p>
 
-<div class="warm"><b>Prima di leggere.</b> Sono pochi punti (6 nella città) e non una carta del calore: le stazioni stanno dove le ha messe ARPA, i sensori sono cambiati nel tempo (<a href="#metodo">vedi i limiti</a>) e la «campagna» è una nostra scelta. I confronti tra stazioni valgono per le estati 2017–2025. Quello che si vede è una differenza, non la sua causa.</div>
+<div class="hl" id="hl"></div>
+<p class="src" id="src-hl"></p>
 
-<h2 id="curva">Di giorno no, di notte sì</h2>
-<div id="curva-testo"></div>
-<div class="ctl"><label class="sub" for="sel-st">Aggiungi una stazione (2017–2025):</label><select id="sel-st" aria-label="Aggiungi una stazione al grafico"></select><button type="button" id="btn-st">togli</button></div>
-<div class="ch" id="ch-curva" role="img" aria-label="Grafico: differenza di temperatura tra Milano e la campagna per ora del giorno"></div>
-<div class="lgd" id="lg-curva"></div>
-<p class="src">Differenza di temperatura tra le stazioni di Milano (media di Brera, Juvara, Marche, Zavattari, Feltre, Lambrate) e la media delle stazioni di campagna, nello stesso istante, per ora del giorno (ora solare), nelle estati. Positivo = Milano più calda. ARPA Lombardia (CC0), calcoli nostri.</p>
+<!-- ============ 1 ============ -->
+<h2 id="giorno">Di notte sì, di giorno no</h2>
+<div class="fig">
+  <h3 id="t-profilo"></h3>
+  <p class="sub" id="s-profilo"></p>
+  <div class="lg" id="lg-profilo"></div>
+  <div class="ch" id="ch-profilo" role="img" aria-label="Grafico: temperatura media di Milano e della campagna nelle 24 ore, estati 2017-2025"></div>
+  <ul class="notes" id="nt-profilo"></ul>
+  <p class="src">Media di giugno, luglio e agosto 2017–2025, ora solare. Milano: media dei termometri di Milano (via Brera, via Juvara, via Marche, piazza Zavattari, via Feltre, Lambrate). Campagna: media dei termometri di sette paesi e cascine a più di 12 km dal Duomo, scelti da noi. ARPA Lombardia (CC0), calcoli nostri. Una differenza non dice perché c’è: vedi i limiti dei dati.</p>
+</div>
 
-<h2 id="mappa">La mappa: quante notti tropicali</h2>
-<p>Una <b>notte tropicale</b> è un giorno in cui la temperatura minima non scende sotto i 20 °C. Scegli che cosa mostrare; clic o passa sopra un punto per la scheda.</p>
-<div class="ctl"><span class="sub">Mostra:</span>
-<button type="button" data-m="tropicali" class="on">Notti tropicali per estate, media 2017–2025</button><button type="button" data-m="trop26">Notti tropicali, estate 2026</button><button type="button" data-m="notte">Di notte rispetto alla campagna (°C)</button></div>
-<div class="ctl"><span class="sub">Vista:</span><button type="button" id="btn-city">la città</button><button type="button" id="btn-all">anche la campagna</button></div>
-<p class="sub" id="map-desc"></p>
-<div id="map" class="map" role="img" aria-label="Mappa di Milano con le stazioni di temperatura"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Cerchi pieni = stazioni dentro Milano; cerchi con bordo tratteggiato = stazioni vicine ma fuori comune o di campagna (la campagna è in grigio più scuro). Quartieri (NIL): Comune di Milano (CC BY). Mappa © OpenStreetMap contributors; temperature: ARPA Lombardia (CC0).</p>
+<div class="fig">
+  <h3 id="t-anni"></h3>
+  <p class="sub">Una notte tropicale è una notte in cui la temperatura non scende sotto i 20 °C. Sono contate le 92 notti di giugno, luglio e agosto. Ogni riga è un’estate: il pallino rosso è via Marche (Isola), quello grigio la campagna.</p>
+  <div class="lg" id="lg-anni"></div>
+  <div class="ch" id="ch-anni" role="img" aria-label="Grafico: notti tropicali per estate, via Marche contro campagna, dal 2003 al 2026"></div>
+  <p class="src">Notti tropicali nelle 92 notti di giugno–agosto, estati con almeno 80 giorni validi. Campagna: media dei termometri rurali lunghi disponibili (almeno 2; nel 2008 non bastano). Il minimo del giorno è calcolato dalle letture alle ore :00. Prima del 2003 non mostriamo i dati perché sospetti (vedi i limiti dei dati). ARPA Lombardia (CC0), calcoli nostri.</p>
+</div>
 
-<h2 id="anni">Anno per anno</h2>
-<div id="anni-testo"></div>
-<div class="ch" id="ch-anni" role="img" aria-label="Grafico: notti tropicali per estate, 2003-2026"></div>
-<div class="lgd" id="lg-anni"></div>
-<p class="src">Notti tropicali (minima di almeno 20 °C) nelle 92 notti di giugno–agosto, estati con almeno 80 giorni validi. «Campagna» = media delle stazioni rurali lunghe disponibili (Rodano, Landriano, Lacchiarella, Sant&rsquo;Angelo Lodigiano, Arconate; almeno 2). Il minimo del giorno è calcolato dalle letture alle ore :00. Prima del 2003 non mostriamo i dati perché sospetti (<a href="#metodo">vedi i limiti</a>).</p>
+<!-- ============ 2 ============ -->
+<h2 id="quartieri">Quartiere per quartiere</h2>
+<div class="fig">
+  <h3 id="t-termometri"></h3>
+  <p class="sub">Quanto è più caldo di notte (dalle 22 alle 5) ogni termometro rispetto alla campagna. La linea tratteggiata è la campagna: a sinistra è più fresco, a destra più caldo.</p>
+  <div class="ch" id="ch-termometri" role="img" aria-label="Termometri: differenza di temperatura notturna tra ogni stazione e la campagna"></div>
+  <p class="src">Estati 2017–2025. Rosso: termometri dentro Milano; grigio: vicini ma fuori comune. ARPA Lombardia (CC0), calcoli nostri. Sono sei punti dentro Milano: non una carta del caldo.</p>
+</div>
 
-<h2 id="stazioni">Le stazioni, una per una</h2>
-<div class="scroll"><table id="tab-staz"></table></div>
-<p class="src">Estati 2017–2025 (9). «Notte» = media delle ore 22–05 meno la campagna; «pomeriggio» = ore 12–16. «Minima media» = media delle minime di giugno–agosto. Notti tropicali = per estate, media delle 9. Il NIL è il quartiere in cui cade la stazione. ARPA Lombardia (CC0), file <a href="data/stazioni.csv">stazioni.csv</a>.</p>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub">Colore: quanto è esposto al caldo il quartiere visto dal satellite a luglio 2024 (indice da 0 a 1). I pallini scuri sono i termometri, con quanto sono più caldi di notte della campagna. Tocca un quartiere per leggerlo.</p>
+  <div class="lg" id="lg-mappa"></div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dei quartieri di Milano colorati per indice di calore da satellite, con i termometri"></div>
+  <p class="note" id="nn-mappa"></p>
+  <p class="src">Indice di esposizione al calore: Comune di Milano, progetto SPOTTED, luglio 2024 (CC BY): è un indice da satellite, non una temperatura misurata, e non sappiamo a che ora del giorno (vedi i limiti dei dati). Confini dei quartieri (NIL): Comune di Milano (CC BY). Termometri: ARPA Lombardia (CC0). Rho, Corsico e Parco Nord sono fuori Milano e non compaiono.</p>
+</div>
 
-<h2 id="alberi">E gli alberi?</h2>
-<div id="alberi-testo"></div>
-<div class="scroll"><table id="tab-alb"></table></div>
-<div class="warn"><b>Sei punti, non una prova.</b> Le sei stazioni stanno in cinque quartieri (Feltre e Lambrate nello stesso), il censimento comprende solo gli alberi che il Comune gestisce (non i giardini privati e i parchi di altri enti), un cerchio di 500 m non vede i parchi grandi, e le stazioni cambiano anche per tutto il resto (strade, palazzi, acqua, vento, il modo in cui è montato il sensore). Si può dire che le due stazioni con più alberi intorno sono le meno calde di notte; non si può dire che sia per gli alberi.</div>
-<p class="src">Alberi del censimento del Comune di Milano, edizione 31 marzo 2025 (ds2484, CC BY), contati nel cerchio di 500 m intorno a ogni stazione (area 78,5 ettari); vedi <a href="../alberi/">Alberi della città</a>. Temperature: ARPA Lombardia (CC0).</p>
+<div class="fig">
+  <h3 id="t-suolo"></h3>
+  <p class="sub" id="s-suolo"></p>
+  <div class="ch" id="ch-suolo" role="img" aria-label="Grafico a punti: suolo coperto contro indice di calore, un punto per quartiere"></div>
+  <p class="src">Un punto per quartiere (88). Suolo coperto da edifici e strade nel 2025: ISPRA, edizione 2026, per quartiere dalla pagina <a href="../suolo/">Suolo</a>. Indice di calore: Comune di Milano (SPOTTED, luglio 2024, CC BY). Suolo, verde e caldo vanno insieme: non si può dire quale conti. Correlazione non è causa.</p>
+</div>
 
-<h2 id="metodo">Metodo e limiti dei dati</h2>
-<ul class="m" id="metodo-lista"></ul>
+<div class="fig">
+  <h3 id="t-verde"></h3>
+  <p class="sub">Metri quadrati di parchi e giardini disegnati dal Comune per ogni residente, in media, nei quartieri con almeno 5.000 residenti. I quartieri sono divisi nelle stesse cinque fasce di colore della mappa.</p>
+  <div class="ch" id="ch-verde" role="img" aria-label="Barre: metri quadri di verde per abitante in media, per fascia di calore"></div>
+  <p class="src">Parchi e giardini: Comune di Milano (CC BY), dalla pagina <a href="../verde/">Parchi e verde</a>; residenti: anagrafe del Comune, 2024. La media è tirata su dai pochi quartieri con un grande parco. Gli alberi della città sono nella pagina <a href="../alberi/">Alberi</a>.</p>
+</div>
 
-<h2 id="fonti">Fonti, licenze, file</h2>
-<ul class="m" id="fonti-lista"></ul>
-<p><a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri della pagina, con campo <code>origine</code>), <a href="data/stazioni.csv">stazioni.csv</a>, <a href="data/nil.geojson">nil.geojson</a> (confini dei quartieri, semplificati).</p>
+<!-- ============ 3 ============ -->
+<h2 id="tuo">Il tuo quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<p class="src">Indice di calore: SPOTTED, luglio 2024; suolo coperto: ISPRA 2026; alberi: censimento del Comune (31 marzo 2025); termometri: ARPA Lombardia. Il termometro più vicino non misura il tuo quartiere: è un paragone.</p>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul>
+<p>Altre pagine sullo stesso tema: <a href="../temperature/">Temperature</a> (Brera dal 1763), <a href="../alberi/">Alberi</a>, <a href="../verde/">Parchi e verde</a>, <a href="../pioggia/">Quanto piove a Milano</a>.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Isola di calore</dt><dd>Il fatto che la città sia più calda della campagna intorno. Succede soprattutto di notte, perché edifici e asfalto restituiscono il calore preso di giorno.</dd>
+<dt>Notte tropicale</dt><dd>Una notte in cui la temperatura non scende sotto i 20 °C.</dd>
+<dt>Campagna</dt><dd>Sette termometri di paesi e cascine a più di 12 km dal Duomo, scelti da noi. La differenza «Milano meno campagna» è calcolata nello stesso istante.</dd>
+<dt>Indice di calore da satellite</dt><dd>Un numero da 0 a 1 per ogni quartiere, calcolato dal Comune su immagini satellitari di luglio 2024. Più è alto, più il quartiere è esposto al caldo. Non è una temperatura.</dd>
+<dt>Suolo coperto</dt><dd>La parte di suolo coperta da edifici, strade e altre superfici artificiali (l’ISPRA lo chiama «suolo consumato»).</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+</dl></div></details>
+<details id="stazioni"><summary>I termometri in numeri</summary><div class="in"><div class="scroll"><table class="kt" id="tab-staz" style="min-width:560px"></table></div></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<ul>
+<li><a href="data/profilo_24ore.json">Temperatura per ora del giorno</a>, Milano e campagna</li>
+<li><a href="data/quartieri_caldo.json">Numeri per quartiere</a>: indice di calore, suolo coperto, alberi, verde, termometro più vicino</li>
+<li><a href="data/stazioni.csv">Termometri</a> (tabella)</li>
+<li><a href="data/riepilogo.json">Tutti gli altri numeri della pagina</a>, con l’origine di ciascuno</li>
+<li><a href="data/nil.geojson">Confini semplificati dei quartieri</a></li>
+</ul></div></details>
+</div>
 
 <footer>
-<p>Pagina costruita da un programma che legge le tabelle pulite e scrive i file di <code>data/</code>. Programmi, note e limiti dei dati: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+<p><b>Fonti e licenze.</b> Temperature: ARPA Lombardia, sensori della rete idro-nivo-meteorologica («Temperatura fino al 2010», «dal 2011 al 2020», «dal 2021», «Dati sensori meteo» e anagrafica delle stazioni) da <a href="https://www.dati.lombardia.it/">dati.lombardia.it</a>, scaricati il 1 novembre 2026; licenza <b>Creative Commons 1.0 Universal (CC0, pubblico dominio)</b>, attribuzione: ARPA Lombardia; dati fino al 1 novembre 2026 (l’estate 2026 è completa). Indice di esposizione al calore (progetto SPOTTED, luglio 2024), alberi (censimento, edizione 31 marzo 2025), parchi e giardini e confini dei quartieri (NIL): Comune di Milano, licenza CC BY, da <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, scaricati tra il 1 e il 2 novembre 2026. Suolo coperto: ISPRA/SNPA, edizione 2026 (CC BY 4.0), come nella pagina <a href="../suolo/">Suolo</a>. Confronto con Linate (nota sulle notti prima del 1996): NOAA GSOD, dominio pubblico, dalla pagina <a href="../temperature/">Temperature</a>.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,NF=null,ST=[];
-var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a';
-var PAL=['#111111','#d9611c','#1f77b4','#2ca02c','#9467bd','#8c564b','#e377c2','#17becf'];
-var SEQ=['#fdebd0','#f8c98b','#ee9a4c','#d9611c','#a93a0e','#6b1d05'];
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'–':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'–':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function sg(x,d){if(x==null)return '–';var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?0:d)}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i>1?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i>1?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function tit(s){return s==null?'–':s.toLowerCase().replace(/(^|[ \-'])([a-zàèéìòù])/g,function(m,a,b){return a+b.toUpperCase()}).replace(/ - /g,'–')}
-var RD=[];
-Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
-  D=a[0];NF=a[1];ST=D.stazioni;
-  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),gry:'#9aa1ad'};
+var D,P,QD,GEO,N=[],BY={},RD=[],sel=null,ANC=[];
+
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function fd(x,d){if(x==null)return '';var a=Math.abs(x),r=(Math.round(a*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+(d?','+r[1]:'')}
+function f1(x){return fd(x,1)}
+function f2(x){return fd(x,2)}
+function sg1(x){var s=fd(x,1);return (x>0&&s.charAt(0)!=='−'&&+s.replace(',','.')!==0?'+':'')+s}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function mean(a){return a.reduce(function(s,v){return s+v},0)/a.length}
+function med(a){a=a.slice().sort(function(x,y){return x-y});var n=a.length;return n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2}
+
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- etichette senza sovrapposizioni ---------- */
+function placer(W,H,pad){
+  var used=[];
+  return{
+   block:function(x0,y0,x1,y1){used.push({x0:x0,y0:y0,x1:x1,y1:y1})},
+   place:function(x,y,text,r,pref){
+     var w=tw(text,13,true),h=15,pd=pad||0,keys=pref||['r','l','u','d','ur','ul','dr','dl'],best=null;
+     for(var ring=0;ring<5&&!best;ring++){
+       var g=(r||5)+5+ring*[0,14,28,46,70][ring]/1;
+       var all={r:[x+g,y-h/2-1],l:[x-g-w,y-h/2-1],u:[Math.max(pd+2,Math.min(x-w/2,W-pd-w-2)),y-g-h-1],d:[Math.max(pd+2,Math.min(x-w/2,W-pd-w-2)),y+g],ur:[x+g*0.7,y-g*0.9-h],ul:[x-g*0.7-w,y-g*0.9-h],dr:[x+g*0.7,y+g*0.9],dl:[x-g*0.7-w,y+g*0.9]};
+       for(var i=0;i<keys.length&&!best;i++){
+         var a=all[keys[i]],R={x0:a[0]-2,y0:a[1],x1:a[0]+w+2,y1:a[1]+h};
+         if(R.x0<pd||R.x1>W-pd||R.y0<0||R.y1>H)continue;
+         var ok=true;for(var j=0;j<used.length;j++){var u=used[j];if(R.x1>u.x0&&R.x0<u.x1&&R.y1>u.y0&&R.y0<u.y1){ok=false;break}}
+         if(ok){used.push(R);best={x:a[0],y:a[1]+h-3.5,R:R,lead:ring>0}}
+       }
+     }
+     if(!best){var a0=[Math.max(pd,Math.min(x+r+5,W-w-pd)),y-h/2],R0={x0:a0[0],y0:a0[1],x1:a0[0]+w,y1:a0[1]+h};used.push(R0);best={x:a0[0],y:a0[1]+h-3.5,R:R0,lead:false}}
+     if(best.lead){var R=best.R,px=Math.max(R.x0,Math.min(x,R.x1)),py=Math.max(R.y0,Math.min(y,R.y1));best.lx=px;best.ly=py}
+     return best;
+   }};
+}
+function lead(x,y,r){return r.lead?'<line x1="'+r1(x)+'" y1="'+r1(y)+'" x2="'+r1(r.lx)+'" y2="'+r1(r.ly)+'" stroke="#333" stroke-width="1"/>':''}
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'profilo_24ore.json'),getJ(DATA+'quartieri_caldo.json'),getJ(DATA+'nil.geojson')]).then(function(r){
+  D=r[0];P=r[1];QD=r[2];GEO=r[3];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function draw(f){f();RD.push(f)}
+
+var NAMES={'5909':'Via Juvara (Porta Venezia)','5897':'Brera','5911':'Via Marche (Isola)','5920':'Piazza Zavattari (San Siro)','2001':'Lambrate','8162':'Via Feltre','14742':'Rho (fuori Milano)','5903':'Corsico (fuori Milano)','4058':'Parco Nord (Cinisello)'};
+var SHORT={'5909':'Juvara','5897':'Brera','5911':'Marche','5920':'Zavattari','2001':'Lambrate','8162':'Feltre'};
+var MCOL=['#FDE7C8','#F9BE78','#F58220','#C2540A','#6E2504'],TH=[0.4,0.5,0.55,0.59];
+var MLAB=['meno di 0,40','da 0,40 a 0,49','da 0,50 a 0,54','da 0,55 a 0,58','0,59 o più'];
+function mc(v){var i=0;while(i<TH.length&&v>=TH[i])i++;return i}
+function stz(id){var r=null;D.stazioni.forEach(function(s){if(s.id===id)r=s});return r}
+
+function prepara(){
+  var by={};QD.q.forEach(function(q){by[q.i]=q});
+  GEO.features.forEach(function(f){var q=by[f.properties.i];var o={};for(var k in q)o[k]=q[k];o.f=f;o.big=q.ab>=5000;N.push(o);BY[o.i]=o});
+  var cnt={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+  var g={};QD.ancore.forEach(function(a){(g[a.nil]=g[a.nil]||[]).push(a.st)});
+  Object.keys(g).forEach(function(k){var ss=g[k].map(stz);ANC.push({nil:+k,sts:g[k],notte:mean(ss.map(function(s){return s.notte})),nome:BY[+k].sn,cal:BY[+k].cal})});
+  ANC.sort(function(a,b){return b.notte-a.notte});
+}
+function night(){return P.ore.filter(function(o){return o.h>=22||o.h<=5})}
+function pom(){return P.ore.filter(function(o){return o.h>=12&&o.h<=16})}
+function kmDist(a,b){var kx=111.32*Math.cos(45.47*Math.PI/180);return Math.hypot((a.lng-b.lng)*kx,(a.lat-b.lat)*110.57)}
 
 function tutto(){
-  sorpresa();curva();mappa();anni();stazioni();alberi();metodo();fonti();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+  prepara();
+  highlights();
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});if(m.length===1)return m[0];return null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.i,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.i,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].i,true);else if(m.length>1)$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true)});
+  scheda();
+  draw(profilo);draw(anni);draw(termometri);draw(mappa);draw(suolo);draw(verde);
+  stazioniTab();limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()});scheda()},150)});
 }
-function sById(i){var r=null;ST.forEach(function(s){if(s.id===i)r=s});return r}
-function urb(){return ST.filter(function(s){return s.classe==='urbana'})}
-
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var C=D.curva['2017-2025'],U=urb();
-  var nmax=Math.max.apply(null,U.map(function(s){return s.notte})),nmin=Math.min.apply(null,U.map(function(s){return s.notte}));
-  var ju=sById('5909'),fe=sById('8162'),la=sById('2001'),br=sById('5897');
-  var pomMin=Math.min.apply(null,C.slice(12,17)),pomMax=Math.max.apply(null,C.slice(12,17));
-  var h='<p><b>Di giorno Milano non è più calda della campagna.</b> Nelle estati 2017–2025, tra le 12 e le 16, le sei stazioni della città sono in media <b>'+sg(pomMin,1)+' / '+sg(pomMax,1)+' °C</b> rispetto alla campagna: uguali o un po&rsquo; più fresche (a Brera '+sg(br.pom,1)+' °C).</p>';
-  h+='<p><b>Di notte sì: circa '+sg(Math.max.apply(null,C),1)+' °C in media, fino a '+sg(nmax,1)+' °C al centro.</b> Dalle 21 alle 5 la differenza resta tra +1,7 e +2,0 °C. Le quattro stazioni del centro, del nord e dell&rsquo;ovest (Juvara, Brera, Marche, Zavattari) stanno tra '+sg(U.filter(function(s){return ['5909','5897','5911','5920'].indexOf(s.id)>=0}).reduce(function(m,s){return Math.min(m,s.notte)},9),1)+' e '+sg(nmax,1)+' °C; hanno 62–68 notti tropicali per estate contro 35–41 della campagna.</p>';
-  h+='<p><b>Dentro la città la notte cambia di '+nf(ju.notte-fe.notte,1)+' °C in 3–4 chilometri.</b> A via Juvara (Porta Venezia) la notte è '+sg(ju.notte,1)+' °C sopra la campagna, a Lambrate '+sg(la.notte,1)+' e a via Feltre '+sg(fe.notte,1)+': l&rsquo;est della città, con da 2 a 7 volte gli alberi nel raggio di 500 m, non scalda più dei campi. È un confronto, non una spiegazione.</p>';
-  h+='<p><b>Il record è del 2026.</b> Nell&rsquo;estate 2026 (giugno–agosto, 92 notti) le stazioni del centro hanno avuto <b>79–80 notti tropicali</b>; il 2022 era arrivato a 72–82.</p>';
-  setH('sorpresa',h);
-}
-
-/* ---------- grafico a linee ---------- */
-function lineChart(box,o){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=o.h||280,m={l:42,r:12,t:16,b:30};
-  var all=[];o.series.forEach(function(s){s.pts.forEach(function(p){if(p[1]!=null)all.push(p)})});
-  var x0=o.x0!=null?o.x0:Math.min.apply(null,all.map(function(p){return p[0]})),x1=o.x1!=null?o.x1:Math.max.apply(null,all.map(function(p){return p[0]}));
-  var lo=Math.min.apply(null,all.map(function(p){return p[1]}).concat([0])),hi=Math.max.apply(null,all.map(function(p){return p[1]}));
-  if(o.ymin!=null)lo=o.ymin;if(o.ymax!=null)hi=o.ymax;
-  var sy=niceStep((hi-lo)/5),y0=Math.floor(lo/sy)*sy,y1=Math.ceil(hi/sy)*sy;
-  var pw=W-m.l-m.r,ph=H-m.t-m.b;
-  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+(Math.abs(v)<1e-9?'#666':'#e3e3e3')+'"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+nf(v,sy<1?1:0)+'</text>';
-  var sx=o.sx||niceStep((x1-x0)/(W<480?4:8)),last=-99;
-  for(v=Math.ceil(x0/sx)*sx;v<=x1+0.01;v+=sx){var xx=X(v);if(xx-last>30){last=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+(o.xf?o.xf(v):Math.round(v))+'</text>'}}
-  s+='<text class="mu" x="'+m.l+'" y="'+(m.t-4)+'">'+o.yl+'</text>';
-  o.series.forEach(function(se){
-    var d='',pen=false;
-    se.pts.forEach(function(p){if(p[1]==null){pen=false;return}d+=(pen?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1);pen=true});
-    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||1.8)+'"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
-  });
-  s+='<line id="gl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,gl=svg.querySelector('#gl'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,xv=x0+(px-m.l)/pw*(x1-x0),yr=Math.round(xv),h='';
-    if(yr<x0||yr>x1){tip.style.display='none';gl.style.display='none';return}
-    o.series.forEach(function(se){var best=null;se.pts.forEach(function(p){if(p[0]===yr)best=p});if(best&&best[1]!=null)h+='<div><span style="color:'+se.color+'">■</span> '+se.nm+': <b>'+o.f(best[1])+'</b></div>'});
-    if(!h){tip.style.display='none';gl.style.display='none';return}
-    gl.setAttribute('x1',X(yr));gl.setAttribute('x2',X(yr));gl.style.display='';
-    tip.innerHTML='<b>'+(o.xt?o.xt(yr):yr)+'</b>'+h;tip.style.display='';var tw=tip.offsetWidth,left=X(yr)/k+10;if(left+tw>r.width)left=X(yr)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='10px'}
-  function hide(){tip.style.display='none';gl.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-}
-function lgdSeries(a){return a.map(function(s){return '<span><i style="border-top-color:'+s.color+(s.dash?';border-top-style:dashed':'')+'"></i>'+esc(s.nm)+'</span>'}).join('')}
-
-/* ---------- curva per ora ---------- */
-var EXTRA=null;
-function curva(){
-  var C=D.curva,CS=D.curva_stazioni;
-  var h24=function(a){return a.map(function(v,i){return [i,v]})};
-  var sel=el('sel-st');
-  sel.innerHTML='<option value="">–</option>'+Object.keys(CS).map(function(n){return '<option>'+esc(n)+'</option>'}).join('');
-  var mx=Math.max.apply(null,C['2017-2025']),ix=C['2017-2025'].indexOf(mx);
-  setH('curva-testo','<p>Il grafico mette in fila le 24 ore. Nelle estati 2017–2025 la differenza tra Milano e la campagna è al massimo di <b>'+sg(mx,1)+' °C alle '+ix+':00</b>, resta intorno a +1,7/+2,0 °C per tutta la notte, poi cala in mattinata e <b>tra le 12 e le 16 è tra −0,4 e −0,1 °C</b>. La sera risale dalle 18. La forma è la stessa nelle estati 2002–2010 (più alta di notte, +2,3/+2,5) e 2011–2016.</p>');
-  function draw(){
-    var S=[{nm:'Milano 2017–2025',color:'#111111',w:2.6,pts:h24(C['2017-2025'])},{nm:'Milano 2011–2016',color:'#d9611c',w:1.6,pts:h24(C['2011-2016'])},{nm:'Milano 2002–2010',color:'#8a8a8a',w:1.6,dash:true,pts:h24(C['2002-2010'])}];
-    if(EXTRA)S.push({nm:EXTRA+' 2017–2025',color:'#1f77b4',w:2,pts:h24(CS[EXTRA])});
-    lineChart(el('ch-curva'),{series:S,f:function(v){return sg(v,1)+' °C'},yl:'°C, città meno campagna',x0:0,x1:23,sx:3,xf:function(v){return v+':00'},xt:function(v){return 'ore '+v+':00'},ymin:-2});
-    setH('lg-curva',lgdSeries(S));
-  }
-  sel.addEventListener('change',function(){EXTRA=sel.value||null;draw()});
-  el('btn-st').addEventListener('click',function(){EXTRA=null;sel.value='';draw()});
-  draw();RD.push(draw);
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  scheda();RD.forEach(function(f){f()});
 }
 
-/* ---------- mappa ---------- */
-var MAP=null,MK=[],CUR='tropicali',MET={};
-function colore(v,m){if(v==null)return '#bdbdbd';var i=0;while(i<m.b.length&&v>=m.b[i])i++;return m.c[i]}
-function mappa(){
-  MET={
-   tropicali:{k:'tropicali',b:[30,40,50,60,70],c:SEQ,f:function(v){return nf(v,0)},u:' notti tropicali per estate',t:'Notti con minima di almeno 20 °C in giugno–agosto (92 notti), media delle 9 estati 2017–2025.'},
-   trop26:{k:'trop26',b:[40,50,60,70,75],c:SEQ,f:function(v){return nf(v,0)},u:' notti tropicali su 92',t:'Notti tropicali nell’estate 2026 (giugno–agosto). Il 2026 è l’estate più calda di questa serie per quasi tutte le stazioni.'},
-   notte:{k:'notte',b:[-1,0,1,2,3],c:SEQ,f:function(v){return sg(v,1)},u:' °C di notte rispetto alla campagna',t:'Differenza media della temperatura tra le 22 e le 5 rispetto alla media delle stazioni di campagna, estati 2017–2025.'}
-  };
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:false}).setView([45.47,9.19],10);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  L.geoJSON(NF,{style:function(){return {color:'#555',weight:1,fillColor:'#ffffff',fillOpacity:.15}},onEachFeature:function(f,l){l.bindTooltip(f.properties.n,{sticky:true})}}).addTo(MAP);
-  var pts=[];
-  ST.forEach(function(s){
-    var mk=L.circleMarker([s.lat,s.lng],{radius:s.classe==='urbana'?11:8,weight:2,color:'#222',dashArray:s.classe==='urbana'?null:'3 3',fillOpacity:.92});
-    mk.bindTooltip(function(){return tip(s)},{sticky:true}).on('click',function(){mk.openTooltip()});
-    mk.addTo(MAP);MK.push([s,mk]);pts.push([s.lat,s.lng]);
-  });
-  var ptsC=ST.filter(function(s){return s.classe!=='rurale'}).map(function(s){return [s.lat,s.lng]});MAP.fitBounds(ptsC,{padding:[24,24]});el('btn-all').addEventListener('click',function(){MAP.fitBounds(pts,{padding:[18,18]})});el('btn-city').addEventListener('click',function(){MAP.fitBounds(ptsC,{padding:[24,24]})});
-  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(b){b.addEventListener('click',function(){CUR=b.getAttribute('data-m');Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
-  ricolora();
+/* ---------- numeri grandi ---------- */
+function top10(){
+  var B=N.filter(function(o){return o.big});
+  return{hot:B.filter(function(o){return mc(o.cal)===4}),cold:B.filter(function(o){return mc(o.cal)===0})};
 }
-function tip(s){var m=MET[CUR];
-  return '<b>'+esc(s.nome)+'</b> <span class="sub">('+esc(s.ufficiale)+', '+(s.classe==='urbana'?'in Milano':s.classe==='cintura'?'fuori comune, vicina':'campagna')+')</span><br>'+(s.nil?'Quartiere: '+esc(tit(s.nil))+'<br>':'')+
-  'Notti tropicali per estate (2017–2025): <b>'+nf(s.tropicali,0)+'</b><br>Estate 2026: <b>'+(s.trop26==null?'–':s.trop26)+'</b> su 92<br>Di notte rispetto alla campagna: <b>'+sg(s.notte,1)+' °C</b><br>Di pomeriggio: '+sg(s.pom,1)+' °C<br>Minima media estiva: '+nf(s.tmin,1)+' °C'}
-function ricolora(){
-  var m=MET[CUR];
-  MK.forEach(function(p){var s=p[0],v=s[m.k];p[1].setStyle({fillColor:colore(v,m)})});
-  setH('map-desc',m.t);
-  var lab=[],b=m.b;lab.push('meno di '+m.f(b[0]));for(var i=0;i<b.length-1;i++)lab.push(m.f(b[i])+' – '+m.f(b[i+1]));lab.push(m.f(b[b.length-1])+' o più');
-  setH('lg-map',m.c.map(function(c,i){return '<span><i class="sq" style="background:'+c+'"></i>'+lab[i]+'</span>'}).join('')+'<span><i class="sq" style="background:#bdbdbd"></i>manca</span>');
+function concordanti(){
+  var n=0,t=0;
+  for(var i=0;i<ANC.length;i++)for(var j=i+1;j<ANC.length;j++){t++;if(ANC[i].cal>=ANC[j].cal)n++}
+  return{n:n,t:t};
+}
+function highlights(){
+  var nn=night(),pp=pom(),dn=mean(nn.map(function(o){return o.diff})),dp=mean(pp.map(function(o){return o.diff}));
+  var t26=['5909','5897','5911','5920'].map(function(i){return stz(i).trop26}),a26=D.notti_per_anno[D.notti_per_anno.length-1];
+  var ju=stz('5909'),fe=stz('8162');
+  var km=kmDist(ju,fe);
+  var cn=concordanti(),tp=top10();
+  var s1=mean(tp.hot.map(function(o){return o.suolo})),s2=mean(tp.cold.map(function(o){return o.suolo}));
+  var v1=mean(tp.hot.map(function(o){return o.mA})),v2=mean(tp.cold.map(function(o){return o.mA}));
+  var H=[
+   {c:C.mi,h:'t-profilo',n:'+'+f1(dn)+'<small> °C</small>',p:'di notte (dalle 22 alle 5) Milano è più calda della campagna. Di pomeriggio no: '+sg1(dp)+' °C.'},
+   {c:C.m3,h:'t-anni',n:Math.min.apply(null,t26)+'–'+Math.max.apply(null,t26),p:'notti tropicali nell’estate 2026 nel centro di Milano, su 92. Nella campagna intorno '+f0(a26['Campagna (media)'])+'.'},
+   {c:C.m2,h:'t-termometri',n:f1(ju.notte-fe.notte)+'<small> °C</small>',p:'di differenza di notte tra due termometri di Milano lontani meno di '+Math.ceil(km)+' km: via Juvara e via Feltre.'},
+   {c:C.m4,h:'t-mappa',n:cn.n===cn.t?ANC.length+'<small> su '+ANC.length+'</small>':cn.n+'<small> su '+cn.t+'</small>',p:cn.n===cn.t?'quartieri con un termometro: il satellite li mette nello stesso ordine di caldo del termometro.':'coppie di quartieri con un termometro in cui satellite e termometro sono d’accordo.'},
+   {c:C.m5,h:'t-suolo',n:f0(s1)+'<small>%</small>',p:'del suolo coperto da edifici e strade, in media, nei '+tp.hot.length+' quartieri più caldi per il satellite. Nei '+tp.cold.length+' più freschi: '+f0(s2)+'%.'},
+   {c:C.ora,h:'t-verde',n:f1(v1)+'<small> m²</small>',p:'di parchi e giardini per residente, in media, nei '+tp.hot.length+' quartieri più caldi. Nei '+tp.cold.length+' più freschi: '+f1(v2)+' m².'}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+  $('src-hl').textContent='Termometri: ARPA Lombardia, estati (giugno–agosto) 2017–2025 e 2026. Caldo dei quartieri visto dal satellite, suolo, parchi e alberi: Comune di Milano e ISPRA. Sono confronti, non cause (vedi i limiti dei dati).';
 }
 
-/* ---------- anni ---------- */
+/* ---------- 1. le 24 ore ---------- */
+function profilo(){
+  var O=P.ore,W=width('ch-profilo'),H=W<500?310:350,m={l:34,r:100,t:28,b:34},pw=W-m.l-m.r,ph=H-m.t-m.b,y0=18,y1=32;
+  function X(h){return m.l+h/23*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s=svgOpen(W,H),nn=night(),dn=mean(nn.map(function(o){return o.diff})),dp=mean(pom().map(function(o){return o.diff}));
+  s+='<rect x="'+X(0)+'" y="'+m.t+'" width="'+(X(5.5)-X(0))+'" height="'+ph+'" fill="#eef0f4"/><rect x="'+X(21.5)+'" y="'+m.t+'" width="'+(X(23)-X(21.5))+'" height="'+ph+'" fill="#eef0f4"/>';
+  s+=T(X(0)+5,m.t+14,'notte',{c:'m'});
+  for(var v=y0;v<=y1;v+=2){s+=L(m.l,Y(v),W-m.r,Y(v),v===y0?C.axis:C.grid)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})}
+  s+=T(m.l-28,m.t-12,'°C',{c:'m'});
+  for(var h=0;h<=21;h+=3)s+=L(X(h),Y(y0),X(h),Y(y0)+4,C.axis)+T(X(h),Y(y0)+18,h,{a:'middle',c:'m'});
+  s+=T(W-m.r,Y(y0)+31,'ora del giorno',{a:'end',c:'m'});
+  for(var i=0;i<23;i++){var a=O[i],b=O[i+1],d=(a.diff+b.diff)/2;
+    s+='<path d="M'+r1(X(i))+' '+r1(Y(a.citta))+'L'+r1(X(i+1))+' '+r1(Y(b.citta))+'L'+r1(X(i+1))+' '+r1(Y(b.campagna))+'L'+r1(X(i))+' '+r1(Y(a.campagna))+'Z" fill="'+(d>=0?C.ora:C.m4)+'" fill-opacity="'+(d>=0?.32:.22)+'"/>'}
+  function line(k,col,w){return '<path d="'+O.map(function(o,i){return (i?'L':'M')+r1(X(i))+' '+r1(Y(o[k]))}).join('')+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linejoin="round"/>'}
+  s+=line('campagna','#4a5160',2.6)+line('citta',C.mi,3.2);
+  var l=O[23];
+  s+=T(X(23)+8,Y(l.citta)+4,'Milano '+f1(l.citta),{c:'b',st:'fill:'+C.mi})+T(X(23)+8,Y(l.campagna)+4,'campagna '+f1(l.campagna),{c:'b',st:'fill:#4a5160'});
+  function nota(x,y,n){return '<g pointer-events="none"><circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="10" fill="'+C.ink+'"/>'+T(x,y+4.5,n,{a:'middle',c:'w'})+'</g>'}
+  var h1=2,a1=O[h1];
+  s+=L(X(h1),Y(a1.citta)+2,X(h1),Y(a1.campagna)-2,C.ink,1.6)+nota(X(h1)+17,(Y(a1.citta)+Y(a1.campagna))/2,'1');
+  var h2=14,a2=O[h2],top2=Y(Math.max(a2.citta,a2.campagna));
+  s+=nota(X(h2),top2-24,'2')+L(X(h2),top2-13,X(h2),top2-3,C.ink,1.4);
+  var cw=pw/23;
+  O.forEach(function(o,i){s+='<rect x="'+r1(X(i)-cw/2)+'" y="'+m.t+'" width="'+r1(cw)+'" height="'+ph+'" fill="transparent"'+tip('<b>Ore '+o.h+'</b><br>Milano '+f1(o.citta)+' °C<br>campagna '+f1(o.campagna)+' °C<br>differenza '+sg1(o.diff)+' °C')+'/>'});
+  $('ch-profilo').innerHTML=s+'</svg>';
+  $('t-profilo').textContent='Di notte Milano è '+f1(dn)+' °C più calda della campagna; a metà pomeriggio no';
+  $('s-profilo').textContent='Temperatura media di un’estate tipica, ora per ora. Tocca il grafico per leggere una singola ora.';
+  $('lg-profilo').innerHTML='<span><i class="ln" style="background:'+C.mi+'"></i>Milano</span><span><i class="ln" style="background:#4a5160"></i>campagna</span><span><i style="background:'+C.ora+';opacity:.5"></i>Milano più calda</span><span><i style="background:'+C.m4+';opacity:.4"></i>Milano più fresca</span>';
+  var mx=O.reduce(function(b,o){return o.diff>b.diff?o:b},O[0]);
+  $('nt-profilo').innerHTML='<li><b class="nb">1</b><span>Di notte (dalle 22 alle 5) la differenza è in media di '+sg1(dn)+' °C; il massimo è alle '+mx.h+' ('+sg1(mx.diff)+' °C). Edifici e asfalto restituiscono il calore preso di giorno.</span></li><li><b class="nb">2</b><span>Tra le 12 e le 16 la differenza è in media di '+sg1(dp)+' °C: la campagna è uguale o un po’ più calda. Alle '+O[15].h+' Milano ha '+f1(O[15].citta)+' °C, la campagna '+f1(O[15].campagna)+'.</span></li>';
+}
+
+/* ---------- 2. estate per estate ---------- */
 function anni(){
-  var A=D.notti_per_anno,keys=['Brera','Juvara','Marche','Zavattari','Feltre','Lambrate','Campagna (media)'];
-  var cols={Brera:'#111111',Juvara:'#d9611c',Marche:'#9467bd',Zavattari:'#8c564b',Feltre:'#2ca02c',Lambrate:'#17becf','Campagna (media)':'#8a8a8a'};
-  var r26=A[A.length-1];
-  setH('anni-testo','<p>Il numero di notti tropicali cambia molto da un&rsquo;estate all&rsquo;altra: nel 2014 (estate fresca) sono 14–29 al centro, nel 2022 <b>72–82</b>, nel <b>2026 '+r26.Marche+'–'+r26.Brera+'</b>. Il centro supera sempre la campagna (nel 2026: '+r26.Brera+' contro '+f0(r26['Campagna (media)'])+'). Le sei stazioni di Milano non sono uguali: da Feltre e Lambrate la linea sta sotto, vicina alla campagna. Non diciamo che il numero cresca nel tempo: con questi sensori e questi anni la linea sale e scende troppo, e i sensori cambiano (vedi i limiti).</p>');
-  function draw(){
-    var S=keys.map(function(k){return {nm:k,color:cols[k],w:k.indexOf('Campagna')===0?2.4:1.6,dash:k.indexOf('Campagna')===0,pts:A.map(function(r){return [r.a,r[k]]})}});
-    lineChart(el('ch-anni'),{series:S,f:function(v){return f0(v)+' notti'},yl:'notti tropicali in giugno–agosto',ymin:0,ymax:92,x0:2003,x1:2026});
-    setH('lg-anni',lgdSeries(S));
-  }
-  draw();RD.push(draw);
+  var A=D.notti_per_anno.filter(function(r){return r.Marche!=null});
+  var W=width('ch-anni'),rh=19,m={l:40,r:10,t:22,b:6},H=m.t+A.length*rh+m.b,pw=W-m.l-m.r-34;
+  function X(v){return m.l+22+v/92*pw}
+  var s=svgOpen(W,H);
+  [0,23,46,69,92].forEach(function(v){s+=L(X(v),m.t-4,X(v),H-m.b,C.grid)+T(X(v),m.t-8,v,{a:'middle',c:'m'})});
+  A.forEach(function(r,i){var y=m.t+i*rh+rh/2,c=r.Marche,k=r['Campagna (media)'],hi=(r.a===2022||r.a===2026);
+    if(hi)s+='<rect x="0" y="'+r1(y-rh/2)+'" width="'+W+'" height="'+rh+'" fill="#f1f2f5"/>';
+    s+=T(m.l-6,y+4.5,r.a,{a:'end',c:hi?'k':'m'});
+    var tp='<b>Estate '+r.a+'</b><br>via Marche: '+c+' notti tropicali<br>campagna: '+(k==null?'manca':f0(k))+' notti<br>Brera '+(r.Brera==null?'–':r.Brera)+' · Juvara '+(r.Juvara==null?'–':r.Juvara)+' · Zavattari '+(r.Zavattari==null?'–':r.Zavattari);
+    if(k!=null){s+=L(X(k),y,X(c),y,'#b9bfc9',3.5)+'<circle cx="'+r1(X(k))+'" cy="'+r1(y)+'" r="5.5" fill="#4a5160"/>'+T(X(k)-9,y+4.5,f0(k),{a:'end',c:'m',st:'font-weight:600'})}
+    s+='<circle cx="'+r1(X(c))+'" cy="'+r1(y)+'" r="6.5" fill="'+C.mi+'"/>'+T(X(c)+11,y+4.5,c,{c:'b',st:'fill:'+C.mi});
+    s+='<rect x="0" y="'+r1(y-rh/2)+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip(tp)+'/>'});
+  $('ch-anni').innerHTML=s+'</svg>';
+  var ok=A.filter(function(r){return r['Campagna (media)']!=null}),piu=ok.filter(function(r){return r.Marche>r['Campagna (media)']}).length;
+  var mn=A.reduce(function(b,r){return r.Marche<b.Marche?r:b},A[0]),mxr=A.reduce(function(b,r){return r.Marche>b.Marche?r:b},A[0]);
+  $('t-anni').textContent='In '+piu+' estati su '+ok.length+' il centro ha più notti tropicali della campagna: da '+mn.Marche+' ('+mn.a+') a '+mxr.Marche+' ('+mxr.a+')';
+  $('lg-anni').innerHTML='<span><i class="dot" style="background:'+C.mi+'"></i>via Marche (Isola)</span><span><i class="dot" style="background:#4a5160"></i>campagna</span><span>Righe grigie: 2022 e 2026</span>';
 }
 
-/* ---------- stazioni ---------- */
-function stazioni(){
-  var cl={urbana:'in Milano',cintura:'vicina, fuori comune',rurale:'campagna'};
-  table('tab-staz',['Stazione','Dove','Minima media (°C)','Notte (°C)','Pomeriggio (°C)','Notti tropicali / estate','Estate 2026','Distanza dal Duomo (km)','Estati'],ST.map(function(s){
-    return ['<b>'+esc(s.nome)+'</b> <span class="sub">'+esc(s.ufficiale)+'</span>',cl[s.classe]+(s.nil?'<br><span class="sub">'+esc(tit(s.nil))+'</span>':''),nf(s.tmin,1),sg(s.notte,1),sg(s.pom,1),nf(s.tropicali,0),s.trop26==null?'–':s.trop26,nf(s.km,0),s.estati]}));
+/* ---------- 3. termometri ---------- */
+function termometri(){
+  var S=D.stazioni.filter(function(s){return s.classe!=='rurale'}).sort(function(a,b){return b.notte-a.notte});
+  var W=width('ch-termometri'),rh=42,m={t:24,b:4},H=m.t+S.length*rh+m.b,lo=-1.6,hi=3.4,bx=14,x1=W-8;
+  function X(v){return bx+(v-lo)/(hi-lo)*(x1-bx)}
+  var s=svgOpen(W,H);
+  [-1,0,1,2,3].forEach(function(v){s+=L(X(v),m.t-2,X(v),H-m.b,v===0?C.ink:C.grid,v===0?1.6:1,v===0?' stroke-dasharray="4 3"':'')+T(X(v),m.t-8,v===0?'campagna':(v>0?'+':'−')+Math.abs(v),{a:'middle',c:'m'})});
+  S.forEach(function(st,i){var y=m.t+i*rh,col=st.classe==='urbana'?C.mi:C.gry,ty=y+28,xv=X(st.notte);
+    s+=T(2,y+15,esc(NAMES[st.id]||st.nome),{c:'k',st:'paint-order:stroke;stroke:#fff;stroke-width:3px'});
+    s+=T(W-4,y+15,sg1(st.notte)+' °C',{a:'end',c:'b',st:'paint-order:stroke;stroke:#fff;stroke-width:3px'});
+    s+='<rect x="'+bx+'" y="'+(ty-5)+'" width="'+(x1-bx)+'" height="10" rx="5" fill="#e6e8ec"/>';
+    s+='<rect x="'+bx+'" y="'+(ty-5)+'" width="'+r1(xv-bx)+'" height="10" rx="5" fill="'+col+'"/>';
+    s+='<circle cx="'+bx+'" cy="'+ty+'" r="9" fill="'+col+'"/>';
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+esc(NAMES[st.id]||st.nome)+'</b><br>di notte '+sg1(st.notte)+' °C sulla campagna<br>di pomeriggio '+sg1(st.pom)+' °C<br>notti tropicali per estate: '+f0(st.tropicali)+'<br>a '+f1(st.km)+' km dal Duomo')+'/>'});
+  $('ch-termometri').innerHTML=s+'</svg>';
+  var ju=stz('5909'),fe=stz('8162');
+  $('t-termometri').textContent='Di notte, tra due termometri di Milano a meno di '+Math.ceil(kmDist(ju,fe))+' km ci sono '+f1(ju.notte-fe.notte)+' °C di differenza';
 }
 
-/* ---------- alberi ---------- */
-function alberi(){
-  var U=urb().slice().sort(function(a,b){return a.alberi_ha-b.alberi_ha});
-  setH('alberi-testo','<p>Il Comune pubblica gli alberi che gestisce. Contandoli nel cerchio di 500 m intorno a ogni stazione, si vede che le due stazioni dell&rsquo;est (Lambrate e Feltre) hanno <b>37 e 43 alberi per ettaro</b>, le quattro del centro, nord e ovest da <b>6 a 21</b>. Sono anche le due con la notte meno calda ('+sg(sById('2001').notte,1)+' e '+sg(sById('8162').notte,1)+' °C contro '+sg(sById('5920').notte,1)+' / '+sg(sById('5909').notte,1)+' °C). Brera, che ha meno alberi di tutte (6 per ettaro), non è però la più calda: l&rsquo;ordine non è proporzionale.</p>');
-  var mx=Math.max.apply(null,U.map(function(s){return s.alberi_ha}));
-  table('tab-alb',['Stazione','Quartiere','Alberi entro 500 m','Alberi per ettaro','Notte (°C)','Notti tropicali / estate'],U.map(function(s){
-    return [esc(s.nome),esc(tit(s.nil)),f0(s.alberi_500m),'<div class="bars"><div class="row" style="grid-template-columns:1fr 36px"><span class="tr"><span class="fill" style="width:'+(s.alberi_ha/mx*100)+'%"></span></span><span class="v">'+nf(s.alberi_ha,1)+'</span></div></div>',sg(s.notte,1),nf(s.tropicali,0)]}));
+/* ---------- 4. la mappa ---------- */
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(lng,lat){return[1+(lng*k-x0)*sc,1+(y1-lat)*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+function rkHot(o){var n=0;N.forEach(function(x){if(x.cal>o.cal)n++});return n}
+function mappa(){
+  var W=width('ch-mappa'),P2=proj(W),H=P2.H,s=svgOpen(W,H),sS='';
+  var cnt=[0,0,0,0,0];N.forEach(function(o){cnt[mc(o.cal)]++});
+  N.forEach(function(o){var c=mc(o.cal),isS=o.i===sel;
+    var tp='<b>'+esc(o.n)+'</b><br>indice di calore '+f2(o.cal)+'<br>suolo coperto '+f0(o.suolo)+'%<br>'+f0(rkHot(o))+' quartieri su '+(N.length-1)+' sono più caldi';
+    var el='<path d="'+P2.path(o.f)+'" fill="'+MCOL[c]+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.i+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el});
+  s+=sS;
+  var pl=placer(W,H,4),pts=[];
+  D.stazioni.filter(function(x){return x.classe==='urbana'}).forEach(function(st){var p=P2.pt(st.lng,st.lat);pts.push({st:st,x:p[0],y:p[1]});pl.block(p[0]-8,p[1]-8,p[0]+8,p[1]+8)});
+  var lab='',dots='';
+  pts.forEach(function(q){dots+='<circle cx="'+r1(q.x)+'" cy="'+r1(q.y)+'" r="6" fill="'+C.ink+'" stroke="#fff" stroke-width="2"'+tip('<b>'+esc(NAMES[q.st.id])+'</b><br>di notte '+sg1(q.st.notte)+' °C sulla campagna')+'/>'});
+  var pref={'5897':['l','dl','u','d'],'5909':['d','dr','r','u'],'5911':['l','ul','u','r'],'5920':['l','ul','u','d'],'2001':['u','ul','l','d'],'8162':['d','dl','l','dr']};
+  var ld='';
+  pts.forEach(function(q){var t=SHORT[q.st.id]+' '+sg1(q.st.notte),r=pl.place(q.x,q.y,t,6,pref[q.st.id]);ld+=lead(q.x,q.y,r);lab+=T(r.x,r.y,esc(t),{c:'halo',st:'font-size:13px;pointer-events:none'})});
+  if(sel){var o=BY[sel],b=P2.bb(o.f),t=o.sn,r=pl.place(b.x,b.y,t,3,['u','d','r','l']);ld+=lead(b.x,b.y,r);lab+=T(r.x,r.y,esc(t),{c:'halo',st:'font-size:13px;pointer-events:none;fill:'+C.mi})}
+  s+=ld+dots+lab;
+  $('ch-mappa').innerHTML=s+'</svg>';
+  $('lg-mappa').innerHTML=MCOL.map(function(c,i){return '<span><i style="background:'+c+';border:1px solid #d0d3d9"></i>'+MLAB[i]+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i class="dot" style="background:'+C.ink+'"></i>termometro</span>';
+  var cn=concordanti();
+  $('t-mappa').textContent=cnt[4]+' quartieri su '+N.length+' sono nella fascia più calda per il satellite; i '+ANC.length+' con un termometro seguono lo stesso ordine';
+  var m=ANC.map(function(a){return a.nome+' (indice '+f2(a.cal)+', di notte '+sg1(a.notte)+' °C)'});
+  $('nn-mappa').innerHTML='Dal più caldo di notte al più fresco: '+m.join('; ')+'. '+(cn.n===cn.t?'Satellite e termometri mettono questi quartieri nello stesso ordine.':'')+(sel?' Quartiere scelto, con il bordo rosso: <b>'+esc(BY[sel].n)+'</b> (<a href="#tuo">vai alla scheda</a>).':'');
 }
 
-/* ---------- metodo ---------- */
+/* ---------- 5. suolo contro calore ---------- */
+function suolo(){
+  var W=width('ch-suolo'),H=W<500?300:340,m={l:44,r:12,t:14,b:44},pw=W-m.l-m.r,ph=H-m.t-m.b,x0=20,x1=100,y0=0.2,y1=0.65;
+  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
+  var s=svgOpen(W,H);
+  [0.2,0.3,0.4,0.5,0.6].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,fd(v,1),{a:'end',c:'m'})});
+  [20,40,60,80,100].forEach(function(v){s+=L(X(v),m.t,X(v),Y(y0),v===20?C.axis:C.grid)+T(X(v),Y(y0)+17,v+(v===100?'%':''),{a:'middle',c:'m'})});
+  s+=T(m.l+pw/2,H-6,'suolo coperto da edifici e strade (%)',{a:'middle',c:'m'});
+  s+=T(2,m.t+4,'indice di calore',{c:'m'});
+  var hot=N.filter(function(o){return o.suolo>=85}),mn=Math.min.apply(null,hot.map(function(o){return o.cal}));
+  s+=L(X(85),m.t,X(85),Y(y0),C.ink,1.2,' stroke-dasharray="4 3"');
+  var anc={};ANC.forEach(function(a){anc[a.nil]=a});
+  N.forEach(function(o){if(anc[o.i]||o.i===sel)return;s+='<circle cx="'+r1(X(o.suolo))+'" cy="'+r1(Y(o.cal))+'" r="5" fill="'+MCOL[mc(o.cal)]+'" stroke="#8a5a2b" stroke-opacity=".55" stroke-width="1"'+tip('<b>'+esc(o.n)+'</b><br>suolo coperto '+f0(o.suolo)+'%<br>indice di calore '+f2(o.cal))+'/>'});
+  var pl=placer(W,H,2),sp=[];
+  N.forEach(function(o){if(anc[o.i]||o.i===sel){var x=X(o.suolo),y=Y(o.cal);pl.block(x-7,y-7,x+7,y+7);sp.push({o:o,x:x,y:y,a:!!anc[o.i]})}});
+  var ldl='',lbl='',cir='';
+  sp.forEach(function(q){var isS=q.o.i===sel,t=q.o.sn,r=pl.place(q.x,q.y,t,7,['l','d','u','r','dl','ul','dr','ur']);ldl+=lead(q.x,q.y,r);
+    cir+='<circle cx="'+r1(q.x)+'" cy="'+r1(q.y)+'" r="'+(isS?8:6.5)+'" fill="'+(isS?C.mi:C.ink)+'" stroke="#fff" stroke-width="2"'+tip('<b>'+esc(q.o.n)+'</b><br>suolo coperto '+f0(q.o.suolo)+'%<br>indice di calore '+f2(q.o.cal)+(q.a?'<br>ha un termometro: di notte '+sg1(anc[q.o.i].notte)+' °C':''))+'/>';lbl+=T(r.x,r.y,esc(t),{c:'halo',st:'font-size:13px;pointer-events:none;fill:'+(isS?C.mi:C.ink)})});
+  s+=ldl+cir+lbl;
+  $('ch-suolo').innerHTML=s+'</svg>';
+  $('t-suolo').textContent='Con almeno l’85% di suolo coperto, ognuno dei '+hot.length+' quartieri ha un indice di calore di '+f2(mn)+' o più';
+  $('s-suolo').textContent='Ogni pallino è un quartiere, del colore della sua fascia di calore (come nella mappa). In scuro i quartieri con un termometro; la linea tratteggiata è l’85% di suolo coperto.';
+}
+
+/* ---------- 6. verde per fascia ---------- */
+function verde(){
+  var B=N.filter(function(o){return o.big}),W=width('ch-verde'),rh=50,H=5*rh+6,s=svgOpen(W,H),R=[];
+  for(var c=4;c>=0;c--){var g=B.filter(function(o){return mc(o.cal)===c});R.push({c:c,n:g.length,v:g.length?mean(g.map(function(o){return o.mA})):0})}
+  var mx=Math.max.apply(null,R.map(function(r){return r.v}));
+  R.forEach(function(r,i){var y=i*rh+3,vt=f1(r.v)+' m²',bw=W-Math.ceil(tw(vt,13,true))-14,w=Math.max(3,r.v/mx*bw);
+    s+='<rect x="0" y="'+(y+1)+'" width="12" height="12" fill="'+MCOL[r.c]+'" stroke="#d0d3d9"/>'+T(18,y+12,'Indice '+MLAB[r.c]+' · '+r.n+' quartieri',{c:'k'});
+    s+='<rect x="0" y="'+(y+20)+'" width="'+r1(w)+'" height="20" fill="'+MCOL[r.c]+'" stroke="#d0d3d9" rx="2"'+tip('<b>Indice '+MLAB[r.c]+'</b><br>'+r.n+' quartieri<br>'+f1(r.v)+' m² di parchi e giardini per residente, in media')+'/>'+T(w+6,y+35,vt,{c:'b'})});
+  $('ch-verde').innerHTML=s+'</svg>';
+  $('t-verde').textContent='Dove l’indice di calore è più alto ci sono in media '+f1(R[0].v)+' m² di parchi a testa; dove è più basso '+f1(R[4].v);
+}
+
+/* ---------- il tuo quartiere ---------- */
+function pair(id,titolo,qv,cv,qcol,fmt,mx,u){
+  var h='<div class="pm"><b>'+titolo+'</b><div class="ch" id="'+id+'"></div></div>';
+  return{h:h,draw:function(){
+    var box=$(id),W=Math.max(220,Math.floor(box.clientWidth)),lw=62,rw=Math.ceil(tw(fmt(Math.max(qv,cv))+(u||''),13,true))+10,bw=W-lw-rw,s=svgOpen(W,56);
+    [{n:'Qui',v:qv,col:qcol},{n:'Mediana',v:cv,col:C.ink2}].forEach(function(r,i){var y=i*26+3;
+      var w=Math.max(3,r.v/mx*bw);s+=T(0,y+16,r.n,{c:'k'})+'<rect x="'+lw+'" y="'+y+'" width="'+r1(w)+'" height="20" fill="'+r.col+'" rx="2"/>'+T(lw+w+6,y+16,fmt(r.v)+(u||''),{c:'b'})});
+    box.innerHTML=s+'</svg>'}};
+}
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure toccalo sulla mappa: ti dico quanto è caldo per il satellite, quanto suolo è coperto, quanti alberi ci sono e che cosa dice il termometro più vicino.';return}
+  var o=BY[sel],mine=ANC.filter(function(a){return a.nil===o.i})[0];
+  var h='<b class="big">'+esc(o.n)+'</b>'+f0(o.ab)+' residenti.';
+  var n=rkHot(o);
+  h+='<p>Per il satellite (luglio 2024) '+(n===0?'è il quartiere più caldo di Milano':'ci sono '+n+' quartieri più caldi su '+(N.length-1))+'. Indice di calore '+f2(o.cal)+'.</p>';
+  if(mine){var ss=mine.sts.map(stz);h+='<p><b>Qui c’è un termometro</b> ('+mine.sts.map(function(i){return esc(NAMES[i])}).join(' e ')+'): di notte, in estate, è '+sg1(mine.notte)+' °C sopra la campagna; in media '+f0(mean(ss.map(function(s){return s.tropicali})))+' notti tropicali per estate.</p>'}
+  else{var st=stz(o.st);h+='<p>Il termometro più vicino è <b>'+esc(NAMES[o.st])+'</b>, a '+f1(o.dst)+' km dal centro del quartiere: di notte, in estate, è '+sg1(st.notte)+' °C sopra la campagna. Non misura il tuo quartiere.</p>';
+    var near=ANC.slice().sort(function(a,b){return Math.abs(a.cal-o.cal)-Math.abs(b.cal-o.cal)})[0],lowest=ANC[ANC.length-1];
+    if(o.cal<lowest.cal-0.04)h+='<p>Per il satellite è più fresco anche di '+esc(lowest.nome)+' (indice '+f2(lowest.cal)+'), il quartiere con un termometro dove la notte è meno calda: lì è '+sg1(lowest.notte)+' °C sopra la campagna.</p>';
+    else h+='<p>Per il satellite somiglia a <b>'+esc(near.nome)+'</b> (indice '+f2(near.cal)+'), dove il termometro dice '+sg1(near.notte)+' °C di notte. È un paragone, non una misura.</p>'}
+  var B=N.filter(function(x){return x.big}),mS=med(N.map(function(x){return x.suolo})),mAl=med(N.map(function(x){return x.albkm2})),mC=med(N.map(function(x){return x.cal})),mV=med(B.map(function(x){return x.mA}));
+  var Pp=[pair('pm1','Indice di calore dal satellite (0–1)',o.cal,mC,C.ora,f2,0.7),
+         pair('pm2','Suolo coperto da edifici e strade (%)',o.suolo,mS,C.m5,f0,100,'%'),
+         pair('pm3','Alberi del Comune per km²',o.albkm2,mAl,C.m2,f0,Math.max(o.albkm2,mAl))];
+  if(o.big)Pp.push(pair('pm4','Parchi e giardini per residente (m²)',o.mA,mV,C.teal,f1,Math.max(o.mA,mV,1),' m²'));
+  r.innerHTML=h+Pp.map(function(p){return p.h}).join('')+'<p style="font-size:.82rem;color:var(--mut)">La mediana è il valore di mezzo tra gli 88 quartieri'+(o.big?' (per i parchi: tra i 64 con almeno 5.000 residenti)':'')+'. Alberi: solo quelli che il Comune gestisce.</p>';
+  Pp.forEach(function(p){p.draw()});
+}
+
+/* ---------- tabella termometri ---------- */
+function stazioniTab(){
+  var cl={urbana:'in Milano',cintura:'fuori comune',rurale:'campagna'};
+  var rows=D.stazioni.map(function(s){return '<tr><td>'+esc(s.nome)+'</td><td style="text-align:left">'+cl[s.classe]+'</td><td>'+(s.classe==='rurale'?'–':sg1(s.notte))+'</td><td>'+(s.classe==='rurale'?'–':sg1(s.pom))+'</td><td>'+f1(s.tmin)+'</td><td>'+f0(s.tropicali)+'</td><td>'+(s.trop26==null?'–':s.trop26)+'</td></tr>'}).join('');
+  $('tab-staz').innerHTML='<thead><tr><th>Termometro</th><th style="text-align:left">Dove</th><th>Notte (°C)</th><th>Pomeriggio (°C)</th><th>Minima media (°C)</th><th>Notti trop. / estate</th><th>Estate 2026</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var L=[
+   '<b>Sei termometri, non una carta del caldo.</b> Dentro Milano ci sono sei stazioni di ARPA, in cinque quartieri (via Feltre e Lambrate sono nello stesso). Per gli altri quartieri non sappiamo quanto sia la differenza di notte: c’è solo l’indice da satellite.',
+   '<b>L’indice da satellite non è una temperatura.</b> È un numero da 0 a 1 calcolato dal Comune su immagini di luglio 2024; il metodo sta su un portale che chiede la registrazione, che non abbiamo fatto, quindi non sappiamo a che ora del giorno si riferisca né se tenga conto della vegetazione. Se la tiene in conto, il legame con il verde è in parte scontato.',
+   '<b>Che cosa è «più caldo».</b> Per ogni istante con almeno 3 stazioni di campagna attive, la temperatura della stazione meno la media di quelle di campagna; poi la media per ora del giorno nelle estati (giugno–agosto). Il minimo e il massimo del giorno sono calcolati dalle letture alle ore :00 (giorno valido con almeno 20 ore su 24). Orari in ora solare.',
+   '<b>La «campagna» l’abbiamo scelta noi</b>, per nome e distanza (più di 12 km dal Duomo, paesi piccoli e cascine); alcune stazioni (Rodano, Lacchiarella) sono dentro paesi. Le singole stazioni di campagna si discostano dalla loro media di circa mezzo grado: <b>le differenze città–campagna hanno un’incertezza di circa ±0,5 °C</b>.',
+   '<b>I sensori cambiano.</b> Molte stazioni hanno salti propri di 0,4–2 °C. Parco Nord passa da +0,9 °C (2003–2007) a −1,3 °C dal 2011; Lambrate da +1,5 (2007) a −1,8 (2011) e di nuovo +1,1 (2012); Feltre scende di circa 1,8 °C dal 2008 al 2014: potrebbe essere cambiato l’ambiente o il sensore, non lo sappiamo. Per questo i confronti tra stazioni si fanno solo sulle estati 2017–2025 e <b>non diciamo se l’isola di calore cresce</b>.',
+   '<b>Brera 2008–2016.</b> Nella pagina <a href="../temperature/">Temperature</a> si è trovato che il sensore di Brera dal dicembre 2007 al settembre 2016 è circa 0,65 °C più caldo delle vicine. Qui non pesa: per il confronto tra stazioni usiamo solo il 2017–2025.',
+   '<b>Notti tropicali prima del 1996: sospette.</b> Le quattro stazioni del centro danno 39–69 notti tropicali per estate nel 1991–1994 e 25–40 nel 1996–1997. Rispetto a Linate (NOAA) la minima delle stazioni milanesi passa da +4/+6 °C (1990–91) a +1 (1995–2005) a +2/+3 (dopo il 2006): non si capisce quanto sia clima e quanto sensore. Per questo il grafico parte dal 2003. Tra il 2003 e il 2016 alcune stazioni mancano a tratti: per questo il grafico segue una sola, via Marche, che ha dati in tutte le estati.',
+   '<b>Notte tropicale</b> = giorno solare con minima di almeno 20,0 °C dalle letture orarie (la notte vera attraversa la mezzanotte: il minimo del giorno è di solito quello prima dell’alba).',
+   '<b>Termometri e quartieri.</b> Ogni termometro è assegnato al quartiere (NIL) in cui cade. Rho, Corsico e Parco Nord sono fuori Milano. Il «termometro più vicino» è misurato dal centro del quartiere: nei quartieri grandi può essere lontano.',
+   '<b>Suolo, verde e alberi.</b> Il suolo coperto è un dato ISPRA a 10 metri; il verde sono i parchi e i giardini disegnati dal Comune, e la media per fascia è tirata su dai pochi quartieri con un grande parco; gli alberi sono quelli che il Comune gestisce (non i giardini privati né i parchi di altri enti). Un quartiere con molto suolo coperto, poco verde e tanto caldo ha tutti e tre i fattori insieme: non si può dire quale conti.',
+   '<b>Dati mancanti.</b> Il valore −999 vuol dire «manca» (0,9% delle righe), scartato; il blocco ARPA «dal 2021» finisce il 1 marzo 2026 e «mese in corso» riprende ai primi di aprile: non tocca le estati.',
+   '<b>Non fatto.</b> Nessuna carta continua del caldo di notte (servono dati satellitari notturni), nessuna correzione dei salti dei sensori.'
+  ];
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
 function metodo(){
-  var R=D.riep;
   var L=[
-   '<b>Che cosa è «più caldo».</b> Per ogni istante con almeno 3 stazioni di campagna attive, la temperatura della stazione meno la media delle stazioni di campagna ('+R.rurali_scelti.map(esc).join(', ')+'); poi la media per ora del giorno nelle estati (giugno–agosto). Il minimo e il massimo del giorno sono calcolati dalle letture alle ore :00 (giorno valido con almeno 20 ore su 24): l&rsquo;estremo vero tra due letture può essere un po&rsquo; più alto o più basso, nello stesso modo per tutte le stazioni e per tutti gli anni. Orari in ora solare.',
-   '<b>La «campagna» l&rsquo;abbiamo scelta noi</b>, per nome e distanza (più di 12 km dal Duomo, paesi piccoli e cascine): non c&rsquo;è in questo progetto una carta dell&rsquo;uso del suolo. Alcune (Rodano, Lacchiarella) sono dentro paesi. Le singole stazioni di campagna si discostano dalla loro media di circa mezzo grado (da −0,85 a +0,68 °C di notte): <b>le differenze città–campagna hanno un&rsquo;incertezza di circa ±0,5 °C</b>. Senza classi: la minima media estiva scende da 21,4–22,0 °C entro 4 km dal Duomo a 19,3 a 6 km e a 18,1–19,5 °C tra 13 e 30 km.',
-   '<b>I sensori cambiano.</b> Molte stazioni ARPA hanno salti propri di 0,4–2 °C. Esempi (differenza di notte rispetto alla campagna, <code>caldo_isola_anno.csv</code>): Parco Nord da +0,9 °C (2003–2007) a −1,3 °C dal 2011; Lambrate da +1,5 (2007) a −1,8 (2011) e di nuovo +1,1 (2012); Zavattari sale di circa 1 °C di notte e di 1,5 °C di giorno dal 2019; Feltre scende di circa 1,8 °C dal 2008 al 2014, da +1,4/+2,6 a +0,1/+0,4: potrebbe essere cambiato l&rsquo;ambiente o il sensore, non lo sappiamo. Per questo i confronti tra stazioni si fanno solo sulle estati 2017–2025 e <b>non diciamo se l&rsquo;isola di calore cresce</b>.',
-   '<b>Brera 2008–2016.</b> Nel pagina <a href="../temperature/">Temperature</a> si è trovato che il sensore di Brera dal dicembre 2007 al settembre 2016 è circa 0,65 °C più caldo delle vicine (nuovi sensori a luglio 2016). Qui compare nei numeri 2002–2016 della curva; per il confronto tra stazioni usiamo solo il 2017–2025.',
-   '<b>Notti tropicali prima del 1996: sospette.</b> Brera, Juvara, Marche e Zavattari danno 39–69 notti tropicali per estate nel 1991–1994 e 25–40 nel 1996–1997. Rispetto a Linate (NOAA) la minima delle stazioni milanesi passa da +4/+6 °C (1990–91) a +1 (1995–2005) a +2/+3 (dopo il 2006): non si capisce quanto sia clima e quanto sensore. Per questo il grafico parte dal 2003 e non c&rsquo;è un «dal 1990».',
-   '<b>Notte tropicale</b> = giorno solare con minima di almeno 20,0 °C dalle letture orarie (la notte vera attraversa la mezzanotte: il minimo del giorno è di solito quello prima dell&rsquo;alba).',
-   '<b>Stazioni e quartieri.</b> Ogni stazione è assegnata al NIL in cui cade (punto in poligono, ds964). Corsico, Parco Nord (Cinisello Balsamo) e Rho sono fuori Milano; gli alberi del Comune non coprono fuori città, quindi per queste il conteggio non c&rsquo;è.',
-   '<b>Dati mancanti.</b> Il valore -999 vuol dire «manca» (0,9% delle righe), scartato; il blocco ARPA «dal 2021» finisce il 1 marzo 2026 e «mese in corso» riprende ai primi di aprile: non tocca le estati.',
-   '<b>Non fatto.</b> Nessuna carta continua del calore (servono dati satellitari), nessun confronto con la copertura del suolo, nessuna correzione dei salti dei sensori.'
+   'Tutti i numeri sono calcolati dai file di questa pagina quando si apre.',
+   'Temperature: letture ARPA Lombardia ogni ora (dal 2014 ogni 10 minuti, ridotte all’ora); estati 2017–2025 per ora del giorno e per termometro; estati 2003–2026 per le notti tropicali. Giugno–agosto, ora solare.',
+   'Curva delle 24 ore: temperatura media di Milano (media di almeno 4 delle 6 stazioni) e della campagna (media di almeno 3 delle 7), nello stesso istante; poi media per ora.',
+   'Quartieri: indice di calore, suolo, alberi e parchi dal file della pagina Parchi e verde; distanza dal termometro più vicino calcolata dal baricentro del quartiere.',
+   'Fasce di colore dell’indice: meno di 0,40, 0,40–0,49, 0,50–0,54, 0,55–0,58, 0,59 o più. Confronto «stesso ordine»: per ogni coppia di quartieri con un termometro, il più caldo di notte ha anche l’indice uguale o più alto.'
   ];
-  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
-}
-
-/* ---------- fonti ---------- */
-function fonti(){
-  var L=[
-   '<b>ARPA Lombardia</b>, sensori di temperatura della rete idro-nivo-meteorologica: «Temperatura fino al 2010» (<code>6eu4-4tja</code>), «dal 2011 al 2020» (<code>d4kj-kbpj</code>), «dal 2021» (<code>w9wd-u6jh</code>), «Dati sensori meteo» (<code>647i-nhxk</code>); anagrafica «Stazioni Idro Nivo Meteorologiche» (<code>nf78-nj6b</code>); da <a href="https://www.dati.lombardia.it/">dati.lombardia.it</a>, scaricati il 1 novembre 2026. Licenza <b>Creative Commons 1.0 Universal (CC0, pubblico dominio)</b>; attribuzione: ARPA Lombardia. Dati fino al 1 novembre 2026 (l&rsquo;estate 2026 è completa).',
-   '<b>Alberi</b>: Comune di Milano, «Territorio: localizzazione degli alberi» (ds2484), edizione 31 marzo 2025, licenza CC BY, scaricato il 1 novembre 2026; <b>confini dei quartieri (NIL)</b>: Comune di Milano (ds964, CC BY). Mappa © contributori di OpenStreetMap.',
-   '<b>Confronto con Linate</b> (nota sulle notti prima del 1996): NOAA GSOD, dominio pubblico, dalla pagina <a href="../temperature/">Temperature</a>.'
-  ];
-  setH('fonti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 })();
 </script>

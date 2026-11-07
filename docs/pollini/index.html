@@ -1,420 +1,544 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · Pollini: la pianura attorno a Milano</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · Pollini e allergie</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0} .warm p{margin:.4em 0}
-.map{height:56vh;min-height:340px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:normal} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,34%) 1fr 130px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.fo{margin:.4em 0} .fo .row{display:grid;grid-template-columns:minmax(96px,26%) 1fr 150px;gap:6px;align-items:center;font-size:.88rem;padding:3px 0}
-.fo .tr{position:relative;height:16px;background:linear-gradient(#f4f4f4,#f4f4f4);} .fo .z{position:absolute;top:-3px;height:22px;border-left:1px solid #555}
-.fo .ci{position:absolute;top:7px;height:3px;background:#9a9a9a} .fo .ci.s{background:var(--acc);height:4px;top:6px} .fo .dot{position:absolute;top:3px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#9a9a9a;border:1px solid #fff} .fo .dot.s{background:var(--acc)}
-.fo .v{font-variant-numeric:tabular-nums;font-size:.82rem}
-.fo .ax{display:grid;grid-template-columns:minmax(96px,26%) 1fr 150px;gap:6px;font-size:.75rem;color:var(--mut)} .fo .ax span.t{position:relative;height:14px}
-.fo .ax span.t b{position:absolute;font-weight:400;transform:translateX(-50%);white-space:nowrap}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .fo .row,.fo .ax{grid-template-columns:1fr} .fo .ax span.n,.fo .ax span.e{display:none} .bars .row{grid-template-columns:1fr}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-.nums{display:flex;flex-wrap:wrap;gap:8px 22px;margin:.5em 0} .nums div{min-width:120px} .nums b{display:block;font-size:1.5rem;color:var(--acc);line-height:1.1}
-td.cl{font-weight:700} td.n{color:var(--mut)}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --blu:#0072BC;    /* M4 */
+  --tur:#F58220;    /* arancio della home */
+  --giallo:#FFD500;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .h{paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px;flex:none}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.lg i.vuoto{background:#fff!important;border:1px solid #cfd3da}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:.6em 0}
+.chips button{font:inherit;font-size:.92rem;padding:9px 13px;min-height:44px;border:2px solid var(--ink);background:#fff;color:var(--ink);border-radius:22px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff}
+#card{border:2px solid var(--ink);padding:10px 14px 12px;margin-top:10px}
+#card h3{margin:.1em 0 .1em;font-size:1.15rem}
+#card p{margin:.35em 0;font-size:.92rem;color:var(--ink2)}
+#card .agg{font-size:.82rem;color:var(--mut);font-weight:400}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:.5em 0 .2em}
+.nums div{background:var(--soft);padding:6px 9px;font-size:.84rem;color:var(--ink2);line-height:1.25}
+.nums b{display:block;font-size:1.35rem;color:var(--ink);line-height:1.1}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>Pollini: la pianura attorno a Milano</h1>
-<p>Quando comincia la stagione dei pollini, quanto dura, quanto polline c&rsquo;&egrave; nell&rsquo;aria, e se negli anni cambia. I dati aperti vengono dalle stazioni della rete nazionale POLLnet (ISPRA e agenzie regionali) che stanno <b>nella pianura attorno a Milano, a 45&ndash;75 km dal Duomo</b>, dal 2007 al 2026. Si parla di undici tipi di polline: nocciolo, ontano, cipressi, platano, betulla, frassino, quercia, graminacee, urticacee (la parietaria), artemisia e ambrosia.</p>
 
-<div class="warm"><p><b>Prima di leggere.</b></p><ul>
-<li><b>Per la citt&agrave; di Milano non c&rsquo;&egrave; una serie aperta di pollini giorno per giorno.</b> Il monitoraggio a Milano lo fa l&rsquo;ATS Citt&agrave; Metropolitana di Milano (stazioni di Milano, Legnano, Rho, Magenta e Lodi), ma mette online solo il bollettino della settimana in corso, a classi (assente, bassa, media, alta), e un calendario riassuntivo 2016-2025. La Lombardia non ha stazioni in POLLnet.</li>
-<li><b>Le stazioni aperte pi&ugrave; vicine sono 45&ndash;60 km</b> (Novara 45 km, Piacenza 59, Vercelli 63; poi Alessandria 75 e Omegna 77; Verona 141). Qui sono usate come &laquo;la pianura padana attorno a Milano&raquo;: stesse piante e stagioni simili, ma <b>non sono i numeri di Milano</b>.</li>
-<li>Per Milano ci sono solo due numeri di testata dell&rsquo;ambrosia (2024 e 2025, dalle note della Regione) e il calendario ATS, che qui sta accanto alla stagione misurata a Novara.</li>
-<li>Le serie sono corte (11-20 anni) e le stagioni cambiano molto da un anno all&rsquo;altro: quasi nessuna tendenza &egrave; sicura. Dove non lo &egrave;, lo diciamo. Tutti i dettagli sono nei <a href="#limiti">limiti dei dati</a>.</li></ul></div>
+<h1>Pollini: le stagioni delle allergie attorno a Milano</h1>
+<p class="lead">Quando c&rsquo;&egrave; nell&rsquo;aria il polline che fa starnutire, quanto &egrave; forte e se le stagioni si stanno spostando. A Milano non c&rsquo;&egrave; una serie aperta di misure giorno per giorno: i dati vengono da sei stazioni della pianura padana, le pi&ugrave; vicine a 45 km dal Duomo, dal 2007 al 2026.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="hl" id="hl"></div>
+<p class="src">Misure: ISPRA - POLLnet (CC BY 4.0), fino a ottobre 2026. Per la citt&agrave; di Milano ci sono solo il calendario dell&rsquo;ATS e due numeri dell&rsquo;ambrosia. Le serie sono corte e le stagioni cambiano molto da un anno all&rsquo;altro: dove una tendenza non &egrave; sicura, lo diciamo.</p>
 
-<h2 id="calendario">Il calendario dei pollini</h2>
-<div id="cal-testo"></div>
-<div class="ctl"><label class="sub" for="cal-st">Stagione misurata a:</label><select id="cal-st" aria-label="Stazione"></select></div>
-<div class="ch" id="ch-cal" role="img" aria-label="Calendario: classi ATS Milano per decade e stagione misurata, per tipo di polline"></div>
-<div class="lgd" id="lg-cal"></div>
-<p class="src">Sfondo: calendario pollinico di Milano e provincia 2016-2025 dell&rsquo;ATS Citt&agrave; Metropolitana di Milano (classi lette dalle caselle colorate del suo PDF: i limiti di classe sono quelli dell&rsquo;ATS, non identici a quelli POLLnet). Barra e punto: dal 5% al 95% del polline dell&rsquo;anno e giorno di massimo, mediana degli anni validi, dati POLLnet (ISPRA, CC BY 4.0).</p>
-<div class="scroll"><table id="tab-tip"></table></div>
+<!-- ============ 1 ============ -->
+<h2 id="anno">Un anno di allergie</h2>
+<div class="fig" id="g-nastro">
+  <h3 id="t-nastro"></h3>
+  <p class="sub">Ogni riga &egrave; un polline, ogni casella dieci giorni. Il colore &egrave; il giorno peggiore di quei dieci giorni. In alto l&rsquo;anno tipico, in basso il 2026.</p>
+  <div class="lg" id="lg-nastro"></div>
+  <div class="ch" id="ch-nastro" role="img" aria-label="Nastro dell'anno: per ogni polline, l'intensit&agrave; ogni dieci giorni in un anno tipico e nel 2026"></div>
+  <p class="note" id="nt-nastro"></p>
+  <p class="src">Fonte: ISPRA - POLLnet (CC BY 4.0), elaborazione nostra. Anno tipico: mediana degli anni validi 2007-2025 di sei stazioni. I livelli sono le soglie POLLnet per ogni polline. Le caselle bianche sono dieci giorni senza abbastanza misure, o non ancora arrivati.</p>
+</div>
 
-<h2 id="anni">Anno per anno, polline per polline</h2>
-<p>Scegli il polline e la stazione. Il primo grafico mostra, per ogni anno, la stagione (dal 5% al 95% del polline annuo) e il giorno di massimo. Il secondo, quanto polline c&rsquo;&egrave; stato in tutto l&rsquo;anno. Gli anni in grigio <b>non sono validi</b>: ci sono troppi buchi nelle misure per fidarsi.</p>
-<div class="ctl" id="tx-btn"></div>
-<div class="ctl"><label class="sub" for="an-st">Stazione:</label><select id="an-st" aria-label="Stazione"></select></div>
-<h3>La stagione, anno per anno</h3>
-<div class="ch" id="ch-range" role="img" aria-label="Inizio, picco e fine della stagione per anno"></div>
-<div class="lgd" id="lg-range"></div>
-<h3>Quanto polline in un anno</h3>
-<p class="sub">Integrale annuo: somma dei valori giornalieri in granuli al metro cubo d&rsquo;aria, giorno per giorno (granuli &times; giorni / m&sup3;). Se mancano giorni &egrave; un minimo.</p>
-<div class="ch" id="ch-integ" role="img" aria-label="Integrale annuo per anno"></div>
-<div id="an-note" class="sub"></div>
-<p class="src">Fonte: ISPRA - POLLnet, concentrazioni giornaliere (CC BY 4.0), elaborazione nostra. Anno valido = integrale almeno 30; giorni campionati almeno 75% dentro la stagione e almeno 80% nel periodo atteso per quel polline; almeno 200 giorni campionati nell&rsquo;anno. Il 2026 arriva fino a met&agrave; o fine ottobre.</p>
+<!-- ============ 2 ============ -->
+<h2 id="cambia">Le stagioni si stanno spostando?</h2>
+<div class="fig" id="g-prima">
+  <h3 id="t-prima"></h3>
+  <p class="sub">Per ogni polline la stagione (dal 5% al 95% del polline dell&rsquo;anno) nei due periodi: 2011-2017 in grigio e 2020-2026 in colore. Il colore c&rsquo;&egrave; solo dove lo spostamento della partenza non pu&ograve; essere un caso.</p>
+  <div class="lg"><span><i style="background:#b6bcc7"></i>2011-2017</span><span><i style="background:var(--blu)"></i>2020-2026, parte prima</span><span><i style="background:var(--tur)"></i>2020-2026, parte dopo</span><span><i style="background:#5f6673"></i>2020-2026, cambio non sicuro</span></div>
+  <div class="ch" id="ch-prima" role="img" aria-label="Per ogni polline, inizio e fine della stagione nel 2011-2017 e nel 2020-2026"></div>
+  <p class="note" id="nt-prima"></p>
+  <p class="src">Fonte: ISPRA - POLLnet (CC BY 4.0). Spostamento: differenza tra le medie dei due periodi degli scarti delle stazioni dalla loro stagione media. L&rsquo;asterisco (*) segna le tendenze 2011-2026 che il test di Mann-Kendall distingue dal caso (probabilit&agrave; di caso sotto il 5%): con 55 tendenze provate, qualcuna esce per caso.</p>
+</div>
 
-<h2 id="tendenze">Le stagioni stanno cambiando?</h2>
-<div id="tr-testo"></div>
-<p class="sub">Indicatore &laquo;pianura attorno a Milano&raquo; dal 2011 al 2026: per ogni anno, la mediana degli scarti di ogni stazione dal suo valore medio. Il punto &egrave; la stima, la barra l&rsquo;intervallo al 95%: <b style="color:var(--acc)">verde</b> se l&rsquo;intervallo non comprende lo zero (cio&egrave; la tendenza si distingue dal caso), <b>grigio</b> se lo comprende.</p>
-<h3>Quando comincia la stagione (giorni per decennio; meno = prima)</h3>
-<div class="fo" id="fo-ini"></div>
-<h3>Quanto dura (giorni per decennio; pi&ugrave; = pi&ugrave; lunga)</h3>
-<div class="fo" id="fo-dur"></div>
-<h3>Quanto polline in un anno (volte per decennio; 1 = invariato)</h3>
-<div class="fo" id="fo-int"></div>
-<div class="warn" id="tr-cautela"></div>
-<h3>Il grafico di un polline</h3>
-<div class="ctl" id="ind-btn"></div>
-<div class="ch" id="ch-ind" role="img" aria-label="Indicatore regionale per anno con tendenza"></div>
-<p class="sub" id="ind-nota"></p>
-<h3>Gli anni peggiori</h3>
-<div id="peggiori"></div>
-<p class="src">Per ogni polline, i tre anni con l&rsquo;integrale pi&ugrave; alto rispetto alla media di ogni stazione (mediana tra le stazioni; il numero di stazioni cambia da un anno all&rsquo;altro, quindi &egrave; un&rsquo;indicazione, non una classifica). Tendenza: pendenza di Theil-Sen con intervallo al 95% e test di Mann-Kendall; 11-16 anni per polline.</p>
+<div class="fig" id="g-caldo">
+  <h3 id="t-caldo"></h3>
+  <p class="sub" id="s-caldo"></p>
+  <div class="ch" id="ch-caldo" role="img" aria-label="Temperatura di marzo-aprile a Brera e giorno di inizio delle graminacee a Novara, anno per anno"></div>
+  <p class="note" id="nt-caldo"></p>
+  <p class="src">Pollini: POLLnet (CC BY 4.0), stazione di Novara. Temperature: serie di Milano Brera di questo sito (<a href="../temperature/">temperature</a>), a circa 50 km, che nel 2008-2016 &egrave; segnalata circa 0,65 &deg;C troppo calda. Un confronto, non una prova: contano anche umidit&agrave;, vento e cicli della pianta.</p>
+</div>
 
-<h2 id="temperature">Il legame con la temperatura</h2>
-<div id="te-testo"></div>
-<div class="ctl" id="te-btn"></div>
-<div class="ch" id="ch-te" role="img" aria-label="Temperatura prima della stagione e inizio della stagione a Novara"></div>
-<p class="sub" id="te-nota"></p>
-<div class="warn"><b>Un confronto, non una prova.</b> La temperatura &egrave; quella di Milano Brera, a circa 50 km dalle stazioni. La serie di Brera 2008-2016 &egrave; stata segnalata come circa 0,65 &deg;C troppo calda (<a href="../temperature/">vedi la pagina delle temperature</a>). Sono 11-17 anni e 22 correlazioni provate: qualcuna viene bene per caso. Un anno caldo prima della stagione e un inizio anticipato vanno insieme, ma altre cose (umidit&agrave;, vento, cicli della pianta) non sono misurate qui.</div>
-<div class="scroll"><table id="tab-te"></table></div>
-<p class="src">Giorni per grado: di quanto si sposta l&rsquo;inizio della stagione per ogni grado in pi&ugrave; di temperatura (con l&rsquo;errore della stima). Correlazione: Spearman tra temperatura e inizio sull&rsquo;indicatore delle stazioni; &laquo;senza tendenza&raquo;: la stessa dopo aver tolto la tendenza lineare di entrambe le serie (* = anche cos&igrave; sotto il 5% di probabilit&agrave; del caso). Per nocciolo e ontano il legame &egrave; meno netto.</p>
-<h3>Il caso delle graminacee</h3>
-<div id="gr-testo"></div>
-<div class="grid2"><div><p class="sub"><b>Temperatura media di marzo-aprile a Brera</b></p><div class="ch" id="ch-ma" role="img" aria-label="Temperatura di marzo-aprile a Brera per anno"></div></div>
-<div><p class="sub"><b>Inizio della stagione delle graminacee a Novara</b></p><div class="ch" id="ch-gr" role="img" aria-label="Inizio delle graminacee a Novara per anno"></div></div></div>
-<p class="src">Temperature: serie di Milano Brera di questo sito (<a href="../temperature/">temperature</a>), media di tutti i giorni dei mesi indicati, anni con almeno l&rsquo;80% dei giorni. Pollini: POLLnet.</p>
+<!-- ============ 4 ============ -->
+<h2 id="polline">Scegli il tuo polline</h2>
+<div class="fig" id="g-tuo">
+  <h3 id="t-tuo">Quando comincia e quanto dura la tua allergia</h3>
+  <p class="sub">Tocca il polline che ti d&agrave; fastidio: sotto compare la sua stagione, anno per anno.</p>
+  <div class="chips" id="chips"></div>
+  <div id="card"></div>
+  <div class="lg" id="lg-tuo"></div>
+  <div class="ch" id="ch-tuo" role="img" aria-label="Stagione del polline scelto, anno per anno"></div>
+  <p class="note" id="nt-tuo"></p>
+  <p class="src">Fonte: ISPRA - POLLnet (CC BY 4.0) per le righe degli anni. La riga &laquo;Milano&raquo; &egrave; il calendario 2016-2025 dell&rsquo;ATS Citt&agrave; Metropolitana di Milano (ATS, licenza non indicata; solo le classi): ha soglie un po&rsquo; diverse, quindi &egrave; in grigio. Le righe vuote sono dieci giorni senza abbastanza misure; il 2026 arriva fino a ottobre.</p>
+</div>
 
-<h2 id="alberi">Gli alberi di Milano e il polline</h2>
-<div id="al-testo"></div>
-<div class="scroll"><table id="tab-al"></table></div>
-<p class="src">Alberi: censimento del Comune di Milano, edizione del 31 marzo 2025 (251.165 alberi gestiti dal Comune, <a href="../alberi/">vedi la pagina degli alberi</a>); non comprende i giardini privati e le aree di altri enti. Polline: mediana degli anni validi a Novara (POLLnet), che non &egrave; Milano.</p>
+<!-- ============ 3 ============ -->
+<h2 id="ambrosia">Il caso dell&rsquo;ambrosia</h2>
+<div class="fig" id="g-amb">
+  <h3 id="t-amb"></h3>
+  <p class="sub">Novara, ogni riga &egrave; un anno e ogni puntino un giorno, dal 15 luglio al 17 ottobre. Stessi colori del primo grafico. A destra il totale dell&rsquo;anno.</p>
+  <div class="lg" id="lg-amb"></div>
+  <div class="ch" id="ch-amb" role="img" aria-label="Ambrosia a Novara: ogni giorno di ogni anno dal 2007 al 2026"></div>
+  <div id="nt-amb"></div>
+  <p class="src">Fonte: ISPRA - POLLnet (CC BY 4.0), Novara. Totale dell&rsquo;anno: granuli di polline per metro cubo sommati su tutti i giorni (se mancano giorni &egrave; un minimo). Le note: Regione Lombardia, Direzione Generale Welfare, di cui si riportano solo i numeri. Il 2018 ha molti giorni senza misura (riga pi&ugrave; chiara).</p>
+</div>
 
-<h2 id="mappa">Dove sono le stazioni</h2>
-<p>I cerchi pieni sono le stazioni POLLnet con dati aperti; quelli vuoti sono i comuni delle stazioni ATS Milano, la cui posizione qui &egrave; solo indicativa (centro del comune) e che non pubblicano dati giornalieri.</p>
-<div id="map" class="map" role="img" aria-label="Mappa delle stazioni di pollini attorno a Milano"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Mappa &copy; OpenStreetMap contributors. Stazioni: ISPRA - POLLnet (CC BY 4.0); distanze in linea d&rsquo;aria dal Duomo.</p>
+<div class="fig" id="g-mappa">
+  <h3 id="t-mappa"></h3>
+  <p class="sub">Per ogni stazione di Milano e dintorni il polline di ambrosia di tutta la stagione: il cerchio pieno &egrave; il 2025, l&rsquo;anello il 2024. L&rsquo;area &egrave; proporzionale al totale.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--mi)"></i>Milano</span><span><i class="dot" style="background:var(--ink2)"></i>altre stazioni</span><span><i class="ring"></i>anello = 2024, pieno = 2025</span></div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa di Milano e dintorni con il totale stagionale dell'ambrosia nel 2024 e nel 2025 per stazione"></div>
+  <p class="note" id="nt-mappa"></p>
+  <p class="src">Fonte: note di Regione Lombardia alle ATS (solo i numeri); confini dei comuni: <a href="../hinterland/">hinterland</a> (ISTAT/Comune di Milano). Le stazioni sono messe al centro del loro comune, quindi in modo indicativo; Busto Arsizio, Lodi e Pavia non hanno i confini sulla mappa. Le frecce a bordo mappa sono le stazioni POLLnet fuori dalla mappa, con i chilometri in linea d&rsquo;aria dal Duomo.</p>
+</div>
 
-<h2 id="metodo">Come &egrave; fatto</h2>
-<ul class="m" id="metodo-lista"></ul>
-
-<h2 id="limiti">Limiti dei dati</h2>
-<div class="warm"><ul id="limiti-lista"></ul></div>
-
-<h2 id="download">File</h2>
-<p id="file-lista"></p>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
+<li><b>Non c&rsquo;&egrave; Milano.</b> Nessuna stazione lombarda &egrave; in POLLnet; per Milano solo il calendario ATS e due numeri dell&rsquo;ambrosia. Le stazioni sono a 45-141 km dal Duomo: stesse piante e stagioni simili, non gli stessi numeri.</li>
+<li><b>Il colore &egrave; il giorno peggiore.</b> Ogni casella dei nastri &egrave; il valore pi&ugrave; alto di dieci giorni, quindi un singolo giorno forte colora tutta la casella. &laquo;Molto alta&raquo; &egrave; una nostra scelta: oltre tre volte la soglia alta POLLnet.</li>
+<li><b>Gli zeri non sono sempre scritti.</b> Alcune stazioni e anni (Novara 2017-2019, Piacenza dal 2018 per i generi, Omegna) registrano un polline solo nei giorni in cui &egrave; presente: non si distingue lo zero dal &laquo;non contato&raquo;.</li>
+<li><b>Contare e classificare cambia da una stazione all&rsquo;altra e nel tempo.</b> Piacenza dice &laquo;Betulaceae&raquo; fino al 2018 e &laquo;Betula&raquo; dopo. Un cambio di conteggio pu&ograve; far salire o scendere i totali.</li>
+<li><b>Serie corte.</b> 11-20 anni per polline e stazione. Le stagioni cambiano molto da un anno all&rsquo;altro e gli intervalli sono larghi. Con 55 tendenze provate, qualcuna &egrave; &laquo;sicura&raquo; per caso: la partenza pi&ugrave; tardi di artemisia e parietaria, in particolare, va letta con cautela.</li>
+<li><b>Anni con buchi:</b> sono escluse le stagioni (stazione &times; polline &times; anno) con troppi giorni mancanti. Il 2026 arriva solo a met&agrave; o fine ottobre.</li>
+<li><b>La stagione dal 5% al 95%</b> dipende dalla definizione: per graminacee e parietaria comprende una coda lunga a basso livello fino a ottobre; per i pollini che cominciano a dicembre (cipressi, nocciolo) l&rsquo;anno solare taglia la parte di dicembre.</li>
+<li><b>L&rsquo;ambrosia e il coleottero:</b> la causa del calo del 2013 &egrave; la spiegazione della Regione Lombardia (<i>Ophraella communa</i>, un coleottero arrivato per caso); nei dati POLLnet si vede il calo, non la causa.</li>
+<li><b>Il calendario ATS</b> &egrave; una media 2016-2025 a classi, con limiti di classe un po&rsquo; diversi da quelli POLLnet; la posizione delle stazioni ATS sulla mappa &egrave; indicativa.</li>
+<li><b>Le temperature</b> sono quelle di Brera, a circa 50 km, con un salto non corretto nel 2008-2016.</li>
+<li><b>Le date sbagliate del servizio.</b> Il servizio ISPRA contiene date 1899-1900 e, per Alessandria, date future e valori negativi: tutte scartate, niente corretto.</li>
+<li><b>Correlazione non &egrave; causa:</b> dove un grafico mette due cose vicine (polline e temperatura, polline e anni) mostra che vanno insieme, non che una causi l&rsquo;altra.</li>
+</ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Granuli per metro cubo</dt><dd>Quanti granuli di polline ci sono in un metro cubo d&rsquo;aria, in media nel giorno.</dd>
+<dt>Soglie bassa, media, alta</dt><dd>Quelle di POLLnet per ogni polline: sotto la media la maggior parte delle persone non ha sintomi, sopra l&rsquo;alta la maggior parte s&igrave;. Cambiano da polline a polline.</dd>
+<dt>Totale dell&rsquo;anno</dt><dd>La somma dei valori di tutti i giorni dell&rsquo;anno: dice quanto polline c&rsquo;&egrave; stato in tutto.</dd>
+<dt>Inizio e fine della stagione</dt><dd>Il giorno in cui il totale accumulato nell&rsquo;anno arriva al 5% e al 95%.</dd>
+<dt>POLLnet</dt><dd>La rete italiana di monitoraggio dei pollini (ISPRA e agenzie regionali).</dd>
+<dt>ATS</dt><dd>Agenzia di tutela della salute: a Milano il monitoraggio lo fa la ATS Citt&agrave; Metropolitana di Milano.</dd>
+<dt>Graminacee, parietaria, ambrosia</dt><dd>Le erbe che fanno pi&ugrave; allergie: i prati in primavera, il muro di casa (parietaria) quasi tutto l&rsquo;anno, la pianta di fine estate (ambrosia).</dd>
+<dt>Decade</dt><dd>Dieci giorni: tre per ogni mese.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come &egrave; fatto</summary><div class="in"><ul>
+<li>Concentrazioni giornaliere di 6 stazioni POLLnet (Novara, Piacenza, Vercelli, Alessandria, Omegna, Verona), scaricate dal servizio aperto dell&rsquo;ISPRA il 1 novembre 2026: 790.260 righe tenute. Niente &egrave; stato corretto.</li>
+<li><b>Anno valido</b> per una stazione e un polline: totale almeno 30; almeno il 75% dei giorni misurati dentro la stagione e l&rsquo;80% nel periodo in cui quel polline c&rsquo;&egrave; di solito; almeno 200 giorni misurati nell&rsquo;anno. Solo gli anni validi entrano nei grafici.</li>
+<li><b>Nastri:</b> per ogni stazione, anno e decade (dieci giorni, tre al mese) il valore pi&ugrave; alto, se ci sono almeno 3 giorni misurati; poi la mediana tra le stazioni. L&rsquo;anno tipico &egrave; la mediana di tutti gli anni validi fino al 2025. Livelli: sotto la media bassa; dalla media all&rsquo;alta media; dall&rsquo;alta a tre volte l&rsquo;alta alta; oltre molto alta (le soglie sono quelle POLLnet di ogni polline).</li>
+<li><b>Spostamenti:</b> per ogni anno dal 2011 la mediana degli scarti di ogni stazione dalla propria stagione media (servono almeno 3 stazioni); poi la media dei due periodi. Tendenza: pendenza di Theil-Sen e test di Mann-Kendall, con almeno 10 anni.</li>
+<li><b>Temperature:</b> media di marzo e aprile a Milano Brera (serie di questo sito, senza la correzione 2008-2016 che &egrave; solo proposta); la linea &egrave; la pendenza di Theil-Sen.</li>
+<li><b>Ambrosia e mappa:</b> i totali di Milano e delle stazioni ATS vengono dalle note della Regione Lombardia (2024 e 2025); le posizioni sono i centri dei comuni.</li>
+<li><b>Calendario ATS:</b> classi lette dalle caselle colorate del calendario 2016-2025 dell&rsquo;ATS Citt&agrave; Metropolitana di Milano; il documento non &egrave; ripubblicato.</li>
+</ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati (una riga per stagione o per decade, non per giorno), separati da virgola o in JSON.</p>
+<ul>
+<li><a href="data/nastro.json">Nastri a decadi</a>: il giorno peggiore di ogni decade per polline e anno, i giorni forti e l&rsquo;ambrosia giorno per giorno a Novara</li>
+<li><a href="data/pollini.json">Tutti i dati della pagina</a> in un solo file</li>
+<li><a href="data/stagioni_taxon_anno.csv">Stagioni per stazione, polline e anno</a> (inizio, fine, massimo, totale, se valida e perch&eacute; no)</li>
+<li><a href="data/riepilogo_taxon_stazione.csv">Stagione tipica</a> per stazione e polline</li>
+<li><a href="data/tendenze_regionali.csv">Tendenze</a> sull&rsquo;indicatore della pianura e <a href="data/tendenze_stazione.csv">per stazione</a></li>
+<li><a href="data/indicatore_regionale_anno.csv">Indicatore della pianura</a>, anno per anno</li>
+<li><a href="data/legame_temperature.csv">Legame con la temperatura</a></li>
+<li><a href="data/anni_peggiori.csv">Anni peggiori</a> per polline</li>
+<li><a href="data/ambrosia_prima_dopo_2013.csv">Ambrosia prima e dopo il 2013</a> e <a href="data/ambrosia_regione_lombardia.csv">le note della Regione Lombardia</a></li>
+<li><a href="data/calendario_ats_milano.csv">Calendario ATS Milano 2016-2025</a> (solo le classi)</li>
+<li><a href="data/alberi_contesto.csv">Alberi del Comune</a> per genere (vedi anche <a href="../alberi/">la pagina degli alberi</a>) e <a href="data/stazioni.csv">le stazioni</a></li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Concentrazioni giornaliere di pollini e spore: ISPRA - POLLnet / SNPA (<a href="https://pollnet.isprambiente.it/opendata/">pollnet.isprambiente.it/opendata</a>), licenza Creative Commons Attribution 4.0 (CC BY 4.0), 6 stazioni scaricate il 1 novembre 2026. Calendario pollinico di Milano e provincia 2016-2025 e bollettino settimanale: ATS Citt&agrave; Metropolitana di Milano (<a href="https://www.ats-milano.it/ats/carta-servizi/guida-servizi/ambiente/igiene-urbana-sanita-pubblica/pollini-spore">pagina pollini e spore</a>), licenza non indicata: sono riportati solo i dati di classe, non il documento. Ambrosia 2016, 2024 e 2025: note della Direzione Generale Welfare di Regione Lombardia alle ATS (&laquo;Prevenzione delle allergopatie da Ambrosia in Lombardia&raquo;), solo i numeri. Studio sul clima e i pollini a Legnano: Scientific Reports, 27/2/2026, <a href="https://doi.org/10.1038/s41598-026-41641-w">doi 10.1038/s41598-026-41641-w</a> (solo citazione). Temperature: Milano Brera, <a href="../temperature/">sezione temperature</a>. Alberi: Comune di Milano, ds2484 (CC BY), <a href="../alberi/">sezione alberi</a>. Mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
-<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>. Altre sezioni: <a href="../alberi/">alberi</a>, <a href="../temperature/">temperature</a>.</p>
+<p><b>Fonti e licenze.</b> Concentrazioni giornaliere di pollini e spore: ISPRA - POLLnet / SNPA (<a href="https://pollnet.isprambiente.it/opendata/">pollnet.isprambiente.it/opendata</a>), licenza Creative Commons Attribution 4.0 (CC BY 4.0), 6 stazioni scaricate il 1 novembre 2026. Calendario pollinico di Milano e provincia 2016-2025 e bollettino settimanale: ATS Citt&agrave; Metropolitana di Milano (<a href="https://www.ats-milano.it/ats/carta-servizi/guida-servizi/ambiente/igiene-urbana-sanita-pubblica/pollini-spore">pagina pollini e spore</a>), licenza non indicata: sono riportati solo i dati di classe, non il documento. Ambrosia 2016, 2024 e 2025: note della Direzione Generale Welfare di Regione Lombardia alle ATS (&laquo;Prevenzione delle allergopatie da Ambrosia in Lombardia&raquo;), solo i numeri. Studio sul clima e i pollini a Legnano: Scientific Reports, 27/2/2026, <a href="https://doi.org/10.1038/s41598-026-41641-w">doi 10.1038/s41598-026-41641-w</a> (solo citazione). Temperature: Milano Brera, <a href="../temperature/">sezione temperature</a>. Confini dei comuni: <a href="../hinterland/">sezione hinterland</a>. Alberi: Comune di Milano, ds2484 (CC BY), <a href="../alberi/">sezione alberi</a>. Elaborazione: Milano in dati.</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>. Altre sezioni: <a href="../aria/">aria</a>, <a href="../temperature/">temperature</a>, <a href="../alberi/">alberi</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,RD=[],ACC='#00695c',WARM='#c26a1b',GRY='#9a9a9a';
-var MS=[1,32,60,91,121,152,182,213,244,274,305,335,366],MN=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-var SC={NO1:'#00695c',PC1:'#c26a1b',AL6:'#3b5ba9',VB1:'#8a4a9d',VR1:'#444444',VC1:'#a89400'};
-var STN={};var TXN={};var TXI={};
-/* ---------- formati ---------- */
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d==null?1:d)}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function doyD(d){d=Math.round(d);var m=0;while(m<11&&d>=MS[m+1])m++;return (d-MS[m]+1)+' '+MN[m]}
-function table(id,head,rows,cls){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function median(a){var s=a.slice().sort(function(x,y){return x-y}),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):null}
-function tickMonths(){return MS.slice(0,12)}
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),blu:cv('--blu'),tur:cv('--tur'),gi:cv('--giallo'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2')};
+var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+var MESIL=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+var MLEN=[31,28,31,30,31,30,31,31,30,31,30,31];
+var CLS=[{c:'#EDEFF2',l:'bassa'},{c:'#FFD500',l:'media'},{c:'#F58220',l:'alta'},{c:'#E30613',l:'molto alta'}];
+var ATSC=['#ffffff','#cfd3da','#7d8593','#0b0d12'],ATSL=['assente','bassa','media','alta'];
+var D=null,N=null,ORD=[],SEL='Gramineae',GEO=null;
 
-J('data/pollini.json').then(function(d){D=d;
-  D.stazioni.forEach(function(s){STN[s.c]=s});D.taxa.forEach(function(t,i){TXN[t.k]=t.nome;TXI[t.k]=t});
-  try{tutto()}catch(e){console.error(e);setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message))}
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(280,Math.floor($(id).clientWidth))}
+function med(a){a=a.filter(function(v){return v!=null&&!isNaN(v)}).sort(function(x,y){return x-y});var n=a.length;if(!n)return null;return n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2}
+function mean(a){a=a.filter(function(v){return v!=null});return a.length?a.reduce(function(s,v){return s+v},0)/a.length:null}
+function dstr(doy){var d=Math.round(doy),m=0;while(m<11&&d>MLEN[m]){d-=MLEN[m];m++}return d+' '+MESI[m]}
+function decLab(i){var m=Math.floor(i/3),k=i%3,a=[1,11,21][k],b=k===2?MLEN[m]:[10,20][k];return a+'-'+b+' '+MESI[m]}
+function decNome(i){var m=Math.floor(i/3);return ['inizio','metà','fine'][i%3]+' '+MESIL[m]}
+function cls(v,sog){if(v==null)return -1;if(v>=sog[2]*3)return 3;if(v>=sog[2])return 2;if(v>=sog[1])return 1;return 0}
+function col(c){return c<0?'#fff':CLS[c].c}
+function nf(v){return v==null?'':v>=10?f0(v):f1(v)}
 
-function tutto(){
-  sorpresa();calendario();anni();tendenze();temperature();alberi();mappa();metodo();limiti();file();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
 }
-function tr(tx,m){return D.trend_reg[tx]&&D.trend_reg[tx][m]}
-function amb(){var o={};D.ambrosia_2013.forEach(function(r){o[r.stazione]=r});return o}
-function regione(a,s){var r=null;D.ambrosia_regione.forEach(function(x){if(x.anno===a&&x.st===s)r=x});return r}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-t]');if(t)showTip(e,t);else TIP.style.display='none';
+  var b=e.target.closest&&e.target.closest('[data-k]');if(b){SEL=b.getAttribute('data-k');buildTuo()}
+});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
 
-/* ---------- grafico generico: linee, punti, retta ---------- */
-function plot(box,o){
-  box.innerHTML='';var W=box.clientWidth||320,H=o.h||260,m={l:o.ml||46,r:12,t:12,b:o.xl?40:26};
-  var xs=[],ys=[];o.series.forEach(function(s){s.pts.forEach(function(p){xs.push(p.x);ys.push(p.y)})});
-  (o.lines||[]).forEach(function(l){ys.push(l.y0,l.y1);xs.push(l.x0,l.x1)});
-  var x0=o.x0!=null?o.x0:Math.min.apply(null,xs),x1=o.x1!=null?o.x1:Math.max.apply(null,xs),y0=o.y0!=null?o.y0:Math.min.apply(null,ys),y1=o.y1!=null?o.y1:Math.max.apply(null,ys);
-  var pad=(y1-y0)*.06||1;if(o.y0==null)y0-=pad;if(o.y1==null)y1+=pad;
-  var sx=o.sx||niceStep((x1-x0)/6),sy=o.sy||niceStep((y1-y0)/5);
-  if(o.x0==null)x0-=(x1-x0)*.03;if(o.x1==null)x1+=(x1-x0)*.03;
-  var pw=W-m.l-m.r,ph=H-m.t-m.b;
-  function X(v){return m.l+(v-x0)/(x1-x0)*pw}function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  var yt=o.yticks||[];if(!o.yticks){for(var v=Math.ceil(y0/sy)*sy;v<=y1+1e-9;v+=sy)yt.push(v)}
-  yt.forEach(function(v){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+(o.yf?o.yf(v):f0(v))+'</text>'});
-  var xt=o.xticks||[];if(!o.xticks){for(v=Math.ceil(x0/sx)*sx;v<=x1+1e-9;v+=sx)xt.push(v)}
-  var lastx=-99;xt.forEach(function(v){var xx=X(v);if(xx-lastx>34){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+(o.xf?o.xf(v):v)+'</text>'}});
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  (o.vlines||[]).forEach(function(l){s+='<line x1="'+X(l.x)+'" x2="'+X(l.x)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(X(l.x)+4)+'" y="'+(m.t+11)+'" style="fill:#8a4a10">'+l.t+'</text>'});
-  (o.hlines||[]).forEach(function(l){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(l.y)+'" y2="'+Y(l.y)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(W-m.r-2)+'" y="'+(Y(l.y)-4)+'" text-anchor="end" style="fill:#8a4a10">'+l.t+'</text>'});
-  (o.lines||[]).forEach(function(l){s+='<line x1="'+X(l.x0)+'" x2="'+X(l.x1)+'" y1="'+Y(l.y0)+'" y2="'+Y(l.y1)+'" stroke="'+(l.c||'#111')+'" stroke-width="2" '+(l.d?'stroke-dasharray="6 4"':'')+'/>'});
-  if(o.xl)s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-5)+'" text-anchor="middle">'+o.xl+'</text>';
-  if(o.yl)s+='<text class="mu" x="'+m.l+'" y="'+(m.t-1)+'" text-anchor="start">'+o.yl+'</text>';
-  var all=[];
-  o.series.forEach(function(se){
-    if(se.line&&se.pts.length>1)s+='<polyline fill="none" stroke="'+se.c+'" stroke-width="'+(se.w||1.8)+'" '+(se.d?'stroke-dasharray="5 4"':'')+' points="'+se.pts.map(function(p){return X(p.x).toFixed(1)+','+Y(p.y).toFixed(1)}).join(' ')+'"/>';
-    if(se.dots!==false)se.pts.forEach(function(p){s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="'+(se.r||3.6)+'" fill="'+(p.hollow?'#fff':se.c)+'" fill-opacity="'+(p.hollow?1:.8)+'" stroke="'+(p.hollow?GRY:'#fff')+'" stroke-width="1"/>';if(p.t)all.push(p)});
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getN(){return getJ('data/nastro.json').catch(function(){return getJ(location.pathname.replace(/[^\/]*$/,'')+'data/nastro.json')})}
+Promise.all([getJ('data/pollini.json'),getN(),getJ('../hinterland/data/comuni.geojson')]).then(function(a){
+  D=a[0];N=a[1];GEO=a[2];
+  ORD=N.taxa.map(function(t){return t.k});
+  drawAll();
+  var rt,w0=document.documentElement.clientWidth;
+  window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){var w=document.documentElement.clientWidth;if(w!==w0){w0=w;drawAll()}},200)});
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati. '+esc(e.message)+'</p>'});
+
+function drawAll(){buildNastro();buildPrima();buildCaldo();buildAmb();buildMappa();buildTuo();buildHL()}
+function tx(k){return N.taxa.filter(function(t){return t.k===k})[0]}
+function nome(k){var n=tx(k).nome;return n==='Parietaria (urticacee)'?'Parietaria':n}
+
+/* ---------- dati derivati ---------- */
+function mesiMedia(){
+  var n=0;for(var m=0;m<12;m++){var ok=false;ORD.forEach(function(k){for(var j=0;j<3;j++)if(cls(N.tip[k][m*3+j],tx(k).sog)>=1)ok=true});if(ok)n++}
+  return n;
+}
+function shiftRows(){
+  return ORD.map(function(k){
+    var st=Object.keys(D.tipico[k]);
+    var i0=med(st.map(function(s){return D.tipico[k][s].ini})),f0v=med(st.map(function(s){return D.tipico[k][s].fin}));
+    function per(m,a,b){return mean(D.indicatore[k][m].filter(function(r){return r[0]>=a&&r[0]<=b}).map(function(r){return r[1]}))}
+    var ia=per('inizio_doy',2011,2017),ib=per('inizio_doy',2020,2026),fa=per('fine_doy',2011,2017),fb=per('fine_doy',2020,2026);
+    var tr=D.trend_reg[k];
+    return {k:k,nome:nome(k),a0:i0+ia,a1:f0v+fa,b0:i0+ib,b1:f0v+fb,di:ib-ia,df:fb-fa,pi:tr.inizio_doy.p,pf:tr.fine_doy.p,pd:tr.inizio_doy.pend,n:tr.inizio_doy.n};
   });
-  s+='<circle id="ring" r="7" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
-    all.forEach(function(p,i){var d=Math.pow(X(p.x)-px,2)+Math.pow(Y(p.y)-py,2);if(d<bd){bd=d;bi=i}});
-    if(bi<0||bd>900){hide();return}
-    var p=all[bi];ring.setAttribute('cx',X(p.x));ring.setAttribute('cy',Y(p.y));ring.style.display='';
-    tip.innerHTML=p.t;tip.style.display='';var tw=tip.offsetWidth,left=X(p.x)/k+10;if(left+tw>r.width)left=X(p.x)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.y)/k-40)+'px'}
-  function hide(){tip.style.display='none';ring.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
 }
-function ols(p){var n=p.length,mx=0,my=0;p.forEach(function(q){mx+=q.x;my+=q.y});mx/=n;my/=n;var a=0,b=0;p.forEach(function(q){a+=(q.x-mx)*(q.y-my);b+=(q.x-mx)*(q.x-mx)});var s=a/b;return {s:s,i:my-s*mx}}
-function legend(id,items){setH(id,items.map(function(it){return '<span>'+(it.line?'<i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.c+'"></i>':'<i style="background:'+it.c+'"></i>')+it.t+'</span>'}).join(''))}
+function ambRatio(){var r=D.ambrosia_2013.filter(function(x){return x.stazione==='NO1'})[0];return r}
+function regione(y,st){var r=D.ambrosia_regione.filter(function(x){return x.anno===y&&x.st===st})[0];return r}
 
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var A=amb(),no=A.NO1,al=A.AL6,vc=A.VC1,vr=A.VR1;
-  var m24=regione(2024,'Milano'),m25=regione(2025,'Milano');
-  var h='<p><b>L&rsquo;ambrosia, il polline pi&ugrave; temuto di fine estate, &egrave; crollata di colpo nel 2013 in tutte le stazioni vicine a Milano, mentre il clima si scaldava.</b> A Novara l&rsquo;integrale dell&rsquo;anno &egrave; passato da '+f0(no.integrale_2012)+' (2012) a '+f0(no.integrale_2013)+' (2013): <b>'+Math.round((1-no.rapporto_2013_su_2012)*100)+'% in meno</b>. Stesso salto a Vercelli ('+Math.round((1-vc.rapporto_2013_su_2012)*100)+'% in meno), a Verona ('+Math.round((1-vr.rapporto_2013_su_2012)*100)+'%) e ad Alessandria ('+Math.round((1-al.rapporto_2013_su_2012)*100)+'%). Negli anni dopo non &egrave; tornata ai livelli 2011-2012: a Novara la mediana 2013-2025 &egrave; '+f0(no.mediana_dopo_2013_2025)+', contro '+f0(no.mediana_prima)+' del 2007-2012.</p>';
-  h+='<p><b>Secondo la Regione Lombardia</b> la causa &egrave; un coleottero, <i>Ophraella communa</i>, arrivato per caso in Lombardia nel 2013, che mangia la pianta e le impedisce di fiorire. <b>I dati di qui non mostrano la causa</b>: mostrano solo che il calo &egrave; arrivato lo stesso anno, in quattro stazioni, mentre le temperature continuavano a salire. Le note regionali dicono anche che negli ultimi anni l&rsquo;insetto &egrave; diminuito e il polline &egrave; risalito (si vede un rimbalzo nel 2019: Novara 2.904, Piacenza 1.699, Alessandria 2.530) e che il 2025 &egrave; stato molto pi&ugrave; basso del 2023-2024. A Milano, secondo le note della Regione, il totale stagionale 2025 &egrave; '+f0(m25.tot)+' granuli al metro cubo contro '+f0(m24.tot)+' del 2024 ('+Math.round((1-m25.tot/m24.tot)*100)+'% in meno).</p>';
-  h+='<div class="ch" id="ch-amb" role="img" aria-label="Integrale annuo dell&rsquo;ambrosia per stazione e anno"></div><div class="lgd" id="lg-amb"></div>';
-  h+='<p class="src">Integrale annuo dell&rsquo;ambrosia per stazione (solo anni validi). Linea tratteggiata: 2013, anno in cui, secondo la Regione, arriva il coleottero. Fonti: POLLnet (ISPRA, CC BY 4.0); note della Regione Lombardia (Direzione Generale Welfare) del 2025 e 2026, di cui si riportano solo i numeri.</p>';
-  setH('sorpresa',h);
-  function draw(){
-    var ser=[];['NO1','AL6','VC1','VR1','PC1','VB1'].forEach(function(c){var rows=(D.stagioni.Ambrosia[c]||[]).filter(function(r){return r[1]});if(!rows.length)return;
-      ser.push({c:SC[c],line:true,pts:rows.map(function(r){return {x:r[0],y:r[5],t:'<b>'+STN[c].n+' '+r[0]+'</b><br>'+f0(r[5])+' granuli×giorno/m³'}})})});
-    plot(el('ch-amb'),{series:ser,h:280,y0:0,xf:function(v){return v},sx:2,yl:'granuli × giorno / m³',vlines:[{x:2013,t:'2013'}]});
-    var l=[];['NO1','AL6','VC1','VR1','PC1','VB1'].forEach(function(c){l.push({c:SC[c],line:true,t:STN[c].n})});legend('lg-amb',l);
+/* ---------- numeri grandi ---------- */
+function buildHL(){
+  var sh=shiftRows(),gr=sh.filter(function(r){return r.k==='Gramineae'})[0];
+  var sicuri=sh.filter(function(r){return r.pi<0.05}),pre=sicuri.filter(function(r){return r.pd<0}).length,dopo=sicuri.length-pre;
+  var ar=ambRatio(),m24=regione(2024,'Milano'),m25=regione(2025,'Milano');
+  var near=D.stazioni.slice().sort(function(a,b){return a.km-b.km})[0];
+  var K=[
+   {c:'#E30613',n:mesiMedia(),u:'mesi su 12',p:'con almeno un polline a livello medio o più, in un anno tipico.',h:'#g-nastro'},
+   {c:'#FFD500',n:sg(gr.pd).replace('-','−'),u:'giorni',p:'ogni dieci anni: le graminacee partono più presto (dal 2011).',h:'#g-prima'},
+   {c:'#00A651',n:sicuri.length+' su '+ORD.length,u:'',p:'pollini che partono in un giorno diverso, in modo sicuro: '+pre+' prima, '+dopo+' dopo.',h:'#g-prima'},
+   {c:'#0072BC',n:'−'+f0((1-ar.rapporto_dopo_su_prima)*100),u:'%',p:'di ambrosia a Novara dal 2013 rispetto al 2007-2012. La stagione è rimasta la stessa.',h:'#g-amb'},
+   {c:'#7B3FA0',n:f0(m25.tot),u:'granuli',p:'di ambrosia a Milano in tutta la stagione 2025. Nel 2024 erano '+f0(m24.tot)+'.',h:'#g-mappa'},
+   {c:'#F58220',n:f0(near.km),u:'km',p:'dal Duomo la stazione aperta più vicina ('+near.n+'). A Milano non ci sono dati giornalieri.',h:'#g-mappa'}
+  ];
+  $('hl').innerHTML=K.map(function(k){return '<a href="'+k.h+'" style="--c:'+k.c+'"><span class="n">'+k.n+(k.u?'<small>'+k.u+'</small>':'')+'</span><p>'+k.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. nastro ---------- */
+function legNastro(id,extra){
+  $(id).innerHTML=CLS.map(function(c){return '<span><i style="background:'+c.c+';border:1px solid #cfd3da"></i>'+c.l+'</span>'}).join('')+'<span><i class="vuoto"></i>senza misure</span>'+(extra||'');
+}
+function buildNastro(){
+  legNastro('lg-nastro');
+  var W=width('ch-nastro'),lm=40,cw=(W-lm-2)/36,top=22,rowH=48,H=top+ORD.length*rowH;
+  var s=svgOpen(W,H);
+  for(var m=0;m<12;m++){
+    var x=lm+m*3*cw;
+    s+=T(x+1.5*cw,12,cw*3>=24?MESI[m]:MESI[m].charAt(0),{a:'middle',c:'m'});
+    s+=L(x,top-6,x,H-6,C.grid,1);
   }
-  draw();RD.push(draw);
+  ORD.forEach(function(k,i){
+    var t=tx(k),y=top+i*rowH,pk=0,pv=-1;
+    N.tip[k].forEach(function(v,j){if(v!=null&&v>pv){pv=v;pk=j}});
+    s+=T(0,y+12,'<tspan class="b">'+esc(nome(k))+'</tspan>');
+    s+=T(W,y+12,'picco: '+decNome(pk),{a:'end',c:'m'});
+    s+=T(lm-4,y+25,'tipico',{a:'end',c:'m'});s+=T(lm-4,y+37,'2026',{a:'end',c:'m'});
+    for(var j=0;j<36;j++){
+      var v1=N.tip[k][j],c1=cls(v1,t.sog),x=lm+j*cw;
+      s+='<rect x="'+r1(x)+'" y="'+(y+17)+'" width="'+r1(cw+0.4)+'" height="11" fill="'+col(c1)+'"'+(c1<0?' stroke="#e6e8ec" stroke-width="1"':'')+tip(nome(k)+', '+decLab(j)+' · anno tipico: '+(c1<0?'poche misure':'giorno peggiore '+nf(v1)+' granuli/m³ ('+CLS[c1].l+')'))+'/>';
+      var r26=N.anni[k]&&N.anni[k][2026],v2=r26?r26.v[j]:null,c2=cls(v2,t.sog);
+      s+='<rect x="'+r1(x)+'" y="'+(y+29)+'" width="'+r1(cw+0.4)+'" height="11" fill="'+col(c2)+'"'+(c2<0?' stroke="#e6e8ec" stroke-width="1"':'')+tip(nome(k)+', '+decLab(j)+' · 2026: '+(c2<0?'senza misure':'giorno peggiore '+nf(v2)+' granuli/m³ ('+CLS[c2].l+')'))+'/>';
+    }
+  });
+  s+='</svg>';
+  $('ch-nastro').innerHTML=s;
+  var mm=mesiMedia();
+  $('t-nastro').innerHTML='In un anno tipico c\'è sempre qualcosa nell\'aria: '+mm+' mesi su 12 hanno almeno un polline a livello medio o più';
+  // confronto 2026
+  var tot=0,hi26=0,hiT=0;
+  ORD.forEach(function(k){var t=tx(k),r=N.anni[k]&&N.anni[k][2026];if(!r)return;for(var j=0;j<36;j++){if(r.v[j]!=null&&N.tip[k][j]!=null){tot++;if(cls(r.v[j],t.sog)>=2)hi26++;if(cls(N.tip[k][j],t.sog)>=2)hiT++}}});
+  var g=N.alti.Gramineae,gt=med(Object.keys(g).filter(function(y){return +y<2026}).map(function(y){return g[y]}));
+  $('nt-nastro').innerHTML='Nelle '+tot+' caselle del 2026 con misure, '+hi26+' sono a livello alto o più, contro '+hiT+' nell\'anno tipico. Le graminacee: '+f0(g[2026])+' giorni sopra la soglia alta nel 2026, '+f0(gt)+' in un anno tipico.';
 }
 
-/* ---------- calendario ---------- */
-var CALC=['#ffffff','#fff1a6','#f7c783','#e8796d'];
-function calendario(){
-  var sel=el('cal-st'),h='';D.stazioni.slice().sort(function(a,b){return a.km-b.km}).forEach(function(s){h+='<option value="'+s.c+'">'+esc(s.n)+' ('+nf(s.km,0)+' km)</option>'});sel.innerHTML=h;
-  var T=D.tipico.Platanaceae.NO1,G=D.tipico.Gramineae.NO1,B=D.tipico.Betula.NO1,C=D.tipico['Cupressaceae/Taxaceae'].NO1,A=D.tipico.Ambrosia.NO1;
-  setH('cal-testo','<p>Ogni riga &egrave; un tipo di polline. Lo sfondo, a caselle di dieci giorni, &egrave; il calendario di Milano e provincia dell&rsquo;ATS (media 2016-2025): giallo concentrazione bassa, arancione media, rosso alta. La barra scura &egrave; la stagione misurata a '+esc(STN.NO1.n)+' (la stazione aperta pi&ugrave; vicina): dal giorno in cui si &egrave; accumulato il 5% del polline dell&rsquo;anno al 95%, col punto sul giorno di massimo. <b>I primi a partire sono nocciolo e cipressi</b> (a Novara dal '+doyD(D.tipico.Corylus.NO1.ini)+' e dal '+doyD(C.ini)+'); <b>aprile &egrave; il mese di betulla e platano</b> (la stagione del platano dura in media solo '+f0(T.dur)+' giorni, con il massimo ai primi di aprile); <b>le graminacee cominciano a met&agrave; aprile e hanno una lunga coda fino a settembre</b>; <b>ambrosia e artemisia sono di fine estate</b> (ambrosia dal '+doyD(A.ini)+', massimo il '+doyD(A.pic)+').</p>');
-  sel.addEventListener('change',draw);
-  function draw(){
-    var st=sel.value,box=el('ch-cal');box.innerHTML='';var W=box.clientWidth||320,rh=26,ml=W<520?92:150,mt=24,H=mt+rh*D.taxa.length+6,pw=W-ml-8;
-    function X(d){return ml+(d-1)/365*pw}
-    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-    for(var m=0;m<12;m++){s+='<text class="mu" x="'+((X(MS[m])+X(MS[m+1]))/2)+'" y="14" text-anchor="middle">'+(W<520?MN[m].charAt(0):MN[m])+'</text>'}
-    D.taxa.forEach(function(t,i){
-      var y=mt+i*rh;s+='<text x="'+(ml-6)+'" y="'+(y+rh/2+4)+'" text-anchor="end">'+esc(W<520?t.nome.split(' ')[0]:t.nome)+'</text>';
-      for(var d=0;d<36;d++){var mo=Math.floor(d/3),pt=d%3,a=MS[mo]+pt*10,b=pt<2?MS[mo]+pt*10+10:MS[mo+1],c=t.scheda_ats?parseInt(t.scheda_ats.charAt(d),10):0;
-        s+='<rect x="'+X(a).toFixed(1)+'" y="'+(y+2)+'" width="'+(X(b)-X(a)).toFixed(1)+'" height="'+(rh-4)+'" fill="'+CALC[c]+'" stroke="#e0e0e0" stroke-width=".5"/>'}
-      var r=D.tipico[t.k]&&D.tipico[t.k][st];
-      if(r){s+='<line x1="'+X(r.ini)+'" x2="'+X(r.fin)+'" y1="'+(y+rh/2)+'" y2="'+(y+rh/2)+'" stroke="#00695c" stroke-width="5" stroke-linecap="round"><title>'+esc(t.nome)+': dal '+doyD(r.ini)+' al '+doyD(r.fin)+', massimo '+doyD(r.pic)+' ('+r.n+' anni)</title></line><circle cx="'+X(r.pic)+'" cy="'+(y+rh/2)+'" r="5" fill="#fff" stroke="#00695c" stroke-width="2.5"/>'}
+/* ---------- 2. stagioni prima e dopo ---------- */
+function buildPrima(){
+  var R=shiftRows(),W=width('ch-prima'),rh=50,top=22,H=top+R.length*rh;
+  function X(d){return d/365*(W-2)+1}
+  var s=svgOpen(W,H);
+  for(var m=0;m<12;m++){var x0=X(MLEN.slice(0,m).reduce(function(a,b){return a+b},0)),x1=X(MLEN.slice(0,m+1).reduce(function(a,b){return a+b},0));
+    s+=T((x0+x1)/2,12,(x1-x0>=24)?MESI[m]:MESI[m].charAt(0),{a:'middle',c:'m'})+L(x0,top-6,x0,H-6,C.grid,1)}
+  R.forEach(function(r,i){
+    var y=top+i*rh,ps=r.pi<0.05,pe=r.pf<0.05;
+    var cB=ps?(r.di<0?C.blu:C.tur):'#5f6673';
+    s+=T(0,y+12,'<tspan class="b">'+esc(r.nome)+'</tspan>');
+    s+=T(W,y+12,'inizio <tspan class="b">'+sg(r.di)+'</tspan> gg'+(ps?'*':'')+' · fine <tspan class="b">'+sg(r.df)+'</tspan> gg'+(pe?'*':''),{a:'end',c:'m'});
+    var a0=Math.max(1,r.a0),b0=Math.max(1,r.b0);
+    s+='<rect x="'+r1(X(a0))+'" y="'+(y+18)+'" width="'+r1(Math.max(2,X(r.a1)-X(a0)))+'" height="9" fill="#b6bcc7"'+tip(r.nome+' 2011-2017: dal '+dstr(r.a0)+' al '+dstr(r.a1))+'/>';
+    s+='<rect x="'+r1(X(b0))+'" y="'+(y+29)+'" width="'+r1(Math.max(2,X(r.b1)-X(b0)))+'" height="9" fill="'+cB+'"'+tip(r.nome+' 2020-2026: dal '+dstr(r.b0)+' al '+dstr(r.b1)+'. Inizio '+sg(r.di)+' giorni'+(ps?' (dal 2011 la tendenza si distingue dal caso)':' (non sicuro)')+', fine '+sg(r.df)+' giorni'+(pe?' (si distingue dal caso)':' (non sicuro)'))+'/>';
+  });
+  s+='</svg>';
+  $('ch-prima').innerHTML=s;
+  var sic=R.filter(function(r){return r.pi<0.05}),gr=R.filter(function(r){return r.k==='Gramineae'})[0];
+  var pre=sic.filter(function(r){return r.di<0}).map(function(r){return r.nome.toLowerCase()}),dop=sic.filter(function(r){return r.di>0}).map(function(r){return r.nome.toLowerCase()});
+  $('t-prima').innerHTML=(sic.length===3?'Tre':sic.length)+' pollini su '+R.length+' hanno cambiato il giorno di partenza in modo sicuro: '+pre.join(' e ')+' parte'+(pre.length>1?'no':'')+' prima, '+dop.join(' e ')+' parte'+(dop.length>1?'no':'')+' dopo';
+  $('nt-prima').innerHTML='Per gli altri pollini le date si muovono, ma non in un modo che si distingua dal caso. Le graminacee durano anche di più: la tendenza sul numero di giorni sopra la soglia media è '+sg(D.trend_reg.Gramineae.giorni_ge_medio.pend)+' giorni per decennio. Con la parietaria che finisce più tardi ('+sg(D.trend_reg.Urticaceae.fine_doy.pend)+' giorni per decennio) e le graminacee che partono prima, la stagione delle erbe si allunga da tutte e due i lati. La stagione dell\'ambrosia non si sposta: <a href="#ambrosia">vedi il caso dell\'ambrosia</a>.';
+}
+
+/* ---------- 3. temperatura e graminacee ---------- */
+function ts(pts){var sl=[];for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++)if(pts[j][0]!==pts[i][0])sl.push((pts[j][1]-pts[i][1])/(pts[j][0]-pts[i][0]));var b=med(sl);var a=med(pts.map(function(p){return p[1]-b*p[0]}));return {a:a,b:b}}
+function buildCaldo(){
+  var pts=D.punti_temp.Gramineae.map(function(r){return [r[1],r[2],r[0]]}).filter(function(r){return r[1]!=null});
+  var lg=D.legame.filter(function(l){return l.taxon==='Gramineae'&&l.serie==='Novara'})[0];
+  var W=width('ch-caldo'),H=Math.round(Math.min(340,W*0.95)),ml=44,mr=12,mt=14,mb=44,pw=W-ml-mr,ph=H-mt-mb;
+  var x0=10.5,x1=15,y0=80,y1=125;
+  function X(v){return ml+(v-x0)/(x1-x0)*pw}
+  function Y(v){return mt+(v-y0)/(y1-y0)*ph}
+  var s=svgOpen(W,H);
+  [80,90,100,110,120].forEach(function(d){s+=L(ml,Y(d),ml+pw,Y(d),C.grid)+T(ml-5,Y(d)+4,dstr(d),{a:'end',c:'m'})});
+  [11,12,13,14,15].forEach(function(v){s+=L(X(v),mt,X(v),mt+ph,C.grid)+T(X(v),mt+ph+16,v,{a:'middle',c:'m'})});
+  s+=T(ml+pw/2,H-4,'temperatura media di marzo-aprile a Brera (°C)',{a:'middle',c:'m'});
+  s+=T(ml,10,'↑ inizio della stagione (più su = prima)',{a:'start',c:'m'});
+  var f=ts(pts);
+  s+=L(X(x0+0.2),Y(f.a+f.b*(x0+0.2)),X(x1-0.2),Y(f.a+f.b*(x1-0.2)),C.ink,2,' stroke-dasharray="6 4"');
+  var placed=[];
+  pts.forEach(function(p){s+='<circle cx="'+r1(X(p[0]))+'" cy="'+r1(Y(p[1]))+'" r="5.5" fill="'+C.blu+'"'+tip(p[2]+': marzo-aprile a '+f1(p[0])+' °C, inizio delle graminacee il '+dstr(p[1]))+'/>'});
+  // etichette degli anni: solo se non si toccano
+  pts.forEach(function(p){
+    var cx=X(p[0]),cy=Y(p[1]),lab=String(p[2]).slice(2);
+    var opts=[[cx+9,cy+4,'start'],[cx-9,cy+4,'end'],[cx,cy-9,'middle'],[cx,cy+18,'middle']];
+    for(var i=0;i<opts.length;i++){
+      var o=opts[i],w=16,bx=o[2]==='start'?o[0]:o[2]==='end'?o[0]-w:o[0]-w/2,by=o[1]-11,ok=bx>ml-2&&bx+w<W&&by>mt-4&&by+14<mt+ph+2;
+      if(ok)placed.forEach(function(q){if(bx<q.x+q.w+3&&bx+w+3>q.x&&by<q.y+q.h+2&&by+14+2>q.y)ok=false});
+      if(ok)pts.forEach(function(q){if(q===p)return;var qx=X(q[0]),qy=Y(q[1]);if(qx>bx-7&&qx<bx+w+7&&qy>by-7&&qy<by+21)ok=false});
+      if(ok){placed.push({x:bx,y:by,w:w,h:14});s+=T(o[0],o[1],'’'+lab,{a:o[2],c:'m h'});break}
+    }
+  });
+  s+='</svg>';
+  $('ch-caldo').innerHTML=s;
+  var gpg=-lg.gpg;
+  $('t-caldo').innerHTML='Quando marzo-aprile è più caldo, le graminacee partono prima: circa '+f0(gpg)+' giorni in meno per ogni grado in più';
+  $('s-caldo').innerHTML='Ogni punto è un anno (tocca per i dettagli). La linea tratteggiata è la tendenza; l\'inizio è il giorno in cui si accumula il 5% del polline dell\'anno a Novara.';
+  $('nt-caldo').innerHTML='Per grado la stima è '+f1(lg.gpg).replace('−','−')+' giorni, con un errore di ±'+f1(lg.se)+': l\'incertezza è grande, e con una sola stagione di polline e 18 anni basta poco a sbagliare. Togliendo la tendenza lineare a entrambe le serie il legame resta ('+lg.anni+'). Altre temperature e altri pollini: <a href="../temperature/">pagina delle temperature</a>.';
+}
+
+/* ---------- 4. ambrosia giorno per giorno ---------- */
+function buildAmb(){
+  var sog=tx('Ambrosia').sog,years=Object.keys(N.ambrosia).map(Number).sort(function(a,b){return a-b});
+  legNastro('lg-amb');
+  var integ={};(D.stagioni.Ambrosia.NO1||[]).forEach(function(r){integ[r[0]]=r[5]});
+  var W=width('ch-amb'),lm=50,rm=44,nd=95,cw=(W-lm-rm)/nd,rh=14,top=24,H=top+years.length*rh+30;
+  function XD(doy){return lm+(doy-196)*cw}
+  var s=svgOpen(W,H);
+  [[196,'lug',212],[213,'ago',243],[244,'set',273],[274,'ott',290]].forEach(function(m){
+    s+=T((XD(m[0])+XD(m[2]+1))/2,12,m[1],{a:'middle',c:'m'})+L(XD(m[0]),top-6,XD(m[0]),top+years.length*rh+4,C.grid,1)});
+  years.forEach(function(y,i){
+    var yy=top+i*rh,row=N.ambrosia[y],cnt=row.filter(function(v){return v!=null}).length,part=cnt<60;
+    s+=T(lm-6,yy+rh-3,y,{a:'end',c:'m'});
+    row.forEach(function(v,j){
+      var c=cls(v,sog);if(c<0)return;
+      s+='<rect x="'+r1(XD(196+j))+'" y="'+yy+'" width="'+r1(cw+0.35)+'" height="'+(rh-2)+'" fill="'+CLS[c].c+'"'+(part?' fill-opacity=".5"':'')+tip(y+', '+dstr(196+j)+': '+nf(v)+' granuli/m³ ('+CLS[c].l+')')+'/>';
     });
-    s+='</svg>';box.innerHTML=s;
-    legend('lg-cal',[{c:CALC[0],t:'assente (ATS)'},{c:CALC[1],t:'bassa'},{c:CALC[2],t:'media'},{c:CALC[3],t:'alta'},{c:'#00695c',line:true,t:'stagione 5%-95% misurata (mediana) e giorno di massimo'}]);
-    var rows=D.taxa.map(function(t){var r=D.tipico[t.k]&&D.tipico[t.k][st];return r?[esc(t.nome)+' <span class="sub">'+(t.tipo==='albero'?'albero':'erba')+'</span>',doyD(r.ini),doyD(r.pic),doyD(r.fin),f0(r.dur),f0(r.integ),r.n+' ('+r.primo+'-'+r.ultimo+')']:[esc(t.nome),'-','-','-','-','-','non misurato']});
-    table('tab-tip',['Polline',STN[st].n+': inizio','massimo','fine','durata (giorni)','polline in un anno','anni validi'],rows);
+    if(integ[y]!=null)s+=T(W,yy+rh-3,f0(integ[y]),{a:'end',c:'b'});
+  });
+  var by=top+years.length*rh;
+  // linea del 2013 e numeri
+  var i13=years.indexOf(2013);
+  s+=L(2,top+i13*rh-1,W,top+i13*rh-1,C.ink,1.4,' stroke-dasharray="5 3"');
+  [[2013,'1'],[2019,'2'],[2025,'3']].forEach(function(n){var i=years.indexOf(n[0]);if(i<0)return;
+    s+='<circle cx="9" cy="'+r1(top+i*rh+rh/2-1)+'" r="8" fill="'+C.ink+'"/>'+T(9,top+i*rh+rh/2+3.5,n[1],{a:'middle'}).replace('<text','<text style="fill:#fff;font-weight:700"')});
+  // la stagione di sempre: 11 ago - 23 set
+  [[223,'11 ago','start'],[266,'23 set','end']].forEach(function(l){s+=L(XD(l[0]),top-2,XD(l[0]),by+6,C.ink,1.2,' stroke-dasharray="3 3"')+T(XD(l[0])+(l[2]==='start'?-2:2),by+20,l[1],{a:l[2]==='start'?'end':'start',c:'m b'})});
+  s+=T(lm-6,by+20,'giorni:',{a:'end',c:'m'});
+  s+='</svg>';
+  $('ch-amb').innerHTML=s;
+  var ar=ambRatio();
+  $('t-amb').innerHTML='A Novara l\'ambrosia è crollata nel 2013 e non è più tornata come prima: oggi è circa un terzo, e la stagione è sempre la stessa';
+  var r=D.stagioni.Ambrosia.NO1,i0=r.filter(function(x){return x[1]}).map(function(x){return x[2]}),f0v=r.filter(function(x){return x[1]}).map(function(x){return x[4]});
+  $('nt-amb').innerHTML='<p class="note"><b>1.</b> Nel 2013 il polline di ambrosia passa da '+f0(ar.integrale_2012)+' (2012) a '+f0(ar.integrale_2013)+': '+f0((1-ar.rapporto_2013_su_2012)*100)+'% in meno, e lo stesso succede nelle altre stazioni vicine. Secondo la Regione Lombardia la causa è un coleottero (<i>Ophraella communa</i>) arrivato per caso quell\'anno; <b>i dati qui mostrano il calo, non la causa</b>. La mediana a Novara passa da '+f0(ar.mediana_prima)+' (2007-2012) a '+f0(ar.mediana_dopo_2013_2025)+' (2013-2025).</p>'
+   +'<p class="note"><b>2.</b> Nel 2019 il polline risale per un anno (Novara '+f0(integ2(2019))+'), poi torna basso. <b>3.</b> A Milano, secondo le note della Regione, il totale 2025 è '+f0(regione(2025,'Milano').tot)+' granuli contro '+f0(regione(2024,'Milano').tot)+' nel 2024: la nota 2025 parla di una diminuzione generale, con più piogge tra luglio e settembre.</p>'
+   +'<p class="note">La stagione non si allunga né si sposta: la partenza tipica è l\'11 agosto circa e la fine il 23 settembre circa (mediana '+dstr(med(i0))+' e '+dstr(med(f0v))+'), le righe dal 2007 al 2026 colorano sempre le stesse settimane. Ciò che è cambiato è quanto polline c\'è.</p>';
+  function integ2(y){return integ[y]}
+}
+
+/* ---------- 5. mappa ---------- */
+function buildMappa(){
+  var W=width('ch-mappa'),c=Math.cos(45.46*Math.PI/180);
+  var xs=[],ys=[],polys=[],mil=null,cen={};
+  GEO.features.forEach(function(f){
+    var g=f.geometry,ps=g.type==='MultiPolygon'?g.coordinates:[g.coordinates];
+    ps.forEach(function(p){polys.push({n:f.properties.n,g:f.properties.g,r:p});p.forEach(function(rg){rg.forEach(function(q){xs.push(q[0]);ys.push(q[1])})})});
+  });
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
+  var ML=4,MT=4,sc=(W-2*ML)/((x1-x0)*c),H=Math.round((y1-y0)*sc)+2*MT;
+  function PX(lng){return ML+(lng-x0)*c*sc}
+  function PY(lat){return MT+(y1-lat)*sc}
+  // centro dei comuni con stazione ATS (media dei vertici dell'anello esterno più grande)
+  function center(name){var best=null;polys.forEach(function(P){if(P.n===name&&(!best||P.r[0].length>best.r[0].length))best=P});if(!best)return null;var sx=0,sy=0,n=0;best.r[0].forEach(function(q){sx+=q[0];sy+=q[1];n++});return [sx/n,sy/n]}
+  var S=[
+    {n:'Milano',ll:center('Milano'),lab:[0,34,'middle']},
+    {n:'Magenta',ll:center('Magenta'),lab:[16,-20,'start']},
+    {n:'Rho',ll:center('Rho'),lab:[-10,-16,'end']},
+    {n:'Legnano',ll:center('Legnano'),lab:[14,-30,'start',1]},
+    {n:'Desio',ll:center('Desio'),lab:[10,-20,'start']},
+    {n:'Busto Arsizio',ll:[8.852,45.611],lab:[-60,-30,'start']},
+    {n:'Lodi',ll:[9.503,45.314],lab:[-6,26,'middle']},
+    {n:'Pavia',ll:[9.155,45.185],lab:[0,-14,'middle']}
+  ];
+  var s=svgOpen(W,H);
+  polys.forEach(function(P){
+    var d=P.r.map(function(rg){return 'M'+rg.map(function(q){return r1(PX(q[0]))+' '+r1(PY(q[1]))}).join('L')+'Z'}).join('');
+    var mi=P.g==='MILANO';
+    s+='<path d="'+d+'" fill="'+(mi?'#fbd6d9':'#eceef1')+'" stroke="#fff" stroke-width="1" fill-rule="evenodd"'+tip(P.n)+'/>';
+  });
+  function rad(v){return Math.sqrt(v)*0.34}
+  var rows=[];
+  S.forEach(function(p){
+    var a=regione(2024,p.n),b=regione(2025,p.n);
+    if(!a&&!b)return;
+    var x=PX(p.ll[0]),y=PY(p.ll[1]),mi=p.n==='Milano',colr=mi?C.mi:C.ink2;
+    rows.push({p:p,a:a,b:b,x:x,y:y,colr:colr,mi:mi});
+  });
+  rows.sort(function(u,v){return ((v.a&&v.a.tot)||0)-((u.a&&u.a.tot)||0)});
+  rows.forEach(function(q){
+    if(q.a&&q.a.tot!=null)s+='<circle cx="'+r1(q.x)+'" cy="'+r1(q.y)+'" r="'+r1(rad(q.a.tot))+'" fill="'+q.colr+'" fill-opacity=".14" stroke="'+q.colr+'" stroke-width="1.6"'+tip(q.p.n+' 2024: '+f0(q.a.tot)+' granuli/m³ in tutta la stagione')+'/>';
+  });
+  rows.forEach(function(q){
+    if(q.b&&q.b.tot!=null)s+='<circle cx="'+r1(q.x)+'" cy="'+r1(q.y)+'" r="'+r1(rad(q.b.tot))+'" fill="'+q.colr+'"'+tip(q.p.n+' 2025: '+f0(q.b.tot)+' granuli/m³ in tutta la stagione')+'/>';
+  });
+  rows.forEach(function(q){
+    var l=q.p.lab,t=q.p.n+(q.a?' '+f0(q.a.tot):'')+(q.b?(q.a?' → ':' ')+f0(q.b.tot):'');
+    var tx2=q.x+l[0],ty=q.y+l[1];
+    s+='<text x="'+r1(tx2)+'" y="'+r1(ty)+'" text-anchor="'+l[2]+'" class="h" style="font-weight:'+(q.mi?800:600)+';font-size:12.5px'+(q.mi?';fill:#E30613':'')+'">'+(l[3]?esc(q.p.n)+'<tspan x="'+r1(tx2)+'" dy="14">'+esc(t.slice(q.p.n.length+1))+'</tspan>':esc(t))+'</text>';
+  });
+  // frecce delle stazioni POLLnet fuori mappa
+  function arrow(x,y,txt,anc){s+=T(x,y,txt,{a:anc,c:'m b h'})}
+  var ST={};D.stazioni.forEach(function(z){ST[z.n]=z});
+  arrow(2,PY(ST.Novara.lat)+26,'← Novara '+f0(ST.Novara.km)+' km','start');
+  arrow(2,PY(ST.Vercelli.lat)+4,'← Vercelli '+f0(ST.Vercelli.km)+' km','start');
+  arrow(2,H-6,'↙ Alessandria '+f0(ST.Alessandria.km)+' km','start');
+  arrow(W-2,H-6,'Piacenza '+f0(ST.Piacenza.km)+' km ↘','end');
+  s+='</svg>';
+  $('ch-mappa').innerHTML=s;
+  var mi25=regione(2025,'Milano').tot,altri=[];S.forEach(function(p){if(p.n!=='Milano'){var b=regione(2025,p.n);if(b&&b.tot!=null)altri.push(b.tot)}});
+  $('t-mappa').innerHTML='A Milano l\'ambrosia è molto meno che nei comuni attorno: '+f0(mi25)+' nel 2025, contro '+f0(Math.min.apply(null,altri))+'-'+f0(Math.max.apply(null,altri))+' delle altre stazioni';
+  var cal=0,tot=0;S.forEach(function(p){var a=regione(2024,p.n),b=regione(2025,p.n);if(a&&b&&a.tot!=null&&b.tot!=null){tot++;if(b.tot<a.tot)cal++}});
+  $('nt-mappa').innerHTML='Dal 2024 al 2025 il totale è sceso in tutte e '+tot+' le stazioni con i due anni ('+cal+' su '+tot+'). I numeri accanto ai nomi sono il 2024 e il 2025, in granuli di polline per metro cubo sommati su tutta la stagione. Le stazioni in mappa sono quelle dell\'ATS e dei comuni vicini: le sole che pubblicano il totale della stagione; il calendario ATS di Milano è nella sezione «Scegli il tuo polline».';
+}
+
+/* ---------- 6. scegli il tuo polline ---------- */
+function buildTuo(){
+  $('chips').innerHTML=ORD.map(function(k){return '<button type="button" data-k="'+esc(k)+'" aria-pressed="'+(k===SEL?'true':'false')+'">'+esc(nome(k))+'</button>'}).join('');
+  var k=SEL,t=tx(k),st=Object.keys(D.tipico[k]);
+  var ini=med(st.map(function(s){return D.tipico[k][s].ini})),pic=med(st.map(function(s){return D.tipico[k][s].pic})),fin=med(st.map(function(s){return D.tipico[k][s].fin}));
+  var al=N.alti[k],ys=Object.keys(al).map(Number).sort(function(a,b){return a-b});
+  var altiTip=med(ys.filter(function(y){return y<2026}).map(function(y){return al[y]})),alti26=al[2026];
+  var worst=ys.filter(function(y){return y<2026}).reduce(function(m,y){return al[y]>al[m]?y:m},ys[0]);
+  var tr=D.trend_reg[k].inizio_doy,pe=D.peggiori.filter(function(p){return p.taxon===k})[0];
+  var h='<h3>'+esc(tx(k).nome)+' <span class="agg">soglia alta: '+nf(t.sog[2])+' granuli/m³</span></h3>';
+  h+='<div class="nums"><div><b>'+dstr(ini)+'</b>di solito comincia</div><div><b>'+dstr(pic)+'</b>il giorno più forte</div><div><b>'+dstr(fin)+'</b>di solito finisce</div><div><b>'+f0(altiTip)+' giorni</b>sopra la soglia alta in un anno'+(alti26!=null?'; '+f0(alti26)+' nel 2026':'')+'</div></div>';
+  h+='<p>'+(tr.p<0.05?'Dal 2011 la partenza si è spostata di <b>'+sg(tr.pend)+' giorni per decennio</b>: lo spostamento si distingue dal caso.':'Dal 2011 la partenza si è spostata di '+sg(tr.pend)+' giorni per decennio, ma <b>non è un cambio sicuro</b>: potrebbe essere un caso.')+(pe?' L\'anno peggiore di questi dati: '+pe.anno+' (a Novara e dintorni '+f1(pe.f).replace('.',',')+' volte la media).':'')+'</p>';
+  $('card').innerHTML=h;
+  // nastro anno per anno
+  var years=Object.keys(N.anni[k]).map(Number).sort(function(a,b){return a-b});
+  var W=width('ch-tuo'),lm=50,rm=62,cw=(W-lm-rm)/36,rh=14,top=24,ats=D.calendario_ats[t.k==='Cupressaceae/Taxaceae'?t.k:t.k]||'',H=top+rh+8+years.length*rh+4;
+  legNastro('lg-tuo','<span><i style="background:#0b0d12"></i>Milano ATS, alta</span>');
+  var s=svgOpen(W,H);
+  for(var m=0;m<12;m++){var x=lm+m*3*cw;s+=T(x+1.5*cw,12,cw*3>=24?MESI[m]:MESI[m].charAt(0),{a:'middle',c:'m'})+L(x,top-6,x,H-2,C.grid,1)}
+  s+=T(lm-4,top+rh-3,'Milano',{a:'end',c:'m b'});
+  for(var j=0;j<36;j++){
+    var a=+ats.charAt(j)||0,x2=lm+j*cw;
+    s+='<rect x="'+r1(x2)+'" y="'+top+'" width="'+r1(cw+0.4)+'" height="'+(rh-2)+'" fill="'+ATSC[a]+'" stroke="'+(a===0?'#e6e8ec':'none')+'"'+tip('Milano (ATS, media 2016-2025), '+decLab(j)+': '+ATSL[a])+'/>';
   }
-  draw();RD.push(draw);
-}
-
-/* ---------- anno per anno ---------- */
-var TXSEL='Betula',STSEL='NO1';
-function anni(){
-  var b='';D.taxa.forEach(function(t){b+='<button type="button" data-t="'+t.k+'"'+(t.k===TXSEL?' class="on"':'')+'>'+esc(t.nome)+'</button>'});setH('tx-btn',b);
-  Array.prototype.forEach.call(document.querySelectorAll('#tx-btn button'),function(bt){bt.addEventListener('click',function(){TXSEL=bt.getAttribute('data-t');Array.prototype.forEach.call(document.querySelectorAll('#tx-btn button'),function(x){x.classList.toggle('on',x===bt)});stazioniOpt();draw()})});
-  var sel=el('an-st');
-  function stazioniOpt(){var h='';D.stazioni.slice().sort(function(a,b){return a.km-b.km}).forEach(function(s){if(D.stagioni[TXSEL]&&D.stagioni[TXSEL][s.c])h+='<option value="'+s.c+'"'+(s.c===STSEL?' selected':'')+'>'+esc(s.n)+' ('+nf(s.km,0)+' km)</option>'});sel.innerHTML=h;if(!D.stagioni[TXSEL][STSEL]){STSEL=sel.value}else sel.value=STSEL}
-  stazioniOpt();sel.addEventListener('change',function(){STSEL=sel.value;draw()});
-  function draw(){
-    var rows=D.stagioni[TXSEL][STSEL]||[];var st=STN[STSEL];
-    /* grafico stagione */
-    var box=el('ch-range');box.innerHTML='';var W=box.clientWidth||320,rh=15,ml=38,mt=20,yrs=[];for(var y=2007;y<=2026;y++)yrs.push(y);
-    var H=mt+rh*yrs.length+6,pw=W-ml-10,by={};rows.forEach(function(r){by[r[0]]=r});
-    var allv=rows.filter(function(r){return r[2]!=null});
-    var d0=1,d1=366;if(allv.length){var vv=allv.filter(function(r){return r[1]});var a=Math.min.apply(null,(vv.length?vv:allv).map(function(r){return r[2]})),c=Math.max.apply(null,(vv.length?vv:allv).map(function(r){return r[4]}));d0=Math.max(1,Math.floor((a-20)/30.5)*30.5);d1=Math.min(366,Math.ceil((c+10)/30.5)*30.5+1)}
-    function X(d){return ml+(d-d0)/(d1-d0)*pw}
-    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-    for(var m=0;m<12;m++){if(MS[m]>=d0-1&&MS[m]<=d1){s+='<line x1="'+X(MS[m])+'" x2="'+X(MS[m])+'" y1="'+mt+'" y2="'+(H-4)+'" stroke="#e3e3e3"/><text class="mu" x="'+(X(MS[m])+2)+'" y="13">'+MN[m]+'</text>'}}
-    yrs.forEach(function(yy,i){var yp=mt+i*rh,r=by[yy];s+='<text class="mu" x="'+(ml-5)+'" y="'+(yp+rh-4)+'" text-anchor="end">'+yy+'</text>';
-      if(!r||r[2]==null){s+='<text class="mu" x="'+(ml+4)+'" y="'+(yp+rh-4)+'">'+(r?'taxon non contato o assente':'nessun dato')+'</text>';return}
-      var x1=Math.max(ml,Math.min(ml+pw,X(r[2]))),x2=Math.max(ml,Math.min(ml+pw,X(r[4]))),ok=r[1];
-      s+='<rect x="'+x1.toFixed(1)+'" y="'+(yp+2)+'" width="'+Math.max(2,x2-x1).toFixed(1)+'" height="'+(rh-5)+'" '+(ok?'fill="'+ACC+'" fill-opacity=".85"':'fill="#f2f2f2" stroke="#999" stroke-dasharray="3 2"')+'><title>'+yy+': '+(ok?'':'NON VALIDO ('+esc(r[7])+') ')+'dal '+doyD(r[2])+' al '+doyD(r[4])+', massimo '+doyD(r[3])+'</title></rect>';
-      if(r[3]>=d0&&r[3]<=d1)s+='<line x1="'+X(r[3])+'" x2="'+X(r[3])+'" y1="'+(yp+1)+'" y2="'+(yp+rh-2)+'" stroke="'+(ok?'#fff':'#777')+'" stroke-width="2.5"/>'});
-    box.innerHTML=s+'</svg>';
-    legend('lg-range',[{c:ACC,t:'stagione dal 5% al 95%, tacca = giorno di massimo'},{c:'#f2f2f2',t:'anno non valido (buchi nelle misure)'}]);
-    /* integrale */
-    var its=rows.filter(function(r){return r[5]!=null&&r[5]>0});
-    var box2=el('ch-integ');box2.innerHTML='';var W2=box2.clientWidth||320,H2=230,m2={l:52,r:8,t:12,b:26},pw2=W2-m2.l-m2.r,ph2=H2-m2.t-m2.b;
-    var ymax=Math.max.apply(null,its.map(function(r){return r[5]}).concat([1])),sy=niceStep(ymax/4),y1=Math.ceil(ymax/sy)*sy;
-    function Y(v){return m2.t+ph2-v/y1*ph2}var bw=pw2/20;
-    var s2='<svg viewBox="0 0 '+W2+' '+H2+'" width="'+W2+'" height="'+H2+'" aria-hidden="true">';
-    for(var v=0;v<=y1+1e-9;v+=sy)s2+='<line x1="'+m2.l+'" x2="'+(W2-m2.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m2.l-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
-    yrs.forEach(function(yy,i){var r=by[yy],xx=m2.l+i*bw;if(i%(W2<520?2:1)===0)s2+='<text class="mu" x="'+(xx+bw/2)+'" y="'+(H2-8)+'" text-anchor="middle">'+(W2<520?String(yy).slice(2):yy)+'</text>';
-      if(!r||!(r[5]>0))return;var ok=r[1];s2+='<rect x="'+(xx+1.5).toFixed(1)+'" y="'+Y(r[5]).toFixed(1)+'" width="'+(bw-3).toFixed(1)+'" height="'+(ph2-(Y(r[5])-m2.t)).toFixed(1)+'" '+(ok?'fill="'+ACC+'" fill-opacity=".85"':'fill="#e9e9e9" stroke="#999" stroke-dasharray="3 2"')+'><title>'+yy+': '+f0(r[5])+(ok?'':' (NON VALIDO: '+esc(r[7])+')')+'</title></rect>'});
-    box2.innerHTML=s2+'</svg>';
-    var inv=rows.filter(function(r){return !r[1]}).length,ty=D.tipico[TXSEL]&&D.tipico[TXSEL][STSEL];
-    setH('an-note',(ty?'<b>'+esc(TXN[TXSEL])+' a '+esc(st.n)+'</b>: '+ty.n+' anni validi, stagione tipica dal '+doyD(ty.ini)+' al '+doyD(ty.fin)+', massimo il '+doyD(ty.pic)+', '+f0(ty.integ)+' granuli&times;giorno/m&sup3; in un anno (mediana). ':'')+(inv?inv+' anni non validi (in grigio). ':'')+(TXI[TXSEL].tipo==='erba'&&(TXSEL==='Gramineae'||TXSEL==='Urticaceae')?'Le stagioni di graminacee e urticacee hanno una coda lunga a basso livello da agosto a ottobre: la &laquo;fine&raquo; al 95% dipende da quella coda.':'')+(STSEL==='PC1'&&['Betula','Alnus','Corylus','Fraxinus','Quercus','Ambrosia'].indexOf(TXSEL)>=0?' A Piacenza questo polline &egrave; indicato per genere solo dal 2018 circa.':''));
-  }
-  draw();RD.push(draw);
-}
-
-/* ---------- tendenze ---------- */
-function forest(id,rows,mn,mx,fmt,zero,log){
-  function P(v){if(log)v=Math.log(v)/Math.LN10;return Math.max(0,Math.min(100,(v-mn)/(mx-mn)*100))}
-  var h='';rows.forEach(function(r){var sig=r.lo!=null&&(r.lo>zero||r.hi<zero);
-    h+='<div class="row"><span>'+esc(r.nm)+'</span><span class="tr"><span class="z" style="left:'+P(zero)+'%"></span><span class="ci'+(sig?' s':'')+'" style="left:'+P(r.lo)+'%;width:'+Math.max(.5,P(r.hi)-P(r.lo))+'%"></span><span class="dot'+(sig?' s':'')+'" style="left:'+P(r.v)+'%"></span></span><span class="v">'+(sig?'<b>':'')+fmt(r)+(sig?'</b>':'')+'</span></div>'});
-  setH(id,h);
-}
-function tendenze(){
-  var tx=D.taxa;
-  var ini=tx.map(function(t){var r=tr(t.k,'inizio_doy');return r?{nm:t.nome,v:r.pend,lo:r.lo,hi:r.hi,p:r.p,n:r.n}:null}).filter(Boolean);
-  var dur=tx.map(function(t){var r=tr(t.k,'durata_giorni');return r?{nm:t.nome,v:r.pend,lo:r.lo,hi:r.hi,n:r.n}:null}).filter(Boolean);
-  var inti=tx.map(function(t){var r=tr(t.k,'log10_integrale');return r?{nm:t.nome,v:r.f,lo:r.flo,hi:r.fhi,n:r.n}:null}).filter(Boolean);
-  function q(x){return sg(x,Math.abs(x)<1?1:0)}
-  function ft(r){return sg(r.v,1)+' (da '+q(r.lo)+' a '+q(r.hi)+')'}
-  forest('fo-ini',ini,-35,25,ft,0);forest('fo-dur',dur,-70,75,ft,0);
-  forest('fo-int',inti,-.5,1,function(r){return '&times;'+nf(r.v,2)+' ('+nf(r.lo,2)+'&ndash;'+nf(r.hi,2)+')'},1,true);
-  var g=tr('Gramineae','inizio_doy'),gd=tr('Gramineae','durata_giorni'),u=tr('Urticaceae','inizio_doy'),a=tr('Artemisia','inizio_doy');
-  var ng=0,nn=0;D.stazioni.forEach(function(s){var r=D.trend_staz.Gramineae&&D.trend_staz.Gramineae[s.c]&&D.trend_staz.Gramineae[s.c].inizio_doy;if(r){nn++;if(r.pend<0)ng++}});
-  setH('tr-testo','<p><b>Il caso pi&ugrave; chiaro sono le graminacee: la stagione comincia circa '+nf(Math.abs(g.pend),0)+' giorni prima ogni dieci anni</b> (intervallo al 95%: da '+nf(Math.abs(g.lo),0)+' a '+nf(Math.abs(g.hi),1)+' giorni prima) <b>e dura circa '+nf(gd.pend,0)+' giorni in pi&ugrave;</b> (da '+nf(gd.lo,0)+' a '+nf(gd.hi,0)+'). In '+ng+' stazioni su '+nn+' la tendenza va nella stessa direzione. Anche la stagione del platano si allunga un po&rsquo;. Per quasi tutti gli alberi la direzione &egrave; &laquo;prima&raquo;, ma gli intervalli comprendono lo zero: non si pu&ograve; escludere che sia il caso. <b>Urticacee e artemisia, invece, partono pi&ugrave; tardi</b> (urticacee +'+nf(u.pend,0)+' giorni per decennio, artemisia +'+nf(a.pend,0)+').</p>');
-  setH('tr-cautela','<b>Per leggere bene.</b> Sono poche stazioni e 11-16 anni, e sono state provate 55 tendenze: qualcuna esce &laquo;significativa&raquo; per caso. Per le urticacee lo spostamento pu&ograve; dipendere dal 5%-95% su una stagione con due picchi (primavera e agosto). La quantit&agrave; di polline degli alberi sale in quasi tutti i casi (&times;1,2&ndash;2,2 per decennio), ma l&rsquo;intervallo comprende quasi sempre 1; a Novara sale per 8 pollini su 11 e tutti nella stessa direzione, il che pu&ograve; indicare anche un cambio nel modo di contare.');
-  var b='';D.taxa.forEach(function(t){b+='<button type="button" data-t="'+t.k+'"'+(t.k==='Gramineae'?' class="on"':'')+'>'+esc(t.nome)+'</button>'});setH('ind-btn',b);
-  var cur='Gramineae',met='inizio_doy';
-  Array.prototype.forEach.call(document.querySelectorAll('#ind-btn button'),function(bt){bt.addEventListener('click',function(){cur=bt.getAttribute('data-t');Array.prototype.forEach.call(document.querySelectorAll('#ind-btn button'),function(x){x.classList.toggle('on',x===bt)});draw()})});
-  var mb=document.createElement('div');mb.className='ctl';mb.innerHTML='<span class="sub">Mostra:</span><button type="button" data-m="inizio_doy" class="on">Inizio (giorni rispetto alla media)</button><button type="button" data-m="durata_giorni">Durata (giorni)</button><button type="button" data-m="log10_integrale">Quantit&agrave; (volte la media)</button>';el('ind-btn').parentNode.insertBefore(mb,el('ch-ind'));
-  Array.prototype.forEach.call(mb.querySelectorAll('button'),function(bt){bt.addEventListener('click',function(){met=bt.getAttribute('data-m');Array.prototype.forEach.call(mb.querySelectorAll('button'),function(x){x.classList.toggle('on',x===bt)});draw()})});
-  function draw(){
-    var rows=(D.indicatore[cur]&&D.indicatore[cur][met])||[],T=tr(cur,met),isl=met==='log10_integrale';
-    function Yv(a){return isl?Math.pow(10,a):a}
-    var pts=rows.map(function(r){return {x:r[0],y:Yv(r[1]),t:'<b>'+r[0]+'</b><br>'+(isl?'&times;'+nf(Yv(r[1]),2)+' la media':sg(r[1],1)+' giorni')+'<br>'+r[2]+' stazioni'}});
-    var lines=[];
-    if(rows.length>=3&&T){var sl=T.pend/10,xs=rows.map(function(r){return r[0]}),ic=median(rows.map(function(r){return r[1]-(isl?T.pend/10/1:sl)*r[0]}));
-      if(isl){sl=Math.log(T.f)/Math.LN10/10;ic=median(rows.map(function(r){return r[1]-sl*r[0]}))}else{sl=T.pend/10;ic=median(rows.map(function(r){return r[1]-sl*r[0]}))}
-      var xa=Math.min.apply(null,xs),xb=Math.max.apply(null,xs);lines.push({x0:xa,x1:xb,y0:Yv(sl*xa+ic),y1:Yv(sl*xb+ic),c:WARM,d:true})}
-    plot(el('ch-ind'),{series:[{c:ACC,pts:pts,line:true,w:1.2}],lines:lines,h:260,x0:2010,x1:2027,sx:2,xf:function(v){return v},yl:isl?'volte la media delle stazioni':'giorni rispetto alla media delle stazioni',hlines:[{y:isl?1:0,t:isl?'media':'media'}]});
-    var sig=T&&(isl?(T.flo>1||T.fhi<1):(T.lo>0||T.hi<0));
-    setH('ind-nota','<b>'+esc(TXN[cur])+'</b>, '+(T?T.n+' anni ('+T.anni+'): tendenza '+(isl?'&times;'+nf(T.f,2)+' per decennio (da '+nf(T.flo,2)+' a '+nf(T.fhi,2)+')':sg(T.pend,1)+' giorni per decennio (da '+sg(T.lo,1)+' a '+sg(T.hi,1)+')')+', '+(sig?'<b>si distingue dal caso</b>':'non si distingue dal caso')+'. Tratteggio: retta di Theil-Sen.':'pochi anni per una tendenza.'));
-  }
-  draw();RD.push(draw);
-  var W=D.peggiori,h='<div class="scroll"><table><thead><tr><th>Polline</th><th class="r">1&deg;</th><th class="r">2&deg;</th><th class="r">3&deg;</th></tr></thead><tbody>';
-  D.taxa.forEach(function(t){var r=W.filter(function(x){return x.taxon===t.k}).sort(function(a,b){return a.pos-b.pos});if(!r.length)return;h+='<tr><td>'+esc(t.nome)+'</td>'+r.map(function(x){return '<td class="r"><b>'+x.anno+'</b> <span class="sub">&times;'+nf(x.f,1)+' ('+x.n+' st.)</span></td>'}).join('')+'</tr>'});
-  setH('peggiori',h+'</tbody></table></div>');
-}
-
-/* ---------- temperature ---------- */
-function temperature(){
-  var rec=function(tx,s){var r=null;D.legame.forEach(function(x){if(x.taxon===tx&&x.serie===s)r=x});return r};
-  var P=rec('Platanaceae','regionale'),Bt=rec('Betula','regionale'),Fr=rec('Fraxinus','regionale');
-  setH('te-testo','<p>Per le piante che fioriscono a fine inverno e in primavera c&rsquo;&egrave; un legame netto con la temperatura dei due mesi prima: <b>negli anni in cui febbraio e marzo sono pi&ugrave; caldi, platano, betulla e frassino cominciano prima, di circa '+nf(Math.abs(P.gpg),0)+'&ndash;'+nf(Math.abs(Fr.gpg),0)+' giorni per ogni grado in pi&ugrave;</b> (correlazione di Spearman da '+sg(P.rho,2)+' a '+sg(Fr.rho,2)+' sull&rsquo;indicatore delle stazioni; resta forte anche tolta la tendenza, cio&egrave; guardando solo le oscillazioni da un anno all&rsquo;altro). Per ambrosia e artemisia (la stagione comincia ad agosto) non si vede nessun legame con la temperatura di giugno-luglio. Scegli un polline per vedere i punti di Novara: ogni punto &egrave; un anno.</p>');
-  var cur='Platanaceae';
-  var cand=['Platanaceae','Betula','Fraxinus','Quercus','Gramineae','Cupressaceae/Taxaceae','Urticaceae','Ambrosia'],b='';
-  cand.forEach(function(k){b+='<button type="button" data-t="'+k+'"'+(k===cur?' class="on"':'')+'>'+esc(TXN[k])+'</button>'});setH('te-btn',b);
-  Array.prototype.forEach.call(document.querySelectorAll('#te-btn button'),function(bt){bt.addEventListener('click',function(){cur=bt.getAttribute('data-t');Array.prototype.forEach.call(document.querySelectorAll('#te-btn button'),function(x){x.classList.toggle('on',x===bt)});draw()})});
-  function draw(){
-    var t=TXI[cur],pts=D.punti_temp[cur].map(function(p){return {x:p[1],y:p[2],t:'<b>'+p[0]+'</b><br>temperatura '+nf(p[1],1)+' &deg;C<br>inizio '+doyD(p[2])}});
-    var L=ols(pts),xa=Math.min.apply(null,pts.map(function(p){return p.x})),xb=Math.max.apply(null,pts.map(function(p){return p.x}));
-    var yt=[];var ys=pts.map(function(p){return p.y}),lo=Math.floor(Math.min.apply(null,ys)/15)*15,hi=Math.ceil(Math.max.apply(null,ys)/15)*15;for(var v=lo;v<=hi;v+=15)yt.push(v);
-    plot(el('ch-te'),{series:[{c:ACC,pts:pts,dots:true,r:4.5}],lines:[{x0:xa,x1:xb,y0:L.s*xa+L.i,y1:L.s*xb+L.i,c:WARM,d:true}],h:280,yticks:yt,yf:doyD,xf:function(v){return nf(v,0)+'°'},sx:1,xl:'temperatura media di '+MN[t.mesi_temp[0]-1]+'-'+MN[t.mesi_temp[1]-1]+' a Brera (°C)',yl:'inizio della stagione a Novara'});
-    var r=rec(cur,'Novara'),rg=rec(cur,'regionale');
-    setH('te-nota',esc(t.nome)+': '+pts.length+' anni a Novara; retta '+sg(L.s,1)+' giorni per grado'+(r?' (Spearman '+sg(r.rho,2)+'; errore della pendenza '+nf(r.se,1)+')':'')+'.'+(rg?' Indicatore delle stazioni: Spearman '+sg(rg.rho,2)+', senza tendenza '+sg(rg.rho_d,2)+'.':''));
-  }
-  draw();RD.push(draw);
-  var rows=D.taxa.map(function(t){var rg=rec(t.k,'regionale'),no=rec(t.k,'Novara');if(!rg)return null;
-    return [esc(t.nome),MN[rg.mesi.split('-')[0]-1]+'-'+MN[rg.mesi.split('-')[1]-1],sg(rg.gpg,1)+' <span class="sub">&plusmn;'+nf(rg.se,1)+'</span>',sg(rg.rho,2),sg(rg.rho_d,2)+(rg.p_d<.05?' *':''),no?sg(no.gpg,1):'-',rg.n]}).filter(Boolean);
-  table('tab-te',['Polline','Mesi di temperatura','Giorni per grado (stazioni)','Correlazione','Senza tendenza','Giorni per grado (Novara)','Anni'],rows);
-  var ma=D.brera_marapr,g=tr('Gramineae','inizio_doy'),tM=null;D.legame.forEach(function(x){if(x.taxon==='Gramineae'&&x.serie==='regionale')tM=x});
-  setH('gr-testo','<p><b>Una cosa non torna.</b> Le graminacee cominciano prima di circa '+nf(Math.abs(g.pend),0)+' giorni ogni dieci anni, ma a Brera la temperatura di marzo-aprile non &egrave; salita: nel '+tM.anni+' la tendenza &egrave; di '+sg(tM.tend,1)+' &deg;C per decennio (negli stessi anni febbraio-marzo +0,65, gennaio-febbraio +1,3). Gli anni pi&ugrave; caldi anticipano le graminacee (circa '+nf(Math.abs(tM.gpg),0)+' giorni per grado) ma <b>il riscaldamento di Brera non spiega la tendenza delle graminacee</b>. Possibili motivi (non verificati qui): un cambio nel modo di contare, le specie di graminacee che cambiano, o il fatto che le temperature di Brera non sono quelle delle stazioni.</p>');
-  function draw2(){
-    plot(el('ch-ma'),{series:[{c:'#3b5ba9',pts:ma.map(function(p){return {x:p[0],y:p[1],t:'<b>'+p[0]+'</b><br>'+nf(p[1],1)+' °C'}}),line:true}],h:220,sx:3,xf:function(v){return v},yf:function(v){return nf(v,0)},yl:'°C, marzo-aprile'});
-    var gp=(D.stagioni.Gramineae.NO1||[]).filter(function(r){return r[1]}).map(function(r){return {x:r[0],y:r[2],t:'<b>'+r[0]+'</b><br>inizio '+doyD(r[2])}});
-    var yt=[];var lo=Math.floor(Math.min.apply(null,gp.map(function(p){return p.y}))/15)*15,hi=Math.ceil(Math.max.apply(null,gp.map(function(p){return p.y}))/15)*15;for(var v=lo;v<=hi;v+=15)yt.push(v);
-    plot(el('ch-gr'),{series:[{c:ACC,pts:gp,line:true}],h:220,sx:3,xf:function(v){return v},yticks:yt,yf:doyD,yl:'inizio graminacee a Novara'});
-  }
-  draw2();RD.push(draw2);
-}
-
-/* ---------- alberi ---------- */
-function alberi(){
-  var AL={};D.alberi.forEach(function(a){AL[a.g]=a});
-  var map=[['Betulla','Betula (betulla)','Betula'],['Platano','Platanus (platano)','Platanaceae'],['Cipressi e affini','Cupressaceae (cipressi, tuie, calocedri, ginepri...)','Cupressaceae/Taxaceae'],['Nocciolo','Corylus (nocciolo)','Corylus'],['Ontano','Alnus (ontano)','Alnus'],['Frassino','Fraxinus (frassino)','Fraxinus'],['Quercia','Quercus (quercia)','Quercus']];
-  var tot=AL['TOTALE censimento comunale 2025'].n,mx=0;map.forEach(function(m){mx=Math.max(mx,AL[m[1]].n)});
-  var rows=map.map(function(m){var a=AL[m[1]],t=D.tipico[m[2]].NO1;return [m[0],'<div class="bars"><div class="row" style="grid-template-columns:1fr 70px"><span class="tr"><span class="fill" style="width:'+(a.n/mx*100)+'%"></span></span><span class="v">'+f0(a.n)+'</span></div></div>',nf(a.q,1)+'%',f0(t.integ),f0(t.dur)+' g']});
-  table('tab-al',['Albero o gruppo','Alberi del Comune (2025)','Quota sul totale','Polline in un anno a Novara','Durata stagione'],rows);
-  var bt=AL['Betula (betulla)'],pl=AL['Platanus (platano)'],cp=AL['Cupressaceae (cipressi, tuie, calocedri, ginepri...)'];
-  setH('al-testo','<p>Il Comune di Milano gestisce <b>'+f0(tot)+'</b> alberi. Il pi&ugrave; comune dopo l&rsquo;acero &egrave; il <b>platano ('+f0(pl.n)+', '+nf(pl.q,1)+'%)</b>: &egrave; anche, a Novara, il polline d&rsquo;albero con la quantit&agrave; annua pi&ugrave; alta, in una stagione di sole due settimane a inizio aprile. Qui il legame &egrave; plausibile, ma &egrave; a Novara, non a Milano. I cipressi e affini sono '+f0(cp.n)+' ('+nf(cp.q,1)+'%) e fanno una stagione lunga (da febbraio ad aprile).</p><p><b>La betulla &egrave; rara in citt&agrave;: '+f0(bt.n)+' alberi, '+nf(bt.q,2)+'%.</b> Eppure &egrave; uno dei pollini pi&ugrave; importanti di aprile (nel calendario ATS di Milano la betulla ha la classe &laquo;alta&raquo; in aprile). Con cos&igrave; pochi alberi in citt&agrave;, il polline di Milano arriva con ogni probabilit&agrave; da fuori, portato dal vento (non &egrave; misurato qui). Il confronto &egrave; solo un contesto: il censimento non comprende i giardini privati e i parchi di altri enti, e il polline viaggia per chilometri.</p><p class="sub">Graminacee, urticacee, artemisia e ambrosia sono erbe: non sono nel censimento degli alberi.</p>');
-}
-
-/* ---------- mappa ---------- */
-function mappa(){
-  var map=L.map('map',{scrollWheelZoom:false,preferCanvas:true}).setView([45.46,9.19],8);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
-  var pts=[[45.4642,9.19]];
-  D.stazioni.forEach(function(s){pts.push([s.lat,s.lon]);
-    L.circleMarker([s.lat,s.lon],{radius:9,color:'#fff',weight:2,fillColor:SC[s.c],fillOpacity:.95}).addTo(map).bindTooltip('<b>'+esc(s.n)+'</b> ('+esc(s.reg)+')<br>'+nf(s.km,0)+' km dal Duomo<br>dati dal '+s.prima.slice(0,4)+' al '+s.ultima.slice(0,4),{sticky:true})});
-  [['Milano (stazione ATS)',45.4642,9.19],['Legnano',45.5967,8.9167],['Rho',45.532,9.0405],['Magenta',45.467,8.883],['Lodi',45.314,9.503]].forEach(function(a){
-    L.circleMarker([a[1],a[2]],{radius:7,color:'#111',weight:2,fillColor:'#fff',fillOpacity:.9}).addTo(map).bindTooltip('<b>'+a[0]+'</b><br>stazione ATS Milano: nessun dato giornaliero aperto<br>(posizione indicativa: centro del comune)',{sticky:true})});
-  L.marker([45.4642,9.19],{icon:L.divIcon({className:'',html:'<div style="font-size:12px;font-weight:700;white-space:nowrap;margin:-24px 0 0 12px;text-shadow:0 0 3px #fff,0 0 3px #fff">Duomo</div>',iconSize:[10,10]}),interactive:false}).addTo(map);
-  map.fitBounds(pts,{padding:[30,30]});setTimeout(function(){map.invalidateSize()},300);
-  var l=[];D.stazioni.forEach(function(s){l.push({c:SC[s.c],t:esc(s.n)+' '+nf(s.km,0)+' km'})});l.push({c:'#fff',t:'comuni con stazione ATS (nessun dato aperto)'});legend('lg-map',l);
-}
-
-/* ---------- metodo, limiti, file ---------- */
-function metodo(){
-  var c=D.meta.controlli;
-  setH('metodo-lista','<li><b>Dati:</b> '+f0(c.righe_grezze)+' righe di concentrazioni giornaliere (media del giorno, granuli di polline per metro cubo d&rsquo;aria) per 6 stazioni POLLnet, scaricate dal servizio aperto dell&rsquo;ISPRA il 1 novembre 2026; tenute '+f0(c.righe_pulite)+'. Scartate: '+f0(c.senza_valore)+' righe senza valore, '+f0(c.valori_negativi)+' valori negativi e '+f0(c.date_future_dopo_scarico)+' date future (tutte di Alessandria). Niente &egrave; stato corretto.</li>'
-  +'<li><b>Integrale annuo:</b> somma dei valori giornalieri dell&rsquo;anno solare. <b>Inizio e fine della stagione:</b> il primo giorno in cui la somma accumulata nell&rsquo;anno raggiunge il 5% e il 95% del totale; durata = fine meno inizio; massimo = il giorno col valore pi&ugrave; alto.</li>'
-  +'<li><b>Anno valido</b> per una stazione e un polline: totale almeno 30; almeno il 75% dei giorni misurati dentro la stagione e l&rsquo;80% nel periodo in cui quel polline c&rsquo;&egrave; di solito (per esempio aprile-agosto per le graminacee); almeno 200 giorni misurati nell&rsquo;anno. '+D.meta.stagioni_valide+' stagioni su '+D.meta.stagioni_totali+' (stazione &times; polline &times; anno) sono valide.</li>'
-  +'<li><b>Tendenze:</b> pendenza di Theil-Sen (la mediana delle pendenze tra coppie di anni) con intervallo di confidenza al 95% e test di Mann-Kendall; solo con almeno 10 anni validi. L&rsquo;<b>indicatore &laquo;pianura attorno a Milano&raquo;</b> &egrave; costruito da noi: per ogni anno dal 2011, la mediana degli scarti di ogni stazione dalla sua media (servono almeno 3 stazioni): non &egrave; una serie ufficiale.</li>'
-  +'<li><b>Temperature:</b> media dei due mesi che precedono la stagione, a Milano Brera (serie di questo sito, senza la correzione 2008-2016 che &egrave; solo proposta); correlazione di Spearman e pendenza in giorni per grado; la stessa dopo aver tolto a entrambe le serie la tendenza lineare.</li>'
-  +'<li><b>Calendario ATS:</b> classi lette dalle caselle colorate (decadi) del PDF dell&rsquo;ATS Citt&agrave; Metropolitana di Milano; il PDF non &egrave; ripubblicato.</li>'
-  +'<li><b>Alberi:</b> censimento del Comune (31/3/2025), conteggio per genere e famiglia.</li>');
-}
-function limiti(){
-  setH('limiti-lista','<li><b>Non c&rsquo;&egrave; Milano.</b> Nessuna stazione lombarda in POLLnet; per Milano solo il calendario ATS e due numeri dell&rsquo;ambrosia. Novara e Piacenza sono a 45-60 km: stesse piante e stagioni simili, non gli stessi numeri.</li>'
-  +'<li><b>Gli zeri non sono sempre scritti.</b> Alcune stazioni e anni (Novara 2017-2019, Piacenza dal 2018 per i generi, Omegna) registrano un polline solo nei giorni in cui &egrave; presente: non si distingue lo zero dal &laquo;non contato&raquo;. Inizi, fini e totali non cambiano; i conteggi di giorni s&igrave;.</li>'
-  +'<li><b>Contare e classificare cambia da una stazione all&rsquo;altra e nel tempo.</b> Piacenza dice &laquo;Betulaceae&raquo; fino al 2018 e &laquo;Betula&raquo; dopo; Novara ha pochissimi giorni per polline nel 2017-2019. Un cambio di conteggio pu&ograve; far salire o scendere i totali: a Novara quasi tutti gli alberi &laquo;crescono&raquo;, e non sappiamo quanto sia vero.</li>'
-  +'<li><b>Serie corte.</b> 11-20 anni per polline e stazione (11-16 per l&rsquo;indicatore dal 2011). Le stagioni dei pollini cambiano molto da un anno all&rsquo;altro, gli intervalli sono larghi. Con 55 tendenze provate, qualcuna &egrave; &laquo;significativa&raquo; per caso.</li>'
-  +'<li><b>Anni con buchi:</b> '+(D.meta.stagioni_totali-D.meta.stagioni_valide)+' stagioni (stazione &times; polline &times; anno) sono state escluse perch&eacute; mancano troppi giorni o il polline non &egrave; stato contato. Il 2026 arriva solo a met&agrave; o fine ottobre.</li>'
-  +'<li><b>Il 5%-95% dipende dalla definizione.</b> Per graminacee e urticacee la durata comprende una coda lunga a basso livello da agosto a ottobre; per i pollini che cominciano a dicembre (cipressi, nocciolo) l&rsquo;anno solare taglia la parte di dicembre.</li>'
-  +'<li><b>Le date sbagliate del servizio.</b> Il servizio ISPRA contiene date 1899-1900 (lo zero delle tabelle Excel) e, per Alessandria, date future e valori negativi: tutte scartate. Il suo conteggio dei risultati si ferma sempre a 3.000: i dati vanno chiesti a pagine.</li>'
-  +'<li><b>Le temperature</b> sono quelle di Brera, a circa 50 km dalle stazioni, con un salto non corretto nel 2008-2016. Il legame con la temperatura &egrave; un confronto, non una prova.</li>'
-  +'<li><b>L&rsquo;ambrosia e il coleottero:</b> &egrave; la spiegazione della Regione Lombardia; nei dati POLLnet si vede il calo, non la causa.</li>'
-  +'<li><b>Il calendario ATS</b> &egrave; una media 2016-2025 a classi, con limiti di classe un po&rsquo; diversi da quelli POLLnet; le posizioni delle stazioni ATS sulla mappa sono indicative.</li>');
-}
-function file(){
-  var f=['pollini.json','stagioni_taxon_anno.csv','riepilogo_taxon_stazione.csv','tendenze_regionali.csv','tendenze_stazione.csv','indicatore_regionale_anno.csv','legame_temperature.csv','anni_peggiori.csv','ambrosia_prima_dopo_2013.csv','ambrosia_regione_lombardia.csv','alberi_contesto.csv','calendario_ats_milano.csv','stazioni.csv'];
-  setH('file-lista',f.map(function(x){return '<a href="data/'+x+'">'+x+'</a>'}).join(', ')+'. Sono valori aggregati (una riga per stagione, non per giorno): la tabella giornaliera completa si rifa con i programmi del progetto a partire dal servizio aperto dell&rsquo;ISPRA. <code>stagioni_taxon_anno.csv</code> ha una riga per stazione, polline e anno (inizio, fine, massimo, durata, integrale, giorni sopra il limite &laquo;medio&raquo; POLLnet, se l&rsquo;anno &egrave; valido e perch&eacute; no).');
+  s+=T(W,top+rh-3,'(ATS)',{a:'end',c:'m'});
+  var y0=top+rh+8;
+  years.forEach(function(y,i){
+    var r=N.anni[k][y],yy=y0+i*rh;
+    s+=T(lm-4,yy+rh-3,y,{a:'end',c:'m'});
+    for(var j=0;j<36;j++){
+      var v=r.v[j],c=cls(v,t.sog);
+      s+='<rect x="'+r1(lm+j*cw)+'" y="'+yy+'" width="'+r1(cw+0.4)+'" height="'+(rh-2)+'" fill="'+col(c)+'"'+(c<0?' stroke="#e6e8ec" stroke-width="1"':'')+tip(nome(k)+' '+y+', '+decLab(j)+': '+(c<0?'senza abbastanza misure':'giorno peggiore '+nf(v)+' granuli/m³ ('+CLS[c].l+')'))+'/>';
+    }
+    var g=al[y];if(g!=null)s+=T(W,yy+rh-3,f0(g)+' gg'+(y===2026?'*':''),{a:'end',c:'m'});
+  });
+  s+=T(W,y0-4+0,'',{});
+  s+='</svg>';
+  $('ch-tuo').innerHTML=s;
+  $('nt-tuo').innerHTML='A destra, i giorni all\'anno sopra la soglia alta. '+(altiTip!=null?'Il '+worst+' ne ha avuti '+f0(al[worst])+', il massimo.':'')+' * Il 2026 arriva fino a ottobre.';
 }
 })();
 </script></body></html>

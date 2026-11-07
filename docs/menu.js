@@ -41,7 +41,7 @@
     { path: 'redditi/',          label: 'Redditi dal 2000' },
     { path: 'scuole/',           label: 'Scuole' },
     { path: 'pioggia/',          label: 'Quanto piove' },
-    { path: 'caldo/',            label: 'Il quartiere più caldo' },
+    { path: 'caldo/',            label: 'Isola di calore' },
     { path: 'costo-vita/',       label: 'Quanto costa vivere' },
     { path: 'metro/',            label: 'Il metrò' },
     { path: 'ristoranti/',       label: 'Cosa si mangia' },
