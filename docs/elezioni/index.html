@@ -32,6 +32,7 @@ h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;paddin
 .ch svg text{fill:var(--ink)}
 .ch svg .m{fill:var(--mut);font-size:12px}
 .ch svg .b{font-weight:700}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
 .ch svg .l{font-size:12px;font-weight:700}
 .ch [data-t]{cursor:pointer}
 .lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
@@ -184,8 +185,8 @@ footer p{margin:.5em 0}
   <h3 id="t-conf"></h3>
   <p class="sub" id="sub-conf"></p>
   <div class="bar" style="margin-top:.2em"><label>Schieramento <select id="famSel"></select></label></div>
-  <div class="lg" id="lg-conf"><span><i class="dot" style="background:var(--mi)"></i>Milano</span><span><i class="dot" style="background:var(--ink)"></i>il luogo che hai scelto</span><span><i class="dot" style="background:var(--axis)"></i>gli altri</span></div>
-  <div id="conf"></div>
+  <div class="lg" id="lg-conf"></div>
+  <div class="ch" id="conf"></div>
   <p class="note" id="nt-conf"></p>
   <p class="src">Fonte: Comune di Milano (CC BY 4.0). Dei quartieri sono esclusi quelli con meno di 1.000 votanti o poco coperti dai dati (le righe oblique sulla mappa).</p>
 </div>
@@ -755,33 +756,34 @@ function renderConf(){
   var cur=S.fam;if(fams.indexOf(cur)<0)cur=leaderOf(cs);S.fam=cur;
   fs.innerHTML=fams.map(function(f){return '<option value="'+esc(f)+'">'+esc(f)+'</option>'}).join('');fs.value=cur;
   var nil=useNil(e),items=[];
-  Object.keys(e.terr).concat(nil?[]:[]);
   var keys=nil?Object.keys(NILS.info):Object.keys(e.terr);
   keys.forEach(function(n){
     var d=TD(e,n);if(!d||!sum(d.v)||(nil&&weak(d,n)))return;
     items.push({n:n,name:tName(e,n),v:shares(e,d.v)[cur]||0,sel:String(S.terr)===n});
   });
-  items.push({n:'MI',name:'Milano',v:cs[cur]||0,mi:true});
   items.sort(function(a,b){return b.v-a.v});
-  var mx=Math.ceil(items[0].v*1.05/5)*5||5;
-  var rows=items.map(function(r,i){return{r:r,i:i}}),show=rows;
-  if(items.length>24){
-    var keep={};for(var i=0;i<10;i++)keep[i]=1;for(i=items.length-10;i<items.length;i++)keep[i]=1;
-    items.forEach(function(r,i){if(r.mi||r.sel)for(var k=Math.max(0,i-1);k<=Math.min(items.length-1,i+1);k++)keep[k]=1});
-    show=rows.filter(function(x){return keep[x.i]});
-  }
-  var h='',prev=-1;
-  show.forEach(function(x){
-    if(prev>=0&&x.i-prev>1)h+='<div class="note" style="margin:2px 0 7px 120px">· · · altri '+(x.i-prev-1)+' quartieri · · ·</div>';
-    prev=x.i;var r=x.r,col=r.mi?'var(--mi)':r.sel?'var(--ink)':'var(--axis)';
-    h+='<div class="rw'+(r.mi||r.sel?' cv':'')+'"'+tip('<b>'+esc(r.name)+'</b><br>'+cur+': '+f1(r.v)+'%<br>'+(x.i+1)+'° su '+items.length)+'><span class="nm wr">'+esc(r.name)+'</span><span class="tr"><i style="width:'+(100*r.v/mx)+'%;background:'+col+'"></i></span><span class="v">'+f0(r.v)+'%</span></div>';
-  });
-  box.innerHTML=h;
-  var top=items[0].mi?items[1]:items[0],bot=items[items.length-1].mi?items[items.length-2]:items[items.length-1];
-  var cl=(cur==='Sì'||cur==='No')?'il '+cur:cur;
-  ti.textContent=(nil?'Tra i quartieri':'Tra i territori')+', '+cl+' va da '+f0(bot.v)+'% a '+f0(top.v)+'%: Milano è al '+f0(cs[cur])+'%';
-  sub.textContent=(nil?'Quartieri':'Territori')+' in ordine, per quota di voti a '+cl+(S.id?' · '+e.label.replace(/\s*\(dati ufficiosi\)/,''):'')+'. In rosso Milano intera'+(S.terr!=null?', in nero il luogo che hai scelto':'')+'.';
-  nt.textContent=nil&&items.length>24?'Sono mostrati i dieci quartieri più alti, i dieci più bassi e dove stanno Milano e il quartiere scelto.':'';
+  var mx=Math.ceil(items[0].v*1.05/5)*5||5,milano=cs[cur]||0;
+  var W=width('conf'),lw=Math.min(Math.round(W*.44),170),vw=40,x0=lw+6,x1=W-vw-6,X=function(v){return x0+v/mx*(x1-x0)},bh=16,top=34,col=fcol(cur);
+  function wrapN(txt,w){var ws=String(txt).split(' '),ls=[],c='';ws.forEach(function(x){var t=c?c+' '+x:x;if(tw(t,13,false)<=w||!c)c=t;else{ls.push(c);c=x}});if(c)ls.push(c);return ls}
+  var y=top,body='',grid='';
+  items.forEach(function(r,i){
+    var ls=wrapN(r.name,lw-4),rh=Math.max(bh+8,ls.length*15+8),cy=y+rh/2,w=Math.max(2,X(r.v)-x0),
+        th='<b>'+esc(r.name)+'</b><br>'+cur+': '+f1(r.v)+'%<br>'+(i+1)+'° su '+items.length;
+    ls.forEach(function(l,k){body+=T(0,cy+4+(k-(ls.length-1)/2)*15,esc(l),{st:'font-size:13px'+(r.sel?';font-weight:800':'')})});
+    body+='<rect x="'+x0+'" y="'+r1(cy-bh/2)+'" width="'+r1(w)+'" height="'+bh+'" fill="'+(r.sel?'#111':col)+'"'+tip(th)+'/>'+
+      T(W,cy+4.5,f0(r.v)+'%',{a:'end',c:'b',st:'font-size:14px'});
+    y+=rh});
+  var H=y+6;
+  grid=L(x0,top-4,x0,H-2,C.axis,1.5);
+  var mxp=X(milano),lab='Milano '+f0(milano)+'%',lx=Math.min(Math.max(mxp,x0+tw(lab,13,true)/2),W-tw(lab,13,true)/2);
+  var line=L(mxp,top-8,mxp,H-2,'#fff',6)+L(mxp,top-8,mxp,H-2,'#E30613',2.5,' stroke-dasharray="6 4"')+T(lx,top-14,lab,{a:'middle',c:'halo',st:'font-size:14px;fill:#E30613'});
+  box.innerHTML=svgOpen(W,H)+grid+body+line+'</svg>';
+  $('lg-conf').innerHTML='<span><i style="background:#E30613;height:3px;width:18px;margin-top:0"></i>riga rossa: Milano intera</span>'+(S.terr!=null?'<span><i style="background:#111"></i>il luogo che hai scelto</span>':'');
+  var top1=items[0],bot=items[items.length-1];
+  var cl=(cur==='Sì'||cur==='No')?'il '+cur:cur,unit=nil?'quartiere':e.sistema==='circoscrizione'?'circoscrizione':'zona o municipio';
+  ti.textContent='Quanto ha preso '+cl+' in ogni '+unit+': dal '+f0(bot.v)+'% al '+f0(top1.v)+'% (Milano: '+f0(milano)+'%)';
+  sub.textContent='Una barra per ogni '+unit+', dalla più alta alla più bassa: la percentuale di voti a '+cl+(S.id?' · '+e.label.replace(/\s*\(dati ufficiosi\)/,''):'')+'. La riga rossa è il risultato di tutta Milano.';
+  nt.textContent='';
 }
 S.tokA=0;
 
