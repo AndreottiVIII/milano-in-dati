@@ -68,6 +68,7 @@
     { path: 'pendolari/', label: 'Pendolari' },
     { path: 'reati/', label: 'Reati denunciati' },
     { path: 'dati-importanti/', label: 'Milano nei dati più importanti' },
+    { path: 'il-sito/', label: 'Il sito: numeri e autore' },
     { path: 'quartiere/', label: 'Il tuo quartiere' },
     { path: 'permettersi/', label: 'Chi può permettersi dove' },
     { path: 'viaggio-linea/', label: 'Un viaggio in tram' },
@@ -129,6 +130,13 @@
     }
   }
   var rootUrl = script ? new URL('./', script.src) : new URL('./', location.href);
+  // Favicon (Duomo rosso nella ciambella delle linee): la aggiunge se la pagina non ce l'ha
+  if (!document.querySelector('link[rel="icon"][href*="favicon.svg"]')) {
+    [['icon', 'favicon.svg', 'image/svg+xml'], ['apple-touch-icon', 'apple-touch-icon.png', '']].forEach(function (f) {
+      var l = document.createElement('link'); l.rel = f[0]; l.href = new URL(f[1], rootUrl).href; if (f[2]) l.type = f[2];
+      document.head.appendChild(l);
+    });
+  }
   var rootPath = rootUrl.pathname;
 
   // Sezione corrente: il percorso della pagina, senza "index.html", confrontato con quello di ogni sezione
@@ -219,7 +227,7 @@
   // I collegamenti stanno in una fila che, sui telefoni stretti, scorre di lato (Home e Cerca restano ferme)
   var lnks = document.createElement('div');
   lnks.className = 'mid-lnks';
-  [['dati-importanti/', 'Dati importanti'], ['quartiere/', 'Il tuo quartiere'], ['quartiere-ideale/', 'Quartiere ideale']].forEach(function (x) {
+  [['dati-importanti/', 'Dati importanti'], ['quartiere/', 'Il tuo quartiere'], ['quartiere-ideale/', 'Quartiere ideale'], ['il-sito/', 'Il sito']].forEach(function (x) {
     var a = document.createElement('a');
     a.className = 'mid-b mid-lnk';
     a.href = new URL(x[0], rootUrl).href;

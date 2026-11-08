@@ -3085,3 +3085,4 @@ Milano nei dati più importanti pubblicata: 12 dati scelti da Davide con il loro
 - 2026-11-08: Dati importanti, grafico 9 rifatto sul 5% che dichiara di più (stesso taglio nel 2000 e nel 2024: 30% → 33%); tolta l'etichetta 'il dato più importante'. Barra in alto: 'Dati importanti' accanto a Home, collegamenti che scorrono di lato sui telefoni stretti.
 Redditi: il confronto 43% dal 9% sostituito dal grafico col cursore su quanto prende chi dichiara di più (1-50%), stesso gruppo nel 2000 e nel 2024.
 Dati importanti: sezione 9 con il grafico col cursore su quanto prende chi dichiara di più.
+Il sito pubblicata: pagine, grafici, numeri, fonti, anni e file contati da strumenti/conta_sito.py, ricalcolati da una GitHub Action a ogni push; autore Davide Caniatti con sito e Substack. Voce 'Il sito' nella barra in alto. Favicon: Duomo rosso nella ciambella delle cinque linee del metrò, in tutte le pagine.
