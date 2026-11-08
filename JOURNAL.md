@@ -3037,3 +3037,5 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-08 — matrimoni: pubblicata definitiva nel nuovo schema, ok di Davide.
 - 2026-11-08 — antenne: pubblicata definitiva nel nuovo schema, ok di Davide.
 - 2026-11-08 — tribunale: pubblicata definitiva nel nuovo schema, ok di Davide.
+- 2026-11-08 — area-c: pubblicata definitiva; colore verde di Area C (#00843D, scelta nostra ispirata ai segnali) e distintivo «C» disegnato da noi, non il logo del Comune (Davide).
+- 2026-11-08 — cani: pubblicata definitiva; il riquadro «Quanti sono i cani?» chiuso in fondo, si apre al click (Davide).

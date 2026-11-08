@@ -1,327 +1,565 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · Cani di Milano</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0} .warm p{margin:.4em 0}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.ctl label.ck{font-size:.9rem;cursor:pointer}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.dot{width:12px;height:12px;border-radius:50%;background:#c26a1b;border:2px solid #fff;box-shadow:0 0 0 1px #555}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.tabmax{max-height:340px;overflow:auto}
-#tab-class{min-width:520px} #tab-stampa{min-width:600px} #tab-serie{min-width:420px}
-.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-</style><script src="../menu.js" defer></script></head><body><main>
-<h1>Le aree cani di Milano, e i cani che nessuno conta</h1>
-<p>Il Comune di Milano pubblica come dato aperto <b>dove sono le aree per i cani</b>: ogni recinto, ogni prato, disegnato sulla mappa. Sono <b id="n-aree">423</b> (in <span id="n-parchi">297</span> parchi e giardini). Qui le guardiamo quartiere per quartiere (gli 88 NIL, Nuclei di Identit&agrave; Locale) e municipio per municipio. <b>Non c&rsquo;&egrave; invece nessun dato aperto sui cani</b>: quanti sono, di che razza, in che zona. Lo dice in fondo la parte <a href="#nonsappiamo">quello che non sappiamo</a>.</p>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri grandi */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:639px){.hl>a:last-child:nth-child(odd){grid-column:1/-1}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli e grafici */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt caption{caption-side:top;text-align:left;font-size:.85rem;color:var(--mut);padding-bottom:2px}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* scrivi il tuo comune */
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris.m{border-left-color:var(--mi)}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.ris .ch{margin-top:6px}
+/* parcheggio */
+.lotwrap{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:700px){.lotwrap{grid-template-columns:1fr 1fr;gap:16px}}
+.lothead{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+.lothead b{font-size:1.8rem;line-height:1;font-weight:800}
+.lothead span{font-size:.85rem;color:var(--mut);line-height:1.2}
+.sl{margin:8px 0 0;padding:8px 12px 10px;background:var(--soft);border-top:6px solid var(--m4)}
+.sl label{display:block;font-weight:750;font-size:.92rem;margin-bottom:2px}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl input[type=range]::-moz-range-thumb{height:28px;width:28px}
+.sl .ex{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+/* piccoli grafici ripetuti */
+.mps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:.4em 0 0}
+@media(min-width:700px){.mps{grid-template-columns:repeat(5,1fr)}}
+.mp{background:var(--soft);border-top:4px solid var(--c);padding:6px 12px 6px;min-width:0}
+.mp b{display:block;font-size:.95rem;line-height:1.2;margin-bottom:2px}
+.mp svg{display:block;overflow:visible;font-family:inherit;font-size:12px}
+.mp svg text{fill:var(--ink)}
+.mp svg .m{fill:var(--mut)}
+.mp svg .b{font-weight:700}
+.mp [data-t]{cursor:pointer}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+/* quartiere e persone */
+.pm{margin:10px 0 0}
+.pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
+.pers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:.4em 0 .6em}
+.pers b{display:block;font-size:.95rem;margin-bottom:4px}
+.pers>div{min-width:0}
+.lg i.dot{border-radius:50%}
+.find{margin:14px 0 0}
+</style>
+<script src="../menu.js" defer></script></head>
+<body><main>
 
-<div class="warm"><b>Prima di leggere.</b> Le aree sono quelle che il Comune ha schedato e che oggi sono nell&rsquo;elenco. La data di ogni area &egrave; quella della scheda, non quella di apertura, e le aree chiuse non compaiono. I numeri sui cani vengono solo da giornali e non sono dati aperti. Le spiegazioni sono nelle sezioni <a href="#crescita">crescita</a>, <a href="#nonsappiamo">quello che non sappiamo</a> e <a href="#metodo">come &egrave; fatto</a>.</div>
+<h1>Cani di Milano</h1>
+<p class="lead">Le 423 aree per i cani, quartiere per quartiere: quante sono, quanto sono grandi, quanto si cammina per arrivarci. E quello che nessuno sa: quanti cani ci sono.</p>
 
-<h2 id="mappa">La mappa</h2>
-<p>I quartieri sono colorati per <b>aree cani ogni 100.000 abitanti</b>: pi&ugrave; scuro = pi&ugrave; aree per abitante. I puntini arancioni sono le singole aree (ingrandendo diventano il disegno vero dell&rsquo;area). Clicca un quartiere o un&rsquo;area per la scheda, oppure scegli dall&rsquo;elenco. Puoi guardare un municipio alla volta.</p>
-<div class="ctl"><label class="sub" for="sel-mun">Municipio:</label><select id="sel-mun" aria-label="Scegli un municipio"></select>
-<label class="sub" for="sel-nil">Quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select>
-<label class="ck"><input type="checkbox" id="ck-aree" checked> mostra le aree</label></div>
-<p class="sub" id="map-desc"></p>
-<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per numero di aree cani ogni 100.000 abitanti, con le aree cani"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Mappa &copy; OpenStreetMap contributors. Aree cani, quartieri e residenti: Comune di Milano (CC BY). I quartieri con meno di 5.000 residenti (parchi e zone quasi senza abitanti) sono in grigio: dividere per pochi abitanti non ha senso, ma le loro aree sono sulla mappa.</p>
-<div id="scheda" class="card"><span class="sub">Scegli un quartiere o un&rsquo;area sulla mappa.</span></div>
+<div class="hl" id="hl"></div>
+<p class="src">Aree cani: Comune di Milano, elenco ds52 (CC BY), scaricato il 1 novembre 2026. Residenti e quartieri: Comune di Milano (CC BY), anno 2024. Minuti a piedi: stima sulla rete dei marciapiedi. Numeri sui cani: giornali, non sono dati aperti (vedi i limiti dei dati).</p>
 
-<h2 id="classifica">Chi ha pi&ugrave; e meno aree per abitante</h2>
-<div id="class-testo"></div>
-<div class="grid2"><div><h3>Meno aree per abitante</h3><div class="bars" id="b-bot"></div></div>
-<div><h3>Pi&ugrave; aree per abitante</h3><div class="bars" id="b-top"></div></div></div>
-<p class="src">Aree cani ogni 100.000 residenti (residenti del registro anagrafico del Comune, ds205, anno 2024). Solo i quartieri con almeno 5.000 residenti.</p>
-<details><summary>Tutti i quartieri in classifica</summary><div class="scroll tabmax"><table id="tab-class"></table></div></details>
+<!-- ============ 1 ============ -->
+<h2 id="anni">Negli anni</h2>
+<div class="fig">
+  <h3 id="t-serie"></h3>
+  <p class="sub">Ogni punto è un anno: quante aree cani hanno la scheda di quell’anno o di prima.</p>
+  <div class="ch" id="ch-serie" role="img" aria-label="Linea: aree cani con scheda entro ogni anno, dal 2011 al 2024"></div>
+  <p class="note" id="nn-serie"></p>
+  <p class="src">Fonte: Comune di Milano, aree cani (CC BY), schede fino al 20/9/2024; residenti dell’anagrafe del Comune (CC BY). La data è quella della scheda, non quella di apertura, e le aree chiuse non compaiono nell’elenco: leggi la linea come «aree oggi in elenco, schedate entro l’anno».</p>
+</div>
 
-<h3 id="municipi">Per municipio</h3>
-<div id="mun-testo"></div>
-<div class="grid2"><div><p class="sub"><b>Aree cani ogni 100.000 abitanti</b></p><div class="bars" id="b-mun-p"></div></div>
-<div><p class="sub"><b>Metri quadrati di aree cani per abitante</b></p><div class="bars" id="b-mun-m"></div></div></div>
-<p class="src">Residenti per municipio: censimento permanente Istat 2023 (non il registro anagrafico dei quartieri: i due insiemi non si confrontano tra loro). Fonte aree: ds52, 1/11/2026.</p>
+<!-- ============ 2 ============ -->
+<h2 id="quartiere">Il tuo quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub" id="s-mappa"></p>
+  <div class="lg" id="lg-mappa"></div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dei quartieri di Milano colorati per aree cani ogni 10.000 residenti"></div>
+  <p class="note" id="nn-mappa"></p>
+  <p class="src">Fonte: Comune di Milano, aree cani (ds52, CC BY, 1/11/2026); residenti per quartiere dell’anagrafe del Comune, anno 2024 (CC BY). Il quartiere è il NIL (Nucleo di identità locale). In grigio i quartieri con meno di 5.000 residenti: dividere per pochi abitanti non ha senso.</p>
+</div>
 
-<h2 id="crescita">Le aree sono raddoppiate</h2>
-<div id="cresc-testo"></div>
-<h3>Aree con scheda entro l&rsquo;anno</h3>
-<div class="ch" id="ch-serie" role="img" aria-label="Grafico a colonne: aree cani con scheda entro ogni anno, dal 2011 al 2024"></div>
-<h3>Schede nuove nell&rsquo;anno</h3>
-<div class="ch" id="ch-nuove" role="img" aria-label="Grafico a colonne: aree cani con scheda registrata in ogni anno, dal 2011 al 2024"></div>
-<div class="warm"><b>Attenzione alla data.</b> <span id="cresc-warn"></span></div>
-<details><summary>La tabella anno per anno</summary><div class="scroll"><table id="tab-serie"></table></div></details>
+<!-- ============ 3 ============ -->
+<h2 id="cammino">Quanto si cammina</h2>
+<div class="fig">
+  <h3 id="t-cammino"></h3>
+  <p class="sub">Per ogni tempo sull’asse, la linea dice quanti residenti ogni 100 arrivano a piedi a un’area cani in quel tempo o meno. Scegli un quartiere qui sopra per aggiungere la sua linea.</p>
+  <div class="lg" id="lg-cammino"></div>
+  <div class="ch" id="ch-cammino" role="img" aria-label="Linee: quota dei residenti che arriva a piedi a un’area cani entro un certo numero di minuti"></div>
+  <p class="note" id="nn-cammino"></p>
+  <p class="src">Stima su rete pedonale di OpenStreetMap a 4,5 km/h (75 metri al minuto), da 46.895 civici residenziali con i residenti 2024 distribuiti in parti uguali tra i civici del quartiere; area cani più vicina tra le 423 del Comune, agganciata al suo punto centrale. Calcolo come nella pagina <a href="../citta-15-minuti/">La città dei 15 minuti</a>. Rete: © OpenStreetMap contributors (ODbL); civici: Comune di Milano (CC BY).</p>
+</div>
 
-<h2 id="nonsappiamo">Quello che non sappiamo</h2>
-<div class="warm" id="nonsappiamo-box"></div>
-<h3>Le uniche cifre: dai giornali</h3>
-<div class="scroll"><table id="tab-stampa"></table></div>
-<div id="stampa-testo"></div>
-<p class="src">Cifre riportate dalla stampa, non verificate alla fonte, non dati aperti. Il rapporto &laquo;per 100 abitanti&raquo; &egrave; calcolato da noi con i residenti del Comune (ds205) dell&rsquo;anno indicato. Si citano i fatti, non i testi degli articoli.</p>
+<!-- ============ 4 ============ -->
+<h2 id="dimensioni">Grandi e piccole</h2>
+<div class="fig">
+  <h3 id="t-dim"></h3>
+  <p class="sub">Ogni pallino è un’area cani, messo sulla sua superficie: a sinistra le più piccole, a destra le più grandi. La scala è moltiplicativa: ogni tacca vale dieci volte la precedente. Tocca un pallino per il nome.</p>
+  <div class="lg" id="lg-dim"></div>
+  <div class="ch" id="ch-dim" role="img" aria-label="423 pallini, uno per area cani, disposti per metri quadrati su una scala moltiplicativa"></div>
+  <p class="note" id="nn-dim"></p>
+  <p class="src">Fonte: Comune di Milano, aree cani (ds52, CC BY, 1/11/2026), campo dei metri quadrati dei poligoni. Un campo da tennis è circa 260 m², un campo da calcio circa 7.000 m². Una riga del Comune è un’area, non un parco: nel Parco Nord ce ne sono fino a 12.</p>
+</div>
 
-<h2 id="metodo">Come &egrave; fatto, e i limiti dei dati</h2>
-<ul class="m" id="metodo-lista"></ul>
+<!-- ============ 5 ============ -->
+<h2 id="cani">Quello che non sappiamo</h2>
+<div class="fig">
+  <h3 id="t-cani"></h3>
+  <p class="sub">Ogni zampa è un cane ogni 100 abitanti registrato all’anagrafe canina. Sono cifre di giornale: non c’è nessun dato aperto con i cani di Milano.</p>
+  <div class="ch" id="ch-cani" role="img" aria-label="Zampe: cani registrati ogni 100 abitanti a Milano nel 2018 e nel 2020 e in Lombardia nel 2020"></div>
+  <p class="note" id="nn-cani"></p>
+  <p class="src">Fonte: 7giorni.info (27/11/2018) e Il Giorno (17/1/2022) sul rapporto Legambiente «Animali in città»; numeri riportati con la fonte, non verificati alla fonte. Residenti per il conto «ogni 100 abitanti»: anagrafe del Comune (CC BY).</p>
+</div>
 
-<h2 id="download">File</h2>
-<p><a href="data/aree.geojson">aree.geojson</a> (le aree cani come poligoni semplificati di circa 1 metro, con quartiere, municipio, metri quadrati e anno di scheda), <a href="data/aree_cani.csv">aree_cani.csv</a> (le stesse aree in tabella, con il punto centrale), <a href="data/nil.geojson">nil.geojson</a> (i confini dei quartieri semplificati, con i valori della mappa), <a href="data/aree_cani_per_nil.csv">aree_cani_per_nil.csv</a>, <a href="data/aree_cani_per_municipio.csv">aree_cani_per_municipio.csv</a>, <a href="data/serie_aree_cani_per_anno_scheda.csv">serie_aree_cani_per_anno_scheda.csv</a>, <a href="data/totali_pubblicati.csv">totali_pubblicati.csv</a> (le cifre dei giornali, con la fonte di ciascuna) e <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina, con l&rsquo;origine di ciascuno).</p>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="nonso-d"><summary>Quanti sono i cani di Milano? Di che razza? In che quartiere?</summary><div class="in" id="nonso"></div></details>
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul>
+<p>Altre pagine sullo stesso tema: <a href="../verde/">Il verde di Milano</a>, <a href="../citta-15-minuti/">La città dei 15 minuti</a>.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Area cani</dt><dd>Uno spazio del Comune dove i cani possono stare senza guinzaglio. Il Comune non dice se sia recintata, né se abbia giochi.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+<dt>Scheda</dt><dd>La riga dell’elenco del Comune per ogni area. La sua data non è la data di apertura.</dd>
+<dt>Mediana</dt><dd>Il valore di mezzo: metà dei casi sta sotto, metà sopra.</dd>
+<dt>Anagrafe canina</dt><dd>L’elenco dei cani con microchip, tenuto dalla Regione Lombardia. Si può cercare un cane solo con il suo numero: non ci sono statistiche.</dd>
+<dt>Scala moltiplicativa</dt><dd>Una scala in cui ogni tacca vale dieci volte la precedente (100, 1.000, 10.000), così le aree piccole e le grandi stanno nello stesso disegno.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<ul>
+<li><a href="data/aree.geojson">Le aree cani come poligoni</a> semplificati di circa 1 metro, con quartiere, municipio, metri quadrati e anno di scheda</li>
+<li><a href="data/aree_cani.csv">Le stesse aree in tabella</a>, con il punto centrale (punto e virgola come separatore)</li>
+<li><a href="data/aree_punti_v2.json">Le aree per la scala dei metri quadrati</a>: nome, superficie, quartiere, punto</li>
+<li><a href="data/quartieri_cani_v2.geojson">Confini semplificati dei quartieri</a> con aree, residenti, minuti a piedi e area più vicina</li>
+<li><a href="data/cammino_cani_v2.json">Minuti a piedi per tutta la città</a></li>
+<li><a href="data/aree_cani_per_nil.csv">Aree cani per quartiere</a> e <a href="data/aree_cani_per_municipio.csv">per municipio</a></li>
+<li><a href="data/serie_aree_cani_per_anno_scheda.csv">Aree con scheda entro l’anno</a>, 2011-2024</li>
+<li><a href="data/totali_pubblicati.csv">Le cifre dei giornali sui cani</a>, con la fonte di ciascuna</li>
+<li><a href="data/riepilogo.json">Altri numeri della pagina</a>, con l’origine di ciascuno</li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Aree cani: Comune di Milano, &laquo;Territorio: localizzazione delle aree cani&raquo; (ds52), licenza Creative Commons Attribution (CC BY, versione non indicata dal portale); schede dal 1983 al 20/9/2024; scaricato dal portale <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026. Confini dei NIL (ds964, CC BY) e residenti per quartiere (ds205, anno 2024, CC BY), Comune di Milano, scaricati il 30 ottobre 2026 per un'altra pagina. Residenti per municipio: Istat, censimento permanente della popolazione 2023 (CC BY 4.0), scaricato il 30 ottobre 2026. Controllo con OpenStreetMap <code>leisure=dog_park</code> (Overpass, 1/11/2026), licenza ODbL, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, che &egrave; anche la mappa di sfondo. Numeri sui cani: articoli di 7giorni.info (27/11/2018) e Il Giorno (17/1/2022, sul rapporto Legambiente &laquo;Animali in citt&agrave;&raquo;), letti il 1 novembre 2026; nessuna licenza, riportiamo solo i numeri con la fonte. Rapporto Legambiente XV (22/7/2026): letto, nessun contenuto ripubblicato.</p>
+<p><b>Fonti e licenze.</b> Aree cani: Comune di Milano, «Territorio: localizzazione delle aree cani» (ds52), licenza Creative Commons Attribution (CC BY, versione non indicata dal portale); schede dal 1983 al 20/9/2024; scaricato dal portale <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a> il 1 novembre 2026. Confini dei NIL (ds964, CC BY), residenti per quartiere (ds205, anno 2024, CC BY) e civici residenziali, Comune di Milano, scaricati il 30 ottobre 2026 per un’altra pagina. Residenti per municipio: Istat, censimento permanente della popolazione 2023 (CC BY 4.0). Rete pedonale e controllo con <code>leisure=dog_park</code>: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL. Numeri sui cani: articoli di 7giorni.info (27/11/2018) e Il Giorno (17/1/2022, sul rapporto Legambiente «Animali in città»), letti il 1 novembre 2026; nessuna licenza, riportiamo solo i numeri con la fonte. Rapporto Legambiente XV (22/7/2026): letto, nessun contenuto ripubblicato.</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,NF=null,AF=null,NIL=[],AR=[],RD=[];
-var ACC='#00695c',WARM='#c26a1b';
-var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
-/* ---------- formati ---------- */
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function nilById(i){for(var k=0;k<NIL.length;k++)if(NIL[k].i===i)return NIL[k];return null}
-function nilByStart(s){for(var k=0;k<NIL.length;k++)if(NIL[k].n.toLowerCase().indexOf(s)===0)return NIL[k];return null}
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e3e6eb',gry:'#9aa1ad'};
+var D,GEO,PT,CAM,N=[],NB=[],BY={},RD=[],sel=null,AR=[];
 
-Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/aree.geojson')]).then(function(a){
-  D=a[0];NF=a[1];AF=a[2];
-  NIL=NF.features.map(function(f){return f.properties});
-  AR=AF.features.map(function(f){return f.properties});
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+grp(String(Math.abs(r)))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function pl(n,u,p){return n+' '+(n===1?u:p)}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip'),NEAR=null;
+function showTip(e,html){
+  TIP.innerHTML=html;TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+function tipOf(e){
+  var el=e.target.closest&&e.target.closest('[data-t]');if(el)return el.getAttribute('data-t');
+  var nr=e.target.closest&&e.target.closest('[data-near]');
+  if(nr&&NEAR){var s=nr.ownerSVGElement.getBoundingClientRect(),px=e.clientX-s.left,py=e.clientY-s.top,b=null,bd=15;
+    NEAR.forEach(function(d){var q=Math.hypot(d.x-px,d.y-py);if(q<bd){bd=q;b=d}});return b?b.t:null}
+  return null;
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var h=tipOf(e);if(h)showTip(e,h);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var h=tipOf(e);if(h)showTip(e,h);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'quartieri_cani_v2.geojson'),getJ(DATA+'aree_punti_v2.json'),getJ(DATA+'cammino_cani_v2.json')]).then(function(r){
+  D=r[0];GEO=r[1];PT=r[2];CAM=r[3];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+
+/* ---------- quartieri e aree ---------- */
+var KM=0,AT=0,P10=0,AK=0;
+function prepara(){
+  GEO.features.forEach(function(f){var p=f.properties;
+    var o={id:p.i,n:p.n,mu:p.mu,ab:p.ab,km2:p.km2,a:p.a,mq:p.mq,big:!!p.big,p10:p.p10,ak:p.ak,med:p.med,q5:p.q5,q10:p.q10,cu:p.cu,nl:p.nl,nm:p.nm,nn:p.nn,nq:p.nq,f:f};
+    N.push(o);BY[o.id]=o;if(o.big)NB.push(o);KM+=o.km2;AT+=o.a});
+  var cnt={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+  NB.sort(function(a,b){return b.p10-a.p10});NB.forEach(function(o,i){o.rk=i+1});
+  P10=D.comune.per100k/10;AK=AT/KM;
+  AR=PT.aree.map(function(a){return{id:a[0],l:a[1],mq:a[2],nil:a[3],mu:a[4],x:a[5],y:a[6],an:a[7]}});
+  AR.sort(function(a,b){return a.mq-b.mq});
+}
+var SOG=null;
+function mcl(o){if(!o.big)return -1;var s=CAM.soglie_classi_per_10mila;return o.p10<=s[0]?0:o.p10<=s[1]?1:o.p10<=s[2]?2:3}
+var MC=[{col:C.m5,txt:'#fff'},{col:C.m4,txt:'#fff'},{col:C.teal,txt:C.ink},{col:C.m3,txt:C.ink}];
+function mnome(){var s=CAM.soglie_classi_per_10mila;return['meno di '+f1(s[0]),'da '+f1(s[0])+' a '+f1(s[1]),'da '+f1(s[1])+' a '+f1(s[2]),'più di '+f1(s[2])]}
+function shortn(s,w,b){if(tw(s,13,b)<=w)return s;while(s.length>3&&tw(s+'…',13,b)>w)s=s.slice(0,-1);return s+'…'}
 
 function tutto(){
-  sorpresa();mappa();classifica();municipi();crescita();nonsappiamo();metodo();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+  prepara();
+  highlights();
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});if(m.length===1)return m[0];return null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].id,true);else if(m.length>1)$('ris').className='ris',$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').className='ris',$('ris').innerHTML='Non trovo «'+esc(q.value)+'» tra gli 88 quartieri. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true)});
+  scheda();
+  draw(serie);draw(mappa);draw(cammino);draw(dimensioni);draw(zampe);
+  testi();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()});scheda()},150)});
+}
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  scheda();RD.forEach(function(f){f()});
 }
 
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var c=D.comune,N=D.nil,S=D.serie,Z=D.serie_nota;
-  el('n-aree').textContent=f0(c.aree);el('n-parchi').textContent=f0(c.id_area);
-  var s0=S[0],s1=S[S.length-1];
-  var h='<p><b>Milano ha '+f0(c.aree)+' aree per i cani, disegnate al metro, ma nessun dato aperto su quanti cani ci siano.</b> Le aree coprono '+f0(c.mq)+' m&sup2;: '+nf(c.mq_per_ab,2)+' m&sup2; per abitante, un&rsquo;area ogni '+f0(c.ab_per_area)+' residenti. Di cani, razze e zone, il Comune e la Regione non pubblicano niente: restano due cifre di giornale (<a href="#nonsappiamo">vedi sotto</a>).</p>';
-  h+='<p><b>Le aree sono pi&ugrave; che raddoppiate dal '+s0.anno+'</b>: da '+f0(s0.aree)+' a '+f0(s1.aree)+' ('+(Z.crescita_aree_pct>0?'+':'')+f0(Z.crescita_aree_pct)+'%), mentre i residenti sono cresciuti del '+nf(Z.crescita_ab_pct,1)+'%. Ma &laquo;nel '+s0.anno+'&raquo; vuol dire &laquo;con scheda del '+s0.anno+' o prima&raquo;: la data &egrave; quella della scheda, non dell&rsquo;apertura (<a href="#crescita">vedi sotto</a>).</p>';
-  h+='<p><b>Nel centro ce ne sono molte meno.</b> Il quartiere con meno aree per abitante &egrave; '+esc(N.meno[0].n)+' ('+f1(N.meno[0].p)+' ogni 100.000 residenti), quello con pi&ugrave; aree '+esc(N.piu[0].n)+' ('+f1(N.piu[0].p)+'): <b>'+N.rapporto+' volte</b> di differenza. I sei quartieri con meno aree sono tutti in centro o vicini al centro.</p>';
-  h+='<p class="src">Fonte: ds52 del Comune di Milano (CC BY), scaricato il 1/11/2026; residenti ds205 2024 e quartieri (CC BY). Tutti i numeri sono in <a href="data/riepilogo.json">riepilogo.json</a>.</p>';
-  setH('sorpresa',h);
-}
-
-/* ---------- mappa ---------- */
-var MAP=null,LAY=null,DOTS=null,POLY=null,SEL=null,MET=null,MUN='',DOTL={},showAree=true;
-function qbreaks(vals,k,step){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(Math.round(s[Math.floor(i*s.length/k)]/step)*step);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
-function pick(n){if(n===1)return [SEQ[3]];var o=[];for(var i=0;i<n;i++)o.push(SEQ[Math.round(i*5/(n-1))]);return o}
-function colore(v){if(v==null)return '#bdbdbd';var i=0;while(i<MET.b.length&&v>=MET.b[i])i++;return MET.c[i]}
-function tipArea(p){return '<b>'+esc(p.l)+'</b><br>'+f0(p.mq)+' m&sup2; &middot; municipio '+p.m+'<br>'+(p.a?'scheda del '+p.a+(p.c?' (data convenzionale)':''):'scheda senza data')}
-function tipNil(p){
-  if(p.cl!==1)return '<b>'+esc(p.n)+'</b><br>'+p.a+' aree, '+f0(p.ab)+' residenti<br>meno di 5.000 residenti: rapporto non calcolato';
-  return '<b>'+esc(p.n)+'</b><br>'+p.a+' aree &middot; '+f1(p.p)+' ogni 100.000 residenti'}
-function inMun(p){return !MUN||p.m===parseInt(MUN,10)}
-function sty(f){var p=f.properties,sel=SEL===p.i,dim=MUN&&p.mun.indexOf(parseInt(MUN,10))<0;
-  return {fillColor:colore(p.cl===1?p.p:null),fillOpacity:dim?.25:(MAP&&MAP.getZoom()>=15?.5:.82),color:sel?'#000':'#fff',weight:sel?3:1}}
-function mappa(){
-  var ok=NIL.filter(function(p){return p.cl===1});
-  var b=qbreaks(ok.map(function(p){return p.p}),6,5);
-  MET={b:b,c:pick(b.length+1)};
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:true}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
-    l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});
-    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
-  MAP.createPane('aree').style.zIndex=450;
-  var rr=L.canvas({pane:'aree'});
-  DOTS=L.layerGroup();POLY=L.layerGroup();
-  AF.features.forEach(function(f){
-    var p=f.properties,d=L.circleMarker([p.y,p.x],{pane:'aree',renderer:rr,radius:3.5,color:'#fff',weight:1,fillColor:WARM,fillOpacity:1});
-    d.bindTooltip(tipArea(p),{sticky:true});d.on('click',function(){scegli(p.n,false)});d._p=p;DOTS.addLayer(d);
-    var g=L.geoJSON(f,{pane:'aree',renderer:rr,style:{color:'#6b3608',weight:1.5,fillColor:WARM,fillOpacity:.7}});
-    g.bindTooltip(tipArea(p),{sticky:true});g.on('click',function(){scegli(p.n,false)});g._p=p;POLY.addLayer(g);
-  });
-  MAP.fitBounds(LAY.getBounds());
-  /* controlli */
-  var sm=el('sel-mun'),h='<option value="">Tutti</option>';
-  for(var m=1;m<=9;m++)h+='<option value="'+m+'">Municipio '+m+'</option>';
-  sm.innerHTML=h;sm.addEventListener('change',function(){MUN=sm.value;aggiorna(true)});
-  var sel=el('sel-nil');h='<option value="">— scegli —</option>';
-  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
-  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
-  el('ck-aree').addEventListener('change',function(){showAree=this.checked;aggiorna(false)});
-  MAP.on('zoomend',function(){aggiorna(false)});
-  /* legenda */
-  var lg='';MET.c.forEach(function(c,i){var t=i===0?'meno di '+f0(MET.b[0]):i===MET.b.length?f0(MET.b[i-1])+' o più':f0(MET.b[i-1])+' – '+f0(MET.b[i]);
-    lg+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
-  lg+='<span><i style="background:#bdbdbd"></i>meno di 5.000 residenti</span><span><i class="dot"></i>un&rsquo;area cani</span>';
-  setH('lg-map',lg);
-  aggiorna(false);
-  setTimeout(function(){MAP.invalidateSize();if(!SEL&&!MUN)MAP.fitBounds(LAY.getBounds())},600);
-  window.addEventListener('resize',function(){MAP.invalidateSize()});
-}
-function aggiorna(zoom){
-  LAY.setStyle(sty);if(SEL)bringSel();
-  DOTS.eachLayer(function(d){MAP.removeLayer(d)});POLY.eachLayer(function(d){MAP.removeLayer(d)});
-  var big=MAP.getZoom()>=15,grp=big?POLY:DOTS,n=0,pts=[];
-  grp.eachLayer(function(l){if(inMun(l._p)){n++;if(showAree)l.addTo(MAP)}});
-  AR.forEach(function(p){if(inMun(p))pts.push([p.y,p.x])});
-  if(zoom&&MUN&&pts.length)MAP.fitBounds(pts,{padding:[30,30]});
-  if(zoom&&!MUN&&!SEL)MAP.fitBounds(LAY.getBounds());
-  var h;
-  if(MUN){var r=null;D.municipi.forEach(function(x){if(x.m===parseInt(MUN,10))r=x});
-    h='<b>Municipio '+r.m+'</b>: '+r.aree+' aree cani, '+f0(r.mq)+' m&sup2;, '+f0(r.ab)+' residenti (censimento 2023): <b>'+f1(r.p)+'</b> aree ogni 100.000 residenti, '+nf(r.mm,2)+' m&sup2; per abitante. I quartieri che non toccano questo municipio sono sbiaditi.'}
-  else h='Tutta Milano: '+D.comune.aree+' aree, '+f1(D.comune.per100k)+' ogni 100.000 residenti (media della citt&agrave;). Il colore dice quante aree ci sono ogni 100.000 residenti del quartiere; pi&ugrave; scuro = pi&ugrave; aree.';
-  setH('map-desc',h);
-}
-function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
-function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);
-  LAY.setStyle(sty);bringSel();
-  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:15})})}
-  scheda(i)}
-function scheda(i){
-  var p=nilById(i);if(!p)return;
-  var C=D.comune,h='<h3>'+esc(p.n)+'</h3><div class="scroll"><table><tbody>';
-  h+='<tr><td>Aree cani</td><td class="r"><b>'+p.a+'</b> <span class="sub">('+f0(p.mq)+' m&sup2;)</span></td></tr>';
-  h+='<tr><td>Residenti (2024)</td><td class="r">'+f0(p.ab)+'</td></tr>';
-  h+='<tr><td>Aree ogni 100.000 residenti</td><td class="r">'+(p.cl===1?'<b>'+f1(p.p)+'</b> <span class="sub">(citt&agrave;: '+f1(C.per100k)+')</span>':'<span class="sub">non calcolato: meno di 5.000 residenti</span>')+'</td></tr>';
-  h+='<tr><td>m&sup2; di aree per abitante</td><td class="r">'+(p.cl===1?'<b>'+nf(p.mm,2)+'</b> <span class="sub">(citt&agrave;: '+nf(C.mq_per_ab,2)+')</span>':'<span class="sub">non calcolato</span>')+'</td></tr>';
-  h+='<tr><td>Residenti per ogni area</td><td class="r">'+(p.a>0?f0(p.ap):'<span class="sub">nessuna area</span>')+(p.a>0?' <span class="sub">(citt&agrave;: '+f0(C.ab_per_area)+')</span>':'')+'</td></tr>';
-  if(p.mun.length)h+='<tr><td>Municipi delle aree</td><td class="r">'+p.mun.join(', ')+'</td></tr>';
-  h+='</tbody></table></div>';
-  var L2=AR.filter(function(x){return x.n===i}).sort(function(a,b){return b.mq-a.mq});
-  if(L2.length){h+='<details><summary>Le '+L2.length+' aree del quartiere</summary><div class="scroll tabmax"><table><thead><tr><th>Dove</th><th class="r">m&sup2;</th><th class="r">Municipio</th><th class="r">Scheda</th></tr></thead><tbody>'+
-    L2.map(function(x){return '<tr><td>'+esc(x.l)+'</td><td class="r">'+f0(x.mq)+'</td><td class="r">'+x.m+'</td><td class="r">'+(x.a||'senza data')+(x.c?' <span class="pill">data convenzionale</span>':'')+'</td></tr>'}).join('')+'</tbody></table></div></details>'}
-  h+='<p class="sub">Aree del ds52 (1/11/2026); residenti ds205 2024. La data &egrave; quella della scheda, non dell&rsquo;apertura.</p>';
-  setH('scheda',h);
-}
-
-/* ---------- classifica ---------- */
-function barsPlain(id,rows,max,col){
-  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
-}
-function classifica(){
-  var N=D.nil,C=D.comune;
-  var sei=N.meno.slice(0,6).map(function(p){return esc(p.n)});
-  var h='<p>I quartieri con almeno 5.000 residenti sono '+N.in_classifica+' su '+N.n+'; gli altri '+N.sotto_5000+' sono parchi o zone quasi senza abitanti (in '+N.senza_aree+' di questi non c&rsquo;&egrave; nessuna area cani). La media della citt&agrave; &egrave; di '+f1(C.per100k)+' aree ogni 100.000 residenti, la mediana dei quartieri '+f1(N.mediana_p)+'. Tra il primo e l&rsquo;ultimo c&rsquo;&egrave; un rapporto di <b>'+N.rapporto+' volte</b>: '+esc(N.piu[0].n)+' ('+f1(N.piu[0].p)+') contro '+esc(N.meno[0].n)+' ('+f1(N.meno[0].p)+').</p>';
-  h+='<p><b>I sei quartieri con meno aree per abitante sono tutti centrali o vicini al centro</b>: '+sei.join(', ')+'. La mappa non dice se l&rsquo;area manchi o se i cani vadano altrove: dice solo quante ce ne sono per residente ('+esc(N.meno[0].n)+' ha '+N.meno[0].aree+' area di '+f0(N.meno[0].mq)+' m&sup2; per '+f0(N.meno[0].ab)+' residenti).</p>';
-  var mx=N.max_assoluto[0];
-  h+='<p class="sub">Il quartiere con pi&ugrave; aree in assoluto &egrave; '+esc(mx.n)+' ('+mx.aree+' aree, '+f1(mx.p)+' ogni 100.000 residenti, '+nf(mx.mm,2)+' m&sup2; per abitante).</p>';
-  setH('class-testo',h);
-  var mxv=N.piu[0].p;
-  barsPlain('b-bot',N.meno.map(function(p){return {nm:p.n,v:p.p,txt:f1(p.p)}}),mxv,'#8a4a10');
-  barsPlain('b-top',N.piu.map(function(p){return {nm:p.n,v:p.p,txt:f1(p.p)}}),mxv);
-  var cl=NIL.filter(function(p){return p.cl===1}).sort(function(a,b){return a.p-b.p}),rest=NIL.filter(function(p){return p.cl!==1}).sort(function(a,b){return a.n.localeCompare(b.n,'it')});
-  table('tab-class',['Quartiere','Aree','m&sup2;','Residenti 2024','Aree ogni 100.000','m&sup2; per abitante'],
-    cl.concat(rest).map(function(p){return [esc(p.n)+(p.cl!==1?' <span class="pill">&lt; 5.000 ab.</span>':''),p.a,f0(p.mq),f0(p.ab),p.cl===1?f1(p.p):'',p.cl===1?nf(p.mm,2):'']}));
-}
-
-/* ---------- municipi ---------- */
-function municipi(){
-  var M=D.municipi,m1=M[0],m6=M[5],m9=M[8],m3=M[2];
-  var gr9=D.grandi_aree.filter(function(x){return x.m===9});
-  var gr9mq=gr9.reduce(function(s,x){return s+x.mq},0);
-  var h='<p>Per municipio la differenza &egrave; pi&ugrave; piccola. Il municipio 6 ha quasi il doppio di aree per abitante del municipio 1 ('+f1(m6.p)+' contro '+f1(m1.p)+' ogni 100.000 residenti). In metri quadrati il municipio 9 ha quasi cinque volte il municipio 3 ('+nf(m9.mm,2)+' contro '+nf(m3.mm,2)+' m&sup2; per abitante), ma conta lo spazio, non il numero: nel municipio 9 le '+gr9.length+' aree cani pi&ugrave; grandi (tutte nel '+esc(gr9[0].l)+') fanno '+f0(gr9mq)+' dei suoi '+f0(m9.mq)+' m&sup2;. Senza le aree sopra i 10.000 m&sup2; i m&sup2; per abitante del municipio 9 scendono a '+nf(m9.mq_senza_grandi_per_ab,2)+'.</p>';
-  setH('mun-testo',h);
-  barsPlain('b-mun-p',M.map(function(r){return {nm:'Municipio '+r.m,v:r.p,txt:f1(r.p)}}),Math.max.apply(null,M.map(function(r){return r.p})));
-  barsPlain('b-mun-m',M.map(function(r){return {nm:'Municipio '+r.m,v:r.mm,txt:nf(r.mm,2)}}),Math.max.apply(null,M.map(function(r){return r.mm})));
-}
-
-/* ---------- grafico a colonne ---------- */
-function cols(box,o){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=o.h||220,m={l:42,r:8,t:18,b:26},n=o.rows.length;
-  var y1=Math.max.apply(null,o.rows.map(function(r){return r.y})),sy=niceStep(y1/4);y1=Math.ceil(y1/sy)*sy;
-  var pw=W-m.l-m.r,ph=H-m.t-m.b,bw=pw/n;
-  function Y(v){return m.t+ph-v/y1*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var v=0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+f0(v)+'</text>';
-  var step=bw<22?2:1;
-  o.rows.forEach(function(r,i){
-    var x=m.l+i*bw+bw*.12,w=bw*.76,y=Y(r.y);
-    s+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+(m.t+ph-y).toFixed(1)+'" fill="'+ACC+'"/>';
-    if((n-1-i)%step===0)s+='<text class="mu" x="'+(x+w/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+r.x+'</text>';
-    if(bw>=30||i===0||i===n-1)s+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(y-4).toFixed(1)+'" text-anchor="middle">'+f0(r.y)+'</text>';
-  });
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/><text class="mu" x="'+m.l+'" y="10" text-anchor="start">'+o.yl+'</text>';
-  s+='<rect id="hit" x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,hit=svg.querySelector('#hit');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k;
-    var i=Math.floor((px-m.l)/bw);if(i<0||i>=n){tip.style.display='none';return}
-    tip.innerHTML=o.rows[i].t;tip.style.display='';var tw=tip.offsetWidth,left=(m.l+(i+.5)*bw)/k+10;if(left+tw>r.width)left=(m.l+(i+.5)*bw)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='0px'}
-  hit.addEventListener('mousemove',show);hit.addEventListener('mouseleave',function(){tip.style.display='none'});
-  hit.addEventListener('touchstart',show,{passive:true});hit.addEventListener('touchmove',show,{passive:true});
-}
-
-/* ---------- crescita ---------- */
-function crescita(){
-  var S=D.serie,Z=D.serie_nota,s0=S[0],s1=S[S.length-1],sc=S.slice().sort(function(a,b){return b.nuove-a.nuove});
-  var h='<p>Contando le aree per anno della loro scheda, da '+f0(s0.aree)+' nel '+s0.anno+' si arriva a '+f0(s1.aree)+' nel '+s1.anno+': <b>'+(Z.crescita_aree_pct>0?'+':'')+f0(Z.crescita_aree_pct)+'%</b> in '+(s1.anno-s0.anno)+' anni. Nello stesso periodo i residenti del Comune (ds205) sono passati da '+f0(s0.ab)+' a '+f0(s1.ab)+' ('+(Z.crescita_ab_pct>0?'+':'')+nf(Z.crescita_ab_pct,1)+'%). Le aree ogni 100.000 residenti raddoppiano: da '+f1(s0.p)+' a '+f1(s1.p)+'. Ogni anno si aggiungono da '+sc[sc.length-1].nuove+' ('+sc[sc.length-1].anno+') a '+sc[0].nuove+' ('+sc[0].anno+') schede nuove; dopo il 2019 il ritmo cala.</p>';
-  setH('cresc-testo',h);
-  setH('cresc-warn','&laquo;Aree con scheda entro l&rsquo;anno&raquo; non vuol dire &laquo;aree aperte in quell&rsquo;anno&raquo;. Il campo <code>data_ini</code> del Comune &egrave; la data in cui &egrave; stata registrata la scheda: '+Z.convenzionali+' aree su '+D.comune.aree+' hanno una data convenzionale (1/1/1983 o 1/7/2009), '+Z.schede_2003+' hanno una scheda del 2003, '+Z.riga_senza_data+' non ha nessuna data (per questo l&rsquo;ultimo anno conta '+s1.aree+' e non '+D.comune.aree+'). Il file &egrave; l&rsquo;elenco di oggi: le aree chiuse, spostate o cancellate non ci sono, quindi non si vede quante ne siano sparite. Prima del '+s0.anno+' ci sono '+f0(Z.schede_entro_2010)+' schede, le ultime sono del '+Z.data_max+'.');
-  function draw(){
-    cols(el('ch-serie'),{rows:S.map(function(r){return {x:r.anno,y:r.aree,t:'<b>'+r.anno+'</b><br>'+f0(r.aree)+' aree con scheda entro l&rsquo;anno<br>'+f1(r.p)+' ogni 100.000 residenti'}}),yl:'aree'});
-    cols(el('ch-nuove'),{rows:S.map(function(r){return {x:r.anno,y:r.nuove,t:'<b>'+r.anno+'</b><br>'+r.nuove+' schede con data in quest&rsquo;anno'}}),yl:'schede nuove',h:170});
-  }
-  draw();RD.push(draw);
-  table('tab-serie',['Anno','Aree con scheda entro l&rsquo;anno','Schede nuove','Residenti (ds205)','Aree ogni 100.000'],S.map(function(r){return [r.anno,f0(r.aree),r.nuove,f0(r.ab),f1(r.p)]}));
-}
-
-/* ---------- quello che non sappiamo ---------- */
-function nonsappiamo(){
-  var P=D.stampa,L=D.legambiente_xv,R=D.stampa_rapporti,G=D.legambiente_2020;
-  var h='<p><b>Quanti sono i cani di Milano? Di che razza? In che quartiere?</b> Nessuno lo pu&ograve; dire con dati aperti. L&rsquo;anagrafe canina &egrave; una banca dati della Regione Lombardia gestita dalle ATS (per Milano, ATS Milano). La pagina della Regione dice che si pu&ograve; solo cercare un singolo animale con il suo microchip: nessuna statistica, nessun file. Il Comune di Milano ha un solo dataset sui cani, quello delle aree. Il portale della Regione non ha nulla sull&rsquo;anagrafe. Non esiste quindi nessuna tabella con anno, zona e razza, e non l&rsquo;abbiamo inventata. Per averla bisognerebbe chiederla a ATS Milano (accesso civico): non &egrave; stato fatto.</p>';
-  h+='<p><b>Anche l&rsquo;anagrafe non conta i cani veri.</b> Chi registra un cane dichiara la residenza del proprietario, non quella del cane; i cani morti restano se nessuno li cancella; quelli non registrati non ci sono. Legambiente dice che solo il '+L.pct+'% dei Comuni italiani ('+L.comuni_che_sanno+' su '+f0(L.comuni)+') sa quanti cani ha in anagrafe. Neppure i cani con il &laquo;patentino&raquo; ('+D.patentino.razze+' razze e incroci, obbligatorio dal '+D.patentino.dal+') hanno un dato aperto.</p>';
-  setH('nonsappiamo-box',h);
-  table('tab-stampa',['Anno','Dove','Che cosa dice la fonte','Numero','Per 100 abitanti (nostro calcolo)','Fonte'],P.map(function(r){return [esc(r.anno),esc(r.ambito),esc(r.grandezza),'<b>'+f0(r.valore)+'</b>',r.per100!=null?nf(r.per100,2):'',esc(r.fonte)]}));
-  var h2='<p>I numeri per Milano sono due: <b>'+f0(P[0].valore)+'</b> cani nel Comune (articolo del 27/11/2018; l&rsquo;anno dei dati non &egrave; dichiarato) e <b>'+f0(P[2].valore)+'</b> &laquo;animali registrati&raquo; nel 2020. Il secondo numero sta nell&rsquo;articolo accanto ai cani, ma il testo dice &laquo;animali&raquo; (i gatti registrati nel Comune sono un&rsquo;altra cifra); lo abbiamo letto come cani. Sono due punti, non una serie: il salto di '+f0(P[2].valore-P[0].valore)+' in due anni non &egrave; credibile come aumento reale dei cani, &egrave; pi&ugrave; probabile che sia l&rsquo;anagrafe che si riempie.</p>';
-  h2+='<p><b>Un confronto, con prudenza.</b> In Lombardia, nel 2020, la stampa riporta '+f0(P[4].valore)+' cani, circa 1 ogni '+nf(R.lombardia_abitanti_per_cane,1)+' abitanti ('+nf(R.lombardia_per100,1)+' per 100). A Milano la stampa parla di circa 1 cane ogni '+R.milano_abitanti_per_cane_stampa+' abitanti; dalla cifra del 2020 e dai residenti del Comune risultano '+nf(R.milano_per100_calcolato_2020,2)+' ogni 100 abitanti, cio&egrave; 1 ogni '+nf(R.milano_abitanti_per_cane_calcolato,1)+'. Se il numero di Milano &egrave; davvero di cani, Milano ha circa la met&agrave; dei cani registrati per abitante della Lombardia, e nello stesso tempo le aree cani sono raddoppiate. Senza sapere quanti sono i cani e dove, non si pu&ograve; dire se le aree siano molte o poche. Iscrivere un cane a Milano non vuol dire che viva a Milano.</p>';
-  h2+='<p class="sub">Legambiente (X rapporto, dati 2020) conta '+G.aree+' aree cani a Milano, una ogni '+f0(G.abitanti_per_area)+' abitanti; nel ds52 le aree con scheda fino al 2020 sono '+G.ds52_scheda_fino_2020+' (e '+D.comune.aree+' oggi): il perimetro del conteggio di Legambiente non &egrave; dichiarato.</p>';
-  setH('stampa-testo',h2);
-}
-
-/* ---------- metodo ---------- */
-function metodo(){
-  var C=D.comune,Z=D.serie_nota,T=D.trappole,O=D.osm,N=D.nil,G=D.legambiente_2020;
-  var L=[
-   '<b>Che cos&rsquo;&egrave; un&rsquo;area.</b> Una riga del ds52 &egrave; un poligono, non un parco: i '+f0(C.aree)+' poligoni stanno in '+f0(C.id_area)+' parchi o giardini (nel Parco Nord ce ne sono fino a 12). Media '+f0(C.mq_media)+' m&sup2;, mediana '+f0(C.mq_mediana)+'. Aree sotto i 100 m&sup2;: '+T.aree_sotto_100+'. Aree sopra i 10.000 m&sup2;: '+T.aree_sopra_10000+' (Parco Nord, Parco Forlanini, Parco Sempione). Il dataset non dice se l&rsquo;area sia recintata o con giochi, n&eacute; se sia aperta.',
-   '<b>Quartieri.</b> Ogni area &egrave; assegnata al NIL in cui cade il suo punto centrale: '+f0(C.aree)+' su '+f0(C.aree)+' cadono dentro un NIL. Il municipio &egrave; quello scritto nel file. '+D.nil.multi_municipio+' NIL hanno aree in pi&ugrave; di un municipio: i raggruppamenti per quartiere e per municipio non si incastrano.',
-   '<b>Residenti.</b> Per i quartieri: registro anagrafico del Comune (ds205), anno 2024, totale '+f0(C.ab_2024)+'. Per i municipi: censimento permanente Istat 2023, che &egrave; pi&ugrave; basso del registro (il registro era il 3,4% sopra il censimento nel 2023): i due insiemi non si confrontano. Le superfici dei quartieri vengono dai poligoni, perch&eacute; nel ds205 tre quartieri hanno le superfici scambiate. La riga &laquo;N.D.&raquo; del ds205, senza quartiere, &egrave; esclusa.',
-   '<b>Quartieri sotto i 5.000 residenti.</b> Sono '+N.sotto_5000+' ('+N.senza_aree+' senza nessuna area cani): il rapporto con i residenti non si calcola, sulla mappa sono grigi. Restano nelle tabelle e le loro aree sono sulla mappa.',
-   '<b>Date.</b> '+Z.convenzionali+' date convenzionali, '+Z.schede_2003+' del 2003, '+Z.riga_senza_data+' riga senza data: vedi <a href="#crescita">la crescita</a>. La serie per anno non &egrave; una serie di aperture.',
-   '<b>Conteggi diversi per le stesse aree.</b> '+G.aree+' (Legambiente 2020), '+G.ds52_scheda_fino_2020+' (ds52, schede fino al 2020), '+C.aree+' (ds52 oggi). Non sono contraddizioni ma perimetri diversi, non tutti dichiarati.',
-   '<b>Controllo con OpenStreetMap.</b> Su '+O.elementi+' elementi <code>leisure=dog_park</code> trovati nel rettangolo di Milano, '+O.dentro_milano+' stanno dentro i confini e '+O.entro_50m+' di questi sono entro 50 metri da un&rsquo;area del ds52; viceversa '+O.ds52_con_osm+' delle '+C.aree+' aree ds52 hanno un elemento OSM vicino. OSM &egrave; fatta da volontari: qui &egrave; un sottoinsieme, il ds52 &egrave; pi&ugrave; completo.',
-   '<b>Mappa.</b> I poligoni delle aree sono semplificati (circa 1 metro) e i confini dei quartieri (circa 3 metri) per tenere la pagina leggera. In un solo caso il punto centrale del CSV cade fuori dal proprio poligono (area fatta di pi&ugrave; parti). Fino a un certo zoom si vedono i puntini, poi i poligoni.',
-   '<b>Anagrafe, non cani.</b> Le cifre di giornale sono iscrizioni, non cani veri; l&rsquo;iscrizione segue il proprietario, non il cane. Non sono verificate alla fonte (articoli, non banche dati) e non c&rsquo;&egrave; una serie: solo i due punti del 2018 e del 2020, pi&ugrave; la Lombardia.',
-   '<b>Pagina costruita da un programma</b> che legge le tabelle pulite della fase di raccolta e scrive i file di <code>data/</code>, confrontando i numeri con quelli di partenza. Ogni numero di questa pagina ha la sua origine in <a href="data/riepilogo.json">riepilogo.json</a> (campo <code>origine</code>).'
+/* ---------- numeri grandi ---------- */
+function mediana(a){var s=a.slice().sort(function(x,y){return x-y}),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function highlights(){
+  var c=D.comune,S=D.serie,s0=S[0];
+  var hi=NB[0],lo=last(NB),rap=hi.p10/lo.p10;
+  var med=mediana(AR.map(function(a){return a.mq})),tot=AR.reduce(function(s,a){return s+a.mq},0),top9=AR.slice(-9).reduce(function(s,a){return s+a.mq},0);
+  var rp=D.stampa_rapporti;
+  var H=[
+    {c:C.mi,h:'t-serie',n:f0(c.aree),p:'aree cani nell’elenco del Comune, in '+f0(c.id_area)+' parchi e giardini. Con scheda del '+s0.anno+' o di prima ce n’erano '+f0(s0.aree)+'.'},
+    {c:C.m3,h:'t-mappa',n:f0(rap)+'<small>×</small>',p:'tra il quartiere con più aree per residente ('+esc(hi.sn)+') e quello con meno ('+esc(lo.sn)+').'},
+    {c:C.m2,h:'t-cammino',n:f1(CAM.mediana_min)+'<small> min</small>',p:'a piedi fino all’area cani più vicina, per un milanese su due. A 10 minuti ci arrivano '+f0(CAM.entro['10']*100)+' su 100.'},
+    {c:C.m4,h:'t-dim',n:f0(med)+'<small> m²</small>',p:'è la mediana: metà delle aree è più piccola. Poco più di tre campi da tennis.'},
+    {c:C.m5,h:'t-cani',n:f1(rp.milano_per100_calcolato_2020),p:'cani registrati ogni 100 abitanti a Milano nel 2020, secondo i giornali. In Lombardia '+f1(rp.lombardia_per100)+'.'},
+    {c:C.ora,h:'t-dim',n:f0(top9/tot*100)+'<small>%</small>',p:'dei metri quadrati sta in sole 9 aree su '+f0(c.aree)+', quasi tutte nei grandi parchi.'}
   ];
-  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+(t.c===C.m3?';--k:#0b0d12':'')+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- il tuo quartiere ---------- */
+function pair(id,titolo,qv,cv,fmt,u){
+  var h='<div class="pm"><b>'+titolo+'</b><div class="ch" id="'+id+'"></div></div>';
+  return {h:h,draw:function(){
+    var box=$(id),W=Math.max(220,Math.floor(box.clientWidth)),mx=Math.max(qv||0,cv),lw=54,rw=Math.ceil(tw(fmt(mx)+(u||''),13,true))+10,bw=W-lw-rw,s=svgOpen(W,56);
+    [{n:'Qui',v:qv,col:C.m4},{n:'Milano',v:cv,col:C.mi}].forEach(function(r,i){var y=i*26+3;
+      s+=T(0,y+16,r.n,{c:'k'});
+      var w=Math.max(3,r.v/mx*bw);s+=hbar(lw,lw+w,y,20,r.col)+T(lw+w+6,y+16,fmt(r.v)+(u||''),{c:'b'})});
+    box.innerHTML=s+'</svg>'}};
+}
+function su100(q){return q>=.995?'quasi tutti':f0(q*100)+' su 100'}
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.className='ris';r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca un quartiere sulla mappa: ti dico quante aree cani ci sono, qual è la più vicina e quanti minuti ci metti a piedi.';return}
+  var o=BY[sel],h='<b class="big">'+esc(o.n)+'</b>Municipio '+o.mu.join(' e ')+' · '+f0(o.ab)+' residenti · '+f1(o.km2)+' km²';
+  h+='<p><b>'+(o.a===0?'Nessuna area cani':pl(o.a,'area cani','aree cani'))+'</b>'+(o.a?', in tutto '+f0(o.mq)+' m²':'')+(o.big?'. Posto '+o.rk+' su '+NB.length+' per aree ogni 10.000 residenti (il 1° è dove ce ne sono di più).':'. Ha meno di 5.000 residenti: il rapporto con i residenti non è confrontabile.')+'</p>';
+  if(o.nl){var prop=o.nn&&o.nn!==o.n?' (quartiere '+esc(o.nn)+')':'';
+    h+='<p>Per il '+f0(o.nq*100)+'% dei residenti l’area più vicina è «'+esc(o.nl)+'»'+prop+', '+f0(o.nm)+' m². A piedi metà dei residenti ci mette '+f1(o.med)+' minuti o meno; '+su100(o.q5)+' ci arrivano in 5 minuti, '+su100(o.q10)+' in 10.</p>'}
+  r.className='ris';
+  var P=[];
+  if(o.big)P.push(pair('pm1','Aree cani ogni 10.000 residenti ('+pl(o.a,'area','aree')+')',o.p10,P10,f1));
+  P.push(pair('pm2','Aree cani per km²',o.ak,AK,f1));
+  if(o.med!=null)P.push(pair('pm3','Minuti a piedi all’area più vicina (metà dei residenti)',o.med,CAM.mediana_min,f1,' min'));
+  r.innerHTML=h+P.map(function(p){return p.h}).join('');
+  P.forEach(function(p){p.draw()});
+}
+
+/* ---------- 1. serie ---------- */
+function serie(){
+  var S=D.serie,n=S.length,W=width('ch-serie'),H=250,m={l:34,r:14,t:44,b:30},pw=W-m.l-m.r-46,ph=H-m.t-m.b;
+  var hi=450,X=function(i){return m.l+8+i*(pw-8)/(n-1)},Y=function(v){return m.t+ph-v/hi*ph};
+  var s=svgOpen(W,H);
+  [0,100,200,300,400].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v===0?C.ink:C.grid,v===0?1.5:1)+(v?T(m.l-6,Y(v)+4,v,{a:'end',c:'m'}):T(m.l-6,Y(v)+4,0,{a:'end',c:'m'}))});
+  S.forEach(function(x,i){if((i%3===0&&i<n-2)||i===n-1)s+=T(X(i),H-8,x.anno,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  var d='';S.forEach(function(x,i){d+=(i?'L':'M')+r1(X(i))+' '+r1(Y(x.aree))});
+  s+='<path d="'+d+'L'+r1(X(n-1))+' '+r1(Y(0))+'L'+r1(X(0))+' '+r1(Y(0))+'Z" fill="'+C.ora+'" fill-opacity=".12"/>';
+  s+='<path d="'+d+'" fill="none" stroke="'+C.ora+'" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  S.forEach(function(x,i){var pp=i?S[i-1].aree:null;
+    s+='<circle cx="'+r1(X(i))+'" cy="'+r1(Y(x.aree))+'" r="'+(i===0||i===n-1?6:3.5)+'" fill="'+C.ora+'" stroke="#fff" stroke-width="2"'+tip('<b>'+x.anno+'</b><br>'+f0(x.aree)+' aree con scheda entro l’anno<br>'+(pp!=null?'+'+x.nuove+' schede nuove nell’anno<br>':'')+f1(x.p)+' ogni 100.000 residenti')+' style="cursor:pointer"/>'});
+  s+=T(X(0)+2,Y(S[0].aree)-14,S[0].anno+': '+f0(S[0].aree),{c:'halo'});
+  s+=T(X(n-1)+10,Y(last(S).aree)+4,f0(last(S).aree),{c:'halo'});
+  s+=T(m.l,16,'aree cani con scheda entro l’anno',{c:'m'});
+  $('ch-serie').innerHTML=s+'</svg>';
+  var s0=S[0],s1=last(S),Z=D.serie_nota;
+  $('t-serie').textContent='Dal '+s0.anno+' al '+s1.anno+' le aree con scheda sono passate da '+f0(s0.aree)+' a '+f0(s1.aree)+', i residenti sono cresciuti del '+f1(Z.crescita_ab_pct)+'%';
+  $('nn-serie').innerHTML='Ogni 100.000 residenti, le aree passano da '+f1(s0.p)+' a '+f1(s1.p)+'. La crescita è più forte fino al 2019 (da 5 a 29 schede nuove l’anno) e rallenta dopo: '+last(S).nuove+' schede nel '+s1.anno+'. Su '+f0(D.comune.aree)+' aree, '+Z.convenzionali+' hanno una data convenzionale (1/1/1983 o 1/7/2009).';
+}
+
+/* ---------- 2. mappa ---------- */
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(lo,la){return[1+(lo*k-x0)*sc,1+(y1-la)*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+function mappa(){
+  var W=width('ch-mappa'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='',lab='',nm=mnome();
+  var cnt=[0,0,0,0],piccoli=0;N.forEach(function(o){var c=mcl(o);if(c>=0)cnt[c]++;else piccoli++});
+  N.forEach(function(o){var c=mcl(o),isS=o.id===sel,b=P.bb(o.f);
+    var tp='<b>'+esc(o.n)+'</b><br>'+(o.a===0?'Nessuna area cani':pl(o.a,'area cani','aree cani'))+' · '+f0(o.ab)+' residenti<br>'+(c>=0?f1(o.p10)+' ogni 10.000 residenti · posto '+o.rk+' su '+NB.length:'Meno di 5.000 residenti: rapporto non confrontabile');
+    var el='<path d="'+P.path(o.f)+'" fill="'+(c>=0?MC[c].col:'#e6e8ec')+'" stroke="'+(isS?C.ink:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el;
+    if(c>=0&&!isS&&b.w>=28&&b.h>=16)lab+=T(Math.min(b.x,W-12),b.y+4,f1(o.p10),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+MC[c].txt})});
+  s+=sS+lab;
+  if(sel){var o=BY[sel],b=P.bb(o.f),t=o.sn+(o.big?' '+f1(o.p10):''),w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),y=Math.max(14,Math.min(H-4,b.y-b.h/2-5));
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
+  /* le aree del quartiere scelto */
+  if(sel){AR.forEach(function(a){if(a.nil!==sel)return;var p=P.pt(a.x,a.y);s+='<circle cx="'+r1(p[0])+'" cy="'+r1(p[1])+'" r="3.6" fill="'+C.mi+'" stroke="#fff" stroke-width="1.4" pointer-events="none"/>'})}
+  $('ch-mappa').innerHTML=s+'</svg>';
+  $('lg-mappa').innerHTML=MC.map(function(t,i){return '<span><i style="background:'+t.col+'"></i>'+nm[i]+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#e6e8ec"></i>pochi residenti <b>&nbsp;'+piccoli+'</b></span>'+(sel?'<span><i class="dot" style="background:'+C.mi+'"></i>aree del quartiere scelto</span>':'');
+  var hi=NB[0],lo=last(NB),zero=N.filter(function(o){return o.a===0}).length;
+  $('t-mappa').textContent='Da '+f1(lo.p10)+' aree ogni 10.000 residenti in '+lo.sn+' a '+f1(hi.p10)+' in '+hi.sn+': '+f0(hi.p10/lo.p10)+' volte di differenza';
+  $('s-mappa').textContent='Il colore e il numero dicono quante aree cani ci sono ogni 10.000 residenti. I quartieri sono divisi in quattro gruppi con lo stesso numero di quartieri; accanto al colore c’è il conto. A Milano la media è '+f1(P10)+'.';
+  var fm=function(a){return a.map(function(o){return esc(o.sn)+' '+f1(o.p10)}).join(', ')};
+  $('nn-mappa').innerHTML='Meno aree per residente: '+fm(NB.slice(-3).reverse())+'. Più aree: '+fm(NB.slice(0,3))+'. I sei quartieri con meno aree sono tutti in centro o vicino al centro. Nessuna area cani in '+zero+' quartieri, tutti con meno di 5.000 residenti (parchi e zone quasi senza abitanti).';
+}
+
+/* ---------- 3. cammino ---------- */
+function cammino(){
+  var W=width('ch-cammino'),H=310,m={l:36,r:18,t:40,b:44},pw=W-m.l-m.r,ph=H-m.t-m.b,xm=20;
+  var X=function(v){return m.l+v/xm*pw},Y=function(v){return m.t+ph-v*ph};
+  var s=svgOpen(W,H),o=sel?BY[sel]:null;
+  [0,.25,.5,.75,1].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),v===0?C.ink:C.grid,v===0?1.5:1)+T(m.l-6,Y(v)+4,f0(v*100)+(v===1?'%':''),{a:'end',c:'m'})});
+  [0,5,10,15,20].forEach(function(v){s+=L(X(v),m.t+ph,X(v),m.t+ph+4,C.ink,1.5)+T(X(v),m.t+ph+19,v,{a:v===0?'start':v===20?'end':'middle',c:'m'})});
+  s+=T(W-m.r,H-6,'minuti a piedi →',{a:'end',c:'m'})+T(m.l,14,'residenti ogni 100 che arrivano entro quel tempo ↑',{c:'m'});
+  function path(a){return a.map(function(v,i){return (i?'L':'M')+r1(X(i))+' '+r1(Y(v))}).join('')}
+  var cu=CAM.curva;
+  s+='<path d="'+path(cu)+'L'+r1(X(20))+' '+r1(Y(0))+'L'+r1(X(0))+' '+r1(Y(0))+'Z" fill="'+C.mi+'" fill-opacity=".10"/>';
+  /* mediana */
+  var md=CAM.mediana_min;
+  s+=L(m.l,Y(.5),X(md),Y(.5),C.ink,1.5,' stroke-dasharray="4 3"')+L(X(md),Y(.5),X(md),Y(0),C.ink,1.5,' stroke-dasharray="4 3"');
+  s+=T(X(md)+6,Y(0)-8,'metà: '+f1(md)+' min',{c:'halo',st:'font-size:12px'});
+  s+='<path d="'+path(cu)+'" fill="none" stroke="'+C.mi+'" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  if(o&&o.cu)s+='<path d="'+path(o.cu)+'" fill="none" stroke="'+C.m4+'" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  [5,10,15].forEach(function(v){
+    s+='<circle cx="'+r1(X(v))+'" cy="'+r1(Y(cu[v]))+'" r="6" fill="'+C.mi+'" stroke="#fff" stroke-width="2"/>';
+    var up=!o||!o.cu||o.cu[v]<=cu[v];
+    s+=T(X(v)-(v===15?2:8),Y(cu[v])+(up?-12:20),f0(cu[v]*100)+'%',{a:'end',c:'halo',st:'fill:'+C.mi});
+    if(o&&o.cu){s+='<circle cx="'+r1(X(v))+'" cy="'+r1(Y(o.cu[v]))+'" r="6" fill="'+C.m4+'" stroke="#fff" stroke-width="2"/>'+T(X(v)-(v===15?2:8),Y(o.cu[v])+(up?20:-12),f0(o.cu[v]*100)+'%',{a:'end',c:'halo',st:'fill:'+C.m4})}});
+  cu.forEach(function(v,i){if(i===0)return;s+='<rect x="'+r1(X(i)-pw/xm/2)+'" y="'+m.t+'" width="'+r1(pw/xm)+'" height="'+ph+'" fill="transparent"'+tip('<b>Entro '+i+(i===1?' minuto':' minuti')+'</b><br>Tutta Milano: '+f0(v*100)+' residenti su 100'+(o&&o.cu?'<br>'+esc(o.sn)+': '+f0(o.cu[i]*100)+' su 100':''))+'/>'});
+  $('ch-cammino').innerHTML=s+'</svg>';
+  $('lg-cammino').innerHTML='<span><i class="ln" style="background:'+C.mi+'"></i>Tutta Milano</span>'+(o&&o.cu?'<span><i class="ln" style="background:'+C.m4+'"></i>'+esc(o.n)+'</span>':'');
+  var E=CAM.entro,ord=NB.slice().sort(function(a,b){return a.med-b.med}),slow=ord.slice(-3).reverse(),fast=ord.slice(0,3);
+  $('t-cammino').textContent=f0(E['5']*100)+' milanesi su 100 arrivano a piedi a un’area cani in 5 minuti, '+f0(E['10']*100)+' in 10, '+f0(E['15']*100)+' in 15';
+  $('nn-cammino').innerHTML='Si cammina meno dove le aree sono tante: '+fast.map(function(x){return esc(x.sn)+' '+f1(x.med)}).join(', ')+' minuti (metà dei residenti). Di più nei quartieri lontani dalle aree: '+slow.map(function(x){return esc(x.sn)+' '+f1(x.med)}).join(', ')+'. Il Duomo ha una sola area: i suoi residenti camminano quasi 10 minuti. Mancano gli ingressi veri delle aree: il tempo è fino al loro punto centrale.';
+}
+
+/* ---------- 4. dimensioni (grafico firma) ---------- */
+function dimensioni(){
+  var W=width('ch-dim'),m={l:12,r:12},lo=50,hi=50000,pw=W-m.l-m.r,rr=W<500?3:3.5,sp=rr*2+.8;
+  var X=function(v){return m.l+(Math.log(v)-Math.log(lo))/(Math.log(hi)-Math.log(lo))*pw};
+  var placed=[],maxH=0;
+  AR.forEach(function(a){
+    var x=X(a.mq),k=0,y;
+    for(;;){y=k*0.5;var ok=true;
+      for(var j=placed.length-1;j>=0;j--){var p=placed[j];if(x-p.x>sp)break;if(Math.hypot(p.x-x,p.y-y)<sp){ok=false;break}}
+      if(ok)break;k++}
+    a.dx=x;a.dy=y;placed.push({x:x,y:y});if(y>maxH)maxH=y});
+  /* le etichette in alto */
+  var items=[],big=AR.slice(-12);
+  var nomeSen=function(a){return a.l.replace(/^(parco|giardino|giardini)\s+/i,function(m_){return m_.toLowerCase()})};
+  var forl=AR[AR.length-1],pn1=AR[AR.length-2],semp=AR.filter(function(a){return /Sempione/.test(a.l)}).slice(-1)[0],pic=AR[0];
+  var sc=[{v:261,t:'campo da tennis',ref:1},{v:7140,t:'campo da calcio',ref:1},{v:forl.mq,t:forl.l+' '+f0(forl.mq),a:forl},{v:pn1.mq,t:pn1.l+' '+f0(pn1.mq),a:pn1},{v:semp.mq,t:semp.l+' '+f0(semp.mq),a:semp},{v:pic.mq,t:pic.l+' '+f0(pic.mq)+' m²',a:pic}];
+  var rowsY=[12,30,48,66,84],rowsEnd=[-1e9,-1e9,-1e9,-1e9,-1e9],ro=[];
+  sc.sort(function(a,b){return X(a.v)-X(b.v)});
+  sc.forEach(function(it){
+    var x=X(it.v),w=tw(it.t,12,!!it.a),anc='start',x0=x-3;
+    if(x0+w>W-2){anc='end';x0=x+3}
+    var l=anc==='start'?x0:x0-w,r=anc==='start'?x0+w:x0,row=0;
+    while(row<rowsY.length&&((anc==='start'&&l<rowsEnd[row]+8))){row++}
+    if(anc==='end'){row=0;while(row<rowsY.length&&rowsEnd[row]>l-8)row++}
+    if(row>=rowsY.length)row=rowsY.length-1;
+    rowsEnd[row]=Math.max(rowsEnd[row],r);it.row=row;it.x0=x0;it.anc=anc;it.x=x;ro.push(it)});
+  var topH=Math.max.apply(null,ro.map(function(i){return rowsY[i.row]}))+14,base=topH+maxH+rr+28,H=base+46;
+  var s=svgOpen(W,H),selN=sel;
+  /* assi */
+  s+=L(m.l,base+rr+2,W-m.r,base+rr+2,C.ink,1.5);
+  [100,1000,10000].forEach(function(v){s+=L(X(v),base+rr+2,X(v),base+rr+8,C.ink,1.5)+T(X(v),base+rr+24,f0(v)+(v===10000?' m²':''),{a:'middle',c:'m'})});
+  /* mediana */
+  var md=mediana(AR.map(function(a){return a.mq}));
+  s+=L(X(md),topH+4,X(md),base+rr+2,C.ink,1.5,' stroke-dasharray="4 3"')+T(X(md)+5,base+rr+40-2,'mediana '+f0(md),{c:'k',st:'font-size:12px'});
+  /* riferimenti */
+  ro.forEach(function(it){if(it.ref)s+=L(it.x,rowsY[it.row]+4,it.x,base+rr+2,C.axis,1.2,' stroke-dasharray="2 3"')});
+  /* pallini */
+  NEAR=[];
+  var cl=function(a){return a.nil===selN};
+  AR.forEach(function(a){if(cl(a))return;var cx=a.dx,cy=base-a.dy;
+    s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+rr+'" fill="'+C.ora+'" fill-opacity=".85" stroke="#fff" stroke-width=".6"/>';
+    NEAR.push({x:cx,y:cy,t:'<b>'+esc(a.l)+'</b><br>'+f0(a.mq)+' m² · municipio '+a.mu+'<br>'+(BY[a.nil]?'quartiere '+esc(BY[a.nil].sn):'')+(a.an?'<br>scheda del '+a.an:'')})});
+  AR.forEach(function(a){if(!cl(a))return;var cx=a.dx,cy=base-a.dy;
+    s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+(rr+1.8)+'" fill="'+C.m4+'" stroke="#fff" stroke-width="1.2"/>';
+    NEAR.push({x:cx,y:cy,t:'<b>'+esc(a.l)+'</b><br>'+f0(a.mq)+' m² · municipio '+a.mu+'<br>quartiere '+esc(BY[a.nil].sn)+(a.an?'<br>scheda del '+a.an:'')})});
+  /* nomi */
+  ro.forEach(function(it){var y=rowsY[it.row];
+    if(it.a){var pp=it.a,cy=base-pp.dy;s+=L(it.x,y+4,it.x,cy-rr-1,C.ink2,1)}
+    s+=T(it.x0,y,esc(it.t),{a:it.anc==='end'?'end':null,c:it.ref?'m':'halo',st:it.ref?'font-size:12px':'font-size:12px'})});
+  s+='<rect data-near="1" x="0" y="'+topH+'" width="'+W+'" height="'+(H-topH)+'" fill="transparent"/>';
+  $('ch-dim').innerHTML=s+'</svg>';
+  var sm=sel?AR.filter(cl).length:0;
+  $('lg-dim').innerHTML='<span><i class="dot" style="background:'+C.ora+'"></i>un’area cani</span>'+(sel?'<span><i class="dot" style="background:'+C.m4+'"></i>le '+sm+' del quartiere scelto ('+esc(BY[sel].sn)+')</span>':'')+'<span><i class="ln" style="background:'+C.ink+'"></i>mediana</span>';
+  var tot=AR.reduce(function(s_,a){return s_+a.mq},0),top9=AR.slice(-9).reduce(function(s_,a){return s_+a.mq},0),sotto=AR.filter(function(a){return a.mq<100}).length,tn=AR.filter(function(a){return a.mq<261}).length;
+  $('t-dim').textContent='La metà delle aree è più piccola di '+f0(md)+' m², poco più di tre campi da tennis; 9 aree fanno il '+f0(top9/tot*100)+'% di tutti i metri';
+  $('nn-dim').innerHTML='In tutto le aree coprono '+f0(tot)+' m²: '+f1(D.comune.mq_per_ab)+' m² per abitante. Le 9 più grandi (oltre 10.000 m²) sono dei parchi Forlanini, Nord e Sempione. '+f0(tn)+' aree sono più piccole di un campo da tennis; '+sotto+' sono sotto i 100 m². Ogni area ha il suo pallino anche se sta nello stesso parco di altre.';
+}
+
+/* ---------- 5. zampe ---------- */
+function zampe(){
+  var W=width('ch-cani'),rp=D.stampa_rapporti,rows=[
+    {n:'Milano, 2018',v:D.stampa[0].per100,col:C.mi,s:'104.067 cani (7giorni.info)'},
+    {n:'Milano, 2020',v:rp.milano_per100_calcolato_2020,col:C.mi,s:'118.292 «animali registrati» (Il Giorno)'},
+    {n:'Lombardia, 2020',v:rp.lombardia_per100,col:C.ink2,s:'1.768.444 cani (Il Giorno)'}];
+  var n=18,sz=Math.min(30,Math.floor((W-4)/n)),gap=sz,y=0,s='',defs='';
+  function paw(x,yy,z,col,op,clip){
+    var g='<g transform="translate('+r1(x)+' '+r1(yy)+') scale('+r1(z)+')" fill="'+col+'" fill-opacity="'+op+'"'+(clip?' clip-path="url(#'+clip+')"':'')+'>'
+      +'<ellipse cx=".5" cy=".7" rx=".27" ry=".21"/><circle cx=".13" cy=".44" r=".11"/><circle cx=".37" cy=".24" r=".12"/><circle cx=".63" cy=".24" r=".12"/><circle cx=".87" cy=".44" r=".11"/></g>';
+    return g;
+  }
+  rows.forEach(function(r,i){
+    var full=Math.floor(r.v),fr=r.v-full;
+    s+=T(0,y+14,'<tspan class="b">'+esc(r.n)+': '+f1(r.v)+'</tspan> <tspan class="m">cani ogni 100 abitanti</tspan>');
+    var py=y+22;
+    for(var k=0;k<full;k++)s+=paw(k*gap,py,sz,r.col,1);
+    if(fr>0.04){var cid='cp'+i;defs+='<clipPath id="'+cid+'" clipPathUnits="userSpaceOnUse"><rect x="'+r1(full*gap)+'" y="'+r1(py-1)+'" width="'+r1(sz*fr)+'" height="'+(sz+2)+'"/></clipPath>';
+      s+=paw(full*gap,py,sz,r.col,.2)+paw(full*gap,py,sz,r.col,1,cid)}
+    s+=T(0,py+sz+14,esc(r.s),{c:'m'});
+    y=py+sz+34});
+  $('ch-cani').innerHTML=svgOpen(W,y)+'<defs>'+defs+'</defs>'+s+'</svg>';
+  $('t-cani').textContent='Secondo i giornali, a Milano i cani registrati sono circa '+f1(rp.milano_per100_calcolato_2020)+' ogni 100 abitanti: in Lombardia sono '+f1(rp.lombardia_per100);
+  $('nn-cani').innerHTML='Se la cifra del 2020 è davvero di cani, Milano ne ha circa la metà della Lombardia per abitante. Ma il giornale scrive «animali registrati» e i gatti sono un’altra cifra; e l’iscrizione segue il proprietario, non il cane. Il salto da 104.067 a 118.292 in due anni più probabilmente è l’anagrafe che si riempie.';
+}
+
+/* ---------- testi in fondo ---------- */
+function testi(){
+  var P=D.stampa,L=D.legambiente_xv,R=D.stampa_rapporti,G=D.legambiente_2020;
+  $('nonso').innerHTML='<p>Nessuno lo può dire con dati aperti. L’anagrafe canina è una banca dati della Regione Lombardia: per Milano la gestisce ATS Milano. La Regione dice che si può solo cercare un singolo animale con il microchip; il Comune ha un solo elenco sui cani, quello delle aree. Per avere una tabella con anno, zona e razza bisognerebbe chiederla a ATS Milano: non è stato fatto. Senza sapere quanti sono i cani e dove, non si può dire se le aree siano molte o poche.</p>';
+  var T_=D.trappole,C_=D.comune,Z=D.serie_nota,O=D.osm,Nn=D.nil;
+  var Ll=[
+   '<b>Nessun dato sui cani.</b> Le uniche cifre sono due articoli di giornale ('+f0(P[0].valore)+' cani nel 2018, '+f0(P[2].valore)+' «animali registrati» nel 2020) e quella della Lombardia. Sono due punti, non una serie, e non verificati alla fonte. Chi registra un cane dichiara la residenza del proprietario, non quella del cane; i cani morti restano se nessuno li cancella; quelli non registrati non ci sono. Legambiente dice che solo il '+L.pct+'% dei Comuni italiani ('+L.comuni_che_sanno+' su '+f0(L.comuni)+') sa quanti cani ha in anagrafe. Neppure i cani con il «patentino» ('+D.patentino.razze+' razze e incroci, obbligatorio dal '+D.patentino.dal+') hanno un dato aperto.',
+   '<b>La data non è l’apertura.</b> La data di ogni area è quella della scheda del Comune. '+Z.convenzionali+' righe hanno una data convenzionale, '+Z.schede_2003+' sono del 2003 e '+Z.riga_senza_data+' non ha data. Le aree chiuse non compaiono nell’elenco. La linea degli anni misura le schede di oggi, non le aperture.',
+   '<b>Conteggi diversi per le stesse aree.</b> '+G.aree+' (Legambiente, dati 2020), '+G.ds52_scheda_fino_2020+' (elenco del Comune con scheda fino al 2020), '+C_.aree+' (elenco di oggi). Non sono contraddizioni ma modi diversi di contare, non tutti dichiarati.',
+   '<b>Che cos’è un’area.</b> Una riga del Comune è un poligono, non un parco: i '+f0(C_.aree)+' poligoni stanno in '+f0(C_.id_area)+' parchi o giardini. Il Comune non dice se un’area sia recintata, con giochi o aperta.',
+   '<b>Quartieri piccoli.</b> '+Nn.sotto_5000+' quartieri hanno meno di 5.000 residenti ('+Nn.senza_aree+' senza nessuna area): il rapporto con i residenti non si calcola e sulla mappa sono grigi.',
+   '<b>Minuti a piedi.</b> Sono una stima: rete dei marciapiedi di OpenStreetMap, 4,5 km/h, residenti distribuiti in parti uguali tra i civici del quartiere, punto centrale dell’area al posto dell’ingresso. Minuti × 75 = metri circa. Le aree sono tutte contate allo stesso modo, anche se piccolissime o dentro un parco grande, e non si sa se siano aperte a ogni ora.',
+   'Il confronto tra le aree e i cani non dice nulla sulle cause: la mappa dei quartieri e la linea degli anni sono due conti separati.'];
+  $('limiti-lista').innerHTML=Ll.map(function(x){return '<li>'+x+'</li>'}).join('');
+  var M=[
+   '<b>Quartieri.</b> Ogni area è assegnata al quartiere in cui cade il suo punto centrale: '+f0(C_.aree)+' su '+f0(C_.aree)+' cadono dentro un quartiere. Le superfici dei quartieri vengono dai loro poligoni, perché nei dati dei residenti tre quartieri hanno le superfici scambiate. La riga dei residenti senza quartiere è esclusa.',
+   '<b>Residenti.</b> Registro anagrafico del Comune, anno 2024, totale '+f0(C_.ab_2024)+'. Per i municipi si usa invece il censimento Istat 2023, più basso: i due insiemi non si confrontano.',
+   '<b>Gruppi della mappa.</b> I '+NB.length+' quartieri con almeno 5.000 residenti sono divisi in quattro gruppi con lo stesso numero di quartieri (quartili) per aree ogni 10.000 residenti. Così nessun colore domina e non c’è un semaforo.',
+   '<b>Controllo con OpenStreetMap.</b> Su '+O.elementi+' elementi di tipo area cani trovati nel rettangolo di Milano, '+O.dentro_milano+' stanno dentro i confini e '+O.entro_50m+' sono entro 50 metri da un’area del Comune; viceversa '+O.ds52_con_osm+' delle '+C_.aree+' aree del Comune hanno un elemento OpenStreetMap vicino. OpenStreetMap è fatta da volontari: qui è un sottoinsieme.',
+   '<b>Minuti a piedi.</b> Come nella pagina La città dei 15 minuti, con le sole '+C_.aree+' aree del Comune (nella pagina dei 15 minuti ci sono anche 12 aree di OpenStreetMap): mediana pesata con i residenti, '+f1(CAM.mediana_min)+' minuti. Per ogni quartiere, l’area più vicina è quella più vicina alla maggior parte dei suoi civici.',
+   '<b>Scala dei metri quadrati.</b> I pallini sono messi su una scala moltiplicativa e impilati dove si sovrappongono; la posizione orizzontale è la superficie, l’altezza non ha significato.',
+   '<b>Pagina costruita da un programma</b> che legge le tabelle e scrive i file della sezione «File», confrontando i numeri con quelli di partenza. Ogni numero ha la sua origine nei file della sezione «File».'];
+  $('metodo-lista').innerHTML=M.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 })();
 </script>
