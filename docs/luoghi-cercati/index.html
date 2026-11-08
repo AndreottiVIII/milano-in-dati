@@ -1,300 +1,592 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · I luoghi di Milano più cercati al mondo</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · I luoghi di Milano più letti al mondo</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15);max-width:260px}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.t20 .row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:0 8px;padding:7px 0;border-bottom:1px solid var(--line);align-items:baseline}
-.t20 .rk{color:var(--mut);font-variant-numeric:tabular-nums;text-align:right} .t20 .nm{font-weight:600;overflow-wrap:anywhere} .t20 .nm small{display:block;font-weight:400;font-size:.78rem;color:var(--mut)}
-.t20 .vv{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
-.t20 .l2{grid-column:2 / 4;display:flex;align-items:center;gap:10px;margin-top:3px}
-.t20 .sb{flex:1;min-width:80px;height:10px;display:flex;background:#f1f1f1} .t20 .sb i{display:block;height:10px}
-.t20 .pc{font-size:.78rem;color:var(--mut);white-space:nowrap;min-width:92px} .t20 svg.sp{width:96px;height:24px;flex:none}
-.t20 .row.sum{background:#faf7f2;font-style:italic} .t20 .row.sum .nm{font-weight:400}
-.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-.dot{display:inline-block;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;background:#111;color:#fff;font-size:.72rem;margin-right:4px}
-#sel-nil{max-width:100%;font:inherit;margin:.3em 0}
-#peaks .pk{border-bottom:1px solid var(--line);padding:7px 0;font-size:.92rem} #tab-np{min-width:520px}
+
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --it:#0b0d12;     /* Italia */
+  --hint:#0072BC;   /* comuni intorno: blu M4 */
+  --tur:#F58220;    /* turisti: arancio della home */
+  --ind:#4b5563;--umi:#00A651;--car:#0072BC;--vpm:#FFD500;--alt:#7B3FA0; /* tipi di rifiuto: grigio, verde M2, blu M4, giallo M3, viola M5 */
+  --pos:#F58220;--neg:#0072BC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* highlights */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* sections */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+:root{--m1:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;--ora:#F58220;--acq:#00A19A;--mag:#E6007E;--mar:#8C5A32;--ros:#F06EAA}
+.find{margin:14px 0 0}
+.find label,.sel label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus,.sel select:focus{outline:3px solid var(--mi);outline-offset:1px}
+.sel{margin:10px 0 8px}
+.sel select{width:100%;max-width:420px;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris.m{border-left-color:var(--mi)}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.hl>a .n{overflow-wrap:anywhere}
+.hl>a.g{color:#000}
+.hl>a.g p{color:#222}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl .v{font-weight:800;font-size:1.3rem}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.8rem;font-weight:700;color:#fff}
+
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>I luoghi di Milano più cercati al mondo</h1>
-<p>Quali luoghi di Milano si leggono di più su Wikipedia, in tutte le lingue? Qui sono contate le <b>letture delle voci</b> dedicate a edifici, chiese, piazze, parchi, stazioni, musei, quartieri e stadi, da luglio 2015 a ottobre 2026. <b>Una lettura non è una visita</b>: dice quanto un luogo incuriosisce, non quanta gente ci va (vedi <a href="#limiti">i limiti dei dati</a>).</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<h1>I luoghi di Milano più letti al mondo</h1>
+<p class="lead">Quali luoghi di Milano si leggono di più su Wikipedia, in tutte le lingue, da luglio 2015 a ottobre 2026. Una lettura non è una visita: dice quanto un luogo incuriosisce, non quanta gente ci va.</p>
 
-<h2 id="classifica">I venti luoghi più letti</h2>
-<p>Scegli una lingua per vedere che cosa legge quel pubblico. La barra dice quanta parte delle letture <b>di quel luogo</b> (in tutte le lingue) è in italiano (verde) e quanta no (arancione). La linea piccola mostra le letture mese per mese nella lingua scelta.</p>
-<div class="ctl" id="ctl-lang"></div>
-<div class="t20" id="t20"></div>
-<p class="src" id="src-top">Fonte: Wikimedia Foundation, Pageviews API (letture di persone, tutti i modi di accesso), titoli delle voci da Wikidata. Luglio 2015 &ndash; ottobre 2026, scaricato il 1 novembre 2026. La riga corsiva &laquo;Navigli insieme&raquo; è una somma di cinque voci (Naviglio Grande, Martesana, Pavese, Cerchia dei Navigli, Darsena) e non entra nel conteggio dei venti. La voce Unesco di Santa Maria delle Grazie è unita alla chiesa.</p>
+<div class="hl" id="hl"></div>
+<p class="src">Tutti i numeri: Wikimedia Foundation, Pageviews API (CC0), letture di persone dal 1 luglio 2015 al 31 ottobre 2026; luoghi e coordinate da Wikidata (CC0); quartieri: Comune di Milano (CC BY). «Lettura» = una persona che apre la voce.</p>
 
-<h2 id="stadio-duomo">San Siro e Duomo nel tempo</h2>
-<p>Letture al mese, in tutte le lingue. I numeri nel grafico indicano i picchi che coincidono con un fatto di cui ho trovato la fonte (tabella qui sotto).</p>
-<div class="lgd" id="lg-sd"></div>
-<div class="ch" id="ch-sd"></div>
-<ol id="ev-sd" class="sub" style="padding-left:1.3em"></ol>
-<p class="src">Fonte: Pageviews API, voci &laquo;Stadio Giuseppe Meazza&raquo; e &laquo;Duomo di Milano&raquo; in tutte le edizioni linguistiche. Gli eventi sono tratti dalle fonti elencate nella tabella.</p>
-<h3 id="picchi">Picchi e che cosa c&rsquo;era quel giorno</h3>
-<p>Un giorno è un picco quando ha almeno 2.000 letture e almeno 4 volte il valore normale (la mediana dei 28 giorni prima). Un picco ha un evento accanto solo se la data coincide e ho trovato una fonte affidabile; <b>coincidere non prova che l&rsquo;evento sia la causa</b>. Gli altri sono &laquo;picco non spiegato&raquo;.</p>
-<div id="peaks"></div>
-<p class="sub">I picchi dei giorni sono per la lingua indicata (italiano o inglese); quello dell&rsquo;Unipol Dome è un mese, in tutte le lingue. &laquo;Normale&raquo;: mediana dei 28 giorni precedenti (giorni) o dei 12 mesi attorno (mese).</p>
+<!-- ============ 1 ============ -->
+<h2 id="classifica">I luoghi più letti</h2>
 
-<h2 id="tempo">Quante letture in totale, e il Covid</h2>
-<div id="tempo-txt"></div>
-<div class="lgd" id="lg-t"></div>
-<div class="ch" id="ch-t"></div>
-<p class="src">Fonte: Pageviews API, somma delle voci dei luoghi (esclusi gli &laquo;altri articoli&raquo; del riquadro più sotto). Il 2015 parte da luglio e il 2026 arriva a ottobre.</p>
-<h3 id="permilione">Milano interessa meno? No: è Wikipedia che si legge meno</h3>
-<div id="pm-txt"></div>
-<div class="lgd" id="lg-pm"></div>
-<div class="ch" id="ch-pm"></div>
-<div class="scroll"><table id="tab-pm"></table></div>
-<p class="src">Fonte: Pageviews API, letture totali di ciascuna Wikipedia (endpoint &laquo;aggregate&raquo;, persone, tutti i modi di accesso) e letture delle voci dei luoghi di Milano nella stessa lingua. Il 2026 è gennaio-ottobre.</p>
+<div class="fig">
+  <h3 id="t-fa"></h3>
+  <p class="sub">I 15 luoghi più letti nella lingua che scegli (San Siro è lo stadio Giuseppe Meazza). Barra verde = letture in italiano, blu = in tutte le altre lingue (quando sono scelte «tutte»).</p>
+  <div class="sel"><label for="sa">Lingua</label><select id="sa"></select></div>
+  <div class="lg" id="lg-fa"></div>
+  <div class="ch" id="ch-fa" role="img" aria-label="Barre: i 15 luoghi di Milano più letti su Wikipedia nella lingua scelta"></div>
+  <p class="src">Fonte: Pageviews API (CC0), voci di Wikipedia nella lingua scelta, titoli da Wikidata (CC0). Luglio 2015 - ottobre 2026. La voce Unesco di Santa Maria delle Grazie è unita alla chiesa.</p>
+</div>
 
-<h2 id="mappa">La mappa: quartieri e letture</h2>
-<p>Ogni luogo è assegnato al quartiere (NIL) in cui cade la sua coordinata su Wikidata. Colore = letture totali dei luoghi del quartiere (scala a gruppi di pari numero di quartieri). Clic su un quartiere per vedere il suo luogo più letto.</p>
-<div class="map" id="map"></div>
-<div class="lgd" id="lg-map"></div>
-<div class="card" id="nil-card"><span class="sub">Clicca un quartiere sulla mappa o scegli dall&rsquo;elenco: </span><select id="sel-nil"></select><div id="nil-det"></div></div>
-<div class="bars" id="b-nil"></div>
-<p class="src">Fonte: Pageviews API, coordinate da Wikidata, confini dei 88 NIL del Comune di Milano (dataset ds964, CC-BY). Mappa &copy; OpenStreetMap contributors.</p>
+<!-- ============ 2 ============ -->
+<h2 id="tempo">Nel tempo</h2>
+<div class="fig">
+  <h3 id="t-tempo"></h3>
+  <p class="sub">Letture dei luoghi di Milano negli ultimi 12 mesi, calcolate ogni mese. In italiano e in tutte le altre lingue insieme.</p>
+  <div class="lg" id="lg-tempo"></div>
+  <div class="ch" id="ch-tempo" role="img" aria-label="Linee: letture dei luoghi di Milano negli ultimi dodici mesi, italiano ed estero, 2016-2026"></div>
+  <ol class="notes" id="nt-tempo"></ol>
+  <p class="src">Fonte: Pageviews API (CC0), somma delle voci dei luoghi. Il 2015 parte da luglio, il 2026 arriva a ottobre.</p>
+</div>
 
-<h2 id="stranieri">Più stranieri, più italiani</h2>
-<p>Tra i luoghi con almeno 200.000 letture, quanta parte è in italiano.</p>
-<div class="grid2"><div><h3>I più letti dall&rsquo;estero</h3><div class="bars" id="b-str"></div></div><div><h3>I più letti in italiano</h3><div class="bars" id="b-ita"></div></div></div>
-<p class="src">Fonte: Pageviews API. Italiano = edizione italiana di Wikipedia; &laquo;estero&raquo; = tutte le altre. La lingua non è la nazionalità (vedi i limiti). Dove manca la voce italiana la quota italiana è bassa per costruzione.</p>
+<div class="fig">
+  <h3 id="t-pm"></h3>
+  <p class="sub">Letture dei luoghi di Milano ogni milione di letture di tutta Wikipedia in quella lingua, nel 2019 e nel 2025. La scala è a salti di moltiplicazione: la distanza tra le linee non è proporzionale ai numeri.</p>
+  <div class="ch" id="ch-pm" role="img" aria-label="Pendenze: letture dei luoghi di Milano ogni milione di letture di Wikipedia, 2019 e 2025, cinque lingue"></div>
+  <p class="note">Wikipedia nel suo insieme si legge meno di prima, soprattutto in italiano: prima di dire che un luogo interessa meno, conviene confrontare con il totale.</p>
+  <p class="src">Fonte: Pageviews API (CC0), letture totali di ciascuna Wikipedia (endpoint «aggregate», persone, tutti i modi di accesso) e letture delle voci dei luoghi di Milano nella stessa lingua.</p>
+</div>
 
+<div class="fig">
+  <h3 id="t-sd"></h3>
+  <p class="sub">Letture al mese, in tutte le lingue. I numeri indicano i picchi che coincidono con un fatto di cui c'è una fonte.</p>
+  <div class="lg" id="lg-sd"></div>
+  <div class="ch" id="ch-sd" role="img" aria-label="Linee: letture mensili delle voci San Siro e Duomo, con eventi numerati"></div>
+  <ol class="notes" id="nt-sd"></ol>
+  <p class="note">Coincidere con una data non prova che l'evento sia la causa del picco.</p>
+  <p class="src">Fonte: Pageviews API (CC0), voci «Stadio Giuseppe Meazza» e «Duomo di Milano» in tutte le edizioni linguistiche. Gli eventi sono tratti dalle fonti elencate in fondo alla pagina.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="dove">Dove sono i luoghi più letti</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite">Scrivi un quartiere, oppure toccalo sulla mappa.</div>
+<div class="fig">
+  <h3 id="t-map"></h3>
+  <p class="sub">Letture totali dei luoghi di ogni quartiere. Il numero accanto a ogni colore conta i quartieri. Ogni luogo conta nel quartiere dove cade il suo punto su Wikidata.</p>
+  <div class="lg" id="lg-map"></div>
+  <div class="ch" id="ch-map" role="img" aria-label="Mappa degli 88 quartieri di Milano colorati per letture dei luoghi"></div>
+  <p class="src">Fonte: Pageviews API (CC0), coordinate da Wikidata (CC0), confini dei 88 quartieri (NIL) del Comune di Milano, dataset ds964 (CC BY).</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="stranieri">Italiani e stranieri</h2>
+<div class="fig">
+  <h3 id="t-str"></h3>
+  <p class="sub">Ogni punto è un luogo con almeno 200.000 letture. In orizzontale: quanta parte delle letture è in italiano. In verticale: quante letture ha in tutto. Scegli un tipo di luogo per vederlo in blu.</p>
+  <div class="sel"><label for="ss">Tipo di luogo</label><select id="ss"></select></div>
+  <div class="ch" id="ch-str" role="img" aria-label="Punti: luoghi con almeno 200.000 letture, per quota di letture in italiano e letture totali"></div>
+  <p class="note">La lingua non è la nazionalità: l'inglese lo leggono anche gli italiani. Dove manca la voce italiana (per esempio Porta Nuova) la quota italiana è quasi zero per costruzione.</p>
+  <p class="src">Fonte: Pageviews API (CC0). Italiano = edizione italiana di Wikipedia; «estero» = tutte le altre.</p>
+</div>
+
+<!-- ============ 5 ============ -->
 <h2 id="nonluoghi">Voci che non sono luoghi</h2>
-<div class="warm"><p style="margin:.2em 0">Questi articoli hanno tante letture ma non sono luoghi: sono opere d&rsquo;arte, eventi, marchi, università, stati storici. Li ho tenuti fuori dalla classifica, ma ecco i più letti. <b>Il &laquo;Cenacolo&raquo; per Wikipedia è un dipinto</b>: la voce dell&rsquo;Ultima Cena ha più letture del Duomo.</p></div>
-<div class="scroll"><table id="tab-np"></table></div>
-<p class="src" id="src-np"></p>
+<div class="fig">
+  <h3 id="t-np"></h3>
+  <p class="sub">Le voci su Milano più lette che per Wikipedia non sono luoghi: opere, eventi, marchi, università, stati storici. La linea tratteggiata è il Duomo.</p>
+  <div class="ch" id="ch-np" role="img" aria-label="Barre: le voci su Milano più lette che non sono luoghi, con il Duomo come confronto"></div>
+  <p class="src">Fonte: Pageviews API (CC0), tipi di voce da Wikidata (CC0), corretti a mano per le voci più lette. Il «Cenacolo» per Wikipedia è l'Ultima Cena, un dipinto: la voce ha più letture del Duomo.</p>
+</div>
 
-<h2 id="limiti">Limiti dei dati</h2>
-<ul class="m">
+<!-- ============ 6 ============ -->
+<h2 id="picchi">I picchi</h2>
+<div class="fig">
+  <h3 id="t-picchi"></h3>
+  <p class="sub">Un picco è un giorno (o un mese) con molte più letture del normale. In verticale: quante volte il normale. In verde i picchi con un fatto che coincide e una fonte, in grigio gli altri.</p>
+  <div class="ch" id="ch-picchi" role="img" aria-label="Punti nel tempo: picchi di letture, quante volte il normale, dal 2015 al 2026"></div>
+  <ol class="notes" id="nt-picchi"></ol>
+  <p class="note">Un picco ha un evento accanto solo se la data coincide e c'è una fonte affidabile; coincidere non prova che l'evento sia la causa. Gli altri sono picchi non spiegati.</p>
+  <p class="src">Fonte: Pageviews API (CC0). Giorno = picco con almeno 2.000 letture e almeno 4 volte il valore normale (la mediana dei 28 giorni prima); mese = confronto con i 12 mesi attorno. Giorni in italiano o inglese come indicato, mesi in tutte le lingue.</p>
+</div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
 <li><b>Letture, non visite.</b> Chi legge la voce può essere a Milano, a casa, a scuola, davanti a una partita. Il conteggio usa gli accessi di persone (non dei programmi dichiarati come tali), ma i programmi che si fingono persone non si possono escludere del tutto.</li>
-<li><b>Lingua non è nazionalità.</b> L&rsquo;inglese lo leggono anche gli italiani; lo spagnolo è letto soprattutto fuori dalla Spagna. Dove non c&rsquo;è la voce italiana (per esempio il quartiere Porta Nuova), la quota italiana è quasi zero per costruzione.</li>
+<li><b>Lingua non è nazionalità.</b> L'inglese lo leggono anche gli italiani; lo spagnolo è letto soprattutto fuori dalla Spagna. Dove non c'è la voce italiana (per esempio il quartiere Porta Nuova), la quota italiana è quasi zero per costruzione.</li>
 <li><b>I redirect fanno perdere qualche lettura.</b> Conto solo il titolo attuale della voce; chi arriva da un vecchio titolo o da una sigla non è contato. Ho controllato i primi <span id="l-red-n"></span> luoghi in italiano: in media i redirect valgono il <span id="l-red-t"></span>% (mediana <span id="l-red-m"></span>%), ma per alcuni sono molto di più: <span id="l-red-c"></span>. Per questi luoghi il totale è sottostimato. Le altre lingue non le ho controllate.</li>
-<li><b>Le coordinate decidono il quartiere.</b> Ogni luogo va nel NIL dove cade il punto di Wikidata: per parchi, canali o edifici grandi vale solo quel punto. Otto voci cadono fuori da tutti i poligoni e non hanno quartiere.</li>
+<li><b>Le coordinate decidono il quartiere.</b> Ogni luogo va nel quartiere dove cade il punto di Wikidata: per parchi, canali o edifici grandi vale solo quel punto. Otto voci cadono fuori da tutti i poligoni e non hanno quartiere.</li>
 <li><b>Le categorie sono in parte a mano.</b> Il tipo di luogo viene dalle classi di Wikidata con regole mie, corrette a mano per 43 voci tra le più lette; le voci oltre il 330° posto non le ho riviste una per una e può esserci qualche errore. Alcuni luoghi hanno più voci (i Navigli, le stazioni); le ho unite solo dove ero sicuro (Santa Maria delle Grazie).</li>
-<li><b>Chi c&rsquo;è e chi no.</b> L&rsquo;elenco viene da Wikidata (cose dentro il Comune, con coordinate e con una voce Wikipedia). Ho scartato 326 voci senza coordinate (dipinti, reti di trasporto, case editrici...) e aggiunto 154 luoghi che Wikidata non collega al Comune ma cadono dentro i confini.</li>
-<li><b>Wikipedia nel suo insieme cala.</b> Le letture della Wikipedia italiana sono scese del 21% tra 2019 e 2025: prima di dire che un luogo interessa meno, confrontare con il totale (vedi la sezione sopra).</li>
-<li><b>Mesi senza letture.</b> L&rsquo;API non dà i mesi a zero: un mese mancante vale zero. Il 2015 parte da luglio e il 2026 arriva a ottobre.</li>
+<li><b>Chi c'è e chi no.</b> L'elenco viene da Wikidata (cose dentro il Comune, con coordinate e con una voce Wikipedia). Ho scartato 326 voci senza coordinate (dipinti, reti di trasporto, case editrici...) e aggiunto 154 luoghi che Wikidata non collega al Comune ma cadono dentro i confini.</li>
+<li><b>Wikipedia nel suo insieme cala.</b> Le letture della Wikipedia italiana sono scese del 21% tra 2019 e 2025: prima di dire che un luogo interessa meno, confrontare con il totale (vedi il grafico «ogni milione di letture»).</li>
+<li><b>Mesi senza letture.</b> L'API non dà i mesi a zero: un mese mancante vale zero. Il 2015 parte da luglio e il 2026 arriva a ottobre.</li>
 <li><b>Eventi.</b> Nei grafici ho scritto un evento solo dove la data coincide e ho trovato una fonte; per gli altri picchi non do spiegazioni.</li>
-</ul>
-
-<h2 id="file">File</h2>
-<ul class="m">
-<li><a href="data/luoghi.csv">luoghi.csv</a>: tutti i luoghi (nome, categoria, quartiere, coordinate, letture totali e per lingua, quota italiana).</li>
-<li><a href="data/non_luoghi.csv">non_luoghi.csv</a>: le voci che non sono luoghi, con le letture totali.</li>
-<li><a href="data/serie.json">serie.json</a>: letture mensili dei luoghi più letti, per lingua.</li>
-<li><a href="data/riepilogo.json">riepilogo.json</a>: classifiche, andamento, picchi, quartieri.</li>
-<li><a href="data/nil.geojson">nil.geojson</a>: i quartieri con le letture.</li>
-</ul>
+<li><b>Le lingue.</b> Le classifiche per lingua usano dieci edizioni (italiano, inglese, tedesco, francese, spagnolo, russo, cinese, giapponese, portoghese, arabo); le altre sono sommate in «altre lingue» e non entrano in quelle classifiche.</li>
+</ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Lettura</dt><dd>Una persona che apre la voce di Wikipedia dedicata a un luogo. Non dice se ci è andata davvero.</dd>
+<dt>Voce</dt><dd>La pagina di Wikipedia su un argomento, in una lingua. Lo stesso luogo ha una voce per ogni lingua.</dd>
+<dt>Quartiere (NIL)</dt><dd>Gli 88 «nuclei di identità locale» in cui il Comune divide Milano.</dd>
+<dt>Redirect</dt><dd>Un vecchio titolo che rimanda alla voce attuale: le letture fatte da lì non sono nei nostri conti.</dd>
+<dt>Picco</dt><dd>Un giorno o un mese con molte più letture del normale.</dd>
+<dt>Quota in italiano</dt><dd>Per ogni luogo, la parte delle sue letture fatte sulla Wikipedia in italiano.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul>
+<li><b>L'elenco dei luoghi.</b> 1.802 elementi di Wikidata dentro Milano, con coordinate e almeno una voce Wikipedia: 1.648 trovati seguendo la catena «si trova nel territorio di» fino a Milano, 154 aggiunti da un controllo per distanza e confini. Di questi 1.527 sono luoghi veri (edifici, chiese, piazze, parchi, stazioni, quartieri), 95 istituzioni, 3 opere d'arte e 177 non-luoghi (eventi, marchi, stati storici, enti).</li>
+<li><b>Le letture.</b> 8.154 coppie (luogo, edizione di Wikipedia) in 201 lingue, con le letture mensili da luglio 2015 a ottobre 2026 (136 mesi). Totale dei luoghi: <span id="m-tot"></span> letture.</li>
+<li><b>Il quartiere.</b> Ogni luogo è assegnato al quartiere in cui cade la sua coordinata.</li>
+<li><b>I picchi.</b> Un giorno è un picco con almeno 2.000 letture e almeno 4 volte il normale (mediana dei 28 giorni prima).</li>
+<li><b>Licenza dei dati.</b> Wikidata: dati strutturati CC0. Letture: i dati Analytics di Wikimedia sono rilasciati con dedica CC0.</li>
+</ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati; nelle tabelle il separatore è il punto e virgola.</p>
+<ul>
+<li><a href="data/luoghi.csv">Tutti i luoghi</a>: nome, categoria, quartiere, coordinate, letture totali e per lingua, quota italiana</li>
+<li><a href="data/non_luoghi.csv">Le voci che non sono luoghi</a>, con le letture totali</li>
+<li><a href="data/serie.json">Letture mensili</a> dei luoghi più letti, per lingua</li>
+<li><a href="data/riepilogo.json">Tutti i numeri di questa pagina</a>: classifiche, andamento, picchi, quartieri</li>
+<li><a href="data/nil.geojson">I quartieri</a> con le letture</li>
+</ul></div></details>
+</div>
 
 <footer id="fonti">
-<b>Fonti.</b> Letture: Wikimedia Foundation, Pageviews API (<code>wikimedia.org/api/rest_v1/metrics/pageviews</code>), persone (<code>agent=user</code>), tutti i modi di accesso, mensili da luglio 2015 a ottobre 2026 e giornaliere per i primi luoghi; scaricate il 1 novembre 2026. I dataset Analytics di Wikimedia sono rilasciati con la dedica Creative Commons CC0 (<a href="https://dumps.wikimedia.org/other/pageviews/readme.html">dumps.wikimedia.org/other/pageviews</a>). Elenco dei luoghi, categorie e coordinate: Wikidata (CC0), interrogato il 1 novembre 2026. Quartieri (NIL): Comune di Milano, dataset ds964, CC-BY. Mappa: &copy; OpenStreetMap contributors.<br>
-<b>Fonti degli eventi.</b> <span id="f-ev"></span><br>
-<a href="../">&larr; Milano in dati</a>
+<p><b>Fonti e licenze.</b> Letture: Wikimedia Foundation, Pageviews API (<code>wikimedia.org/api/rest_v1/metrics/pageviews</code>), persone (<code>agent=user</code>), tutti i modi di accesso, mensili da luglio 2015 a ottobre 2026 e giornaliere per i primi luoghi; scaricate il 1 novembre 2026. I dataset Analytics di Wikimedia sono rilasciati con la dedica Creative Commons CC0 (<a href="https://dumps.wikimedia.org/other/pageviews/readme.html">dumps.wikimedia.org/other/pageviews</a>). Elenco dei luoghi, categorie e coordinate: Wikidata (CC0), interrogato il 1 novembre 2026. Quartieri (NIL): Comune di Milano, dataset ds964, CC-BY.</p>
+<p><b>Fonti degli eventi.</b> <span id="f-ev"></span></p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+</main>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var R=null,S=null,NF=null,LANG='all',MAP=null,LAY=null,SEL=null;
-var ACC='#00695c',WARM='#c26a1b',GRY='#8a8a8a',INK='#111';
-var SEQ=['#d7ece7','#a6d3ca','#62b0a4','#2b8a7d','#136459','#052e29'];
-var LN={all:'Tutte le lingue',it:'Italiano',en:'Inglese',de:'Tedesco',fr:'Francese',es:'Spagnolo',ru:'Russo',zh:'Cinese',ja:'Giapponese',pt:'Portoghese',ar:'Arabo'};
-var CAT={stadio_sport:'stadio o palasport',chiesa_religioso:'chiesa o luogo religioso',teatro_cultura:'teatro, cinema, locale',castello_difesa:'castello, porta',edificio_palazzo:'edificio',stazione:'stazione',museo:'museo',piazza:'piazza',quartiere:'quartiere',parco_verde:'parco o cimitero',monumento_arte:'monumento',strada:'strada',canale_acqua:'canale o fiume',somma:'somma'};
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function YK(v){return v>=1e6?nf(v/1e6,1)+' M':v>=1000?f0(v/1000)+' mila':String(v)}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function fM(x){var m=x/1e6;return nf(m,m>=10?1:2)+' M'}
-function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function MESE(m){var n=['','gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'],a=m.split('-');return n[parseInt(a[1],10)]+' '+a[0]}
-function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
-function barsPlain(id,rows,max,col){
-  setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/max*100)+'%;background:'+(col||ACC)+'"></span></span><span class="v">'+r.txt+'</span></div>'}).join(''));
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function yi(y){return D.meta.anni.indexOf(y)}
+function G(id){for(var i=0;i<D.milano.gruppi.length;i++)if(D.milano.gruppi[i].id===id)return D.milano.gruppi[i]}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/&[a-z]+;/g,'x')).width}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function r1(v){return Math.round(v*10)/10}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+/* barra orizzontale con estremo arrotondato (4px) lontano dalla base */
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d=x1>=x0?
+    'M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z':
+    'M'+r1(r)+' '+r1(y)+'H'+r1(l+rr)+'Q'+r1(l)+' '+r1(y)+' '+r1(l)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(l)+' '+r1(y+h)+' '+r1(l+rr)+' '+r1(y+h)+'H'+r1(r)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
 }
-/* ---------- grafico a linee ---------- */
-function line(box,o){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=o.h||300,m={l:50,r:10,t:14,b:26},pw=W-m.l-m.r,ph=H-m.t-m.b,n=o.n;
-  var ymax=0;o.series.forEach(function(s){s.vals.forEach(function(v){if(v!=null&&v>ymax)ymax=v})});
-  var sy=niceStep(ymax/5);ymax=Math.ceil(ymax/sy)*sy;
-  function X(i){return m.l+(n>1?i/(n-1)*pw:0)} function Y(v){return m.t+ph-v/ymax*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+esc(o.label||'grafico')+'">';
-  if(o.band)s+='<rect x="'+X(o.band.i0)+'" y="'+m.t+'" width="'+Math.max(2,X(o.band.i1)-X(o.band.i0))+'" height="'+ph+'" fill="#f3dcc0" opacity=".7"/><text class="mu" x="'+(X(o.band.i0)+3)+'" y="'+(m.t+11)+'">'+o.band.t+'</text>';
-  for(var v=0;v<=ymax+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-5)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yf(v)+'</text>';
-  var lastx=-99;for(var i=0;i<n;i++){if(o.tick(i)){var xx=X(i);if(xx-lastx>38){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xl(i)+'</text>'}}}
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  o.series.forEach(function(se){var d='',on=false;se.vals.forEach(function(v,i){if(v==null){on=false;return}d+=(on?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);on=true});
-    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2"'+(se.dash?' stroke-dasharray="5 4"':'')+'/>';
-    if(o.dots)se.vals.forEach(function(v,i){if(v!=null)s+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="3" fill="'+se.color+'"/>'})});
-  (o.mk||[]).forEach(function(k){var x=X(k.i),y=Y(o.series[k.s].vals[k.i]);s+='<circle cx="'+x+'" cy="'+y+'" r="8" fill="#111"/><text x="'+x+'" y="'+(y+3.5)+'" text-anchor="middle" style="fill:#fff;font-weight:700">'+k.n+'</text>'});
-  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#555" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,i=Math.round((px-m.l)/pw*(n-1));if(i<0)i=0;if(i>n-1)i=n-1;
-    cur.setAttribute('x1',X(i));cur.setAttribute('x2',X(i));cur.style.display='';tip.innerHTML=o.tip(i);tip.style.display='';
-    var tw=tip.offsetWidth,left=X(i)/k+10;if(left+tw>r.width)left=X(i)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='4px'}
-  function hide(){tip.style.display='none';cur.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+/* colonna verticale, estremo arrotondato lontano dalla base */
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(4,h,w/2);if(h<0.5)return '';
+  var d=y1<=y0?
+    'M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z':
+    'M'+r1(x)+' '+r1(t)+'V'+r1(b-rr)+'Q'+r1(x)+' '+r1(b)+' '+r1(x+rr)+' '+r1(b)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(b)+' '+r1(x+w)+' '+r1(b-rr)+'V'+r1(t)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
 }
-/* ---------- sorpresa ---------- */
-function sorpresa(){
-  var s=R.sorpresa,P=R.primo_per_lingua,ste=[],dum=[];
-  Object.keys(P).forEach(function(l){(/Meazza/.test(P[l])?ste:dum).push(LN[l].toLowerCase())});
-  function lst(a){return a.length>1?a.slice(0,-1).join(', ')+' e '+a[a.length-1]:a[0]}
-  var h='<p><b>San Siro batte il Duomo.</b> La voce dello stadio Giuseppe Meazza ha '+fM(s.stadio_t)+' di letture, quella del Duomo '+fM(s.duomo_t)+'. Per l&rsquo;<b>'+f0(s.stadio_estero)+'%</b> le letture dello stadio non sono in italiano (per il Duomo il '+f0(s.duomo_estero)+'%).</p>';
-  h+='<p>In '+lst(ste)+' il luogo di Milano più letto è lo stadio; il Duomo vince in '+lst(dum)+'.</p>';
-  h+='<p>Un solo mese di semifinali di Champions League (maggio 2023) ha dato '+f0(s.stadio_maggio2023)+' letture allo stadio: quasi otto mesi medi del Duomo (circa '+f0(s.duomo_mese_medio)+' al mese).</p>';
-  h+='<p>Il Bosco Verticale è il <b>settimo</b> luogo (' +fM(s.bosco_t)+'), davanti alla Pinacoteca di Brera e a Sant&rsquo;Ambrogio. In totale i luoghi hanno avuto '+fM(R.views_totali_luoghi)+' di letture; il '+nf(R.quota_it,1)+'% in italiano.</p>';
-  setH('sorpresa',h);
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function yearTicks(years,X,yb){var s='',show=[2010,2015,2020,2024];years.forEach(function(a,i){if(show.indexOf(a)>=0)s+=T(X(i),yb+16,a,{a:i===0?'start':i===years.length-1?'end':'middle',c:'m'})});return s}
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
 }
-/* ---------- classifica ---------- */
-function spark(a){var w=96,h=24,mx=Math.max.apply(null,a)||1,d='';a.forEach(function(v,i){d+=(i?'L':'M')+(i/(a.length-1)*w).toFixed(1)+' '+(h-1-v/mx*(h-3)).toFixed(1)});
-  return '<svg class="sp" viewBox="0 0 '+w+' '+h+'" aria-hidden="true"><path d="'+d+'" fill="none" stroke="'+INK+'" stroke-width="1.2"/></svg>'}
-function classifica(){
-  var bt='';Object.keys(LN).forEach(function(l){bt+='<button data-l="'+l+'" class="'+(l===LANG?'on':'')+'">'+LN[l]+'</button>'});
-  setH('ctl-lang',bt);
-  Array.prototype.forEach.call(el('ctl-lang').querySelectorAll('button'),function(b){b.addEventListener('click',function(){LANG=b.getAttribute('data-l');classifica()})});
-  var rows=R.top[LANG],k=0,h='';
-  rows.forEach(function(r){
-    var sr=S.luoghi[r.q]?S.luoghi[r.q][LANG]:null,it=r.it;
-    if(r.somma)h+='<div class="row sum"><span class="rk"></span><span class="nm">'+esc(r.n)+'<small>somma, non in classifica</small></span><span class="vv">'+fM(r.v)+'</span><div class="l2"><span class="sb"><i style="width:'+it+'%;background:'+ACC+'"></i><i style="width:'+(100-it)+'%;background:'+WARM+'"></i></span><span class="pc">'+f0(it)+'% italiano</span>'+(sr?spark(sr):'')+'</div></div>';
-    else{k++;h+='<div class="row"><span class="rk">'+k+'</span><span class="nm">'+esc(cap(r.n))+'<small>'+esc(CAT[r.c]||r.c)+(r.nil?' &middot; '+esc(cap(r.nil.toLowerCase())):'')+'</small></span><span class="vv">'+(r.v>=1e6?fM(r.v):f0(r.v))+'</span><div class="l2"><span class="sb"><i style="width:'+it+'%;background:'+ACC+'"></i><i style="width:'+(100-it)+'%;background:'+WARM+'"></i></span><span class="pc">'+f0(it)+'% italiano</span>'+(sr?spark(sr):'')+'</div></div>'}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getCSV(u,sep){sep=sep||';';return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){
+  var Ls=t.replace(/\r/g,'').split('\n').filter(Boolean),h=Ls[0].split(sep);
+  return Ls.slice(1).map(function(l){var v=l.split(sep),o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
+function parseCSV(t,sep){var rows=[],row=[],f='',q=false;for(var i=0;i<t.length;i++){var c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===sep){row.push(f);f=''}else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}else if(c!=='\r')f+=c}if(f!==''||row.length){row.push(f);rows.push(row)}return rows}
+function getCSVq(u,sep){sep=sep||',';return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){var R=parseCSV(t.replace(/^\ufeff/,''),sep),h=R[0];return R.slice(1).filter(function(r){return r.length>1}).map(function(v){var o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
+function nz(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
+var RD=[];
+function draw(f){f();RD.push(f)}
+function startResize(){var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)})}
+function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+/* proiezione di una lista di feature geojson (longitudine schiacciata col coseno della latitudine) */
+function geoProj(F,W,lat,bd){
+  var k=Math.cos((lat||45.46)*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  F.forEach(function(f){anelli(f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  if(bd){x0=bd[0]*k;x1=bd[1]*k;y0=bd[2];y1=bd[3]}
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,k:k,sc:sc,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(lon,la){return[1+(lon*k-x0)*sc,1+(y1-la)*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+/* classi bilanciate per quantili: restituisce le soglie (n-1) */
+function quantSoglie(v,n){var a=v.slice().sort(function(x,y){return x-y}),o=[];for(var i=1;i<n;i++)o.push(a[Math.floor(i*a.length/n)]);return o}
+function clsQ(v,s){var i=0;while(i<s.length&&v>=s[i])i++;return i}
+function hlRender(T){$('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" class="'+(t.c==='#FFD500'?'g':'')+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('')}
+/* campo "scrivi il tuo ..." con elenco lungo */
+function campo(inp,datalist,items,onPick,nomeKey,msg){
+  datalist.innerHTML=items.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  function trova(k){var m=items.filter(function(x){return nz(x.n)===k||(x.sn&&nz(x.sn)===k)});return m.length===1?m[0]:null}
+  inp.addEventListener('input',function(){var k=nz(inp.value),c=k?trova(k):null;if(c)onPick(c,false);else if(!k)onPick(null,false)});
+  inp.addEventListener('change',function(){var k=nz(inp.value);if(!k)return;var c=trova(k);if(c){onPick(c,true);return}
+    var m=items.filter(function(x){return nz(x.n).indexOf(k)===0});
+    if(m.length===1)onPick(m[0],true);else onPick(null,true,m.length?'Ci sono più scelte che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.':msg||'Non lo trovo. Controlla come è scritto.')});
+}
+/* etichette senza sovrapposizioni: items {x,y,r,txt,cls}, occ = rettangoli già occupati */
+function placeLabels(items,W,H,occ){
+  var boxes=(occ||[]).slice(),out='';
+  items.forEach(function(it){
+    var w=tw(it.txt,12,true),h=14,pos=[[it.r+4,4,'start'],[-it.r-4,4,'end'],[0,-it.r-5,'middle'],[0,it.r+15,'middle'],[-it.r-4,-14,'end'],[it.r+4,-14,'start'],[0,-it.r-20,'middle'],[0,it.r+31,'middle']];
+    for(var k=0;k<pos.length;k++){
+      var p=pos[k],tx=it.x+p[0],ty=it.y+p[1],x1=p[2]==='start'?tx:p[2]==='end'?tx-w:tx-w/2,b={x:x1,y:ty-11,w:w,h:h};
+      if(b.x<0||b.x+b.w>W||b.y<0||b.y+b.h>H)continue;
+      if(boxes.some(function(o){return b.x<o.x+o.w&&b.x+b.w>o.x&&b.y<o.y+o.h&&b.y+b.h>o.y}))continue;
+      boxes.push(b);out+=T(tx,ty,it.txt,{a:p[2],c:it.cls||'k'});return;
+    }
   });
-  setH('t20',h);
+  return out;
 }
-/* ---------- stadio e duomo ---------- */
-function stadioDuomo(){
-  var M=S.mesi,A=S.luoghi['Q133566'].all,B=S.luoghi['Q18068'].all,ev={},mk=[],num=0;
-  R.eventi_grafico.forEach(function(e){num++;var i=M.indexOf(e.m);ev[i]=(ev[i]?ev[i]+'<br>':'')+'<b>'+num+'</b> '+esc(e.t);mk.push({i:i,s:e.s==='stadio'?0:1,n:num})});
-  setH('ev-sd',R.eventi_grafico.map(function(e){return '<li>'+esc(e.t)+'</li>'}).join(''));
-  setH('lg-sd',lgdLine([{color:WARM,t:'Stadio Giuseppe Meazza'},{color:ACC,t:'Duomo di Milano'}]));
-  line(el('ch-sd'),{n:M.length,h:300,label:'Letture mensili di stadio e Duomo',series:[{vals:A,color:WARM},{vals:B,color:ACC}],mk:mk,yf:YK,
-    tick:function(i){return M[i].slice(5)==='01'},xl:function(i){return M[i].slice(0,4)},
-    tip:function(i){return '<b>'+MESE(M[i])+'</b><br>Stadio: '+f0(A[i])+'<br>Duomo: '+f0(B[i])+(ev[i]?'<br>'+ev[i]:'')}});
+
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),ink:cv('--ink'),ink2:cv('--ink2'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),m2:cv('--m2'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),acq:cv('--acq'),light:'#c9ced6',m3:'#FFD500'};
+var R,LU,NLU,S,GEO,N=[];
+var LG=[['it','Italiano','in italiano'],['en','Inglese','in inglese'],['de','Tedesco','in tedesco'],['fr','Francese','in francese'],['es','Spagnolo','in spagnolo'],['ru','Russo','in russo'],['zh','Cinese','in cinese'],['ja','Giapponese','in giapponese'],['pt','Portoghese','in portoghese'],['ar','Arabo','in arabo']];
+var CAT={chiesa_religioso:'Chiese e luoghi di culto',edificio_palazzo:'Edifici e palazzi',quartiere:'Quartieri',stazione:'Stazioni',parco_verde:'Parchi e verde',monumento_arte:'Monumenti e arte',museo:'Musei',strada:'Strade',teatro_cultura:'Teatri e cultura',castello_difesa:'Castelli e difese',piazza:'Piazze',stadio_sport:'Stadi e sport',canale_acqua:'Canali e acque'};
+var TIPO={citta_intera:'la città',opera_arte:'opera d’arte',evento:'evento',marchio:'marchio',rete_trasporti:'rete di trasporti',stato_storico:'stato storico',istruzione:'università',ente_territoriale:'ente',citta_antica:'città antica'};
+var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function mln(v){return f1(v/1e6)+' mln'}
+function vk(l){return l==='all'?'views_totali':'views_'+l}
+function lname(l){for(var i=0;i<LG.length;i++)if(LG[i][0]===l)return LG[i]}
+function short(s,n){s=nome(s).replace(/^(Chiesa di|Teatro alla|Teatro)\s+/i,'').replace(/^Stazione di Milano /i,'Stazione ');return s.length>n?s.slice(0,n-1)+'…':s}
+function nome(s){var t=String(s);if(/Meazza/.test(t))return 'San Siro';return t.charAt(0).toUpperCase()+t.slice(1)}
+
+Promise.all([getJ(DATA+'riepilogo.json'),getCSV(DATA+'luoghi.csv'),getCSV(DATA+'non_luoghi.csv'),getJ(DATA+'serie.json'),getJ(DATA+'nil.geojson')]).then(function(r){
+  R=r[0];GEO=r[4];S=r[3];
+  LU=r[1].map(function(x){var o={q:x.qid,n:x.nome,cat:x.categoria,nil:x.nil,lat:+x.lat,lon:+x.lon,qi:+x['quota_italiano_%']};Object.keys(x).forEach(function(k){if(k.indexOf('views_')===0)o[k]=+x[k]});return o}).filter(function(x){return x.views_totali>0});
+  NLU=r[2].map(function(x){return{n:x.nome,tipo:x.tipo,cat:x.categoria,v:+x.views_totali}});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function top(lang,n){var k=vk(lang);return LU.slice().sort(function(a,b){return b[k]-a[k]}).slice(0,n)}
+function rankIn(lang){var k=vk(lang),a=LU.slice().sort(function(x,y){return y[k]-x[k]}),m={};a.forEach(function(x,i){m[x.q]=i+1});return m}
+
+function tutto(){
+  highlights();
+  fillSel('sa',[['all','Tutte le lingue']].concat(LG.map(function(l){return[l[0],l[1]]})),'all',figA);
+  var cats=Object.keys(CAT).sort(function(a,b){return CAT[a].localeCompare(CAT[b],'it')});
+  fillSel('ss',[['','Tutti i tipi']].concat(cats.map(function(c){return[c,CAT[c]]})),'',scatter);
+  prepNil();
+  draw(figA);draw(tempo);draw(permilione);draw(sandu);draw(mappa);draw(scatter);draw(nonluoghi);draw(picchi);
+  fondo();startResize();
 }
-function quando(q){return q.replace(/(\d{4})-(\d\d)-(\d\d)/g,function(a,y,m,d){return parseInt(d,10)+' '+MESE(y+'-'+m)}).replace(/, /g,' e ')}
-function picchi(){
-  var h='';
-  R.picchi_verificati.forEach(function(p){
-    h+='<div class="pk"><b>'+esc(cap(p.luogo))+'</b> &middot; '+esc(quando(p.quando))+' <span class="sub">('+(p.lingua==='tutte'?'tutte le lingue':'in '+LN[p.lingua].toLowerCase())+')</span><br>'+p.valori.map(f0).join(' e ')+' letture contro circa '+f0(p.normale)+' di solito.<br>Coincide con: '+esc(p.evento)+'. <span class="sub">Fonte: <a href="'+esc(p.fonte)+'">'+esc(p.fonte_n)+'</a></span></div>'});
-  R.picchi_non_spiegati.forEach(function(p){
-    h+='<div class="pk"><b>'+esc(cap(p.luogo))+'</b> &middot; '+esc(p.quando.replace(/^(\d{4}-\d\d) \(mese\)$/,function(a,m){return MESE(m)+' (mese)'}))+' <span class="sub">(tutte le lingue)</span><br>'+f0(p.valori[0])+' letture contro circa '+f0(p.normale)+' di solito. <span class="pill">picco non spiegato</span></div>'});
-  setH('peaks',h);
+function fillSel(id,opts,val,fn){var s=$(id);s.innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>'}).join('');s.value=val;s.addEventListener('change',fn)}
+
+/* ---------- in alto ---------- */
+function highlights(){
+  var tot=R.views_totali_luoghi,sp=R.sorpresa,pk=R.picchi_verificati[0],np=NLU.filter(function(x){return x.n==='Ultima Cena'})[0];
+  var tre=R.nil_top.slice(0,3).map(function(x){return x.n}).join(', ').replace('Stadio - Ippodromi','Stadio').replace(/, ([^,]*)$/,' e $1');
+  var T=[
+   {c:C.mi,h:'t-tempo',n:f0(tot/1e6),u:'mln',p:'letture dei luoghi di Milano in 11 anni e 4 mesi, su Wikipedia in tutte le lingue.'},
+   {c:'#FFD500',h:'t-fa',n:f1(sp.stadio_t/1e6),u:'mln',p:'letture per San Siro, il luogo più letto. Secondo il Duomo con '+f1(sp.duomo_t/1e6)+' milioni.'},
+   {c:C.m2,h:'t-str',n:f0(sp.stadio_estero)+'%',u:'',p:'delle letture di San Siro è fuori dall’italiano. Per il Duomo il '+f0(sp.duomo_estero)+'%.'},
+   {c:C.m4,h:'t-map',n:f0(R.nil_top3_quota)+'%',u:'',p:'delle letture è in tre quartieri su 88: '+tre+'.'},
+   {c:C.m5,h:'t-np',n:f0(np.v/1e6),u:'mln',p:'letture per l’Ultima Cena: il doppio del Duomo, ma per Wikipedia è un dipinto, non un luogo.'},
+   {c:C.ora,h:'t-picchi',n:'×'+f0(pk.valori[1]/pk.normale),u:'',p:'il 16 aprile 2019, dopo l’incendio di Notre-Dame, la voce italiana del Duomo ha avuto '+f0(pk.valori[1])+' letture invece di '+f0(pk.normale)+'.'}
+  ];
+  hlRender(T);
 }
-/* ---------- tempo ---------- */
+
+/* ---------- A: barre per lingua ---------- */
+function figA(){
+  var lang=$('sa').value,k=vk(lang),rows=top(lang,15),W=width('ch-fa');
+  var rh=44,topm=4,H=topm+rows.length*rh,vmax=rows[0][k],rw=70,X=function(v){return (W-rw)*v/vmax};
+  var s=svgOpen(W,H);
+  rows.forEach(function(x,i){
+    var y=topm+i*rh,tt='<b>'+esc(nome(x.n))+'</b><br>'+f0(x[k])+' letture'+(lang==='all'?'<br>in italiano '+f0(x.qi)+'%':'')+'<br>quartiere: '+esc(x.nil||'—');
+    s+=T(0,y+13,(i+1)+'. '+nome(x.n),{c:'b'});
+    var by=y+19,bh=17;
+    if(lang==='all'){var wi=X(x.views_it),wt=X(x.views_totali);s+=hbar(0,wi,by,bh,C.m2,tip(tt))+hbar(wi,wt,by,bh,C.m4,tip(tt))}
+    else s+=hbar(0,X(x[k]),by,bh,C.m4,tip(tt));
+    s+=T(X(x[k])+6,by+13,mln(x[k]),{c:'b'});
+  });
+  $('ch-fa').innerHTML=s+'</svg>';
+  $('lg-fa').innerHTML=lang==='all'?'<span><i style="background:'+C.m2+'"></i>italiano</span><span><i style="background:'+C.m4+'"></i>altre lingue</span>':'<span><i style="background:'+C.m4+'"></i>letture '+lname(lang)[2]+'</span>';
+  var pr=R.primo_per_lingua,n12=0,tot=0;Object.keys(pr).forEach(function(l){tot++;if(/Meazza|Duomo di Milano/.test(pr[l]))n12++});
+  $('t-fa').textContent='San Siro o il Duomo sono il luogo più letto in '+n12+' lingue su '+tot+(lang==='all'?'':'. '+(lang==='it'?'In italiano':'In '+lname(lang)[1].toLowerCase())+' il primo è '+nome(rows[0].n));
+}
+
+/* ---------- tempo: linee 12 mesi ---------- */
+function roll(a){var o=[];for(var i=11;i<a.length;i++){var s=0;for(var j=i-11;j<=i;j++)s+=a[j];o.push(s)}return o}
+function mIdx(ym){return R.tempo.mesi.indexOf(ym)}
+function ymLab(ym){var p=ym.split('-');return MESI[+p[1]-1]+' '+p[0]}
 function tempo(){
-  var T=R.tempo,M=T.mesi,Y=R.annuale,lk=R.lockdown,tot=T.it.map(function(v,i){return v+T.estero[i]});
-  var y19=Y['2019'].it+Y['2019'].estero,y20=Y['2020'].it+Y['2020'].estero,y23=Y['2023'].it+Y['2023'].estero,y25=Y['2025'].it+Y['2025'].estero;
-  var i19=M.indexOf('2019-03'),i20=M.indexOf('2020-03');
-  var m19=tot[i19],m20=tot[i20];
-  var h='<p>I luoghi di Milano hanno avuto '+fM(y19)+' di letture nel 2019, '+fM(y20)+' nel 2020 ('+nf(100*(y20/y19-1),0)+'%), il massimo nel 2023 con '+fM(y23)+' e '+fM(y25)+' nel 2025. Nel marzo 2020, primo mese di chiusure, le letture sono scese del '+nf(-100*(m20/m19-1),0)+'% rispetto a marzo 2019. Il 2023 è alto anche per lo stadio (le semifinali di Champions League di maggio).</p>';
-  setH('tempo-txt',h);
-  setH('lg-t',lgdLine([{color:ACC,t:'In italiano'},{color:WARM,t:'Nelle altre lingue'}]));
-  line(el('ch-t'),{n:M.length,h:280,label:'Letture mensili dei luoghi, italiano e altre lingue',series:[{vals:T.it,color:ACC},{vals:T.estero,color:WARM}],
-    band:{i0:M.indexOf(lk.da),i1:M.indexOf(lk.a),t:'lockdown'},
-    yf:YK,tick:function(i){return M[i].slice(5)==='01'},xl:function(i){return M[i].slice(0,4)},
-    tip:function(i){return '<b>'+MESE(M[i])+'</b><br>Italiano: '+f0(T.it[i])+'<br>Altre lingue: '+f0(T.estero[i])+((i>=M.indexOf(lk.da)&&i<=M.indexOf(lk.a))?'<br>'+esc(lk.t):'')}});
-  el('ch-t').insertAdjacentHTML('afterend','<p class="sub">Fascia arancione: '+esc(lk.t)+'. Fonte: <a href="'+lk.fonte+'">'+esc(lk.fonte_n)+'</a>.</p>');
+  var W=width('ch-tempo'),H=300,m={l:46,r:8,t:38,b:26},mesi=R.tempo.mesi.slice(11),it=roll(R.tempo.it),es=roll(R.tempo.estero),n=mesi.length;
+  var hi=Math.ceil(Math.max(Math.max.apply(null,it),Math.max.apply(null,es))/2e6)*2e6,pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(i){return m.l+i*pw/(n-1)},Y=function(v){return m.t+ph-v/hi*ph};
+  var s=svgOpen(W,H);
+  for(var v=0;v<=hi;v+=2e6)s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,v/1e6,{a:'end',c:'m'});
+  s+=T(m.l-6,m.t-22,'milioni',{a:'end',c:'m'});
+  s+=L(m.l,Y(0),W-m.r,Y(0),C.axis);
+  mesi.forEach(function(ym,i){if(ym.slice(5)==='01'&&(+ym.slice(0,4))%2===0)s+=T(X(i),H-8,ym.slice(0,4),{a:'middle',c:'m'})});
+  function path(a,col){return '<path d="M'+a.map(function(v,i){return r1(X(i))+' '+r1(Y(v))}).join('L')+'" fill="none" stroke="'+col+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'}
+  s+=path(it,C.m2)+path(es,C.m4);
+  var l=n-1;
+  var HA=';paint-order:stroke;stroke:#fff;stroke-width:4px';s+=T(X(l),Y(it[l])+(it[l]>=es[l]?-9:17),f1(it[l]/1e6),{a:'end',c:'b',st:'fill:'+C.m2+HA})+T(X(l),Y(es[l])+(es[l]>it[l]?-9:17),f1(es[l]/1e6),{a:'end',c:'b',st:'fill:'+C.m4+HA});
+  s+=T(X(0)+2,Y(it[0])-9,f1(it[0]/1e6),{c:'b',st:'fill:'+C.m2})+T(X(0)+2,Y(es[0])+17,f1(es[0]/1e6),{c:'b',st:'fill:'+C.m4});
+  var NT=[['2020-04',1],['2023-12',2]];
+  NT.forEach(function(o){var i=mesi.indexOf(o[0]);if(i<0)return;var x=X(i);s+=L(x,m.t-8,x,Y(Math.max(it[i],es[i])),C.ink,1)+'<circle cx="'+r1(x)+'" cy="'+(m.t-16)+'" r="10" fill="'+C.ink+'"/>'+T(x,m.t-12,o[1],{a:'middle',c:'w'})});
+  for(var i=0;i<n;i+=1){s+='<rect x="'+r1(X(i)-pw/(n-1)/2)+'" y="'+m.t+'" width="'+r1(pw/(n-1))+'" height="'+ph+'" fill="transparent"'+tip('<b>12 mesi fino a '+ymLab(mesi[i])+'</b><br>'+sw(C.m2)+'italiano: '+f1(it[i]/1e6)+' mln<br>'+sw(C.m4)+'altre lingue: '+f1(es[i]/1e6)+' mln<br>Totale: <b>'+f1((it[i]+es[i])/1e6)+' mln</b>')+'/>'}
+  $('ch-tempo').innerHTML=s+'</svg>';
+  $('lg-tempo').innerHTML='<span><i class="ln" style="background:'+C.m2+'"></i>italiano</span><span><i class="ln" style="background:'+C.m4+'"></i>altre lingue</span>';
+  var a=R.annuale,t19=a[2019].it+a[2019].estero,t23=a[2023].it+a[2023].estero,t=R.tempo,m19=mIdx('2019-03'),m20=mIdx('2020-03'),cov=((t.it[m20]+t.estero[m20])/(t.it[m19]+t.estero[m19]))*100;
+  $('t-tempo').textContent='Nel 2023 i luoghi di Milano hanno avuto '+f0(t23/1e6)+' milioni di letture, il '+f0((t23/t19-1)*100)+'% in più del 2019';
+  $('nt-tempo').innerHTML='<li><b class="nb">1</b><span>Marzo 2020, primo lockdown: le letture di quel mese sono il '+f0(cov)+'% di quelle di marzo 2019. Per il Covid c’è la pagina <a href="../anno-covid/">L’anno del Covid</a>.</span></li><li><b class="nb">2</b><span>Alla fine del 2023 le letture dei 12 mesi toccano il massimo, con le straniere molto più numerose delle italiane.</span></li>';
 }
+
+/* ---------- pendenze: per milione di letture di Wikipedia ---------- */
 function permilione(){
-  var P=R.per_milione,ys=Object.keys(P.it).filter(function(y){return y!=='2015'}),
-      b=function(l){return ys.map(function(y){return 100*P[l][y].per_milione/P[l]['2019'].per_milione})};
-  var it19=P.it['2019'],it25=P.it['2025'],en19=P.en['2019'],en25=P.en['2025'];
-  setH('pm-txt','<p>La Wikipedia italiana ha perso il '+nf(100*(1-it25.wiki/it19.wiki),0)+'% delle letture tra 2019 e 2025 ('+nf(it19.wiki/1e9,2)+' &rarr; '+nf(it25.wiki/1e9,2)+' miliardi), e le letture dei luoghi di Milano in italiano sono scese quasi quanto ('+nf(100*(it25.luoghi/it19.luoghi-1),0)+'%). Se si guardano <b>le letture dei luoghi di Milano ogni milione di letture della Wikipedia italiana</b>, il 2025 ('+f0(it25.per_milione)+') è uguale al 2019 ('+f0(it19.per_milione)+'). In inglese invece il rapporto cresce: da '+nf(en19.per_milione,1)+' a '+nf(en25.per_milione,1)+'. Nel grafico 2019 = 100.</p>');
-  setH('lg-pm',lgdLine([{color:ACC,t:'Italiano'},{color:WARM,t:'Inglese'}]));
-  line(el('ch-pm'),{n:ys.length,h:240,dots:true,label:'Letture dei luoghi ogni milione di letture di Wikipedia, indice 2019=100',series:[{vals:b('it'),color:ACC},{vals:b('en'),color:WARM}],yf:function(v){return f0(v)},
-    tick:function(i){return true},xl:function(i){return ys[i]==='2026'?'2026*':ys[i]},
-    tip:function(i){var y=ys[i];return '<b>'+y+(y==='2026'?' (gen-ott)':'')+'</b><br>Italiano: '+nf(b('it')[i],0)+' ('+nf(P.it[y].per_milione,0)+' ogni milione)<br>Inglese: '+nf(b('en')[i],0)+' ('+nf(P.en[y].per_milione,1)+' ogni milione)'}});
-  var hd='<thead><tr><th>Wikipedia</th>',cols=['2019','2020','2023','2025','2026'];cols.forEach(function(y){hd+='<th class="r">'+y+(y==='2026'?'*':'')+'</th>'});hd+='</tr></thead><tbody>';
-  ['it','en','de','fr','es'].forEach(function(l){hd+='<tr><td>'+LN[l]+'</td>';cols.forEach(function(y){hd+='<td class="r">'+nf(P[l][y].per_milione,l==='it'?0:1)+'</td>'});hd+='</tr>'});
-  setH('tab-pm',hd+'</tbody>');
+  var W=width('ch-pm'),Ls=['it','en','de','fr','es'],cols=[C.m2,C.m4,C.m5,C.ora,C.acq],pm=R.per_milione;
+  var rows=Ls.map(function(l,i){return{l:l,col:cols[i],a:pm[l]['2019'].per_milione,b:pm[l]['2025'].per_milione}});
+  var all=[];rows.forEach(function(r){all.push(r.a,r.b)});
+  var lo=Math.log(Math.min.apply(null,all)*.9),hi=Math.log(Math.max.apply(null,all)*1.1),top0=34,H=320,bot=14,lw=118,rw=130,xa=lw,xb=W-rw,Y=function(v){return top0+(hi-Math.log(v))/(hi-lo)*(H-top0-bot)};
+  var s=svgOpen(W,H);
+  s+=T(xa,16,'2019',{a:'middle',c:'b',st:'font-size:15px'})+T(xb,16,'2025',{a:'middle',c:'b',st:'font-size:15px'});
+  function dodge(pos){var o=pos.map(function(y,i){return{y:y,i:i}}).sort(function(a,b){return a.y-b.y});for(var i=1;i<o.length;i++)if(o[i].y-o[i-1].y<16)o[i].y=o[i-1].y+16;var r=[];o.forEach(function(z){r[z.i]=z.y});return r}
+  var la=dodge(rows.map(function(r){return Y(r.a)})),lb=dodge(rows.map(function(r){return Y(r.b)}));
+  rows.forEach(function(r,i){
+    var d=((r.b/r.a-1)*100),th='<b>'+lname(r.l)[1]+'</b><br>2019: '+f0(r.a)+'<br>2025: '+f0(r.b)+' ('+sg0(d)+'%)<br>letture dei luoghi ogni milione di letture di Wikipedia';
+    s+=L(xa,Y(r.a),xb,Y(r.b),r.col,3.5,' stroke-linecap="round"')+'<line x1="'+xa+'" y1="'+r1(Y(r.a))+'" x2="'+xb+'" y2="'+r1(Y(r.b))+'" stroke="transparent" stroke-width="16"'+tip(th)+'/>';
+    s+='<circle cx="'+xa+'" cy="'+r1(Y(r.a))+'" r="5" fill="'+r.col+'"/><circle cx="'+xb+'" cy="'+r1(Y(r.b))+'" r="5" fill="'+r.col+'"/>';
+    s+=T(xa-10,la[i]+4,lname(r.l)[1]+' '+f0(r.a),{a:'end',c:'b',st:'fill:'+r.col});
+    s+=T(xb+10,lb[i]+4,f0(r.b)+' ('+sg0(d)+'%)',{a:'start',c:'b',st:'fill:'+r.col});
+  });
+  $('ch-pm').innerHTML=s+'</svg>';
+  var ri=rows[0],rd=(ri.b/ri.a-1)*100,wi=pm.it,wk=wi['2025'].wiki/wi['2019'].wiki-1;
+  $('t-pm').textContent='In italiano Milano si legge come nel 2019 ('+sg0(rd)+'% ogni milione di letture), mentre tutta Wikipedia italiana si legge il '+f0(Math.abs(wk*100))+'% in meno';
 }
-/* ---------- mappa ---------- */
-function qbreaks(vals,k){var s=vals.slice().sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(s[Math.floor(i*s.length/k)]);return b.filter(function(v,i,a){return i===0||v>a[i-1]})}
-var BR=[],COL=[];
-function colore(v){if(!v)return '#e3e3e3';var i=0;while(i<BR.length&&v>=BR[i])i++;return COL[i]}
-function tipNil(p){return '<b>'+esc(p.n)+'</b><br>'+f0(p.v)+' letture ('+nf(p.q,1)+'% del totale)<br>'+p.np+' luoghi'+(p.top?'<br>più letto: '+esc(cap(p.top)):'')}
-function nilCard(p){
-  setH('nil-det','<h3>'+esc(p.n)+'</h3><p style="margin:.2em 0">'+f0(p.v)+' letture in tutto ('+nf(p.q,1)+'% dei luoghi di Milano), '+p.np+' luoghi.'+(p.top?' Il più letto è <b>'+esc(cap(p.top))+'</b> ('+f0(p.topv)+').':' Nessun luogo con voce Wikipedia.')+'</p>');
+
+/* ---------- San Siro e Duomo ---------- */
+function sandu(){
+  var W=width('ch-sd'),H=290,m={l:56,r:8,t:44,b:26},mesi=S.mesi,n=mesi.length,sd=S.luoghi['Q133566'].all,du=S.luoghi['Q18068'].all;
+  var hi=Math.ceil(Math.max(Math.max.apply(null,sd),Math.max.apply(null,du))/2e5)*2e5,pw=W-m.l-m.r,ph=H-m.t-m.b,X=function(i){return m.l+i*pw/(n-1)},Y=function(v){return m.t+ph-v/hi*ph};
+  var s=svgOpen(W,H),stp=hi>6e5?3e5:2e5;
+  for(var v=0;v<=hi;v+=stp)s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,v===0?0:f0(v/1000)+' mila',{a:'end',c:'m'});
+  s+=L(m.l,Y(0),W-m.r,Y(0),C.axis);
+  mesi.forEach(function(ym,i){if(ym.slice(5)==='01'&&(+ym.slice(0,4))%2===0)s+=T(X(i),H-8,ym.slice(0,4),{a:'middle',c:'m'})});
+  function path(a,col){return '<path d="M'+a.map(function(v,i){return r1(X(i))+' '+r1(Y(v))}).join('L')+'" fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linejoin="round"/>'}
+  s+=path(du,C.ora)+path(sd,C.m4);
+  var ev=R.eventi_grafico,last=-99,row=0;
+  ev.forEach(function(e,k){var i=mesi.indexOf(e.m),x=X(i),v=e.s==='stadio'?sd[i]:du[i];if(x-last<24)row=1-row;else row=0;last=x;
+    s+=L(x,m.t-6,x,Y(v),C.ink,1)+'<circle cx="'+r1(x)+'" cy="'+(row?m.t-2:m.t-20)+'" r="10" fill="'+C.ink+'"/>'+T(x,(row?m.t+2:m.t-16),k+1,{a:'middle',c:'w'})});
+  for(var i=0;i<n;i++)s+='<rect x="'+r1(X(i)-pw/(n-1)/2)+'" y="'+m.t+'" width="'+r1(pw/(n-1))+'" height="'+ph+'" fill="transparent"'+tip('<b>'+ymLab(mesi[i])+'</b><br>'+sw(C.m4)+'San Siro: '+f0(sd[i])+'<br>'+sw(C.ora)+'Duomo: '+f0(du[i]))+'/>';
+  $('ch-sd').innerHTML=s+'</svg>';
+  $('lg-sd').innerHTML='<span><i class="ln" style="background:'+C.m4+'"></i>San Siro</span><span><i class="ln" style="background:'+C.ora+'"></i>Duomo</span>';
+  $('nt-sd').innerHTML=ev.map(function(e,k){return '<li><b class="nb">'+(k+1)+'</b><span>'+esc(e.t)+'</span></li>'}).join('');
+  var mx=sd.indexOf(Math.max.apply(null,sd));
+  $('t-sd').textContent='Il picco di San Siro è a '+ymLab(mesi[mx])+': '+f0(sd[mx]/1000)+' mila letture in un mese, contro le '+f0(R.sorpresa.duomo_mese_medio/1000)+' mila del Duomo in un mese normale';
+}
+
+/* ---------- mappa dei quartieri ---------- */
+var CL=['#FFD500','#F9A11B','#F0502C','#C2185B','#5E1B6B'],SOGL,SELN=null;
+function prepNil(){
+  N=GEO.features.map(function(f){var p=f.properties;return{id:p.i,n:p.n,sn:p.n.split(' - ')[0],v:p.v,q:p.q,np:p.np,top:p.top,topv:p.topv,f:f}});
+  var vs=N.map(function(o){return o.v});SOGL=quantSoglie(vs,5);
+  var o=N.slice().sort(function(a,b){return b.v-a.v});o.forEach(function(x,i){x.rk=i+1});
+  campo($('q'),$('elenco'),N,function(c,fin,msg){if(c)pick(c.id,fin);else if(msg){$('ris').className='ris';$('ris').innerHTML=msg}else{pick(null)}},'n','Non trovo questo quartiere tra gli 88. Controlla come è scritto, oppure toccalo sulla mappa.');
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true,true)});
+}
+function pick(id,fin,fromMap){
+  SELN=id;var c=N.filter(function(x){return x.id===id})[0],r=$('ris');
+  if(!c){r.className='ris';r.innerHTML='Scrivi un quartiere, oppure toccalo sulla mappa.'}
+  else{r.className='ris m';r.innerHTML='<b class="big">'+esc(c.n)+'</b>'+f0(c.v)+' letture in tutto ('+f1(c.q)+'% del totale), '+c.rk+'° quartiere su 88, con '+f0(c.np)+' luoghi.<p>Il luogo più letto è <b>'+esc(nome(c.top))+'</b> ('+f0(c.topv)+' letture).</p>';if(fromMap)$('q').value=c.n}
+  mappa();
 }
 function mappa(){
-  var vals=NF.features.map(function(f){return f.properties.v}).filter(function(v){return v>0});
-  BR=qbreaks(vals,6);COL=SEQ.slice(0,BR.length+1);
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:true,zoomSnap:0.25}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  function sty(f){var s=SEL===f.properties.i;return {fillColor:colore(f.properties.v),fillOpacity:.82,color:s?INK:'#fff',weight:s?3:.8}}
-  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});l.on('click',function(){scegli(f.properties.i)})}}).addTo(MAP);
-  MAP.fitBounds(LAY.getBounds());
-  var lg='';for(var i=0;i<=BR.length;i++){var a=i?f0(BR[i-1]):'0',b=i<BR.length?f0(BR[i])+' &ndash; ':'oltre ';lg+='<span><i style="background:'+COL[i]+'"></i>'+(i===0?'meno di '+f0(BR[0]):i<BR.length?f0(BR[i-1])+' &ndash; '+f0(BR[i]):'oltre '+f0(BR[i-1]))+'</span>'}
-  lg+='<span><i style="background:#e3e3e3"></i>nessun luogo</span>';setH('lg-map',lg);
-  var sel=el('sel-nil'),h='<option value="">&mdash; scegli &mdash;</option>';
-  NF.features.map(function(f){return f.properties}).sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
-  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10))});
-  function scegli(i){SEL=i;sel.value=String(i);LAY.setStyle(sty);LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();nilCard(l.feature.properties)}})}
-  var mx=R.nil_top[0].v;
-  barsPlain('b-nil',R.nil_top.map(function(p){return {nm:p.n,v:p.v,txt:fM(p.v)+' &middot; '+nf(p.q,1)+'%'}}),mx);
-  el('b-nil').insertAdjacentHTML('afterbegin','<p style="margin:.2em 0">I tre quartieri con più letture (Duomo, Stadio-Ippodromi, Brera) fanno il <b>'+nf(R.nil_top3_quota,0)+'%</b> del totale. Non è dove sono le cose: è dove cade la coordinata del luogo (la Scala e la Pinacoteca stanno nel NIL Brera).</p>');
-  setTimeout(function(){MAP.invalidateSize();MAP.fitBounds(LAY.getBounds())},600);
-  window.addEventListener('resize',function(){MAP.invalidateSize()});
+  var W=width('ch-map'),P=geoProj(GEO.features,W,45.46),H=P.H,s=svgOpen(W,H),cnt=[0,0,0,0,0],sel='';
+  N.forEach(function(o){var c=clsQ(o.v,SOGL);cnt[c]++;
+    var el='<path d="'+P.path(o.f)+'" fill="'+CL[c]+'" stroke="'+(o.id===SELN?C.ink:'#fff')+'" stroke-width="'+(o.id===SELN?3:1)+'" data-n="'+o.id+'"'+tip('<b>'+esc(o.n)+'</b><br>'+f0(o.v)+' letture<br>luogo più letto: '+esc(nome(o.top)))+'/>';
+    if(o.id===SELN)sel=el;else s+=el});
+  s+=sel;
+  var big=N.slice().sort(function(a,b){return b.v-a.v}).slice(0,3);
+  big.forEach(function(o){var b=P.bb(o.f);s+=T(b.x,b.y+4,o.sn,{a:'middle',c:'k',st:'paint-order:stroke;stroke:#fff;stroke-width:3px;pointer-events:none'})});
+  $('ch-map').innerHTML=s+'</svg>';
+  var lab=['meno di '+f0(SOGL[0]/1000)+' mila'];for(var i=1;i<SOGL.length;i++)lab.push('da '+f0(SOGL[i-1]/1000)+' a '+f0(SOGL[i]/1000)+' mila');lab.push('più di '+f0(SOGL[SOGL.length-1]/1000)+' mila');
+  $('lg-map').innerHTML=lab.map(function(t,i){return '<span><i style="background:'+CL[i]+'"></i>'+t+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('');
+  $('t-map').textContent='Tre quartieri su 88 fanno il '+f0(R.nil_top3_quota)+'% delle letture: '+R.nil_top.slice(0,3).map(function(x){return x.n}).join(', ').replace(/, ([^,]*)$/,' e $1');
 }
-/* ---------- stranieri/italiani ---------- */
-function stranieri(){
-  barsPlain('b-str',R.piu_stranieri.map(function(p){return {nm:cap(p.n),v:100-p.it,txt:f0(100-p.it)+'% estero'}}),100,WARM);
-  barsPlain('b-ita',R.piu_italiani.map(function(p){return {nm:cap(p.n),v:p.it,txt:f0(p.it)+'% it'}}),100,ACC);
+
+/* ---------- punti: quota italiana e letture ---------- */
+function scatter(){
+  var W=width('ch-str'),H=360,m={l:62,r:12,t:12,b:44},pw=W-m.l-m.r,ph=H-m.t-m.b,cat=$('ss').value;
+  var P=LU.filter(function(x){return x.views_totali>=200000}),lo=Math.log(2e5),hi=Math.log(2e7);
+  var X=function(q){return m.l+q/100*pw},Y=function(v){return m.t+ph-(Math.log(v)-lo)/(hi-lo)*ph};
+  var s=svgOpen(W,H);
+  [[2e5,'200 mila'],[5e5,'500 mila'],[1e6,'1 mln'],[2e6,'2 mln'],[5e6,'5 mln'],[1e7,'10 mln']].forEach(function(t){s+=L(m.l,Y(t[0]),W-m.r,Y(t[0]),C.grid)+T(m.l-6,Y(t[0])+4,t[1],{a:'end',c:'m'})});
+  [0,25,50,75,100].forEach(function(q){s+=T(X(q),H-26,q+'%',{a:q===0?'start':q===100?'end':'middle',c:'m'})});
+  s+=T(m.l,H-8,'← tutto estero',{c:'m'})+T(W-m.r,H-8,'tutto italiano →',{a:'end',c:'m'});
+  s+=L(X(50),m.t,X(50),m.t+ph,C.axis,1,' stroke-dasharray="3 3"');
+  var inC=function(x){return !cat||x.cat===cat};
+  var bg='',fg='',occ=[],items=[];
+  P.forEach(function(x){var px=X(x.qi),py=Y(x.views_totali),hit=inC(x),r=hit&&cat?6:5;
+    var el='<circle cx="'+r1(px)+'" cy="'+r1(py)+'" r="'+r+'" fill="'+(hit?C.m4:'#c9ced6')+'" fill-opacity="'+(hit?.9:.7)+'" stroke="#fff" stroke-width="1"'+tip('<b>'+esc(nome(x.n))+'</b><br>'+f0(x.views_totali)+' letture<br>in italiano '+f0(x.qi)+'%<br>'+esc(CAT[x.cat]||''))+'/>';
+    if(hit)fg+=el;else bg+=el;occ.push({x:px-r,y:py-r,w:2*r,h:2*r})});
+  var lab=P.filter(inC).sort(function(a,b){return b.views_totali-a.views_totali}).slice(0,cat?10:12);
+  lab.forEach(function(x){items.push({x:X(x.qi),y:Y(x.views_totali),r:5,txt:short(nome(x.n),22)})});
+  s+=bg+fg+placeLabels(items,W,H-30,occ);
+  $('ch-str').innerHTML=s+'</svg>';
+  var n10=P.filter(function(x){return x.qi<30}).length;
+  $('t-str').textContent=n10+' luoghi su '+P.length+' tra quelli con più di 200.000 letture sono letti per oltre il 70% fuori dall’italiano';
+  if(cat){var pp=P.filter(inC),mi=pp.reduce(function(a,x){return a+x.qi},0)/pp.length;$('t-str').textContent+='. '+CAT[cat]+': in media il '+f0(mi)+'% in italiano'}
 }
+
+/* ---------- voci che non sono luoghi ---------- */
 function nonluoghi(){
-  var h='<thead><tr><th>Voce</th><th>Che cos&rsquo;è</th><th class="r">Letture</th></tr></thead><tbody>';
-  R.non_luoghi.forEach(function(r){h+='<tr><td>'+esc(cap(r.n))+'</td><td>'+esc(r.tipo)+'</td><td class="r">'+fM(r.t)+'</td></tr>'});
-  setH('tab-np',h+'</tbody>');
-  setH('src-np','Fonte: Pageviews API, tutte le lingue, luglio 2015 &ndash; ottobre 2026. In tutto le voci che non sono luoghi hanno '+fM(R.views_non_luoghi)+' di letture (nel file <a href="data/non_luoghi.csv">non_luoghi.csv</a> l&rsquo;elenco completo). Le università e gli ospedali contano le letture dell&rsquo;istituzione, non del posto.');
+  var W=width('ch-np'),rows=NLU.slice(0,10),duo=top('all',2).filter(function(x){return /Duomo di Milano/.test(x.n)})[0].views_totali,vmax=rows[0].v,rh=44,H=rows.length*rh+22,rw=70,X=function(v){return (W-rw)*v/vmax};
+  var s=svgOpen(W,H);
+  rows.forEach(function(r,i){var y=18+i*rh,it=r.n==='Ultima Cena';
+    s+=T(0,y+13,(i+1)+'. '+r.n+' ('+(TIPO[r.cat]||r.tipo)+')',{c:'b',st:'paint-order:stroke;stroke:#fff;stroke-width:4px'});
+    s+=hbar(0,X(r.v),y+19,17,it?C.m5:C.ink2,tip('<b>'+esc(r.n)+'</b><br>'+f0(r.v)+' letture<br>'+esc(TIPO[r.cat]||r.tipo)));
+    s+=T(X(r.v)+6,y+32,mln(r.v),{c:'b'})});
+  s+=L(X(duo),10,X(duo),H,C.ink,1.5,' stroke-dasharray="4 3"')+T(X(duo)+4,12,'Duomo '+f1(duo/1e6),{c:'b'});
+  $('ch-np').innerHTML=s+'</svg>';
+  var n=NLU.filter(function(x){return x.v>duo}).length;
+  $('t-np').textContent='Solo '+n+' voci che non sono luoghi hanno più letture del Duomo: la città stessa, l’Ultima Cena e le Olimpiadi';
 }
-function limiti(){
-  var r=R.redirect;el('l-red-n').textContent=r.controllati;el('l-red-t').textContent=nf(r['totale_%'],1);el('l-red-m').textContent=nf(r['mediana_%'],1);
-  el('l-red-c').innerHTML=r.casi.map(function(c){return esc(cap(c.n))+' (il redirect &laquo;'+esc(c.titolo)+'&raquo; ha '+f0(c.redirect)+' letture contro '+f0(c.voce)+' della voce)'}).join('; ');
-  var seen={},h=[];R.picchi_verificati.forEach(function(p){if(!seen[p.fonte]){seen[p.fonte]=1;h.push('<a href="'+esc(p.fonte)+'">'+esc(p.fonte_n)+'</a>')}});h.push('<a href="'+R.lockdown.fonte+'">'+esc(R.lockdown.fonte_n)+'</a>');
-  el('f-ev').innerHTML=h.join('; ')+'.';
+
+/* ---------- picchi nel tempo ---------- */
+function picchi(){
+  var W=width('ch-picchi'),H=320,m={l:46,r:10,t:14,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,n=136;
+  function px(q){var d=q.match(/(\d{4})-(\d{2})(?:-(\d{2}))?/);if(!d){var mm=q.match(/([a-zà]+) (\d{4})/),ms=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];d=[0,mm[2],ms.indexOf(mm[1])+1]}return (+d[1]-2015)*12+(+d[2])-7+((+d[3]||15)-1)/30}
+  var D=[];
+  R.picchi_verificati.forEach(function(p,k){D.push({i:px(p.quando),r:Math.max.apply(null,p.valori)/p.normale,t:p.luogo,ok:true,k:k+1,p:p})});
+  R.picchi_non_spiegati.forEach(function(p){D.push({i:px(p.quando),r:p.valori[0]/p.normale,t:p.luogo,ok:false,p:p})});
+  var X=function(i){return m.l+i/(n-1)*pw},hi=Math.log(300),lo=Math.log(2),Y=function(r){return m.t+ph-(Math.log(r)-lo)/(hi-lo)*ph};
+  var s=svgOpen(W,H);
+  [[2,'2×'],[5,'5×'],[10,'10×'],[25,'25×'],[60,'60×'],[150,'150×']].forEach(function(t){s+=L(m.l,Y(t[0]),W-m.r,Y(t[0]),C.grid)+T(m.l-6,Y(t[0])+4,t[1],{a:'end',c:'m'})});
+  s+=L(m.l,Y(2),W-m.r,Y(2),C.axis);
+  for(var y=2016;y<=2026;y+=2)s+=T(X((y-2015)*12-6),H-12,y,{a:'middle',c:'m'});
+  var occ=[],items=[],dots='';
+  D.slice().sort(function(a,b){return (a.ok?1:0)-(b.ok?1:0)}).forEach(function(d){var x=X(d.i),y=Y(d.r),r=d.ok?10:5;
+    var th='<b>'+esc(nome(d.t))+'</b><br>'+f0(d.r)+' volte il normale<br>'+esc(d.p.quando)+(d.ok?'<br>'+esc(d.p.evento):'<br>nessun evento trovato');
+    dots+='<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="'+r+'" fill="'+(d.ok?C.m2:'#9aa1ad')+'" stroke="#fff" stroke-width="1.2"'+tip(th)+'/>'+(d.ok?T(x,y+4,d.k,{a:'middle',c:'w'}):'');
+    occ.push({x:x-r,y:y-r,w:2*r,h:2*r});if(!d.ok)items.push({x:x,y:y,r:r,txt:short(nome(d.t),18),cls:'m'})});
+  s+=dots+placeLabels(items,W,H-24,occ);
+  $('ch-picchi').innerHTML=s+'</svg>';
+  var pk=R.picchi_verificati[0];
+  $('t-picchi').textContent='Il Duomo ha avuto un giorno da '+f0(pk.valori[1]/pk.normale)+' volte il normale: l’incendio di Notre-Dame, 16 aprile 2019';
+  $('nt-picchi').innerHTML=R.picchi_verificati.map(function(p,k){return '<li><b class="nb">'+(k+1)+'</b><span><b>'+esc(nome(p.luogo))+'</b>, '+esc(p.quando.replace(/, /g,' e '))+' ('+(p.lingua==='it'?'italiano':'inglese')+'): '+f0(Math.max.apply(null,p.valori))+' letture contro '+f0(p.normale)+' normali. '+esc(p.evento)+'. <a href="'+esc(p.fonte)+'">'+esc(p.fonte_n)+'</a></span></li>'}).join('');
 }
-function tutto(){
-  sorpresa();classifica();stadioDuomo();picchi();tempo();permilione();stranieri();nonluoghi();limiti();
-  if(window.L)mappa();else el('map').innerHTML='<p class="sub" style="padding:8px">Mappa non disponibile (libreria non caricata).</p>';
+
+/* ---------- in fondo ---------- */
+function fondo(){
+  var rd=R.redirect;
+  $('l-red-n').textContent=rd.controllati;$('l-red-t').textContent=f1(rd['totale_%']);$('l-red-m').textContent=f1(rd['mediana_%']);
+  $('l-red-c').textContent=rd.casi.map(function(c){return c.n+' (la voce «'+c.titolo+'» ha '+f0(c.redirect)+' letture da vecchi titoli contro '+f0(c.voce)+' del titolo attuale)'}).join('; ');
+  $('m-tot').textContent=f0(R.views_totali_luoghi);
+  var seen={},h=[];R.picchi_verificati.forEach(function(p){if(!seen[p.fonte]){seen[p.fonte]=1;h.push('<a href="'+esc(p.fonte)+'">'+esc(p.fonte_n)+'</a>')}});
+  $('f-ev').innerHTML=h.join('; ')+'.';
 }
-var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(R){stadioDuomo();var c=el('ch-t');tempoRedraw()}},200)});
-function tempoRedraw(){var x=el('tempo-txt');var old=document.querySelectorAll('#ch-t + p.sub');Array.prototype.forEach.call(old,function(o){o.parentNode.removeChild(o)});tempo();permilione()}
-Promise.all([J('data/riepilogo.json'),J('data/serie.json'),J('data/nil.geojson')]).then(function(a){R=a[0];S=a[1];NF=a[2];tutto()}).catch(function(e){setH('sorpresa','<p>Non riesco a caricare i dati ('+esc(e.message)+'). Riprova più tardi.</p>')});
 })();
 </script>
-</main></body></html>
+</body></html>

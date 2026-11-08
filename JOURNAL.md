@@ -3062,3 +3062,13 @@ Città dei 15 minuti pubblicata definitiva: cursore dei minuti e mappa di quello
 La Scala pubblicata definitiva: compositori e direttori (opzioni A e B).
 Pietre d'inciampo pubblicata definitiva: pallini sopra i mesi (opzione B).
 Beni confiscati pubblicata definitiva: flussi (opzione A).
+Violenza politica pubblicata definitiva: morti sommati anno per anno (opzione B).
+Telefoni pubblici pubblicata definitiva: punti telefoni per abitante e quota in strada (opzione A).
+Fondi ai quartieri popolari pubblicata definitiva: flusso dai programmi agli interventi (opzione B).
+Rigenerazione pubblicata definitiva: mappa degli ambiti (opzione A).
+Luoghi più cercati pubblicata definitiva: barre per lingua (opzione A).
+Targhe pubblicata definitiva: flussi e pallini per anno (opzioni A e B).
+Vibrazioni pubblicata definitiva: linee ora per ora (opzione B).
+Reati in città pubblicata definitiva: denunce e paura al buio (opzione B).
+Parcheggi pubblicata definitiva: i tre grafici A, B e C insieme, ognuno con il suo titolo.
+Chi può permettersi dove pubblicata definitiva: reddito tipico in testa, semaforo 30/40%, mestieri più mappa del mestiere.

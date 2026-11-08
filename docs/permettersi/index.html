@@ -1,170 +1,341 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · Chi può permettersi di vivere dove</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · Chi può permettersi dove</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select,.ctl input[type=number]{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl input[type=number]{width:8.5em;cursor:text}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.ctl label.ck{font-size:.9rem;cursor:pointer}
-.ctl input[type=range]{flex:1 1 220px;min-width:160px;accent-color:var(--acc)}
-.yr{font-weight:700;font-size:1.1rem;min-width:3.2em;color:var(--acc)}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 84px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .bars .row{grid-template-columns:minmax(80px,38%) 1fr 66px}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.tabmax{max-height:360px;overflow:auto} #tab-all{min-width:560px}
-.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-.big{font-size:1.5rem;font-weight:700;color:var(--acc);line-height:1.2}
-.cnt{border:1px solid var(--line);padding:8px 12px;margin:.6em 0;font-size:1.02rem}
-.hint{color:var(--warm)}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;--ora:#F58220;
+  --v:#17863A;--vd:#0E5E27;--g:#F2C200;--r:#D62828;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.lg i.dia{transform:rotate(45deg) scale(.8);border-radius:1px}
+.lg i.das{background:#fff!important;border:2px dashed var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+/* cursore sugli anni */
+.sl{display:flex;align-items:center;gap:10px;margin:.4em 0 .2em}
+.sl label{font-weight:700;font-size:.95rem}
+.sl input[type=range]{flex:1;min-width:0;height:36px;accent-color:var(--mi)}
+.sl output{font-weight:800;font-size:1.3rem;min-width:2.6em;text-align:right;font-variant-numeric:tabular-nums}
+.slt{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut);margin:-4px 0 6px}
+/* scrivi il tuo CAP */
+.calc{background:var(--soft);padding:12px 12px 14px;margin:.4em 0}
+.calc label.t{display:block;font-weight:700;font-size:.95rem;margin-bottom:6px}
+.calc .inr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.calc input[type=text]{font:inherit;font-size:1.4rem;font-weight:800;width:6.5em;padding:6px 8px;border:2px solid var(--ink);border-radius:2px;background:#fff;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.calc .msg{font-size:.9rem;color:var(--ink2);flex:1 1 180px}
+.card{border-top:4px solid var(--mi);background:var(--soft);padding:10px 12px 12px;margin:.6em 0 0}
+.card h4{margin:0 0 6px;font-size:1.05rem}
+.card .tre{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.card .tre b{display:block;font-size:1.45rem;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums}
+.card .tre span{display:block;font-size:.82rem;color:var(--ink2);line-height:1.25;margin-top:2px}
+.card .mini{margin-top:8px}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+.vedi{margin:1.6em 0 0;padding:10px 12px;background:var(--soft);font-size:.92rem}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+
+[hidden]{display:none!important}
+.calc select,.calc input[type=number]{font:inherit;font-size:1rem;padding:8px 8px;border:2px solid var(--ink);border-radius:2px;background:#fff;color:var(--ink);max-width:100%;min-height:44px}
+.calc .rowc{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 8px}
+.calc .rowc label{font-size:.92rem}
+.calc input[type=range]{flex:1 1 200px;min-width:140px;height:36px;accent-color:var(--mi)}
+.calc input[type=checkbox]{width:20px;height:20px;vertical-align:-4px;margin-right:6px;accent-color:var(--mi)}
+.calc .big{font-size:1.05rem;font-weight:800;margin:4px 0 0;line-height:1.3}
+.calc input[type=text]{font:inherit;font-size:1.1rem;font-weight:700;width:100%;max-width:26em;padding:8px;border:2px solid var(--ink);border-radius:2px;background:#fff;color:var(--ink);letter-spacing:0}
+.ris{font-size:.9rem;color:var(--ink2);margin:6px 0 0;min-height:1.2em}
+.spiega{background:var(--soft);padding:10px 12px 4px;margin:.2em 0 .8em;border-left:6px solid var(--ink)}
+.spiega p{margin:0 0 .7em;font-size:.95rem;line-height:1.4;color:var(--ink)}
+details.q{border-top:1px solid var(--grid);border-bottom:1px solid var(--grid);margin:1em 0 0}
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>Chi può permettersi di vivere dove</h1>
-<p>Una regola molto usata dice che l&rsquo;affitto non dovrebbe superare il <b>30% del reddito</b>. Qui la applichiamo ai quartieri di Milano (88 NIL): dato un reddito e una grandezza di casa, in quali quartieri l&rsquo;affitto sta dentro quella linea? E quanti quartieri ne sono usciti dal 2015? Sono <b>confronti, non cause</b>: non diciamo perché i numeri cambiano. L&rsquo;idea viene da due lavori che fanno lo stesso per altre città: <a href="https://mietenwatch.de/" rel="noopener">Mietenwatch</a> di Berlino e il <a href="https://furmancenter.org/" rel="noopener">Furman Center</a> della New York University.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<h1>Chi può permettersi dove</h1>
+<p class="lead">Una regola dice che l&rsquo;affitto non dovrebbe superare il 30% del reddito: con quale reddito, e in quale anno, la rispetti nei quartieri di Milano?</p>
 
-<div class="warm"><b>Prima di leggere.</b> Gli affitti sono le <b>stime dell&rsquo;Agenzia delle Entrate (OMI)</b>, non gli affitti degli annunci. I redditi sono quelli dichiarati ai fini IRPEF da <b>contribuenti</b>, non da famiglie: una persona sola, lorda. Per i quartieri i redditi sono stimati dai CAP. Tutte le ipotesi sono scritte in <a href="#metodo">Come è fatto</a> e i limiti in <a href="#limiti">Che cosa non dice questo dato</a>.</div>
+<div class="hl" id="hl"></div>
+<p class="src">Affitti: stime dell&rsquo;Agenzia delle Entrate (OMI, CC BY 4.0), non gli affitti degli annunci. Redditi: MEF, redditi dichiarati ai fini IRPEF da contribuenti, lordi (CC BY 3.0). Quartieri: Comune di Milano (CC BY), solo quelli con almeno 2.000 residenti. Se non è detto altro: casa da 60 m², abitazioni civili. I limiti sono in fondo.</p>
 
-<h2 id="calcolatore">Il calcolatore</h2>
-<p>Scegli un reddito, una grandezza di casa e un anno. La mappa colora i quartieri in base a <b>quanta parte del reddito se ne va in affitto</b>: verde = dentro il 30%, arancione = fuori. Clic su un quartiere per la scheda.</p>
-<div class="ctl"><label class="sub" for="sel-red">Reddito:</label>
-<select id="sel-red" aria-label="Scegli il reddito">
-<option value="p50">Reddito mediano di Milano (metà dei contribuenti guadagna di più)</option>
-<option value="p25">Reddito basso: 25° percentile (tre su quattro guadagnano di più)</option>
-<option value="p75">Reddito medio-alto: 75° percentile</option>
-<option value="loc">Reddito mediano di chi abita nel quartiere (stima)</option>
-<option value="inf">Infermiere/a, stipendio di base da contratto</option><option value="dp0">Docente di scuola primaria, inizio carriera</option><option value="dp15">Docente di scuola primaria, 15-20 anni di servizio</option><option value="ds0">Docente di scuola secondaria di II grado, inizio carriera</option><option value="ds15">Docente di scuola secondaria di II grado, 15-20 anni di servizio</option>
-<option value="alt">Un reddito che scrivo io</option>
-</select>
-<span id="box-alt" hidden><input type="number" id="in-alt" value="30000" min="1000" max="500000" step="500" aria-label="Reddito lordo annuo in euro del 2024"> <span class="sub">euro lordi l&rsquo;anno (valore 2024)</span></span>
-<label class="ck"><input type="checkbox" id="ck-due"> due redditi uguali in casa</label></div>
-<div class="ctl"><span class="sub">Casa:</span>
-<button type="button" data-mq="40">40 m&sup2;</button><button type="button" data-mq="60" class="on">60 m&sup2;</button><button type="button" data-mq="80">80 m&sup2;</button>
-<select id="sel-tip" aria-label="Tipo di abitazione"><option value="civ">abitazioni civili</option><option value="eco">abitazioni di tipo economico</option></select>
-<span class="sub">Mostra:</span><button type="button" data-v="quota" class="on">quota del reddito</button><button type="button" data-v="ok">quanti contribuenti ce la fanno</button></div>
-<div class="ctl"><span class="sub">Anno:</span><input type="range" id="yr" min="0" max="13" step="1" value="13" aria-label="Anno"><span class="yr" id="yr-out">2024</span></div>
-<p class="sub" id="yr-note"></p>
-<div class="cnt" id="conta"></div>
-<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
-<p class="sub" id="map-desc"></p>
-<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per quota del reddito spesa in affitto"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Affitti: Agenzia delle Entrate, OMI (CC BY 4.0), valore centrale della forbice di ogni zona, media sulle case del quartiere; redditi: MEF, Dipartimento delle Finanze (CC BY 3.0). Mappa &copy; OpenStreetMap contributors; quartieri e civici: Comune di Milano (CC BY). In grigio i quartieri con meno di 2.000 residenti (parchi, aree quasi senza abitanti) e, per il reddito del quartiere, quelli senza un dato affidabile.</p>
-<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<!-- ============ 0. il reddito di chi abita ============ -->
+<h2 id="basta">Il reddito di chi abita basta?</h2>
+<div class="fig" id="f-tipico">
+  <h3 id="t-tipico"></h3>
+  <div class="spiega">
+    <p><b>Reddito tipico di chi abita.</b> In ogni quartiere abbiamo preso i redditi di chi ci vive e scelto quello nel mezzo: metà guadagna di più, metà di meno. È un reddito lordo, di una persona, prima delle tasse.</p>
+    <p><b>«Basta».</b> Vuol dire che con quel reddito l&rsquo;affitto di una casa da 60 m² non supera il 30% del reddito. Per esempio, con 30.000 euro l&rsquo;anno il 30% è 750 euro al mese.</p>
+    <p><b>Il confronto.</b> <span id="sp-conf"></span></p>
+  </div>
+  <div class="lg" id="lg-tipico"></div>
+  <div class="ch" id="ch-tipico" role="img" aria-label="Barre: quota del reddito tipico di chi abita spesa per un affitto di 60 metri quadrati in ogni quartiere, 2024, con il confronto con il 2015"></div>
+  <p class="note" id="nt-tipico"></p>
+  <p class="src">Il reddito del quartiere è una stima: il MEF pubblica i redditi per CAP, non per quartiere (CC BY 3.0), e abbiamo mescolato i CAP in cui cadono le case di ciascun quartiere. Sono esclusi i 5 quartieri del centro con CAP instabili e quelli con meno di 2.000 residenti. Affitto: OMI (CC BY 4.0). Chi abita non è per forza chi paga un affitto.</p>
+</div>
 
-<h2 id="tempo">Quanti quartieri stanno dentro il 30%</h2>
-<div id="tempo-testo"></div>
-<div class="ch" id="ch-conta" role="img" aria-label="Grafico: numero di quartieri con affitto sotto il 30% del reddito, per anno"></div>
-<div class="lgd" id="lg-conta"></div>
-<p class="src">Quartieri con almeno 2.000 residenti. Stessa casa e stesso tipo di abitazione scelti sopra. Le linee dei redditi della città valgono per tutti gli anni; la linea del reddito di quartiere solo per gli otto anni in cui il MEF pubblica i CAP.</p>
-<div id="usciti"></div>
+<!-- ============ 1 ============ -->
+<h2 id="quanti">Quanti quartieri ce la fanno</h2>
 
-<h2 id="citta">La città intera, anno per anno</h2>
-<div id="citta-testo"></div>
-<p class="src"><b>Perché 38,2% e non 34,5%?</b> Nella pagina <a href="../costo-vita/">Quanto costa vivere</a> lo stesso conto (60 m&sup2;, reddito mediano 2024) dà 34,5%: là l&rsquo;affitto è la mediana delle zone OMI (745,5 &euro; al mese); qui è la media sui civici residenziali (13,74 &euro; al m&sup2;, circa 824 &euro; al mese per 60 m&sup2;). Il reddito è lo stesso. Le due misure non si contraddicono.</p>
-<div class="ch" id="ch-citta" role="img" aria-label="Grafico: quota del reddito spesa in affitto, per grandezza della casa, dal 2011 al 2024"></div>
-<div class="lgd" id="lg-citta"></div>
-<p class="src">Affitto OMI medio delle abitazioni civili (media sui civici residenziali di Milano) per i metri quadrati indicati, diviso per il reddito lordo del contribuente mediano (o del 25° percentile, linea tratteggiata) di Milano. Nel 2014 le zone OMI sono state ridisegnate e nel 2024 ancora: i salti attorno a quegli anni possono essere di perimetro.</p>
+<div class="fig" id="f-col">
+  <h3 id="t-col"></h3>
+  <p class="sub">Per ogni anno, quanti quartieri hanno un affitto che non supera il 30% del reddito. Ogni colonna è un anno, dal 2011 al 2024; il numero sopra è quanti quartieri su 73. Quattro casi: il reddito mediano con tre grandezze di casa, e il quarto più basso dei redditi con 40 m².</p>
+  <div class="ch" id="ch-col" role="img" aria-label="Colonne: quanti quartieri su 73 stanno dentro il 30% del reddito, per anno, per quattro casi"></div>
+  <p class="note" id="nt-col"></p>
+  <p class="src">Affitto OMI del quartiere (valore centrale, abitazioni civili, media dei due semestri) × metri quadrati × 12, diviso il reddito lordo annuo del contribuente mediano o del 25° percentile di Milano di quell&rsquo;anno. Fonti: Agenzia delle Entrate OMI (CC BY 4.0); MEF (CC BY 3.0); quartieri del Comune di Milano (CC BY). Dal 2023 le quotazioni OMI includono anche un aggiornamento delle stime: vedi i limiti dei dati.</p>
+</div>
 
-<h2 id="redditi">Che reddito serve</h2>
-<div id="serve-testo"></div>
-<div class="grid2"><div><h3>Reddito lordo annuo per stare nel 30% (60 m&sup2;, 2024) &ndash; i pi&ugrave; cari</h3><div class="bars" id="b-serve-alto"></div></div>
-<div><h3>&hellip; i meno cari</h3><div class="bars" id="b-serve-basso"></div></div></div>
-<p class="src">Affitto OMI del quartiere &times; 60 m&sup2; &times; 12 &divide; 0,30. Solo quartieri con almeno 2.000 residenti. Linee di riferimento: reddito mediano e 75° percentile dei contribuenti di Milano nel 2024 (<span id="rif-serve"></span>).</p>
-<details><summary>Tutti i quartieri, con le impostazioni scelte sopra</summary><div class="scroll tabmax"><table id="tab-all"></table></div></details>
+<div class="fig" id="f-firma">
+  <h3 id="t-firma-h">Prova con il tuo reddito</h3>
+  <p class="sub">Scegli un reddito e una casa: il disegno qui sotto, la mappa e la scheda del quartiere usano questa scelta. Il reddito è in euro del 2024; per gli anni prima viene riportato indietro con l&rsquo;inflazione.</p>
+  <div class="calc" id="calcolatore">
+    <label class="t" for="sel-red">Reddito lordo di una persona</label>
+    <div class="rowc"><select id="sel-red" aria-label="Scegli un reddito"></select>
+      <input type="number" id="in-alt" min="1000" max="500000" step="500" value="30000" hidden aria-label="Reddito lordo annuo in euro del 2024"></div>
+    <div class="rowc" id="box-sl" hidden><input type="range" id="sl-alt" min="10000" max="100000" step="500" value="30000" aria-label="Reddito lordo annuo, cursore"></div>
+    <div class="rowc">
+      <label for="sel-mq">Casa</label><select id="sel-mq" aria-label="Metri quadrati"><option value="40">40 m²</option><option value="60" selected>60 m²</option><option value="80">80 m²</option></select>
+      <label for="sel-tip">Tipo</label><select id="sel-tip" aria-label="Tipo di abitazione"><option value="civ">abitazioni civili</option><option value="eco">tipo economico</option></select>
+    </div>
+    <div class="rowc"><label><input type="checkbox" id="ck-due">due redditi uguali in casa</label></div>
+    <p class="big" id="calc-msg"></p>
+  </div>
+</div>
 
-<h2 id="professioni">Infermiere, insegnante, autista</h2>
-<div id="prof-testo"></div>
+<div class="fig" id="f-a">
+  <h3 id="t-a"></h3>
+  <p class="sub">Ogni pallino è un quartiere, messo sull&rsquo;asse nel punto del reddito lordo che serve per restare nel 30%. Il colore dice quanto pesa l&rsquo;affitto sul <b>tuo</b> reddito. La riga nera è il tuo reddito. Sopra il 2015, sotto il 2024: i pallini si spostano a destra, la riga no. Tutto in euro del 2024. Tocca un pallino per vedere il nome.</p>
+  <div class="lg" id="lg-a"></div>
+  <div class="ch" id="ch-a" role="img" aria-label="Pallini: reddito necessario per stare nel 30% in ciascun quartiere, nel 2015 e nel 2024, con il reddito scelto"></div>
+  <details class="q"><summary>Tutti i quartieri, con il loro colore</summary><div class="in" id="nomi-a"></div></details>
+  <p class="src">Fonte: Agenzia delle Entrate OMI (CC BY 4.0) e MEF (CC BY 3.0); quartieri del Comune di Milano (CC BY). Reddito che serve = affitto mensile × 12 ÷ 0,30, riportato in euro del 2024 con l&rsquo;indice ISTAT dei prezzi (FOI).</p>
+</div>
 
-<h2 id="limiti">Limiti dei dati</h2>
-<div class="warm"><ul id="limiti-lista"></ul></div>
+<details class="q" id="usciti"><summary>Quali quartieri sono usciti dal 30%</summary><div class="in" id="usciti-in"></div></details>
 
-<h2 id="metodo">Come è fatto</h2>
-<ul class="m" id="metodo-lista"></ul>
+<!-- ============ 2 ============ -->
+<h2 id="mappa">Quartiere per quartiere</h2>
+<div class="fig" id="f-mappa">
+  <h3 id="t-mappa"></h3>
+  <p class="sub" id="s-mappa"></p>
+  <div class="calc">
+    <label class="t" for="q">Il tuo quartiere</label>
+    <input type="text" id="q" list="elenco" autocomplete="off" placeholder="Scrivi un quartiere, per esempio Isola" aria-label="Nome del quartiere">
+    <datalist id="elenco"></datalist>
+    <div class="rowc" style="margin-top:8px"><label for="sel-anno">Anno</label><select id="sel-anno" aria-label="Anno"></select></div>
+    <p class="ris" id="ris"></p>
+  </div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dei quartieri di Milano colorati a semaforo per quota del reddito spesa in affitto"></div>
+  <div id="scheda"></div>
+  <p class="src">Fonte: Agenzia delle Entrate OMI (CC BY 4.0) e MEF (CC BY 3.0); confini e residenti dei quartieri (NIL): Comune di Milano (CC BY). Per ogni quartiere l&rsquo;affitto è la media delle quotazioni delle zone in cui cadono le sue case. Le notti di Airbnb sono una fotografia del 2026 (Inside Airbnb, CC BY 4.0, dati aggregati).</p>
+</div>
 
-<h2 id="download">File</h2>
-<p><a href="data/nil_affitti_redditi.csv">nil_affitti_redditi.csv</a> (per quartiere e anno: affitto OMI al metro quadro, forbice, case economiche, reddito stimato del quartiere, quota del reddito per 40, 60 e 80 m&sup2; e quota di contribuenti che sta nel 30%), <a href="data/citta_percentili_affitto.csv">citta_percentili_affitto.csv</a> (percentili di reddito e affitto medio, 2011&ndash;2024), <a href="data/dati.json">dati.json</a> (i dati letti da questa pagina, con le classi di reddito della citt&agrave;), <a href="data/nil.geojson">nil.geojson</a> (confini dei quartieri, semplificati), <a href="data/riepilogo.json">riepilogo.json</a> (i numeri del testo).</p>
+<!-- ============ 3 ============ -->
+<h2 id="peso">Quanto pesa sul reddito</h2>
+<div class="fig" id="f-peso">
+  <h3 id="t-peso"></h3>
+  <p class="sub">Quanta parte del reddito lordo di un contribuente di Milano se ne va in affitto, con l&rsquo;affitto medio della città. Linee piene: reddito mediano. Tratteggio: reddito basso (25° percentile). Le fasce di colore sono quelle del semaforo.</p>
+  <div class="lg" id="lg-peso"></div>
+  <div class="ch" id="ch-peso" role="img" aria-label="Linee: quota del reddito spesa in affitto a Milano dal 2011 al 2024 per tre grandezze di casa e per il reddito basso"></div>
+  <ol class="notes" id="nt-peso"></ol>
+  <p class="src">Affitto medio dei civici di Milano (OMI, CC BY 4.0) × metri quadrati × 12 ÷ reddito lordo (MEF, CC BY 3.0). La linea del 30% è una convenzione, non una legge. Correlazione non è causa: la pagina mostra due serie sullo stesso grafico, non spiega perché si muovono. Per i prezzi di vendita vedi <a href="../prezzi-case/">i prezzi delle case</a>, per i redditi <a href="../redditi/">i redditi dei milanesi</a>.</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="serve">Che reddito serve</h2>
+<div class="fig" id="f-serve">
+  <h3 id="t-serve"></h3>
+  <p class="sub">Reddito lordo annuo che serve per 60 m² dentro il 30%, negli otto quartieri più cari e negli otto meno cari. Il colore dice che cosa succede a chi guadagna il reddito mediano di Milano. 2024.</p>
+  <div class="ch" id="ch-serve" role="img" aria-label="Barre: reddito lordo necessario per 60 metri quadrati nei otto quartieri più cari e nei otto meno cari, 2024"></div>
+  <p class="note" id="nt-serve"></p>
+  <p class="src">Affitto OMI del quartiere (CC BY 4.0) × 60 × 12 ÷ 0,30. Reddito mediano stimato da sette classi di reddito del MEF (CC BY 3.0). Solo quartieri con almeno 2.000 residenti. Sono contribuenti singoli: con due stipendi la situazione cambia molto.</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="prof">Infermiere, insegnante</h2>
+<div class="fig" id="f-prof">
+  <h3 id="t-prof"></h3>
+  <p class="sub">Per ogni stipendio, i 73 quartieri divisi a semaforo: quanti sono dentro il 30% del reddito, quanti tra il 30% e il 40%, quanti oltre. 2024. Sono gli stipendi di base dei contratti nazionali: con turni e indennità si guadagna di più.</p>
+  <div class="calc"><div class="rowc"><label for="sel-pm">Casa</label><select id="sel-pm" aria-label="Metri quadrati della casa"><option value="40">40 m²</option><option value="60" selected>60 m²</option><option value="80">80 m²</option></select></div></div>
+  <div class="lg" id="lg-prof"></div>
+  <div class="ch" id="ch-prof" role="img" aria-label="Barre a semaforo: quartieri dentro il 30%, tra il 30% e il 40% e oltre il 40% del reddito, per ogni stipendio, 2024"></div>
+  <p class="note" id="nt-prof"></p>
+  <p class="src" id="src-prof"></p>
+</div>
+
+<div class="fig">
+    <h3 id="t-pb"></h3>
+    <p class="sub">Scegli un mestiere e una casa: i quartieri si colorano a semaforo. La losanga nera è il Duomo.</p>
+    <div class="calc"><div class="rowc"><label for="sel-pb">Mestiere</label><select id="sel-pb" aria-label="Scegli un mestiere"></select></div>
+      <div class="rowc"><label for="sel-pbm">Casa</label><select id="sel-pbm" aria-label="Metri quadrati della casa"><option value="40">40 m²</option><option value="60" selected>60 m²</option><option value="80">80 m²</option></select></div></div>
+    <div class="ch" id="ch-pb" role="img" aria-label="Mappa dei quartieri colorati a semaforo per il mestiere scelto"></div>
+    <p class="src">Stipendi: contratti nazionali dell&rsquo;ARAN, indirizzi nelle fonti del grafico sopra. Affitto OMI (CC BY 4.0), quartieri del Comune di Milano (CC BY). Quota = affitto mensile × 12 ÷ stipendio lordo annuo; verde fino al 30%, giallo tra il 30% e il 40%, rosso oltre.</p>
+</div>
+
+<p class="vedi"><b>Vedi anche.</b> <a href="../prezzi-case/">I prezzi delle case</a>: quanto costano comprare e affittare, zona per zona. <a href="../redditi/">I redditi dei milanesi</a>: chi guadagna quanto, CAP per CAP. <a href="../affitti-brevi/">Gli affitti brevi</a>: quante notti di Airbnb pagano un affitto. <a href="../costo-vita/">Il costo della vita</a>: l&rsquo;inflazione che senti tu.</p>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>OMI</dt><dd>L&rsquo;Osservatorio del mercato immobiliare dell&rsquo;Agenzia delle Entrate. Per ogni zona dà una forbice di prezzi, stimata, non gli affitti firmati.</dd>
+<dt>Quartiere (NIL)</dt><dd>Gli 88 «nuclei di identità locale» del Comune di Milano. Qui contano solo i 73 con almeno 2.000 residenti e una quotazione.</dd>
+<dt>Semaforo</dt><dd>I colori usati per dire se ci si può permettere una casa. Verde: l&rsquo;affitto non supera il 30% del reddito. Giallo: è tra il 30% e il 40%, si è vicini al limite. Rosso: supera il 40%.</dd>
+<dt>Dentro il 30%</dt><dd>L&rsquo;affitto mensile × 12 non supera il 30% del reddito lordo annuo. Con un reddito di 30.000 euro lordi, un affitto fino a 750 euro al mese.</dd>
+<dt>Lordo</dt><dd>Il reddito prima di tasse e contributi. Sul netto la quota sarebbe più alta.</dd>
+<dt>Contribuente</dt><dd>Chi presenta la dichiarazione dei redditi: non è lo stesso che un residente o una famiglia.</dd>
+<dt>Reddito mediano</dt><dd>Metà dei contribuenti guadagna di più e metà di meno. Il 25° percentile è il reddito sotto cui sta un contribuente su quattro; il 75° quello sopra cui ne sta uno su quattro.</dd>
+<dt>Euro del 2024</dt><dd>Gli euro di ogni anno ricalcolati con l&rsquo;inflazione (indice ISTAT FOI), per confrontare anni diversi.</dd>
+<dt>Tabellare</dt><dd>Lo stipendio di base di un contratto nazionale, senza turni, indennità e straordinari.</dd>
+<dt>Punti</dt><dd>Quando una quota è già una percentuale, il cambio si scrive in punti: da 30% a 38% sono 8 punti.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati per quartiere o per città, separati da virgola, con il punto per i decimali. Nessun dato di singole persone.</p>
+<ul>
+<li><a href="data/nil_affitti_redditi.csv">Per quartiere e anno</a>: affitto OMI al metro quadro, forbice, case economiche, reddito stimato del quartiere, quota del reddito per 40, 60 e 80 m² e quota di contribuenti che sta nel 30%</li>
+<li><a href="data/citta_percentili_affitto.csv">Percentili di reddito e affitto medio di Milano</a>, 2011-2024</li>
+<li><a href="data/dati.json">I dati letti da questa pagina</a>, con le classi di reddito della città e gli stipendi dei contratti</li>
+<li><a href="data/nil.geojson">I confini dei quartieri</a>, semplificati</li>
+<li><a href="data/riepilogo.json">Altri numeri di questa pagina</a></li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Affitti: Agenzia delle Entrate, Osservatorio del Mercato Immobiliare (OMI), quotazioni di Milano 2011&ndash;2024, consultazione pubblica, CC BY 4.0 &ndash; <a href="../prezzi-case/">pagina dei prezzi delle case</a>. Redditi: MEF, Dipartimento delle Finanze, &laquo;Redditi e principali variabili IRPEF&raquo; su base comunale e per CAP, anni d&rsquo;imposta 2011&ndash;2024, CC BY 3.0 &ndash; <a href="../redditi/">pagina dei redditi</a>. Quartieri (NIL), civici e residenti: Comune di Milano, CC BY &ndash; <a href="../quartieri-che-cambiano/">quartieri che cambiano</a>. Inflazione: ISTAT, indice FOI senza tabacchi. Notti di Airbnb: elaborazione su Inside Airbnb (CC BY 4.0, solo dati aggregati) e quotazioni OMI &ndash; <a href="../affitti-brevi/">affitti brevi</a>. Confronto con il costo della vita: <a href="../costo-vita/">costo della vita</a>. Stipendi delle professioni: ARAN, testi dei CCNL Comparto Sanit&agrave; 2022-2024 e Istruzione e Ricerca 2022-2024 (indirizzi nella sezione sulle professioni). Mappa &copy; OpenStreetMap contributors.</p>
+<p><b>Fonti e licenze.</b> Affitti: Agenzia delle Entrate, Osservatorio del Mercato Immobiliare (OMI), quotazioni di Milano 2011-2024, consultazione pubblica, licenza CC BY 4.0 (vedi <a href="../prezzi-case/">i prezzi delle case</a>). Redditi: Ministero dell&rsquo;Economia e delle Finanze, Dipartimento delle Finanze, «Redditi e principali variabili IRPEF» su base comunale e per CAP, anni d&rsquo;imposta 2011-2024, licenza CC BY 3.0 (vedi <a href="../redditi/">i redditi dei milanesi</a>). Quartieri (NIL), civici e residenti: Comune di Milano, CC BY (vedi <a href="../quartieri-che-cambiano/">quartieri che cambiano</a>). Inflazione: ISTAT, indice FOI senza tabacchi. Notti di Airbnb: elaborazione su Inside Airbnb (CC BY 4.0, solo dati aggregati) e quotazioni OMI (vedi <a href="../affitti-brevi/">gli affitti brevi</a>). Confronto con il costo della vita: <a href="../costo-vita/">il costo della vita</a>. Stipendi delle professioni: ARAN, testi dei contratti nazionali Comparto Sanità 2022-2024 e Istruzione e Ricerca 2022-2024 (indirizzi nell&rsquo;ultimo grafico).</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,NF=null,R=null,NIL=[],BYID={},DRAW_CONTA=null,DRAW_NIL=null,DRAW_CITTA=null;
-var ACC='#00695c',WARM='#c26a1b';
-var PROFK={}; /* stipendi tabellari ARAN: dati.json -> professioni */
-var QCOL=['#2b8a7d','#a6d3ca','#f3dcc0','#e0a96d','#a8540f'],OKCOL=['#f3dcc0','#c9e4de','#62b0a4','#2b8a7d','#052e29'];
-var ST={mode:'p50',mq:60,tip:'civ',yi:13,due:false,alt:30000,view:'quota',sel:null};
-/* ---------- formati ---------- */
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)}
-function pc(x,d){return nf(100*x,d==null?0:d)+'%'}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),v:cv('--v'),vd:cv('--vd'),g:cv('--g'),r:cv('--r'),ink:cv('--ink'),ink2:cv('--ink2'),mut:cv('--mut'),grid:cv('--grid'),axis:cv('--axis'),gry:'#aab0bb',bro:'#8C5A32'};
+var D=null,R=null,GEO=null,NIL=[],BY={},PK={},PROF=[];
+var ST={mode:'p50',alt:30000,due:false,mq:60,tip:'civ',yi:13,sel:null};
+var PM=60,PBM=60,PBK='inf';
+var SOG2=0.4,SEMC=[C.v,C.g,C.r],SEMTXT=['#0E5E27','#7A5D00','#A31D1D'];
+/* semaforo: 0 verde fino al 30% del reddito, 1 giallo fino al 40%, 2 rosso oltre */
+function sem(q){return q<=D.soglia+1e-9?0:q<=SOG2+1e-9?1:2}
+function semLg(p){p=p||'';return ['dentro il 30%','tra il 30% e il 40%','oltre il 40%'].map(function(t,i){return '<span><i style="background:'+SEMC[i]+'"></i>'+p+t+'</span>'}).join('')}
+var RD=[],DYN=[];
 
-Promise.all([J('data/dati.json'),J('data/nil.geojson'),J('data/riepilogo.json')]).then(function(a){
-  D=a[0];NF=a[1];R=a[2];
-  NIL=D.nil;NIL.forEach(function(n){BYID[n.i]=n});D.professioni.forEach(function(q){PROFK[q.k]=q});
-  NF.features.forEach(function(f){f.properties=BYID[f.properties.i]});
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null||isNaN(x))return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null||isNaN(x))return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function pp(x){return f0(x*100)+'%'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function sn(n){return n.n.split(' - ')[0]}
+function pl(n,u,p){return f0(n)+' '+(n===1?u:p)}
 
-function tutto(){
-  sorpresa();controlli();mappa();cittaInit();aggiorna();professioni();limiti();metodo();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){[DRAW_CONTA,DRAW_NIL,DRAW_CITTA].forEach(function(f){if(f)f()})},200)});
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function shortn(s,w,b){if(tw(s,13,b)<=w)return s;while(s.length>3&&tw(s+'…',13,b)>w)s=s.slice(0,-1);return s+'…'}
+function spread(a,gap,lo,hi){
+  a.sort(function(p,q){return p.y-q.y});
+  for(var i=1;i<a.length;i++)if(a[i].y-a[i-1].y<gap)a[i].y=a[i-1].y+gap;
+  if(a.length&&last(a).y>hi){last(a).y=hi;for(var j=a.length-2;j>=0;j--)if(a[j+1].y-a[j].y<gap)a[j].y=a[j+1].y-gap}
+  if(a.length&&a[0].y<lo)a[0].y=lo;
 }
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'dati.json'),getJ(DATA+'nil.geojson'),getJ(DATA+'riepilogo.json')]).then(function(a){
+  D=a[0];GEO=a[1];R=a[2];
+  NIL=D.nil;NIL.forEach(function(n){BY[n.i]=n});D.professioni.forEach(function(q){PK[q.k]=q;PROF.push(q)});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
 
 /* ---------- calcoli ---------- */
-function yr(){return D.anni[ST.yi]}
-function capIdx(y){return D.anni_cap.indexOf(y)}
 function foiR(y){return D.foi[String(y)]/D.foi['2024']}
-function redditoCitta(mode,yi){return D.citta[yi][mode]}
-/* reddito lordo annuo considerato per un quartiere (o null con motivo) */
-function reddito(n,yi,mode){
-  mode=mode||ST.mode;var y=D.anni[yi],k=ST.due?2:1,v;
-  if(mode==='p25'||mode==='p50'||mode==='p75')v=D.citta[yi][mode];
-  else if(PROFK[mode])v=PROFK[mode].lordo*foiR(y);
-  else if(mode==='alt')v=ST.alt*foiR(y);
-  else if(mode==='loc'){var j=capIdx(y);if(j<0)return {no:'anno'};if(n.instab)return {no:'instab'};v=n.p50[j];if(v==null)return {no:'anno'}}
-  return {v:v*k};
+function abitato(n){return n.ab>=D.soglia_residenti}
+function redditoY(mode,yi,due){ /* reddito lordo annuo, euro dell'anno, una persona (o due uguali) */
+  var y=D.anni[yi],k=due?2:1;
+  if(mode==='p25'||mode==='p50'||mode==='p75')return D.citta[yi][mode]*k;
+  if(PK[mode])return PK[mode].lordo*foiR(y)*k;
+  return ST.alt*foiR(y)*k;
 }
-function affitto(n,yi,tip){var a=(tip||ST.tip)==='eco'?n.eco:n.aff;return a[yi]}
-function quotaN(n,yi,mq,mode,tip){
-  var a=affitto(n,yi,tip),r=reddito(n,yi,mode);
-  if(a==null||r.no)return null;
-  return a*(mq||ST.mq)*12/r.v;
-}
+function affitto(n,yi,tip){return ((tip||'civ')==='eco'?n.eco:n.aff)[yi]}
+function quota(n,yi,mq,mode,tip,due){var a=affitto(n,yi,tip);if(a==null)return null;return a*mq*12/redditoY(mode,yi,due)}
+function need(n,yi,mq,tip){var a=affitto(n,yi,tip);return a==null?null:a*mq*12/D.soglia}
+function lista(yi,tip){return NIL.filter(function(n){return abitato(n)&&affitto(n,yi,tip)!=null})}
+function conta(yi,mode,mq,tip,due){var ok=0,tot=0;lista(yi,tip).forEach(function(n){tot++;if(quota(n,yi,mq,mode,tip,due)<=D.soglia+1e-9)ok++});return{ok:ok,tot:tot}}
 function cdf(yi,x){
   var c=D.cls[String(D.anni[yi])],E=D.edges,cum=[0],i;
   for(i=0;i<7;i++)cum.push(cum[i]+c.sh[i]);
@@ -175,293 +346,468 @@ function cdf(yi,x){
   var x0=E[k],x1=E[k+1],w=x1-x0,cc=Math.max(-1.98,Math.min(1.98,12*((c.m[k]-x0)/w-.5))),t=(x-x0)/w;
   return cum[k]+(cum[k+1]-cum[k])*(t+cc*(t*t/2-t/2));
 }
-function okShare(n,yi,mq,tip){ /* quota di contribuenti di Milano con reddito sufficiente per stare nel 30% */
-  var a=affitto(n,yi,tip);if(a==null)return null;
-  return 1-cdf(yi,a*(mq||ST.mq)*12/D.soglia);
+function okShare(n,yi,mq,tip){var a=affitto(n,yi,tip);return a==null?null:1-cdf(yi,a*mq*12/D.soglia)}
+function median(a){var b=a.slice().sort(function(p,q){return p-q}),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2}
+var I15=4,I24=13;
+function capI(y){return D.anni_cap.indexOf(y)}
+function tipici(yi){ /* quartieri col reddito tipico: ok / totale, 60 m2 civili */
+  var j=capI(D.anni[yi]),ok=0,tot=0;
+  NIL.forEach(function(n){if(!abitato(n)||n.instab||n.aff[yi]==null||n.p50[j]==null)return;tot++;if(n.aff[yi]*60*12/n.p50[j]<=D.soglia+1e-9)ok++});
+  return{ok:ok,tot:tot};
 }
-function abitato(n){return n.ab>=D.soglia_residenti}
-function conta(yi,mode,mq,tip){
-  var ok=0,tot=0;
-  NIL.forEach(function(n){if(!abitato(n)||n.aff[yi]==null)return;
-    var q=quotaN(n,yi,mq,mode,tip);if(q==null)return;tot++;if(q<=D.soglia+1e-9)ok++});
-  return {ok:ok,tot:tot};
-}
-function insieme(yi,mode,mq,tip){
-  var s={};NIL.forEach(function(n){if(!abitato(n)||n.aff[yi]==null)return;var q=quotaN(n,yi,mq,mode,tip);if(q!=null&&q<=D.soglia+1e-9)s[n.i]=1});return s;
+function redTxt(){ /* frase sul reddito scelto, 2024 */
+  var v=redditoY(ST.mode,I24,ST.due);return f0(v)+' euro lordi l’anno ('+f0(v/12)+' al mese)'
 }
 
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var P=R.persona.p50['60'],Q=R.persona.p25['40'],Q60=R.persona.p25['60'],N=R.n_nil,C=R.citta,nec=R.reddito_necessario_60mq;
-  var h='<p><b>Fino al 2022 per chi ha il reddito mediano la situazione non è peggiorata. Poi, in due anni, quasi tutto è cambiato.</b> Con 60 m&sup2; e il reddito mediano dei contribuenti milanesi ('+f0(P.reddito_eur['2015'])+' euro lordi nel 2015, '+f0(P.reddito_eur['2024'])+' nel 2024) i quartieri dentro la linea del 30% erano <b>'+P['2011']+'</b> su '+N+' nel 2011, <b>'+P['2015']+'</b> nel 2015, <b>'+P['2019']+'</b> nel 2019, <b>'+P['2022']+'</b> nel 2022 e sono <b>'+P['2024']+'</b> nel 2024. Dal 2015 ne sono usciti <b>'+P.usciti_2015_2024.length+'</b>, nessuno è entrato.</p>';
-  h+='<p><b>Chi sta nel quarto più basso dei redditi non ce la fa con 60 m&sup2; in nessun quartiere, in nessun anno dal 2011.</b> Con 40 m&sup2; ci stava in '+Q['2015']+' quartieri nel 2015 e ci sta in '+Q['2024']+' nel 2024 (25° percentile: '+f0(Q.reddito_eur['2024'])+' euro lordi). Tutti e due i conteggi vanno letti con la cautela che segue: sono contribuenti singoli, non famiglie.</p>';
-  h+='<p><b>Il salto è quasi tutto nelle quotazioni 2023-2024.</b> L&rsquo;affitto OMI medio sale del '+nf(R.affitto_civici_crescita_2015_2022_pct,1)+'% dal 2015 al 2022 e del '+nf(R.affitto_civici_crescita_2022_2024_pct,1)+'% nei due anni dopo; il reddito mediano dei contribuenti cresce del '+nf(R.reddito_mediano_crescita_2015_2024_pct,1)+'% in nove anni (l&rsquo;inflazione del '+nf(R.foi_crescita_2015_2024_pct,1)+'%). Le quotazioni OMI sono <b>stime dell&rsquo;Agenzia, non affitti firmati</b>, e parte dell&rsquo;aumento 2023-24 &egrave; l&rsquo;Agenzia che si aggiorna: la tendenza vale come ordine di grandezza, non come misura precisa.</p>';
-  h+='<p class="src">Numeri: <code>data/riepilogo.json</code>. Abitazioni civili, quartieri con almeno 2.000 residenti, reddito lordo di un solo contribuente, affitto OMI al valore centrale. Reddito necessario per stare nel 30% con 60 m&sup2; nel quartiere mediano: '+f0(nec['2015'].mediana)+' euro nel 2015, '+f0(nec['2024'].mediana)+' nel 2024.</p>';
-  setH('sorpresa',h);
+/* ---------- avvio ---------- */
+function draw(f){f();RD.push(f)}
+function dyn(f){f();DYN.push(f);RD.push(f)}
+function aggiorna(){DYN.forEach(function(f){f()})}
+function tutto(){
+  /* controlli */
+  var so=[['p50','Reddito mediano di Milano (metà dei contribuenti guadagna di più)'],['p25','Reddito basso: 25° percentile (tre su quattro guadagnano di più)'],['p75','Reddito alto: 75° percentile']];
+  PROF.forEach(function(q){so.push([q.k,q.nome.split(',')[0].replace('Infermiere/a','Infermiere/a, stipendio di base')+(q.k.charAt(0)==='d'?(q.k==='dp0'?', primaria, inizio carriera':q.k==='dp15'?', primaria, 15-20 anni di servizio':q.k==='ds0'?', superiori, inizio carriera':', superiori, 15-20 anni di servizio'):'')])});
+  so.push(['alt','Un reddito che scrivo io']);
+  $('sel-red').innerHTML=so.map(function(o){return '<option value="'+o[0]+'">'+esc(o[1])+'</option>'}).join('');
+  PROF.forEach(function(q){q.corto=q.k==='inf'?'Infermiere/a':q.k==='dp0'?'Insegnante primaria, inizio carriera':q.k==='dp15'?'Insegnante primaria, 15-20 anni':q.k==='ds0'?'Insegnante superiori, inizio carriera':'Insegnante superiori, 15-20 anni'});
+  $('sel-red').addEventListener('change',function(){ST.mode=this.value;var alt=ST.mode==='alt';$('in-alt').hidden=!alt;$('box-sl').hidden=!alt;aggiorna()});
+  $('in-alt').addEventListener('input',function(){var v=parseFloat(this.value);if(v>0){ST.alt=v;$('sl-alt').value=Math.min(100000,Math.max(10000,v));aggiorna()}});
+  $('sl-alt').addEventListener('input',function(){ST.alt=+this.value;$('in-alt').value=this.value;aggiorna()});
+  $('ck-due').addEventListener('change',function(){ST.due=this.checked;aggiorna()});
+  $('sel-mq').addEventListener('change',function(){ST.mq=+this.value;aggiorna()});
+  $('sel-tip').addEventListener('change',function(){ST.tip=this.value;aggiorna()});
+  $('sel-pm').addEventListener('change',function(){PM=+this.value;prof()});
+  $('sel-pbm').addEventListener('change',function(){PBM=+this.value;profB()});
+  $('sel-pb').innerHTML=(function(){var c=D.citta[I24];return PROF.map(function(q){return [q.k,q.corto+' · '+f0(q.lordo)+' €']}).concat([['p25','Reddito basso (25° percentile) · '+f0(c.p25)+' €'],['p50','Reddito mediano · '+f0(c.p50)+' €'],['p75','Reddito alto (75° percentile) · '+f0(c.p75)+' €']]).map(function(o){return '<option value="'+o[0]+'">'+esc(o[1])+'</option>'}).join('')})();
+  $('sel-pb').addEventListener('change',function(){PBK=this.value;profB()});
+  $('sel-anno').innerHTML=D.anni.slice().reverse().map(function(y){return '<option value="'+D.anni.indexOf(y)+'">'+y+'</option>'}).join('');
+  $('sel-anno').addEventListener('change',function(){ST.yi=+this.value;aggiorna()});
+  var ab=NIL.filter(abitato);
+  $('elenco').innerHTML=ab.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(n){return '<option value="'+esc(n.n)+'">'}).join('');
+  function trova(k){var m=ab.filter(function(x){return nz(x.n)===k||nz(sn(x))===k});return m.length===1?m[0]:null}
+  function sceglie(n,scrivi){ST.sel=n?n.i:null;if(scrivi&&n)$('q').value=n.n;aggiorna()}
+  var q=$('q');
+  q.addEventListener('input',function(){var k=nz(q.value);if(!k){if(ST.sel!==null){ST.sel=null;aggiorna()}$('ris').textContent='';return}var n=trova(k);if(n){$('ris').textContent='';sceglie(n,false)}});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var n=trova(k);if(n){$('ris').textContent='';sceglie(n,true);return}
+    var m=ab.filter(function(x){return nz(x.n).indexOf(k)===0||nz(sn(x)).indexOf(k)===0});
+    if(m.length===1){$('ris').textContent='';sceglie(m[0],true)}
+    else if(m.length>1)$('ris').textContent='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(sn).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.';
+    else $('ris').textContent='Non trovo «'+q.value+'» tra i '+ab.length+' quartieri con almeno 2.000 residenti. Controlla come è scritto, oppure tocca un quartiere sulla mappa.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p){var n=BY[+p.getAttribute('data-n')];if(n&&abitato(n))sceglie(n,true)}});
+
+  highlights();
+  dyn(tipico);
+  draw(colonne);
+  usciti();
+  dyn(calcMsg);dyn(arrA);dyn(mappa);dyn(scheda);
+  draw(peso);draw(serve);draw(prof);draw(profB);
+  limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
 }
 
-/* ---------- controlli ---------- */
-function controlli(){
-  var sel=el('sel-nil'),h='<option value="">— scegli —</option>';
-  NIL.filter(abitato).slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
-  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
-  el('sel-red').addEventListener('change',function(){ST.mode=this.value;el('box-alt').hidden=ST.mode!=='alt';aggiorna()});
-  el('in-alt').addEventListener('input',function(){var v=parseFloat(this.value);if(v>0){ST.alt=v;aggiorna()}});
-  el('ck-due').addEventListener('change',function(){ST.due=this.checked;aggiorna()});
-  el('sel-tip').addEventListener('change',function(){ST.tip=this.value;aggiorna()});
-  el('yr').addEventListener('input',function(){ST.yi=parseInt(this.value,10);aggiorna()});
-  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-mq]'),function(b){b.addEventListener('click',function(){ST.mq=parseInt(b.getAttribute('data-mq'),10);
-    Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-mq]'),function(x){x.classList.toggle('on',x===b)});aggiorna()})});
-  Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-v]'),function(b){b.addEventListener('click',function(){ST.view=b.getAttribute('data-v');
-    Array.prototype.forEach.call(document.querySelectorAll('.ctl button[data-v]'),function(x){x.classList.toggle('on',x===b)});aggiorna()})});
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var N=conta(I24,'p50',60,'civ').tot,c19=conta(8,'p50',60,'civ').ok,c24=conta(I24,'p50',60,'civ').ok;
+  var p25_60=0;D.anni.forEach(function(y,i){p25_60=Math.max(p25_60,conta(i,'p25',60,'civ').ok)});
+  var p25_40_15=conta(I15,'p25',40,'civ').ok,p25_40_24=conta(I24,'p25',40,'civ').ok;
+  var needs=lista(I24,'civ').map(function(n){return need(n,I24,60,'civ')}),nmed=median(needs);
+  var needs15=lista(I15,'civ').map(function(n){return need(n,I15,60,'civ')}),nmed15=median(needs15);
+  var c=D.citta,q24=c[I24].quota_p50_60,q15=c[I15].quota_p50_60;
+  var t15=tipici(I15),t24=tipici(I24);
+  var inf=PK.inf,infok=lista(I24,'civ').filter(function(n){return need(n,I24,60,'civ')<=inf.lordo}).length;
+  var Tt=[
+   {c:C.mi,h:'f-tipico',n:t24.ok,u:'su '+t24.tot,p:'quartieri in cui il reddito tipico di chi ci abita basta per 60 m². Nel 2015 erano '+t15.ok+'.'},
+   {c:C.m3,h:'f-col',n:c24,u:'su '+N,p:'quartieri dove 60 m² stanno dentro il 30% del reddito mediano. Nel 2019 erano '+c19+'.'},
+   {c:C.m2,h:'f-firma',n:p25_60,u:'su '+N,p:'quartieri alla portata del quarto più basso dei redditi con 60 m², in tutti gli anni dal 2011. Con 40 m² erano '+p25_40_15+' nel 2015 e sono '+p25_40_24+'.'},
+   {c:C.m4,h:'f-serve',n:f0(nmed),u:' €',p:'il reddito lordo che serve per 60 m² nel quartiere mediano. Nel 2015 ne bastavano '+f0(nmed15)+' (euro di allora).'},
+   {c:C.m5,h:'f-peso',n:pp(q24).replace('%',''),u:'%',p:'del reddito mediano se ne va per 60 m². Nel 2015 era il '+pp(q15)+': affitti +'+f0(R.affitto_civici_crescita_2015_2024_pct)+'%, redditi +'+f0(R.reddito_mediano_crescita_2015_2024_pct)+'% in nove anni.'},
+   {c:C.ora,h:'f-prof',n:infok,u:'su '+N,p:'quartieri alla portata di un infermiere con lo stipendio di base, per 60 m².'}
+  ];
+  $('hl').innerHTML=Tt.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
-/* ---------- mappa ---------- */
-var MAP=null,LAY=null;
-function mappa(){
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:true,zoomSnap:.25}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
-    l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});
-    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
-  MAP.fitBounds(LAY.getBounds());
-  setTimeout(function(){MAP.invalidateSize();if(!ST.sel)MAP.fitBounds(LAY.getBounds())},600);
-  window.addEventListener('resize',function(){MAP.invalidateSize()});
-}
-function bin(v,b){var i=0;while(i<b.length&&v>b[i])i++;return i}
-function colN(n){
-  if(!abitato(n))return '#bdbdbd';
-  if(ST.view==='ok'){var o=okShare(n,ST.yi);if(o==null)return '#bdbdbd';return OKCOL[bin(o,[.1,.25,.5,.75])]}
-  var q=quotaN(n,ST.yi);if(q==null)return '#bdbdbd';
-  return QCOL[bin(q,[.2,.3,.4,.5])];
-}
-function sty(f){var p=f.properties,sel=ST.sel===p.i;
-  return {fillColor:colN(p),fillOpacity:.84,color:sel?'#000':'#fff',weight:sel?3:1}}
-function tipNil(p){
-  var h='<b>'+esc(p.n)+'</b>';
-  if(!abitato(p))return h+'<br>meno di 2.000 residenti: non confrontabile';
-  var a=affitto(p,ST.yi);if(a==null)return h+'<br>senza quotazione OMI';
-  if(ST.view==='ok'){var o=okShare(p,ST.yi);return h+'<br>ce la fa il '+pc(o,0)+' dei contribuenti<br>affitto '+f0(a*ST.mq)+' € al mese'}
-  var r=reddito(p,ST.yi);
-  if(r.no)return h+'<br>'+(r.no==='anno'?'reddito del quartiere non disponibile in questo anno':'reddito del quartiere non affidabile (CAP 20121/20122)');
-  var q=quotaN(p,ST.yi);
-  return h+'<br>affitto '+f0(a*ST.mq)+' € al mese<br><b>'+pc(q,0)+'</b> del reddito'+(q<=D.soglia?' (dentro il 30%)':' (fuori dal 30%)');
-}
-function legenda(){
-  var h;
-  if(ST.view==='ok'){
-    var t=['meno del 10%','10% – 25%','25% – 50%','50% – 75%','oltre il 75%'];
-    h=OKCOL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+t[i]+'</span>'}).join('');
-  }else{
-    var t2=['fino al 20%','20% – 30%','30% – 40%','40% – 50%','oltre il 50%'];
-    h=QCOL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+t2[i]+'</span>'}).join('');
-  }
-  h+='<span><i style="background:#bdbdbd"></i>non confrontabile / senza dato</span>';
-  setH('lg-map',h);
-}
-function incomeText(){
-  var y=yr(),k=ST.due?' (due redditi uguali)':'';
-  if(ST.mode==='loc')return 'il reddito mediano stimato di chi abita in ogni quartiere'+k;
-  var r=reddito(null,ST.yi);var v=r.v;
-  return '<b>'+f0(v)+' euro lordi l&rsquo;anno</b> ('+f0(v/12)+' al mese)'+k;
-}
-function aggiorna(){
-  var y=yr(),cap=capIdx(y)>=0;
-  el('yr-out').textContent=y;el('yr').value=ST.yi;
-  var nota='';
-  if(y<=2013)nota='Fino al 2013 le zone OMI erano 55 e disegnate in modo diverso: i confronti con gli anni dal 2014 in poi possono contenere salti di perimetro.';
-  if(ST.mode==='loc'&&!cap)nota='Il reddito dei quartieri esiste solo per gli anni 2011, 2015 e 2019–2024 (il MEF non pubblica i CAP degli altri): scegli uno di questi anni.';
-  if(PROFK[ST.mode]||ST.mode==='alt')nota=(nota?nota+' ':'')+'Il reddito scelto è in euro del 2024; per gli anni prima è riportato indietro con l’inflazione (stesso potere d’acquisto, non il reddito vero di allora).';
-  setH('yr-note',nota);
-  var mqTxt=ST.mq+' m²',cv=conta(ST.yi,ST.mode,ST.mq,ST.tip),h;
-  if(ST.view==='ok'){
-    h='Casa di '+mqTxt+' ('+(ST.tip==='civ'?'abitazioni civili':'tipo economico')+'), '+y+'. Per ogni quartiere: quanti dei contribuenti di Milano guadagnano abbastanza (almeno affitto &times; 12 &divide; 0,30) da restare nel 30%. È indipendente dal reddito scelto sopra.';
-    setH('conta','Reddito di riferimento: '+incomeText()+'. <b>'+cv.ok+' quartieri su '+cv.tot+'</b> stanno dentro il 30%.');
-  }else{
-    h='Quota del reddito '+(ST.mode==='loc'?'tipico del quartiere ':'')+'che se ne va in affitto per una casa di '+mqTxt+' ('+(ST.tip==='civ'?'abitazioni civili':'tipo economico')+'), '+y+'.';
-    if(ST.mode==='loc'&&!cap)setH('conta','Reddito del quartiere non disponibile per il '+y+'.');
-    else setH('conta','Reddito considerato: '+incomeText()+'. <b>'+cv.ok+' quartieri su '+cv.tot+'</b> stanno dentro il 30%'+(ST.mode==='loc'?' (escluso il centro, vedi i limiti)':'')+'.');
-  }
-  setH('map-desc',h);
-  legenda();
-  if(LAY){LAY.setStyle(sty);if(ST.sel)LAY.eachLayer(function(l){if(l.feature.properties.i===ST.sel)l.bringToFront()})}
-  if(ST.sel)scheda(ST.sel);
-  grafConta();usciti();serve();tabAll();
-}
-function scegli(i,zoom){ST.sel=i;el('sel-nil').value=String(i);LAY.setStyle(sty);
-  LAY.eachLayer(function(l){if(l.feature.properties.i===i){l.bringToFront();if(zoom)MAP.fitBounds(l.getBounds(),{maxZoom:14})}});
-  scheda(i)}
-
-/* ---------- scheda ---------- */
-function scheda(i){
-  var p=BYID[i],y=yr(),yi=ST.yi;if(!p)return;
-  var h='<h3>'+esc(p.n)+'</h3>';
-  if(!abitato(p)){setH('scheda',h+'<p class="sub">Meno di 2.000 residenti: non entra nei confronti.</p>');return}
-  var a=affitto(p,yi),aff=ST.tip==='civ'?p.aff:p.eco;
-  h+='<div class="scroll"><table><tbody>';
-  if(a==null){h+='<tr><td colspan="2">Nessuna quotazione OMI per questo tipo di casa nel '+y+'.</td></tr>'}
-  else{
-    var lo=ST.tip==='civ'?p.lo[yi]:null,hi=ST.tip==='civ'?p.hi[yi]:null;
-    h+='<tr><td>Affitto OMI '+y+' (€ al m² al mese)</td><td class="r"><b>'+nf(a,1)+'</b>'+(lo!=null?' <span class="sub">(forbice '+nf(lo,1)+'–'+nf(hi,1)+')</span>':'')+'</td></tr>';
-    h+='<tr><td>Casa di '+ST.mq+' m²: affitto al mese</td><td class="r"><b>'+f0(a*ST.mq)+' €</b>'+(lo!=null?' <span class="sub">('+f0(lo*ST.mq)+'–'+f0(hi*ST.mq)+')</span>':'')+'</td></tr>';
-    var r=reddito(p,yi);
-    if(r.no)h+='<tr><td>Reddito considerato</td><td class="r"><span class="sub">'+(r.no==='anno'?'non disponibile in questo anno':'non affidabile per questo quartiere')+'</span></td></tr>';
-    else{var q=a*ST.mq*12/r.v;
-      h+='<tr><td>Reddito considerato</td><td class="r">'+f0(r.v)+' € lordi l’anno</td></tr>';
-      h+='<tr><td>Quota del reddito</td><td class="r"><b>'+pc(q,0)+'</b> '+(q<=D.soglia?'<span class="sub">dentro il 30%</span>':'<span class="pill">fuori dal 30%</span>')+'</td></tr>'}
-    h+='<tr><td>Reddito lordo per stare nel 30%</td><td class="r"><b>'+f0(a*ST.mq*12/D.soglia)+' €</b> l’anno <span class="sub">('+f0(a*ST.mq/D.soglia)+' al mese)</span></td></tr>';
-    h+='<tr><td>Contribuenti di Milano che ce la fanno</td><td class="r"><b>'+pc(okShare(p,yi),0)+'</b></td></tr>';
-  }
-  var j=capIdx(y);
-  if(j>=0&&p.p50[j]!=null)h+='<tr><td>Reddito mediano stimato di chi abita qui</td><td class="r">'+(p.instab?'<span class="sub">non affidabile (CAP 20121/20122)</span>':f0(p.p50[j])+' €')+'</td></tr>';
-  if(p.notti!=null)h+='<tr><td>Notti di Airbnb al mese per pagare l’affitto di 60 m² (2026)</td><td class="r">'+f1(p.notti)+'</td></tr>';
-  h+='</tbody></table></div><div class="ch" id="ch-nil" role="img" aria-label="Grafico: quota del reddito in affitto negli anni, per questo quartiere"></div><div class="lgd" id="lg-nil"></div>';
-  h+='<p class="sub">CAP principale: '+esc(p.cap)+' ('+Math.round(100*p.cap_q)+'% delle case). Affitti OMI: stime; reddito: contribuenti, non famiglie.</p>';
-  setH('scheda',h);
-  var x=D.anni,s1=x.map(function(_,k){return quotaN(p,k)});
-  var ser=[{name:'questo quartiere',color:ACC,pts:s1}];
-  var city=x.map(function(_,k){if(ST.mode==='loc')return null;var c=D.citta[k];return c.affitto_mq_media_civici*ST.mq*12/reddito(null,k).v});
-  if(ST.mode!=='loc'&&ST.tip==='civ')ser.push({name:'media di Milano',color:'#777',dash:true,pts:city});
-  var draw=function(){lineChart(el('ch-nil'),{xs:x,series:ser,ymin:0,ymax:Math.max(.8,Math.min(1.5,Math.max.apply(null,s1.filter(function(v){return v!=null}).concat([.6]))*1.1)),yfmt:function(v){return pc(v,0)},vfmt:function(v){return pc(v,0)},h:220,hline:{v:D.soglia,l:'30%'}})};
-  draw();DRAW_NIL=draw;
-  setH('lg-nil',lgdLine(ser.map(function(s){return {t:s.name,color:s.color,dash:s.dash}}).concat([{t:'linea del 30%',color:WARM,dash:true}])));
-}
-
-/* ---------- grafico a linee ---------- */
-function lineChart(box,o){
-  if(!box)return;
-  var W=Math.max(300,box.clientWidth||600),H=o.h||260,m={l:42,r:12,t:16,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,xs=o.xs,x0=xs[0],x1=xs[xs.length-1];
-  function X(v){return m.l+(v-x0)/(x1-x0)*pw}
-  function Y(v){return m.t+ph-(v-o.ymin)/(o.ymax-o.ymin)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" preserveAspectRatio="xMidYMid meet">';
-  var st=niceStep((o.ymax-o.ymin)/4);
-  for(var v=Math.ceil(o.ymin/st)*st;v<=o.ymax+1e-9;v+=st){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eee"/><text class="mu" x="'+(m.l-4)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yfmt(v)+'</text>'}
-  var every=pw<460?2:1;
-  xs.forEach(function(xv,i){if((xs.length-1-i)%every===0)s+='<text class="mu" x="'+X(xv)+'" y="'+(H-12)+'" text-anchor="middle">'+xv+'</text>'});
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  (o.vlines||[]).forEach(function(vl,vi){var le=X(vl.x)>W*.7;s+='<line x1="'+X(vl.x)+'" x2="'+X(vl.x)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#aaa" stroke-dasharray="2 3"/><text class="mu" x="'+(X(vl.x)+(le?-3:3))+'" y="'+(m.t+9+vi*11)+'" text-anchor="'+(le?'end':'start')+'">'+vl.l+'</text>'});
-  if(o.hline)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(o.hline.v)+'" y2="'+Y(o.hline.v)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/><text x="'+(W-m.r-2)+'" y="'+(Y(o.hline.v)-4)+'" text-anchor="end" style="fill:#8a4a10">'+o.hline.l+'</text>';
-  o.series.forEach(function(se){
-    var d='',pen=false;
-    se.pts.forEach(function(v,i){if(v==null){pen=false;return}d+=(pen?'L':'M')+X(xs[i]).toFixed(1)+' '+Y(v).toFixed(1);pen=true});
-    if(se.dots)se.pts.forEach(function(v,i){if(v!=null)s+='<circle cx="'+X(xs[i]).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="3.6" fill="'+se.color+'" stroke="#fff"/>'});
-    else s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2.2"'+(se.dash?' stroke-dasharray="6 4"':'')+'/>';
-    if(!se.dots&&se.pts.length<=14)se.pts.forEach(function(v,i){if(v!=null)s+='<circle cx="'+X(xs[i]).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="2" fill="'+se.color+'"/>'});
+/* ---------- 1. colonne: quanti quartieri per anno ---------- */
+function colonne(){
+  var W=width('ch-col'),ml=4,mr=4,pw=W-ml-mr,n=D.anni.length,slot=pw/n,bw=Math.max(12,slot*.74);
+  var P=[{t:'Reddito mediano, casa da 40 m²',m:'p50',q:40},{t:'Reddito mediano, casa da 60 m²',m:'p50',q:60},{t:'Reddito mediano, casa da 80 m²',m:'p50',q:80},{t:'Reddito basso (25° percentile), casa da 40 m²',m:'p25',q:40}];
+  var N=conta(I24,'p50',60,'civ').tot,top=30,bh=56,gap=26,H=P.length*(top+bh+gap)+16,s=svgOpen(W,H),y0=0;
+  P.forEach(function(p,pi){
+    var by=y0+top+bh;
+    s+=T(ml,y0+13,esc(p.t),{c:'b'});
+    D.anni.forEach(function(y,i){
+      var ok=conta(i,p.m,p.q,'civ').ok,h=ok/N*bh,x=ml+i*slot+(slot-bw)/2,fin=i===n-1;
+      s+='<rect x="'+r1(x)+'" y="'+r1(by-Math.max(h,.8))+'" width="'+r1(bw)+'" height="'+r1(Math.max(h,.8))+'" fill="'+(fin?C.vd:C.v)+'"'+tip('<b>'+y+'</b><br>'+ok+' quartieri su '+N+' dentro il 30%<br>'+p.t)+'/>';
+      s+=T(x+bw/2,by-Math.max(h,.8)-3,String(ok),{a:'middle',c:fin?'b':'',st:'font-size:12px'});
+    });
+    s+=L(ml,by,W-mr,by,C.axis,1);
+    [0,4,8,13].forEach(function(i){var x=ml+i*slot+slot/2;s+=T(x,by+14,D.anni[i],{a:i===0?'start':i===13?'end':'middle',c:'m'})});
+    y0+=top+bh+gap;
   });
-  s+='<line id="gl" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,gl=svg.querySelector('#gl'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bi=0,bd=1e9;
-    xs.forEach(function(xv,i){var d=Math.abs(X(xv)-px);if(d<bd){bd=d;bi=i}});
-    var h='<b>'+xs[bi]+'</b>';o.series.forEach(function(se){if(se.pts[bi]!=null)h+='<br><span style="color:'+se.color+'">&#9632;</span> '+se.name+': '+(o.vfmt||o.yfmt)(se.pts[bi])});
-    gl.setAttribute('x1',X(xs[bi]));gl.setAttribute('x2',X(xs[bi]));gl.style.display='';
-    tip.innerHTML=h;tip.style.display='';var tw=tip.offsetWidth,left=X(xs[bi])/k+10;if(left+tw>r.width)left=X(xs[bi])/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='6px'}
-  function hide(){tip.style.display='none';gl.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
+  $('ch-col').innerHTML='<div class="lg"><span><i style="background:'+C.v+'"></i>quartieri dentro il 30% del reddito (il verde del semaforo)</span></div>'+s+'</svg>';
+  var a=conta(I24,'p50',60,'civ').ok,b=conta(8,'p50',60,'civ').ok,c22=conta(11,'p50',60,'civ').ok;
+  $('t-col').textContent='Con il reddito mediano, 60 m² stanno dentro il 30% in '+b+' quartieri su '+N+' nel 2019 e in '+a+' nel 2024';
+  $('nt-col').innerHTML='Nel 2022 erano ancora '+c22+'. Il salto è tutto negli ultimi due anni, quelli in cui le quotazioni dell&rsquo;Agenzia salgono del '+f0(R.affitto_civici_crescita_2022_2024_pct)+'%; parte dell&rsquo;aumento è l&rsquo;Agenzia che aggiorna le stime. Le colonne sono tutte della stessa altezza di scala: 73 quartieri è la barra intera.';
 }
 
-/* ---------- quanti quartieri ---------- */
-function grafConta(){
-  var x=D.anni,tot=R.n_nil;
-  var modes=[['p25','25° percentile',WARM,false],['p50','reddito mediano',ACC,false],['p75','75° percentile','#1b5fa6',false]];
-  var ser=modes.map(function(m){return {name:m[1],color:m[2],pts:x.map(function(_,k){return conta(k,m[0],ST.mq,ST.tip).ok})}});
-  var loc={name:'reddito del quartiere',color:'#555',dots:true,pts:x.map(function(_,k){return capIdx(x[k])<0?null:conta(k,'loc',ST.mq,ST.tip).ok})};
-  ser.push(loc);
-  setH('tempo-testo','<p>Quanti dei '+tot+' quartieri con almeno 2.000 residenti hanno un affitto, per una casa di <b>'+ST.mq+' m&sup2;</b>, che non supera il 30% del reddito? Tre redditi della città (stesso per tutti i quartieri) e, con i punti, il reddito stimato di chi abita nel quartiere (esclusi i '+R.nil_instabili.length+' del centro con CAP instabili). Cambia la casa o il tipo di abitazione sopra per vedere altre versioni.</p>');
-  var draw=function(){lineChart(el('ch-conta'),{xs:x,series:ser,ymin:0,ymax:Math.ceil(tot/10)*10,yfmt:function(v){return f0(v)},vfmt:function(v){return f0(v)+' quartieri'},h:280,vlines:[{x:2014,l:'zone OMI ridisegnate'},{x:2023,l:'quotazioni 2023-24'}]})};
-  draw();DRAW_CONTA=draw;
-  setH('lg-conta',lgdLine(ser.map(function(s){return {t:s.name,color:s.color}})));
+/* ---------- Il tuo reddito: pallini sull'asse, con i nomi ---------- */
+function calcMsg(){$('calc-msg').textContent='Reddito considerato nel 2024: '+redTxt()+(ST.due?', due redditi uguali':'')+'. Casa da '+ST.mq+' m², '+(ST.tip==='civ'?'abitazioni civili':'tipo economico')+'.'}
+function arrA(){
+  var W=width('ch-a'),ml=10,mr=10,AX=70000,pw=W-ml-mr,r=5.3,d=2*r+1.4,LANES=4,LH=16,labH=LANES*LH+10,top=64;
+  function X(v){return ml+Math.min(v,AX)/AX*pw}
+  var rows=[I15,I24].map(function(yi){
+    var y=D.anni[yi],f=foiR(y),inc=redditoY(ST.mode,yi,ST.due)/f;
+    var pts=lista(yi,ST.tip).map(function(n){return{n:n,v:need(n,yi,ST.mq,ST.tip)/f,q:quota(n,yi,ST.mq,ST.mode,ST.tip,ST.due)}}).sort(function(a,b){return a.v-b.v});
+    var placed=[],mx=0,c=[0,0,0];
+    pts.forEach(function(p){p.s=sem(p.q);c[p.s]++;p.x=X(p.v);var l=0;while(placed.some(function(o){var dx=o.x-p.x,dy=(o.l-l)*d;return dx*dx+dy*dy<d*d}))l++;p.l=l;mx=Math.max(mx,l);placed.push(p)});
+    return{yi:yi,y:y,inc:inc,pts:pts,mx:mx,c:c};
+  });
+  var H=0;rows.forEach(function(rw){rw.h=top+(rw.mx+1)*d+8+labH;H+=rw.h+14});H+=22;
+  var s=svgOpen(W,H),yy=0,names='';
+  [10000,20000,30000,40000,50000,60000,70000].forEach(function(v){s+=L(X(v),0,X(v),H-22,C.grid,1)});
+  rows.forEach(function(rw){
+    var pts=rw.pts,iy=yy,base=iy+top+(rw.mx+1)*d+4;
+    s+=T(ml,iy+16,'<tspan style="font-weight:800;font-size:16px">'+rw.y+'</tspan>  <tspan style="font-weight:700">'+rw.c[0]+' su '+pts.length+' dentro il 30%</tspan>',{});
+    s+=T(ml,iy+33,rw.c[0]+' verdi · '+rw.c[1]+' gialli · '+rw.c[2]+' rossi',{c:'m'});
+    var xi=X(rw.inc),over=rw.inc>AX,la=xi>W*.55?'end':'start';
+    s+=T(xi+(la==='end'?-5:5),iy+52,'<tspan style="font-weight:800">tu: '+(over?'oltre ':'')+f0(rw.inc)+' €</tspan>',{a:la,c:'halo'});
+    s+=L(xi,iy+57,xi,base,C.ink,2.2);
+    s+=L(ml,base,W-mr,base,C.axis,1);
+    /* nomi: scelta e posto nelle corsie sotto l'asse */
+    var P=[],sel=null;function addP(p){if(p&&P.indexOf(p)<0)P.push(p)}
+    pts.forEach(function(p){if(p.n.i===ST.sel)sel=p});
+    addP(sel);addP(pts[0]);addP(last(pts));
+    if(rw.c[0]>0)addP(pts[rw.c[0]-1]);if(rw.c[0]<pts.length)addP(pts[rw.c[0]]);
+    if(rw.c[0]+rw.c[1]>0&&rw.c[0]+rw.c[1]<pts.length){addP(pts[rw.c[0]+rw.c[1]-1]);addP(pts[rw.c[0]+rw.c[1]])}
+    for(var k=1;k<pts.length*3;k++)addP(pts[Math.floor(((k*0.6180339)%1)*pts.length)]);
+    var put=[];
+    P.forEach(function(p){
+      if(put.length>=20)return;
+      var t=shortn(sn(p.n),120,true),w=tw(t,12,true)+2,cx=p.x,x0=Math.min(Math.max(cx-w/2,2),W-2-w),x1=x0+w,ok=false,lane;
+      for(lane=0;lane<LANES&&!ok;lane++){
+        ok=put.every(function(o){
+          if(o.lane===lane)return x1+6<o.x0||x0>o.x1+6;
+          if(o.lane<lane)return cx<o.x0-3||cx>o.x1+3;
+          return o.cx<x0-3||o.cx>x1+3;
+        });
+        if(ok)break;
+      }
+      if(!ok)return;
+      put.push({p:p,t:t,x0:x0,x1:x1,cx:cx,lane:lane});
+    });
+    put.forEach(function(o){var cy=base-d/2-o.p.l*d;s+=L(o.cx,cy+r,o.cx,base+14+o.lane*LH-11,'#6b7280',1)});
+    /* pallini */
+    pts.forEach(function(p){
+      var cy=base-d/2-p.l*d,h='<b>'+esc(p.n.n)+'</b><br>'+rw.y+': serve un reddito di '+f0(p.v)+' € l’anno<br>(euro del 2024) per '+ST.mq+' m²<br>col tuo reddito l’affitto è il <b>'+pp(p.q)+'</b>: '+['dentro il 30%','tra il 30% e il 40%','oltre il 40%'][p.s];
+      s+='<circle cx="'+r1(p.x)+'" cy="'+r1(cy)+'" r="'+r+'" fill="'+SEMC[p.s]+'" stroke="rgba(0,0,0,.4)" stroke-width=".8"'+tip(h)+'/>';
+    });
+    if(sel)s+='<circle cx="'+r1(sel.x)+'" cy="'+r1(base-d/2-sel.l*d)+'" r="'+(r+3.4)+'" fill="none" stroke="'+C.ink+'" stroke-width="2.4" pointer-events="none"/>';
+    put.forEach(function(o){s+=T((o.x0+o.x1)/2,base+14+o.lane*LH,esc(o.t),{a:'middle',c:'b halo',st:'font-size:12px'+(o.p.n.i===ST.sel?';font-weight:800':'')})});
+    /* elenco dei nomi per colore */
+    names+='<p><b>'+rw.y+'</b></p>';
+    [0,1,2].forEach(function(si){
+      var l=pts.filter(function(p){return p.s===si}).map(function(p){return sn(p.n)}).sort(function(a,b){return a.localeCompare(b,'it')});
+      names+='<p><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:'+SEMC[si]+';margin-right:6px;vertical-align:-1px"></span><b>'+['Dentro il 30%','Tra il 30% e il 40%','Oltre il 40%'][si]+' ('+l.length+').</b> '+(l.length?l.map(esc).join(', ')+'.':'Nessuno.')+'</p>';
+    });
+    yy+=rw.h+14;
+  });
+  [10,20,30,40,50,60,70].forEach(function(v){s+=T(X(v*1000),H-8,String(v),{a:v===70?'end':'middle',c:'m'})});
+  $('ch-a').innerHTML=s+'</svg><p class="note">Asse in migliaia di euro lordi l&rsquo;anno, euro del 2024.</p>';
+  $('nomi-a').innerHTML=names;
+  $('lg-a').innerHTML=semLg()+'<span><i class="ln" style="background:'+C.ink+'"></i>il tuo reddito</span><span><i class="ring" style="border-color:'+C.ink+'"></i>il quartiere scelto</span>';
+  var a=rows[0],b=rows[1];
+  $('t-a').textContent='Con '+f0(redditoY(ST.mode,I24,ST.due))+' euro lordi l’anno, '+ST.mq+' m² sono alla portata di '+b.c[0]+' quartieri su '+b.pts.length+' nel 2024; nel 2015 erano '+a.c[0];
 }
+
+/* ---------- chi è uscito ---------- */
 function usciti(){
-  var a=D.anni.indexOf(2015),b=D.anni.length-1;
-  var s0=insieme(a,ST.mode,ST.mq,ST.tip),s1=insieme(b,ST.mode,ST.mq,ST.tip),out=[],inn=[],rest=0;
-  var ok0=Object.keys(s0).length;
-  NIL.forEach(function(n){if(s0[n.i]&&!s1[n.i])out.push(n.n);if(!s0[n.i]&&s1[n.i])inn.push(n.n);if(s0[n.i]&&s1[n.i])rest++});
-  out.sort(function(p,q){return p.localeCompare(q,'it')});inn.sort(function(p,q){return p.localeCompare(q,'it')});
-  var h='<h3>Chi è uscito dalla linea del 30% dal 2015 al 2024</h3><p>Con le impostazioni scelte (reddito: '+el('sel-red').options[el('sel-red').selectedIndex].text+'; casa di '+ST.mq+' m&sup2;): nel 2015 stavano dentro la linea <b>'+ok0+'</b> quartieri, nel 2024 <b>'+Object.keys(s1).length+'</b>. <b>'+out.length+'</b> sono usciti, <b>'+inn.length+'</b> sono entrati, '+rest+' sono rimasti dentro.</p>';
-  if(out.length)h+='<p class="sub"><b>Usciti:</b> '+out.map(esc).join('; ')+'.</p>';
-  if(inn.length)h+='<p class="sub"><b>Entrati:</b> '+inn.map(esc).join('; ')+'.</p>';
-  h+='<p class="sub">Per il reddito del quartiere si confrontano gli anni 2015 e 2024 (esclusi i quartieri del centro con CAP instabili). Con un reddito scritto da te o con quello di una professione il reddito è lo stesso potere d&rsquo;acquisto in tutti gli anni, quindi il confronto misura solo gli affitti.</p>';
-  setH('usciti',h);
+  var s0=[],s1=[],out=[],inn=[],rest=0;
+  lista(I24,'civ').forEach(function(n){
+    if(affitto(n,I15,'civ')==null)return;
+    var a=quota(n,I15,60,'p50','civ',false)<=D.soglia+1e-9,b=quota(n,I24,60,'p50','civ',false)<=D.soglia+1e-9;
+    if(a&&!b)out.push(n.n);if(!a&&b)inn.push(n.n);if(a&&b)rest++;
+  });
+  out.sort(function(p,q){return p.localeCompare(q,'it')});
+  $('usciti-in').innerHTML='<p>Con il reddito mediano di ogni anno e una casa da 60 m²: <b>'+out.length+'</b> quartieri erano dentro il 30% nel 2015 e non lo sono più nel 2024, <b>'+inn.length+'</b> sono entrati, '+rest+' sono rimasti dentro.</p><p><b>Usciti:</b> '+out.map(esc).join('; ')+'.</p><p class="note">Elenco fisso: non cambia con il reddito scelto sopra.</p>';
 }
 
-/* ---------- la città ---------- */
-function cittaInit(){
-  var x=D.anni,C=D.citta,S=R.citta;
-  var s=[{name:'60 m², reddito mediano',color:ACC,pts:C.map(function(c){return c.quota_p50_60})},
-         {name:'40 m², reddito mediano',color:'#62b0a4',pts:C.map(function(c){return c.quota_p50_40})},
-         {name:'80 m², reddito mediano',color:'#1b5fa6',pts:C.map(function(c){return c.quota_p50_80})},
-         {name:'40 m², 25° percentile',color:WARM,dash:true,pts:C.map(function(c){return c.quota_p25_40})}];
-  var c15=S['2015'],c22=S['2022'],c24=S['2024'],c11=S['2011'];
-  setH('citta-testo','<p>Con l&rsquo;affitto medio della città e il reddito del contribuente mediano, una casa di 60 m&sup2; costava il <b>'+pc(c11.quota_p50_60,1)+'</b> del reddito nel 2011, il <b>'+pc(c15.quota_p50_60,1)+'</b> nel 2015, il <b>'+pc(c22.quota_p50_60,1)+'</b> nel 2022 e il <b>'+pc(c24.quota_p50_60,1)+'</b> nel 2024. Per 40 m&sup2; si passa dal '+pc(c15.quota_p50_40,1)+' (2015) al '+pc(c24.quota_p50_40,1)+' (2024); per 80 m&sup2; dal '+pc(c15.quota_p50_80,1)+' al '+pc(c24.quota_p50_80,1)+'. Per chi sta al 25° percentile ('+f0(c24.p25)+' euro lordi nel 2024) anche 40 m&sup2; costano il '+pc(c24.quota_p25_40,0)+'. In media, per 60 m&sup2;, la linea del 30% &egrave; superata gi&agrave; nel 2011: restano sotto solo i quartieri pi&ugrave; economici, e sono quelli che si contano nella mappa.</p>');
-  var draw=function(){lineChart(el('ch-citta'),{xs:x,series:s,ymin:0,ymax:.9,yfmt:function(v){return pc(v,0)},vfmt:function(v){return pc(v,1)},h:280,hline:{v:D.soglia,l:'30%'},vlines:[{x:2014,l:'zone OMI ridisegnate'},{x:2023,l:'quotazioni 2023-24'}]})};
-  draw();DRAW_CITTA=draw;
-  setH('lg-citta',lgdLine(s.map(function(q){return {t:q.name,color:q.color,dash:q.dash}}).concat([{t:'linea del 30%',color:WARM,dash:true}])));
+/* ---------- 2. mappa ---------- */
+var PJ=null;
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  GEO.features.forEach(function(f){anelli(f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(lo,la){return{x:1+(lo*k-x0)*sc,y:1+(y1-la)*sc}},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2}}};
+}
+/* distanza in linea d'aria dal Duomo al centro (riquadro) di ogni quartiere */
+var DUO={lat:45.4642,lon:9.1919},CEN=null;
+function centri(){
+  if(CEN)return CEN;CEN={};
+  GEO.features.forEach(function(f){
+    var g=f.geometry,rs=g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates),a=1e9,b=-1e9,c=1e9,d=-1e9;
+    rs.forEach(function(rg){rg.forEach(function(p){a=Math.min(a,p[0]);b=Math.max(b,p[0]);c=Math.min(c,p[1]);d=Math.max(d,p[1])})});
+    var lo=(a+b)/2,la=(c+d)/2,R=6371,rad=Math.PI/180,dl=(la-DUO.lat)*rad,dn=(lo-DUO.lon)*rad;
+    var h=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(DUO.lat*rad)*Math.cos(la*rad)*Math.sin(dn/2)*Math.sin(dn/2);
+    CEN[f.properties.i]={lon:lo,lat:la,km:2*R*Math.asin(Math.sqrt(h))};
+  });
+  return CEN;
+}
+function mappa(){
+  var W=width('ch-mappa'),yi=ST.yi,y=D.anni[yi],P=proj(W);
+  var qs={};
+  NIL.forEach(function(n){if(!abitato(n)||affitto(n,yi,ST.tip)==null)return;qs[n.i]=quota(n,yi,ST.mq,ST.mode,ST.tip,ST.due)});
+  var CL=[{c:C.v,t:'dentro il 30%'},{c:C.g,t:'tra il 30% e il 40%'},{c:C.r,t:'oltre il 40%'}];
+  var cnt=[0,0,0],grey=0;
+  var s=svgOpen(W,P.H),sS='',sel=ST.sel;
+  GEO.features.forEach(function(f){var n=BY[f.properties.i],q=qs[n.i],isS=n.i===sel,c=q==null?-1:sem(q);if(c>=0)cnt[c]++;else grey++;
+    var h='<b>'+esc(n.n)+'</b><br>'+(q==null?(abitato(n)?'Nessuna quotazione OMI per questo anno':'Meno di 2.000 residenti: non confrontabile'):f0(affitto(n,yi,ST.tip)*ST.mq)+' € al mese per '+ST.mq+' m²<br><b>'+pp(q)+'</b> del reddito ('+CL[c].t+')');
+    var el='<path d="'+P.path(f)+'" fill="'+(c>=0?CL[c].c:'#dde0e5')+'" stroke="'+(isS?C.ink:'#fff')+'" stroke-width="'+(isS?3:.8)+'" stroke-linejoin="round" data-n="'+n.i+'"'+tip(h)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el});
+  s+=sS;
+  /* nomi: il più caro, il meno caro, il scelto */
+  var ids=Object.keys(qs).map(Number).sort(function(a,b){return qs[b]-qs[a]}),lab=[ids[0],last(ids)];if(sel!=null&&lab.indexOf(sel)<0&&qs[sel]!=null)lab.push(sel);
+  var used=[];
+  lab.forEach(function(id){var f=GEO.features.filter(function(g){return g.properties.i===id})[0],b=P.bb(f),t=sn(BY[id])+' '+pp(qs[id]),w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),yy=b.y+4,tries=0;
+    while(tries<6&&used.some(function(u){return Math.abs(u.y-yy)<15&&Math.abs(u.x-x)<(u.w+w)/2+4})){yy+=(tries%2?-1:1)*15*(tries+1);tries++}
+    yy=Math.max(14,Math.min(P.H-4,yy));used.push({x:x,y:yy,w:w});
+    s+='<g pointer-events="none">'+T(x,yy,esc(t),{a:'middle',c:'halo',st:'font-size:13px;font-weight:700'})+'</g>'});
+  $('ch-mappa').innerHTML='<div class="lg">'+CL.map(function(q,i){return '<span><i style="background:'+q.c+'"></i>'+q.t+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#dde0e5"></i>senza dato <b>&nbsp;'+grey+'</b></span></div>'+s+'</svg>';
+  var tot=cnt[0]+cnt[1]+cnt[2];
+  $('t-mappa').textContent='Nel '+y+', con '+f0(redditoY(ST.mode,yi,ST.due))+' euro lordi l’anno e '+ST.mq+' m², '+cnt[0]+' quartieri su '+tot+' stanno dentro il 30%';
+  $('s-mappa').textContent='Colore a semaforo: quanta parte del reddito se ne va in affitto. Verde: dentro il 30%. Giallo: tra il 30% e il 40%. Rosso: oltre il 40%. Il numero accanto al colore conta i quartieri. Reddito, casa e tipo si scelgono nel riquadro «Prova con il tuo reddito»; l’anno qui sotto. Tocca un quartiere per la scheda.';
 }
 
-/* ---------- che reddito serve ---------- */
-var BARS_DONE=false;
+/* ---------- scheda del quartiere ---------- */
+function scheda(){
+  var box=$('scheda');
+  if(ST.sel==null){box.innerHTML='<div class="card"><h4>Scegli un quartiere</h4><p class="note">Scrivi il nome sopra o toccalo sulla mappa: qui compaiono affitto, quota del reddito e reddito che serve.</p></div>';return}
+  var n=BY[ST.sel],yi=ST.yi,y=D.anni[yi],a=affitto(n,yi,ST.tip);
+  if(a==null){box.innerHTML='<div class="card"><h4>'+esc(n.n)+'</h4><p class="note">Nessuna quotazione OMI per questo anno.</p></div>';return}
+  var inc=redditoY(ST.mode,yi,ST.due),q=a*ST.mq*12/inc,ok=q<=D.soglia+1e-9,j=capI(y);
+  var h='<div class="card"><h4>'+esc(n.n)+', '+y+'</h4><div class="tre">';
+  h+='<div><b>'+f0(a*ST.mq)+' €</b><span>affitto al mese per '+ST.mq+' m² ('+f1(a)+' € al m²)</span></div>';
+  h+='<div><b style="color:'+SEMTXT[sem(q)]+'">'+pp(q)+'</b><span>del reddito scelto: '+['dentro il 30%','tra il 30% e il 40%','oltre il 40%'][sem(q)]+'</span></div>';
+  h+='<div><b>'+f0(a*ST.mq*12/D.soglia)+' €</b><span>reddito lordo l’anno che serve per il 30%</span></div></div>';
+  h+='<p class="note">Ce la fa il <b>'+pp(okShare(n,yi,ST.mq,ST.tip))+'</b> dei contribuenti di Milano. ';
+  if(j>=0&&n.p50[j]!=null&&!n.instab)h+='Il reddito tipico di chi abita qui è circa '+f0(n.p50[j])+' € (stima). ';
+  else if(j>=0&&n.instab)h+='Il reddito di chi abita qui non è affidabile (CAP 20121 e 20122). ';
+  if(n.notti!=null)h+='Con Airbnb servirebbero '+f1(n.notti)+' notti al mese per incassare l’affitto di 60 m² (fotografia 2026).';
+  h+='</p></div>';
+  box.innerHTML=h;
+}
+
+/* ---------- 3. quanto pesa: linee ---------- */
+function peso(){
+  var W=width('ch-peso'),H=290,ml=44,mr=Math.min(122,W*.34),mt=14,mb=30,pw=W-ml-mr,ph=H-mt-mb,xs=D.anni,x0=xs[0],x1=last(xs),ymax=.6;
+  function X(v){return ml+(v-x0)/(x1-x0)*pw}function Y(v){return mt+ph-v/ymax*ph}
+  var S=[{n:'60 m²',c:C.ink,k:'quota_p50_60'},{n:'40 m²',c:C.m4,k:'quota_p50_40'},{n:'80 m²',c:C.m5,k:'quota_p50_80'},{n:'40 m², basso',c:C.ora,k:'quota_p25_40',d:1}];
+  var s=svgOpen(W,H);
+  s+='<rect x="'+ml+'" y="'+r1(Y(.3))+'" width="'+r1(W-mr-ml)+'" height="'+r1(Y(0)-Y(.3))+'" fill="'+C.v+'" fill-opacity=".16"/>';
+  s+='<rect x="'+ml+'" y="'+r1(Y(.4))+'" width="'+r1(W-mr-ml)+'" height="'+r1(Y(.3)-Y(.4))+'" fill="'+C.g+'" fill-opacity=".28"/>';
+  s+='<rect x="'+ml+'" y="'+r1(Y(ymax))+'" width="'+r1(W-mr-ml)+'" height="'+r1(Y(.4)-Y(ymax))+'" fill="'+C.r+'" fill-opacity=".12"/>';
+  [0,.1,.2,.3,.4,.5,.6].forEach(function(v){if(v===.3)return;s+=L(ml,Y(v),W-mr,Y(v),C.grid,1)+((v===0||v===.6)?T(ml-6,Y(v)+4,pp(v),{a:'end',c:'m'}):'')});
+  s+=L(ml,Y(.3),W-mr,Y(.3),C.ink,1.4,' stroke-dasharray="5 4"')+T(ml-6,Y(.3)+4,'30%',{a:'end',c:'b'});
+  s+=L(ml,mt+ph,W-mr,mt+ph,C.axis,1);
+  [2011,2015,2019,2024].forEach(function(y){s+=T(X(y),H-10,y,{a:y===2011?'start':y===2024?'end':'middle',c:'m'})});
+  S.forEach(function(se){
+    var d='';D.citta.forEach(function(c,i){d+=(i?'L':'M')+r1(X(c.anno))+' '+r1(Y(c[se.k]))});
+    s+='<path d="'+d+'" fill="none" stroke="'+se.c+'" stroke-width="2.6" stroke-linejoin="round"'+(se.d?' stroke-dasharray="6 4"':'')+'/>';
+    var a=D.citta[0][se.k],b=last(D.citta)[se.k];
+    s+='<circle cx="'+r1(X(x0))+'" cy="'+r1(Y(a))+'" r="3.4" fill="'+se.c+'"/><circle cx="'+r1(X(x1))+'" cy="'+r1(Y(b))+'" r="3.4" fill="'+se.c+'"/>';
+  });
+  var e=S.map(function(se){return{se:se,y:Y(last(D.citta)[se.k])+4}});spread(e,15,mt+8,H-mb);
+  e.forEach(function(o){var v=last(D.citta)[o.se.k];s+=T(X(x1)+8,o.y,'<tspan fill="'+o.se.c+'" style="font-weight:800">'+pp(v)+'</tspan> '+o.se.n,{c:'b'})});
+  var b0=S.map(function(se){return{se:se,y:Y(D.citta[0][se.k])+4}});spread(b0,15,mt+8,H-mb);
+  b0.forEach(function(o){s+=T(X(x0)-8,o.y,pp(D.citta[0][o.se.k]),{a:'end',c:'b',st:'fill:'+o.se.c});});
+  /* note numerate */
+  [[2014,1],[2023,2]].forEach(function(p){s+='<circle cx="'+r1(X(p[0]))+'" cy="'+(mt+9)+'" r="9" fill="'+C.ink+'"/><text x="'+r1(X(p[0]))+'" y="'+(mt+13)+'" text-anchor="middle" class="w" style="fill:#fff">'+p[1]+'</text>'});
+  /* tocco per anno */
+  var sl=pw/(xs.length-1);
+  D.citta.forEach(function(c,i){
+    var h='<b>'+c.anno+'</b><br>'+S.map(function(se){return se.n+': '+pp(c[se.k])}).join('<br>');
+    s+='<rect x="'+r1(X(c.anno)-sl/2)+'" y="'+mt+'" width="'+r1(sl)+'" height="'+ph+'" fill="transparent"'+tip(h)+'/>';
+  });
+  $('ch-peso').innerHTML=s+'</svg>';
+  $('lg-peso').innerHTML=semLg()+'<span><i class="ln" style="background:'+C.ink+'"></i>60 m²</span><span><i class="ln" style="background:'+C.m4+'"></i>40 m²</span><span><i class="ln" style="background:'+C.m5+'"></i>80 m²</span><span><i class="ln" style="background:'+C.ora+'"></i>40 m², reddito basso</span>';
+  var C5=D.citta[I15],C4=last(D.citta);
+  $('t-peso').textContent='Con il reddito mediano, 60 m² costavano il '+pp(C5.quota_p50_60)+' del reddito nel 2015 e costano il '+pp(C4.quota_p50_60)+' nel 2024: '+f0((C4.quota_p50_60-C5.quota_p50_60)*100)+' punti in più';
+  $('nt-peso').innerHTML='<li><b class="nb">1</b><span>Nel 2014 le zone dell&rsquo;Agenzia passano da 55 a 40: prima di qui i confronti sono meno solidi.</span></li><li><b class="nb">2</b><span>Nel 2023-2024 le quotazioni salgono del '+f0(R.affitto_civici_crescita_2022_2024_pct)+'% in due anni, in parte perché le stime si aggiornano. Il reddito mediano cresce del '+f0(R.reddito_mediano_crescita_2015_2024_pct)+'% in nove anni, l&rsquo;inflazione del '+f0(R.foi_crescita_2015_2024_pct)+'%.</span></li>';
+}
+
+/* ---------- il reddito tipico di chi abita: una barra per quartiere ---------- */
+function tipSem(yi){
+  var j=capI(D.anni[yi]),c=[0,0,0],tot=0;
+  NIL.forEach(function(n){if(!abitato(n)||n.instab||n.aff[yi]==null||n.p50[j]==null)return;tot++;c[sem(n.aff[yi]*60*12/n.p50[j])]++});
+  return{c:c,tot:tot};
+}
+function tipico(){
+  var j24=capI(2024),j15=capI(2015),pts=[];
+  NIL.forEach(function(n){if(!abitato(n)||n.instab||n.aff[I24]==null||n.p50[j24]==null)return;
+    pts.push({n:n,x:n.p50[j24],q:n.aff[I24]*720/n.p50[j24],q15:(n.aff[I15]!=null&&n.p50[j15]!=null)?n.aff[I15]*720/n.p50[j15]:null,x15:n.p50[j15]})});
+  pts.sort(function(a,b){return a.q-b.q});
+  var S15=tipSem(I15),S24=tipSem(I24);
+  var W=width('ch-tipico'),nw=Math.min(136,W*.37),ml=nw+6,mr=52,pw=W-ml-mr,rh=22;
+  var mx=0;pts.forEach(function(p){mx=Math.max(mx,p.q,p.q15||0)});
+  var AX=Math.max(.8,Math.ceil(mx*10)/10);
+  function X(v){return ml+v/AX*pw}
+  var s='',y=0,sx0=44,swd=W-sx0-2,SB=34;
+  /* i due riassunti: 2015 e 2024 */
+  [[2015,S15],[2024,S24]].forEach(function(a){
+    var S=a[1],x=sx0;
+    s+=T(0,y+23,'<tspan style="font-weight:800;font-size:15px">'+a[0]+'</tspan>',{});
+    S.c.forEach(function(k,si){var w=k/S.tot*swd;if(!k)return;
+      s+='<rect x="'+r1(x)+'" y="'+y+'" width="'+r1(w)+'" height="'+SB+'" fill="'+SEMC[si]+'" stroke="#fff" stroke-width="1.5"'+tip('<b>'+a[0]+'</b><br>'+k+' quartieri su '+S.tot+': '+['il reddito tipico basta (affitto dentro il 30%)','affitto tra il 30% e il 40% del reddito tipico','affitto oltre il 40% del reddito tipico'][si])+'/>';
+      if(w>=18)s+=T(x+w/2,y+22,String(k),{a:'middle',st:'font-weight:800;font-size:14px;fill:'+(si===1?'#1a1a1a':'#fff')});
+      x+=w});
+    y+=SB+8});
+  y+=14;
+  /* intestazione dell'asse */
+  var hy=y+12;
+  s+=T(0,hy,'Quartiere (dal meno al più pesante, 2024)',{c:'m'});
+  var y30=X(.3),y40=X(.4);
+  s+=T(y30+3,hy+16,'30%',{a:'end',c:'b'})+T(y40-3,hy+16,'40%',{c:'b'});
+  var ry=hy+24,H=ry+pts.length*rh+26;
+  s+=L(y30,ry-6,y30,ry+pts.length*rh,C.ink,1.5,' stroke-dasharray="5 4"')+L(y40,ry-6,y40,ry+pts.length*rh,C.ink,1.5,' stroke-dasharray="1.5 3"');
+  var sel=null;
+  pts.forEach(function(p,i){
+    var yy=ry+i*rh,s0=sem(p.q),isS=p.n.i===ST.sel;
+    if(isS)s+='<rect x="0" y="'+(yy+1)+'" width="'+W+'" height="'+(rh-2)+'" fill="none" stroke="'+C.ink+'" stroke-width="2"/>';
+    s+=T(nw,yy+rh/2+4,esc(shortn(sn(p.n),nw,isS)),{a:'end',c:isS?'b':''});
+    var h='<b>'+esc(p.n.n)+'</b><br>reddito tipico di chi abita: '+f0(p.x)+' €<br>affitto di 60 m²: '+f0(p.n.aff[I24]*60)+' € al mese<br>nel 2024 pesa il <b>'+pp(p.q)+'</b> del reddito tipico: '+['basta, dentro il 30%','tra il 30% e il 40%','oltre il 40%'][s0]+(p.q15!=null?'<br>nel 2015 pesava il '+pp(p.q15):'');
+    s+='<rect x="'+ml+'" y="'+(yy+3)+'" width="'+r1(Math.max(X(p.q)-ml,1))+'" height="'+(rh-6)+'" fill="'+SEMC[s0]+'" data-n="'+p.n.i+'"'+tip(h)+' style="cursor:pointer"/>';
+    if(p.q15!=null)s+='<circle cx="'+r1(X(p.q15))+'" cy="'+(yy+rh/2)+'" r="4.6" fill="'+SEMC[sem(p.q15)]+'" stroke="'+C.ink+'" stroke-width="1.6" data-n="'+p.n.i+'"'+tip(h)+' style="cursor:pointer"/>';
+    s+=T(Math.max(X(p.q),p.q15!=null?X(p.q15)+5:0)+7,yy+rh/2+4,f1(p.q*100)+'%',{c:'b halo',st:'font-size:12px'});
+  });
+  s+=T(0,H-6,'Barra: 2024. Cerchio: lo stesso quartiere nel 2015.',{c:'m'});
+  $('ch-tipico').innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('lg-tipico').innerHTML='<span><i style="background:'+C.v+'"></i>basta: affitto dentro il 30%</span><span><i style="background:'+C.g+'"></i>quasi: tra il 30% e il 40%</span><span><i style="background:'+C.r+'"></i>non basta: oltre il 40%</span><span><i class="ring" style="border-color:'+C.ink+'"></i>stesso quartiere nel 2015</span>';
+  var N=pts.length;
+  $('t-tipico').textContent='Il reddito tipico di chi abita basta per 60 m² in '+S24.c[0]+' quartieri su '+S24.tot+'; nel 2015 erano '+S15.c[0]+' su '+S15.tot;
+  $('sp-conf').innerHTML='Nel 2015 il reddito tipico bastava in <b>'+S15.c[0]+' quartieri su '+S15.tot+'</b>; nel 2024 basta in <b>'+S24.c[0]+' su '+S24.tot+'</b>. Le due barre colorate in alto contano i quartieri verdi, gialli e rossi: 2015 sopra, 2024 sotto. Nello stesso periodo gli affitti delle quotazioni sono saliti del '+f0(R.affitto_civici_crescita_2015_2024_pct)+'% e il reddito mediano di Milano del '+f0(R.reddito_mediano_crescita_2015_2024_pct)+'%. Sotto, ogni quartiere ha la sua riga: la barra dice quanta parte del reddito tipico se ne va in affitto nel 2024, il cerchio com&rsquo;era nel 2015.';
+  $('nt-tipico').innerHTML='Pesa di più a '+esc(sn(last(pts).n))+' ('+pp(last(pts).q)+' del reddito tipico) e di meno a '+esc(sn(pts[0].n))+' ('+pp(pts[0].q)+'). Gli affitti dell&rsquo;Agenzia sono stime e il reddito del quartiere è ricostruito dai CAP: un quartiere vicino al 30% non si può dire dentro o fuori con certezza. Tocca una barra per vedere i numeri e scegliere il quartiere nella mappa.';
+}
+
+/* ---------- che reddito serve: barre ---------- */
 function serve(){
-  var yi=D.anni.indexOf(2024),arr=NIL.filter(function(n){return abitato(n)&&n.aff[yi]!=null}).map(function(n){return {n:n.n,v:n.aff[yi]*60*12/D.soglia}}).sort(function(a,b){return b.v-a.v});
-  var C=R.citta['2024'],nec=R.reddito_necessario_60mq;
-  if(!BARS_DONE){BARS_DONE=true;
-    var top=arr.slice(0,8),bot=arr.slice(-8).reverse(),mx=top[0].v;
-    function bars(id,rows,col){setH(id,rows.map(function(r){return '<div class="row"><span class="nm" title="'+esc(r.n)+'">'+esc(r.n)+'</span><span class="tr"><span class="fill" style="width:'+(r.v/mx*100)+'%;background:'+col+'"></span></span><span class="v">'+f0(r.v)+' €</span></div>'}).join(''))}
-    bars('b-serve-alto',top,'#a8540f');bars('b-serve-basso',bot,ACC);
-    el('rif-serve').textContent='mediano '+f0(C.p50)+' €, 75° percentile '+f0(C.p75)+' €';
-    setH('serve-testo','<p>Per una casa di 60 m&sup2; nel 2024 il reddito lordo che serve per restare nel 30% va da <b>'+f0(nec['2024'].min[1])+' euro</b> ('+esc(nec['2024'].min[0])+') a <b>'+f0(nec['2024'].max[1])+' euro</b> ('+esc(nec['2024'].max[0])+'); nel quartiere mediano &egrave; <b>'+f0(nec['2024'].mediana)+' euro</b>. Nel 2015 era '+f0(nec['2015'].mediana)+' euro, e a Milano il reddito mediano dei contribuenti era '+f0(R.citta['2015'].p50)+' euro. Quanti contribuenti guadagnano almeno la cifra del quartiere mediano? Il <b>'+nf(nec['2015'].quota_contribuenti_sopra_mediana_nil,0)+'%</b> nel 2015, il <b>'+nf(nec['2024'].quota_contribuenti_sopra_mediana_nil,0)+'%</b> nel 2024. Sono contribuenti singoli: una coppia con due redditi sta in condizioni molto diverse (spunta &laquo;due redditi uguali&raquo; sopra).</p>');
-  }
-}
-function tabAll(){
-  var yi=ST.yi,rows=NIL.filter(abitato).map(function(n){var q=quotaN(n,yi),a=affitto(n,yi);return {n:n,q:q,a:a}}).sort(function(p,q){return (q.q==null?-1:q.q)-(p.q==null?-1:p.q)});
-  table('tab-all',['Quartiere','Affitto € al mese','Reddito considerato €','Quota del reddito','Reddito per il 30% €','Contribuenti che ce la fanno'],rows.map(function(r){
-    var rd=reddito(r.n,yi);
-    return [esc(r.n.n),r.a==null?'':f0(r.a*ST.mq),rd.no?'':f0(rd.v),r.q==null?'':pc(r.q,0),r.a==null?'':f0(r.a*ST.mq*12/D.soglia),r.a==null?'':pc(okShare(r.n,yi),0)]}));
+  var yi=I24,ls=lista(yi,'civ').map(function(n){return{n:n,v:need(n,yi,60,'civ')}}).sort(function(a,b){return b.v-a.v});
+  var top=ls.slice(0,8),bot=ls.slice(-8),G=[{t:'I più cari',a:top},{t:'I meno cari',a:bot}];
+  var W=width('ch-serve'),nw=Math.min(150,W*.4),ml=nw+6,mr=64,rh=24,hd=44,gh=26,AX=Math.ceil(top[0].v/10000)*10000,pw=W-ml-mr;
+  function X(v){return ml+v/AX*pw}
+  var p50=D.citta[yi].p50,lim=p50*4/3,H=hd+G.length*(gh+8*rh)+6,s=svgOpen(W,H),y=hd;
+  var t1='verde fino a '+f0(p50)+' (mediano)',t2='giallo fino a '+f0(lim);
+  s+=T(X(p50)+(tw(t1,13,true)+X(p50)>W-4?-4:4),12,t1,{a:tw(t1,13,true)+X(p50)>W-4?'end':'start',c:'b'});
+  s+=T(X(lim)+(tw(t2,13,true)+X(lim)>W-4?-4:4),30,t2,{a:tw(t2,13,true)+X(lim)>W-4?'end':'start',c:'b'});
+  s+=L(X(p50),hd-6,X(p50),H-4,C.ink,2)+L(X(lim),hd-6,X(lim),H-4,C.ink,2,' stroke-dasharray="2 3"');
+  G.forEach(function(g){
+    s+=T(0,y+17,g.t,{c:'b'});y+=gh;
+    g.a.forEach(function(o,i){var yy=y+i*rh,si=o.v<=p50?0:o.v<=lim?1:2,w=o.v/AX*pw;
+      s+=T(nw,yy+rh/2+4,esc(shortn(sn(o.n),nw,false)),{a:'end'});
+      s+='<rect x="'+ml+'" y="'+(yy+3)+'" width="'+r1(w)+'" height="'+(rh-6)+'" fill="'+SEMC[si]+'"'+tip('<b>'+esc(o.n.n)+'</b><br>serve un reddito lordo di '+f0(o.v)+' € l’anno per 60 m²<br>affitto '+f1(affitto(o.n,yi,'civ'))+' € al m² al mese<br>col reddito mediano pesa il '+pp(o.v/p50*D.soglia)+' del reddito')+'/>';
+      s+=T(ml+w+5,yy+rh/2+4,f0(o.v)+' €',{c:'b halo'});});
+    y+=8*rh;
+  });
+  $('ch-serve').innerHTML='<div class="lg"><span><i style="background:'+C.v+'"></i>col reddito mediano: dentro il 30%</span><span><i style="background:'+C.g+'"></i>tra il 30% e il 40%</span><span><i style="background:'+C.r+'"></i>oltre il 40%</span></div>'+s+'</svg>';
+  var needs=ls.map(function(o){return o.v}),med=median(needs);
+  $('t-serve').textContent='Per 60 m² dentro il 30% servono da '+f0(last(ls).v)+' euro lordi a '+sn(last(ls).n)+' a '+f0(ls[0].v)+' a '+sn(ls[0].n)+'; nel quartiere mediano '+f0(med);
+  var sopra=1-cdf(yi,med);
+  $('nt-serve').innerHTML='Il reddito mediano di Milano è '+f0(p50)+' euro: '+(ls.filter(function(o){return o.v<=p50}).length)+' quartieri su '+ls.length+' sono alla portata di chi guadagna come lui. Il reddito del quartiere mediano lo raggiunge il '+f0(sopra*100)+'% dei contribuenti nel 2024 (era il '+f0(R.reddito_necessario_60mq['2015'].quota_contribuenti_sopra_mediana_nil)+'% nel 2015).';
 }
 
 /* ---------- professioni ---------- */
-function professioni(){
-  var P=D.professioni;
-  var h='<p>I contratti nazionali pubblicano uno <b>stipendio di base</b> (il &laquo;tabellare&raquo;), non quanto si guadagna davvero con turni, indennit&agrave; e straordinari: i numeri qui sotto sono quindi una stima <b>per difetto</b>. Sono presi dai testi ufficiali dell&rsquo;ARAN (l&rsquo;agenzia che firma i contratti del pubblico impiego), valori dal 1&deg; gennaio 2024: 12 mensilit&agrave; pi&ugrave; la tredicesima, lordi.</p>';
-  h+='<div class="scroll"><table><thead><tr><th>Professione</th><th class="r">Lordo annuo (con 13a)</th><th class="r">Quartieri sotto il 30% nel 2024 (40 / 60 / 80 m&sup2;)</th><th>Fonte ufficiale (ARAN)</th></tr></thead><tbody>';
-  P.forEach(function(q){h+='<tr><td>'+esc(q.nome)+'</td><td class="r"><b>'+f0(q.lordo)+' €</b><br><span class="sub">'+nf(q.tabellare_12,2)+' (12 mensilità) ÷ 12 × 13</span></td><td class="r">'+q.nil_dentro_30_2024['40']+' / '+q.nil_dentro_30_2024['60']+' / '+q.nil_dentro_30_2024['80']+' su '+R.n_nil+'</td><td>'+esc(q.fonte)+'. <a href="'+esc(q.url)+'" rel="noopener">PDF</a></td></tr>'});
-  h+='<tr><td>Autista di autobus</td><td class="r"><span class="sub">non incluso</span></td><td class="r"></td><td>Il contratto degli autoferrotranvieri &egrave; un contratto privato (tra associazioni di imprese e sindacati), senza un testo ufficiale aperto con una tabella chiara: non ho usato cifre di fonti secondarie.</td></tr>';
-  h+='</tbody></table></div>';
-  h+='<p>Per l&rsquo;infermiere, &egrave; escluso dal calcolo anche l&rsquo;indennit&agrave; di specificit&agrave; infermieristica ('+nf(R.professioni.indennita_specificita_infermieristica_mese,2)+' euro al mese per 12 mesi dal 2024, Tabella 3 dello stesso contratto). Per i docenti, l&rsquo;anzianit&agrave; di servizio conta molto: la fascia 0-8 anni &egrave; l&rsquo;inizio carriera, la 15-20 &egrave; una met&agrave; carriera. Nel calcolatore puoi scegliere queste professioni dall&rsquo;elenco dei redditi; per tutte le altre c&rsquo;&egrave; <b>un reddito che scrivi tu</b> (il lordo annuo, la &laquo;RAL&raquo; della busta paga). I numeri sono per una persona sola: con due stipendi spunta &laquo;due redditi uguali&raquo;.</p>';
-  setH('prof-testo',h);
+var ETQ_Q=['dentro il 30%','tra il 30% e il 40%','oltre il 40%'];
+function profRows(){
+  var c=D.citta[I24];
+  return PROF.map(function(q){return{n:q.corto,v:q.lordo,k:q.k}}).concat([{n:'Reddito basso (25° percentile)',v:c.p25,k:'p25'},{n:'Reddito mediano',v:c.p50,k:'p50'},{n:'Reddito alto (75° percentile)',v:c.p75,k:'p75'}]);
+}
+function semCounts(v,mq){var c=[0,0,0];lista(I24,'civ').forEach(function(n){c[sem(affitto(n,I24,'civ')*mq*12/v)]++});return c}
+function prof(){
+  var N=lista(I24,'civ').length,rows=profRows(),mq=PM;
+  rows.forEach(function(r){r.c=semCounts(r.v,mq)});
+  var W=width('ch-prof'),rh=60,H=rows.length*rh+4,s=svgOpen(W,H),bx=2,bw=W-4;
+  rows.forEach(function(r,i){
+    var y=i*rh,x=bx;
+    s+=T(bx,y+16,'<tspan style="font-weight:700">'+esc(r.n)+'</tspan>  <tspan fill="'+C.mut+'" style="font-size:12px">'+f0(r.v)+' € lordi</tspan>',{});
+    r.c.forEach(function(k,si){
+      var w=k/N*bw;if(!k)return;
+      s+='<rect x="'+r1(x)+'" y="'+(y+24)+'" width="'+r1(w)+'" height="30" fill="'+SEMC[si]+'" stroke="#fff" stroke-width="1.5"'+tip('<b>'+esc(r.n)+'</b> ('+f0(r.v)+' € lordi)<br>casa da '+mq+' m²: '+k+' quartieri su '+N+' con l’affitto '+ETQ_Q[si]+' del reddito')+'/>';
+      if(w>=20)s+=T(x+w/2,y+44,String(k),{a:'middle',st:'font-weight:800;font-size:14px;fill:'+(si===1?'#1a1a1a':'#fff')});
+      x+=w;
+    });
+  });
+  $('ch-prof').innerHTML=s+'</svg>';
+  $('lg-prof').innerHTML=semLg('quartieri ');
+  var inf=rows[0].c,p0=rows[1].c,s15=rows[4].c;
+  $('t-prof').textContent='Con lo stipendio di base un infermiere si può permettere '+mq+' m² in '+inf[0]+' quartieri su '+N+', un insegnante di primaria a inizio carriera in '+p0[0]+', uno delle superiori con 15-20 anni di servizio in '+s15[0];
+  var i80=semCounts(rows[0].v,80)[0],s80=semCounts(rows[4].v,80)[0];
+  $('nt-prof').innerHTML='I numeri nelle barre sono quartieri. Con 80 m² quasi nessuno ce la fa: '+i80+' quartieri per l&rsquo;infermiere, '+s80+' per l&rsquo;insegnante con più anzianità. Sono stipendi di una persona sola: per una famiglia con due stipendi, spunta «due redditi uguali» nel riquadro in alto.';
+  $('src-prof').innerHTML='Stipendi lordi annui dal 1° gennaio 2024, 12 mensilità più la tredicesima, dai testi ufficiali dell&rsquo;ARAN (l&rsquo;agenzia che firma i contratti del pubblico impiego). '+PROF.map(function(q){return esc(q.nome.split(',')[0]==='Infermiere/a'?'Infermiere':q.nome.split(',')[0])+': '+f0(q.lordo)+' € ('+nf2(q.tabellare_12)+' × 12 ÷ 12 × 13), '+esc(q.fonte)+' — <a href="'+esc(q.url)+'" rel="noopener">testo del contratto</a>'}).join('. ')+'. Per l&rsquo;infermiere è esclusa l&rsquo;indennità di specificità infermieristica ('+nf2(R.professioni.indennita_specificita_infermieristica_mese)+' euro al mese). L&rsquo;autista di autobus non c&rsquo;è: il suo contratto è privato e non ha una tabella ufficiale aperta.';
 }
 
-/* ---------- limiti e metodo ---------- */
+/* la mappa del mestiere */
+function profB(){
+  var W=width('ch-pb'),P=proj(W),rows=profRows(),r=rows.filter(function(x){return x.k===PBK})[0],mq=PBM,cen=centri(),N=0;
+  var cnt=[0,0,0],grey=0,best=null,s=svgOpen(W,P.H),sS='';
+  GEO.features.forEach(function(f){
+    var n=BY[f.properties.i],a=abitato(n)?affitto(n,I24,'civ'):null;
+    if(a==null){s+='<path d="'+P.path(f)+'" fill="#dde0e5" stroke="#fff" stroke-width=".8" stroke-linejoin="round"'+tip('<b>'+esc(n.n)+'</b><br>'+(abitato(n)?'Nessuna quotazione OMI':'Meno di 2.000 residenti: non confrontabile'))+'/>';grey++;return}
+    var q=a*mq*12/r.v,si=sem(q);cnt[si]++;N++;
+    if(si===0&&(!best||cen[n.i].km<best.km))best={n:n,f:f,km:cen[n.i].km};
+    s+='<path d="'+P.path(f)+'" fill="'+SEMC[si]+'" stroke="#fff" stroke-width=".8" stroke-linejoin="round"'+tip('<b>'+esc(n.n)+'</b><br>'+f0(a*mq)+' € al mese per '+mq+' m²<br>con '+f0(r.v)+' € lordi l’anno pesa il <b>'+pp(q)+'</b>: '+ETQ_Q[si]+'<br>a '+f1(cen[n.i].km)+' km dal Duomo')+'/>';
+  });
+  var du=P.pt(DUO.lon,DUO.lat);
+  var lab=[];
+  if(best){s+='<path d="'+P.path(best.f)+'" fill="none" stroke="'+C.ink+'" stroke-width="3" stroke-linejoin="round" pointer-events="none"/>';var b=P.bb(best.f);lab.push({t:sn(best.n),x:b.x,y:b.y+4})}
+  s+='<path d="M'+r1(du.x)+' '+r1(du.y-7)+'L'+r1(du.x+6)+' '+r1(du.y)+'L'+r1(du.x)+' '+r1(du.y+7)+'L'+r1(du.x-6)+' '+r1(du.y)+'Z" fill="'+C.ink+'" stroke="#fff" stroke-width="1.5" pointer-events="none"/>';
+  lab.push({t:'Duomo',x:du.x,y:du.y-12});
+  var used=[];
+  lab.forEach(function(o){var w=tw(o.t,13,true),x=Math.min(Math.max(o.x,w/2+2),W-w/2-2),yy=o.y,tries=0;
+    while(tries<6&&used.some(function(u){return Math.abs(u.y-yy)<15&&Math.abs(u.x-x)<(u.w+w)/2+4})){yy+=(tries%2?-1:1)*15*(tries+1);tries++}
+    yy=Math.max(14,Math.min(P.H-4,yy));used.push({x:x,y:yy,w:w});
+    s+='<g pointer-events="none">'+T(x,yy,esc(o.t),{a:'middle',c:'halo',st:'font-size:13px;font-weight:700'})+'</g>'});
+  $('ch-pb').innerHTML='<div class="lg">'+[0,1,2].map(function(i){return '<span><i style="background:'+SEMC[i]+'"></i>'+ETQ_Q[i]+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#dde0e5"></i>senza dato <b>&nbsp;'+grey+'</b></span></div>'+s+'</svg>';
+  $('t-pb').textContent='«'+r.n+'» ('+f0(r.v)+' € lordi): '+mq+' m² stanno dentro il 30% in '+cnt[0]+' quartieri su '+N+(best?'; il più vicino al Duomo è '+sn(best.n)+', a '+f1(best.km)+' km':'; nessuno è vicino al Duomo');
+}
+
+function nf2(x){var r=(Math.round(x*100)/100).toFixed(2).split('.');return grp(r[0])+','+r[1]}
+
+/* ---------- in fondo ---------- */
 function limiti(){
   var L=[
-   '<b>Gli affitti sono stime, non affitti firmati.</b> L&rsquo;OMI dell&rsquo;Agenzia delle Entrate d&agrave; per ogni zona una forbice (minimo e massimo) di &euro;/m&sup2; al mese per le abitazioni civili in stato normale: noi usiamo il valore centrale e la superficie lorda. Non sono gli affitti degli annunci n&eacute; quelli dei contratti gi&agrave; in corso: la mappa dice che cosa costerebbe un nuovo contratto in una casa &laquo;media&raquo; della zona, non che cosa pagano i residenti. Non abbiamo un secondo dato per misurare di quanto l&rsquo;OMI si scosti dal mercato.',
-   '<b>Il salto 2023-2024 &egrave; in parte l&rsquo;Agenzia che si aggiorna.</b> Le quotazioni salgono del '+nf(R.affitto_civici_crescita_2022_2024_pct,0)+'% in due anni dopo essere salite del '+nf(R.affitto_civici_crescita_2015_2022_pct,0)+'% in sette. Parte di questo &egrave; mercato, parte revisione delle stime (con la revisione delle zone del 2024). Ne segue che la fine della serie pesa pi&ugrave; del resto nei conteggi &laquo;quanti quartieri sono usciti dal 30%&raquo;.',
-   '<b>Le zone OMI non sono i quartieri.</b> Il valore di un quartiere (NIL) &egrave; la media delle quotazioni delle zone in cui cadono le sue case residenziali (circa '+f0(R.log.civici_residenziali)+' civici), ciascuna con la zona che aveva in quel semestre. Le zone sono state ridisegnate: 55 fino al 2013, 40 dal 2014, 42 dal secondo semestre 2024. Tra 2013 e 2014 i salti possono essere di perimetro; per questo i confronti principali partono dal 2015. Tre quartieri minori (Chiaravalle, Quintosole, Ronchetto delle Rane) non hanno case in zone con quotazione dal 2014.',
-   '<b>I redditi sono di contribuenti, non di famiglie.</b> Il MEF pubblica i redditi di chi presenta la dichiarazione, lordi di imposte. Non sono i residenti (minori e chi non dichiara restano fuori), non sono i nuclei familiari, non sono i redditi disponibili, e contengono pensionati e persone con redditi parziali o secondari. Chi sta nel 25° percentile include chi ha lavorato pochi mesi o ha un secondo reddito in famiglia: non &egrave; per forza una famiglia povera. Escludiamo i contribuenti senza classe di reddito (forfettari, redditi tassati a parte): sono da 1 a 4 su 100 secondo l&rsquo;anno.',
-   '<b>Il 30% si applica di solito al reddito lordo della famiglia.</b> Qui &egrave; il lordo di una persona (o di due uguali, se spunti la casella). Sul netto di imposte e contributi la quota sarebbe pi&ugrave; alta. La soglia del 30% &egrave; una convenzione, non una legge.',
-   '<b>Il reddito di quartiere &egrave; una stima, e al centro non regge.</b> Il MEF pubblica i redditi per CAP, non per NIL: la distribuzione di ogni quartiere &egrave; la miscela di quelle dei CAP in cui cadono le sue case. Per Duomo, Brera, Guastalla, Giardini di Porta Venezia e Porta Vigentina pi&ugrave; della met&agrave; delle case sta nei CAP 20121 e 20122, la cui sede fiscale cambia senza motivo economico (<a href="../redditi/">pagina dei redditi</a>): in modalit&agrave; &laquo;reddito del quartiere&raquo; sono grigi. Il reddito per CAP esiste solo per il 2011, il 2015 e il 2019–2024.',
-   '<b>I percentili sono stimati da sette classi.</b> Il MEF d&agrave; i contribuenti in sette classi di reddito (0–10.000, 10–15.000, 15–26.000, 26–55.000, 55–75.000, 75–120.000, oltre 120.000 euro). Dentro ogni classe usiamo una distribuzione lineare con la media che ricaviamo da importo diviso contribuenti. Il reddito mediano cos&igrave; ottenuto &egrave; vicino a quello usato dalla pagina del costo della vita (differenza massima 2%: 25.926 contro 25.919 euro nel 2024), ma il 25° percentile dipende di pi&ugrave; dall&rsquo;ipotesi, perch&eacute; un contribuente su tre sta nella prima classe.',
-   '<b>Chi paga davvero?</b> La mappa non sa chi vive in affitto: i proprietari non pagano l&rsquo;affitto, e chi affitta tende ad avere redditi diversi dalla media del quartiere. Il reddito del quartiere &egrave; quello di tutti i contribuenti, non solo degli inquilini.',
-   '<b>Gli stipendi delle professioni sono quelli di base.</b> I contratti ARAN danno il &laquo;tabellare&raquo;: senza turni, indennit&agrave; (per l&rsquo;infermiere c&rsquo;&egrave; anche quella di specificit&agrave;, '+nf(R.professioni.indennita_specificita_infermieristica_mese,2)+' euro al mese), straordinari, incarichi. Sono quindi stime per difetto. L&rsquo;autista di autobus non c&rsquo;&egrave;: vedi la sezione sulle professioni.',
-   '<b>Le notti di Airbnb</b> sono una fotografia del 2026 (un solo portale) e usano le quotazioni 2026: servono come termine di paragone, non come causa degli affitti. Qui non facciamo l&rsquo;ipotesi che gli affitti brevi alzino gli affitti lunghi (<a href="../affitti-brevi/">pagina degli affitti brevi</a>).'
+   '<b>Gli affitti sono stime, non affitti firmati.</b> L’OMI dell’Agenzia delle Entrate dà per ogni zona una forbice (minimo e massimo) di euro al m² al mese per le abitazioni civili in stato normale: usiamo il valore centrale e la superficie lorda. Non sono gli affitti degli annunci né dei contratti in corso: il disegno dice che cosa costerebbe un nuovo contratto in una casa «media» della zona, non che cosa pagano i residenti. Non abbiamo un secondo dato per misurare di quanto l’OMI si scosti dal mercato.',
+   '<b>Il salto 2023-2024 è in parte l’Agenzia che si aggiorna.</b> Le quotazioni salgono del '+f0(R.affitto_civici_crescita_2022_2024_pct)+'% in due anni dopo essere salite del '+f0(R.affitto_civici_crescita_2015_2022_pct)+'% in sette. Parte è mercato, parte revisione delle stime (con la revisione delle zone del 2024). Quindi la fine della serie pesa più del resto nei conteggi «quanti quartieri sono usciti dal 30%».',
+   '<b>Le zone OMI non sono i quartieri.</b> Il valore di un quartiere (NIL) è la media delle quotazioni delle zone in cui cadono le sue case residenziali (circa '+f0(R.log.civici_residenziali)+' civici), ciascuna con la zona che aveva in quel semestre. Le zone sono state ridisegnate: 55 fino al 2013, 40 dal 2014, 42 dal secondo semestre 2024. Tra 2013 e 2014 i salti possono essere di perimetro; per questo i confronti principali partono dal 2015. Tre quartieri minori (Chiaravalle, Quintosole, Ronchetto delle Rane) non hanno case in zone con quotazione dal 2014.',
+   '<b>I redditi sono di contribuenti, non di famiglie.</b> Il MEF pubblica i redditi di chi presenta la dichiarazione, lordi di imposte. Non sono i residenti (minori e chi non dichiara restano fuori), non sono i nuclei familiari né i redditi disponibili, e contengono pensionati e persone con redditi parziali o secondari. Chi sta nel 25° percentile include chi ha lavorato pochi mesi o ha un secondo reddito in famiglia: non è per forza una famiglia povera. Escludiamo i contribuenti senza classe di reddito (forfettari, redditi tassati a parte): sono da 1 a 4 su 100 secondo l’anno.',
+   '<b>Il 30% si applica di solito al reddito lordo della famiglia.</b> Qui è il lordo di una persona (o di due uguali, se spunti la casella). Sul netto di imposte e contributi la quota sarebbe più alta. La soglia del 30% è una convenzione, non una legge.',
+   '<b>Il reddito di quartiere è una stima, e al centro non regge.</b> Il MEF pubblica i redditi per CAP, non per quartiere: la distribuzione di ogni quartiere è la miscela di quelle dei CAP in cui cadono le sue case. Per Duomo, Brera, Guastalla, Giardini di Porta Venezia e Porta Vigentina più della metà delle case sta nei CAP 20121 e 20122, la cui sede fiscale cambia senza motivo economico (<a href="../redditi/">pagina dei redditi</a>): per questo non compaiono nel grafico del reddito tipico. Il reddito per CAP esiste solo per il 2011, il 2015 e il 2019-2024.',
+   '<b>I percentili sono stimati da sette classi.</b> Il MEF dà i contribuenti in sette classi di reddito (0-10.000, 10-15.000, 15-26.000, 26-55.000, 55-75.000, 75-120.000, oltre 120.000 euro). Dentro ogni classe usiamo una distribuzione lineare con la media ricavata da importo diviso contribuenti. Il reddito mediano così ottenuto è vicino a quello usato dalla pagina del costo della vita (differenza massima 2%: 25.926 contro 25.919 euro nel 2024), ma il 25° percentile dipende di più dall’ipotesi, perché un contribuente su tre sta nella prima classe.',
+   '<b>Chi paga davvero?</b> I disegni non sanno chi vive in affitto: i proprietari non pagano l’affitto, e chi affitta tende ad avere redditi diversi dalla media del quartiere. Il reddito del quartiere è quello di tutti i contribuenti, non solo degli inquilini.',
+   '<b>Gli stipendi delle professioni sono quelli di base.</b> I contratti ARAN danno il «tabellare»: senza turni, indennità (per l’infermiere c’è anche quella di specificità, '+nf2(R.professioni.indennita_specificita_infermieristica_mese)+' euro al mese), straordinari, incarichi. Sono quindi stime per difetto. L’autista di autobus non c’è: il suo contratto è privato e senza una tabella ufficiale aperta.',
+   '<b>Le notti di Airbnb</b> sono una fotografia del 2026 (un solo portale) e usano le quotazioni 2026: servono come termine di paragone, non come causa degli affitti. Qui non facciamo l’ipotesi che gli affitti brevi alzino gli affitti lunghi (<a href="../affitti-brevi/">pagina degli affitti brevi</a>).',
+   '<b>I colori del semaforo.</b> Il 30% è la regola comune citata all’inizio della pagina. Il 40% come secondo limite viene dall’Eurostat, che considera «sovraccaricata» una famiglia con spese per la casa oltre il 40% del reddito disponibile: noi lo applichiamo al reddito lordo di una persona, quindi è una misura più dolce. Le due soglie sono una convenzione e valgono per tutti i grafici della pagina.',
+   '<b>La distanza dal Duomo</b> è in linea d’aria dal Duomo al centro del riquadro che racchiude ogni quartiere: non è il tempo di viaggio e i quartieri lunghi e stretti hanno un centro poco rappresentativo.',
+   '<b>Il quarto più basso dei redditi non ce la fa mai con 60 m².</b> Nessun quartiere sta dentro il 30% per il 25° percentile in nessun anno dal 2011: il risultato regge anche se la stima del 25° percentile è un po&#39; sbagliata, ma il suo valore esatto è il meno solido di tutti.'
   ];
-  setH('limiti-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 function metodo(){
   var L=[
-   '<b>Idea.</b> Per ogni quartiere e anno: quota = affitto mensile ÷ reddito mensile. Affitto mensile = quotazione OMI (€/m²/mese, abitazioni civili, stato prevalente, valore centrale della forbice) × metri quadrati scelti (40, 60 o 80). Si sta &laquo;dentro&raquo; se la quota non supera il 30%. Per l&rsquo;anno si fa la media dei due semestri.',
-   '<b>Dalle zone ai quartieri.</b> Ognuno dei '+f0(R.log.civici_residenziali)+' civici residenziali del Comune riceve la zona OMI che aveva in ciascun semestre (punto-in-poligono sui perimetri pubblici dell&rsquo;Agenzia); il valore del quartiere &egrave; la media dei suoi civici (stessa ipotesi della pagina <a href="../quartieri-che-cambiano/">quartieri che cambiano</a>: i residenti sono distribuiti in parti uguali sui civici).',
-   '<b>Redditi di Milano.</b> Reddito complessivo dei contribuenti (MEF), mediano e 25° e 75° percentile, calcolati da sette classi con distribuzione lineare dentro ogni classe e media di classe ricavata da importi e contribuenti (la classe &laquo;oltre 120.000&raquo; ha una coda di Pareto). La classe &laquo;minore o uguale a zero&raquo; &egrave; unita alla prima. Per le classi mancanti nei CAP 2023-24 il numero di contribuenti si ricava da «Reddito complessivo - Numero».',
-   '<b>Redditi dei quartieri.</b> Distribuzione di ogni NIL = media delle distribuzioni dei suoi CAP, con peso la quota di civici del NIL in ciascun CAP. Mediana e 25° percentile dalla distribuzione risultante. Solo 2011, 2015, 2019, 2020, 2021, 2022, 2023, 2024.',
-   '<b>Contribuenti che ce la fanno.</b> Reddito necessario = affitto mensile × 12 ÷ 0,30; quota = contribuenti di Milano con reddito complessivo pari o superiore (1 − funzione di ripartizione della stessa distribuzione).',
-   '<b>Reddito scelto in euro 2024.</b> Per le professioni e per il reddito scritto a mano gli anni prima sono riportati indietro con l&rsquo;indice FOI dell&rsquo;ISTAT (senza tabacchi, base 2025 = 100), per avere lo stesso potere d&rsquo;acquisto in ogni anno. I redditi mediano, basso e alto, invece, sono quelli veri di ciascun anno.',
-   '<b>Quartieri nei conteggi.</b> Solo quelli con almeno 2.000 residenti (Comune, ds205, 2024) e con quotazione OMI: '+R.n_nil+' su 88 per i redditi della citt&agrave;, '+R.locale.n_nil+' per i redditi di quartiere. Gli altri sono parchi e aree quasi senza abitanti.',
-   '<b>Notti di Airbnb.</b> Media pesata per quota di case, per quartiere, del numero di notti al mese necessarie per incassare l&rsquo;affitto OMI di 60 m&sup2; secondo la pagina degli affitti brevi.',
-   '<b>Tutto &egrave; rifacibile</b> con un programma (gli stipendi dei contratti ARAN sono scritti nel programma con pagina e indirizzo del PDF).'
+   '<b>Idea.</b> Per ogni quartiere e anno: quota = affitto mensile ÷ reddito mensile. Affitto mensile = quotazione OMI (euro al m² al mese, abitazioni civili, stato prevalente, valore centrale della forbice) × metri quadrati scelti (40, 60 o 80). Si sta «dentro» se la quota non supera il 30%. Per l’anno si fa la media dei due semestri.',
+   '<b>Dalle zone ai quartieri.</b> Ognuno dei '+f0(R.log.civici_residenziali)+' civici residenziali del Comune riceve la zona OMI che aveva in ciascun semestre (punto in poligono sui perimetri pubblici dell’Agenzia); il valore del quartiere è la media dei suoi civici (stessa ipotesi della pagina <a href="../quartieri-che-cambiano/">quartieri che cambiano</a>: i residenti sono distribuiti in parti uguali sui civici).',
+   '<b>Redditi di Milano.</b> Reddito complessivo dei contribuenti (MEF), mediano e 25° e 75° percentile, calcolati da sette classi con distribuzione lineare dentro ogni classe e media di classe ricavata da importi e contribuenti (la classe «oltre 120.000» ha una coda di Pareto). La classe «minore o uguale a zero» è unita alla prima. Per le classi mancanti nei CAP 2023-24 il numero di contribuenti si ricava per differenza dal totale.',
+   '<b>Redditi dei quartieri.</b> Distribuzione di ogni quartiere = media delle distribuzioni dei suoi CAP, con peso la quota di civici del quartiere in ciascun CAP. Mediana e 25° percentile dalla distribuzione risultante. Solo 2011, 2015, 2019, 2020, 2021, 2022, 2023, 2024.',
+   '<b>Contribuenti che ce la fanno.</b> Reddito necessario = affitto mensile × 12 ÷ 0,30; quota = contribuenti di Milano con reddito complessivo pari o superiore (1 meno la funzione di ripartizione della stessa distribuzione).',
+   '<b>Reddito scelto in euro 2024.</b> Per le professioni e per il reddito scritto a mano gli anni prima sono riportati indietro con l’indice FOI dell’ISTAT (senza tabacchi, base 2025 = 100), per avere lo stesso potere d’acquisto in ogni anno. I redditi mediano, basso e alto, invece, sono quelli veri di ciascun anno. Nei disegni a pallini l’asse è in euro del 2024 per tutti gli anni.',
+   '<b>Quartieri nei conteggi.</b> Solo quelli con almeno 2.000 residenti (Comune, 2024) e con quotazione OMI: '+R.n_nil+' su 88 per i redditi della città, '+R.locale.n_nil+' per i redditi di quartiere. Gli altri sono parchi e aree quasi senza abitanti.',
+   '<b>Notti di Airbnb.</b> Media pesata per quota di case, per quartiere, del numero di notti al mese necessarie per incassare l’affitto OMI di 60 m² secondo la pagina degli affitti brevi.',
+   '<b>Colori a semaforo.</b> Per ogni quartiere: quota = affitto mensile ÷ reddito mensile. Verde se la quota è al massimo il 30%, giallo se è oltre il 30% e fino al 40%, rosso oltre il 40%. Le stesse soglie valgono nelle mappe, nelle barre e nei pallini.',
+   '<b>Distanza dal Duomo.</b> Distanza in linea d’aria (formula dell’emisfero) tra piazza del Duomo (45,4642 N, 9,1919 E) e il centro del riquadro che contiene ogni quartiere, dai confini del Comune di Milano.',
+   '<b>Tutto è rifacibile</b> con un programma (gli stipendi dei contratti ARAN sono scritti nel programma con pagina e indirizzo del testo).'
   ];
-  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
-/* parte della pagina che non dipende dai controlli */
 })();
 </script>
 </body></html>
