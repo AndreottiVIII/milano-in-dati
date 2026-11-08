@@ -3083,3 +3083,5 @@ Cinema spariti pubblicata definitiva: sale attive anno per anno (opzione B) e fa
 Viaggio in linea pubblicata definitiva: schema del metrò con barre per fermata e salti più grandi in giallo (idea A).
 Milano nei dati più importanti pubblicata: 12 dati scelti da Davide con il loro grafico; voce 'Dati importanti' nella barra in alto.
 - 2026-11-08: Dati importanti, grafico 9 rifatto sul 5% che dichiara di più (stesso taglio nel 2000 e nel 2024: 30% → 33%); tolta l'etichetta 'il dato più importante'. Barra in alto: 'Dati importanti' accanto a Home, collegamenti che scorrono di lato sui telefoni stretti.
+Redditi: il confronto 43% dal 9% sostituito dal grafico col cursore su quanto prende chi dichiara di più (1-50%), stesso gruppo nel 2000 e nel 2024.
+Dati importanti: sezione 9 con il grafico col cursore su quanto prende chi dichiara di più.
