@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="it"><head><base href="../../cinema-spariti/"><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · I cinema scomparsi</title>
+<style>
+
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --it:#0b0d12;     /* Italia */
+  --hint:#0072BC;   /* comuni intorno: blu M4 */
+  --tur:#F58220;    /* turisti: arancio della home */
+  --ind:#4b5563;--umi:#00A651;--car:#0072BC;--vpm:#FFD500;--alt:#7B3FA0; /* tipi di rifiuto: grigio, verde M2, blu M4, giallo M3, viola M5 */
+  --pos:#F58220;--neg:#0072BC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* highlights */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* sections */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+
+/* aggiunte comuni */
+.opz{display:inline-block;background:var(--ink);color:#fff;font-weight:800;font-size:1.5rem;line-height:1;padding:8px 16px;margin:1.8em 0 .5em}
+.opzq{border:3px solid var(--ink);padding:0 12px 14px;margin:1.6em 0 0}
+.opzq .opz{margin:-1px 0 .5em -13px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:.5em 0 .7em}
+.ctl label{font-weight:700;font-size:.92rem;display:flex;flex-direction:column;gap:3px}
+select,input.cerca{font:inherit;font-size:1rem;padding:9px 10px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink);max-width:100%;min-height:44px}
+input.cerca{width:100%;max-width:420px}
+.card{border-left:8px solid var(--c,#0b0d12);background:var(--soft);padding:10px 14px;margin:.7em 0 0;font-size:.95rem;line-height:1.4}
+.card b.t{font-size:1.05rem;display:block;margin-bottom:2px}
+.card .big{font-size:2rem;font-weight:800;line-height:1.05;display:block}
+.card ul{margin:.3em 0 0;padding-left:1.1em}
+.mapw{max-width:560px;margin:0 auto}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:.2em 0 .8em}
+.chips a,.chips button,.chips span{font:inherit;font-size:.82rem;line-height:1.2;padding:5px 8px;border:0;border-radius:3px;color:#fff;cursor:pointer;text-decoration:none;min-height:30px}
+.scrollx{overflow-x:auto;max-height:520px;overflow-y:auto;border:1px solid var(--grid)}
+table.el{border-collapse:collapse;width:100%;font-size:.86rem}
+table.el th,table.el td{border-bottom:1px solid var(--grid);padding:5px 6px;text-align:left;vertical-align:top}
+table.el th{position:sticky;top:0;background:#fff;color:var(--mut);font-size:.8rem}
+@media(max-width:640px){.hide-s{display:none}}
+
+.card .t{display:block;font-weight:800;font-size:1.05rem;margin-bottom:2px}
+
+table.fo{border-collapse:collapse;width:100%;font-size:.86rem}
+table.fo th,table.fo td{border-bottom:1px solid var(--grid);padding:5px 6px;text-align:left;vertical-align:top}
+.circa{font-style:italic;color:var(--mut)}
+</style><script src="../menu.js" defer></script></head><body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../cinema-spariti/" style="color:#000">Pagina attuale</a></div><main>
+
+<h1>I cinema scomparsi di Milano</h1>
+<p class="lead">A Milano le sale cinematografiche sono aumentate fino agli anni Sessanta e poi sono diminuite molto. Dove erano, quando hanno aperto e chiuso, e che cosa c’è oggi al loro posto.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Tutti i numeri: elenco spazioCinema 2017 (170 sale chiuse, più l’Odeon, chiuso nel 2023), Wikidata (CC0), Wikipedia (CC BY-SA), OpenStreetMap (ODbL, 29 ottobre 2026). Le sale sono quelle dell’elenco: non è un censimento completo.</p>
+
+<!-- ============ quanti ============ -->
+<h2 id="quanti">Quanti cinema c’erano</h2>
+
+<div class="opzq">
+<span class="opz">Opzione A</span>
+<div class="fig" style="margin-top:0">
+  <h3 id="t-fa"></h3>
+  <p class="sub">Le dodici sale che sono durate di più, dal primo anno di apertura all’ultimo di attività. I vuoti sono gli anni di chiusura temporanea.</p>
+  <div class="ch" id="ch-a" role="img" aria-label="Barre di tempo: le dodici sale chiuse che sono state aperte più a lungo"></div>
+  <p class="src">Fonte: elenco spazioCinema 2017 (anni), Wikidata (CC0). Anni a volte approssimati nella fonte.</p>
+</div>
+</div>
+
+<div class="opzq">
+<span class="opz">Opzione B</span>
+<div class="fig" style="margin-top:0">
+  <h3 id="t-fb"></h3>
+  <p class="sub">Sale attive anno per anno, tra quelle poi chiuse (rosso) e quelle ancora aperte di cui si conosce l’anno di apertura (verde). I rombi sono stime della stampa, non nostri dati. Tocca per leggere.</p>
+  <div class="ch" id="ch-b" role="img" aria-label="Area: sale attive anno per anno, 1890-2026, con tre stime della stampa"></div>
+  <ol class="notes" id="nt-b"></ol>
+  <p class="note"><b>Attenzione.</b> La curva scende per forza verso il presente: l’elenco comprende solo le sale che hanno chiuso, e quelle chiuse da poco sono poche. Non è un crollo reale. Il conto vero è più alto: mancano le sale ancora aperte di cui non si sa l’anno di apertura, le sale parrocchiali e le arene.</p>
+  <p class="src">Fonte: elenco spazioCinema 2017, Wikidata (CC0), Wikipedia (CC BY-SA); stime: VareseNews, 3/2/2019 (ricerca CineMi di E. Roaro) e Il Giorno, 17/12/2022 (Anec Lombardia). L’elenco 2017 non registra le chiusure dopo il 2017, tranne l’Odeon (2023).</p>
+</div>
+</div>
+
+<div class="opzq">
+<span class="opz">Opzione C</span>
+<div class="fig" style="margin-top:0">
+  <h3 id="t-fc"></h3>
+  <p class="sub">Per decennio: a sinistra le sale che aprono, a destra quelle che chiudono.</p>
+  <div class="ch" id="ch-c" role="img" aria-label="Barre a farfalla: aperture e chiusure di sale per decennio"></div>
+  <p class="src">Fonte: elenco spazioCinema 2017, Wikidata (CC0), Wikipedia (CC BY-SA). Per le sale con più periodi (chiuse e riaperte) la chiusura è quella dell’ultimo periodo. «2020» conta solo l’Odeon.</p>
+</div>
+</div>
+
+<!-- ============ dove ============ -->
+<h2 id="dove">Dove erano</h2>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub">Un punto per sala sui quartieri di Milano. Scegli un decennio dal menu: compaiono le sale attive in quel periodo. Tocca un punto per leggerlo.</p>
+  <div class="ctl"><label>Decennio<select id="s-dec"></select></label></div>
+  <div class="lg"><span><i class="dot" style="background:var(--mi)"></i>sala chiusa, posizione esatta</span><span><i class="ring" style="border-color:var(--mi)"></i>sala chiusa, posizione approssimata</span><span><i class="dot" style="background:var(--m2)"></i>cinema aperto oggi</span></div>
+  <div class="mapw"><div class="ch" id="ch-map" role="img" aria-label="Mappa dei quartieri di Milano con i cinema attivi nel decennio scelto"></div></div>
+  <div class="card" id="card-map" style="--c:#0b0d12"><span class="t">Tocca un punto</span>Qui compare la scheda del cinema.</div>
+  <p class="note" id="nt-map"></p>
+  <p class="src">Posizione esatta (Wikidata o OpenStreetMap) per 43 sale chiuse; posizione approssimata (solo geocodifica Nominatim, anche solo la via) per 116; 12 non compaiono perché senza posizione. Quartieri (NIL): Comune di Milano (CC BY).</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-cosa"></h3>
+  <p class="sub">Per quante ex sale c’è, entro 30 metri dall’indirizzo, almeno un negozio o un locale di quel tipo.</p>
+  <div class="ch" id="ch-cosa" role="img" aria-label="Barre: tipi di negozi e locali vicino agli indirizzi dei cinema chiusi"></div>
+  <p class="src">Fonte: OpenStreetMap (ODbL). È solo un <b>candidato</b>: i negozi o locali entro 30 m dall’indirizzo non sono per forza nel palazzo del vecchio cinema. Manca per i cinema senza posizione precisa.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-cerca"></h3>
+  <p class="sub">Scrivi il nome di una sala o scegli dall’elenco: compaiono gli anni e che cosa c’è nei dintorni.</p>
+  <div class="ctl"><label>Cinema<input class="cerca" id="q-ci" list="dl-ci" placeholder="per esempio Odeon" autocomplete="off"></label></div>
+  <datalist id="dl-ci"></datalist>
+  <div class="card" id="card-ci" style="--c:#0b0d12"><span class="t">Scegli un cinema</span>Qui compaiono i suoi dati.</div>
+</div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="elenco"><summary>Tutte le sale chiuse, una per una</summary><div class="in">
+<div class="ctl"><label>Ordina per<select id="s-ord"><option value="c">anno di chiusura</option><option value="a">anno di apertura</option><option value="n">nome</option></select></label></div>
+<div class="scrollx"><table class="el" id="tab"><thead><tr><th>Cinema</th><th>Anni di attività</th><th class="hide-s">Cosa c’è ora (candidato)</th></tr></thead><tbody></tbody></table></div>
+<p class="note">«ca.» = data approssimata nella fonte. «Cosa c’è ora» è solo un candidato, come spiegato sopra.</p></div></details>
+<details id="oggi"><summary>I 28 cinema aperti oggi</summary><div class="in"><ul id="oggi-l"></ul><p class="note">Elenco di OpenStreetMap, 29 ottobre 2026. Dell’anno di apertura si sa solo per 7 di 28.</p></div></details>
+
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
+<li><b>Sale parrocchiali, arene estive e cinema a luci rosse</b>: l&rsquo;elenco non li include tutti. Il conto delle sale attive è quindi per difetto.</li>
+<li><b>Cinema ancora aperti</b>: l&rsquo;anno di apertura è noto solo per 7 di 28. Gli altri non entrano nella storia del grafico né nei decenni sulla mappa.</li>
+<li><b>Date incerte</b>: 67 sale chiuse hanno almeno una data «ca.» nella fonte. Chiusure e riaperture temporanee sono nei periodi di attività, ma la data di chiusura usata nel grafico è quella finale.</li>
+<li><b>Elenco fermo al 2017</b>: le chiusure successive (tranne l&rsquo;Odeon, 2023) non sono registrate. L&rsquo;Odeon è stato aggiunto perché OpenStreetMap lo segnala chiuso e Wikipedia ne dà la data.</li>
+<li><b>Nessun numero di schermi</b>: non esiste una serie storica delle sale per cinema; l&rsquo;unico dato (schermi) è quello di OpenStreetMap per alcuni cinema aperti oggi.</li>
+<li><b>Posizioni</b>: 116 sono approssimate (geocodifica) e 12 mancano; alcuni indirizzi della fonte A sembrano incoerenti. Altri 4 luoghi che compaiono solo su Wikidata (due teatri, due cinema senza date) sono stati lasciati fuori.</li>
+<li>Per le sale fino al 1955 la ricerca d&rsquo;archivio più completa è il progetto CineMi, che non è scaricabile e quindi non è usato qui.</li>
+</ul></div></details>
+
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Sala attiva</dt><dd>Una sala aperta in quell’anno, secondo i periodi di attività dell’elenco.</dd>
+<dt>Posizione approssimata</dt><dd>Il punto è quello che un servizio di geocodifica dà all’indirizzo: può essere a qualche decina di metri, o sulla via giusta ma non sul civico.</dd>
+<dt>Candidato</dt><dd>Un negozio o un locale vicino all’indirizzo del vecchio cinema, preso da OpenStreetMap: non è detto che occupi il vecchio cinema.</dd>
+<dt>Voto A, B, C</dt><dd>Quanto è affidabile la fonte: A elenco principale, B posizione e candidati, C stampa e Wikipedia.</dd>
+</dl></div></details>
+
+<details id="metodo"><summary>Come è fatto</summary><div class="in">
+<table class="fo">
+<tr><th>Voto</th><th>Fonte</th><th>A cosa serve</th></tr>
+<tr><td><b>A</b></td><td>Elenco «Sale cinematografiche milanesi che hanno cessato l&rsquo;attività», spazioCinema (Anteo), 2017, <a href="https://www.spaziocinema.info/cinema/notizie/scegli-il-nome-delle-nuove-sale-di-anteo-tra-le-insegne-di-storici-cinema-milanesi">pagina</a>, consultata il 30/10/2026</td><td>nomi, indirizzi e anni delle 170 sale chiuse. Sono pubblicati solo questi fatti, con la fonte: né il testo né il PDF, che restano © spazioCinema. Buon accordo con le date note da altre fonti, ma senza autore né fonti proprie.</td></tr>
+<tr><td><b>B</b></td><td><a href="https://www.wikidata.org">Wikidata</a> (CC0)</td><td>coordinate esatte di 43 cinema chiusi e anno di apertura del Ducale. Nota: parte delle voci sembra derivata da una lista simile all&rsquo;elenco A, quindi l&rsquo;accordo non è una verifica indipendente.</td></tr>
+<tr><td><b>B</b></td><td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (ODbL), estrazione del 29/10/2026</td><td>i cinema aperti oggi e il candidato «cosa c&rsquo;è ora». OSM non conserva la storia (solo 2 cinema marcati come dismessi).</td></tr>
+<tr><td><b>B</b></td><td>Nominatim (OpenStreetMap)</td><td>posizioni <b>approssimate</b> di 116 cinema chiusi; non verificate una per una.</td></tr>
+<tr><td><b>C</b></td><td><a href="https://it.wikipedia.org">Wikipedia in italiano</a> (CC BY-SA)</td><td>anni di apertura dei cinema oggi aperti (Odeon, Ariosto, Beltrade, Plinius, Anteo, CityLife) e la chiusura dell&rsquo;Odeon nel 2023.</td></tr>
+<tr><td><b>C</b></td><td>Stampa: <a href="https://www.ilgiorno.it/milano/cronaca/cinema-e297abe2">Il Giorno, 17/12/2022</a> (Anec Lombardia); <a href="https://www.varesenews.it">VareseNews, 3/2/2019</a> (ricerca CineMi di E. Roaro)</td><td>solo punti di riferimento sul grafico: circa 160 cinema negli anni Settanta, 29 strutture nel 2022, 110 sale nel 1950. Sono stime giornalistiche, senza serie pubblicata.</td></tr>
+<tr><td>&ndash;</td><td>Comune di Milano, dati aperti (CKAN)</td><td>nessun elenco di sale cinematografiche: non usato per i conteggi.</td></tr>
+</table>
+<p class="note">Il conto delle sale attive in un anno somma le sale poi chiuse con le sale ancora aperte di cui si conosce l’anno di apertura. Un decennio come «1980» comprende il 1980-1989.</p></div></details>
+
+<details id="download"><summary>File</summary><div class="in"><ul>
+<li><a href="data/cinema.json">Tutti i cinema</a>, chiusi e aperti, con anni, indirizzo e posizione</li>
+<li><a href="data/serie.json">Sale attive anno per anno</a>, con aperture e chiusure per decennio</li>
+</ul></div></details>
+</div>
+
+<footer>
+<p><b>Fonti e licenze.</b> Elenco «Sale cinematografiche milanesi che hanno cessato l’attività», spazioCinema (Anteo), 2017: si pubblicano solo nomi, indirizzi e anni, con la fonte; il testo e il PDF restano © spazioCinema. Wikidata (CC0). OpenStreetMap, © OpenStreetMap contributors (ODbL), estrazione del 29/10/2026. Nominatim (OpenStreetMap). Wikipedia in italiano (CC BY-SA). Stampa: Il Giorno, 17/12/2022; VareseNews, 3/2/2019. Quartieri: Comune di Milano (CC BY).</p>
+<p>Aggiornato al 30 ottobre 2026. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+var C={mi:'#E30613',m1:'#E30613',m2:'#00A651',m3:'#FFD500',m4:'#0072BC',m5:'#7B3FA0',or:'#F58220',aq:'#00A19A',ma:'#E6007E',br:'#8C5A32',
+  uo:'#0072BC',do:'#F06EAA',grid:'#e6e8ec',axis:'#9aa1ad',mut:'#5f6673',ink:'#0b0d12',ink2:'#2f3440',light:'#c9ced6',soft:'#f4f5f7'};
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function r1(v){return Math.round(v*10)/10}
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function circ(x,y,r,fill,extra){return '<circle cx="'+r1(x)+'" cy="'+r1(y)+'" r="'+r1(r)+'" fill="'+fill+'"'+(extra||'')+'/>'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d=x1>=x0?
+    'M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z':
+    'M'+r1(r)+' '+r1(y)+'H'+r1(l+rr)+'Q'+r1(l)+' '+r1(y)+' '+r1(l)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(l)+' '+r1(y+h)+' '+r1(l+rr)+' '+r1(y+h)+'H'+r1(r)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+/* tooltip al tocco */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+/* dati */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+var RD=[];
+function draw(f){f();RD.push(f)}
+function startResize(){var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)})}
+/* numeri in alto */
+function hl(T){$('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('')}
+/* mappe: quartieri o comuni */
+function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+function mkProj(F,W,lat){
+  var k=Math.cos((lat||45.46)*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  F.forEach(function(f){anelli(f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(lon,lat2){return[1+(lon*k-x0)*sc,1+(y1-lat2)*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+function inRing(x,y,rg){var c=false;for(var i=0,j=rg.length-1;i<rg.length;j=i++){var xi=rg[i][0],yi=rg[i][1],xj=rg[j][0],yj=rg[j][1];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
+function inFeat(f,x,y){var g=f.geometry,polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;
+  for(var a=0;a<polys.length;a++){var p=polys[a];if(inRing(x,y,p[0])){var hole=false;for(var h=1;h<p.length;h++)if(inRing(x,y,p[h]))hole=true;if(!hole)return true}}return false}
+function nilDi(F,lon,lat){for(var i=0;i<F.length;i++)if(inFeat(F[i],lon,lat))return F[i];return null}
+function mapW(id){return Math.min(560,width(id))}
+
+var CL=[],OA=[],SE,NIL=[],ALLC=[],sel=null;
+var FONTI={A:'elenco spazioCinema 2017',W:'Wikidata',O:'OpenStreetMap',N:'Nominatim',P:'Wikipedia'};
+document.documentElement.style.setProperty('--mi',C.m1);document.documentElement.style.setProperty('--m2',C.m2);
+Promise.all([getJ('data/cinema.json'),getJ('data/serie.json'),getJ('data/nil_quartieri.geojson')]).then(function(r){
+  ALLC=r[0].cinema;SE=r[1];NIL=r[2].features;
+  CL=ALLC.filter(function(c){return c.st==='chiuso'});OA=ALLC.filter(function(c){return c.st==='aperto'});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function vita(c){return c.a&&c.c?c.c-c.a:0}
+function anni(c){if(c.st==='aperto')return c.per.length?'dal '+(c.ac?'ca. ':'')+c.per[0][0]:'anno di apertura non noto';
+  return c.per.map(function(p,i){return (i===0&&c.ac?'ca. ':'')+p[0]+'–'+(i===c.per.length-1&&c.cc?'ca. ':'')+p[1]}).join('; ')}
+function ctip(c){return '<b>'+esc(c.n)+'</b><br>'+esc(c.ind||'')+'<br>'+esc(anni(c))}
+function tutto(){
+  highlights();opts();
+  draw(firmaA);draw(firmaB);draw(firmaC);draw(mappa);draw(cosa);
+  cerca();tabella();oggi();startResize();
+}
+function totSerie(){return SE.anni.map(function(a,i){return SE.chiuse[i]+SE.aperte_note[i]})}
+function cosaGruppi(){
+  var G={'ristorante':'Ristorante o fast food','fast food':'Ristorante o fast food','bar o caffè':'Bar, caffè o pub','bar':'Bar, caffè o pub','pub':'Bar, caffè o pub','abbigliamento':'Abbigliamento o scarpe','scarpe':'Abbigliamento o scarpe','albergo':'Albergo','farmacia':'Farmacia','ottica':'Ottica','banca':'Banca','teatro':'Teatro','gioielleria':'Gioielleria','arredamento':'Arredamento','supermercato':'Supermercato o minimarket','minimarket':'Supermercato o minimarket','parrucchiere':'Parrucchiere o estetica','estetica':'Parrucchiere o estetica'};
+  var cnt={},tot=0;
+  CL.forEach(function(c){if(!c.cosa)return;tot++;var set={};c.cosa.split(';').forEach(function(p){var m=/\(([^)]*)\)\s*$/.exec(p.trim());var g=m&&G[m[1]];if(g)set[g]=1});Object.keys(set).forEach(function(g){cnt[g]=(cnt[g]||0)+1})});
+  return{cnt:cnt,tot:tot};
+}
+function highlights(){
+  var tot=totSerie(),mx=Math.max.apply(null,tot),ay=SE.anni[tot.indexOf(mx)],cm=0,cd=0;SE.chiusure.forEach(function(v,i){if(v>cm){cm=v;cd=SE.decenni[i]}});
+  var lg=CL.slice().sort(function(a,b){return vita(b)-vita(a)})[0],cg=cosaGruppi();
+  hl([
+   {c:C.m1,h:'t-mappa',n:CL.length,u:'',p:'sale chiuse, dal '+Math.min.apply(null,CL.map(function(c){return c.a}).filter(Boolean))+' al '+Math.max.apply(null,CL.map(function(c){return c.c}).filter(Boolean))+'.'},
+   {c:C.m3,h:'t-fb',n:mx,u:'',p:'sale attive nel '+ay+', l’anno di massimo (almeno: il conto è per difetto).'},
+   {c:C.m2,h:'t-fa',n:vita(lg),u:'',p:'anni di attività per la sala più longeva: '+esc(lg.n)+' ('+lg.a+'-'+lg.c+').'},
+   {c:C.m4,h:'t-fc',n:cm,u:'',p:'chiusure negli anni '+(cd==1980?'Ottanta':cd)+', il decennio peggiore.'},
+   {c:C.m5,h:'t-cosa',n:cg.tot,u:'',p:'ex sale hanno un negozio o un locale entro 30 metri dall’indirizzo (solo un candidato).'},
+   {c:C.or,h:'t-mappa',n:OA.length,u:'',p:'cinema aperti oggi (OpenStreetMap, 29 ottobre 2026).'}
+  ]);
+}
+
+/* ---------- A: le sale più longeve ---------- */
+function firmaA(){
+  var box=$('ch-a'),W=width('ch-a'),top=CL.slice().sort(function(a,b){return vita(b)-vita(a)}).slice(0,12),y0=1890,y1=2026,pw=W-8,rh=40,H=top.length*rh+26,s='';
+  var X=function(y){return 4+(y-y0)/(y1-y0)*pw};
+  for(var a=1900;a<=2020;a+=20)s+=L(X(a),0,X(a),top.length*rh,C.grid)+T(X(a),top.length*rh+16,a,{a:'middle',c:'m'});
+  top.forEach(function(c,i){var y=i*rh;
+    s+=T(4,y+13,esc(c.n)+' <tspan class="m">'+c.a+'–'+c.c+'</tspan>',{c:'b'})+T(W-4,y+13,vita(c)+' anni',{a:'end',c:'b'});
+    s+=L(X(c.a),y+26,X(c.c),y+26,C.grid,1);
+    c.per.forEach(function(p){s+='<rect x="'+r1(X(p[0]))+'" y="'+(y+19)+'" width="'+r1(Math.max(2,X(p[1])-X(p[0])))+'" height="14" fill="'+C.m1+'"'+tip(ctip(c))+'/>'});
+  });
+  box.innerHTML=svgOpen(W,H)+s+'</svg>';
+  var v=CL.filter(function(c){return vita(c)>0}).map(vita).sort(function(a,b){return a-b}),mediana=v[Math.floor(v.length/2)];
+  $('t-fa').textContent='Le sale più longeve sono durate fino a '+vita(top[0])+' anni; la metà di tutte è durata meno di '+mediana;
+}
+
+/* ---------- B: sale attive anno per anno ---------- */
+function firmaB(){
+  var box=$('ch-b'),W=width('ch-b'),H=300,m={l:34,r:8,t:32,b:26},yrs=SE.anni,n=yrs.length,y0=yrs[0],y1=last(yrs),pw=W-m.l-m.r,ph=H-m.t-m.b,hi=180;
+  var X=function(y){return m.l+(y-y0)/(y1-y0)*pw},Y=function(v){return m.t+ph-v/hi*ph};
+  var s='';[0,50,100,150].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})});
+  var d1='M'+r1(X(y0))+' '+r1(Y(0)),d2='';
+  yrs.forEach(function(y,i){d1+='L'+r1(X(y))+' '+r1(Y(SE.chiuse[i]))});d1+='L'+r1(X(y1))+' '+r1(Y(0))+'Z';
+  s+='<path d="'+d1+'" fill="'+C.m1+'" fill-opacity=".9"/>';
+  var up='M'+yrs.map(function(y,i){return r1(X(y))+' '+r1(Y(SE.chiuse[i]+SE.aperte_note[i]))}).join('L')+'L'+yrs.map(function(y,i){return r1(X(y))+' '+r1(Y(SE.chiuse[i]))}).reverse().join('L')+'Z';
+  s+='<path d="'+up+'" fill="'+C.m2+'"/>'+L(m.l,Y(0),W-m.r,Y(0),C.axis);
+  [1900,1920,1940,1960,1980,2000,2020].forEach(function(y){s+=T(X(y),Y(0)+17,y,{a:'middle',c:'m'})});
+  var tot=totSerie(),mx=Math.max.apply(null,tot),iy=tot.indexOf(mx);
+  s+=circ(X(yrs[iy]),Y(mx),4,C.ink)+T(X(yrs[iy]),Y(mx)-9,mx+' nel '+yrs[iy],{a:'middle',c:'b'});
+  // stime della stampa
+  var NT=[{x:X(1950),v:110,k:1},{x:(X(1970)+X(1979))/2,v:160,k:2,w:X(1979)-X(1970)},{x:X(2022),v:29,k:3}];
+  NT.forEach(function(o){var t=SE.stampa[o.k-1];
+    if(o.w)s+=L(X(1970),Y(o.v),X(1979),Y(o.v),C.ink,2);
+    s+='<path d="M'+r1(o.x)+' '+r1(Y(o.v)-9)+'L'+r1(o.x+9)+' '+r1(Y(o.v))+'L'+r1(o.x)+' '+r1(Y(o.v)+9)+'L'+r1(o.x-9)+' '+r1(Y(o.v))+'Z" fill="#fff" stroke="'+C.ink+'" stroke-width="2"'+tip('<b>Stima della stampa</b><br>'+esc(t.etichetta)+'<br>'+esc(t.fonte))+'/>'+T(o.x,Y(o.v)+4,o.k,{a:'middle',c:'b',st:'font-size:12px;fill:#0b0d12'})});
+  box.innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('nt-b').innerHTML=SE.stampa.map(function(t,i){return '<li><b class="nb">'+(i+1)+'</b><span>Stima della stampa: <b>'+esc(t.etichetta)+'</b> ('+esc(t.fonte)+').</span></li>'}).join('');
+  $('t-fb').textContent='Le sale (poi chiuse) toccano il massimo nel '+yrs[iy]+' e poi scendono: ma è un effetto dell’elenco, non un crollo vero';
+}
+
+/* ---------- C: farfalla aperture e chiusure ---------- */
+function firmaC(){
+  var box=$('ch-c'),W=width('ch-c'),dec=SE.decenni,lw=44,half=(W-lw)/2-4,mx=Math.max.apply(null,SE.aperture.concat(SE.chiusure)),rh=29,H=dec.length*rh+4,s='',cx=W/2;
+  dec.forEach(function(d,i){var y=i*rh,f=SE.aperture[i],l=SE.chiusure[i],wf=half*f/mx,wl=half*l/mx;
+    s+=T(cx,y+19,d,{a:'middle',c:'b'});
+    if(f)s+=hbar(cx-lw/2,cx-lw/2-wf,y+4,22,'#9aa1ad',tip('<b>'+d+'-'+(d+9)+'</b><br>'+f+' sale aperte'));
+    if(l)s+=hbar(cx+lw/2,cx+lw/2+wl,y+4,22,C.m1,tip('<b>'+d+'-'+(d+9)+'</b><br>'+l+' sale chiuse'));
+    if(f)s+=T(wf>26?cx-lw/2-wf+5:cx-lw/2-wf-4,y+20,f,{a:wf>26?'start':'end',c:wf>26?'k':'k'});
+    if(l)s+=T(wl>26?cx+lw/2+wl-5:cx+lw/2+wl+4,y+20,l,{a:wl>26?'end':'start',c:wl>26?'w':'k'})});
+  box.innerHTML=svgOpen(W,H)+s+'</svg>';
+  var cm=0,cd=0,am=0,ad=0;SE.chiusure.forEach(function(v,i){if(v>cm){cm=v;cd=SE.decenni[i]}});SE.aperture.forEach(function(v,i){if(v>am){am=v;ad=SE.decenni[i]}});
+  $('t-fc').textContent='Il picco di aperture è nel '+ad+'-'+(ad+9)+' ('+am+' sale), quello di chiusure nel '+cd+'-'+(cd+9)+' ('+cm+')';
+}
+
+/* ---------- mappa ---------- */
+function opts(){
+  $('s-dec').innerHTML=SE.decenni.filter(function(d){return d>=1900&&d<=2010}).map(function(d){return '<option value="'+d+'"'+(d===1960?' selected':'')+'>'+d+'-'+(d+9)+'</option>'}).join('')+'<option value="oggi">Oggi (cinema aperti)</option>';
+  $('s-dec').addEventListener('change',function(){sel=null;mappa();$('card-map').innerHTML='<span class="t">Tocca un punto</span>Qui compare la scheda del cinema.';$('card-map').style.setProperty('--c','#0b0d12')});
+}
+function attivo(c,d){
+  if(d==='oggi')return c.st==='aperto';
+  d=+d;if(c.st==='aperto'&&!c.per.length)return false;
+  return c.per.some(function(p){return p[0]<=d+9&&p[1]>=d});
+}
+function mappa(){
+  var box=$('ch-map'),W=mapW('ch-map'),P=mkProj(NIL,W),d=$('s-dec').value,s=svgOpen(W,P.H),n=0,senza=0,ap=0,tot=0;
+  NIL.forEach(function(g){s+='<path d="'+P.path(g)+'" fill="#e6e8ec" stroke="#fff" stroke-width="1"/>'});
+  ALLC.forEach(function(c,i){if(!attivo(c,d))return;tot++;if(c.lat==null||c.pos===''){senza++;return}
+    var p=P.pt(c.lon,c.lat);if(p[0]<-4||p[0]>W+4||p[1]<-4||p[1]>P.H+4){senza++;return}
+    var open=c.st==='aperto',col=open?C.m2:C.m1,isel=i===sel;n++;
+    if(c.pos==='a'&&!open)s+='<circle cx="'+r1(p[0])+'" cy="'+r1(p[1])+'" r="'+(isel?7:5)+'" fill="#fff" stroke="'+col+'" stroke-width="'+(isel?3:2)+'" data-ci="'+i+'" style="cursor:pointer"/>';
+    else s+='<circle cx="'+r1(p[0])+'" cy="'+r1(p[1])+'" r="'+(isel?8:5.5)+'" fill="'+col+'" stroke="'+(isel?'#0b0d12':'#fff')+'" stroke-width="'+(isel?2.5:1.2)+'" data-ci="'+i+'" style="cursor:pointer"/>'});
+  box.innerHTML=s+'</svg>';
+  $('nt-map').textContent=(d==='oggi'?'Cinema aperti oggi: ':'Sale attive in questo decennio: ')+tot+'. Sulla mappa '+n+(senza?'; '+senza+' senza posizione e non disegnate':'')+'.';
+  var d60=ALLC.filter(function(c){return attivo(c,1960)}).length,d00=ALLC.filter(function(c){return attivo(c,2000)}).length;
+  $('t-mappa').textContent=d60+' sale sono state attive almeno un anno negli anni Sessanta, '+d00+' negli anni Duemila: scegli un decennio e guarda dove';
+}
+function scheda(c){
+  var h='<span class="t">'+esc(c.n)+'</span>'+(c.alt?'Altri nomi: '+esc(c.alt)+'<br>':'')+esc(c.ind||'indirizzo non noto')+'<br>Anni di attività: '+esc(anni(c)).replace(/ca\./g,'<span class="circa">ca.</span>');
+  if(c.sale)h+='<br>Sale (schermi): '+c.sale;
+  if(c.pos==='a'&&c.st!=='aperto')h+='<br><span class="note">Posizione approssimata.</span>';
+  if(c.cosa)h+='<br>Cosa c’è nei dintorni oggi (solo un candidato): '+esc(c.cosa);
+  if(c.nota)h+='<br><span class="note">'+esc(c.nota)+'</span>';
+  h+='<br><span class="note">Fonti: '+c.fo.map(function(k){return FONTI[k]||k}).join(', ')+'.</span>';
+  return h;
+}
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest&&ev.target.closest('[data-ci]');if(!el)return;
+  var i=+el.getAttribute('data-ci'),c=ALLC[i];sel=i;$('card-map').innerHTML=scheda(c);$('card-map').style.setProperty('--c',c.st==='aperto'?C.m2:C.m1);mappa();
+});
+
+/* ---------- cosa c'è ora ---------- */
+function cosa(){
+  var box=$('ch-cosa'),W=width('ch-cosa'),g=cosaGruppi(),ks=Object.keys(g.cnt).sort(function(a,b){return g.cnt[b]-g.cnt[a]}).slice(0,10),rh=38,H=ks.length*rh+2,s='',mx=g.cnt[ks[0]],bw=W-8;
+  ks.forEach(function(k,i){var y=i*rh;s+=T(2,y+13,esc(k),{c:'b'})+T(W-2,y+13,g.cnt[k]+' ex sale',{a:'end',c:'m'})+hbar(2,2+bw*g.cnt[k]/mx,y+18,14,C.m5,tip('<b>'+esc(k)+'</b><br>vicino a '+g.cnt[k]+' ex sale'))});
+  box.innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('t-cosa').textContent='Vicino a '+g.cnt[ks[0]]+' ex sale su '+g.tot+' c’è oggi: «'+ks[0].toLowerCase()+'»; poi «'+ks[1].toLowerCase()+'» ('+g.cnt[ks[1]]+') e «'+ks[2].toLowerCase()+'» ('+g.cnt[ks[2]]+')';
+}
+
+/* ---------- scrivi un cinema ---------- */
+function cerca(){
+  $('dl-ci').innerHTML=ALLC.slice().sort(function(a,b){return a.n.localeCompare(b.n)}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  $('t-cerca').textContent='Scegli tra '+ALLC.length+' cinema, chiusi e aperti, e leggi la loro storia';
+  function go(){var v=$('q-ci').value.trim().toLowerCase(),c=ALLC.filter(function(x){return x.n.toLowerCase()===v})[0];if(!c)return;$('card-ci').innerHTML=scheda(c);$('card-ci').style.setProperty('--c',c.st==='aperto'?C.m2:C.m1)}
+  $('q-ci').addEventListener('input',go);$('q-ci').addEventListener('change',go);
+}
+
+/* ---------- elenco ---------- */
+function tabella(){
+  function draw2(){var o=$('s-ord').value,l=CL.slice().sort(function(a,b){return o==='n'?a.n.localeCompare(b.n):o==='a'?(a.a||9999)-(b.a||9999):(a.c||9999)-(b.c||9999)});
+    $('tab').querySelector('tbody').innerHTML=l.map(function(c){return '<tr><td><b>'+esc(c.n)+'</b>'+(c.ind?'<br><span class="note">'+esc(c.ind)+'</span>':'')+'</td><td>'+esc(anni(c)).replace(/ca\./g,'<span class="circa">ca.</span>')+'</td><td class="hide-s note">'+esc(c.cosa||'')+'</td></tr>'}).join('')}
+  $('s-ord').addEventListener('change',draw2);draw2();
+}
+function oggi(){
+  $('oggi-l').innerHTML=OA.slice().sort(function(a,b){return a.n.localeCompare(b.n)}).map(function(c){return '<li><b>'+esc(c.n)+'</b>'+(c.ind?', <span class="note">'+esc(c.ind)+'</span>':'')+(c.per.length?' <span class="note">(dal '+(c.ac?'ca. ':'')+c.per[0][0]+')</span>':'')+'</li>'}).join('');
+}
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1),el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();el.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname+'#'+id)},true);
+</script></body></html>
