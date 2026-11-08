@@ -3072,3 +3072,8 @@ Vibrazioni pubblicata definitiva: linee ora per ora (opzione B).
 Reati in città pubblicata definitiva: denunce e paura al buio (opzione B).
 Parcheggi pubblicata definitiva: i tre grafici A, B e C insieme, ognuno con il suo titolo.
 Chi può permettersi dove pubblicata definitiva: reddito tipico in testa, semaforo 30/40%, mestieri più mappa del mestiere.
+Consiglio comunale pubblicata definitiva: una riga per consigliere con tutti i nomi (opzione B rifatta).
+Terzo settore pubblicata definitiva: fasce min-max (opzione C) con le schede che spiegano i tipi di ente dal Codice del Terzo settore.
+Quartieri che cambiano pubblicata definitiva: livello contro cambiamento (opzione A) con quadranti spiegati e tutti i nomi.
+Statue pubblicata definitiva: opzioni A e B, senza le opere di soggetto non determinato.
+Elezioni ripubblicata: grafico dei quartieri rifatto a barre ordinate con la riga di Milano.

@@ -1,348 +1,649 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · I quartieri che cambiano</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .mini{height:260px;border:1px solid var(--ink)}
-.map .leaflet-tile-pane,.mini .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
-.bars{margin:.4em 0} .bars .row{display:grid;grid-template-columns:minmax(100px,40%) 1fr 96px;gap:6px;align-items:center;font-size:.88rem;padding:2px 0}
-.bars .nm{line-height:1.2;overflow-wrap:anywhere} .bars .tr{background:#f1f1f1;height:10px;position:relative} .bars .fill{display:block;height:10px;background:var(--acc)}
-.bars .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.zb{position:relative;height:10px;background:#f1f1f1;min-width:70px} .zb:after{content:"";position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666} .zb i{position:absolute;top:0;height:10px}
-.iv .row{display:grid;grid-template-columns:minmax(110px,36%) 1fr;gap:6px;align-items:center;font-size:.8rem;height:17px;cursor:pointer}
-.iv .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .iv .tr{position:relative;height:11px;background:#f6f6f6}
-.iv .a{position:absolute;top:5px;height:1px;background:#777} .iv .b{position:absolute;top:2px;height:7px;background:rgba(0,105,92,.35)} .iv .d{position:absolute;top:0;width:5px;height:11px;margin-left:-2px;background:var(--acc)}
-.iv .ax{display:grid;grid-template-columns:minmax(110px,36%) 1fr;gap:6px;font-size:.75rem;color:var(--mut)} .iv .ax span:last-child{display:flex;justify-content:space-between}
-.sl{display:grid;grid-template-columns:minmax(120px,32%) 1fr 40px;gap:8px;align-items:center;font-size:.9rem;margin:2px 0} .sl input{width:100%}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 14px}
-@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem} .sl{grid-template-columns:1fr 60px 34px}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.tabmax{max-height:480px;overflow:auto}
-.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-.dotc{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1px solid #fff;box-shadow:0 0 0 1px #888}
-</style><script src="../menu.js" defer></script></head><body><main>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri grandi */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:639px){.hl>a:last-child:nth-child(odd){grid-column:1/-1}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli e grafici */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt caption{caption-side:top;text-align:left;font-size:.85rem;color:var(--mut);padding-bottom:2px}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* scrivi il tuo comune */
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris.m{border-left-color:var(--mi)}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.ris .ch{margin-top:6px}
+/* parcheggio */
+.lotwrap{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:700px){.lotwrap{grid-template-columns:1fr 1fr;gap:16px}}
+.lothead{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+.lothead b{font-size:1.8rem;line-height:1;font-weight:800}
+.lothead span{font-size:.85rem;color:var(--mut);line-height:1.2}
+.sl{margin:8px 0 0;padding:8px 12px 10px;background:var(--soft);border-top:6px solid var(--m4)}
+.sl label{display:block;font-weight:750;font-size:.92rem;margin-bottom:2px}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl input[type=range]::-moz-range-thumb{height:28px;width:28px}
+.sl .ex{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+/* piccoli grafici ripetuti */
+.mp{background:var(--soft);border-top:4px solid var(--c);padding:6px 12px 6px;min-width:0}
+.mp b{display:block;font-size:.95rem;line-height:1.2;margin-bottom:2px}
+.mp svg{display:block;overflow:visible;font-family:inherit;font-size:12px}
+.mp svg text{fill:var(--ink)}
+.mp svg .m{fill:var(--mut)}
+.mp svg .b{font-weight:700}
+.mp [data-t]{cursor:pointer}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+
+/* quartiere e persone */
+.pm{margin:10px 0 0}
+.pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
+.pers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:.4em 0 .6em}
+.pers b{display:block;font-size:.95rem;margin-bottom:4px}
+.pers>div{min-width:0}
+.lg i.dot{border-radius:50%}
+.find{margin:14px 0 0}
+
+.find select{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find select:focus{outline:3px solid var(--mi);outline-offset:1px}
+table.kt td.l,table.kt th.l{text-align:left}
+.scroll{overflow-x:auto}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.warn{font-size:.88rem;color:#7a4300;background:#fff4e5;border-left:5px solid var(--ora);padding:8px 10px;margin:.6em 0;line-height:1.35}
+.leg2{display:flex;gap:8px;align-items:center;margin:4px 0;font-size:.9rem}
+.leg2 i{flex:0 0 14px;height:14px;border-radius:2px}
+.leg2 span{flex:1;line-height:1.2}
+.ris table{border-collapse:collapse;width:100%;font-size:.88rem;margin-top:6px}
+.ris td{padding:4px 0;border-bottom:1px solid #dcdfe4;vertical-align:top}
+.ris td.r{text-align:right;white-space:nowrap;padding-left:8px;font-variant-numeric:tabular-nums}
+.cd{border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.cd .n{display:block;font-size:2.1rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 4px}
+.cd .n small{font-size:1rem;font-weight:700}
+.cd p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.nb2{display:inline-block;min-width:1.6em;text-align:center;font-weight:800}
+.tit{font-size:1.2rem;margin:1.6em 0 .2em;font-weight:800}
+.come{background:var(--soft);border-left:6px solid var(--mi);padding:8px 12px;margin:.8em 0;font-size:.92rem;line-height:1.35}
+.come ul{margin:.3em 0 0;padding-left:1.1em}.come li{margin:.4em 0}
+.tp{border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;margin:14px 0}
+.tp h4{margin:0;font-size:1.3rem;line-height:1.15;font-weight:800}
+.tp .nq{font-size:.85rem;color:var(--mut);margin:2px 0 4px}
+.tp p{margin:.3em 0 .4em;font-size:.92rem;line-height:1.35;color:var(--ink2)}
+</style>
+<script src="../menu.js" defer></script></head><body><main>
 <h1>I quartieri che cambiano</h1>
-<p>Milano ha 88 quartieri (i NIL, Nuclei di Identità Locale). Qui ne guardiamo <b id="n-cl">73</b>, quelli con almeno 2.000 residenti, e li mettiamo in fila per <b>quanto stanno cambiando</b>: nove segnali presi da altre pagine del sito (redditi, prezzi e affitti, nuove case, affitti brevi, locali, botteghe storiche, giovani adulti, laureati), contati con pesi uguali. È un confronto tra quartieri. <b>Non misura chi se ne va o chi arriva, e non dice perché le cose cambiano.</b></p>
+<p class="lead">Milano ha 88 quartieri. Ne guardiamo 73, quelli con almeno 2.000 residenti, e li mettiamo in fila per quanto stanno cambiando: redditi, prezzi e affitti, nuove case, affitti brevi, locali, botteghe, giovani adulti, laureati.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="hl" id="hl"></div>
+<p class="src">Tutti i numeri: pagine del sito su redditi (MEF, CC BY 3.0), prezzi e affitti (Agenzia delle Entrate, OMI, CC BY 4.0, stime), affitti brevi (Inside Airbnb, CC BY 4.0), locali, residenti e botteghe storiche (Comune di Milano, CC BY), laureati (ISTAT, CC BY 4.0). È un confronto tra quartieri: non misura chi se ne va o chi arriva, e non dice perché le cose cambiano.</p>
+<p class="warn"><b>Cinque limiti, prima di leggere.</b> I prezzi e gli affitti sono stime, non prezzi pagati. Tre segnali su nove non sono davvero per quartiere (reddito per CAP, prezzi per zona OMI). I nove segnali vanno poco d'accordo: l'indice riassume più storie, quindi sono sicuri gli estremi, non il centro della classifica. Le botteghe storiche ci sono solo per <b id="n-bott"></b> quartieri. Misura il cambiamento, non gli spostamenti di persone né le cause. Il resto è nei limiti dei dati, in fondo.</p>
 
-<div class="warm"><b>Prima di leggere le classifiche, cinque limiti dei dati</b> (l&rsquo;elenco completo è <a href="#limiti">in fondo</a>).
-<ul id="limiti-brevi"></ul></div>
+<!-- ============ 1 ============ -->
+<h2 id="classifica">In classifica</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Lambrate" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<div class="fig">
+  <h3 id="t-ix"></h3>
+  <p class="sub">Quartieri colorati per posto in classifica. L'indice è la media di nove punteggi, a pesi uguali: più è scuro, più il quartiere cambia rispetto agli altri. Il numero è il posto dei primi dieci. In grigio i 15 quartieri con meno di 2.000 residenti, fuori classifica.</p>
+  <div class="lg" id="lg-ix"></div>
+  <div class="ch pick" id="ch-ix" role="img" aria-label="Mappa dei quartieri colorati per indice di cambiamento"></div>
+  <p class="note" id="nn-ix"></p>
+  <p class="src">Fonti: vedi sopra; confini dei quartieri (NIL) e civici: Comune di Milano (CC BY). Il quartiere scelto ha il bordo nero. Un colore scuro non è un giudizio: è un confronto tra quartieri.</p>
+</div>
 
-<h2 id="mappa">La mappa</h2>
-<p>Scegli che cosa mostrare. Clic su un quartiere per la scheda (oppure scegli dall&rsquo;elenco). Il colore va dall&rsquo;arancio (cambia meno degli altri) al verde (cambia di più): è un confronto tra quartieri, non un giudizio.</p>
-<div class="ctl" id="ctl-map"><span class="sub">Mostra:</span></div>
-<div class="ctl"><label class="sub" for="sel-nil">Il tuo quartiere:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
-<p class="sub" id="map-desc"></p>
-<div id="map" class="map" role="img" aria-label="Mappa dei quartieri di Milano colorati per indice di cambiamento"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">Mappa © OpenStreetMap contributors. Dati: vedi <a href="#fonti">fonti</a>. In grigio i quartieri con meno di 2.000 residenti, che non sono in classifica.</p>
-<div id="scheda" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
+<div class="fig">
+  <h3 id="t-rank"></h3>
+  <p class="sub">I dieci quartieri con l'indice più alto (a sinistra) e i dieci con l'indice più basso (sotto). Il numero davanti al nome è il posto su 73.</p>
+  <div class="ch" id="ch-rank1" role="img" aria-label="Barre: i dieci quartieri con l'indice di cambiamento più alto"></div>
+  <p class="mt" style="margin-top:1em">I dieci con l'indice più basso</p>
+  <div class="ch" id="ch-rank2" role="img" aria-label="Barre: i dieci quartieri con l'indice di cambiamento più basso"></div>
+  <p class="note" id="nn-rank"></p>
+  <p class="src">Indice = media di nove punteggi standardizzati (z), pesi uguali. Fonti: vedi sopra. Quartieri con meno segnali (reddito, botteghe, locali mancanti) hanno la media degli altri.</p>
+</div>
 
-<h2 id="classifica">Chi cambia di più e di meno</h2>
-<div id="class-testo"></div>
-<div class="grid2"><div><h3>I 10 con l&rsquo;indice più alto</h3><div class="bars" id="b-top"></div></div>
-<div><h3>I 10 con l&rsquo;indice più basso</h3><div class="bars" id="b-bot"></div></div></div>
-<p class="src">Indice = media di nove punteggi standardizzati (z), pesi uguali. Tra parentesi la posizione su 73 e, sotto, la posizione migliore e peggiore che il quartiere ha in tutte le varianti provate.</p>
-<details><summary>Tutti i quartieri in classifica</summary><div class="scroll tabmax"><table id="tab-class"></table></div></details>
+<!-- ============ 2 ============ -->
+<h2 id="casa">Casa, reddito e persone</h2>
+<div class="fig">
+  <h3 id="t-casa"></h3>
+  <p class="sub">Ogni pallino è un quartiere. Variazione del prezzo di vendita e dell'affitto stimati, in euro di oggi, dal secondo semestre 2014 al primo 2026. La linea nera è il valore tipico (mediana).</p>
+  <div class="ch" id="ch-casa" role="img" aria-label="Pallini su un asse: variazione di prezzi e affitti dei quartieri"></div>
+  <p class="src">Fonte: Agenzia delle Entrate, Osservatorio del Mercato Immobiliare (OMI), abitazioni civili (CC BY 4.0): sono stime, non prezzi di vendita né affitti pagati. Quasi tutta la salita è del 2023-2026; i valori sono per zona OMI, portati al quartiere con i civici del Comune.</p>
+</div>
 
-<h3 id="incertezza">Quanto è sicuro il posto in classifica</h3>
-<p>Per ogni quartiere: il pallino è il posto con i pesi uguali; la barra verde è l&rsquo;intervallo tra il posto migliore e il peggiore in <span id="n-prove">21</span> prove (altri pesi, altri dati, un indicatore in meno alla volta); la linea sottile è il 5°–95° percentile con 5.000 pesi casuali. <b>Gli estremi restano fermi; il centro della classifica è una scala dove i quartieri si scambiano il posto.</b> Clic su una riga per la scheda.</p>
-<div class="iv"><div class="ax"><span></span><span><span>1° (cambia di più)</span><span>73° (cambia di meno)</span></span></div><div class="scroll tabmax" style="overflow-x:hidden" id="iv"></div></div>
-<p class="src" id="iv-nota"></p>
+<div class="fig">
+  <h3 id="t-reddito"></h3>
+  <p class="sub">Variazione del reddito medio per contribuente, in euro di oggi, dall'anno d'imposta 2011 al 2024. Verde dove cresce, rosso dove cala. Il numero è la variazione in percento.</p>
+  <div class="lg" id="lg-reddito"></div>
+  <div class="ch" id="ch-reddito" role="img" aria-label="Mappa dei quartieri colorati per variazione del reddito reale"></div>
+  <p class="note" id="nn-reddito"></p>
+  <p class="src">Fonte: MEF, Dipartimento delle Finanze, «Redditi e principali variabili IRPEF» per CAP (CC BY 3.0), portato ai quartieri con i civici del Comune. Il reddito è del contribuente, non del residente.</p>
+</div>
 
-<h2 id="tipologie">Livello e cambiamento</h2>
-<div id="tip-testo"></div>
-<div class="ch" id="ch-sc" role="img" aria-label="Grafico: livello e indice di cambiamento per quartiere"></div>
-<div class="lgd" id="lg-sc"></div>
-<p class="src">Ogni punto è un quartiere. Orizzontale: livello (media dei punteggi z di reddito 2024, prezzo OMI 2026 e laureati 2023). Verticale: indice di cambiamento. Linee: i tagli usati per le tipologie.</p>
-<div class="warn"><b>Le tipologie sono tagli scelti da noi, non gruppi scoperti dai dati.</b> Abbiamo provato un raggruppamento automatico (k-means): non trova gruppi netti (<span id="sil"></span>). I quartieri formano un continuo; le sei etichette servono solo a leggere meglio il grafico. Il taglio del cambiamento è a terzi (alto, medio, basso); il livello è alto da +0,5 e basso fino a −0,5.</div>
-<div class="scroll"><table id="tab-tip"></table></div>
+<div class="fig">
+  <h3 id="t-pers"></h3>
+  <p class="sub">Ogni pallino è un quartiere. In alto: laureati, variazione della quota di residenti con la laurea dal censimento 2011 al 2023, in punti. In basso: variazione della quota di residenti di 25-34 anni, dal 2014 al 2025, in punti. Linea nera: valore tipico.</p>
+  <div class="ch" id="ch-pers" role="img" aria-label="Pallini su un asse: laureati e giovani adulti nei quartieri"></div>
+  <p class="src">Fonti: ISTAT, censimenti (CC BY 4.0) per i laureati; Comune di Milano, anagrafe dei residenti per età (CC BY). I censimenti 2011 e 2023 non sono dello stesso tipo: può restare qualche differenza di definizione.</p>
+</div>
 
+<!-- ============ 3 ============ -->
 <h2 id="storie">Tre storie, non una</h2>
-<div id="storie-testo"></div>
-<div class="grid3">
-<div><h3>Casa</h3><p class="sub">reddito, prezzi, affitti, nuove case</p><div id="m-casa" class="mini"></div><p class="sub" id="m-casa-t"></p></div>
-<div><h3>Commercio</h3><p class="sub">affitti brevi, locali, botteghe</p><div id="m-comm" class="mini"></div><p class="sub" id="m-comm-t"></p></div>
-<div><h3>Persone</h3><p class="sub">25-34 anni, laureati</p><div id="m-pers" class="mini"></div><p class="sub" id="m-pers-t"></p></div></div>
-<div class="lgd"><span><i style="background:#a8540f"></i>molto sotto la media</span><span><i style="background:#e0a96d"></i>sotto</span><span><i style="background:#eee"></i>vicino</span><span><i style="background:#62b0a4"></i>sopra</span><span><i style="background:#136459"></i>molto sopra</span><span><i style="background:#bdbdbd"></i>fuori classifica o senza dato</span></div>
-<p class="src">Punteggio medio dei segnali del blocco (z). Un quartiere può essere sopra la media in un blocco e sotto in un altro.</p>
+<p class="note">I nove segnali vanno poco d'accordo: un quartiere può cambiare molto per la casa e poco per le persone. Per questo mettiamo insieme due cose: <b>quanto il quartiere è ricco oggi</b> e <b>quanto è cambiato</b>. Ne escono sei tipi di quartiere.</p>
 
-<h2 id="pesi">Prova tu i pesi</h2>
-<p>L&rsquo;indice di base dà lo stesso peso ai nove segnali. Qui puoi cambiarli (0 = ignora il segnale). Guarda chi resta in testa e in coda.</p>
-<div class="ctl" id="ctl-w"></div>
-<div id="sl"></div>
-<div class="warn" id="w-sum"></div>
-<div class="grid2"><div><h3>I 10 in testa con questi pesi</h3><div class="bars" id="w-top"></div></div><div><h3>I 10 in coda con questi pesi</h3><div class="bars" id="w-bot"></div></div></div>
-<p class="src" id="w-nota"></p>
+<div class="come">
+  <b>Come si leggono i due assi</b>
+  <ul>
+    <li><b>In orizzontale: quanto è ricco oggi.</b> È la media di tre cose: il reddito dei residenti (2024), il prezzo delle case (stima 2026) e la quota di laureati (2023). Più il punto è a destra, più il quartiere sta sopra gli altri su queste tre cose; a sinistra, sotto.</li>
+    <li><b>In verticale: quanto è cambiato.</b> È l'indice della classifica qui sopra, che riassume i nove segnali (case, redditi, commercio, persone). Più il punto è in alto, più il quartiere è cambiato rispetto agli altri.</li>
+    <li><b>Le linee tratteggiate</b> sono tagli che abbiamo scelto noi per dare un nome ai gruppi: in orizzontale un terzo dei quartieri cambia di più, un terzo di meno, uno sta in mezzo; in verticale il livello è alto, medio o basso. Non sono gruppi trovati dai dati: i quartieri formano un continuo.</li>
+  </ul>
+</div>
 
-<h2 id="limiti">Limiti dei dati</h2>
-<div class="warm"><ul id="limiti-lista"></ul></div>
+<div class="fig" id="fig-a">
+  <h3 id="t-fa"></h3>
+  <p class="sub">Ogni punto è un quartiere, del colore del suo tipo. In grande, dentro ogni zona, il nome del tipo. I nomi di tutti i quartieri sono nei sei riquadri qui sotto. Tocca un punto per leggere il nome.</p>
+  <div class="ch" id="ch-fa" role="img" aria-label="Punti: livello e cambiamento dei quartieri, colorati per tipo, con i sei tipi scritti nelle zone del grafico"></div>
+  <p class="src">Fonti: vedi sopra. Livello = media dei punteggi di reddito medio 2024, prezzo OMI 2026 e laureati 2023; cambiamento = indice a pesi uguali. Un raggruppamento automatico non trova gruppi netti.</p>
+</div>
 
-<h2 id="metodo">Come è fatto</h2>
-<ul class="m" id="metodo-lista"></ul>
-<h3>I nove segnali</h3>
-<div class="scroll"><table id="tab-ind"></table></div>
+<h3 class="tit" id="tipi">I sei tipi, con tutti i quartieri</h3>
+<p class="note">Ogni riquadro dice che cosa vuol dire il tipo e mostra, uno per uno, i suoi quartieri: ogni nome è collegato al suo punto. Più in alto = è cambiato di più; più a destra = è più ricco.</p>
+<div id="tipi-box"></div>
 
-<h2 id="download">File</h2>
-<p><a href="data/nil.csv">nil.csv</a> (tutti i valori, i punteggi, il posto e l&rsquo;intervallo per quartiere), <a href="data/nil.geojson">nil.geojson</a> (confini semplificati con gli stessi valori), <a href="data/robustezza_varianti.csv">robustezza_varianti.csv</a>, <a href="data/indicatori_definizioni.csv">indicatori_definizioni.csv</a>, <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Si possono riusare citando la fonte; il Comune, il MEF, l&rsquo;Agenzia delle Entrate e l&rsquo;ISTAT hanno licenze CC BY (vedi sotto). I singoli annunci Airbnb non sono pubblicati: solo conteggi per quartiere.</p>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: i 88 quartieri in cui il Comune divide Milano. Se ne guardano 73, quelli con almeno 2.000 residenti.</dd>
+<dt>Indice di cambiamento</dt><dd>La media di nove punteggi standardizzati, uno per segnale, con pesi uguali. Più è alto, più il quartiere è «salito» rispetto agli altri. Non ha uno zero assoluto.</dd>
+<dt>Punteggio standardizzato (z)</dt><dd>Quanto un quartiere sta sopra o sotto la media dei quartieri, per un segnale, misurato in unità di variazione tipica.</dd>
+<dt>Euro di oggi (reali)</dt><dd>Valori corretti per l'inflazione, per poter confrontare anni diversi.</dd>
+<dt>OMI</dt><dd>Osservatorio del mercato immobiliare dell'Agenzia delle Entrate: stime dei prezzi di case e affitti per zona.</dd>
+<dt>CAP</dt><dd>Codice di avviamento postale. I redditi sono pubblicati per CAP, non per quartiere.</dd>
+<dt>Gentrificazione</dt><dd>Il nome che si dà a un quartiere in cui salgono redditi, prezzi e affitti e cambiano commercio e abitanti. Qui non è un'etichetta per quartieri o persone, e non diciamo che cosa la causa.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul>
+<p class="mt">I nove segnali</p><div class="scroll"><table class="kt" id="tab-ind"></table></div></div></details>
+<details id="download"><summary>File</summary><div class="in"><p><a href="data/nil.csv">nil.csv</a> (tutti i valori, i punteggi, il posto e l'intervallo per quartiere), <a href="data/nil.geojson">nil.geojson</a> (confini semplificati con gli stessi valori), <a href="data/robustezza_varianti.csv">robustezza_varianti.csv</a>, <a href="data/indicatori_definizioni.csv">indicatori_definizioni.csv</a>, <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). Si possono riusare citando la fonte; il Comune, il MEF, l'Agenzia delle Entrate e l'ISTAT hanno licenze CC BY (vedi sotto). I singoli annunci Airbnb non sono pubblicati: solo conteggi per quartiere.</p></div></details>
+</div>
 
 <footer id="fonti">
-<p><b>Fonti e licenze.</b> Redditi: MEF, Dipartimento delle Finanze, «Redditi e principali variabili IRPEF» per CAP, CC BY 3.0. Prezzi e affitti: Agenzia delle Entrate, Osservatorio del Mercato Immobiliare (OMI), CC BY 4.0, stime. Affitti brevi: Inside Airbnb (insideairbnb.com), CC BY 4.0. Locali: Comune di Milano, registro dei pubblici esercizi (CC BY). Residenti: Comune di Milano, anagrafe per quartiere (CC BY). Laureati: ISTAT, censimenti (CC BY 4.0). Civici e confini dei quartieri: Comune di Milano (CC BY). Mappa: © OpenStreetMap contributors.</p>
+<p><b>Fonti e licenze.</b> Redditi: MEF, Dipartimento delle Finanze, «Redditi e principali variabili IRPEF» per CAP, CC BY 3.0. Prezzi e affitti: Agenzia delle Entrate, Osservatorio del Mercato Immobiliare (OMI), CC BY 4.0, stime. Affitti brevi: Inside Airbnb (insideairbnb.com), CC BY 4.0. Locali: Comune di Milano, registro dei pubblici esercizi (CC BY). Residenti: Comune di Milano, anagrafe per quartiere (CC BY). Laureati: ISTAT, censimenti (CC BY 4.0). Civici e confini dei quartieri: Comune di Milano (CC BY).</p>
 <p><b>Le pagine da cui vengono i dati:</b> <a href="../redditi/">Redditi dal 2000</a> · <a href="../prezzi-case/">Prezzi delle case</a> · <a href="../affitti-brevi/">Affitti brevi</a> · <a href="../ristoranti/">Ristoranti</a> · <a href="../censimenti/">Censimenti</a> · <a href="../scuole/">Scuole</a> · <a href="../citta-15-minuti/">La città dei 15 minuti</a> (civici e CAP).</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
+
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,NF=null,NIL=[],CL=[],BYID={};
-var ACC='#00695c',WARM='#c26a1b';
-var DIV=['#a8540f','#e0a96d','#f3dcc0','#c9e5df','#62b0a4','#136459'];
-var TIPC={'In salita rapida':'#00695c','Alti e ancora in salita':'#4f9ac7','Nella media':'#bdbdbd','Già alti e stabili':'#7a5195','Fermi su livelli medi':'#e0a96d','Fermi su livelli bassi':'#a8540f'};
-var TIPORD=['In salita rapida','Alti e ancora in salita','Nella media','Già alti e stabili','Fermi su livelli medi','Fermi su livelli bassi'];
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e3e6eb',gry:'#9aa1ad',men:'#0072BC',don:'#F06EAA',up:'#00A651',down:'#E30613'};
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+grp(String(Math.abs(r)))}
+function fp(x){return x<10?f1(x):f0(x)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function pl(n,u,p){return n+' '+(n===1?u:p)}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function spread(a,gap,lo,hi){
+  a.sort(function(p,q){return p.y-q.y});
+  for(var k=1;k<a.length;k++)if(a[k].y-a[k-1].y<gap)a[k].y=a[k-1].y+gap;
+  var b=hi;for(k=a.length-1;k>=0;k--){if(a[k].y>b)a[k].y=b;b=a[k].y-gap}
+  if(a.length&&a[0].y<lo){a[0].y=lo;for(k=1;k<a.length;k++)if(a[k].y-a[k-1].y<gap)a[k].y=a[k-1].y+gap}
+}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getT(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()})}
+
+/* ===== libreria comune (palette, dati, mappe, barre, punti) ===== */
+var RD=[];function draw(f){f();RD.push(f)}
+function pl(n,u,p){return n+' '+(n===1?u:p)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function fp(x){return x<10?f1(x):f0(x)}
+function shortn(s,w,b){if(tw(s,13,b)<=w)return s;while(s.length>3&&tw(s+'…',13,b)>w)s=s.slice(0,-1);return s+'…'}
+function parseCSV(t,sep){
+  sep=sep||',';var rows=[],row=[],f='',q=false,i=0,n=t.length;
+  if(t.charCodeAt(0)===0xFEFF)i=1;
+  for(;i<n;i++){var c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;
+    else if(c===sep){row.push(f);f=''}
+    else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}
+    else if(c!=='\r')f+=c}
+  if(f!==''||row.length){row.push(f);rows.push(row)}
+  var h=rows[0];return rows.slice(1).filter(function(r){return r.length>1||r[0]!==''}).map(function(r){var o={};h.forEach(function(k,j){o[k]=r[j]});return o});
+}
+function getC(u,sep){return getT(u).then(function(t){return parseCSV(t,sep)})}
+function numAll(a,keys){a.forEach(function(o){keys.forEach(function(k){o[k]=o[k]===''||o[k]==null?null:+o[k]})});return a}
+/* numeri grandi */
+function hl(T){$('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('')}
+/* ridisegno al cambio di larghezza */
+function onResize(extra){var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()});if(extra)extra()},150)})}
+function fillSel(id,opts,sel){$(id).innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(sel)?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')}
+function lgd(a){return a.map(function(x){return '<span><i'+(x.k?' class="'+x.k+'"':'')+' style="background:'+x.c+'"></i>'+x.t+(x.n!=null?' <b>&nbsp;'+x.n+'</b>':'')+'</span>'}).join('')}
+/* scala di tick "belli" */
+function nice(lo,hi,n){var span=hi-lo,st=Math.pow(10,Math.floor(Math.log(span/n)/Math.LN10)),e=span/n/st;st*=e>=5?5:e>=2?2:1;var a=Math.ceil(lo/st-1e-9)*st,r=[];for(var v=a;v<=hi+1e-9;v+=st)r.push(Math.round(v/st)*st);return r}
+/* ----- mappe ----- */
+function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+function mapProj(feats,W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  feats.forEach(function(f){anelli(f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,sc:sc,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(p){return[1+(p[0]*k-x0)*sc,1+(y1-p[1])*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+/* disegna una mappa: o={box,feats,id(f),fill(f),tip(f),lab(f,bb)->{t,col}|null,sel,under(P)->svg,over(P)->svg,stroke,pfeats}
+   i riquadri hanno data-n=id per scegliere; restituisce {P,W,H} */
+function mapDraw(o){
+  var W=width(o.box),P=mapProj(o.pfeats||o.feats,W),s=svgOpen(W,P.H),sS='',lab='';
+  if(o.under)s+=o.under(P);
+  o.feats.forEach(function(f){var id=o.id(f),isS=id===o.sel,fl=o.fill(f),b=P.bb(f);
+    var sk=typeof o.stroke==='function'?o.stroke(f):(o.stroke||'#fff'),el='<path d="'+P.path(f)+'" fill="'+fl+'" stroke="'+(isS?C.ink:sk)+'" stroke-width="'+(isS?3:(o.sw||0.8))+'" stroke-linejoin="round" data-n="'+id+'"'+(o.tip?tip(o.tip(f)):'')+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el;
+    if(o.lab&&!isS){var l=o.lab(f,b);if(l)lab+=T(Math.min(Math.max(b.x,18),W-18),b.y+4,l.t,{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+l.col})}});
+  s+=sS+lab;
+  if(o.over)s+=o.over(P);
+  $(o.box).innerHTML=s+'</svg>';return{P:P,W:W,H:P.H};
+}
+/* nomi corti dei quartieri */
+function nilShort(list){
+  var cnt={};list.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  list.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+}
+function titleCase(s){return s.toLowerCase().replace(/(^|[ \-'(\/])([a-zàèéìòù])/g,function(m,a,b){return a+b.toUpperCase()}).replace(/ (Di|Del|Della|Dei|Delle|Da|De|Sul|Il|La|Le|Lo|E) /g,function(m,a){return ' '+a.toLowerCase()+' '})}
+/* campo "scrivi il tuo quartiere" con elenco: items [{id,n,sn}]; i riquadri con data-n scelgono */
+function bindFind(inp,dl,res,items,onPick,noun){
+  var q=$(inp);
+  $(dl).innerHTML=items.slice().sort(function(a,b){return a.sn.localeCompare(b.sn,'it')}).map(function(c){return '<option value="'+esc(c.sn)+'">'}).join('');
+  function trova(k){var m=items.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});return m.length===1?m[0]:null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)onPick(c.id,false);else if(!k)onPick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){onPick(c.id,true);return}
+    var m=items.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)onPick(m[0].id,true);else if(m.length>1){$(res).className='ris';$(res).innerHTML='Ci sono più '+noun+' che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.sn)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.'}
+    else{$(res).className='ris';$(res).innerHTML='Non trovo «'+esc(q.value)+'» tra i '+items.length+' '+noun+'. Controlla come è scritto, oppure tocca la mappa.'}});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(!p||!p.closest('.ch.pick'))return;var id=+p.getAttribute('data-n');onPick(id,true);var c=items.filter(function(x){return x.id===id})[0];if(c)q.value=c.sn});
+}
+/* ----- barre orizzontali -----
+ o={box,rows:[{n,v,col,v2,lab,t,sub}],fmt,max,bh,above}  v2 = parte piena (es. pagato) sopra la barra chiara */
+function barsH(o){
+  var W=width(o.box),bh=o.bh||18,rows=o.rows,mx=o.max||Math.max.apply(null,rows.map(function(r){return r.v})),
+      fm=o.fmt||f0,labs=rows.map(function(r){return r.lab||fm(r.v)}),rw=Math.ceil(Math.max.apply(null,labs.map(function(l){return tw(l,13,true)})))+8,
+      lw0=Math.max.apply(null,rows.map(function(r){return tw(r.n,13,true)})),above=o.above!=null?o.above:lw0>W*0.36;
+  var lw=above?0:Math.min(Math.ceil(lw0)+8,Math.floor(W*0.4)),bw=W-lw-rw,step=above?bh+26:bh+8,s=svgOpen(W,rows.length*step+2);
+  rows.forEach(function(r,i){var y=i*step+2,col=r.col||C.m4,tp=r.t?tip(r.t):'',x0=lw,w=Math.max(r.v>0?3:0,r.v/mx*bw);
+    var ly=above?y+12:y+bh*0.72;
+    s+=T(0,ly,esc(above?r.n:shortn(r.n,lw-6,true)),{c:'k'});
+    if(r.sub&&above)s+=T(W,ly,esc(r.sub),{a:'end',c:'m'});
+    var by=above?y+17:y;
+    if(r.v2!=null){s+=hbar(x0,x0+w,by,bh,col,' fill-opacity=".28"'+tp);var w2=Math.max(r.v2>0?2:0,r.v2/mx*bw);s+=hbar(x0,x0+w2,by,bh,col,tp)}
+    else s+=hbar(x0,x0+w,by,bh,col,tp);
+    s+=T(x0+w+6,by+bh*0.74,labs[i],{c:'b'})});
+  $(o.box).innerHTML=s+'</svg>';
+}
+/* ----- punti a coppie: prima/dopo ----- rows:[{n,a,b,ca,cb,col,t,la,lb}] */
+function dumbbell(o){
+  var W=width(o.box),rows=o.rows,lo=o.min,hi=o.max,fm=o.fmt||f0,pad=44,mL=6,step=o.step||40,H=rows.length*step+34,
+      X=function(v){return mL+30+(v-lo)/(hi-lo)*(W-mL-pad-36)},s=svgOpen(W,H);
+  nice(lo,hi,5).forEach(function(v){s+=L(X(v),14,X(v),H-18,C.grid)+T(X(v),H-4,fm(v)+(o.unit||''),{a:'middle',c:'m'})});
+  rows.forEach(function(r,i){var y=22+i*step+(step-18)/2;
+    s+=T(mL,y-9,esc(shortn(r.n,W-mL-4,true)),{c:'k'});
+    var xa=X(r.a),xb=X(r.b),col=r.col||C.axis;
+    s+=L(xa,y+4,xb,y+4,col,3);
+    s+='<circle cx="'+r1(xa)+'" cy="'+r1(y+4)+'" r="6" fill="#fff" stroke="'+(r.ca||C.axis)+'" stroke-width="2.5"'+(r.t?tip(r.t):'')+'/>';
+    s+='<circle cx="'+r1(xb)+'" cy="'+r1(y+4)+'" r="7" fill="'+(r.cb||C.ink2)+'"'+(r.t?tip(r.t):'')+'/>';
+    var la=r.la||fm(r.a)+(o.unit||''),lb=r.lb||fm(r.b)+(o.unit||''),left=xb>=xa;
+    s+=T(left?xa-10:xa+10,y+9,la,{a:left?'end':'start',c:'m'})+T(left?xb+11:xb-11,y+9,lb,{a:left?'start':'end',c:'b'})});
+  $(o.box).innerHTML=s+'</svg>';
+}
+/* ----- punti con i nomi -----
+ o={box,pts:[{x,y,col,r,n,t,lab,sel,id}],xmin,xmax,ymin,ymax,xfmt,yfmt,xl,yl,h,under(X,Y,m,W,H)} */
+function scatter(o){
+  var W=width(o.box),H=o.h||Math.min(Math.round(W*0.95),440),m={l:46,r:12,t:10,b:44},
+      X=function(v){return m.l+(v-o.xmin)/(o.xmax-o.xmin)*(W-m.l-m.r)},Y=function(v){return H-m.b-(v-o.ymin)/(o.ymax-o.ymin)*(H-m.t-m.b)},s=svgOpen(W,H),xf=o.xfmt||f0,yf=o.yfmt||f0;
+  nice(o.xmin,o.xmax,5).forEach(function(v){s+=L(X(v),m.t,X(v),H-m.b,C.grid)+T(X(v),H-m.b+16,xf(v),{a:'middle',c:'m'})});
+  nice(o.ymin,o.ymax,5).forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,yf(v),{a:'end',c:'m'})});
+  if(o.zero!==false){if(o.ymin<0&&o.ymax>0)s+=L(m.l,Y(0),W-m.r,Y(0),C.axis,1.5);if(o.xmin<0&&o.xmax>0)s+=L(X(0),m.t,X(0),H-m.b,C.axis,1.5)}
+  if(o.under)s+=o.under(X,Y,m,W,H);
+  s+=T(m.l+(W-m.l-m.r)/2,H-4,o.xl||'',{a:'middle',c:'m'});
+  s+='<text transform="translate(12,'+(m.t+(H-m.t-m.b)/2)+') rotate(-90)" text-anchor="middle" class="m">'+(o.yl||'')+'</text>';
+  var pts=o.pts.slice().sort(function(a,b){return (a.sel?1:0)-(b.sel?1:0)});
+  pts.forEach(function(p){var r=p.r||5;s+='<circle cx="'+r1(X(p.x))+'" cy="'+r1(Y(p.y))+'" r="'+(p.sel?r+2:r)+'" fill="'+p.col+'" fill-opacity="'+(p.op||.88)+'" stroke="'+(p.sel?C.ink:'#fff')+'" stroke-width="'+(p.sel?2.5:1)+'"'+(p.t?tip(p.t):'')+(p.id!=null?' data-n="'+p.id+'"':'')+'/>'});
+  var used=[],lab='';
+  o.pts.filter(function(p){return p.lab}).sort(function(a,b){return (b.sel?1:0)-(a.sel?1:0)}).forEach(function(p){
+    var t=p.n,w=tw(t,12,true)+4,px=X(p.x),py=Y(p.y),r=(p.r||5)+3,c=[[px+r,py+4,'start'],[px-r,py+4,'end'],[px,py-r-2,'middle'],[px,py+r+11,'middle']];
+    for(var k=0;k<c.length;k++){var x=c[k][0],y=c[k][1],a=c[k][2],x0=a==='start'?x:a==='end'?x-w:x-w/2,x1=x0+w,y0=y-12,y1=y+3;
+      if(x0<2||x1>W-2||y0<2||y1>H-2)continue;
+      if(used.some(function(u){return u.x1>x0&&u.x0<x1&&u.y1>y0&&u.y0<y1}))continue;
+      used.push({x0:x0,x1:x1,y0:y0,y1:y1});lab+=T(x,y,esc(t),{a:a,c:'halo',st:'font-size:12px;pointer-events:none'});break}});
+  $(o.box).innerHTML=s+lab+'</svg>';return{X:X,Y:Y,W:W,H:H};
+}
+/* ----- treemap (squarify) ----- */
+function squarify(items,x,y,w,h){
+  var tot=items.reduce(function(a,i){return a+i.v},0),sc=w*h/tot,rem=items.map(function(i){return{it:i,a:i.v*sc}}),out=[];
+  function worst(row,side){var s=0,mx=0,mn=1e18;row.forEach(function(r){s+=r.a;mx=Math.max(mx,r.a);mn=Math.min(mn,r.a)});return Math.max(side*side*mx/(s*s),s*s/(side*side*mn))}
+  while(rem.length){var side=Math.min(w,h),row=[rem[0]],i=1;
+    while(i<rem.length){var t=row.concat(rem[i]);if(worst(t,side)<=worst(row,side)){row=t;i++}else break}
+    var s=0;row.forEach(function(r){s+=r.a});
+    if(w>=h){var cw=s/h,cy=y;row.forEach(function(r){var ch=r.a/cw;out.push({it:r.it,x:x,y:cy,w:cw,h:ch});cy+=ch});x+=cw;w-=cw}
+    else{var rh=s/w,cx=x;row.forEach(function(r){var rw=r.a/rh;out.push({it:r.it,x:cx,y:y,w:rw,h:rh});cx+=rw});y+=rh;h-=rh}
+    rem=rem.slice(row.length)}
+  return out;
+}
+/* parole su più righe dentro una larghezza */
+function wrapT(txt,w,b){var ws=String(txt).split(' '),ls=[],cur='';ws.forEach(function(x){var t=cur?cur+' '+x:x;if(tw(t,12,b)<=w||!cur)cur=t;else{ls.push(cur);cur=x}});if(cur)ls.push(cur);return ls}
+
+/* scorciatoie per le funzioni copiate dalle pagine di prima */
+function el(id){return $(id)}
+function setH(id,h){$(id).innerHTML=h}
 function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d)}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function fv(k,v){if(v==null)return 'n.d.';var I=D.ind[k];return (I.segno?sg(v,I.dec):nf(v,I.dec))+(I.unita==='%'?'%':I.unita)}
+function pc(x){return nf(x,0)+'%'}
+function M(x,d){return nf(x/1e6,d==null?1:d)+' M'}
 
-Promise.all([J('data/riepilogo.json'),J('data/nil.geojson')]).then(function(a){
-  D=a[0];NF=a[1];NIL=NF.features.map(function(f){return f.properties});
-  NIL.forEach(function(p){BYID[p.i]=p});CL=NIL.filter(function(p){return p.cl===1});
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* due barre a confronto, una scala per ogni misura. items:[{t,a,b,fmt,u}] */
+function pairBars(box,items,la,lb,ca,cb){
+  var W=width(box),rw=70,lw=0,bh=18,step=2*bh+36,s=svgOpen(W,items.length*step+4),bw=W-rw;
+  items.forEach(function(it,i){var y=i*step+2,mx=it.max||Math.max(it.a,it.b)||1,fm=it.fmt||f1;
+    s+=T(0,y+12,esc(it.t),{c:'k'});
+    [[it.a,ca,la],[it.b,cb,lb]].forEach(function(r,k){var by=y+18+k*(bh+4),w=Math.max(r[0]>0?3:0,r[0]/mx*(bw-6));
+      s+=hbar(0,w,by,bh,r[1],tip('<b>'+esc(r[2])+'</b><br>'+esc(it.t)+': '+fm(r[0])+(it.u||'')))+T(w+6,by+bh*0.74,fm(r[0])+(it.u||''),{c:'b'})})});
+  $(box).innerHTML=s+'</svg>';
+}
 
-var RD=[];
+/* scheda "qui contro Milano": due barre */
+function pairB(id,titolo,qv,cv,col,fmt,u){
+  var h='<div class="pm"><b>'+titolo+'</b><div class="ch" id="'+id+'"></div></div>';
+  return{h:h,draw:function(){var box=$(id),W=Math.max(220,Math.floor(box.clientWidth)),mx=Math.max(Math.abs(qv||0),Math.abs(cv))||1,lw=54,rw=Math.ceil(tw(fmt(mx)+(u||''),13,true))+10,bw=W-lw-rw,s=svgOpen(W,56);
+    [{n:'Qui',v:qv,col:col},{n:'Milano',v:cv,col:C.ink2}].forEach(function(r,i){var y=i*26+3;s+=T(0,y+16,r.n,{c:'k'});if(r.v==null){s+=T(lw,y+16,'non disponibile',{c:'b'});return}
+      var w=Math.max(3,Math.abs(r.v)/mx*bw);s+=hbar(lw,lw+w,y,20,r.col)+T(lw+w+6,y+16,fmt(r.v)+(u||''),{c:'b'})});box.innerHTML=s+'</svg>'}};
+}
+
+/* colonna verticale, estremo arrotondato lontano dalla base */
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(4,h,w/2);if(h<0.5)return '';
+  var d=y1<=y0?
+    'M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z':
+    'M'+r1(x)+' '+r1(t)+'V'+r1(b-rr)+'Q'+r1(x)+' '+r1(b)+' '+r1(x+rr)+' '+r1(b)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(b)+' '+r1(x+w)+' '+r1(b-rr)+'V'+r1(t)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+
+var D,NG,N=[],BY={},CLN=[],sel=null;
+var SH=['Reddito','Prezzo delle case','Affitto','Nuove case','Affitti brevi','Locali','Botteghe perse','Giovani 25-34','Laureati'];
+var BL=['#a9d0ec','#5aa6d8','#0072BC','#004a7c','#00263f'];
+var RG=['#B3000F','#F0545C','#4CC58A','#00843D'];
+var TIPC={'Alti e ancora in salita':C.m5,'In salita rapida':C.ora,'Nella media':C.m4,'Fermi su livelli medi':C.teal,'Fermi su livelli bassi':C.gry,'Già alti e stabili':C.bro};
+var NS=NaN;
+function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th class="'+(i?'':'l')+'">'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td class="'+(i?'':'l')+'" style="white-space:normal">'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
+function sg(x,d){var v=Number(x),a=Math.abs(v);return (v>0?'+':v<0?'−':'')+nf(a,d==null?1:d)}
+function fv(k,v){var I=D.ind[k];return (I.segno?sg(v,I.dec):nf(v,I.dec))+I.unita}
+function med(a){var b=a.filter(function(x){return x!=null}).sort(function(x,y){return x-y}),n=b.length;return n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2}
+
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson')]).then(function(r){
+  D=r[0];NG=r[1];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
 function tutto(){
-  el('n-cl').textContent=D.n_classificati;
-  sorpresa();limitiBrevi();mappa();classifica();incertezza();tipologie();storie();pesi();limiti();metodo();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
+  NG.features.forEach(function(f){var p=f.properties,o={id:p.i,n:p.n,mun:p.mun,ab:p.ab,cl:p.cl,v:p.v,z:p.z,rk:p.rk,ix:p.ix,rmin:p.rmin,rmax:p.rmax,liv:p.liv,bc:p.bc,bn:p.bn,bp:p.bp,tip:p.tip,lim:p.lim||[],ctx:p.ctx,f:f};N.push(o);BY[o.id]=o;if(o.cl)CLN.push(o)});
+  nilShort(N);
+  $('n-bott').textContent=D.n_botteghe;
+  highlights();
+  bindFind('q','elenco','ris',N,function(id){sel=id;scheda();RD.forEach(function(f){f()})},'quartieri');
+  scheda();draw(mappaIx);draw(rank);
+  draw(casa);draw(reddito);draw(pers);
+  draw(fA);
+  limiti();metodo();
+  onResize(scheda);
 }
-function nm(p){return esc(p.n)}
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var S=D.sorpresa,h='';
-  h+='<p><b>Il cambiamento più forte non è dove abitano i più ricchi.</b> I '+S.mun1_n+' quartieri classificati del Municipio 1 ('+S.mun1.map(function(m){return esc(m.n)+', '+m.rk+'°'}).join('; ')+') sono tutti tra gli ultimi '+S.mun1_ultimi+' su '+D.n_classificati+', e nessuno dei primi 10 è nel centro storico. Nei prezzi OMI il centro è fermo in termini reali (zona B12, Duomo–San Babila: '+sg(S.b12,1)+'% dal 2014 al 2026).</p>';
-  h+='<p><b>Il quartiere che nessuno si aspetta è Lambrate-Ortica</b>, al 1° posto (nelle prove va dal 1° al '+S.lamb.rmax+'°): il reddito reale è fermo ('+sg(S.lamb.red,1)+'%), eppure l&rsquo;affitto OMI è '+sg(S.lamb.aff,1)+'% (il più alto dei '+D.n_classificati+'), i laureati sono cresciuti di '+sg(S.lamb.lau,1)+' punti (2° posto) e le nuove abitazioni sono '+f0(S.lamb.cos)+' ogni 1.000 residenti ('+S.lamb.rk_cos+'° posto). Cautela: sono stime OMI e permessi di costruire, e la zona OMI è condivisa con altri quartieri.</p>';
-  h+='<p>Seguono '+D.sorpresa.top5.slice(1).map(function(t){return esc(t.n)}).join(', ')+'. <b>Sarpi</b> (la «Chinatown»), che con sette segnali era in testa, è ora '+S.sarpi.rk+'° (reddito del CAP '+sg(S.sarpi.red,1)+'%, prezzo OMI '+sg(S.sarpi.pre,1)+'%, affitto OMI '+sg(S.sarpi.aff,1)+'%, locali '+sg(S.sarpi.rist,1)+'%). <b>Maggiore–Musocco–Certosa</b> è 3° soprattutto per le nuove case ('+f0(S.magg.cos)+' abitazioni ogni 1.000 residenti): qui il cambiamento è anche edilizia.</p>';
-  h+='<p class="src">Questa classifica dà lo stesso peso a tutti i segnali. Se si dà molto peso agli affitti brevi il Duomo sale (ne ha molti): lo si vede <a href="#pesi">nella prova dei pesi</a>.</p>';
-  setH('sorpresa',h);
+
+/* ---------- numeri grandi ---------- */
+function highlights(){
+  var S=D.sorpresa,M=D.mediane,neg=CLN.filter(function(o){return o.v[0]!=null&&o.v[0]<0}).length,nr=CLN.filter(function(o){return o.v[0]!=null}).length;
+  hl([
+    {c:C.mi,h:'t-ix',n:'+'+f0(S.lamb.aff),u:'%',p:'l’affitto a Lambrate - Ortica dal 2014 (euro di oggi, stima OMI): il quartiere che cambia di più, 1° su '+D.n_classificati+'.'},
+    {c:C.m3,h:'t-rank',n:S.mun1_nel_top10+'<small> su 10</small>',u:'',p:'dei quartieri che cambiano di più è nel centro storico: i '+S.mun1_n+' del Municipio 1 sono tra gli ultimi '+S.mun1_ultimi+'.'},
+    {c:C.m2,h:'t-casa',n:'+'+f0(M.prezzo_var),u:'%',p:'il prezzo mediano delle case dal 2014, in euro di oggi (stime OMI). Gli affitti: +'+f0(M.affitto_var)+'%.'},
+    {c:C.m4,h:'t-reddito',n:'+'+f0(M.reddito_var),u:'%',p:'il reddito reale mediano per contribuente dal 2011 al 2024; in '+neg+' quartieri su '+nr+' è sceso.'},
+    {c:C.m5,h:'t-pers',n:'+'+f0(M.laureati_var),u:' punti',p:'la quota di laureati tra i residenti, valore tipico dei quartieri, dal censimento 2011 al 2023.'},
+    {c:C.ora,h:'t-fa',n:String(D.tipologie.filter(function(t){return t.nome==='Alti e ancora in salita'})[0].n)+'<small> su '+D.n_classificati+'</small>',u:'',p:'quartieri sono già alti e ancora in salita: tra loro Porta Garibaldi - Porta Nuova, Isola e Sarpi.'}
+  ]);
 }
-function limitiBrevi(){
-  var L=['<b>I prezzi e gli affitti sono stime dell&rsquo;Agenzia delle Entrate (OMI), non prezzi pagati.</b> Reali sono quasi fermi fino al 2022 e salgono dopo: gran parte della salita 2014–2026 è del 2023–2026, anche per la revisione delle zone del 2024.',
-   '<b>Tre segnali su nove non sono davvero per quartiere</b>: il reddito è per CAP (38 valori), prezzi e affitti per zona OMI (circa 42). Quartieri vicini condividono lo stesso numero.',
-   '<b>I nove segnali vanno poco d&rsquo;accordo</b> (alfa di Cronbach '+nf(D.coerenza.alfa,2)+'): l&rsquo;indice riassume più storie. Si possono dire con sicurezza gli estremi, non il centro della classifica.',
-   '<b>Le botteghe storiche perse ci sono solo per '+D.n_botteghe+' quartieri</b> (quelli con almeno 5 botteghe nell&rsquo;Albo 2017); per gli altri manca. Le nuove case sono permessi, non cantieri finiti, e dove si costruisce molto il «cambiamento» è anche edilizia.',
-   '<b>Misura il cambiamento, non gli spostamenti di persone né le cause.</b> Nessun dato su chi parte e chi arriva.'];
-  setH('limiti-brevi',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+
+/* ---------- scheda ---------- */
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.className='ris';r.innerHTML='Scrivi il nome del tuo quartiere qui sopra, oppure tocca la mappa: ti dico che posto ha in classifica e come vanno i nove segnali, a confronto con il valore tipico dei quartieri.';return}
+  var o=BY[sel],h='<b class="big">'+esc(o.sn)+'</b>Municipio '+o.mun+' · '+f0(o.ab)+' residenti';
+  if(o.cl)h+='<br><b>'+o.rk+'° posto su '+D.n_classificati+'</b> (nelle prove di metodo va dal '+o.rmin+'° al '+o.rmax+'°) · '+esc(o.tip);
+  else h+='<br>Fuori classifica: meno di 2.000 residenti.';
+  var rows=D.ind.map(function(I,k){var v=o.v[k];return [esc(SH[k]),v==null?'<span class="sub">non calcolato</span>':'<b>'+fv(k,v)+'</b>',fv(k,D.mediane[I.id])]});
+  h+='<table class="kt"><thead><tr><th class="l">Segnale</th><th>Qui</th><th>Tipico</th></tr></thead><tbody>'+rows.map(function(x){return '<tr><td class="l">'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>'}).join('')+'</tbody></table>';
+  if(o.lim.length)h+='<p class="sub" style="font-size:.85rem">'+o.lim.map(esc).join(' ')+'</p>';
+  r.className='ris m';r.innerHTML=h;
 }
-/* ---------- mappa ---------- */
-var MAP=null,LAY=null,CUR='ix',SEL=null,MET={};
-function qb(vals,k){var s=vals.filter(function(v){return v!=null}).sort(function(a,b){return a-b}),b=[];for(var i=1;i<k;i++)b.push(s[Math.floor(i*s.length/k)]);return b}
-function cls(v,b){var i=0;while(i<b.length&&v>=b[i])i++;return i}
-function getv(p,k){if(k==='ix')return p.cl?p.ix:null;if(k==='tip')return null;var j=parseInt(k,10);return p.v[j]}
-function fmtB(x,k){return k==='ix'?nf(x,2):(D.ind[parseInt(k,10)].segno?sg(x,D.ind[parseInt(k,10)].dec):nf(x,D.ind[parseInt(k,10)].dec))}
-function setMet(){
-  MET={};var keys=['ix','0','1','2','3','4','5','6'];
-  keys.forEach(function(k){var vals=CL.map(function(p){return getv(p,k)});var b=qb(vals,6);MET[k]={b:b}});
-  MET.tip={};
+
+/* ---------- mappa dell'indice ---------- */
+function clsIx(o){return Math.min(4,Math.floor((o.rk-1)/(D.n_classificati/5)))}
+function mappaIx(){
+  var S=D.sorpresa,cnt=[0,0,0,0,0];CLN.forEach(function(o){cnt[clsIx(o)]++});
+  var tp=CLN.slice().sort(function(a,b){return a.rk-b.rk});
+  $('t-ix').textContent=tp[0].sn+' è al 1° posto per cambiamento e '+tp[tp.length-1].sn+' al '+D.n_classificati+'°; il centro storico è in fondo';
+  var edge=[0,1,2,3,4].map(function(k){var a=CLN.filter(function(o){return clsIx(o)===k}).map(function(o){return o.rk});return Math.min.apply(null,a)+'°-'+Math.max.apply(null,a)+'°'});
+  $('lg-ix').innerHTML=lgd([0,1,2,3,4].map(function(k){return{c:BL[4-k],t:edge[k]+(k===0?' cambia di più':k===4?' cambia di meno':''),n:cnt[k]}}).concat([{c:'#cfd3da',t:'fuori classifica',n:N.length-CLN.length}]));
+  mapDraw({box:'ch-ix',feats:NG.features,id:function(f){return f.properties.i},sel:sel,
+    fill:function(f){var o=BY[f.properties.i];return o.cl?BL[4-clsIx(o)]:'#cfd3da'},
+    tip:function(f){var o=BY[f.properties.i];return '<b>'+esc(o.sn)+'</b><br>'+(o.cl?o.rk+'° su '+D.n_classificati+' · '+esc(o.tip):'Fuori classifica (meno di 2.000 residenti)')},
+    lab:function(f,b){var o=BY[f.properties.i];if(!o.cl||o.rk>10||b.w<20||b.h<14)return null;return{t:o.rk,col:'#fff'}}});
+  $('nn-ix').innerHTML='<b>Il cambiamento più forte non è dove abitano i più ricchi.</b> I '+S.mun1_n+' quartieri classificati del Municipio 1 ('+S.mun1.map(function(m){return esc(m.n)+', '+m.rk+'°'}).join('; ')+') sono tutti tra gli ultimi '+S.mun1_ultimi+' su '+D.n_classificati+', e nessuno dei primi 10 è nel centro storico. Nei prezzi OMI il centro è fermo in termini reali (zona B12, Duomo–San Babila: '+sg(S.b12,1)+'% dal 2014 al 2026).';
 }
-function colNil(p){
-  if(CUR==='tip')return p.cl?TIPC[p.tip]:'#bdbdbd';
-  var v=getv(p,CUR);if(!p.cl||v==null)return '#bdbdbd';return DIV[cls(v,MET[CUR].b)];
+function rank(){
+  var S=D.sorpresa,tp=CLN.slice().sort(function(a,b){return a.rk-b.rk}),top=tp.slice(0,10),bot=tp.slice(-10).reverse(),mx=Math.max.apply(null,tp.map(function(o){return Math.abs(o.ix)}));
+  $('t-rank').textContent=top[0].sn+', '+top[1].sn+' e '+top[2].sn+' cambiano di più; '+bot[0].sn+' e '+bot[1].sn+' di meno';
+  barsH({box:'ch-rank1',rows:top.map(function(o){return{n:o.rk+'° '+o.sn,v:o.ix,col:C.m4,lab:nf(o.ix,2),t:'<b>'+esc(o.sn)+'</b><br>'+o.rk+'° su '+D.n_classificati+' · indice '+nf(o.ix,2)}}),max:mx,bh:16,above:true});
+  barsH({box:'ch-rank2',rows:bot.map(function(o){return{n:o.rk+'° '+o.sn,v:-o.ix,col:C.ora,lab:'−'+nf(-o.ix,2),t:'<b>'+esc(o.sn)+'</b><br>'+o.rk+'° su '+D.n_classificati+' · indice '+sg(o.ix,2)}}),max:mx,bh:16,above:true});
+  $('nn-rank').innerHTML='<b>Il quartiere che nessuno si aspetta è Lambrate - Ortica</b>, al 1° posto (nelle prove va dal 1° al '+S.lamb.rmax+'°): il reddito reale è fermo ('+sg(S.lamb.red,1)+'%), eppure l’affitto OMI è '+sg(S.lamb.aff,1)+'% (il più alto dei '+D.n_classificati+'), i laureati sono cresciuti di '+sg(S.lamb.lau,1)+' punti (2° posto) e le nuove abitazioni sono '+f0(S.lamb.cos)+' ogni 1.000 residenti. Cautela: sono stime OMI e permessi di costruire, e la zona OMI è condivisa con altri quartieri. <b>Sarpi</b> era in testa con sette segnali, ora è '+S.sarpi.rk+'°.';
 }
-function sty(f){var p=f.properties,sel=SEL===p.i;return {fillColor:colNil(p),fillOpacity:.85,color:sel?'#000':'#fff',weight:sel?3:1}}
-function tipNil(p){
-  var h='<b>'+nm(p)+'</b>';
-  if(!p.cl)return h+'<br>meno di 2.000 residenti: fuori classifica';
-  h+='<br>indice '+sg(p.ix,2)+' · '+p.rk+'° su '+D.n_classificati+' (tra '+p.rmin+'° e '+p.rmax+'°)';
-  if(CUR!=='ix'&&CUR!=='tip'){var k=parseInt(CUR,10);h+='<br>'+esc(D.ind[k].et)+': '+fv(k,p.v[k])}
-  if(CUR==='tip')h+='<br>'+esc(p.tip);
-  return h;
+
+/* ---------- pallini su un asse (con mediana) ---------- */
+function strips(box,rows){
+  var W=width(box),m=16,r=4.2,step=2*r+1.2,y=0,s='',parts=[];
+  rows.forEach(function(rw){
+    var vals=CLN.filter(function(o){return o.v[rw.k]!=null}).map(function(o){return{o:o,v:o.v[rw.k]}}).sort(function(a,b){return a.v-b.v}),X=function(v){return m+(v-rw.min)/(rw.max-rw.min)*(W-2*m)},lev=[];
+    vals.forEach(function(q){q.x=X(q.v);var k=0;while(lev[k]&&lev[k].some(function(x){return Math.abs(x-q.x)<2*r+.6}))k++;(lev[k]=lev[k]||[]).push(q.x);q.k=k});
+    var base=y+30+lev.length*step+4,mdv=med(vals.map(function(q){return q.v}));
+    s+=T(0,y+12,esc(rw.t),{c:'k'});
+    nice(rw.min,rw.max,5).forEach(function(v){s+=L(X(v),y+20,X(v),base,C.grid)+T(X(v),base+16,nf(v||0,0)+rw.u,{a:'middle',c:'m'})});
+    s+=L(m,base,W-m,base,C.axis,1.5);
+    vals.forEach(function(q){s+='<circle cx="'+r1(q.x)+'" cy="'+r1(base-r-1.5-q.k*step)+'" r="'+r+'" fill="'+rw.col(q.v)+'" stroke="#fff" stroke-width=".7"'+tip('<b>'+esc(q.o.sn)+'</b><br>'+rw.t+': '+rw.fmt(q.v)+'<br>'+q.o.rk+'° in classifica')+'/>'});
+    s+=L(X(mdv),y+22,X(mdv),base,C.ink,2.5)+T(Math.min(X(mdv)+6,W-90),y+32,'tipico '+rw.fmt(mdv),{c:'b'});
+    var mxq=vals[vals.length-1],lx=mxq.x,ly=base-r-1.5-mxq.k*step;s+=T(lx>W-110?lx-9:lx+9,ly+4,esc(mxq.o.sn),{a:lx>W-110?'end':'start',c:'halo',st:'font-size:12px;pointer-events:none'});
+    y=base+30});
+  $(box).innerHTML=svgOpen(W,y)+s+'</svg>';
 }
-function mappa(){
-  setMet();
-  var ctl=el('ctl-map'),h='';
-  h+='<button type="button" data-m="ix" class="on">Indice di cambiamento</button>';
-  D.ind.forEach(function(I,k){h+='<button type="button" data-m="'+k+'">'+esc(I.et)+'</button>'});
-  h+='<button type="button" data-m="tip">Tipologia</button>';
-  ctl.insertAdjacentHTML('beforeend',h);
-  MAP=L.map('map',{scrollWheelZoom:false,preferCanvas:true}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  LAY=L.geoJSON(NF,{style:sty,onEachFeature:function(f,l){
-    l.bindTooltip(function(){return tipNil(f.properties)},{sticky:true});
-    l.on('click',function(){scegli(f.properties.i,false)})}}).addTo(MAP);
-  MAP.fitBounds(LAY.getBounds());
-  var sel=el('sel-nil'),o='<option value="">— scegli —</option>';
-  NIL.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){o+='<option value="'+p.i+'">'+esc(p.n)+(p.cl?'':' (fuori classifica)')+'</option>'});
-  sel.innerHTML=o;sel.addEventListener('change',function(){if(sel.value)scegli(parseInt(sel.value,10),true)});
-  Array.prototype.forEach.call(ctl.querySelectorAll('button[data-m]'),function(b){b.addEventListener('click',function(){
-    CUR=b.getAttribute('data-m');Array.prototype.forEach.call(ctl.querySelectorAll('button[data-m]'),function(x){x.classList.toggle('on',x===b)});ricolora()})});
-  ricolora();
-  setTimeout(function(){MAP.invalidateSize();if(!SEL)MAP.fitBounds(LAY.getBounds())},600);
-  window.addEventListener('resize',function(){MAP.invalidateSize()});
+function casa(){
+  var M=D.mediane;
+  $('t-casa').textContent='Prezzi delle case +'+f0(M.prezzo_var)+' e affitti +'+f0(M.affitto_var)+'% in mediana dal 2014 (euro di oggi); a Lambrate - Ortica l’affitto è più che raddoppiato';
+  strips('ch-casa',[{t:'Prezzo delle case',k:1,min:0,max:50,u:'%',col:function(){return C.m4},fmt:function(v){return sg(v,0)+'%'}},{t:'Affitto',k:2,min:0,max:120,u:'%',col:function(){return C.teal},fmt:function(v){return sg(v,0)+'%'}}]);
 }
-function ricolora(){
-  LAY.setStyle(sty);if(SEL)bringSel();
-  var h='',d='';
-  if(CUR==='tip'){
-    TIPORD.forEach(function(t){h+='<span><i style="background:'+TIPC[t]+'"></i>'+esc(t)+'</span>'});
-    d='Le sei tipologie (tagli scelti da noi, non gruppi scoperti): cambiamento alto, medio o basso, per livello alto, medio o basso. Vedi <a href="#tipologie">la sezione sul livello</a>.';
-  } else {
-    var b=MET[CUR].b;
-    DIV.forEach(function(c,i){var t=i===0?'meno di '+fmtB(b[0],CUR):i===b.length?fmtB(b[i-1],CUR)+' o più':fmtB(b[i-1],CUR)+' – '+fmtB(b[i],CUR);h+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
-    if(CUR==='ix')d='Indice di cambiamento: media di nove punteggi z (pesi uguali). Sei classi con lo stesso numero di quartieri. Verde = cambia più della media dei quartieri, arancio = meno. Clic per vedere il posto e quanto è incerto.';
-    else{var I=D.ind[parseInt(CUR,10)];d=esc(I.desc)+' Mediana tra i quartieri: '+fv(parseInt(CUR,10),D.mediane[I.id])+'.'}
-  }
-  h+='<span><i style="background:#bdbdbd"></i>fuori classifica o senza dato</span>';
-  setH('lg-map',h);setH('map-desc',d);
+function pers(){
+  var M=D.mediane;
+  $('t-pers').textContent='La quota di laureati sale di '+f0(M.laureati_var)+' punti in mediana; i residenti di 25-34 anni cambiano di '+nf(M.giovani_var,1)+' punti';
+  strips('ch-pers',[{t:'Laureati (punti)',k:8,min:-2,max:16,u:'',col:function(v){return v>=0?C.up:C.down},fmt:function(v){return sg(v,1)+' punti'}},{t:'Residenti di 25-34 anni (punti)',k:7,min:-4,max:12,u:'',col:function(){return C.m5},fmt:function(v){return sg(v,1)+' punti'}}]);
 }
-function bringSel(){LAY.eachLayer(function(l){if(l.feature.properties.i===SEL)l.bringToFront()})}
-function scegli(i,zoom){SEL=i;el('sel-nil').value=String(i);LAY.setStyle(sty);bringSel();
-  if(zoom){LAY.eachLayer(function(l){if(l.feature.properties.i===i)MAP.fitBounds(l.getBounds(),{maxZoom:14})})}
-  scheda(i)}
-function zbar(z){if(z==null)return '<div class="zb"></div>';var w=Math.min(Math.abs(z),3)/3*50,l=z>=0?50:50-w;return '<div class="zb"><i style="left:'+l+'%;width:'+w+'%;background:'+(z>=0?ACC:WARM)+'"></i></div>'}
-function scheda(i){
-  var p=BYID[i],h='<h3>'+nm(p)+'</h3><p class="sub">Municipio '+p.mun+' · '+f0(p.ab)+' residenti (2024)</p>';
-  if(p.cl){
-    h+='<p><b>'+p.rk+'° su '+D.n_classificati+'</b> per indice di cambiamento ('+sg(p.ix,2)+'). In tutte le varianti provate il posto va da <b>'+p.rmin+'°</b> a <b>'+p.rmax+'°</b>; con 5.000 pesi casuali, il 90% centrale va da '+f0(p.p5)+'° a '+f0(p.p95)+'°. Tipologia: <span class="dotc" style="background:'+TIPC[p.tip]+'"></span><b>'+esc(p.tip)+'</b> (livello '+sg(p.liv,2)+').</p>';
-  } else h+='<p><b>Fuori classifica</b> (meno di 2.000 residenti): i valori sono mostrati, ma non c&rsquo;è un posto.</p>';
-  var rows=D.ind.map(function(I,k){var v=p.v[k];return [esc(I.et)+(I.blocco?' <span class="sub">('+I.blocco+')</span>':''),v==null?'<span class="sub">non calcolato</span>':fv(k,v),fv(k,D.mediane[I.id]),p.cl?zbar(p.z[k]):'']});
-  h+='<div class="scroll"><table><thead><tr><th>Segnale</th><th class="r">Quartiere</th><th class="r">Mediana</th><th class="r" style="min-width:90px">Rispetto agli altri</th></tr></thead><tbody>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td class="r">'+r[1]+'</td><td class="r">'+r[2]+'</td><td>'+r[3]+'</td></tr>'}).join('')+'</tbody></table></div>';
-  if(p.cl)h+='<p class="sub">Blocchi (z): casa '+sg(p.bc,2)+' · commercio '+(p.bn==null?'n.d.':sg(p.bn,2))+' · persone '+sg(p.bp,2)+'. Barra: punteggio z del segnale (da −3 a +3), verde sopra la media, arancio sotto.</p>';
-  var c=p.ctx;h+='<p class="sub">Altri segnali, non nell&rsquo;indice: residenti '+(c.pop==null?'n.d.':sg(c.pop,1)+'%')+' dal 2014 al 2025; quota di stranieri '+(c.str==null?'n.d.':sg(c.str,1)+' punti')+'; iscritti alle scuole del quartiere '+(c.sc==null?'n.d.':sg(c.sc,0)+'%')+' (2015–2024).</p>';
-  h+='<div class="warn"><b>Limiti per questo quartiere</b><ul style="margin:.3em 0;padding-left:1.2em">'+p.lim.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div>';
-  setH('scheda',h);
+
+/* ---------- mappa del reddito: verde/rosso ---------- */
+function clsRed(v){return v==null?-1:v<=-5?0:v<0?1:v<5?2:3}
+function reddito(){
+  var cnt=[0,0,0,0],nul=0;N.forEach(function(o){var c=o.cl?clsRed(o.v[0]):-1;if(c<0)nul++;else cnt[c]++});
+  var neg=cnt[0]+cnt[1],tot=cnt[0]+cnt[1]+cnt[2]+cnt[3],M=D.mediane;
+  $('t-reddito').textContent='Il reddito reale per contribuente è sceso in '+neg+' quartieri su '+tot+' e cresciuto negli altri; il valore tipico è '+sg(M.reddito_var,1)+'%';
+  $('lg-reddito').innerHTML=lgd([{c:RG[0],t:'cala di oltre il 5%',n:cnt[0]},{c:RG[1],t:'cala fino al 5%',n:cnt[1]},{c:RG[2],t:'cresce fino al 5%',n:cnt[2]},{c:RG[3],t:'cresce di oltre il 5%',n:cnt[3]},{c:'#cfd3da',t:'senza dato',n:nul}]);
+  mapDraw({box:'ch-reddito',feats:NG.features,id:function(f){return f.properties.i},sel:sel,
+    fill:function(f){var o=BY[f.properties.i],c=o.cl?clsRed(o.v[0]):-1;return c<0?'#cfd3da':RG[c]},
+    tip:function(f){var o=BY[f.properties.i];return '<b>'+esc(o.sn)+'</b><br>'+(o.cl&&o.v[0]!=null?'Reddito reale: '+sg(o.v[0],1)+'%':'Reddito non calcolato')},
+    lab:function(f,b){var o=BY[f.properties.i];if(!o.cl||o.v[0]==null||Math.abs(o.v[0])<1||b.w<34||b.h<17)return null;return{t:sg(o.v[0],0),col:'#fff'}}});
+  $('nn-reddito').textContent='Il segnale manca in '+D.n_reddito_mancante+' quartieri classificati: Duomo, Brera, Guastalla e Porta Vigentina stanno nei CAP 20121 e 20122, la cui sede fiscale cambia senza motivo economico. In grigio anche i quartieri con meno di 2.000 residenti.';
 }
-/* ---------- classifica ---------- */
-function barRow(p,maxv){var w=Math.min(Math.abs(p.ix)/maxv,1)*50,l=p.ix>=0?50:50-w;return '<div class="row" data-i="'+p.i+'" style="cursor:pointer"><div class="nm">'+nm(p)+'<br><span class="sub">'+p.rk+'° · tra '+p.rmin+'° e '+p.rmax+'°</span></div><div class="tr" style="position:relative"><span style="position:absolute;left:'+l+'%;width:'+w+'%;height:10px;background:'+(p.ix>=0?ACC:WARM)+'"></span><span style="position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666"></span></div><div class="v">'+sg(p.ix,2)+'</div></div>'}
-function classifica(){
-  var s=CL.slice().sort(function(a,b){return a.rk-b.rk}),mx=Math.max.apply(null,CL.map(function(p){return Math.abs(p.ix)}));
-  setH('class-testo','<p>L&rsquo;indice è la media di nove punteggi: ha media zero, quindi un valore positivo vuol dire «cambia più della media dei quartieri». <b>Stabili in tutte le prove</b>: nei primi 10 in almeno metà delle 5.000 estrazioni a pesi casuali sono '+D.robustezza.stabili_top.map(esc).join(', ')+'; negli ultimi 10 '+D.robustezza.stabili_bot.map(esc).join(', ')+'.</p>');
-  setH('b-top',s.slice(0,10).map(function(p){return barRow(p,mx)}).join(''));
-  setH('b-bot',s.slice(-10).reverse().map(function(p){return barRow(p,mx)}).join(''));
-  [el('b-top'),el('b-bot')].forEach(function(b){b.addEventListener('click',function(e){var r=e.target.closest('.row');if(r){scegli(parseInt(r.getAttribute('data-i'),10),true);el('mappa').scrollIntoView({behavior:'smooth'})}})});
-  table('tab-class',['Quartiere','Posto','Intervallo varianti','Indice','Tipologia'],s.map(function(p){return [nm(p),p.rk,p.rmin+'–'+p.rmax,sg(p.ix,2),esc(p.tip)]}));
+
+/* ---------- livello e cambiamento ---------- */
+var TD={
+ 'Alti e ancora in salita':'Quartieri già ricchi (livello alto) che continuano a cambiare molto.',
+ 'In salita rapida':'Quartieri che cambiano molto ma partono da un livello medio o basso.',
+ 'Nella media':'Quartieri che cambiano come la maggior parte degli altri (il terzo di mezzo), a qualsiasi livello.',
+ 'Già alti e stabili':'Quartieri con un livello alto che cambiano poco.',
+ 'Fermi su livelli medi':'Quartieri con un livello medio che cambiano poco.',
+ 'Fermi su livelli bassi':'Quartieri con un livello basso che cambiano poco: redditi, prezzi e laureati restano sotto gli altri e non si muovono.'};
+var TORD=['Alti e ancora in salita','In salita rapida','Nella media','Già alti e stabili','Fermi su livelli medi','Fermi su livelli bassi'];
+function fA(){
+  var T4=D.tipologie,so=D.soglie;
+  $('t-fa').textContent='Quartieri alti che salgono ('+(T4.filter(function(t){return t.nome==='Alti e ancora in salita'})[0].n)+') e quartieri bassi che restano fermi ('+(T4.filter(function(t){return t.nome==='Fermi su livelli bassi'})[0].n)+'): sono due storie diverse';
+  var pts=CLN.map(function(o){return{x:o.liv,y:o.ix,col:TIPC[o.tip]||C.gry,r:5.5,op:.95,n:o.sn,lab:o.id===sel,id:o.id,sel:o.id===sel,t:'<b>'+esc(o.sn)+'</b><br>'+esc(o.tip)}});
+  var W=width('ch-fa'),xs=pts.map(function(p){return p.x}),ys=pts.map(function(p){return p.y});
+  var x0=Math.floor(Math.min.apply(null,xs)*2)/2-.2,x1=Math.ceil(Math.max.apply(null,xs)*2)/2+.1,y0=Math.floor(Math.min.apply(null,ys)*4)/4-.35,y1=Math.ceil(Math.max.apply(null,ys)*4)/4+.3;
+  scatter({box:'ch-fa',pts:pts,xmin:x0,xmax:x1,ymin:y0,ymax:y1,xfmt:function(v){return ''},yfmt:function(v){return ''},xl:'← meno ricco · più ricco →',yl:'cambia di meno · cambia di più',h:Math.min(Math.round(W*1.45),600),zero:false,
+    under:function(X,Y,m,WW,H){var s='',d=' stroke-dasharray="5 4"',xl=so.livello_basso_fino_a,xh=so.livello_alto_da,yl=so.indice_terzo_basso,yh=so.indice_terzo_alto,L0=m.l,R0=WW-m.r,T0=m.t,B0=H-m.b;
+      [xl,xh].forEach(function(v){s+=L(X(v),T0,X(v),B0,C.axis,1.5,d)});[yl,yh].forEach(function(v){s+=L(L0,Y(v),R0,Y(v),C.axis,1.5,d)});
+      function nm(t,cx,w,y){var ls=wrapT(t,w-18,true);ls.forEach(function(l,i){s+=T(cx,y+i*15,esc(l),{a:'middle',c:'halo',st:'font-size:14px;fill:'+TIPC[t]+';stroke-width:4px'})})}
+      nm('Alti e ancora in salita',(X(xh)+R0)/2,R0-X(xh),T0+16);
+      nm('In salita rapida',(L0+X(xh))/2-(X(xh)-L0)*.1,(X(xh)-L0)*.6,T0+16);
+      nm('Nella media',(L0+X(xl))/2,X(xl)-L0,Y(yh)+22);
+      nm('Fermi su livelli bassi',(L0+X(xl))/2,X(xl)-L0,B0-50);
+      nm('Fermi su livelli medi',(X(xl)+X(xh))/2,X(xh)-X(xl),B0-50);
+      nm('Già alti e stabili',(X(xh)+R0)/2,R0-X(xh),B0-50);
+      return s}});
+  var box=$('tipi-box');
+  if(!box.getAttribute('data-ok')){box.innerHTML=TORD.map(function(t,i){return '<div class="tp" style="--c:'+TIPC[t]+'"><h4><i style="display:inline-block;width:16px;height:16px;border-radius:50%;background:'+TIPC[t]+';margin-right:8px;vertical-align:-1px"></i>'+esc(t)+'</h4><div class="nq" id="nq-'+i+'"></div><p>'+TD[t]+'</p><div class="ch" id="zm-'+i+'" role="img" aria-label="Quartieri del tipo '+esc(t)+', ognuno col suo nome"></div></div>'}).join('');box.setAttribute('data-ok','1')}
+  TORD.forEach(function(t,i){var L=CLN.filter(function(o){return o.tip===t});$('nq-'+i).textContent=pl(L.length,'quartiere','quartieri')+' · '+f0(L.reduce(function(s,o){return s+o.ab},0))+' residenti';zoom('zm-'+i,L,TIPC[t])});
 }
-function incertezza(){
-  el('n-prove').textContent=D.robustezza.varianti.filter(function(v){return v.t!=null}).length+D.robustezza.loo.length;
-  var s=CL.slice().sort(function(a,b){return a.rk-b.rk}),n=s.length,pc=function(r){return (r-1)/(n-1)*100};
-  setH('iv',s.map(function(p){return '<div class="row" data-i="'+p.i+'" title="'+esc(p.n)+': '+p.rk+'°, varianti '+p.rmin+'°–'+p.rmax+'°"><div class="nm">'+p.rk+'. '+nm(p)+'</div><div class="tr"><i class="a" style="left:'+pc(p.p5)+'%;width:'+(pc(p.p95)-pc(p.p5))+'%"></i><i class="b" style="left:'+pc(p.rmin)+'%;width:'+Math.max(pc(p.rmax)-pc(p.rmin),.6)+'%"></i><i class="d" style="left:'+pc(p.rk)+'%"></i></div></div>'}).join(''));
-  el('iv').addEventListener('click',function(e){var r=e.target.closest('.row');if(r){scegli(parseInt(r.getAttribute('data-i'),10),true);el('mappa').scrollIntoView({behavior:'smooth'})}});
-  var R=D.robustezza;
-  setH('iv-nota','Intervallo medio tra il posto migliore e il peggiore nelle varianti: '+R.ampiezza_media+' posti (mediana '+R.ampiezza_mediana+'); con pesi casuali il 5°–95° percentile è in media largo '+R.ampiezza_p5p95+' posti. Le prove: altri tipi di punteggio, pesi per blocco, casa/commercio/persone ×2, solo i sette segnali della prima versione, reddito con CAP instabili, Airbnb in crescita, locali per codice, tutti i civici, altre date OMI, un indicatore in meno alla volta (correlazione di Spearman con la classifica di base da '+nf(R.rho_min,2)+' a '+nf(R.rho_max,2)+'). Dettagli in <a href="data/robustezza_varianti.csv">robustezza_varianti.csv</a>.');
+/* tutti i nomi, collegati ai punti con una linea */
+function zoom(id,list,col){
+  var W=width(id),lw=Math.min(Math.round(W*.42),150),rowH=18,top=8,n=list.length,H=Math.max(n*rowH+top*2,150),
+      px0=lw+36,px1=W-14,xs=list.map(function(o){return o.liv}),ys=list.map(function(o){return o.ix}),
+      xa=Math.min.apply(null,xs),xb=Math.max.apply(null,xs),ya=Math.min.apply(null,ys),yb=Math.max.apply(null,ys);
+  if(xb-xa<.2){xa-=.1;xb+=.1}if(yb-ya<.2){ya-=.1;yb+=.1}
+  var X=function(v){return px0+(v-xa)/(xb-xa)*(px1-px0)},Y=function(v){return top+8+(yb-v)/(yb-ya)*(H-2*top-16)},s=svgOpen(W,H+20);
+  var lab=list.map(function(o){return{o:o,y:Y(o.ix)}});spread(lab,rowH,top+8,H-top-8);
+  s+=L(px0,H-2,px1,H-2,C.axis,1.5);
+  lab.forEach(function(q){var o=q.o,x=X(o.liv),y=Y(o.ix);
+    s+=L(Math.min(tw(o.sn,13,false),lw-8)+6,q.y-4,x,y,C.axis,1)+T(0,q.y,esc(o.sn),{c:'k',st:'font-size:13px'})});
+  lab.forEach(function(q){var o=q.o,tp='<b>'+esc(o.sn)+'</b><br>'+esc(o.tip);s+='<circle cx="'+r1(X(o.liv))+'" cy="'+r1(Y(o.ix))+'" r="6" fill="'+col+'" stroke="#fff" stroke-width="1.5"'+tip(tp)+'/>'});
+  s+=T(px0,H+16,'meno ricco',{c:'m'})+T(px1,H+16,'più ricco →',{a:'end',c:'m'});
+  $(id).innerHTML=s+'</svg>';
 }
-/* ---------- tipologie ---------- */
-function tipologie(){
-  var T=D.tipologie.slice().sort(function(a,b){return TIPORD.indexOf(a.nome)-TIPORD.indexOf(b.nome)});
-  setH('tip-testo','<p>Per leggere insieme <b>quanto è alto</b> un quartiere (reddito, prezzo, laureati) e <b>quanto cambia</b>, li mettiamo su un grafico. In alto a destra stanno i quartieri già alti che salgono ancora; in alto a sinistra quelli che salgono partendo da un livello medio o basso; in basso a destra quelli già alti e fermi.</p>');
-  el('sil').textContent='silhouette tra '+nf(Math.min.apply(null,[].concat(Object.values(D.silhouette['indice+livello']),Object.values(D.silhouette['tre_blocchi+livello']))),2)+' e '+nf(Math.max.apply(null,Object.values(D.silhouette['indice+livello'])),2)+', dove 0,5 è appena «ragionevole» e 0,7 «netto»';
-  table('tab-tip',['Tipologia','Quartieri','Residenti','Quali'],T.map(function(t){return ['<span class="dotc" style="background:'+TIPC[t.nome]+'"></span>'+esc(t.nome),t.n,f0(t.residenti),'<span class="sub" style="white-space:normal;display:block;text-align:left">'+t.nil.map(esc).join(', ')+'</span>']}));
-  setH('lg-sc',TIPORD.map(function(t){return '<span><i style="background:'+TIPC[t]+';border-radius:50%"></i>'+esc(t)+'</span>'}).join(''));
-  var draw=function(){scatter(el('ch-sc'))};draw();RD.push(draw);
-}
-function scatter(box){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=Math.max(300,Math.min(420,W*.8)),m={l:44,r:12,t:14,b:42};
-  var xs=CL.map(function(p){return p.liv}),ys=CL.map(function(p){return p.ix});
-  var x0=Math.floor(Math.min.apply(null,xs)*2)/2-.25,x1=Math.ceil(Math.max.apply(null,xs)*2)/2+.25,y0=Math.floor(Math.min.apply(null,ys)*4)/4-.1,y1=Math.ceil(Math.max.apply(null,ys)*4)/4+.1;
-  var pw=W-m.l-m.r,ph=H-m.t-m.b;
-  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  for(var v=Math.ceil(y0*2)/2;v<=y1;v+=.5)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#eee"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+nf(v,1)+'</text>';
-  var lastx=-99;for(v=Math.ceil(x0);v<=x1;v+=1){var xx=X(v);if(xx-lastx>30){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+nf(v,0)+'</text>'}}
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  var so=D.soglie;
-  [so.livello_basso_fino_a,so.livello_alto_da].forEach(function(c){s+='<line x1="'+X(c)+'" x2="'+X(c)+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/>'});
-  [so.indice_terzo_basso,so.indice_terzo_alto].forEach(function(c){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(c)+'" y2="'+Y(c)+'" stroke="'+WARM+'" stroke-dasharray="5 4"/>'});
-  s+='<text class="mu" x="'+(m.l+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">livello (reddito, prezzo, laureati) →</text><text class="mu" x="'+m.l+'" y="'+(m.t-3)+'">↑ indice di cambiamento</text>';
-  CL.forEach(function(p){s+='<circle cx="'+X(p.liv).toFixed(1)+'" cy="'+Y(p.ix).toFixed(1)+'" r="5" fill="'+TIPC[p.tip]+'" fill-opacity=".85" stroke="#fff" stroke-width="1"/>'});
-  s+='<circle id="ring" r="8" fill="none" stroke="#111" stroke-width="2" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,ring=svg.querySelector('#ring'),rect=svg.querySelector('rect:last-of-type'),cur=-1;
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,py=(t.clientY-r.top)*k,bi=-1,bd=1e9;
-    CL.forEach(function(p,i){var d=Math.pow(X(p.liv)-px,2)+Math.pow(Y(p.ix)-py,2);if(d<bd){bd=d;bi=i}});
-    if(bi<0||bd>900){tip.style.display='none';ring.style.display='none';cur=-1;return}
-    cur=bi;var p=CL[bi];ring.setAttribute('cx',X(p.liv));ring.setAttribute('cy',Y(p.ix));ring.style.display='';
-    tip.innerHTML='<b>'+nm(p)+'</b><br>'+p.rk+'° · indice '+sg(p.ix,2)+'<br>livello '+sg(p.liv,2)+'<br>'+esc(p.tip);tip.style.display='';
-    var tw=tip.offsetWidth,left=X(p.liv)/k+10;if(left+tw>r.width)left=X(p.liv)/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top=Math.max(0,Y(p.ix)/k-40)+'px'}
-  function hide(){tip.style.display='none';ring.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-  rect.addEventListener('click',function(ev){show(ev);if(cur>=0)scegli(CL[cur].i,false)});
-}
-/* ---------- tre storie ---------- */
-function mini(id,key,tid,lista){
-  var b=[-1,-.5,.5,1],C=['#a8540f','#e0a96d','#eeeeee','#62b0a4','#136459'];
-  var mp=L.map(id,{preferCanvas:true,scrollWheelZoom:false,dragging:!L.Browser.mobile,tap:false}).setView([45.4655,9.19],10);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(mp);
-  var ly=L.geoJSON(NF,{style:function(f){var p=f.properties,v=p.cl?p[key]:null;return {fillColor:v==null?'#bdbdbd':C[cls(v,b)],fillOpacity:.88,color:'#fff',weight:.7}},
-    onEachFeature:function(f,l){var p=f.properties;l.bindTooltip('<b>'+nm(p)+'</b><br>'+(p.cl&&p[key]!=null?'punteggio '+sg(p[key],2):'fuori classifica o senza dato'),{sticky:true})}}).addTo(mp);
-  mp.fitBounds(ly.getBounds());setTimeout(function(){mp.invalidateSize();mp.fitBounds(ly.getBounds())},500);
-  RD.push(function(){mp.invalidateSize()});
-  setH(tid,'Più alti: '+lista.alti.map(esc).join(', ')+'. Più bassi: '+lista.bassi.map(esc).join(', ')+'.');
-}
-function storie(){
-  var C=D.coerenza;
-  setH('storie-testo','<p>I nove segnali non si muovono insieme: la correlazione media tra due segnali è '+nf(C.corr_media,2)+' e tra i tre blocchi è '+nf(C.blocchi.casa_comm,2)+' (casa–commercio), '+nf(C.blocchi.casa_pers,2)+' (casa–persone), '+nf(C.blocchi.comm_pers,2)+' (commercio–persone). Per questo l&rsquo;indice è un riassunto, non una misura di una sola cosa. Si leggono almeno tre storie:</p><ul><li><b>Il centro ricco</b> (reddito, affitti brevi): più che un cambiamento è un livello. Gli annunci Airbnb ogni 100 abitazioni e il reddito 2024 vanno insieme (correlazione '+nf(C.rho_airbnb_reddito2024,2)+').</li><li><b>La corona che si rimette in moto</b> (affitti, laureati, prezzi): gli affitti OMI salgono di più dove erano più bassi (correlazione con il reddito 2024: '+nf(C.rho_affitto_reddito2024,2)+'), quindi in parte è rincorsa.</li><li><b>I giovani adulti</b> aumentano di più dove il reddito è cresciuto meno (correlazione '+nf(C.rho_giovani_reddito,2)+') e dove cresce la quota di stranieri ('+nf(C.rho_giovani_stranieri,2)+').</li></ul><p class="sub">Correlazioni di Spearman tra quartieri. Un legame non è una causa.</p>');
-  mini('m-casa','bc','m-casa-t',D.blocchi.casa);mini('m-comm','bn','m-comm-t',D.blocchi.commercio);mini('m-pers','bp','m-pers-t',D.blocchi.persone);
-}
-/* ---------- pesi ---------- */
-var W=[1,1,1,1,1,1,1,1,1],PRE=[['Pesi uguali',[1,1,1,1,1,1,1,1,1]],['Casa ×2',[2,2,2,2,1,1,1,1,1]],['Affitti brevi ×4',[1,1,1,1,4,1,1,1,1]],['Solo casa',[1,1,1,1,0,0,0,0,0]],['Solo commercio',[0,0,0,0,1,1,1,0,0]],['Solo persone',[0,0,0,0,0,0,0,1,1]]];
-function calcola(w){
-  var out=CL.map(function(p){var num=0,den=0,n=0;for(var k=0;k<9;k++){if(p.z[k]!=null){n++;num+=w[k]*p.z[k];den+=w[k]}}
-    return {p:p,ix:(n>=6&&den>0)?num/den:null}}).filter(function(o){return o.ix!=null});
-  out.sort(function(a,b){return b.ix-a.ix});out.forEach(function(o,i){o.rk=i+1});return out;
-}
-function pesi(){
-  var ctl=el('ctl-w'),h='';PRE.forEach(function(p,i){h+='<button type="button" data-p="'+i+'"'+(i===0?' class="on"':'')+'>'+p[0]+'</button>'});ctl.innerHTML=h;
-  setH('sl',D.ind.map(function(I,k){return '<div class="sl"><label for="w'+k+'">'+esc(I.et)+'</label><input type="range" id="w'+k+'" min="0" max="4" step="0.5" value="1"><span id="wv'+k+'">1</span></div>'}).join(''));
-  D.ind.forEach(function(I,k){el('w'+k).addEventListener('input',function(){W[k]=parseFloat(this.value);el('wv'+k).textContent=nf(W[k],1).replace(',0','');Array.prototype.forEach.call(ctl.querySelectorAll('button'),function(b){b.classList.remove('on')});aggiorna()})});
-  Array.prototype.forEach.call(ctl.querySelectorAll('button'),function(b){b.addEventListener('click',function(){var w=PRE[parseInt(b.getAttribute('data-p'),10)][1];W=w.slice();
-    w.forEach(function(v,k){el('w'+k).value=v;el('wv'+k).textContent=String(v)});Array.prototype.forEach.call(ctl.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b)});aggiorna()})});
-  aggiorna();
-}
-function aggiorna(){
-  var base=calcola([1,1,1,1,1,1,1,1,1]),cur=calcola(W),br={};base.forEach(function(o){br[o.p.i]=o.rk});
-  if(!cur.length){setH('w-sum','<b>Tutti i pesi sono zero.</b> Alza almeno un segnale.');setH('w-top','');setH('w-bot','');return}
-  var n=cur.length,mx=Math.max.apply(null,cur.map(function(o){return Math.abs(o.ix)}));
-  function row(o){var d=br[o.p.i]-o.rk,ar=d>0?'▲ '+d:d<0?'▼ '+(-d):'=',w=Math.min(Math.abs(o.ix)/mx,1)*50,l=o.ix>=0?50:50-w;
-    return '<div class="row" data-i="'+o.p.i+'" style="cursor:pointer"><div class="nm">'+nm(o.p)+'<br><span class="sub">'+o.rk+'° (base '+br[o.p.i]+'°) '+ar+'</span></div><div class="tr" style="position:relative"><span style="position:absolute;left:'+l+'%;width:'+w+'%;height:10px;background:'+(o.ix>=0?ACC:WARM)+'"></span><span style="position:absolute;left:50%;top:-2px;height:14px;border-left:1px solid #666"></span></div><div class="v">'+sg(o.ix,2)+'</div></div>'}
-  setH('w-top',cur.slice(0,10).map(row).join(''));setH('w-bot',cur.slice(-10).reverse().map(row).join(''));
-  var tb=base.slice(0,10).map(function(o){return o.p.i}),bb=base.slice(-10).map(function(o){return o.p.i});
-  var t10=cur.slice(0,10).map(function(o){return o.p.i}),b10=cur.slice(-10).map(function(o){return o.p.i});
-  var kt=tb.filter(function(i){return t10.indexOf(i)>=0}).length,kb=bb.filter(function(i){return b10.indexOf(i)>=0}).length;
-  var s5=D.sorpresa.top5.map(function(t){return t.n}),pos={};cur.forEach(function(o){pos[o.p.n]=o.rk});
-  setH('w-sum','Dei 10 in testa con pesi uguali, <b>'+kt+'</b> restano tra i primi 10; dei 10 in coda, <b>'+kb+'</b> restano tra gli ultimi 10 ('+n+' quartieri con almeno 6 segnali). I primi cinque di base ora sono: '+s5.map(function(x){return esc(x)+' '+(pos[x]||'n.d.')+'°'}).join(', ')+'.');
-  setH('w-nota','Finché tutti i segnali contano, gli estremi cambiano poco; spingendo su un solo blocco la classifica si rimescola, perché i blocchi raccontano storie diverse. Con 5.000 pesi estratti a caso, i quartieri sempre in testa o in coda sono quelli elencati sopra; il centro cambia di molti posti.');
-  [el('w-top'),el('w-bot')].forEach(function(b){b.onclick=function(e){var r=e.target.closest('.row');if(r){scegli(parseInt(r.getAttribute('data-i'),10),true);el('mappa').scrollIntoView({behavior:'smooth'})}}});
-}
-/* ---------- limiti completi e metodo ---------- */
+
 function limiti(){
   var C=D.coerenza,R=D.robustezza;
   var L=[
@@ -373,5 +674,7 @@ function metodo(){
   setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
   table('tab-ind',['Segnale','Blocco','Finestra / fonte','Che cosa misura'],D.ind.map(function(I){return [esc(I.et),esc(I.blocco),'<span class="sub" style="white-space:normal">'+esc(I.fonte)+'</span>','<span style="white-space:normal">'+esc(I.desc)+'</span>']}));
 }
+
 })();
-</script></body></html>
+</script>
+</body></html>
