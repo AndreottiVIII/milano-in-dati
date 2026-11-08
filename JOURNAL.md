@@ -3042,3 +3042,6 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-08 — suolo: pubblicata definitiva; primo grafico rifatto in barre con «già costruito nel 2006 / costruito dopo / ancora libero» e spiegazione di «suolo consumato» (Davide); via le griglie da 100.
 - 2026-11-08 — costo-vita: pubblicata definitiva e arricchita su richiesta di Davide: «Con 100 euro», voce di spesa a scelta (menu vero), «La tua inflazione» con esempi e cursori; dati già nel progetto.
 - 2026-11-08 — bilancio-comune: pubblicata definitiva; la voce di spesa è un menu a tendina vero (Davide: «così è macchinoso»). menu.js: le tendine mostrano tutte le scelte al tocco, freccia ▾, elenchi corti diventano <select>.
+Benessere pubblicata definitiva: tenuto il profilo a ragnatela (opzione C); 'com'è cambiata dal 2019' verde dove migliora, rosso dove peggiora.
+Chi governa Milano pubblicata definitiva: staffetta dei sindaci (opzione A) con i colori del partito.
+Povertà educativa pubblicata definitiva: strisce di pallini (opzione A), confronto CAP ricchi/altri più chiaro, colori fissi in tutta la pagina.
