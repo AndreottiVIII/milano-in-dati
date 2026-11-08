@@ -3081,3 +3081,5 @@ Milano nei film e nei libri pubblicata definitiva: specchio film/libri (opzione 
 Nomi delle fermate pubblicata definitiva: binari per linea (opzione A), confronto metro-tram spiegato in parole semplici.
 Cinema spariti pubblicata definitiva: sale attive anno per anno (opzione B) e farfalla aperture/chiusure più in basso (C).
 Viaggio in linea pubblicata definitiva: schema del metrò con barre per fermata e salti più grandi in giallo (idea A).
+Milano nei dati più importanti pubblicata: 12 dati scelti da Davide con il loro grafico; voce 'Dati importanti' nella barra in alto.
+- 2026-11-08: Dati importanti, grafico 9 rifatto sul 5% che dichiara di più (stesso taglio nel 2000 e nel 2024: 30% → 33%); tolta l'etichetta 'il dato più importante'. Barra in alto: 'Dati importanti' accanto a Home, collegamenti che scorrono di lato sui telefoni stretti.

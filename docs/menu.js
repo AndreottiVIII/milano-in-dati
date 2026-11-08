@@ -67,6 +67,7 @@
     { path: 'suolo/', label: 'Quanto suolo si consuma' },
     { path: 'pendolari/', label: 'Pendolari' },
     { path: 'reati/', label: 'Reati denunciati' },
+    { path: 'dati-importanti/', label: 'Milano nei dati più importanti' },
     { path: 'quartiere/', label: 'Il tuo quartiere' },
     { path: 'permettersi/', label: 'Chi può permettersi dove' },
     { path: 'viaggio-linea/', label: 'Un viaggio in tram' },
@@ -155,8 +156,13 @@
     '#mid-menu .mid-home{background:#000;color:#fff;font-weight:700}' +
     '#mid-menu .mid-home:hover{background:#333}' +
     '#mid-menu .mid-lnk[aria-current]{background:#ffe1d6;border-color:#ff5a36}' +
+    '#mid-menu .mid-lnks{display:flex;gap:8px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;' +
+    '-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 18px),transparent);padding-right:14px}' +
+    '#mid-menu .mid-lnks::-webkit-scrollbar{display:none}' +
+    '@media (min-width:640px){#mid-menu .mid-lnks{-webkit-mask-image:none;mask-image:none;padding-right:0}}' +
     '#mid-menu .mid-toggle{margin-left:auto}' +
     '#mid-menu .mid-toggle[aria-expanded=true]{background:#000;color:#fff}' +
+    '@media (max-width:480px){#mid-menu .mid-home span{display:none}#mid-menu .mid-lnks{gap:5px}}' +
     '@media (max-width:400px){#mid-menu .mid-bar{padding:6px 10px;gap:5px}#mid-menu .mid-b{font-size:13px;padding:5px 9px}#mid-menu .mid-tx{display:none}#mid-menu .mid-toggle{padding:5px 9px}}' +
     '@media (max-width:360px){#mid-menu .mid-home span{display:none}#mid-menu .mid-b{font-size:12.5px;padding:5px 7px}}' +
     '#mid-menu .mid-panel{max-height:calc(100vh - 120px);overflow-y:auto}' +
@@ -210,14 +216,18 @@
   home.title = 'Milano in dati: la pagina iniziale';
   if (isHome) home.setAttribute('aria-current', 'page');
   bar.appendChild(home);
-  [['quartiere/', 'Il tuo quartiere'], ['quartiere-ideale/', 'Quartiere ideale']].forEach(function (x) {
+  // I collegamenti stanno in una fila che, sui telefoni stretti, scorre di lato (Home e Cerca restano ferme)
+  var lnks = document.createElement('div');
+  lnks.className = 'mid-lnks';
+  [['dati-importanti/', 'Dati importanti'], ['quartiere/', 'Il tuo quartiere'], ['quartiere-ideale/', 'Quartiere ideale']].forEach(function (x) {
     var a = document.createElement('a');
     a.className = 'mid-b mid-lnk';
     a.href = new URL(x[0], rootUrl).href;
     a.textContent = x[1];
     if (current === x[0]) a.setAttribute('aria-current', 'page');
-    bar.appendChild(a);
+    lnks.appendChild(a);
   });
+  bar.appendChild(lnks);
 
   var btn = document.createElement('button');
   btn.type = 'button';
