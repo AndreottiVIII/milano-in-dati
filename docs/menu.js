@@ -4,9 +4,38 @@
 
    >>> QUANDO SI AGGIUNGE (O SI RINOMINA) UNA SEZIONE: aggiornare l'elenco SEZIONI qui sotto,
    >>> nello stesso ordine e con le stesse etichette dell'elenco numerato di docs/index.html.
-   >>> Vedi docs/MENU_README.md. */
+   >>> Vedi strumenti/MENU_README.md. */
 (function () {
   'use strict';
+
+  // Testo statico per chi non ha JavaScript (strumenti/statico.py): con JavaScript la pagina lo ridisegna da sola, quindi si toglie.
+  Array.prototype.forEach.call(document.querySelectorAll('.statico'), function (x) { if (x.parentNode) x.parentNode.removeChild(x); });
+
+  // Articoli davanti ai numeri che si leggono con una vocale (otto, undici, ottanta, ottocento):
+  // "il 8%" -> "l'8%", "del 11" -> "dell'11". Vale anche per i testi che le pagine scrivono dopo, nei grafici.
+  var RX_ART = /(^|[^A-Za-zÀ-ÿ'’])(il|Il|del|Del|al|Al|dal|Dal|nel|Nel|sul|Sul) ((?:8\d{0,2}|11)(?:\.\d{3})*(?:,\d+)?)(?![\d])/g;
+  function articolo(m, pre, a, n) { return pre + (a === 'il' ? 'l’' : a === 'Il' ? 'L’' : a + 'l’') + n; }
+  function sistemaArticoli(radice) {
+    if (!radice || !document.createTreeWalker) return;
+    var w = document.createTreeWalker(radice, NodeFilter.SHOW_TEXT, null, false), t;
+    while ((t = w.nextNode())) {
+      var v = t.nodeValue;
+      if (v && /\d/.test(v) && /(il|el|al|ul) (8|11)/i.test(v)) {
+        var nv = v.replace(RX_ART, articolo);
+        if (nv !== v) t.nodeValue = nv;
+      }
+    }
+  }
+  function avviaArticoli() {
+    sistemaArticoli(document.body);
+    if (!window.MutationObserver) return;
+    var attesa = false;
+    new MutationObserver(function () {
+      if (attesa) return; attesa = true;
+      (window.requestAnimationFrame || setTimeout)(function () { attesa = false; sistemaArticoli(document.body); });
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avviaArticoli); else avviaArticoli();
 
   // path = cartella della sezione, relativa a docs/ (con la barra finale)
   var SEZIONI = [

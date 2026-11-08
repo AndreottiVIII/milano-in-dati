@@ -9,19 +9,20 @@ Per ogni pagina di docs/:
 - scrive nella pagina i meta Open Graph e Twitter tra <!--condividi--> e <!--/condividi-->
   (si puo' rilanciare quante volte si vuole: il blocco viene sostituito).
 
-Uso: python -I -X utf8 strumenti/anteprime_link.py [pagina ...]   (senza nomi: tutte)
-Il modello grafico e' bozze-grafici/anteprime-link/modello.html. Se il sito cambia indirizzo, cambiare BASE.
+Uso: python -I -X utf8 strumenti/anteprime_link.py [--senza-immagini] [pagina ...]   (senza nomi: tutte)
+--senza-immagini: riscrive solo i meta nelle pagine, senza rifare i PNG.
+Il modello grafico e' bozze-grafici/anteprime-link/modello.html. Se il sito cambia indirizzo, cambiare BASE in sito.py.
+La meta description NON si scrive qui (la scrive seo.py); og:description la riusa da sito.descrizione().
 """
 import html, json, os, pathlib, re, sys
 from urllib.parse import urlencode
 from playwright.sync_api import sync_playwright
 
-BASE = 'https://andreottiviii.github.io/milano-in-dati/'
-LOCALE = 'http://localhost:8796/'
-R = pathlib.Path(__file__).resolve().parent.parent
-DOCS = R / 'docs'
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import sito
+from sito import BASE, LOCALE, R, DOCS
+
 MODELLO = (R / 'bozze-grafici' / 'anteprime-link' / 'modello.html').as_uri()
-ESCLUSE = {'anteprima'}
 
 temi = json.load(open(DOCS / 'temi.json', encoding='utf-8'))
 COL = {t['id']: (t['colore'], t['testo']) for t in temi['temi']}
@@ -29,9 +30,7 @@ TEMA = {p['path'].strip('/'): p for p in temi['pagine']}
 
 
 def pagine():
-    out = [''] + sorted(d.name for d in DOCS.iterdir()
-                        if d.is_dir() and d.name not in ESCLUSE and not d.name.startswith('_') and (d / 'index.html').is_file())
-    return out
+    return sito.pagine()
 
 
 def pulisci(s):
@@ -52,8 +51,7 @@ def dati_pagina(pg, p):
         const pe = c.querySelector('p');
         t = pe ? pe.innerText : c.innerText.replace(n, '');
       }
-      const d = document.querySelector('meta[name="description"]');
-      return {h1: h1 ? h1.innerText : document.title, n, t, desc: d ? d.content : ''};
+      return {h1: h1 ? h1.innerText : document.title, n, t};
     }""")
     return info
 
@@ -62,19 +60,17 @@ def numero_home():
     c = json.load(open(DOCS / 'il-sito' / 'data' / 'conti.json', encoding='utf-8'))
     mil = c['numeri'] / 1e6
     n = ('%.1f' % mil).replace('.', ',') + ' milioni'
-    t = 'di numeri sulla città in %d grafici e %d pagine, da %d fonti. Dal %d a oggi.' % (
+    t = 'di numeri sulla città in %d grafici e %d pagine, da %d editori. Dal %d a oggi.' % (
         c['grafici'], c['pagine'], c['fonti'], c['anno_da'])
     return n, t
 
 
-def blocco(p, titolo, desc, alt, ha_desc):
+def blocco(p, titolo, desc, alt):
     url = BASE + (p + '/' if p else '')
     img = url + 'condividi.png'
     e = lambda s: html.escape(s, quote=True)
-    righe = []
-    if not ha_desc:
-        righe.append('<meta name="description" content="%s">' % e(desc))
-    righe += [
+    # La meta description non si scrive qui: la scrive solo seo.py. Qui og:description la riusa.
+    righe = [
         '<meta property="og:type" content="website">',
         '<meta property="og:site_name" content="Milano in dati">',
         '<meta property="og:locale" content="it_IT">',
@@ -82,6 +78,8 @@ def blocco(p, titolo, desc, alt, ha_desc):
         '<meta property="og:description" content="%s">' % e(desc),
         '<meta property="og:url" content="%s">' % url,
         '<meta property="og:image" content="%s">' % img,
+        '<meta property="og:image:secure_url" content="%s">' % img,
+        '<meta property="og:image:type" content="image/png">',
         '<meta property="og:image:width" content="1200">',
         '<meta property="og:image:height" content="630">',
         '<meta property="og:image:alt" content="%s">' % e(alt),
@@ -104,14 +102,15 @@ def scrivi_meta(path, b):
 
 
 def main():
-    scelte = [a.strip('/') for a in sys.argv[1:]] or pagine()
+    senza_img = '--senza-immagini' in sys.argv
+    scelte = [a.strip('/') for a in sys.argv[1:] if not a.startswith('--')] or pagine()
     fav = (DOCS / 'favicon.svg').read_text(encoding='utf-8')
     with sync_playwright() as pw:
         b = pw.chromium.launch(channel='msedge')
-        sito = b.new_context(viewport={'width': 1000, 'height': 900})
+        ctx_sito = b.new_context(viewport={'width': 1000, 'height': 900})
         img = b.new_context(viewport={'width': 1200, 'height': 630})
         img.add_init_script('window.FAV=' + json.dumps(fav))
-        ps, pi = sito.new_page(), img.new_page()
+        ps, pi = ctx_sito.new_page(), img.new_page()
         for p in scelte:
             f = DOCS / p / 'index.html' if p else DOCS / 'index.html'
             if not f.is_file():
@@ -132,24 +131,25 @@ def main():
                 n, t = numero_home()
             else:
                 n, t = pulisci(info['n']), pulisci(info['t'])
-                n = re.sub(r'(\d)([A-Za-zÀ-ÿ])', r'\1 \2', n)
                 if (not n or len(n) > 14) and tema.get('numero'):
                     n, t = tema['numero']['valore'], tema['numero']['testo']
+                n = re.sub(r'(\d)([A-Za-zÀ-ÿ])', r'\1 \2', n)  # "481kg" -> "481 kg"
                 if not n:
                     n, t = '', pulisci(tema.get('descrizione', '')) or 'I numeri di Milano, con le fonti.'
             if len(t) > 140:
                 t = t[:137].rsplit(' ', 1)[0] + '…'
-            pi.goto(MODELLO + '?' + urlencode(dict(v='A', t=titolo, n=n or '·', p=t, c=colore, tx=testo)))
-            pi.wait_for_selector('body[data-ok]')
-            if not n:
-                pi.evaluate("document.querySelector('.box').style.display='none'")
-            pi.wait_for_timeout(150)
-            out = (DOCS / p / 'condividi.png') if p else (DOCS / 'condividi.png')
-            pi.screenshot(path=str(out))
-            desc = (info['desc'] or ((n + ' ' + t).strip() if n else t))[:160]
+            if not senza_img:
+                pi.goto(MODELLO + '?' + urlencode(dict(v='A', t=titolo, n=n or '·', p=t, c=colore, tx=testo)))
+                pi.wait_for_selector('body[data-ok]')
+                if not n:
+                    pi.evaluate("document.querySelector('.box').style.display='none'")
+                pi.wait_for_timeout(150)
+                out = (DOCS / p / 'condividi.png') if p else (DOCS / 'condividi.png')
+                pi.screenshot(path=str(out))
+            desc = sito.descrizione(p)
             titolo_og = titolo if not p else titolo + ' · Milano in dati'
             alt = (titolo + ': ' + (n + ' ' + t if n else t)).strip()
-            scrivi_meta(f, blocco(p, titolo_og, desc, alt, bool(info['desc'])))
+            scrivi_meta(f, blocco(p, titolo_og, desc, alt))
             print(p or 'home', '|', n, '|', t[:60])
         b.close()
 

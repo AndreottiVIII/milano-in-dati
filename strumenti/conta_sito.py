@@ -2,28 +2,28 @@
 Uso (dalla radice del progetto):  python -I -X utf8 strumenti/conta_sito.py
 
 REGOLE DI CONTEGGIO
-- Pagine: le cartelle docs/<p>/index.html elencate in docs/temi.json o in docs/menu.js (SEZIONI),
-  più dati-importanti (pagina vera fuori dai temi). Escluse: anteprima, elenco, il-sito, bozze (_*).
+- Pagine: le voci del menu, cioè l'elenco SEZIONI in docs/menu.js (tutte, comprese elenco e il-sito). È l'unica
+  definizione di "pagina": lo stesso numero va in home, il-sito e fonti.
 - Grafici: nelle pagine, ogni elemento HTML che ha la classe "ch" oppure role="img" (un elemento = un grafico o una mappa).
 - Numeri: in docs/<p>/data/ (anche dentro i .gz) celle numeriche dei CSV; valori numerici foglia dei JSON;
   nei GeoJSON solo i valori numerici di "properties" (non le coordinate). Valori con zero iniziale (codici) esclusi.
-- File di dati e MB: tutti i file in docs/*/data/ delle pagine contate (esclusa anteprima).
-- Fonti: domini (senza www, al livello "registrabile") dei link esterni nel piè di pagina <footer> e nei paragrafi
-  class="src" delle pagine; esclusi github, il sito stesso, davidecaniatti.
-- Anni: valori-anno (1000..anno corrente) nelle colonne/chiavi "anno"/"year" (e simili) dei dati di ogni pagina; le date
-  ISO nelle colonne "data" contano come anno; gli anni futuri (previsioni) non contano. Si parte dall'anno più recente e
-  si risale finché non c'è un buco di più di 3 anni tra due anni presenti: quello è l'inizio della serie. Così una
-  statua del 1560 o un terremoto del 1117 (date di cose, non di misure) non allungano la serie di dati.
-- Fonti: ai link del piè di pagina si aggiungono i link nelle chiavi fonti/licenze/note dei JSON di dati e nei file
-  di testo delle fonti (LICENZE, altre_fonti ecc.), perché molte pagine scrivono le fonti da quei file.
+- File di dati e MB: tutti i file in docs/*/data/ delle pagine contate.
+- Fonti: gli editori dei dati elencati in docs/fonti/data/fonti.json (stesso conteggio della pagina Fonti e metodo:
+  "editori diversi"). Per ogni pagina, il numero di editori citati per quella pagina. Le pagine che non sono nella
+  tabella delle fonti (dati-importanti, elenco, il-sito, fonti) hanno 0.
+- Anni: per ogni pagina l'inizio e la fine dei dati sono quelli scritti nella tabella ANNI qui sotto, presa dalle
+  descrizioni di docs/temi.json e dal testo delle pagine. Le pagine che non sono nella tabella ripiegano su un calcolo
+  automatico: valori-anno (1000..anno corrente) nelle colonne/chiavi "anno"/"year" dei dati; si parte dall'anno più
+  recente e si risale finché non c'è un buco di più di 3 anni. Le pagine nella tabella con (None, None) non hanno una
+  serie di anni (riepiloghi, giochi, elenchi di cose datate) e restano fuori dal grafico del tempo.
+- Temi: quelli di docs/temi.json. Le pagine che non sono in nessun tema (dati-importanti, elenco, il-sito) stanno nel
+  gruppo "Riepiloghi e guide".
 """
-import os, re, json, csv, gzip, io, datetime
-from urllib.parse import urlparse
+import os, re, json, csv, gzip, io, html, datetime
 
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(R, 'docs')
 OUT = os.path.join(DOCS, 'il-sito', 'data', 'conti.json')
-ESCLUSE = {'anteprima', 'elenco', 'il-sito'}
 OGGI = datetime.date.today()
 ANNO_MAX = OGGI.year
 ANNO_MIN = 1000
@@ -139,27 +139,72 @@ def serie(anni):
     return ys[i], ys[-1]
 
 
+ANNI = {
+    # slug: (primo anno, ultimo anno); None = si usa quello calcolato dai dati.
+    # Fonte: descrizioni di docs/temi.json e testo delle pagine.
+    'temperature': (1763, None), 'beni-culturali': (2022, 2023), 'elezioni': (1946, None), 'aria': (1971, None),
+    'area-c': (2016, None), 'bici-auto-mezzi': (2010, 2024), 'scala': (1778, None), 'violenza-politica': (1919, 2019),
+    'neve-e-nebbia': (1952, 2025), 'derby': (1909, None), 'cinema-spariti': (1896, None),
+    'acqua-del-sindaco': (2021, 2026), 'censimenti': (1861, 2023), 'prezzi-case': (2006, None),
+    'bilancio-comune': (2015, 2025), 'appalti': (2019, 2025), 'affitti-brevi': (2012, 2025), 'alberi': (2023, 2025),
+    'cani': (2011, 2024), 'morti': (2011, None), 'matrimoni': (1948, 2024), 'biblioteche': (2013, None),
+    'redditi': (2000, 2024), 'scuole': (2009, 2024), 'pioggia': (1858, 2025), 'caldo': (2017, 2026),
+    'costo-vita': (2005, None), 'metro': (2016, 2025), 'ristoranti': (2019, None), 'turisti': (2000, 2025),
+    'luoghi-cercati': (2015, 2026), 'quartieri-che-cambiano': (2011, 2026), 'pollini': (2007, None),
+    'voto-reddito': (2016, None), 'antenne': (2021, 2025), 'costruzioni': (2014, 2024),
+    'arrivi-partenze': (2002, 2024), 'comunita': (1999, 2025), 'eta': (1999, 2025), 'benessere': (2004, 2024),
+    'incroci': (2010, 2025), 'amministratori': (1946, None), 'botteghe': (2017, 2026), 'suolo': (2006, None),
+    'pendolari': (1991, 2021), 'reati': (2004, 2024), 'permettersi': (2011, 2024), 'case-vuote': (1991, 2023),
+    'divisa': (1999, 2025), 'sfratti': (2001, 2025), 'lavoro': (1991, 2023), 'rigenerazione': (2012, 2026),
+    'rifiuti': (2010, 2024), 'poverta-educativa': (2004, 2024), 'palazzi': (2011, 2024),
+    'il-tuo-giorno': (1763, None), 'milano-trema': (1065, 2016), 'omicidi': (1983, 2024), 'nascite': (2003, 2025),
+    'tribunale': (2019, 2025), 'auto': (2007, 2025), 'carceri': (2019, 2026), 'musei': (1996, 2025),
+    'aeroporti': (1994, None), 'bici': (2011, None), 'consiglio': (2016, 2026), 'verde': (2011, 2024),
+    'imprese': (2000, 2025), 'hinterland': (2001, 2026), 'tasse': (2000, 2025), 'vibrazioni': (2019, 2026),
+    'consumi': (2000, 2024),
+    # senza una serie di anni: riepiloghi, giochi, elenchi di cose datate
+    'vie': (None, None), 'statue': (None, None), 'targhe': (None, None), 'citta-15-minuti': (None, None),
+    'nomi-fermate': (None, None), 'case-servizi-reddito': (None, None), 'quartiere': (None, None),
+    'quartiere-ideale': (None, None), 'indovina-quartiere': (None, None), 'chilometri-duomo': (None, None),
+    'viaggio-linea': (None, None), 'attesa-fermata': (None, None), 'anno-covid': (None, None),
+    'storia-case': (None, None), 'storia-centro': (None, None), 'oltre-il-reddito': (None, None),
+    'sport': (None, None), 'dati-importanti': (None, None), 'elenco': (None, None), 'il-sito': (None, None),
+    'fonti': (None, None),
+}
+SOLO_PAGINA = {'milano-trema'}
+GRUPPO_ALTRO = {'id': 'guide', 'nome': 'Riepiloghi e guide', 'colore': '#5f6673'}
+
+
 def pagine_elenco():
+    """Le pagine sono le voci del menu (SEZIONI in docs/menu.js). Da temi.json solo tema ed etichetta."""
     t = json.load(open(os.path.join(DOCS, 'temi.json'), encoding='utf-8'))
     temi = {x['id']: x for x in t['temi']}
-    ps = {}
-    for p in t['pagine']:
-        ps[p['path'].strip('/')] = p
+    tp = {p['path'].strip('/'): p for p in t['pagine']}
     menu = open(os.path.join(DOCS, 'menu.js'), encoding='utf-8').read()
-    for m in re.finditer(r"path:\s*'([^']+)'\s*,\s*label:\s*'((?:[^'\\]|\\.)*)'", menu):
+    ps = {}
+    voce = re.compile(r"""path:\s*'([^']+)'\s*,\s*label:\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")""")
+    for m in voce.finditer(menu):
         k = m.group(1).strip('/')
-        ps.setdefault(k, {'path': k + '/', 'label': m.group(2).replace("\\'", "'"), 'tema': None})
-    if os.path.isfile(os.path.join(DOCS, 'dati-importanti', 'index.html')):
-        ps.setdefault('dati-importanti', {'path': 'dati-importanti/', 'label': 'Dati importanti', 'tema': None})
+        lab = (m.group(2) if m.group(2) is not None else m.group(3)).replace("\\'", "'")
+        ps[k] = {'path': k + '/', 'label': (tp.get(k) or {}).get('label') or lab, 'tema': (tp.get(k) or {}).get('tema')}
     return temi, ps
+
+
+def fonti_da_tabella():
+    """Editori per pagina e totale degli editori, da docs/fonti/data/fonti.json (quello che dice la pagina Fonti)."""
+    f = json.load(open(os.path.join(DOCS, 'fonti', 'data', 'fonti.json'), encoding='utf-8'))
+    per_pagina = {}
+    for x in f['fonti']:
+        per_pagina.setdefault(x['pagina'], set()).add(x['editore'])
+    return {k: len(v) for k, v in per_pagina.items()}, len(f['editori'])
 
 
 tag_re = re.compile(r'<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>')
 
 
-def conta_grafici(html):
+def conta_grafici(h):
     n = 0
-    for m in tag_re.finditer(html):
+    for m in tag_re.finditer(h):
         a = m.group(2)
         if re.search(r'role\s*=\s*["\']img["\']', a):
             n += 1
@@ -170,74 +215,11 @@ def conta_grafici(html):
     return n
 
 
-def dominio(url):
-    h = (urlparse(url).hostname or '').lower()
-    if h.startswith('www.'):
-        h = h[4:]
-    p = h.split('.')
-    if len(p) >= 3 and p[-2] in ('gov', 'co', 'com', 'edu', 'org', 'ac'):
-        return '.'.join(p[-3:])
-    return '.'.join(p[-2:]) if len(p) >= 2 else h
-
-
-def fonti_pagina(html):
-    blocchi = re.findall(r'<footer\b.*?</footer>', html, re.S | re.I)
-    blocchi += re.findall(r'<(?:p|div)\b[^>]*class="[^"]*\bsrc\b[^"]*"[^>]*>.*?</(?:p|div)>', html, re.S | re.I)
-    ds = set()
-    for b in blocchi:
-        for u in re.findall(r'href="(https?://[^"]+)"', b):
-            d = dominio(u)
-            if d and 'github' not in d and 'davidecaniatti' not in d and d not in ESCL_DOM:
-                ds.add(d)
-    return ds
-
-
-URL_RE = re.compile(r"https?://[^\s\"'<>)\],]+")
-ESCL_DOM = ('w3.org', 'schema.org', 'localhost')
-chiave_fonte = re.compile(r'font|licen|sourc|metod|limit|nota|note|credit', re.I)
-
-
-def urls_in(o, ok, ds):
-    if isinstance(o, str):
-        if ok:
-            for u in URL_RE.findall(o):
-                d = dominio(u)
-                if d and 'github' not in d and 'davidecaniatti' not in d and d not in ESCL_DOM:
-                    ds.add(d)
-    elif isinstance(o, list):
-        for x in o:
-            urls_in(x, ok, ds)
-    elif isinstance(o, dict):
-        for k, v in o.items():
-            urls_in(v, ok or bool(chiave_fonte.match(str(k))), ds)
-
-
-def fonti_dati(dd):
-    ds = set()
-    if not os.path.isdir(dd):
-        return ds
-    for root, _, files in os.walk(dd):
-        for f in files:
-            p = os.path.join(root, f)
-            fl = f.lower()
-            try:
-                if fl.endswith('.json') and os.path.getsize(p) < 3000000:
-                    urls_in(json.loads(open(p, encoding='utf-8-sig').read()), False, ds)
-                elif fl.endswith(('.txt', '.md')) or chiave_fonte.search(fl) and fl.endswith('.csv'):
-                    for u in URL_RE.findall(open(p, encoding='utf-8-sig', errors='replace').read()):
-                        d = dominio(u)
-                        if d and 'github' not in d and 'davidecaniatti' not in d and d not in ESCL_DOM:
-                            ds.add(d)
-            except Exception:
-                pass
-    return ds
-
-
-def titolo(html, fallback):
-    m = re.search(r'<h1[^>]*>(.*?)</h1>', html, re.S | re.I)
+def titolo(h, fallback):
+    m = re.search(r'<h1[^>]*>(.*?)</h1>', h, re.S | re.I)
     if m:
         t = re.sub(r'<[^>]+>', '', m.group(1))
-        t = re.sub(r'\s+', ' ', t).strip()
+        t = re.sub(r'\s+', ' ', html.unescape(t)).strip()
         if t:
             return t
     return fallback
@@ -245,17 +227,17 @@ def titolo(html, fallback):
 
 def main():
     temi, ps = pagine_elenco()
+    fonti_pag, n_editori = fonti_da_tabella()
     righe = []
-    tutti_domini = set()
     tot_file = 0
     tot_byte = 0
+    senza_tabella = []
     for k in sorted(ps):
-        if k in ESCLUSE or k.startswith('_'):
-            continue
         ih = os.path.join(DOCS, k, 'index.html')
         if not os.path.isfile(ih):
+            print('ATTENZIONE: manca docs/%s/index.html' % k)
             continue
-        html = open(ih, encoding='utf-8', errors='replace').read()
+        h = open(ih, encoding='utf-8', errors='replace').read()
         acc = Acc()
         nf = 0
         nb = 0
@@ -267,31 +249,40 @@ def main():
                     nf += 1
                     nb += os.path.getsize(p)
                     conta_file(p, acc)
-        ds = fonti_pagina(html) | fonti_dati(dd)
-        tutti_domini |= ds
         tot_file += nf
         tot_byte += nb
         an = serie(acc.anni)
+        if k in ANNI:
+            da, a = ANNI[k]
+            if da is None:
+                an = None
+            else:
+                an = (da, a if a is not None else (an[1] if an else da))
+        else:
+            senza_tabella.append(k)
         p = ps[k]
-        righe.append({'path': k + '/', 'nome': p.get('label') or k, 'titolo': titolo(html, p.get('label') or k),
-                      'tema': p.get('tema') or 'altro', 'grafici': conta_grafici(html), 'numeri': acc.num,
-                      'file': nf, 'mb': round(nb / 1048576, 2), 'fonti': len(ds),
+        righe.append({'path': k + '/', 'nome': p.get('label') or k, 'titolo': titolo(h, p.get('label') or k),
+                      'tema': p.get('tema') or GRUPPO_ALTRO['id'], 'grafici': conta_grafici(h), 'numeri': acc.num,
+                      'file': nf, 'mb': round(nb / 1048576, 2), 'fonti': fonti_pag.get(k, 0),
                       'anno_da': an[0] if an else None, 'anno_a': an[1] if an else None})
+    if senza_tabella:
+        print('Pagine non nella tabella ANNI (anni calcolati dai dati, da controllare):', ', '.join(senza_tabella))
     per_tema = []
     for tid, t in temi.items():
         n = sum(1 for r in righe if r['tema'] == tid)
         if n:
             per_tema.append({'id': tid, 'nome': t['nome'], 'colore': t['colore'], 'pagine': n})
-    n = sum(1 for r in righe if r['tema'] == 'altro')
+    n = sum(1 for r in righe if r['tema'] == GRUPPO_ALTRO['id'])
     if n:
-        per_tema.append({'id': 'altro', 'nome': 'Altre pagine', 'colore': '#5f6673', 'pagine': n})
+        per_tema.append({'id': GRUPPO_ALTRO['id'], 'nome': GRUPPO_ALTRO['nome'], 'colore': GRUPPO_ALTRO['colore'], 'pagine': n})
     per_tema.sort(key=lambda x: -x['pagine'])
-    da = [r['anno_da'] for r in righe if r['anno_da']]
+    # il titolo di testa parte dalle misure vere: un catalogo di eventi lontani (terremoti dal 1065) resta nella sua pagina
+    da = [r['anno_da'] for r in righe if r['anno_da'] and r['path'].strip('/') not in SOLO_PAGINA]
     a = [r['anno_a'] for r in righe if r['anno_a']]
     conti = {
         'aggiornato': OGGI.isoformat(),
         'pagine': len(righe), 'grafici': sum(r['grafici'] for r in righe), 'numeri': sum(r['numeri'] for r in righe),
-        'file': tot_file, 'mb': round(tot_byte / 1048576, 1), 'fonti': len(tutti_domini),
+        'file': tot_file, 'mb': round(tot_byte / 1048576, 1), 'fonti': n_editori,
         'anno_da': min(da), 'anno_a': max(a), 'anni': max(a) - min(da) + 1, 'quartieri': 88,
         'per_tema': per_tema, 'elenco': righe,
     }

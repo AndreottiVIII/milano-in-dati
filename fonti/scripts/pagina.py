@@ -11,7 +11,8 @@ Uso (Python 3.12):
   --aggiorna       riscarica con il browser l'HTML "dopo JavaScript" di tutte le pagine (di norma si riusa la cache)
   --senza-browser  non usa il browser: legge l'HTML scritto sul disco (le parti scritte da JavaScript mancano)
 
-Le correzioni a mano stanno in correzioni.json (accanto a questo file), con il motivo di ciascuna.
+Le correzioni a mano stanno in correzioni.json (accanto a questo file), con il motivo di ciascuna;
+quelle alle licenze (indirizzo della licenza, righe per le pagine senza blocco fonti, frasi senza nomi di file) in licenze.json.
 Si può rilanciare quante volte si vuole.
 """
 import argparse
@@ -434,7 +435,7 @@ def note_per_pagina(radice):
 # ------------------------------------------------------------------ correzioni a mano
 def _lic(s):
     """Da un testo di licenza scritto a mano ("CC BY 4.0", "Uso con citazione, non aperta") a (tipo, nome)."""
-    noti = {R.LIC_TUTTI, R.LIC_CITAZIONE, R.LIC_ANMIG, R.LIC_NC, R.LIC_PD, R.LIC_NONDICH}
+    noti = {R.LIC_TUTTI, R.LIC_CITAZIONE, R.LIC_NESSUNA, R.LIC_ANMIG, R.LIC_NC, R.LIC_PD, R.LIC_NONDICH}
     if s in noti:
         return s, s
     tipo, ver, _ = scegli_licenza(s)
@@ -483,6 +484,36 @@ def applica_correzioni(slug, righe, corr):
     return righe
 
 
+# ------------------------------------------------------------------ licenze.json
+def leggi_licenze(path):
+    if not Path(path).exists():
+        return {"modifiche": [], "aggiunte": [], "riscritture": []}
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def aggiunte_licenze(slug, righe, lic):
+    """Righe per le pagine senza un blocco fonti proprio (licenze.json -> aggiunte). Nota e indirizzo della licenza
+    si scrivono in costruisci(), dopo il testo, per tenere l'ordine dei campi."""
+    for a in lic.get("aggiunte", []):
+        if a["pagina"] != slug:
+            continue
+        r = {"editore": a["editore"], "gruppo": a.get("gruppo", R.GRUPPO.get(a["editore"], "")), "dataset": list(a.get("dataset", [])),
+             "link": list(a.get("link", [])), "siti": list(a.get("siti", [])), "licenza_tipo": a["licenza_tipo"], "licenza": a["licenza"],
+             "licenza_da_editore": a.get("licenza_da_editore", False), "altre_licenze": list(a.get("altre_licenze", [])),
+             "date": list(a.get("date", [])), "data_da_pagina": a.get("data_da_pagina", False), "testi": [a["testo"]],
+             "_dopo": {k: a[k] for k in ("nota", "licenza_url") if k in a}}
+        righe.append(r)
+    return righe
+
+
+def riscrivi(t, riscritture):
+    """Frasi riscritte a mano (da -> a), poi pulizia automatica dei nomi di file che restano."""
+    for x in riscritture:
+        if x["da"] in t:
+            t = t.replace(x["da"], x["a"])
+    return R.senza_file(t)
+
+
 # ------------------------------------------------------------------ programma principale
 def etichette_menu(docs):
     try:
@@ -510,6 +541,8 @@ def main():
         slugs = [s for s in slugs if s in menu]
     corr = json.loads((Path(__file__).parent / "correzioni.json").read_text(encoding="utf-8")) if (Path(__file__).parent / "correzioni.json").exists() else {}
     corr_pag = {k: v for k, v in corr.items() if not k.startswith("_")}
+    lic = leggi_licenze(Path(__file__).parent / "licenze.json")
+    risc = lic.get("riscritture", [])
 
     if a.senza_browser:
         files = {s: docs / s / "index.html" for s in slugs}
@@ -527,6 +560,7 @@ def main():
         righe, _tot, data_pag = estrai_fonti(s, d["fonti_testo"], corr_pag)
         righe = unisci_righe(righe)
         righe = applica_correzioni(s, righe, corr_pag)
+        righe = aggiunte_licenze(s, righe, lic)
         if not righe:
             senza_fonti.append(s)
         limiti = d["limiti"]
@@ -536,7 +570,7 @@ def main():
         pag = {
             "slug": s, "url": f"../{s}/", "etichetta": etich.get(s, d["titolo"] or s), "titolo": d["titolo"],
             "n_fonti": len(righe), "data_scarico": intervallo(data_pag or []),
-            "limiti": [tronca(x, 300) for x in limiti], "n_limiti": len(limiti),
+            "limiti": [riscrivi(tronca(x, 300), risc) for x in limiti], "n_limiti": len(limiti),
             "nota_fonti": cp.get("nota_fonti", ""),
         }
         pagine.append(pag)
@@ -550,7 +584,7 @@ def main():
             print("=====", s, "| fonti:", len(righe), "| limiti:", len(limiti), "| date:", data_pag)
             for r in righe:
                 print("   ", r["editore"], "|", r["licenza"], "(def)" if r["licenza_da_editore"] else "", "|", intervallo(r["date"]), "|", ",".join(r["dataset"])[:60])
-    uscita = costruisci(pagine, fonti_tutte, non_esiste, corr, ricaduti, senza_fonti)
+    uscita = costruisci(pagine, fonti_tutte, non_esiste, corr, ricaduti, senza_fonti, lic)
     out_dir = docs / "fonti" / "data"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "fonti.json").write_text(json.dumps(uscita, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -558,10 +592,19 @@ def main():
     print(f"pagine {len(pagine)} | righe fonte {len(fonti_tutte)} | editori {len(uscita['editori'])} | senza fonti: {senza_fonti} | ricaduti sull'HTML grezzo: {ricaduti}")
 
 
-def costruisci(pagine, fonti, non_esiste, corr, ricaduti, senza_fonti):
+def costruisci(pagine, fonti, non_esiste, corr, ricaduti, senza_fonti, lic=None):
+    lic = lic or {}
+    risc = lic.get("riscritture", [])
     for f in fonti:  # testo originale (breve) per controllare la riga
-        f["testo"] = tronca(" … ".join(f.pop("testi", [])), 360)
+        f["testo"] = riscrivi(tronca(" … ".join(f.pop("testi", [])), 360), risc)
         f.setdefault("nota", "")
+        f.update(f.pop("_dopo", {}))
+    for m in lic.get("modifiche", []):  # licenze.json -> modifiche
+        trovate = [f for f in fonti if f["pagina"] == m["pagina"] and f["editore"] == m["editore"] and f["licenza_tipo"] == m["tipo_prima"]]
+        if not trovate:
+            raise ValueError(f"licenze.json: nessuna riga per {m['pagina']} / {m['editore']} / {m['tipo_prima']}")
+        for f in trovate:
+            f.update({k: v for k, v in m.items() if k not in ("pagina", "editore", "tipo_prima")})
     # editori
     ed = {}
     for f in fonti:
@@ -590,6 +633,7 @@ def costruisci(pagine, fonti, non_esiste, corr, ricaduti, senza_fonti):
             ne.append(x)
     escl = [re.compile(p, re.I) for p in (corr.get("_non_esistono_escludi") or [])]
     ne = [x for x in ne if not any(rx.search(x["testo"]) for rx in escl)]
+    ne = [dict(x, testo=riscrivi(x["testo"], risc)) for x in ne]  # per ultimo: i filtri sopra leggono il testo originale
     return {
         "generato": dt.date.today().isoformat(),
         "conteggi": {

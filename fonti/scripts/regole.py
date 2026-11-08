@@ -83,6 +83,7 @@ LIC_ANMIG = "Autorizzazione dichiarata (ANMIG)"
 LIC_NC = "CC BY-NC (solo uso non commerciale)"
 LIC_PD = "Dominio pubblico"
 LIC_NONDICH = "Non indicata"
+LIC_NESSUNA = "Nessuna licenza dichiarata"  # cercata sul sito di chi pubblica, e non c'è
 
 # (tipo, versione-regex opzionale, regex di riconoscimento). L'ordine è di priorità nella stessa frase.
 LICENZE = [
@@ -142,3 +143,35 @@ NON_ESISTE = re.compile(
     r"non ci sono (?:dati|numeri|serie)[^.]{0,30}(?:pubblic|aperti|disponibil)|nessun (?:dato|elenco|registro|archivio) (?:aperto|pubblico|pubblicato)|"
     r"dato (?:non )?(?:aperto|pubblico)|non (?:è|sono) (?:in )?(?:forma|formato) aperta?|non (?:è|sono) (?:in )?open data|"
     r"(?:richiede|serve|servirebbe|occorre)[^.]{0,25}(?:richiesta|accesso agli atti|FOIA)|accesso agli atti|FOIA", re.I)
+
+# ---------------------------------------------------------------- nomi di file nei testi
+# Nei testi mostrati sulla pagina «Fonti» non devono comparire nomi di file né percorsi: chi legge non li vede.
+FILE_NOME = re.compile(r"(?:[\w-]+/)*[\w.-]+\.(?:csv|json|geojson|xlsx?|gz|zip|parquet)\b", re.I)
+CARTELLA_DATA = re.compile(r"\bdata/(?:giorni/)?", re.I)
+
+
+URL = re.compile(r"https?://\S+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)+/\S*", re.I)
+
+
+def senza_file(t):
+    """Toglie da un testo i nomi di file (.csv, .json, ...) e i percorsi del tipo data/... (gli indirizzi web restano com'erano).
+    Rete di sicurezza per le pagine nuove: i testi già noti sono riscritti a parole in licenze.json."""
+    if not t:
+        return t
+    pezzi, ultimo, out = [], 0, []
+    for m in URL.finditer(t):
+        out.append(("t", t[ultimo:m.start()]))
+        out.append(("u", m.group(0)))
+        ultimo = m.end()
+    out.append(("t", t[ultimo:]))
+    res = ""
+    for tipo, s in out:
+        if tipo == "t":
+            s = FILE_NOME.sub("un file", s)
+            s = CARTELLA_DATA.sub("i dati ", s)
+        res += s
+    t = res
+    t = re.sub(r"\bun file(?:\s*(?:,|e|ed)\s*un file)+", "un file", t)  # "un file, un file" -> "un file"
+    t = re.sub(r"\(\s*\)", "", t)
+    t = re.sub(r"\s+([,.;:)])", r"\1", t)
+    return re.sub(r"\s{2,}", " ", t).strip()
