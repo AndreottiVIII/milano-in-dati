@@ -1,266 +1,640 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · Le vie intitolate a donne</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · Donne nelle vie</title>
 <style>
-:root{--acc:#c2185b;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r{text-align:right;white-space:nowrap} .big{font-size:2.2rem;font-weight:700;color:var(--acc)} .sub{font-size:.85rem;color:var(--mut)} .rng{font-size:.95rem}
-.src{font-size:.8rem;color:var(--mut)} #map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)} #map{height:68vh;min-height:380px;border:1px solid var(--ink)} tr.inc td{color:var(--mut)}
-a{color:var(--acc)} .legend span{display:inline-block;width:28px;height:0;border-top:4px solid var(--acc);vertical-align:middle;margin-right:6px} .legend span.d{border-top-style:dashed}
-.scroll{max-height:520px;overflow:auto;border:1px solid var(--line)} footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-@media(max-width:640px){.big{font-size:1.7rem} th,td{padding:5px 4px;font-size:.88rem}}
-/* vie-anno-nomi:inizio */
-.va{min-width:0}.va *{min-width:0}
-.va-avviso{border-left:6px solid var(--acc);background:#f6f6f6;padding:8px 10px;margin:10px 0}
-.va-et{display:block;font-weight:700;margin:14px 0 6px}
-#va-q{width:100%;font:inherit;font-size:18px;padding:12px;border:3px solid var(--ink);border-radius:0;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
-.va-sugg{margin:0}.va-sugg button{display:block;width:100%;font:inherit;font-size:16px;text-align:left;padding:11px 8px;border:0;border-bottom:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
-.va-sugg button small,.va-sugg p{display:block;color:var(--mut);font-size:14px}
-.va-sugg p{margin:8px 0}
-.va-prova{font-size:15px;margin:10px 0 0}.va-prova button,.va-elenco button{font:inherit;font-size:15px;border:2px solid var(--ink);background:#fff;color:var(--ink);padding:4px 9px;margin:4px 6px 0 0;cursor:pointer}
-.va-scheda{margin-top:6px}.va-tit{font-size:1.5rem;font-weight:700;line-height:1.15;margin:18px 0 2px;overflow-wrap:anywhere}
-.va-sub{font-size:14px;color:var(--mut)}
-.va-scheda h4{font-size:1rem;margin:16px 0 4px;border-top:2px solid var(--ink);padding-top:8px}
-.va-anno{font-size:1.4rem;font-weight:700;color:var(--acc);margin:2px 0}
-.va-pic{font-size:14px;color:var(--mut)}
-.va-gr{margin:10px 0}.va-r{margin:12px 0}
-.va-rt{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;font-size:15px}.va-rt span{color:var(--mut);font-size:14px}
-.va-bar{height:14px;margin-top:3px;background:#f2f2f2}.va-b{display:block;height:100%}
-.va-b.t{background:#555}.va-b.d{background:var(--acc)}
-.va-leg{font-size:14px;color:var(--mut)}.va-leg .va-b{display:inline-block;width:18px;height:12px;vertical-align:middle}
-.va h3{font-size:1.05rem;margin:20px 0 4px}
-.va-num{padding-left:20px}.va-num li{margin:8px 0}
-.va-linea{list-style:none;margin:6px 0 4px 6px;padding:0;border-left:6px solid var(--acc)}
-.va-linea li{position:relative;padding:4px 0 14px 18px}
-.va-linea li:before{content:"";position:absolute;left:-14px;top:7px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--ink)}
-.va-linea li.cambia:before{background:var(--acc);border-color:var(--acc)}
-.va-an{font-size:14px;font-weight:700}.va-nm{font-size:1.1rem;line-height:1.2;font-weight:700;overflow-wrap:anywhere}
-.va-tag{display:inline-block;font-size:12px;font-weight:700;background:#e8e8e8;color:var(--ink);padding:1px 6px;margin-left:6px;vertical-align:2px}
-.va-tag.c{background:var(--acc);color:#fff}
-.va-det{font-size:14px;color:var(--mut)}
-.va-elenco summary{cursor:pointer;font-weight:700;margin:10px 0}
-@media(max-width:640px){#va-q{font-size:16px}.va-tit{font-size:1.3rem}}
-/* vie-anno-nomi:fine */
-</style><script src="../menu.js" defer></script></head><body><main>
-<h1>Quante vie di Milano sono intitolate a donne?</h1>
-<p>Tra le vie e le piazze del Comune di Milano intitolate a una persona, quelle dedicate a una donna sono una piccola parte. Qui sotto il conto, la mappa (colorate solo le vie delle donne) e l&rsquo;elenco.</p>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;--ora:#F58220;
+  --uo:#0072BC;--do:#F06EAA;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.vuoto{border-radius:50%;background:#fff!important;border:3px solid var(--do);width:13px;height:13px}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.find{margin:14px 0 0}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.prova{font-size:.9rem;margin:8px 0 0}
+.prova button{font:inherit;font-size:.9rem;border:2px solid var(--ink);background:#fff;color:var(--ink);padding:6px 10px;margin:4px 6px 0 0;cursor:pointer;min-height:36px}
+.ris{background:var(--soft);border-left:6px solid var(--do);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris:empty{display:none}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.35em 0 0}
+.ris ul{margin:.4em 0 0;padding-left:1.1em}
+.ris li{margin:.3em 0}
+.ris h4{font-size:.95rem;margin:.9em 0 .2em}
+.anno{font-size:1.6rem;font-weight:800;margin:.1em 0}
+.linea{list-style:none;margin:6px 0 4px 6px;padding:0;border-left:6px solid var(--ink)}
+.linea li{position:relative;padding:4px 0 12px 18px;margin:0}
+.linea li:before{content:"";position:absolute;left:-14px;top:7px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--ink)}
+.linea li.cambia:before{background:var(--mi);border-color:var(--mi)}
+.linea .an{font-size:.85rem;font-weight:700}
+.linea .nm{font-size:1.05rem;font-weight:700;line-height:1.2}
+.linea .de{font-size:.85rem;color:var(--mut)}
+.tg{display:inline-block;font-size:.75rem;font-weight:700;background:#e8e8e8;padding:1px 6px;margin-left:6px}
+.tg.c{background:var(--mi);color:#fff}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+.scroll{max-height:460px;overflow:auto;border:1px solid var(--grid)}
+table.kt{border-collapse:collapse;width:100%;font-size:.85rem}
+table.kt th,table.kt td{padding:5px 6px;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem;position:sticky;top:0;background:#fff}
+.elenco button{font:inherit;font-size:.88rem;border:2px solid var(--ink);background:#fff;color:var(--ink);padding:5px 9px;margin:4px 6px 0 0;cursor:pointer}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+</style>
+<script src="../menu.js" defer></script></head><body><main>
 
-<h2>Le percentuali</h2>
-<table>
-<tr><th></th><th>Santi compresi</th><th>Santi esclusi</th></tr>
-<tr><td><b>Su 100 vie intitolate a persone</b></td><td><span class="big">6,6%</span><br><span class="sub">140 donne su 2.110 vie intitolate a persone (certe)</span><br><span class="rng">contando anche le vie incerte (quasi tutte di uomini): <b>5,4%&ndash;6,6%</b></span></td><td><span class="big">5,1%</span><br><span class="sub">103 donne su 2.009 vie intitolate a persone (certe)</span><br><span class="rng">contando anche le vie incerte (quasi tutte di uomini): <b>4,2%&ndash;5,1%</b></span></td></tr>
-<tr><td><b>Su 100 vie in tutto</b></td><td><span class="big">3,3%</span><br><span class="sub">140 donne su 4.278 vie in tutto</span><br><span class="rng">le vie incerte non cambiano questo conto</span></td><td><span class="big">2,5%</span><br><span class="sub">103 donne su 4.122 vie in tutto</span><br><span class="rng">le vie incerte non cambiano questo conto</span></td></tr>
-</table>
-<p class="src"><b>Numero fermo</b> = solo i casi sicuri (persona indicata nel tag OpenStreetMap <code>name:etymology:wikidata</code>, oppure trovata su Wikidata con nome identico; sesso dal campo Wikidata P21). <b>Con i casi incerti</b> = si aggiungono le vie per cui una donna &egrave; solo una possibilit&agrave; (omonimie, nome di battesimo senza conferma, santa o chiesa?). &laquo;Santi esclusi&raquo; toglie dal conto, sia al numeratore sia al denominatore, tutte le vie dedicate a santi e sante. Un gruppo di sole sorelle conta come donne; &laquo;Fratelli&hellip;&raquo; e coppie sono nel totale ma non tra le donne.
-Fonte dei numeri: <a href="data/percentuali.json">data/percentuali.json</a> (calcolati da <a href="data/strade_classificate_v2.csv">data/strade_classificate_v2.csv</a>, campi <code>categoria</code>, <code>confidenza</code>, <code>santa</code>, <code>santo</code>). Universo: 4.278 vie e piazze del Comune di Milano (registro civici del Comune, 4.030 codici via, pi&ugrave; 248 vie presenti solo in OpenStreetMap). Dati OSM del 2026-10-29.</p>
+<h1>Donne nelle vie</h1>
+<p class="lead">Quante vie e piazze di Milano portano il nome di una donna, chi sono e dove si trovano. Scrivi il nome di una via o il tuo quartiere.</p>
 
-<h2>Quando sono state intitolate</h2>
-<table><tr><th>Anno di intitolazione</th><th>donne / persone (certe)</th><th>quota</th><th>con incerti: donne / persone</th><th>quota</th></tr><tr><td>fino al 1949</td><td class='r'>15 / 354</td><td class='r'>4,2%</td><td class='r'>15 / 441</td><td class='r'>3,4%</td></tr><tr><td>1950-1979</td><td class='r'>9 / 165</td><td class='r'>5,5%</td><td class='r'>9 / 200</td><td class='r'>4,5%</td></tr><tr><td>1980-1999</td><td class='r'>9 / 102</td><td class='r'>8,8%</td><td class='r'>9 / 116</td><td class='r'>7,8%</td></tr><tr><td>2000 e dopo</td><td class='r'>14 / 103</td><td class='r'>13,6%</td><td class='r'>14 / 123</td><td class='r'>11,4%</td></tr></table>
-<p class="src">Solo per le vie con <code>DATA_INTITOLAZIONE</code> nel registro del Comune (circa il 31% delle vie, mancano soprattutto le vie storiche): numeri piccoli, da leggere con cautela. Fonte: <a href="data/percentuali_per_periodo.csv">data/percentuali_per_periodo.csv</a>, <a href="data/percentuali_per_decennio.csv">per decennio</a>.</p>
+<div class="hl" id="hl"></div>
+<p class="src">Fonti: OpenStreetMap (ODbL), Wikidata (CC0) e registro dei numeri civici del Comune di Milano (CC BY). Dati del 29 ottobre 2026. I conti sono sulle vie, non sulle persone: una persona con due vie conta due volte.</p>
 
-<!-- vie-anno-nomi:inizio -->
-<h2 id="cerca-via">Cerca la tua via</h2>
-<div class="va">
-<p>Scrivi il nome di una via di Milano. Se il registro dei numeri civici del Comune ha la data di intitolazione, la vedi qui sotto. Per 36 vie vedi anche come si chiamavano sulle mappe dal 1884.</p>
-<p class="va-avviso"><b>Attenzione.</b> La data c&rsquo;&egrave; solo per circa un terzo delle vie: 1.232 su 4.030 (31%). I nomi sulle mappe storiche ci sono solo per 36 vie, scelte per un progetto su letteratura e turismo.</p>
-<label class="va-et" for="va-q">Nome della via</label>
-<input id="va-q" type="search" placeholder="per esempio: Monte Grappa" autocomplete="off" enterkeyhint="search">
-<div class="va-sugg" id="va-sugg" role="listbox" aria-label="Vie trovate"></div>
-<p class="va-prova">Oppure prova: <span id="va-prova"></span></p>
-<div class="va-scheda" id="va-scheda" aria-live="polite"></div>
+<!-- ============ 1 ============ -->
+<h2 id="quante-sono">Quante sono</h2>
+<div class="fig" id="quante">
+  <h3 id="t-quante"></h3>
+  <p class="sub">Tutte le 4.278 vie e piazze del Comune di Milano, divise per chi o che cosa ricordano. Ogni pezzo della barra è largo quanto il suo numero di vie.</p>
+  <div class="ch" id="ch-quante" role="img" aria-label="Barra con tutte le vie di Milano divise in donne, uomini, coppie miste, nome incerto e luoghi o cose"></div>
+  <p class="note" id="nn-quante"></p>
+  <p class="src">Fonte: OpenStreetMap (ODbL) e Wikidata (CC0) per le persone; registro dei numeri civici del Comune di Milano (CC BY) per l’elenco delle vie. Dati del 29 ottobre 2026.</p>
 </div>
 
-<h2 id="anno-nome">In che anno hanno preso il nome le vie</h2>
-<div class="va">
-<p>Il registro del Comune ha una data di intitolazione per 1.232 vie su 4.030 (31%). Per 14 di queste la data &egrave; un valore segnaposto (1 gennaio 1700 o 1 gennaio 1900), che non conto. Restano 1.218 vie con una data vera, qui contate per decennio.</p>
-<div class="va-leg"><span class="va-b t"></span> vie con data &nbsp; <span class="va-b d"></span> di cui intitolate a donne</div>
-<div class="va-gr">
-<div class="va-r"><div class="va-rt"><b>Anni 1900</b><span>1 vie, di cui 0 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:0.21%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.00%"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1910</b><span>1 vie, di cui 0 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:0.21%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.00%"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1920</b><span>470 vie, di cui 13 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:100.00%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:2.77%;min-width:3px"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1930</b><span>140 vie, di cui 0 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:29.79%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.00%"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1940</b><span>36 vie, di cui 2 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:7.66%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.43%;min-width:3px"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1950</b><span>57 vie, di cui 0 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:12.13%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.00%"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1960</b><span>56 vie, di cui 1 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:11.91%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.21%;min-width:3px"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1970</b><span>154 vie, di cui 8 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:32.77%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:1.70%;min-width:3px"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1980</b><span>4 vie, di cui 0 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:0.85%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.00%"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 1990</b><span>137 vie, di cui 9 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:29.15%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:1.91%;min-width:3px"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 2000</b><span>100 vie, di cui 3 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:21.28%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:0.64%;min-width:3px"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 2010</b><span>51 vie, di cui 5 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:10.85%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:1.06%;min-width:3px"></span></div></div>
-<div class="va-r"><div class="va-rt"><b>Anni 2020</b><span>11 vie, di cui 6 a donne</span></div><div class="va-bar" aria-hidden="true"><span class="va-b t" style="width:2.34%;min-width:3px"></span></div><div class="va-bar" aria-hidden="true"><span class="va-b d" style="width:1.28%;min-width:3px"></span></div></div>
-</div>
-<p class="va-pic">Le donne sono quelle che la pagina gi&agrave; riconosce come tali (persona, donna o uomo): in tutto 47 vie con data, su 880 intitolate a persone. Per decennio i numeri delle donne sono piccoli. <a href="data/intitolazioni_per_decennio.csv">Numeri per decennio (CSV)</a> &middot; <a href="data/vie_data_intitolazione.csv">tutte le vie con la data (CSV)</a></p>
-
-<h3>Le vie con una data sono un campione di tutte le vie?</h3>
-<p>Non del tutto. Non sono solo vie recenti: 648 delle 1.218 hanno una data fino al 1949, 162 dal 2000 in poi. Ma non sono nemmeno scelte a caso:</p>
-<ul>
-<li>Nel Municipio 1 (il centro) ha la data il 14% delle vie; negli altri Municipi dal 23% al 41%.</li>
-<li>Tra le vie con data, 72% sono intitolate a una persona; tra quelle senza data, 56%.</li>
-<li>Nessuno dei 26 corsi ha la data.</li>
-<li>610 delle date (oltre una su due) cadono negli anni Venti e Trenta del Novecento. Molte vie hanno la stessa data: 105 il 2 ottobre 1930; in tutto 655 vie condividono la data con almeno altre 9.</li>
-</ul>
-<p><b>Quindi il grafico dice solo quando risultano intitolate le vie che hanno una data nel registro.</b> Non dice quando sono nate le vie di Milano, n&eacute; quando sono state intitolate le altre, e non permette di dire come sia cambiata nel tempo la quota di donne in tutta la citt&agrave;. Non ne ricavo conclusioni sul passato. Il registro non spiega a quale nome si riferisca la data.</p>
+<div class="fig" id="modi">
+  <h3 id="t-modi"></h3>
+  <p class="sub">La percentuale di donne cambia secondo come si conta: su tutte le vie o solo su quelle dedicate a persone, con o senza le sante. Più il conto è prudente, più il numero scende.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--do)"></i>solo i casi sicuri</span><span><i class="vuoto"></i>contando anche i casi incerti</span></div>
+  <div class="ch" id="ch-modi" role="img" aria-label="Quattro modi di contare la quota di vie a donne, con il valore minimo e massimo"></div>
+  <p class="note">I casi incerti sono 486 vie che probabilmente ricordano un uomo ma senza conferma: se si contano tra le persone, la quota delle donne scende. Il conto su tutte le vie non cambia.</p>
+  <p class="src">Fonte: OpenStreetMap (ODbL), Wikidata (CC0), Comune di Milano (CC BY). Quote calcolate sulle vie con persona riconosciuta.</p>
 </div>
 
-<h2 id="come-si-chiamava">Come si chiamava</h2>
-<div class="va">
-<p class="va-avviso"><b>Sono solo 36 vie</b>, scelte per un progetto su letteratura e turismo (LetMi) del Comune. Non rappresentano le vie di Milano: da questi numeri non si ricava nulla sul resto della citt&agrave;.</p>
-<p>Per queste vie il Comune ha letto il nome su dieci mappe: 1884, 1910, 1930, 1946, 1956, 1965, 1972, 1990, 2006, 2012. Per vederli, cerca la via nel campo qui sopra.</p>
-<ul class="va-num">
-<li><b>33 su 36</b> cambiano nome almeno una volta. Le altre 3 non cambiano: Via Verziere, Corso Giacomo Matteotti e Corso Europa. Le ultime due non ci sono sulla mappa del 1884.</li>
-<li><b>19 cambi su 40</b> cadono tra la mappa del 1910 e quella del 1930 (20 anni); tra il 1930 e il 1946 (16 anni) sono 5. Altri 3 cambi non si possono collocare, perch&eacute; in mezzo c&rsquo;&egrave; una mappa che non si legge.</li>
-<li><b>La regola.</b> Conta come cambio solo un nome del tutto diverso. &laquo;Via Turati&raquo; e &laquo;Via Filippo Turati&raquo;, &laquo;Piazza XXIV Maggio&raquo; e &laquo;Piazza Ventiquattro Maggio&raquo;, o viale al posto di via, non contano. Se sulla mappa si aggiunge o si toglie un secondo nome, lo segno ma non lo conto.</li>
-</ul>
-<p class="va-pic">Un cambio &egrave; collocato tra due mappe, non in un anno preciso. I dati dicono quando, non perch&eacute;. I nomi sono quelli letti a mano dal Comune sulle mappe: non li ho controllati sulle mappe originali.</p>
-<details class="va-elenco"><summary>Le 36 vie</summary><div id="va-elenco"></div></details>
+<!-- ============ 2 ============ -->
+<h2 id="chi-sono">Chi sono</h2>
+<p class="note">Chi sono le persone ricordate dalle vie? Due modi di guardarle: per mestiere e per anno di nascita.</p>
+
+<div class="fig" id="chi">
+  <h3 id="t-chiA"></h3>
+  <p class="sub">Per ogni gruppo di mestieri, la quota di donne (rosa) e di uomini (blu) che ci rientrano. Si legge così: a destra il gruppo pesa di più. Una persona può stare in più gruppi.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--do)"></i>donne</span><span><i class="dot" style="background:var(--uo)"></i>uomini</span></div>
+  <div class="ch" id="ch-chiA" role="img" aria-label="Per sette gruppi di mestieri, quota di donne e di uomini ricordati dalle vie"></div>
+  <p class="note" id="nn-chiA"></p>
+  <p class="src">Fonte: mestieri da Wikidata (CC0); vie da OpenStreetMap (ODbL) e dal registro del Comune di Milano (CC BY). I gruppi sono fatti qui, per parole chiave, e sono approssimati.</p>
 </div>
-<!-- vie-anno-nomi:fine -->
-<h2>La mappa</h2>
-<p class="legend"><span></span>via intitolata a una donna (caso certo) &nbsp; <span class="d"></span>caso da verificare. Clic su una via per vedere la persona.</p>
-<div id="map" role="img" aria-label="Mappa di Milano con le vie intitolate a donne"></div>
 
-<h2>Le vie intitolate a donne (140)</h2>
-<div class="scroll"><table><tr><th>Via</th><th>Persona</th><th>Anni</th><th>Professione</th><th>Intitolata il</th><th>Note</th></tr><tr class=''><td>Galleria ANNA CASTELLI FERRIERI</td><td>Anna Castelli Ferrieri</td><td>1918&ndash;2006</td><td>designer, architetto</td><td>2017-12-11</td><td></td></tr><tr class=''><td>Galleria Santa Radegonda</td><td>Radegonda</td><td>518&ndash;587</td><td>poeta, monarca, scrittore</td><td></td><td>santa</td></tr><tr class=''><td>Largo ISABELLA D&#x27;ARAGONA</td><td>Isabella d&#x27;Aragona (1470-1524), duchessa di Milano</td><td></td><td></td><td></td><td></td></tr><tr class=''><td>Largo MARIA CALLAS</td><td>Maria Meneghini Callas</td><td>1923&ndash;1977</td><td>cantante lirico, attore</td><td>1994-12-13</td><td></td></tr><tr class=''><td>Largo Sibilla Aleramo</td><td>Sibilla Aleramo</td><td>1876&ndash;1960</td><td>scrittore, poeta, curatore editoriale</td><td></td><td></td></tr><tr class=''><td>Passaggio Santa Margherita</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Piazza ANITA GARIBALDI</td><td>Anita Garibaldi</td><td>1821&ndash;1849</td><td>politico</td><td>1928-05-12</td><td></td></tr><tr class=''><td>Piazza DELLA SCALA</td><td>Regina della Scala</td><td>1333&ndash;1384</td><td>aristocratico</td><td></td><td></td></tr><tr class=''><td>Piazza ELEONORA DUSE</td><td>Eleonora Duse</td><td>1858&ndash;1924</td><td>attore, sceneggiatore, attore teatrale</td><td></td><td></td></tr><tr class=''><td>Piazza Elsa Morante</td><td>Elsa Morante</td><td>1912&ndash;1985</td><td>scrittore, poeta, romanziere</td><td></td><td></td></tr><tr class=''><td>Piazza FERNANDA PIVANO</td><td>Fernanda Pivano</td><td>1917&ndash;2009</td><td>giornalista, scrittore, traduttore</td><td>2021-09-28</td><td></td></tr><tr class=''><td>Piazza GAE AULENTI</td><td>Gae Aulenti</td><td>1927&ndash;2012</td><td>architetto, costumista, designer</td><td>2013-03-20</td><td></td></tr><tr class=''><td>Piazza LINA BO BARDI</td><td>Lina Bo Bardi</td><td>1914&ndash;1992</td><td>architetto, disegnatore, illustratore</td><td>2014-12-09</td><td></td></tr><tr class=''><td>Piazza MARIA ADELAIDE DI SAVOIA</td><td>Maria Adelaide di Savoia</td><td>1685&ndash;1712</td><td>consorte</td><td></td><td></td></tr><tr class=''><td>Piazza ROSA SCOLARI</td><td>Rosa Chiarina Scolari</td><td>1882&ndash;1949</td><td>monaca</td><td></td><td></td></tr><tr class=''><td>Piazza SANT&#x27;EUFEMIA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Piazza SANTA FRANCESCA ROMANA</td><td>Francesca Romana</td><td>1384&ndash;1440</td><td>fondatore di un ordine religioso, suora</td><td></td><td>santa</td></tr><tr class=''><td>Piazza SANTA GIUSTINA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Piazza SANTA MARIA ALLA FONTANA</td><td>&ndash;</td><td></td><td></td><td>1929-03-27</td><td>santa</td></tr><tr class=''><td>Piazza SANTA MARIA BELTRADE</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Piazza SANTA MARIA DEL SUFFRAGIO</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Piazza SANTA MARIA DELLE GRAZIE</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Piazza SANTA MARIA NASCENTE</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Piazza TINA MODOTTI</td><td>Tina Modotti</td><td>1896&ndash;1942</td><td>fotografo, attore, artista</td><td>2021-09-22</td><td></td></tr><tr class=''><td>Piazzale PRINCIPESSA CLOTILDE</td><td>Clotilde</td><td>474&ndash;545</td><td>consorte</td><td></td><td></td></tr><tr class=''><td>Piazzale VERONICA GAMBARA</td><td>Veronica Gambara</td><td>1485&ndash;1550</td><td>poeta</td><td></td><td></td></tr><tr class=''><td>Piazzetta Adelaide Brignone</td><td>Lilla Brignone</td><td>1913&ndash;1984</td><td>attore teatrale, attore cinematografico</td><td></td><td></td></tr><tr class=''><td>Via ADA NEGRI</td><td>Ada Negri</td><td>1870&ndash;1945</td><td>scrittore, poeta</td><td></td><td></td></tr><tr class=''><td>Via ADELAIDE BONO CAIROLI</td><td>Adelaide Cairoli</td><td>1806&ndash;1871</td><td>patriota</td><td></td><td></td></tr><tr class=''><td>Via ADELAIDE COARI</td><td>Adelaide Coari</td><td>1881&ndash;1966</td><td>sindacalista, pedagogista, attivista</td><td>1992-04-29</td><td></td></tr><tr class=''><td>Via ADELAIDE RISTORI</td><td>Adelaide Ristori</td><td>1822&ndash;1906</td><td>attore teatrale, attore</td><td></td><td></td></tr><tr class=''><td>Via ADELE MARTIGNONI</td><td>Adele Martignoni</td><td>1858&ndash;1924</td><td>insegnante, pittore</td><td></td><td></td></tr><tr class=''><td>Via ADELE ZOAGLI</td><td>Adele Zoagli</td><td>1805&ndash;1884</td><td></td><td></td><td></td></tr><tr class=''><td>Via ADELINA PATTI</td><td>Adelina Patti</td><td>1843&ndash;1919</td><td>cantante lirico, compositore</td><td></td><td></td></tr><tr class=''><td>Via ANNA KULISCIOFF</td><td>Anna Kuliscioff</td><td>1854&ndash;1925</td><td>medico, politico, curatore editoriale</td><td></td><td></td></tr><tr class=''><td>Via ANNA MARIA MOZZONI</td><td>Anna Maria Mozzoni</td><td>1837&ndash;1920</td><td>politico, suffragette, giornalista</td><td>1995-10-31</td><td></td></tr><tr class=''><td>Via ANTONIA POZZI</td><td>Antonia Pozzi</td><td>1912&ndash;1938</td><td>scrittore, poeta</td><td></td><td></td></tr><tr class=''><td>Via ARMIDA BARELLI</td><td>Armida Barelli</td><td>1882&ndash;1952</td><td>attivista, curatore editoriale, religiosa cristiana</td><td></td><td></td></tr><tr class=''><td>Via BIANCA CEVA</td><td>Bianca Ceva</td><td>1897&ndash;1982</td><td>traduttore, partigiano</td><td>2023-06-07</td><td></td></tr><tr class=''><td>Via BIANCA DI SAVOIA</td><td>Bianca di Savoia</td><td>1336&ndash;1387</td><td>aristocratico</td><td></td><td></td></tr><tr class=''><td>Via BIANCA MILESI</td><td>Bianca Milesi</td><td>1790&ndash;1849</td><td>pittore, scrittore</td><td>1978-09-21</td><td></td></tr><tr class=''><td>Via CARLOTTA MARCHIONNI</td><td>Carlotta Marchionni</td><td>1796&ndash;1861</td><td>attore</td><td></td><td></td></tr><tr class=''><td>Via CAROLINA INVERNIZIO</td><td>Carolina Invernizio</td><td>1851&ndash;1916</td><td>scrittore, sceneggiatore</td><td>1998-10-28</td><td></td></tr><tr class=''><td>Via CLELIA DEL GRILLO BORROMEO</td><td>&ndash;</td><td></td><td></td><td>1974-03-28</td><td></td></tr><tr class=''><td>Via COSTANZA ARCONATI</td><td>&ndash;</td><td></td><td></td><td>1924-05-19</td><td></td></tr><tr class=''><td>Via CRISTINA BELGIOIOSO</td><td>Cristina Trivulzio di Belgiojoso</td><td>1808&ndash;1871</td><td>giornalista, salottiera, scrittore</td><td>1928-05-18</td><td></td></tr><tr class=''><td>Via Clara Maffei</td><td>Clara Maffei</td><td>1814&ndash;1886</td><td>salottiera</td><td></td><td></td></tr><tr class=''><td>Via DINA GALLI</td><td>Dina Galli</td><td>1877&ndash;1951</td><td>attore, attore teatrale, attore cinematografico</td><td>1966-01-17</td><td></td></tr><tr class=''><td>Via DONNA PRASSEDE</td><td>Donna Prassede (personaggio dei Promessi Sposi)</td><td></td><td></td><td>2003-07-15</td><td></td></tr><tr class=''><td>Via ELEONORA FONSECA PIMENTEL</td><td>Eleonora de Fonseca Pimentel</td><td>1752&ndash;1799</td><td>politico, poeta, giornalista</td><td></td><td></td></tr><tr class=''><td>Via FEDERICA GALLI</td><td>Federica Galli</td><td>1932&ndash;2009</td><td>pittore, artista, intagliatore</td><td>2021-07-15</td><td></td></tr><tr class=''><td>Via FELICITA MORANDI</td><td>Felicita Morandi</td><td>1827&ndash;1906</td><td>scrittore, poeta, traduttore</td><td></td><td></td></tr><tr class=''><td>Via FERNANDA WITTGENS</td><td>Fernanda Wittgens</td><td>1903&ndash;1957</td><td>storico dell&#x27;arte, insegnante, funzionario</td><td>1970-12-03</td><td></td></tr><tr class=''><td>Via GAETANINA CALVI</td><td>Gaetanina Calvi</td><td>1887&ndash;1964</td><td>ingegnere, ricercatore</td><td>2026-03-13</td><td></td></tr><tr class=''><td>Via GALLA PLACIDIA</td><td>Galla Placidia</td><td>386&ndash;450</td><td>politico</td><td>1928-02-01</td><td></td></tr><tr class=''><td>Via GEORGE SAND</td><td>George Sand</td><td>1804&ndash;1876</td><td>scrittore, giornalista, salottiera</td><td>1928-05-18</td><td></td></tr><tr class=''><td>Via GERMANA DE STAEL</td><td>Madame de Staël</td><td>1766&ndash;1817</td><td>scrittore, salottiera, diarista</td><td>1974-06-17</td><td></td></tr><tr class=''><td>Via GIUDITTA E GIULIA GRISI</td><td>&ndash;</td><td></td><td></td><td>1998-07-23</td><td>gruppo</td></tr><tr class=''><td>Via GIUDITTA PASTA</td><td>Giuditta Pasta</td><td>1797&ndash;1865</td><td>cantante lirico</td><td></td><td></td></tr><tr class=''><td>Via GIUDITTA SIDOLI</td><td>Giuditta Bellerio Sidoli</td><td>1804&ndash;1871</td><td>politico</td><td>1921-06-08</td><td></td></tr><tr class=''><td>Via GIULIETTA PEZZI</td><td>Giulietta Pezzi</td><td>1812&ndash;1878</td><td>scrittore, poeta, giornalista</td><td>1929-03-27</td><td></td></tr><tr class=''><td>Via GIUSEPPINA GRASSINI</td><td>Giuseppina Grassini</td><td>1773&ndash;1850</td><td>attore, cantante lirico, cantante</td><td>1998-07-17</td><td></td></tr><tr class=''><td>Via GIUSEPPINA LAZZARONI</td><td>&ndash;</td><td></td><td></td><td>1929-03-27</td><td></td></tr><tr class=''><td>Via GIUSEPPINA PIZZIGONI</td><td>Giuseppina Pizzigoni</td><td>1870&ndash;1947</td><td>pedagogista</td><td></td><td></td></tr><tr class=''><td>Via GIUSEPPINA STREPPONI</td><td>Giuseppina Strepponi</td><td>1815&ndash;1897</td><td>cantante lirico</td><td>1998-07-28</td><td></td></tr><tr class=''><td>Via GRAZIA DELEDDA</td><td>Grazia Deledda</td><td>1871&ndash;1936</td><td>scrittore, poeta, drammaturgo</td><td></td><td></td></tr><tr class=''><td>Via ISOTTA CESARE</td><td>&ndash;</td><td></td><td></td><td>2000-06-16</td><td></td></tr><tr class=''><td>Via LAURA CICERI VISCONTI</td><td>Laura Ciceri Visconti</td><td>1768&ndash;1861</td><td>filantropo</td><td></td><td></td></tr><tr class=''><td>Via LAURA SOLERA MANTEGAZZA</td><td>Laura Solera Mantegazza</td><td>1813&ndash;1873</td><td>riformatore sociale, filantropo</td><td></td><td></td></tr><tr class=''><td>Via LINDA MALNATI</td><td>Linda Malnati</td><td>1855&ndash;1921</td><td>scrittore, attivista per i diritti delle donne, pacifista</td><td></td><td></td></tr><tr class=''><td>Via LUISA BATTISTOTTI SASSI</td><td>Luisa Battistotti Sassi</td><td>1824&ndash;1876</td><td></td><td></td><td></td></tr><tr class=''><td>Via LUISA SANFELICE</td><td>Luisa Sanfelice</td><td>1764&ndash;1800</td><td>rivoluzionario</td><td>1924-05-19</td><td></td></tr><tr class=''><td>Via Laura Orvieto</td><td>Laura Orvieto</td><td>1876&ndash;1953</td><td>scrittore, scrittore per bambini</td><td></td><td></td></tr><tr class=''><td>Via MADDALENA</td><td>Maria Maddalena</td><td>?&ndash;100</td><td>assistente familiare, teologo</td><td></td><td>santa</td></tr><tr class=''><td>Via MADDALENA GIUDICE DONADONI</td><td>&ndash;</td><td></td><td></td><td>1928-05-18</td><td></td></tr><tr class=''><td>Via MADRE ANNA EUGENIA PICCO</td><td>Eugenia Picco</td><td>1867&ndash;1921</td><td>religioso cattolico</td><td></td><td></td></tr><tr class=''><td>Via MADRE CABRINI</td><td>Francesca Saverio Cabrini</td><td>1850&ndash;1917</td><td>missionario, monaca, fondatore di un ordine religioso</td><td></td><td></td></tr><tr class=''><td>Via MADRE CAROLINA ORSENIGO</td><td>&ndash;</td><td></td><td></td><td></td><td></td></tr><tr class=''><td>Via MADRE CLELIA MERLONI</td><td>Clelia Merloni</td><td>1861&ndash;1930</td><td>religioso cattolico, monaca, religiosa cristiana</td><td></td><td></td></tr><tr class=''><td>Via MADRE VIRGINIA BESOZZI</td><td>&ndash;</td><td></td><td></td><td>2019-06-20</td><td></td></tr><tr class=''><td>Via MARIA DRAGO</td><td>Maria Drago</td><td>1774&ndash;1852</td><td>patriota, Patriot</td><td></td><td></td></tr><tr class=''><td>Via MARIA GAETANA AGNESI</td><td>Maria Gaetana Agnesi</td><td>1718&ndash;1799</td><td>matematico, teologo, pedagogista</td><td></td><td></td></tr><tr class=''><td>Via MARIA MELATO</td><td>Maria Melato</td><td>1885&ndash;1950</td><td>attore</td><td></td><td></td></tr><tr class=''><td>Via MARIA MONTESSORI</td><td>Maria Montessori</td><td>1870&ndash;1952</td><td>medico, biologo, pedagogista</td><td></td><td></td></tr><tr class=''><td>Via MARIA TERESA</td><td>Maria Teresa d&#x27;Austria</td><td>1717&ndash;1780</td><td>aristocratico, monarca, politico</td><td></td><td></td></tr><tr class=''><td>Via MARTA NAVARRA BERNSTEIN</td><td>&ndash;</td><td></td><td></td><td>1978-01-30</td><td></td></tr><tr class=''><td>Via MATILDE SERAO</td><td>Matilde Serao</td><td>1856&ndash;1927</td><td>scrittore, curatore editoriale, giornalista</td><td>1948-06-08</td><td></td></tr><tr class=''><td>Via MATILDE VISCONTINI</td><td>Metilde Viscontini Dembowski</td><td>1790&ndash;1825</td><td>aristocratico, attivista</td><td>1975-10-01</td><td></td></tr><tr class=''><td>Via MILLY CARLA MIGNONE</td><td>&ndash;</td><td></td><td></td><td>1994-03-14</td><td></td></tr><tr class=''><td>Via Madre Teresa di Calcutta</td><td>Madre Teresa di Calcutta</td><td>1910&ndash;1997</td><td>suora, missionario, monaca</td><td></td><td></td></tr><tr class=''><td>Via Mafalda di Savoia</td><td>Mafalda di Savoia</td><td>1902&ndash;1944</td><td>aristocratico</td><td></td><td></td></tr><tr class=''><td>Via Maria Monegherio</td><td>&ndash;</td><td></td><td></td><td></td><td></td></tr><tr class=''><td>Via ONDINA VALLA</td><td>Ondina Valla</td><td>1916&ndash;2006</td><td>velocista, altista, lunghista</td><td>2018-03-26</td><td></td></tr><tr class=''><td>Via REGINA TEODOLINDA</td><td>Teodolinda</td><td>570&ndash;627</td><td>monarca, mecenate</td><td></td><td></td></tr><tr class=''><td>Via RITA TONOLI</td><td>Rita Tonoli</td><td>1876&ndash;1947</td><td>benefattore, insegnante</td><td></td><td></td></tr><tr class=''><td>Via ROSA LUXEMBURG</td><td>Rosa Luxemburg</td><td>1871&ndash;1919</td><td>politico, filosofo, rivoluzionario</td><td>1974-06-17</td><td></td></tr><tr class=''><td>Via ROSA MASSARA DE CAPITANI</td><td>Rosa Massara De Capitani</td><td>1869&ndash;1925</td><td>poeta, insegnante, scrittore</td><td></td><td></td></tr><tr class=''><td>Via ROSA VERGANI MARELLI</td><td>Rosa Vergani Marelli</td><td>1883&ndash;1952</td><td>insegnante, scrittore</td><td></td><td></td></tr><tr class=''><td>Via ROSALBA CARRIERA</td><td>Rosalba Carriera</td><td>1675&ndash;1757</td><td>pittore, disegnatore, disegnatore architettonico</td><td>1970-09-21</td><td></td></tr><tr class=''><td>Via ROSINA GRUGNOLA FERRARIO</td><td>&ndash;</td><td></td><td></td><td></td><td></td></tr><tr class=''><td>Via SANT&#x27;AGNESE</td><td>Sant&#x27;Agnese</td><td>300&ndash;304</td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANT&#x27;ELENA</td><td>&ndash;</td><td></td><td></td><td>2007-05-07</td><td>santa</td></tr><tr class=''><td>Via SANT&#x27;EUFEMIA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANT&#x27;ORSOLA</td><td>Sant&#x27;Orsola</td><td>400&ndash;385</td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA CECILIA</td><td>Santa Cecilia</td><td>200&ndash;230</td><td>musicista</td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA GIOVANNA D&#x27;ARCO</td><td>Giovanna d&#x27;Arco</td><td>1412&ndash;1431</td><td>militare, capo religioso</td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA LUCIA</td><td>Santa Lucia</td><td>283&ndash;304</td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARCELLINA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARGHERITA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARIA ALLA PORTA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARIA FULCORINA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARIA PODONE</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARIA ROSSA</td><td>&ndash;</td><td></td><td></td><td>1948-06-08</td><td>santa</td></tr><tr class=''><td>Via SANTA MARIA SEGRETA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARIA VALLE</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MARTA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA MONICA</td><td>santa Monica</td><td>332&ndash;387</td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA RADEGONDA</td><td>Radegonda</td><td>518&ndash;587</td><td>poeta, monarca, scrittore</td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA RITA DA CASCIA</td><td>Rita da Cascia</td><td>1381&ndash;1457</td><td>monaca, filosofo, religiosa cristiana</td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA SOFIA</td><td>Santa Sofia</td><td>201&ndash;137</td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA TECLA</td><td>Tecla di Iconio</td><td>100&ndash;100</td><td>teologo</td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA TERESA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SANTA VALERIA</td><td>Santa Valeria</td><td>50&ndash;200</td><td></td><td></td><td>santa</td></tr><tr class=''><td>Via SIMONETTA CICCO</td><td>&ndash;</td><td></td><td></td><td></td><td></td></tr><tr class=''><td>Via SOFIA ALBINI BISI</td><td>&ndash;</td><td></td><td></td><td></td><td></td></tr><tr class=''><td>Via SOFONISBA ANGUISSOLA</td><td>Sofonisba Anguissola</td><td>1532&ndash;1625</td><td>pittore, artista, artista visuale</td><td>1928-02-01</td><td></td></tr><tr class=''><td>Via STAMIRA D&#x27;ANCONA</td><td>Stamira</td><td>1173&ndash;1173</td><td></td><td></td><td></td></tr><tr class=''><td>Via TERESA NOCE</td><td>Teresa Noce</td><td>1900&ndash;1980</td><td>politico, giornalista, sindacalista</td><td>1993-12-23</td><td></td></tr><tr class=''><td>Via TINA DI LORENZO</td><td>Tina Di Lorenzo</td><td>1872&ndash;1930</td><td>attore, attore teatrale</td><td></td><td></td></tr><tr class=''><td>Via VITTORIA COLONNA</td><td>Vittoria Colonna</td><td>1492&ndash;1547</td><td>scrittore, poeta</td><td></td><td></td></tr><tr class=''><td>Viale BEATRICE D&#x27;ESTE</td><td>Beatrice d&#x27;Este</td><td>1475&ndash;1497</td><td>politico, ambasciatore, duca</td><td></td><td></td></tr><tr class=''><td>Viale BIANCA MARIA</td><td>Bianca Maria Visconti (1425-1468)</td><td></td><td></td><td></td><td></td></tr><tr class=''><td>Viale CATERINA DA FORLI&#x27;</td><td>Caterina Sforza</td><td>1463&ndash;1509</td><td>scrittore, politico</td><td>1928-05-12</td><td></td></tr><tr class=''><td>Viale Maria Grazia Cutuli</td><td>Maria Grazia Cutuli</td><td>1962&ndash;2001</td><td>giornalista</td><td></td><td></td></tr><tr class=''><td>Viale REGINA GIOVANNA</td><td>Giovanna I di Napoli</td><td>1326&ndash;1382</td><td>politico</td><td></td><td></td></tr><tr class=''><td>Viale REGINA MARGHERITA</td><td>Margherita di Savoia</td><td>1851&ndash;1926</td><td>salottiera</td><td></td><td></td></tr><tr class=''><td>Viale RITA LEVI-MONTALCINI</td><td>Rita Levi-Montalcini</td><td>1909&ndash;2012</td><td>neurologo, neuroscienziato, biochimico</td><td>2021-05-01</td><td></td></tr><tr class=''><td>Vicolo SANTA CATERINA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Vicolo SANTA MARIA ALLA PORTA</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr><tr class=''><td>Vicolo SANTA MARIA VALLE</td><td>&ndash;</td><td></td><td></td><td></td><td>santa</td></tr></table></div>
-<p class="src">Fonti: persona e anni da Wikidata (<code>strade_classificate_v2.csv</code>: persona, nascita, morte, professioni); data di intitolazione dal registro del Comune (campo <code>DATA_INTITOLAZIONE</code>, spesso vuoto). I 56 casi dubbi sono stati decisi uno per uno il 29/10/2026: <a href="data/decisioni_davide.csv">elenco delle decisioni (CSV)</a>; tra questi, le vie "Santa Maria…" contano come donna (la Madonna) e Via Donna Prassede come personaggio dei Promessi Sposi.</p>
+<div class="fig" id="chiC">
+  <h3 id="t-chiC"></h3>
+  <p class="sub">Un pallino rosa è una via. L’asse è l’anno di nascita della donna, a gruppi di dieci anni. Sono scritti i nomi di alcune.</p>
+  <div class="ch" id="ch-chiC" role="img" aria-label="Pallini rosa per anno di nascita delle donne ricordate dalle vie, dal 1700 al 2000"></div>
+  <p class="note" id="nn-chiC"></p>
+  <p class="src">Fonte: anni di nascita da Wikidata (CC0); vie da OpenStreetMap (ODbL) e dal registro del Comune di Milano (CC BY).</p>
+</div>
 
-<h2 id="limiti">Limiti dei dati</h2>
-<ul>
-<li><b>Il conteggio dipende da OpenStreetMap e da Wikidata, che cambiano di continuo.</b> I dati sono del 29 ottobre 2026: tra qualche mese i conteggi cambieranno, e vanno sempre citati con la data.</li>
-<li><b>L'etimologia in OpenStreetMap è incompleta.</b> Solo il 28% delle strade ha il tag; di quelle che lo hanno, il 27% non punta a una persona. Per le altre la persona è stata cercata su Wikidata dal nome della via: funziona bene sui nomi completi, male su titoli e nomi parziali (Santa, Madre, Don, Padre) e sulle sante, difficili da distinguere dalle chiese.</li>
-<li><b>«Sicuro» non vuol dire verificato a mano.</b> Un solo candidato su Wikidata può comunque essere l'omonimo sbagliato; il controllo a campione è stato fatto solo sulle donne. Alcuni tag sono indiretti: Piazza della Scala punta a Regina della Scala, ed è contata come donna perché è il tag di OpenStreetMap.</li>
-<li><b>Casi dubbi.</b> Le vie «Santa Maria…» sono quasi sempre chiese, non persone: qui contano come donna (la Madonna) per scelta, come i 56 casi dubbi decisi uno per uno (elenco nel CSV). Le percentuali con e senza i casi incerti danno un intervallo, non un solo numero.</li>
-<li><b>La data di intitolazione c'è solo per circa il 31% delle vie</b> e manca soprattutto per le vie storiche; ci sono anche valori segnaposto (come 1700-01-01). Per decennio i numeri sono molto piccoli.</li>
-<li><b>Le vie non sono i nomi.</b> Un nome in OpenStreetMap può essere più strade, e una stessa via può avere più nomi scritti in modo diverso; il registro del Comune e OpenStreetMap non coincidono del tutto (248 vie sono solo in OpenStreetMap).</li>
+<!-- ============ 3 ============ -->
+<h2 id="quando">Quando</h2>
+<div class="fig" id="g-quando">
+  <h3 id="t-quando"></h3>
+  <p class="sub">Tra le vie dedicate a persone con data di intitolazione, quante sono di donne, in quattro periodi. Sotto ogni periodo: donne su persone.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--do)"></i>solo i casi sicuri</span><span><i style="background:#f9c7de"></i>fino al conto con i casi incerti</span></div>
+  <div class="ch" id="ch-quando" role="img" aria-label="Linea della quota di donne tra le vie dedicate a persone in quattro periodi"></div>
+  <p class="note">I periodi non sono lunghi uguale. La data c’è solo per circa una via su tre, e manca soprattutto per le vie storiche: per questo i numeri piccoli vanno letti con cautela.</p>
+  <p class="src">Fonte: data di intitolazione dal registro dei numeri civici del Comune di Milano (CC BY, 1° ottobre 2026); persone da OpenStreetMap (ODbL) e Wikidata (CC0).</p>
+</div>
+
+<div class="fig" id="recenti">
+  <h3 id="t-rec"></h3>
+  <p class="sub">Ogni riga è un anno. I pallini blu sono vie dedicate a uomini, il pallino rosa a una donna, con il nome. Sono tutte le vie con una data dal 2000.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--uo)"></i>uomo</span><span><i class="dot" style="background:var(--do)"></i>donna</span><span><i class="dot" style="background:#7a7f8a"></i>coppia o gruppo misto</span></div>
+  <div class="ch" id="ch-rec" role="img" aria-label="Anno per anno, dal 2000, le vie intitolate a uomini e a donne"></div>
+  <p class="note" id="nn-rec"></p>
+  <p class="src">Fonte: data di intitolazione dal registro dei numeri civici del Comune di Milano (CC BY, 1° ottobre 2026); persone da OpenStreetMap (ODbL) e Wikidata (CC0). Solo vie con persona riconosciuta.</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="dove">Dove</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<div class="fig" id="mappa">
+  <h3 id="t-mappa"></h3>
+  <p class="sub">Ogni quartiere è colorato secondo quante vie a donne ci sono. Il numero scritto è il conto; tocca un quartiere per leggere i nomi.</p>
+  <div class="lg" id="lg-mappa"></div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dei quartieri di Milano colorati per numero di vie intitolate a donne"></div>
+  <p class="note" id="nn-mappa"></p>
+  <p class="src">Fonte: vie da OpenStreetMap (ODbL), persone da Wikidata (CC0), confini dei quartieri del Comune di Milano (CC BY). Ogni via è contata nel quartiere dove cade il suo punto centrale.</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="cerca">Cerca la tua via</h2>
+<div class="find">
+  <label for="qv">Scrivi il nome di una via di Milano</label>
+  <input id="qv" type="text" list="el-vie" placeholder="per esempio: Via Monte Grappa" autocomplete="off" spellcheck="false" aria-controls="ris-via">
+  <datalist id="el-vie"></datalist>
+</div>
+<p class="prova" id="prova">Oppure prova: </p>
+<div class="ris" id="ris-via" aria-live="polite"></div>
+<p class="note">La data c’è solo per circa una via su tre. I nomi sulle mappe storiche dal 1884 ci sono solo per 36 vie, scelte dal Comune per un progetto su letteratura e turismo.</p>
+<p class="src">Fonte: registro dei numeri civici del Comune di Milano (CC BY 4.0, dati del 1° ottobre 2026); nomi sulle mappe storiche: Comune di Milano, «Vie di Milano e corrispondenza toponomastica nelle mappe storiche dal 1884» (CC BY 4.0, ultima modifica dell’8 maggio 2026).</p>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="elenco-donne"><summary>L’elenco delle vie a donne</summary><div class="in"><p id="el-titolo"></p><div class="scroll"><table class="kt" id="tab-donne"></table></div></div></details>
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
+<li><b>Il conteggio dipende da OpenStreetMap e da Wikidata, che cambiano di continuo.</b> I dati sono del 29 ottobre 2026: tra qualche mese i numeri cambieranno, e vanno sempre citati con la data.</li>
+<li><b>Chi è la persona è indicato solo per il 28% delle vie.</b> Di quelle che lo hanno, il 27% non punta a una persona. Per le altre la persona è stata cercata su Wikidata partendo dal nome della via: funziona bene sui nomi completi, male su titoli e nomi parziali (Santa, Madre, Don, Padre) e sulle sante, difficili da distinguere dalle chiese.</li>
+<li><b>«Sicuro» non vuol dire controllato a mano.</b> Un solo candidato su Wikidata può essere comunque l’omonimo sbagliato; il controllo a campione è stato fatto solo sulle donne. Piazza della Scala, per esempio, è contata come donna perché OpenStreetMap la collega a Regina della Scala.</li>
+<li><b>Casi dubbi.</b> Le vie «Santa Maria…» sono quasi sempre chiese, non persone: qui contano come donna (la Madonna), per scelta, come gli altri 56 casi dubbi decisi uno per uno il 29 ottobre 2026. La quota con e senza i casi incerti dà un intervallo, non un solo numero.</li>
+<li><b>La data di intitolazione c’è solo per circa il 31% delle vie</b> (1.232 su 4.030) e manca soprattutto per le vie storiche; ci sono anche 14 valori segnaposto (1° gennaio 1700 o 1900), non contati. Per periodo i numeri sono piccoli.</li>
+<li><b>Le vie con una data non sono un campione di tutte le vie.</b> Nel Municipio 1 (il centro) ha la data il 14% delle vie, negli altri dal 23% al 41%; nessuno dei 26 corsi ha la data; più di una data su due cade negli anni Venti e Trenta del Novecento, con 105 vie intitolate nello stesso giorno, il 2 ottobre 1930. I grafici dicono quando risultano intitolate le vie con una data, non quando sono state intitolate le altre. Il registro non spiega a quale nome si riferisca la data.</li>
+<li><b>I mestieri sono approssimati.</b> Vengono dai dati di Wikidata, che per 23 donne e 261 uomini non indicano nessun mestiere riconoscibile: quelle persone non sono nei grafici dei mestieri. I gruppi sono fatti qui con parole chiave.</li>
+<li><b>Le vie non sono i nomi.</b> Un nome in OpenStreetMap può essere più strade, e una stessa via può avere nomi scritti in modo diverso; il registro del Comune e OpenStreetMap non coincidono del tutto (248 vie sono solo in OpenStreetMap).</li>
+<li><b>I quartieri.</b> Una via lunga può attraversare più quartieri: qui conta in uno solo, quello del suo punto centrale. I quartieri grandi hanno più vie, e il conto non è corretto per quante vie ci sono in tutto: le vie senza posizione nei dati non sono sulla mappa.</li>
+<li><b>I nomi sulle mappe storiche sono solo per 36 vie</b>, scelte dal Comune per un progetto su letteratura e turismo: non dicono nulla sulle altre. Sono letti dal Comune sulle mappe e non sono stati controllati sulle mappe originali. Nel registro i nomi sono tutti in maiuscolo: maiuscole e accenti mostrati qui sono ricostruiti e possono avere qualche errore.</li>
 <li><b>Confronti con altre cifre.</b> Mapping Diversity (febbraio 2023) e il censimento citato dalla stampa (2019) usano altri metodi e altre date: le differenze vanno lette con cautela.</li>
-<!-- vie-anno-nomi-limiti:inizio -->
-<li><b>Le vie con una data non sono un campione di tutte le vie.</b> Nel centro la data manca pi&ugrave; spesso, e molte date si ripetono per decine di vie: il grafico per decennio dice quando risultano intitolate le vie con una data, non quando sono state intitolate tutte le altre (sezione &laquo;In che anno hanno preso il nome le vie&raquo;).</li>
-<li><b>I nomi sulle mappe storiche sono solo per 36 vie.</b> Il Comune le ha scelte per un progetto su letteratura e turismo: non dicono nulla sulle altre vie. I nomi sono letti dal Comune sulle mappe e qui non sono stati controllati sulle mappe originali.</li>
-<li><b>Nel registro del Comune i nomi sono scritti tutti in maiuscolo.</b> Maiuscole e accenti dei nomi mostrati nella ricerca sono ricostruiti qui e possono avere qualche errore.</li>
-<!-- vie-anno-nomi-limiti:fine -->
-</ul>
+</ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Via intitolata a una donna</dt><dd>Una via, una piazza o un altro luogo con nome di strada il cui nome ricorda una donna, anche una santa.</dd>
+<dt>Caso sicuro e caso incerto</dt><dd>Sicuro: la persona è indicata in OpenStreetMap, oppure è stata trovata su Wikidata con lo stesso nome. Incerto: una donna è solo una possibilità (omonimie, solo il nome di battesimo, santa o chiesa?).</dd>
+<dt>Senza sante</dt><dd>Un conto in cui le vie dedicate a santi e sante sono tolte, sia dalle donne sia dal totale.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+<dt>Municipio</dt><dd>Una delle 9 zone amministrative di Milano.</dd>
+<dt>Registro dei numeri civici</dt><dd>L’elenco ufficiale del Comune con tutti i numeri civici e le vie, dove per alcune vie c’è anche la data di intitolazione.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul>
+<li>Le vie sono 4.278: 4.030 dal registro dei numeri civici del Comune e 248 presenti solo in OpenStreetMap.</li>
+<li>La persona è riconosciuta dall’indicazione in OpenStreetMap o cercando il nome della via su Wikidata. Il sesso è quello scritto su Wikidata.</li>
+<li>Un gruppo di sole sorelle conta come donne; «Fratelli…» e le coppie sono nel totale ma non tra le donne.</li>
+<li>«Senza sante» toglie dal conto, sia tra le donne sia nel totale, le vie dedicate a santi e sante.</li>
+<li>I 7 gruppi di mestieri sono fatti raggruppando i mestieri di Wikidata per parole chiave; le sante e i santi sono messi nella fede. La percentuale è calcolata sulle persone con un mestiere riconoscibile.</li>
+<li>I quartieri sono assegnati con il punto centrale di ogni via.</li>
+<li>Ogni numero della pagina è calcolato dai file elencati sotto «File».</li>
+</ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Dati derivati da OpenStreetMap: licenza ODbL, con attribuzione e condivisione alla pari.</p>
+<ul>
+<li><a href="data/percentuali.json">Tutte le percentuali</a> della pagina, con e senza sante</li>
+<li><a href="data/percentuali_per_periodo.csv">Quota di donne per periodo</a> e <a href="data/percentuali_per_decennio.csv">per decennio</a></li>
+<li><a href="data/strade_classificate_v2.csv">Tutte le vie con la classificazione</a> (tabella)</li>
+<li><a href="data/vie_donne.geojson">Le vie intitolate a donne</a>, con le linee sulla mappa</li>
+<li><a href="data/decisioni_davide.csv">I 56 casi dubbi decisi uno per uno</a></li>
+<li><a href="data/vie_data_intitolazione.csv">Tutte le vie con la data di intitolazione</a> e <a href="data/intitolazioni_per_decennio.csv">le intitolazioni per decennio</a></li>
+<li><a href="data/vie_v2_grafici.json">Numeri dei grafici su mestieri, secoli, anni recenti e quartieri</a></li>
+<li><a href="data/quartieri_nil.geojson">Confini dei quartieri</a> con il numero di vie a donne</li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Vie, geometrie ed etimologie: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, licenza ODbL; i dati derivati qui pubblicati (<code>vie_donne.geojson</code>, tabelle CSV) sono quindi anch&rsquo;essi ODbL (condivisione alla pari, con attribuzione). Persone, sesso, date: <a href="https://www.wikidata.org">Wikidata</a>, CC0. Registro dei numeri civici e date di intitolazione: <a href="https://dati.comune.milano.it/dataset/ds634-numeri-civici-coordinate">Comune di Milano, ds634</a>, CC BY. Mappa di base: tessere OpenStreetMap (&copy; OpenStreetMap contributors), rese in grigio.</p>
-<p>Confronti: Mapping Diversity (OBC Transeuropa / EDJNet, febbraio 2023) conta per Milano 135 donne su 2.677 vie dedicate a persone (5,0%); un censimento citato dalla stampa nel 2019 ne contava 141 su 4.250 vie. Le differenze di metodo sono spiegate in <code>NOTE.md</code> (sezione Fase 2).</p>
-<!-- vie-anno-nomi-fonti:inizio -->
-<p>Anni di intitolazione: Comune di Milano, registro dei numeri civici con coordinate (<a href="https://dati.comune.milano.it/dataset/ds634-numeri-civici-coordinate">ds634</a>), licenza CC BY 4.0, dati del 1&deg; ottobre 2026. Nomi sulle mappe storiche: Comune di Milano, &laquo;Vie di Milano e corrispondenza toponomastica nelle mappe storiche dal 1884&raquo; (<a href="https://dati.comune.milano.it/dataset/ds2914-vie-di-milano-e-corrispondenza-toponomastica-nelle-mappe-storiche-dal-1884">ds2914</a>, progetto LetMi), licenza CC BY 4.0, ultima modifica dell&rsquo;8 maggio 2026. Sezioni &laquo;Cerca la tua via&raquo;, &laquo;In che anno&raquo; e &laquo;Come si chiamava&raquo; aggiunte il 6 novembre 2026.</p>
-<!-- vie-anno-nomi-fonti:fine -->
-<p>Aggiornato al 29 ottobre 2026. Progetto Milano in dati.</p>
+<p><b>Fonti e licenze.</b> Vie, geometrie ed etimologie: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, licenza ODbL; i dati derivati qui pubblicati sono quindi anch’essi ODbL (condivisione alla pari, con attribuzione). Persone, sesso, anni, mestieri: <a href="https://www.wikidata.org">Wikidata</a>, CC0. Registro dei numeri civici e date di intitolazione: <a href="https://dati.comune.milano.it/dataset/ds634-numeri-civici-coordinate">Comune di Milano, ds634</a>, CC BY, dati del 1° ottobre 2026. Nomi sulle mappe storiche: Comune di Milano, «Vie di Milano e corrispondenza toponomastica nelle mappe storiche dal 1884» (<a href="https://dati.comune.milano.it/dataset/ds2914-vie-di-milano-e-corrispondenza-toponomastica-nelle-mappe-storiche-dal-1884">ds2914</a>, progetto LetMi), CC BY 4.0, ultima modifica dell’8 maggio 2026. Confini dei quartieri: Comune di Milano, CC BY.</p>
+<p>Confronti: Mapping Diversity (OBC Transeuropa / EDJNet, febbraio 2023) conta per Milano 135 donne su 2.677 vie dedicate a persone (5,0%); un censimento citato dalla stampa nel 2019 ne contava 141 su 4.250 vie. I metodi sono diversi da quelli di questa pagina.</p>
+<p>Aggiornato al 29 ottobre 2026. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script>
-var map = L.map('map',{scrollWheelZoom:false}).setView([45.4642, 9.19], 12);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
-fetch('data/vie_donne.geojson',{cache:'no-cache'}).then(function(r) { return r.json(); }).then(function(g) {
-  var layer = L.geoJSON(g, {
-    style: function(f) { var inc = f.properties.confidenza === 'incerto'; return {color: '#c2185b', weight: inc ? 3 : 5, opacity: inc ? 0.75 : 1, dashArray: inc ? '6 6' : null}; },
-    onEachFeature: function(f, l) {
-      var p = f.properties, h = '<b>' + esc(p.nome) + '</b><br>' + (p.persona ? esc(p.persona) : 'persona da verificare');
-      if (p.nascita || p.morte) h += ' (' + esc(p.nascita || '?') + '&ndash;' + esc(p.morte || '?') + ')';
-      if (p.professione) h += '<br>' + esc(p.professione.split(',').slice(0, 3).join(','));
-      if (p.intitolazione && p.intitolazione.length === 8 && p.intitolazione !== '19000101' && p.intitolazione !== '17000101') h += '<br>Intitolata il ' + p.intitolazione.slice(0, 4) + '-' + p.intitolazione.slice(4, 6) + '-' + p.intitolazione.slice(6);
-      if (p.confidenza === 'incerto') h += '<br><i>caso da verificare: ' + esc(p.motivo) + '</i>';
-      if (p.santa) h += '<br><i>santa</i>';
-      if (p.qid) h += '<br><a href="https://www.wikidata.org/wiki/' + esc(p.qid.split(';')[0]) + '" target="_blank" rel="noopener">Wikidata</a>';
-      l.bindPopup(h);
-    }
-  }).addTo(map);
-}).catch(function() { document.getElementById('map').insertAdjacentHTML('afterend', '<p>Mappa non caricata.</p>'); });
-</script><!-- vie-anno-nomi-js:inizio -->
+<div class="tip" id="tip"></div>
 <script>
 (function(){
-  var VOCI=[],NOMI={},PRONTO=false;
-  function pulisci(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
-  function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
-  function es(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-  function dataIt(d){return parseInt(d.slice(6),10)+' '+MESI[parseInt(d.slice(4,6),10)-1]+' '+d.slice(0,4);}
-  function periodo(r){var a=r.da,b=r.a;if(a===b)return a==='oggi'?'oggi':'mappa del '+a;return 'dal '+a+(b==='oggi'?' a oggi':' al '+b);}
-  function linea(s){
-    var ul=el('ul','va-linea');
-    s.righe.forEach(function(r){
-      var li=el('li',r.esito==='cambio'?'cambia':'');var tag='';
-      if(r.esito==='cambio')tag='<span class="va-tag c">cambia</span>';
-      else if(r.esito==='parziale')tag='<span class="va-tag">nome aggiunto o tolto</span>';
-      else if(r.esito==='nasce')tag='<span class="va-tag">la via nasce</span>';
-      var det=(r.varianti&&r.varianti.length)?'<div class="va-det">scritto anche: '+r.varianti.map(es).join('; ')+'</div>':'';
-      li.innerHTML='<div class="va-an">'+es(periodo(r))+tag+'</div><div class="va-nm">'+es(r.nome.trim())+'</div>'+det;
-      ul.appendChild(li);
-    });
-    return ul;
-  }
-  function mostra(v){
-    var s=document.getElementById('va-scheda');s.innerHTML='';
-    s.appendChild(el('div','va-tit',es(v.n)));
-    if(v.m)s.appendChild(el('div','va-sub',(v.m.indexOf('-')>=0?'Municipi ':'Municipio ')+es(v.m.replace(/-/g,', '))));
-    s.appendChild(el('h4','','In che anno ha preso il nome'));
-    if(v.x){s.appendChild(el('p','','Questa via non c&rsquo;&egrave; nel registro dei numeri civici del Comune, quindi non ho una data.'));}
-    else if(!v.d){s.appendChild(el('p','','Il registro del Comune non ha una data per questa via. Succede per 69 vie su 100.'));}
-    else if(v.d==='17000101'||v.d==='19000101'){s.appendChild(el('p','','Il registro ha per questa via la data '+dataIt(v.d)+', che &egrave; un valore segnaposto e non indica un anno vero.'));}
-    else{s.appendChild(el('p','va-anno',v.d.slice(0,4)));s.appendChild(el('p','va-pic','Data di intitolazione nel registro del Comune: '+dataIt(v.d)+'. Il registro non spiega a quale nome si riferisca.'));}
-    s.appendChild(el('h4','','Come si chiamava'));
-    var st=v.s?NOMI[v.s]:null;
-    if(st){
-      var f=st.n===0?'Nessun cambio di nome sulle mappe.':(st.n===1?'Ha cambiato nome una volta.':'Ha cambiato nome '+st.n+' volte.');
-      s.appendChild(el('p','',f+' Nomi letti sulle mappe dal 1884:'));
-      s.appendChild(linea(st));
-      s.appendChild(el('p','va-pic','Sono solo 36 vie, scelte per un progetto su letteratura e turismo.'));
-    }else{
-      s.appendChild(el('p','','I nomi sulle mappe storiche ci sono solo per 36 vie scelte dal Comune; questa non &egrave; tra quelle.'));
+'use strict';
+var DATA='data/';
+var C={mi:'#E30613',m2:'#00A651',m3:'#FFD500',m4:'#0072BC',m5:'#7B3FA0',ora:'#F58220',ink:'#0b0d12',mut:'#5f6673',grid:'#e6e8ec',axis:'#9aa1ad',U:'#0072BC',D:'#F06EAA'};
+var PCT,PER,G,GEO,VOCI=[],NOMI={},N=[],BY={},RD=[],sel=null,DONNE=[];
+
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return grp(r[0])+','+r[1]}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function pl(n,u,p){return n+' '+(n===1?u:p)}
+function r1(v){return Math.round(v*10)/10}
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H,defs){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'+(defs||'')}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function shortn(s,w,b,sz){if(tw(s,sz||13,b)<=w)return s;while(s.length>3&&tw(s+'…',sz||13,b)>w)s=s.slice(0,-1);return s+'…'}
+function tc(s){
+  if(s!==s.toUpperCase())return s;
+  s=s.toLowerCase().replace(/(^|[\s'’\-])([a-zà-ú])/g,function(m,a,b){return a+b.toUpperCase()});
+  return s.replace(/ (Di|Da|De|Del|Della|Dei|Dal|E|D)(?= )/g,function(m){return m.toLowerCase()});
+}
+function nomeVia(n){return tc(n.trim())}
+function senzaTipo(n){return tc(n.replace(/^(Via|Viale|Piazza|Piazzale|Piazzetta|Largo|Galleria|Vicolo|Passaggio|Corso)\s+/i,'').trim())}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>vw-6)x=vw-w-6;if(x<6)x=6;if(y<window.pageYOffset+4)y=e.pageY+16;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getT(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()})}
+function draw(f){f();RD.push(f)}
+
+Promise.all([getJ(DATA+'percentuali.json'),getT(DATA+'percentuali_per_periodo.csv'),getJ(DATA+'vie_v2_grafici.json'),getJ(DATA+'quartieri_nil.geojson'),getJ(DATA+'vie_anno.json'),getJ(DATA+'vie_nomi.json')]).then(function(r){
+  PCT=r[0];
+  PER=r[1].replace(/^﻿/,'').replace(/\r/g,'').split('\n').filter(Boolean).slice(1).map(function(l){var v=l.split(',');return{p:v[0],ps:+v[1],ds:+v[2],q:+v[3]*100,pi:+v[4],di:+v[5],qi:+v[6]*100}});
+  G=r[2];GEO=r[3];VOCI=r[4];r[5].forEach(function(x){NOMI[x.id]=x});
+  DONNE=G.donne;
+  tutto();
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function mestieri(){
+  var cats=G.mestieri.cat,v=G.mestieri.v,t=G.mestieri.tot;
+  return cats.map(function(c){return{c:c,d:v[c].d,u:v[c].u,pd:v[c].d/t.d*100,pu:v[c].u/t.u*100}}).sort(function(a,b){return b.pd-a.pd});
+}
+function recenti(){return G.recenti}
+
+function tutto(){
+  quartieriPrepara();
+  highlights();
+  draw(strip);draw(modi);draw(chiA);draw(chiC);draw(quando);draw(rec);draw(mappa);
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return nz(x.n)===k||nz(x.sn)===k});return m.length===1?m[0]:null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,true);return}
+    var m=N.filter(function(x){return nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0});
+    if(m.length===1)pick(m[0].id,true);else if(m.length>1)$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+'. Scrivi qualche lettera in più.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),true)});
+  cercaVia();tabella();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+
+/* ---------- numeri grandi ---------- */
+function highlights(){
+  var p=PCT.percentuali[0],ps=PCT.percentuali[1];
+  var me=mestieri(),fede=me.filter(function(x){return x.c==='Fede e religione'})[0];
+  var P0=PER[0],P3=PER[3];
+  var r20=recenti().filter(function(x){return x.y>=2020&&x.k!=='m'}),d20=r20.filter(function(x){return x.k==='d'}).length;
+  var top=N.slice().sort(function(a,b){return b.c-a.c})[0];
+  var topS=DONNE.filter(function(d){return d.nil===top.id&&d.s}).length;
+  var H=[
+   {n:f1(p.quota_donne_su_tutte_le_strade_ferma*100)+'<small>%</small>',p:'delle '+grp(String(p.strade_totali))+' vie e piazze di Milano ricorda una donna: sono '+p.donne_sicure,c:C.mi,h:'quante'},
+   {n:f0(fede.pd)+'<small>%</small>',p:'delle donne ricordate dalle vie è una santa, una religiosa o una suora. Tra gli uomini è il '+f0(fede.pu)+'%',c:C.m3,h:'chi'},
+   {n:f1(P3.q)+'<small>%</small>',p:'delle vie a persone intitolate dal 2000 è di una donna. Fino al 1949 era il '+f1(P0.q)+'%',c:C.m2,h:'g-quando'},
+   {n:d20+' su '+r20.length,p:'le vie a persone intitolate dal 2020 che ricordano una donna',c:C.m4,h:'recenti'},
+   {n:String(top.c),p:'vie a donne nel quartiere '+top.n+', il primo in classifica; '+topS+' sono sante',c:C.m5,h:'mappa'},
+   {n:f1(ps.quota_donne_su_persone_ferma*100)+'<small>%</small>',p:'la quota di donne tra le vie a persone se si tolgono i santi e le sante. Con le sante è il '+f1(p.quota_donne_su_persone_ferma*100)+'%',c:C.ora,h:'modi'}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. la barra di tutte le vie ---------- */
+function strip(){
+  var p=PCT.percentuali[0],W=width('ch-quante'),bw=W-2,x0=1,y0=26,h=46,tot=p.strade_totali;
+  var segs=[
+    {k:'donne',n:p.donne_sicure,col:C.D,nome:'donne',ext:'top'},
+    {k:'uomini',n:p.uomini_sicuri,col:C.U,nome:'uomini',inner:true},
+    {k:'prob',n:p.uomini_incerti,col:'url(#hat)',nome:'probabilmente uomini, da confermare',ext:'bot',sh:'uomini da confermare'},
+    {k:'misti',n:p.misti_sicuri,col:'#3b3f4a',nome:'coppie e gruppi misti',ext:'bot',sh:'coppie e gruppi misti'},
+    {k:'sconos',n:p.sconosciute,col:'#9aa1ad',nome:'persone senza nome riconosciuto',ext:'bot',sh:'nome non riconosciuto'},
+    {k:'luoghi',n:p.non_persone,col:'#d5d8de',nome:'luoghi, date e cose',inner:true}];
+  var defs='<defs><pattern id="hat" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#bcd9ee"/><line x1="0" y1="0" x2="0" y2="6" stroke="'+C.U+'" stroke-width="3"/></pattern></defs>';
+  var x=x0,s='',bots=[],topLab='';
+  segs.forEach(function(g){g.x=x;g.w=bw*g.n/tot;x+=g.w;g.cx=g.x+g.w/2});
+  segs.forEach(function(g){
+    var t='<b>'+esc(g.nome)+'</b><br>'+f0(g.n)+' vie ('+f1(g.n/tot*100)+'%)';
+    s+='<rect x="'+r1(g.x)+'" y="'+y0+'" width="'+r1(Math.max(g.w,1.5))+'" height="'+h+'" fill="'+g.col+'" stroke="#fff" stroke-width="1"'+tip(t)+'/>';
+    if(g.inner){
+      var fs=g.k==='uomini'?'w':'';var txt=g.k==='uomini'?'uomini':'luoghi, date, cose';
+      s+='<g pointer-events="none">'+T(g.cx,y0+20,f0(g.n),{a:'middle',c:g.k==='uomini'?'w':'b',st:'font-size:15px'+(g.k==='uomini'?'':';fill:'+C.ink)})+T(g.cx,y0+37,txt,{a:'middle',c:g.k==='uomini'?'w':'',st:g.k==='uomini'?'':'font-size:12px'})+'</g>';
     }
+    if(g.ext==='bot')bots.push(g);
+  });
+  var d=segs[0];
+  var tl=f0(d.n)+' donne · '+f1(d.n/tot*100)+'%';
+  s+=L(d.cx,y0-2,d.cx,y0-12,C.ink,1.5)+T(Math.max(d.cx-5,2),y0-15,tl,{c:'b',st:'font-size:14px'});
+  bots.sort(function(a,b){return a.cx-b.cx});
+  var yb=y0+h;
+  bots.forEach(function(g,i){
+    var ly=yb+18+i*19;
+    s+=L(g.cx,yb,g.cx,ly-5,C.ink,1.5);
+    s+=T(g.cx-4,ly,esc(f0(g.n)+' '+g.sh),{a:'end'});
+  });
+  var H=yb+18+bots.length*19+4;
+  $('ch-quante').innerHTML=svgOpen(W,H,defs)+s+'</svg>';
+  var u=p.uomini_sicuri,dn=p.donne_sicure;
+  $('t-quante').textContent='Per ogni via intitolata a una donna ce ne sono '+f0(u/dn)+' intitolate a un uomo';
+  $('nn-quante').innerHTML='Le vie dedicate a persone con un nome riconosciuto sono '+grp(String(p.persone_sicure))+': '+grp(String(p.donne_sicure))+' di donne, '+grp(String(p.uomini_sicuri))+' di uomini, '+p.misti_sicuri+' miste. Il resto sono vie dedicate a luoghi, date e cose (come Via Roma o Via XX Settembre), o con un nome che non si riesce ad attribuire.';
+}
+
+/* ---------- 2. quattro modi di contare ---------- */
+function modi(){
+  var a=PCT.percentuali[0],b=PCT.percentuali[1],W=width('ch-modi');
+  var rows=[
+   {l:'Su tutte le '+grp(String(a.strade_totali))+' vie',lo:a.quota_donne_su_tutte_le_strade_ferma*100,hi:a.quota_donne_su_tutte_le_strade_ferma*100},
+   {l:'Sulle '+grp(String(a.persone_sicure))+' vie a persone',lo:a.quota_donne_su_persone_estremo_basso*100,hi:a.quota_donne_su_persone_estremo_alto*100},
+   {l:'Senza sante, su tutte le '+grp(String(b.strade_totali))+' vie',lo:b.quota_donne_su_tutte_le_strade_ferma*100,hi:b.quota_donne_su_tutte_le_strade_ferma*100},
+   {l:'Senza sante, sulle '+grp(String(b.persone_sicure))+' vie a persone',lo:b.quota_donne_su_persone_estremo_basso*100,hi:b.quota_donne_su_persone_estremo_alto*100}];
+  var xl=10,xr=W-14,mx=8,rh=62,top=2,ax=top+rows.length*rh;
+  function X(v){return xl+(xr-xl)*v/mx}
+  var s='';
+  for(var t=0;t<=mx;t+=2){s+=L(X(t),top,X(t),ax,C.grid,1)+T(X(t),ax+16,t+'%',{a:'middle',c:'m'})}
+  rows.forEach(function(r,i){
+    var y=top+i*rh,cy=y+48;
+    s+=T(xl,y+15,esc(r.l),{c:'b'});
+    var rng=Math.abs(r.hi-r.lo)>0.05;
+    var tp='<b>'+esc(r.l)+'</b><br>'+(rng?'da '+f1(r.lo)+'% a '+f1(r.hi)+'%':f1(r.hi)+'%');
+    if(rng)s+=L(X(r.lo),cy,X(r.hi),cy,C.D,5,' stroke-linecap="round"'+tip(tp));
+    s+='<circle cx="'+r1(X(r.hi))+'" cy="'+cy+'" r="7" fill="'+C.D+'"'+tip(tp)+'/>';
+    s+=T(X(r.hi),cy-14,f1(r.hi)+'%',{a:'middle',c:'b'});
+    if(rng){s+='<circle cx="'+r1(X(r.lo))+'" cy="'+cy+'" r="6" fill="#fff" stroke="'+C.D+'" stroke-width="3.5"'+tip(tp)+'/>'+T(X(r.lo),cy-14,f1(r.lo)+'%',{a:'middle',c:'b'})}
+  });
+  $('ch-modi').innerHTML=svgOpen(W,ax+24)+s+'</svg>';
+  $('t-modi').textContent='Anche contando nel modo più generoso, le donne restano sotto il '+(Math.floor(rows[1].hi)+1)+'% delle vie a persone';
+}
+
+/* ---------- 3. mestieri ---------- */
+function chiA(){
+  var rows=mestieri(),W=width('ch-chiA'),rh=54,top=2,xl=40,xr=W-44,mx=50;
+  function X(v){return xl+(xr-xl)*v/mx}
+  var s='',ax=top+rows.length*rh;
+  for(var t=0;t<=mx;t+=10)s+=L(X(t),top,X(t),ax,C.grid,1)+T(X(t),ax+16,t+'%',{a:'middle',c:'m'});
+  rows.forEach(function(r,i){
+    var y=top+i*rh,cy=y+40;
+    var tp='<b>'+esc(r.c)+'</b><br>Donne: '+f0(r.pd)+'% ('+r.d+' persone)<br>Uomini: '+f0(r.pu)+'% ('+grp(String(r.u))+' persone)';
+    s+=T(4,y+16,esc(r.c),{c:'b'});
+    s+=L(X(r.pd),cy,X(r.pu),cy,'#c3c7ce',5,' stroke-linecap="round"'+tip(tp));
+    var dl=r.pd<r.pu;
+    s+='<circle cx="'+r1(X(r.pd))+'" cy="'+cy+'" r="7" fill="'+C.D+'"'+tip(tp)+'/><circle cx="'+r1(X(r.pu))+'" cy="'+cy+'" r="7" fill="'+C.U+'"'+tip(tp)+'/>';
+    s+=T(X(r.pd)+(dl?-11:11),cy+5,f0(r.pd)+'%',{a:dl?'end':'start',c:'b'});
+    s+=T(X(r.pu)+(dl?11:-11),cy+5,f0(r.pu)+'%',{a:dl?'start':'end',c:'b'});
+  });
+  $('ch-chiA').innerHTML=svgOpen(W,ax+24)+s+'</svg>';
+  var f=rows.filter(function(r){return r.c==='Fede e religione'})[0],sc=rows.filter(function(r){return r.c==='Scuola, scienza e cure'})[0],po=rows.filter(function(r){return r.c==='Politica, lotta e armi'})[0],pi=rows.filter(function(r){return r.c==='Pittura, architettura, design'})[0];
+  $('t-chiA').textContent='Le donne delle vie sono ricordate soprattutto per la fede ('+f0(f.pd)+'%), gli uomini per politica e scienza';
+  $('nn-chiA').innerHTML='La fede pesa '+f0(f.pd)+'% tra le donne e '+f0(f.pu)+'% tra gli uomini; la scuola e la scienza '+f0(sc.pd)+'% contro '+f0(sc.pu)+'%; la pittura e l’architettura '+f0(pi.pd)+'% contro '+f0(pi.pu)+'%. Il calcolo è sulle '+G.mestieri.tot.d+' donne e i '+grp(String(G.mestieri.tot.u))+' uomini con un mestiere riconoscibile.';
+}
+
+/* ---------- pallini per anno di nascita ---------- */
+var ETI=[['anita garibaldi','Anita Garibaldi'],['maria montessori','Maria Montessori'],['rita levi','Rita Levi-Montalcini'],['maria callas','Maria Callas'],['gae aulenti','Gae Aulenti']];
+function chiC(){
+  var W=width('ch-chiC'),xl=8,xr=W-8,Y0=1700,Y1=2000;
+  function X(y){return xl+(xr-xl)*(y-Y0)/(Y1-Y0)}
+  var ws=DONNE.filter(function(d){return d.na!=null&&d.na>=Y0&&d.na<Y1}),old=DONNE.filter(function(d){return d.na!=null&&d.na<Y0}).length,nn=DONNE.filter(function(d){return d.na==null}).length;
+  var bw=(xr-xl)/30,dm=Math.min(9,bw-1),st=dm+1.5,bins={};
+  ws.forEach(function(d){var b=Math.floor((d.na-Y0)/10);(bins[b]=bins[b]||[]).push(d)});
+  var mxs=0;Object.keys(bins).forEach(function(b){mxs=Math.max(mxs,bins[b].length)});
+  var etiq=[];
+  ws.forEach(function(d){var nm=d.n.toLowerCase();ETI.forEach(function(e){if(nm.indexOf(e[0])>=0)etiq.push({d:d,t:e[1]})})});
+  var base=0,s='',lanes=[],lh=17,topPad=0;
+  // posizione dei pallini
+  var pos={};
+  Object.keys(bins).forEach(function(b){bins[b].sort(function(p,q){return p.na-q.na}).forEach(function(d,i){pos[d.n]={x:X(Y0+b*10+5),i:i}})});
+  etiq.forEach(function(e){var p=pos[e.d.n];e.x=p.x;e.top=(bins[Math.floor((e.d.na-Y0)/10)].length-1)*st+dm+3;e.w=tw(e.t,13,true)*1.1+4});
+  etiq.sort(function(a,b){return b.x-a.x});
+  var placed=[];
+  etiq.forEach(function(e){
+    var lane=0;e.x0=Math.max(2,Math.min(e.x-3,W-2-e.w));
+    placed.forEach(function(q){if(e.x0+e.w+8>=q.x0)lane=Math.max(lane,q.k+1)});
+    e.k=lane;placed.push(e);
+  });
+  var nl=0;etiq.forEach(function(e){nl=Math.max(nl,e.k+1)});
+  var stackH=mxs*st+dm+6,labTop=nl*lh+4,H=labTop+stackH+30,by=labTop+stackH;
+  // asse
+  s+=L(xl,by,xr,by,C.axis,1.5);
+  for(var y=Y0;y<=Y1;y+=50){s+=L(X(y),by,X(y),by+5,C.axis,1.5)+T(X(y),by+20,String(y),{a:y===Y0?'start':y===Y1?'end':'middle',c:'m'})}
+  ws.forEach(function(d){var p=pos[d.n],cy=by-dm/2-3-p.i*st;
+    var tp='<b>'+esc(nomeVia(d.n))+'</b><br>'+(d.p?esc(d.p)+'<br>':'')+d.na+(d.mo!=null?'–'+d.mo:'');
+    s+='<circle cx="'+r1(p.x)+'" cy="'+r1(cy)+'" r="'+r1(dm/2)+'" fill="'+C.D+'"'+(etiq.some(function(e){return e.d===d})?' stroke="'+C.ink+'" stroke-width="2"':'')+tip(tp)+'/>'});
+  etiq.forEach(function(e){
+    var ly=labTop-e.k*lh-2;
+    s+=L(e.x,ly+3,e.x,by-e.top-3,C.ink,1.5)+T(e.x0,ly,esc(e.t),{c:'b halo'});
+  });
+  $('ch-chiC').innerHTML=svgOpen(W,H)+s+'</svg>';
+  var n19=ws.filter(function(d){return d.na>=1800}).length;
+  $('t-chiC').textContent=n19+' delle '+(ws.length+old)+' donne con anno di nascita noto sono nate dal 1800 in poi';
+  $('nn-chiC').innerHTML='Non sono disegnate '+old+' donne nate prima del 1700 (sante, regine, nobili) e '+nn+' senza anno di nascita noto. Tocca un pallino per il nome della via.';
+}
+
+/* ---------- 4. quando: linea per periodo ---------- */
+function quando(){
+  var W=width('ch-quando'),H=262,pl=40,pr=14,pt=26,pb=56,mx=16;
+  function Y(v){return pt+(H-pt-pb)*(1-v/mx)}
+  var n=PER.length,x0=pl+34,x1=W-pr-34;
+  function X(i){return x0+(x1-x0)*i/(n-1)}
+  var s='';
+  for(var t=0;t<=mx;t+=4)s+=L(pl,Y(t),W-pr,Y(t),t===0?C.axis:C.grid,t===0?1.5:1)+T(pl-6,Y(t)+4,t+'%',{a:'end',c:'m'});
+  var top=PER.map(function(p,i){return X(i)+','+Y(p.q)}),bot=PER.map(function(p,i){return X(i)+','+Y(p.qi)}).reverse();
+  s+='<polygon points="'+top.concat(bot).join(' ')+'" fill="#f9c7de"/>';
+  s+='<polyline points="'+top.join(' ')+'" fill="none" stroke="'+C.D+'" stroke-width="4" stroke-linejoin="round"/>';
+  PER.forEach(function(p,i){
+    var tp='<b>'+esc(p.p)+'</b><br>'+p.ds+' donne su '+p.ps+' persone: '+f1(p.q)+'%<br>Con i casi incerti: '+p.di+' su '+p.pi+': '+f1(p.qi)+'%';
+    s+='<circle cx="'+r1(X(i))+'" cy="'+r1(Y(p.q))+'" r="6.5" fill="'+C.D+'" stroke="#fff" stroke-width="2"'+tip(tp)+'/>';
+    s+=T(X(i),Y(p.q)-13,f1(p.q)+'%',{a:'middle',c:'b',st:'font-size:15px'});
+    s+=T(X(i),Y(p.qi)+17,f1(p.qi)+'%',{a:'middle',c:'m'});
+    s+=T(X(i),H-pb+20,esc(p.p),{a:'middle',c:'b',st:'font-size:12px'});
+    s+=T(X(i),H-pb+36,p.ds+' su '+p.ps,{a:'middle',c:'m'});
+  });
+  $('ch-quando').innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('t-quando').textContent='Dal 2000 le donne sono il '+f1(PER[n-1].q)+'% delle vie a persone: fino al 1949 erano il '+f1(PER[0].q)+'%';
+}
+
+/* ---------- 4b. anni recenti: una riga per anno ---------- */
+function rec(){
+  var R=recenti(),W=width('ch-rec'),by={},Y0=2000,Y1=2026,mxu=0;
+  R.forEach(function(x){(by[x.y]=by[x.y]||[]).push(x)});
+  for(var y=Y0;y<=Y1;y++){var a=by[y]||[];mxu=Math.max(mxu,a.filter(function(x){return x.k!=='d'}).length)}
+  var dx=7,x0=40,xn=x0+mxu*dx+14,top=2,s='',yy=top,lh=19;
+  var years=[];for(y=Y0;y<=Y1;y++)years.push(y);
+  var nD=0,tt=R.length,nU=0;
+  years.forEach(function(y){
+    var a=by[y]||[],u=a.filter(function(x){return x.k!=='d'}),d=a.filter(function(x){return x.k==='d'});
+    var rh=Math.max(22,d.length*lh+4),cy=yy+12;
+    if(y%10===0)s+=L(2,yy,W-2,yy,C.axis,1);else s+=L(2,yy,W-2,yy,C.grid,1);
+    s+=T(2,cy+5,String(y),{c:'b',st:'font-size:13px'});
+    u.forEach(function(x,i){
+      var tp='<b>'+esc(nomeVia(x.n))+'</b><br>'+(x.p?esc(x.p)+'<br>':'')+'intitolata nel '+y;
+      s+='<circle cx="'+r1(x0+i*dx+3)+'" cy="'+cy+'" r="3.1" fill="'+(x.k==='m'?'#7a7f8a':C.U)+'"'+tip(tp)+'/>'});
+    d.forEach(function(x,i){
+      var tp='<b>'+esc(nomeVia(x.n))+'</b><br>'+(x.p?esc(x.p)+'<br>':'')+'intitolata nel '+y;
+      var ny=cy+i*lh;
+      s+='<circle cx="'+r1(xn+5)+'" cy="'+ny+'" r="5.5" fill="'+C.D+'"'+tip(tp)+'/>'+T(xn+15,ny+5,esc(shortn(senzaTipo(x.n),W-xn-18,true,13)),{c:'b'})});
+    nD+=d.length;nU+=u.length;
+    yy+=rh;
+  });
+  s+=L(2,yy,W-2,yy,C.axis,1);
+  $('ch-rec').innerHTML=svgOpen(W,yy+4)+s+'</svg>';
+  var uU=R.filter(function(x){return x.k==='u'}).length;
+  $('t-rec').textContent='Dal 2000 sono state intitolate '+tt+' vie a persone: '+nD+' a donne, '+uU+' a uomini';
+  var r20=R.filter(function(x){return x.y>=2020&&x.k!=='m'}),d20=r20.filter(function(x){return x.k==='d'}).length;
+  $('nn-rec').innerHTML='Dal 2020 le donne sono '+d20+' su '+r20.length+'; ma è un periodo breve, con pochissime intitolazioni. Negli anni 2000 le donne sono state '+R.filter(function(x){return x.y<2010&&x.k==='d'}).length+' su '+R.filter(function(x){return x.y<2010&&x.k!=='m'}).length+'.';
+}
+
+/* ---------- 5. mappa dei quartieri ---------- */
+function quartieriPrepara(){
+  GEO.features.forEach(function(f){var p=f.properties;var o={id:p.i,n:p.n,mu:p.mu,c:p.c,f:f};N.push(o);BY[o.id]=o});
+  var cnt={};N.forEach(function(o){o.sn=o.n.replace(/^Q\.re /,'').split(' - ')[0];cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0].replace(/^Porta /,'')+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+}
+var CL=[{col:'#E6E8EC',txt:C.ink,nome:'nessuna',t:function(c){return c===0}},
+ {col:'#F27BB3',txt:C.ink,nome:'1 via',t:function(c){return c===1}},
+ {col:'#E0408F',txt:'#fff',nome:'2 vie',t:function(c){return c===2}},
+ {col:'#B5156B',txt:'#fff',nome:'da 3 a 4',t:function(c){return c>=3&&c<=4}},
+ {col:'#6D0A40',txt:'#fff',nome:'5 o più',t:function(c){return c>=5}}];
+function ccl(c){for(var i=0;i<CL.length;i++)if(CL[i].t(c))return i}
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+function mappa(){
+  var W=width('ch-mappa'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='',lab='',cnt=CL.map(function(){return 0});
+  N.forEach(function(o){var c=ccl(o.c);cnt[c]++;var isS=o.id===sel,b=P.bb(o.f);
+    var tp='<b>'+esc(o.n)+'</b><br>'+(o.c?pl(o.c,'via a una donna','vie a donne'):'Nessuna via a una donna');
+    var el='<path d="'+P.path(o.f)+'" fill="'+CL[c].col+'" stroke="'+(isS?C.ink:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
+    if(isS)sS=el;else s+=el;
+    if(o.c>0&&!isS&&b.w>=24&&b.h>=16)lab+=T(Math.min(b.x,W-12),b.y+4,String(o.c),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+CL[c].txt})});
+  s+=sS;
+  if(sel){var o=BY[sel],b=P.bb(o.f),c=ccl(o.c);lab+=T(Math.min(b.x,W-12),b.y+4,String(o.c),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+CL[c].txt})}
+  s+=lab;
+  if(sel){var o2=BY[sel],b2=P.bb(o2.f),t=o2.sn,w=tw(t,13,true),x=Math.min(Math.max(b2.x,w/2+2),W-w/2-2),y=Math.max(14,Math.min(H-4,b2.y-b2.h/2-5));
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
+  $('ch-mappa').innerHTML=s+'</svg>';
+  $('lg-mappa').innerHTML=CL.map(function(t,i){return '<span><i style="background:'+t.col+'"></i>'+t.nome+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('');
+  var top=N.slice().sort(function(a,b){return b.c-a.c});
+  var senza=cnt[0];
+  $('t-mappa').textContent='In '+senza+' quartieri su '+N.length+' nessuna via ricorda una donna; '+top[0].n+' ne ha '+top[0].c;
+  var mapped=N.reduce(function(a,o){return a+o.c},0),tot=DONNE.length;
+  $('nn-mappa').innerHTML='Il quartiere scelto ha il bordo nero. I quartieri contano le vie, non le persone, e non sono corretti per quante vie ci sono in tutto. '+top[0].n+' è il centro storico: '+DONNE.filter(function(d){return d.nil===top[0].id&&d.s}).length+' delle sue '+top[0].c+' vie sono di sante, spesso nomi di chiese. '+(tot-mapped>0?pl(tot-mapped,'via non ha','vie non hanno')+' una posizione nei dati e non è nella mappa.':'');
+}
+function pick(id,scrivi){
+  sel=id;
+  if(scrivi){var c=BY[id];$('q').value=c?c.sn:''}
+  scheda();RD.forEach(function(f){f()});
+}
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.innerHTML='';return}
+  var o=BY[sel],L2=DONNE.filter(function(d){return d.nil===sel}).sort(function(a,b){return a.n<b.n?-1:1});
+  if(!L2.length){r.innerHTML='<b class="big">'+esc(o.sn)+': nessuna via a una donna</b><p>In questo quartiere nessuna via o piazza ricorda una donna.</p>';return}
+  var sa=L2.filter(function(d){return d.s}).length;
+  r.innerHTML='<b class="big">'+esc(o.sn)+': '+pl(L2.length,'via a una donna','vie a donne')+'</b>'+(sa?'<p>'+pl(sa,'è una santa','sono sante')+'.</p>':'')+'<ul>'+L2.map(function(d){
+    var a=d.na!=null?' ('+d.na+(d.mo!=null?'–'+d.mo:'')+')':'';
+    return '<li><b>'+esc(nomeVia(d.n))+'</b>'+(d.p?', '+esc(d.p)+a:(d.s?', santa':''))+'</li>'}).join('')+'</ul>';
+}
+
+/* ---------- 6. cerca la tua via ---------- */
+var MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function dataIt(d){return parseInt(d.slice(6),10)+' '+MESI[parseInt(d.slice(4,6),10)-1]+' '+d.slice(0,4)}
+function periodo(r){var a=r.da,b=r.a;if(a===b)return a==='oggi'?'oggi':'mappa del '+a;return 'dal '+a+(b==='oggi'?' a oggi':' al '+b)}
+function linea(st){
+  var h='<ul class="linea">';
+  st.righe.forEach(function(r){
+    var tag='';
+    if(r.esito==='cambio')tag='<span class="tg c">cambia</span>';
+    else if(r.esito==='parziale')tag='<span class="tg">nome aggiunto o tolto</span>';
+    else if(r.esito==='nasce')tag='<span class="tg">la via nasce</span>';
+    var det=(r.varianti&&r.varianti.length)?'<div class="de">scritto anche: '+r.varianti.map(esc).join('; ')+'</div>':'';
+    h+='<li'+(r.esito==='cambio'?' class="cambia"':'')+'><div class="an">'+esc(periodo(r))+tag+'</div><div class="nm">'+esc(r.nome.trim())+'</div>'+det+'</li>';
+  });
+  return h+'</ul>';
+}
+function mostraVia(v){
+  var h='<b class="big">'+esc(v.n)+'</b>';
+  if(v.m&&!v.x)h+='<p>'+(v.m.indexOf('-')>=0?'Municipi ':'Municipio ')+esc(v.m.replace(/-/g,', '))+'</p>';
+  var dn=DONNE.filter(function(d){return nz(d.n)===nz(v.n)})[0];
+  if(dn){h+='<h4>A chi è intitolata</h4><p>A una donna'+(dn.p?': <b>'+esc(dn.p)+'</b>'+(dn.na!=null?' ('+dn.na+(dn.mo!=null?'–'+dn.mo:'')+')':''):(dn.s?': una santa':''))+'.</p>'}
+  h+='<h4>In che anno ha preso il nome</h4>';
+  if(v.x)h+='<p>Questa via non c’è nel registro dei numeri civici del Comune, quindi non c’è una data.</p>';
+  else if(!v.d)h+='<p>Il registro del Comune non ha una data per questa via. Succede per 69 vie su 100.</p>';
+  else if(v.d==='17000101'||v.d==='19000101')h+='<p>Il registro ha per questa via la data '+dataIt(v.d)+', che è un valore segnaposto e non indica un anno vero.</p>';
+  else h+='<p class="anno">'+v.d.slice(0,4)+'</p><p>Data di intitolazione nel registro del Comune: '+dataIt(v.d)+'. Il registro non spiega a quale nome si riferisca.</p>';
+  h+='<h4>Come si chiamava</h4>';
+  var st=v.s?NOMI[v.s]:null;
+  if(st){h+='<p>'+(st.n===0?'Nessun cambio di nome sulle mappe.':(st.n===1?'Ha cambiato nome una volta.':'Ha cambiato nome '+st.n+' volte.'))+' Nomi letti sulle mappe dal 1884:</p>'+linea(st)+'<p>Sono solo 36 vie, scelte per un progetto su letteratura e turismo.</p>'}
+  else h+='<p>I nomi sulle mappe storiche ci sono solo per 36 vie scelte dal Comune; questa non è tra quelle.</p>';
+  $('ris-via').innerHTML=h;
+}
+function cercaVia(){
+  var qv=$('qv'),by={};
+  var nomi=VOCI.map(function(v){return v.n}).sort(function(a,b){return a.localeCompare(b,'it')});
+  $('el-vie').innerHTML=nomi.map(function(n){return '<option value="'+esc(n)+'">'}).join('');
+  VOCI.forEach(function(v){(by[nz(v.n)]=by[nz(v.n)]||[]).push(v)});
+  function vai(){
+    var k=nz(qv.value);if(!k){$('ris-via').innerHTML='';return}
+    var m=by[k];
+    if(m){mostraVia(m[0]);return}
+    var p=VOCI.filter(function(v){return nz(v.n).indexOf(k)===0});
+    if(p.length===1){mostraVia(p[0]);return}
+    if(k.length>=3)$('ris-via').innerHTML=p.length?'Ci sono '+p.length+' vie che iniziano così, per esempio: '+p.slice(0,5).map(function(v){return esc(v.n)}).join(', ')+'. Scegli dall’elenco o scrivi il nome intero.':'Nessuna via trovata. Prova con il nome come compare sulla targa, per esempio «Via Filippo Turati».';
   }
-  function cerca(){
-    var q=pulisci(document.getElementById('va-q').value),out=document.getElementById('va-sugg');out.innerHTML='';
-    if(q.length<2)return;
-    if(!PRONTO){out.appendChild(el('p','','Carico le vie&hellip;'));return;}
-    var t=q.split(' ');
-    var tro=VOCI.filter(function(v){return t.every(function(w){return v.k.some(function(p){return p.indexOf(w)===0;});});});
-    tro.sort(function(a,b){return (b.s?1:0)-(a.s?1:0)||a.n.length-b.n.length||(a.n<b.n?-1:1);});
-    if(!tro.length){out.appendChild(el('p','','Nessuna via trovata. Prova con meno parole, per esempio solo il cognome.'));return;}
-    tro.slice(0,8).forEach(function(v){
-      var b=el('button','',es(v.n));b.type='button';
-      var extra=[];
-      if(v.d&&v.d!=='17000101'&&v.d!=='19000101')extra.push('intitolata nel '+v.d.slice(0,4));
-      if(v.s)extra.push('con i nomi sulle mappe storiche');
-      if(!v.x&&v.m)extra.push((v.m.indexOf('-')>=0?'Municipi ':'Municipio ')+v.m.replace(/-/g,', '));
-      var vecchio=v.s&&NOMI[v.s]?NOMI[v.s].nomi.filter(function(n){var p=pulisci(n);return t.every(function(w){return p.split(' ').some(function(x){return x.indexOf(w)===0;});})&&!t.every(function(w){return pulisci(v.n).split(' ').some(function(x){return x.indexOf(w)===0;});});})[0]:null;
-      if(vecchio)extra.unshift('nome vecchio: '+vecchio.trim());
-      if(extra.length)b.innerHTML+='<small>'+es(extra.join(' · '))+'</small>';
-      b.onclick=function(){mostra(v);out.innerHTML='';document.getElementById('va-q').value='';document.getElementById('va-scheda').scrollIntoView({block:'nearest'});};
-      out.appendChild(b);
-    });
-  }
-  function vaiA(nome){
-    var v=VOCI.filter(function(x){return x.n===nome;})[0];if(v){mostra(v);document.getElementById('va-sugg').innerHTML='';}
-  }
-  function pronto(){
-    PRONTO=true;
-    var p=document.getElementById('va-prova');
-    ['Viale Monte Grappa','Via Filippo Turati','Via Cesare Lombroso'].forEach(function(n){
-      if(!VOCI.some(function(x){return x.n===n;}))return;
-      var b=el('button','',es(n));b.type='button';b.onclick=function(){vaiA(n);};p.appendChild(b);
-    });
-    var e=document.getElementById('va-elenco');
-    VOCI.filter(function(x){return x.s;}).sort(function(a,b){return a.n<b.n?-1:1;}).forEach(function(v){
-      var b=el('button','',es(v.n));b.type='button';b.onclick=function(){vaiA(v.n);document.getElementById('cerca-via').scrollIntoView();};e.appendChild(b);
-    });
-    cerca();
-  }
-  document.getElementById('va-q').addEventListener('input',cerca);
-  document.getElementById('va-q').addEventListener('keydown',function(ev){if(ev.key==='Enter'){var b=document.querySelector('#va-sugg button');if(b)b.click();ev.preventDefault();}});
-  Promise.all([fetch('data/vie_anno.json',{cache:'no-cache'}).then(function(r){return r.json();}),fetch('data/vie_nomi.json',{cache:'no-cache'}).then(function(r){return r.json();})]).then(function(r){
-    r[1].forEach(function(x){NOMI[x.id]=x;});
-    r[0].forEach(function(v){var chiavi=[v.n];if(v.s&&NOMI[v.s]){chiavi.push(NOMI[v.s].oggi);NOMI[v.s].nomi.forEach(function(n){chiavi.push(n);});}
-      v.k=[];chiavi.forEach(function(c){pulisci(c).split(' ').forEach(function(w){if(w&&v.k.indexOf(w)<0)v.k.push(w);});});});
-    VOCI=r[0];pronto();
-  }).catch(function(){document.getElementById('va-sugg').innerHTML='<p>Non sono riuscito a caricare l&rsquo;elenco delle vie. Riprova pi&ugrave; tardi.</p>';});
+  qv.addEventListener('input',vai);qv.addEventListener('change',vai);
+  var pr=$('prova');
+  ['Viale Monte Grappa','Via Filippo Turati','Via Anna Kuliscioff','Via Cesare Lombroso'].forEach(function(n){
+    if(!VOCI.some(function(x){return x.n===n}))return;
+    var b=document.createElement('button');b.type='button';b.textContent=n;b.onclick=function(){qv.value=n;vai()};pr.appendChild(b);
+  });
+  var e=VOCI.filter(function(x){return x.s}).sort(function(a,b){return a.n<b.n?-1:1});
+  var det=document.createElement('details');det.className='elenco';
+  det.innerHTML='<summary>Le 36 vie con i nomi sulle mappe storiche</summary><div class="in" id="el36"></div>';
+  pr.parentNode.insertBefore(det,$('ris-via'));
+  e.forEach(function(v){var b=document.createElement('button');b.type='button';b.textContent=v.n;b.onclick=function(){qv.value=v.n;vai();$('ris-via').scrollIntoView({block:'nearest'})};$('el36').appendChild(b)});
+}
+
+/* ---------- elenco delle vie a donne ---------- */
+function tabella(){
+  var L2=DONNE.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')});
+  $('el-titolo').textContent='Le '+L2.length+' vie e piazze che ricordano una donna, in ordine alfabetico.';
+  $('tab-donne').innerHTML='<tr><th>Via</th><th>Persona</th><th>Anni</th><th>Intitolata</th></tr>'+L2.map(function(d){
+    return '<tr><td>'+esc(nomeVia(d.n))+(d.s?' (santa)':'')+'</td><td>'+esc(d.p||'')+'</td><td>'+(d.na!=null?d.na+'–'+(d.mo!=null?d.mo:''):'')+'</td><td>'+(d.d||'')+'</td></tr>'}).join('');
+}
 })();
 </script>
-<!-- vie-anno-nomi-js:fine -->
 </body></html>

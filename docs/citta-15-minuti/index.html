@@ -1,476 +1,544 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · La città dei 15 minuti</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut)} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.map{height:68vh;min-height:380px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.bar{display:inline-block;height:8px;background:var(--acc);vertical-align:middle;margin-right:6px}
-tr.sel td{background:var(--soft)} tr.click{cursor:pointer}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
-svg.sc{width:100%;display:block;font:12px system-ui,Arial,sans-serif} svg.sc text{fill:#111} svg.sc .mu{fill:#666} svg.sc circle{cursor:pointer}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.3em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri grandi */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli e grafici */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .r{fill:var(--mi);font-weight:800}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t],.ch [data-n]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* scrivi il tuo quartiere */
+.find{margin:14px 0 0}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.ris .ch{margin-top:6px}
+/* cursore e menu */
+.sl{margin:8px 0 0;padding:8px 12px 10px;background:var(--soft);border-top:6px solid var(--m4)}
+.sl label{display:block;font-weight:750;font-size:.92rem;margin-bottom:2px}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl input[type=range]::-moz-range-thumb{height:28px;width:28px}
+.sl .ex{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+.sel{margin:8px 0 0;padding:8px 12px 10px;background:var(--soft);border-top:6px solid var(--teal)}
+.sel label{display:block;font-weight:750;font-size:.92rem;margin-bottom:4px}
+.sel select{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.bign{display:flex;align-items:baseline;gap:10px;margin:8px 0 2px}
+.bign b{font-size:2.2rem;line-height:1;font-weight:800}
+.bign span{font-size:.9rem;color:var(--ink2);line-height:1.25}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+table.kt{border-collapse:collapse;width:100%;font-size:.85rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:left;vertical-align:top}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>Milano è la città dei 15 minuti?</h1>
-<p>Per ogni indirizzo di Milano abbiamo contato quanti, tra dieci tipi di servizio, si raggiungono a piedi in 15 minuti lungo le strade: farmacia, medico di base, asilo nido, scuola, biblioteca, mercato, parco, impianto sportivo, ufficio postale, negozio alimentare. Il punteggio va da 0 a 10. A parte, dieci servizi extra (cinema, teatri e musei, aree gioco, piscine, aree cani, metropolitana, BikeMi, supermercati, ospedali, librerie) portano il punteggio fino a 20: il punteggio a 10 resta com&rsquo;è e l&rsquo;indice con gli extra si sceglie sulla mappa.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<h1>La città dei 15 minuti</h1>
+<p class="lead">Quali servizi si raggiungono a piedi in 15 minuti da casa, in ogni quartiere di Milano: farmacia, medico, scuola, biblioteca, parco e altri.</p>
 
-<h2 id="mappa">Il punteggio, quartiere per quartiere</h2>
-<p>Più il colore è scuro, più servizi mancano entro 15 minuti. Clic su un quartiere (NIL) per la scheda. Si può passare alla vista a esagoni di 100 m, che mostra le differenze dentro lo stesso quartiere: anche gli esagoni hanno la loro scheda, con i minuti a piedi per ogni servizio. In <b style="color:#b8860b">oro</b> gli esagoni &laquo;premium&raquo;: tutti i civici dentro hanno tutti e 20 i servizi, essenziali ed extra, entro 15 minuti.</p>
-<div class="ctl"><span class="sub">Vista:</span><button id="v-nil" class="on" type="button">Quartieri (NIL)</button><button id="v-hex" type="button">Esagoni da 100 m</button>
-<label class="sub" for="sel-nil">Scheda di:</label><select id="sel-nil" aria-label="Scegli un quartiere"></select></div>
-<div class="ctl" id="ctl-modo" style="display:none"><span class="sub">Punteggio:</span><button id="m-10" class="on" type="button">solo i 10 essenziali</button><button id="m-20" type="button">con gli extra</button></div>
-<div id="map1" class="map" role="img" aria-label="Mappa del punteggio dei servizi a 15 minuti per quartiere di Milano"></div>
-<div class="lgd" id="lg1"></div>
-<div id="card" class="card"><span class="sub">Scegli un quartiere sulla mappa o dall&rsquo;elenco.</span></div>
-<div id="extra-testo"></div>
+<div class="hl" id="hl"></div>
+<p class="src">Comune di Milano (indirizzi, servizi, residenti 2025, redditi per CAP, anno d’imposta 2024) e OpenStreetMap (rete pedonale). I tempi a piedi sono stimati sulla rete delle strade, a 4,5 km/h: 15 minuti sono 1.125 metri. Sono dieci servizi essenziali, un punto ciascuno.</p>
 
-<h2 id="servizi">Un servizio alla volta</h2>
-<p>Scegli un tipo di servizio: ogni esagono da 100 m è colorato secondo i minuti a piedi fino al più vicino (mediana dei civici dentro l&rsquo;esagono). Più il colore è scuro, più si cammina.</p>
-<div class="ctl"><label class="sub" for="sel-tipo">Servizio:</label><select id="sel-tipo"></select></div>
-<div id="map2" class="map" role="img" aria-label="Mappa dei minuti a piedi fino al servizio scelto"></div>
-<div class="lgd" id="lg2"></div>
-<p id="tipo-nota" class="src"></p>
-<h3>Quanti residenti arrivano in 15 minuti</h3>
-<div class="scroll"><table id="tab-tipi"></table></div>
-<p class="src">Clic su una riga per vederla sulla mappa. Fonti e anno dei dati di ogni servizio in &laquo;Come è fatto&raquo;.</p>
+<!-- ============ 1 ============ -->
+<h2 id="cosa-manca">Cosa si raggiunge e cosa manca</h2>
+<div class="fig">
+  <h3 id="t-cursore"></h3>
+  <p class="sub" id="s-cursore"></p>
+  <div class="sl"><label for="minuti">Minuti a piedi: <b id="minuti-v">15</b></label>
+    <input id="minuti" type="range" min="1" max="30" step="1" value="15" aria-label="Minuti a piedi">
+    <div class="ex"><span>1 minuto</span><span>30 minuti</span></div></div>
+  <div class="bign"><b id="mn-n"></b><span id="mn-t"></span></div>
+  <div class="ch" id="ch-cursore" role="img" aria-label="Quota degli indirizzi di Milano che raggiungono ogni servizio nei minuti scelti"></div>
+  <p class="src">Fonte: Comune di Milano (servizi e indirizzi, CC BY; farmacie CC0; medici CC BY-NC, solo tempi calcolati) e OpenStreetMap contributors (rete pedonale, ODbL). Quota degli 57.405 indirizzi di Milano, calcolata sugli esagoni da 100 metri: per questo può differire di poco dalle quote dei residenti scritte altrove.</p>
+</div>
 
+<div class="fig">
+  <h3 id="t-manca"></h3>
+  <p class="sub" id="s-manca"></p>
+  <div class="lg" id="lg-manca"></div>
+  <div class="ch" id="ch-manca" role="img" aria-label="Mappa dei quartieri di Milano colorati per il servizio che manca di più"></div>
+  <p class="note" id="nn-manca"></p>
+  <p class="src">Fonte: Comune di Milano (servizi, indirizzi e residenti 2025, CC BY; farmacie CC0; medici CC BY-NC, solo tempi calcolati) e OpenStreetMap contributors (rete pedonale, ODbL). Il quartiere è il NIL (Nucleo di identità locale).</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="quartiere">Il tuo quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<div class="fig">
+  <h3 id="t-mappa"></h3>
+  <p class="sub" id="s-mappa"></p>
+  <div class="lg" id="lg-mappa"></div>
+  <div class="ch" id="ch-mappa" role="img" aria-label="Mappa dei quartieri di Milano colorati per punteggio dei servizi a 15 minuti"></div>
+  <p class="note" id="nn-mappa"></p>
+  <p class="src">Fonte: Comune di Milano (servizi, indirizzi e residenti 2025, CC BY; farmacie CC0; medici CC BY-NC, solo tempi calcolati) e OpenStreetMap contributors (rete pedonale, ODbL). Il numero scritto è il punteggio del quartiere, da 0 a 10. Il quartiere scelto ha il bordo rosso.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-quanti"></h3>
+  <p class="sub" id="s-quanti"></p>
+  <div class="ch" id="ch-quanti" role="img" aria-label="Quota dei residenti di Milano per numero di servizi raggiunti a piedi in 15 minuti"></div>
+  <p class="src">Fonte: Comune di Milano (servizi, indirizzi e residenti 2025, CC BY; farmacie CC0; medici CC BY-NC, solo tempi calcolati) e OpenStreetMap contributors (rete pedonale, ODbL). Residenti stimati in parti uguali sugli indirizzi residenziali di ogni quartiere.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="servizio">Un servizio alla volta</h2>
+<div class="fig">
+  <h3 id="t-servizio"></h3>
+  <p class="sub" id="s-servizio"></p>
+  <div class="sel"><label for="sel-tipo">Scegli un servizio</label><select id="sel-tipo" aria-label="Scegli un servizio"></select></div>
+  <div class="lg" id="lg-servizio"></div>
+  <div class="ch" id="ch-servizio" role="img" aria-label="Mappa di Milano a esagoni di 100 metri colorati per i minuti a piedi fino al servizio scelto"></div>
+  <p class="note" id="nn-servizio"></p>
+  <p class="src">Fonte: Comune di Milano (servizi e indirizzi, CC BY; farmacie CC0; medici CC BY-NC, solo tempi calcolati; altri servizi extra da Regione Lombardia, CC0) e OpenStreetMap contributors (rete pedonale, servizi, ODbL). Ogni esagono è di 100 metri: il colore è la mediana dei minuti degli indirizzi dentro l’esagono, fino al servizio più vicino.</p>
+</div>
+
+<!-- ============ 4 ============ -->
 <h2 id="redditi">Redditi e servizi</h2>
-<p>I redditi del Comune sono pubblicati solo per CAP (38 zone), non per quartiere: il confronto si fa quindi tra CAP. Ogni punto è un CAP; sull&rsquo;asse orizzontale il reddito imponibile medio per contribuente (anno d&rsquo;imposta 2024), su quello verticale il punteggio medio dei residenti del CAP. La linea tratteggiata è la tendenza media. Cascina Merlata è esclusa (dato non affidabile).</p>
-<div id="scatter"></div>
-<p id="sc-info" class="sub" aria-live="polite">Passa il mouse o tocca un punto per vedere CAP, zona, reddito e punteggio.</p>
-<p id="sc-testo"></p>
-<div class="warn"><b>Correlazione non vuol dire causa: i dati non dicono perché.</b> I 38 CAP sono poche zone, il CAP dei civici è stimato (giusto nel 96,6% dei casi di prova) e il reddito è quello dei contribuenti, non di tutti i residenti.</div>
-<h3>Le eccezioni</h3>
-<div class="grid2"><div><p class="sub"><b>Serviti meno di quanto il reddito farebbe prevedere</b> (distanza dalla tendenza, in deviazioni standard)</p><div class="scroll" id="ecc1"></div></div>
-<div><p class="sub"><b>Serviti più di quanto il reddito farebbe prevedere</b></p><div class="scroll" id="ecc2"></div></div></div>
-<p id="ecc-testo"></p>
-<h3 id="esagoni-reddito">Esagono per esagono</h3>
-<p>Lo stesso confronto, ma con gli oltre 10 mila esagoni da 100 m invece dei 38 CAP. Ogni puntino è un esagono: in orizzontale il reddito del suo CAP (il reddito non esiste per aree più piccole), in verticale il punteggio con gli extra, da 0 a 20. I puntini dello stesso CAP stanno in colonna; la lineetta nera è la mediana del CAP. In oro gli esagoni premium (20 su 20).</p>
-<div id="hexsc" style="position:relative"></div>
-<p id="hexsc-info" class="sub" aria-live="polite">Passa il mouse o tocca una colonna per vedere il CAP.</p>
-<p id="hexsc-testo"></p>
-<div class="warn"><b>Correlazione non vuol dire causa.</b> I CAP più ricchi sono anche quelli del centro, dove i servizi sono più fitti per ragioni di storia e di densità: i dati non separano le due cose. E ogni esagono prende il reddito medio del suo CAP, non quello di chi ci abita.</div>
+<div class="fig">
+  <h3 id="t-reddito"></h3>
+  <p class="sub" id="s-reddito"></p>
+  <div class="lg" id="lg-reddito"></div>
+  <div class="ch" id="ch-reddito" role="img" aria-label="Reddito imponibile medio e punteggio dei servizi per CAP"></div>
+  <p class="note" id="nn-reddito"></p>
+  <p class="src">Fonte: Comune di Milano, redditi Irpef per CAP, anno d’imposta 2024 (CC BY), indirizzi e servizi (CC BY; farmacie CC0; medici CC BY-NC, solo tempi calcolati); OpenStreetMap contributors (rete pedonale, ODbL). I redditi sono pubblicati per CAP, non per quartiere: il CAP di ogni indirizzo è stimato.</p>
+</div>
 
-<h2 id="classifica">I cinque meglio e i cinque peggio</h2>
-<p id="class-intro"></p>
-<h3>Meglio serviti</h3><div class="scroll" id="top5"></div>
-<h3>Peggio serviti</h3><div class="scroll" id="bot5"></div>
-<p id="class-nota" class="src"></p>
-<details><summary>Elenco di tutti i quartieri</summary><div class="scroll" id="tutti"></div></details>
-
-<h2 id="limiti">Limiti dei dati</h2>
-<ul class="m">
-<li><b>Tempi stimati, non misurati.</b> Si cammina a 4,5 km/h sulla rete stradale di OpenStreetMap, partendo dai civici; i residenti sono distribuiti in parti uguali sui civici residenziali, quindi i palazzi grandi non sono riconosciuti. L'aggancio alla rete ha un errore tipico di 15 metri (circa 12 secondi). Le mappe a esagoni usano tutti i civici applicati, anche quelli non residenziali.</li>
-<li><b>I servizi hanno anni diversi.</b> Gli asili nido sono fermi all'anno scolastico 2018/19 (99 righe su 600 senza coordinate); le piscine del Comune sono del 2019–2020; le stazioni BikeMi del 2022. OpenStreetMap può mancare di negozi, teatri, musei, piscine e librerie. L'anno di ogni servizio è nella sezione «Anno dei dati».</li>
-<li><b>Una riga non è sempre un servizio.</b> Nel file dei medici di base c'è una riga per medico, non per ambulatorio (1.189 righe ma 428 punti); nei negozi di vicinato più attività stanno allo stesso civico; i mercati settimanali contano anche se aperti un solo giorno a settimana; tra i 1.065 poligoni dei parchi, 737 hanno meno di 500 m² (aiuole).</li>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
+<li><b>Tempi stimati, non misurati.</b> Si cammina a 4,5 km/h sulla rete stradale di OpenStreetMap, partendo dagli indirizzi; i residenti sono distribuiti in parti uguali sugli indirizzi residenziali di ogni quartiere, quindi i palazzi grandi non sono riconosciuti. L’aggancio alla rete ha un errore tipico di 15 metri (circa 12 secondi).</li>
+<li><b>I servizi hanno anni diversi.</b> Gli asili nido sono fermi all’anno scolastico 2018/19 (99 righe su 600 senza coordinate); le piscine del Comune sono del 2019–2020; le stazioni BikeMi del 2022. OpenStreetMap può mancare di negozi, teatri, musei, piscine e librerie. L’anno di ogni servizio è nella tabella in «Come è fatto».</li>
+<li><b>Una riga non è sempre un servizio.</b> Nell’elenco dei medici di base c’è una riga per medico, non per ambulatorio (1.189 righe ma 428 punti); nei negozi di vicinato più attività stanno allo stesso indirizzo; i mercati settimanali contano anche se aperti un solo giorno a settimana; tra i 1.065 poligoni dei parchi, 737 hanno meno di 500 m² (aiuole).</li>
+<li><b>Biblioteche.</b> Contano le 26 sedi del Sistema bibliotecario del Comune. Con le 57 biblioteche segnate su OpenStreetMap dentro il Comune la quota dei residenti che arriva in 15 minuti sale al 59%.</li>
 <li><b>Ospedali.</b> Il pronto soccorso non è in nessun elenco aperto e viene da OpenStreetMap, che è incompleto (per esempio il Sacco non risulta con pronto soccorso). Il punto è il centro della struttura: per chi abita vicino a un ingresso di un grande ospedale il tempo è sovrastimato. Escludere le case di cura private è una scelta del progetto.</li>
-<li><b>Redditi per CAP, non per quartiere.</b> Il CAP dei civici è stimato (nel file del Comune non c'è), e i contribuenti di alcuni CAP hanno una discontinuità tra il 2022 e il 2024 che il file non spiega. Il legame tra redditi e servizi è una correlazione, non una prova di causa.</li>
+<li><b>Redditi per CAP, non per quartiere.</b> Il CAP degli indirizzi è stimato (nell’elenco del Comune non c’è), e i contribuenti di alcuni CAP hanno una discontinuità tra il 2022 e il 2024 che l’elenco non spiega. Il legame tra redditi e servizi è una correlazione, non una prova di causa.</li>
 <li><b>Cascina Merlata</b> (956 residenti) è in grigio e senza punteggio: nessun servizio entro 43 minuti a piedi. Può essere vero (autostrade e ferrovia isolano il quartiere) ma può dipendere da servizi nuovi non ancora nei dati o da passaggi pedonali mancanti in OpenStreetMap.</li>
+<li><b>Effetto bordo.</b> I servizi appena fuori dal confine del Comune non sono nei dati. Una prova che li aggiunge da OpenStreetMap cambia il punteggio della città da 8,967 a 8,971: conta solo per pochi quartieri minuscoli ai margini.</li>
+</ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Servizi essenziali</dt><dd>Dieci tipi di servizio, un punto ciascuno: farmacia, medico di base, asilo nido, scuola (infanzia, primaria e media), biblioteca, mercato, parco, impianto sportivo, ufficio postale e negozio alimentare di vicinato. Il punteggio di un indirizzo va da 0 a 10.</dd>
+<dt>Servizi extra</dt><dd>Altri dieci tipi, contati a parte: cinema, teatri e musei, aree gioco, piscine, aree cani, metropolitana, BikeMi, supermercati, ospedali, librerie. Si vedono nella mappa «Un servizio alla volta».</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le zone in cui il Comune divide Milano. Qui sono 88, ma 75 hanno abbastanza residenti e indirizzi per entrare nei confronti.</dd>
+<dt>Esagono</dt><dd>Una cella di 100 metri di lato sulla mappa, che raccoglie gli indirizzi che ci stanno dentro.</dd>
+<dt>CAP</dt><dd>Il codice postale. A Milano sono 38 zone, e i redditi sono pubblicati solo per CAP.</dd>
+<dt>Mediana</dt><dd>Il valore di mezzo: metà degli indirizzi ci mette meno, metà ci mette di più.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul>
+<li><b>A piedi lungo le strade, non in linea d’aria.</b> Il percorso segue la rete pedonale di OpenStreetMap (marciapiedi, vie, sentieri, scale; sono escluse autostrade e strade vietate ai pedoni) a 4,5 km/h: 15 minuti sono 1.125 metri. Le salite e i semafori non costano tempo in più. Il tratto in linea d’aria dal portone alla strada e dalla strada al servizio è contato.</li>
+<li><b>I punti di partenza sono gli indirizzi in vigore</b> del Comune (57.405 punti). Il punteggio di un indirizzo è il numero di tipi di servizio (su 10) raggiungibili in 15 minuti o meno.</li>
+<li><b>I residenti sono una stima.</b> Il Comune pubblica gli abitanti per quartiere (2025), non per indirizzo: sono distribuiti in parti uguali sugli indirizzi residenziali di ciascun quartiere. Dove ci sono palazzi molto grandi o quartieri nuovi l’ipotesi è debole. Gli esagoni non usano i residenti: contano gli indirizzi.</li>
+<li><b>Dieci tipi di servizio, un punto ciascuno.</b> I tre tipi di mercato (coperti, settimanali, degli agricoltori) valgono come uno solo. Un mercato settimanale è aperto uno o due giorni a settimana: contarlo è un’ipotesi generosa (con i soli mercati coperti arriva il 37% dei residenti, non il 92%). Le scuole sono infanzia, primarie e medie; le superiori non contano. Dei negozi di vicinato contano solo gli alimentari.</li>
+<li><b>Parchi:</b> contano quelli di almeno 5.000 m², e si «arriva» quando si tocca il bordo, entrando dall’ingresso più vicino. Il Parco Agricolo Sud non è nei dati dei parchi del Comune: nelle periferie del sud i parchi risultano più lontani di quanto siano.</li>
+<li><b>Asili nido:</b> l’ultimo elenco del Comune è dell’anno scolastico 2018/19 e 26 sedi non hanno un indirizzo ritrovabile, quindi i nidi sono probabilmente sottostimati.</li>
+<li><b>I redditi sono per CAP.</b> Ogni indirizzo riceve il CAP del punto con CAP noto più vicino (negozi, farmacie, poste, ambulatori): sulle prove è giusto nel 96,6% dei casi. Il reddito è l’imponibile Irpef diviso per il numero di contribuenti; il punteggio del CAP è la media pesata sui residenti stimati. La linea tratteggiata è la tendenza media.</li>
+<li><b>Il servizio che manca di più</b> (nella mappa di quello che manca) è quello che raggiunge la quota più bassa di residenti del quartiere; se tutti i dieci servizi sono raggiunti da almeno il 90% dei residenti, il quartiere è segnato come «niente che manchi».</li>
+<li><b>Quartieri piccoli.</b> I quartieri con meno di 30 indirizzi o meno di 1.000 residenti si vedono sulle mappe ma non entrano nei conteggi per quartiere: pochi indirizzi bastano a cambiare tutto.</li>
+<li><b>Controlli.</b> La distanza lungo la rete non è mai minore della linea d’aria; ricalcolando a mano 20 indirizzi a caso il risultato è uguale (differenza massima 0,005 minuti); 8 luoghi noti hanno tempi plausibili.</li>
 </ul>
-
-<h2 id="metodo">Come è fatto</h2>
-<ul class="m">
-<li><b>A piedi lungo le strade, non in linea d&rsquo;aria.</b> Il percorso segue la rete pedonale di OpenStreetMap (marciapiedi, vie, sentieri, scale; sono escluse autostrade e strade vietate ai pedoni) a 4,5 km/h: 15 minuti sono 1.125 metri. Le salite e i semafori non costano tempo in più. Il tratto in linea d&rsquo;aria dal portone alla strada e dalla strada al servizio è contato.</li>
-<li><b>I punti di partenza sono i civici in vigore</b> del Comune (57.405 punti). Il punteggio di un civico è il numero di tipi di servizio (su 10) raggiungibili in 15 minuti o meno.</li>
-<li><b>I residenti sono una stima.</b> Il Comune pubblica gli abitanti per quartiere (2025), non per indirizzo: li ho distribuiti in parti uguali sui civici residenziali di ciascun quartiere. Dove ci sono palazzi molto grandi o quartieri nuovi l&rsquo;ipotesi è debole. Gli esagoni non usano i residenti: sono la media dei civici che contengono.</li>
-<li><b>Dieci tipi di servizio, un punto ciascuno.</b> I tre tipi di mercato (coperti, settimanali, degli agricoltori) valgono come uno solo. Un mercato settimanale è aperto uno o due giorni a settimana: contarlo è un&rsquo;ipotesi generosa (con i soli mercati coperti raggiunge il 37% dei residenti, non il 92%). Le scuole sono infanzia, primarie e medie; le superiori non contano. Dei negozi di vicinato contano solo gli alimentari.</li>
-<li><b>Parchi:</b> contano quelli di almeno 5.000 m², e si &laquo;arriva&raquo; quando si tocca il bordo, entrando dall&rsquo;ingresso più vicino. Il Parco Agricolo Sud non è nei dati dei parchi del Comune: nelle periferie del sud i parchi risultano più lontani di quanto siano.</li>
-<li><b>Asili nido:</b> l&rsquo;ultimo elenco del Comune è dell&rsquo;anno scolastico 2018/19 e 26 sedi non hanno un indirizzo ritrovabile, quindi i nidi sono probabilmente sottostimati.</li>
-<li><b>Effetto bordo:</b> i servizi appena fuori dal confine del Comune non sono nei dati. Con una prova che li aggiunge da OpenStreetMap il punteggio della città cambia da 8,967 a 8,971; fa differenza solo per pochi quartieri minuscoli ai margini (per esempio Roserio, 257 abitanti). Per chi vive nei quartieri popolosi è trascurabile.</li>
-<li><b>I redditi sono per CAP.</b> Ogni civico riceve il CAP del punto con CAP noto più vicino (negozi, farmacie, poste, ambulatori): sulle prove è giusto nel 96,6% dei casi. Il reddito è l&rsquo;imponibile Irpef diviso per il numero di contribuenti; il punteggio del CAP è la media pesata sui residenti stimati. Intervallo di confidenza: 5.000 ricampionamenti dei CAP.</li>
-<li id="m-extra"><b>Servizi extra (a parte).</b> Caricamento&hellip;</li>
-<li><b>Cascina Merlata è segnata come &laquo;dato non affidabile&raquo;.</b> Nel registro dei civici del Comune ha solo 13 indirizzi (è il nuovo quartiere dell&rsquo;ex Expo) e i servizi recenti mancano: il suo punteggio, molto basso, non si può prendere sul serio. È grigia sulle mappe ed è fuori dalle classifiche e dal confronto con i redditi.</li>
-<li><b>Quartieri piccoli.</b> I quartieri con meno di 30 civici o meno di 1.000 residenti si vedono sulla mappa ma non entrano in classifica: pochi indirizzi bastano a cambiare tutto.</li>
-<li><b>Controlli.</b> La distanza lungo la rete non è mai minore della linea d&rsquo;aria; ricalcolando a mano 20 civici a caso il risultato è uguale (differenza massima 0,005 minuti); 8 luoghi noti hanno tempi plausibili.</li>
-</ul>
-<h3>Anno dei dati</h3>
-<div class="scroll"><table id="tab-anni"></table></div>
-
-<h2 id="download">File</h2>
-<p><a href="data/nil_punteggi.csv">nil_punteggi.csv</a> (punteggio, residenti e quote per tipo di ogni quartiere), <a href="data/cap_redditi_servizi.csv">cap_redditi_servizi.csv</a> (CAP: redditi 2019-2024 e servizi), <a href="data/esagoni.json">esagoni.json</a> (esagoni da 100 m: punteggio e minuti per tipo; solo valori aggregati), <a href="data/nil_punteggi_extra.csv">nil_punteggi_extra.csv</a> e <a href="data/cap_punteggi_extra.csv">cap_punteggi_extra.csv</a> (punteggio con gli extra e quote per servizio extra), <a href="data/extra.json">extra.json</a> (dati delle mappe con gli extra), <a href="data/esagoni_cap.json">esagoni_cap.json</a> (CAP e reddito di ogni esagono, quota di civici con 20 su 20). Non c&rsquo;è l&rsquo;elenco dei medici di base.</p>
+<table class="kt" id="tab-anni"></table></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati. L’elenco dei medici di base, con nomi e date di nascita, non è ripubblicato: ci sono solo i tempi a piedi calcolati, per esagono.</p>
+<ul>
+<li><a href="data/nil_punteggi.csv">Punteggio, residenti e quota per servizio di ogni quartiere</a> (tabella)</li>
+<li><a href="data/cap_redditi_servizi.csv">Redditi 2019-2024 e servizi per CAP</a> (tabella)</li>
+<li><a href="data/esagoni.json">Esagoni da 100 metri</a>: punteggio e minuti per servizio</li>
+<li><a href="data/nil_punteggi_extra.csv">Punteggio con i servizi extra, per quartiere</a> e <a href="data/cap_punteggi_extra.csv">per CAP</a> (tabelle)</li>
+<li><a href="data/extra.json">Dati dei servizi extra</a></li>
+<li><a href="data/esagoni_cap.json">CAP e reddito di ogni esagono</a></li>
+<li><a href="data/nil.geojson">Confini dei quartieri</a> con i punteggi</li>
+<li><a href="data/riepilogo.json">Tutti i numeri di questa pagina</a>, per la città e per CAP</li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Dati aperti del <a href="https://dati.comune.milano.it/">Comune di Milano</a>: civici con coordinate, residenti per quartiere, confini dei quartieri (NIL), farmacie (licenza CC0), medici di medicina generale (CC BY-NC), asili nido, scuole, biblioteche, mercati, parchi, impianti sportivi, uffici postali, esercizi di vicinato, redditi per CAP: tutti CC BY salvo dove indicato. Dei medici di base si pubblicano solo i tempi a piedi calcolati, aggregati in esagoni: l&rsquo;elenco dei medici, con nomi e date di nascita, non è pubblicato. Servizi extra: Comune di Milano (aree gioco, aree cani, centri balneari, posti letto delle strutture ospedaliere, Milano Musei Card; CC BY), Regione Lombardia (georeferenziazione delle strutture di ricovero; CC0) e OpenStreetMap (teatri, musei, supermercati, librerie, piscine e aree cani aggiuntive, cinema, pronto soccorso). Rete pedonale, controlli e mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p><b>Fonti e licenze.</b> Dati aperti del <a href="https://dati.comune.milano.it/">Comune di Milano</a>: numeri civici con coordinate, residenti per quartiere, confini dei quartieri (NIL), farmacie (licenza CC0), medici di medicina generale (CC BY-NC), asili nido, scuole, biblioteche, mercati, parchi, impianti sportivi, uffici postali, esercizi di vicinato, redditi per CAP: tutti CC BY salvo dove indicato. Dei medici di base si pubblicano solo i tempi a piedi calcolati, aggregati in esagoni: l’elenco dei medici, con nomi e date di nascita, non è pubblicato. Servizi extra: Comune di Milano (aree gioco, aree cani, centri balneari, posti letto delle strutture ospedaliere, Milano Musei Card; CC BY), Regione Lombardia (georeferenziazione delle strutture di ricovero; CC0) e OpenStreetMap (teatri, musei, supermercati, librerie, piscine e aree cani aggiuntive, cinema, pronto soccorso). Rete pedonale, controlli e mappa di sfondo: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
 <p>Dati scaricati il 29 ottobre 2026. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
-var M=null,NIL=null,HX=null,EXT=null,HC=null,TIPI=[],ETI={},NBY={},modo='10';
-function eti(t){return ETI[t]||(EXT&&EXT.etichette[t])||t}
-function TA(t){return HX.t[t]||EXT.hex.t[t]}
+'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
+  grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e3e6eb',gry:'#9aa1ad'};
+var M,NIL,HX,EXT,HC,N=[],BY={},RD=[],sel=null,TIPI=[],ETI={};
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function pc(x,d){return (d?f1(x*100):f0(x*100))+'%'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f1(x){return nf(x,1)} function f2(x){return nf(x,2)} function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function pc(x,d){return nf(x*100,d==null?0:d)+'%'}
+function $(id){return document.getElementById(id)}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}
+function sn(t){return ETI[t].replace(/ \(.*\)/,'').replace(' di vicinato','')}
+function short(n){return n.replace(/^Q\.re /,'').split(' - ')[0]}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/<[^>]*>/g,'')).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d='M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+
+/* ---------- riquadro al tocco ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else if(!e.target.closest||!e.target.closest('[data-hx]'))TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else if(!e.target.closest||!e.target.closest('[data-hx]'))TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
 function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-Promise.all([J('data/riepilogo.json'),J('data/nil.geojson'),J('data/esagoni.json'),J('data/extra.json').catch(function(){return null}),J('data/esagoni_cap.json').catch(function(){return null})]).then(function(a){
-  M=a[0];NIL=a[1];HX=a[2];EXT=a[3];HC=a[4];TIPI=M.ordine;ETI=M.etichette;
-  NIL.features.forEach(function(f){NBY[f.properties.i]=f.properties});
-  sorpresa();initMap1();initMap2();tabTipi();scatter();eccezioni();classifica();anni();extraBlocchi();hexScatter();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){scatter();hexScatter()},200)});
-}).catch(function(e){document.getElementById('sorpresa').innerHTML='<b>Dati non caricati.</b> '+esc(e.message)});
+Promise.all([J(DATA+'riepilogo.json'),J(DATA+'nil.geojson'),J(DATA+'esagoni.json'),J(DATA+'extra.json').catch(function(){return null})]).then(function(a){
+  M=a[0];NIL=a[1];HX=a[2];EXT=a[3];TIPI=M.ordine;ETI=M.etichette;
+  prepara();highlights();tutto();
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function draw(f){f();RD.push(f)}
+function prepara(){
+  NIL.features.forEach(function(f){var p=f.properties;
+    var o={id:p.i,n:p.n,sn:short(p.n),s:p.s,r:p.r,c:p.c,p:p.p,t:p.t,q:p.q,f:f};
+    N.push(o);BY[o.id]=o});
+  var cnt={};N.forEach(function(o){cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1)o.sn=o.n});
+  N.filter(function(o){return o.s==='ok'}).sort(function(a,b){return b.p-a.p}).forEach(function(o,i){o.rk=i+1});
+}
+function proj(W){
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,k:k,sc:sc,x0:x0,y1:y1,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(p){return[1+(p[0]*k-x0)*sc,1+(y1-p[1])*sc]},
+   inv:function(x,y){return[((x-1)/sc+x0)/k,y1-(y-1)/sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+function okN(){return N.filter(function(o){return o.s==='ok'})}
+function cityQ(t){return M.tipi.filter(function(z){return z.t===t})[0].q}
 
-/* ---------- sorpresa ---------- */
-function sorpresa(){
-  var c=M.citta,q={};M.tipi.forEach(function(t){q[t.t]=t.q});
-  var cp=M.cap,bi=M.citta.biblio_osm;
-  document.getElementById('sorpresa').innerHTML=
-   '<p>Milano è già quasi la &laquo;città dei 15 minuti&raquo;: il <b>'+f0(Math.min(q.medici,q.farmacie,q.nidi,q.scuole,q.sport)*100)+'&ndash;'+f1(q.vicinato*100)+'%</b> dei residenti raggiunge a piedi in 15 minuti medico, farmacia, nido, scuola, impianto sportivo e negozio alimentare. Ma solo il <b>'+pc(c.tutti)+'</b> li ha tutti e 10 i tipi di servizio, perché quasi sempre manca la biblioteca: la raggiunge il <b>'+pc(q.biblioteche)+'</b> dei residenti ('+pc(bi.quota_residenti_entro15)+' contando anche le '+bi.punti_OSM_library_dentro_Comune+' &laquo;library&raquo; di OpenStreetMap).</p>'+
-   '<p>Il reddito conta, ma poco, e non per le biblioteche: sui '+cp.n+' CAP il legame tra punteggio e reddito imponibile 2024 è <b>Spearman '+f2(cp.rho)+'</b> (intervallo di confidenza al 95%: '+f2(cp.ic[0])+'&ndash;'+f2(cp.ic[1])+'). Il terzo di CAP più povero ha <b>'+f1(cp.terzi.basso.punteggio)+'</b> servizi su 10, il più ricco <b>'+f1(cp.terzi.alto.punteggio)+'</b>; per la sola biblioteca la correlazione è <b>'+f2(cp.cor_tipo.biblioteche)+'</b>.</p>'+
-   '<p class="src">Fonte: Comune di Milano (civici, servizi, residenti 2025: '+f0(c.residenti)+' persone; redditi per CAP, anno d&rsquo;imposta 2024) e OpenStreetMap contributors (rete pedonale). Calcolo: vedi &laquo;Come è fatto&raquo;.</p>';
-}
-
-/* ---------- colori ---------- */
-var CSC=['#cfe8e3','#9dd0c7','#62b0a4','#2b8a7d','#136459','#052e29'];   /* punteggio: dal 9,5-10 (chiaro) al meno di 5 (scuro) */
-var LSC=['9,5 &ndash; 10','9 &ndash; 9,5','8 &ndash; 9','7 &ndash; 8','5 &ndash; 7','0 &ndash; 5'];
-function binS(p){return p>=9.5?0:p>=9?1:p>=8?2:p>=7?3:p>=5?4:5}
-var CTM=['#cfe8e3','#8ccbc0','#3f9a8d','#052e29'],LTM=['0 &ndash; 5 min','5 &ndash; 10 min','10 &ndash; 15 min','oltre 15 min'];
-function binT(t){return(t<0||t>15)?3:t<=5?0:t<=10?1:2}   /* t in minuti; <0 = oltre 43 min */
-var GREY='#9e9e9e';
-var LSC20=['18 &ndash; 20','16 &ndash; 18','14 &ndash; 16','12 &ndash; 14','10 &ndash; 12','0 &ndash; 10'];
-function binS20(p){return p>=18?0:p>=16?1:p>=14?2:p>=12?3:p>=10?4:5}
-function pv(i,p){return modo==='20'&&EXT&&EXT.nil[i]?EXT.nil[i][1]:p}
-function legend(id,cols,labs,extra){
-  var h='';cols.forEach(function(c,i){h+='<span><i style="background:'+c+'"></i>'+labs[i]+'</span>'});
-  h+='<span><i style="background:'+GREY+'"></i>grigio: dato non affidabile (Cascina Merlata)</span>';
-  if(extra)h+=extra;document.getElementById(id).innerHTML=h;
-}
-function baseMap(el){
-  var map=L.map(el,{scrollWheelZoom:false,preferCanvas:true}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
-  return map;
-}
-
-/* ---------- mappa 1: NIL / esagoni ---------- */
-var map1,nilLayer,hex1,sel=null,vista='nil',selLayer=null;
-function nilStyle(f){
-  var p=f.properties,col;
-  if(p.s==='nonaff')col=GREY;else if(p.s==='senza')col='#ddd';else col=modo==='20'&&EXT&&EXT.nil[p.i]?CSC[binS20(EXT.nil[p.i][1])]:CSC[binS(p.p)];
-  return{fillColor:col,fillOpacity:.82,color:'#fff',weight:1,opacity:1};
-}
-function initMap1(){
-  map1=baseMap('map1');
-  nilLayer=L.geoJSON(NIL,{style:nilStyle,onEachFeature:function(f,l){
-    var p=f.properties;
-    l.bindTooltip(function(){return esc(p.n)+(p.s==='nonaff'?': dato non affidabile':p.s==='senza'?': senza residenti':modo==='20'&&EXT&&EXT.nil[p.i]?': '+f1(EXT.nil[p.i][1])+' su 20 ('+f1(p.p)+' su 10 + '+f1(EXT.nil[p.i][0])+' extra)':': '+f1(p.p)+' su 10')},{sticky:true});
-    l.on('click',function(){selNil(p.i,false)});
-  }}).addTo(map1);
-  map1.fitBounds(nilLayer.getBounds());
-  hex1=hexLayer(map1,function(k){return hexColorScore(k)},function(k){
-    var t=modo==='20'&&EXT?'Punteggio medio dei civici con gli extra: '+f1(EXT.hex.p20[k]/10)+' su 20 ('+HX.n[k]+' civici)':'Punteggio medio dei civici: '+f1(HX.p[k]/10)+' su 10 ('+HX.n[k]+' civici)';
-    return HX.nil[k]===73?'Cascina Merlata: dato non affidabile':(premium(k)?'<b style="color:#b8860b">Premium: 20 su 20</b> &middot; ':'')+t+(NBY[HX.nil[k]]?' &middot; '+esc(NBY[HX.nil[k]].n):'')+'<br><span style="color:#666">clic per la scheda</span>';
-  },function(k){if(HX.nil[k]===73){if(NBY[73])selNil(73,false);return}hexCard(k)});
-  var sn=document.getElementById('sel-nil'),h='<option value="">&mdash; scegli &mdash;</option>';
-  NIL.features.map(function(f){return f.properties}).filter(function(p){return p.s!=='senza'}).sort(function(a,b){return a.n.localeCompare(b.n,'it')}).forEach(function(p){h+='<option value="'+p.i+'">'+esc(p.n)+'</option>'});
-  sn.innerHTML=h;sn.onchange=function(){if(sn.value)selNil(+sn.value,true)};
-  document.getElementById('v-nil').onclick=function(){setVista('nil')};document.getElementById('v-hex').onclick=function(){setVista('hex')};
-  legend1();
-  if(EXT){document.getElementById('ctl-modo').style.display='';document.getElementById('m-10').onclick=function(){setModo('10')};document.getElementById('m-20').onclick=function(){setModo('20')}}
-}
-function setModo(m){
-  modo=m;document.getElementById('m-10').classList.toggle('on',m==='10');document.getElementById('m-20').classList.toggle('on',m==='20');
-  nilLayer.setStyle(nilStyle);if(selLayer)selLayer.setStyle({color:'#000',weight:3});
-  hex1.recolor(hexColorScore);
-  legend1();
-  document.getElementById('map1').setAttribute('aria-label',m==='20'?'Mappa del punteggio con gli extra, da 0 a 20, per quartiere di Milano':'Mappa del punteggio dei servizi a 15 minuti per quartiere di Milano');
-  if(sel!=null)card(NBY[sel]);
-}
-function setVista(v){
-  vista=v;document.getElementById('v-nil').classList.toggle('on',v==='nil');document.getElementById('v-hex').classList.toggle('on',v==='hex');
-  if(v==='hex'){map1.removeLayer(nilLayer);hex1.addTo(map1)}else{map1.removeLayer(hex1);nilLayer.addTo(map1);if(selLayer)selLayer.bringToFront()}
-  legend1();
-}
-var GOLD='#f2b600';
-function premium(k){return !!(EXT&&EXT.hex.p20[k]>=200&&HX.nil[k]!==73)}
-function legend1(){
-  var g=vista==='hex'&&EXT?'<span><i style="background:'+GOLD+';border-color:#8a6d00"></i><b>oro: premium, 20 su 20</b></span>':'';
-  if(modo==='20')legend('lg1',CSC,LSC20,g+'<span class="sub">punteggio medio con gli extra, da 0 a 20</span>');else legend('lg1',CSC,LSC,g+'<span class="sub">punteggio medio, da 0 a 10</span>');
-}
-function hexColorScore(k){return HX.nil[k]===73?GREY:premium(k)?GOLD:modo==='20'&&EXT?CSC[binS20(EXT.hex.p20[k]/10)]:CSC[binS(HX.p[k]/10)]}
-function hexCard(k){
-  var nil=NBY[HX.nil[k]],pr=premium(k),h='<h3 style="margin-top:.2em">Esagono da 100 m'+(nil?' &middot; '+esc(nil.n):'')+'</h3>';
-  if(pr)h+='<p style="margin:.3em 0"><span style="display:inline-block;background:'+GOLD+';color:#111;font-weight:800;padding:2px 10px;border-radius:12px;letter-spacing:.04em">&#9733; PREMIUM &middot; 20 SU 20</span> <span class="sub">tutti i civici dell&rsquo;esagono hanno tutti e 20 i servizi entro 15 minuti a piedi</span></p>';
-  h+='<p style="margin:.2em 0"><span style="font-size:1.8rem;font-weight:700;color:var(--acc)">'+f1(HX.p[k]/10)+'</span> su 10 essenziali';
-  if(EXT)h+=' &middot; <span style="font-size:1.3rem;font-weight:700;color:var(--acc)">'+f1(EXT.hex.p20[k]/10)+'</span> su 20 con gli extra';
-  h+=' &middot; '+HX.n[k]+' civici (punteggio medio dei civici)';
-  if(HC&&!pr&&HC.top[k]>0)h+=' &middot; con 20 su 20: '+HC.top[k]+'% dei civici';
-  h+='</p>';
-  if(HC&&HC.cap[k]>=0){var c=HC.cap[k];h+='<p class="sub" style="margin:.2em 0">CAP '+HC.caps[c]+(HC.cq[k]<100?' (per il '+HC.cq[k]+'% dei civici)':'')+': reddito imponibile medio 2024 <b>'+f0(HC.red[c])+' euro</b> per contribuente (dato del CAP intero, non dell&rsquo;esagono).</p>'}
-  function riga(lab,v){var ok=v>=0&&v<=150;return '<tr><td>'+esc(lab)+'</td><td class="r">'+(v<0?'oltre 43 min':f1(v/10)+' min')+'</td><td style="color:'+(ok?'#00695c':'#b00020')+';font-weight:700">'+(ok?'&#10003;':'&#10007;')+'</td></tr>'}
-  var t1='<table><tr><th>Servizio essenziale</th><th class="r">A piedi</th><th></th></tr>';TIPI.forEach(function(t){t1+=riga(ETI[t],HX.t[t][k])});t1+='</table>';
-  var t2='';if(EXT){t2='<table><tr><th>Servizio extra</th><th class="r">A piedi</th><th></th></tr>';EXT.ordine.forEach(function(t){t2+=riga(EXT.etichette[t],EXT.hex.t[t][k])});t2+='</table>'}
-  h+='<div class="grid2"><div class="scroll">'+t1+'</div><div class="scroll">'+t2+'</div></div>';
-  h+='<p class="src">Minuti: mediana dei civici dentro l&rsquo;esagono, fino al servizio più vicino lungo le strade. &#10003; = entro 15 minuti.'+(nil&&nil.s!=='senza'?' <a href="#" id="card-nil">Vai alla scheda del quartiere '+esc(nil.n)+'</a>':'')+'</p>';
-  document.getElementById('card').innerHTML=h;
-  var a=document.getElementById('card-nil');if(a)a.onclick=function(ev){ev.preventDefault();selNil(HX.nil[k],false)};
-}
-function selNil(i,zoom){
-  sel=i;var p=NBY[i];document.getElementById('sel-nil').value=i;
-  if(selLayer){nilLayer.resetStyle(selLayer);selLayer=null}
-  nilLayer.eachLayer(function(l){if(l.feature.properties.i===i){selLayer=l;l.setStyle({color:'#000',weight:3});if(vista==='nil')l.bringToFront();if(zoom)map1.fitBounds(l.getBounds(),{maxZoom:14,padding:[20,20]})}});
-  card(p);
-}
-function card(p){
-  var h='<h3 style="margin-top:.2em">'+esc(p.n)+'</h3>';
-  if(p.s==='senza'){h+='<p>Nessun residente.</p>'}
-  else if(p.s==='nonaff'){h+='<p><b>Dato non affidabile.</b> Nel registro dei civici del Comune questo nuovo quartiere (ex Expo) ha solo '+p.c+' indirizzi e i servizi recenti mancano nei dati: il punteggio non è mostrato né messo in classifica. Residenti 2025: '+f0(p.r)+'.</p>'}
-  else{
-    var rk=null;
-    var ee=EXT&&EXT.nil[p.i];
-    if(modo==='20'&&ee)h+='<p style="margin:.2em 0"><span style="font-size:1.8rem;font-weight:700;color:var(--acc)">'+f1(ee[1])+'</span> su 20 con gli extra ('+f1(p.p)+' su 10 essenziali + '+f1(ee[0])+' su 10 extra) &middot; tutti e 20 i servizi entro 15 minuti: <b>'+pc(ee[2],1)+'</b> dei residenti</p>';
-    h+='<p style="margin:.2em 0"><span style="font-size:'+(modo==='20'&&ee?'1.1rem':'1.8rem')+';font-weight:700;color:var(--acc)">'+f1(p.p)+'</span> su 10 &middot; residenti 2025: <b>'+f0(p.r)+'</b> &middot; con tutti i 10 servizi entro 15 minuti: <b>'+pc(p.t)+'</b> dei residenti &middot; punteggio entro 10 minuti: '+f1(p.p10)+'</p>';
-    if(p.s==='pochi')h+='<p class="sub">Non in classifica: '+(p.c<30?'meno di 30 civici ('+p.c+')':'')+(p.c<30&&p.r<1000?' e ':'')+(p.r<1000?'meno di 1.000 residenti':'')+'. Pochi indirizzi bastano a cambiare tutto.</p>';
-    var meta=[],parte=[];
-    TIPI.forEach(function(t,k){var q=p.q[k];if(q<.5)meta.push([ETI[t],q]);else if(q<.9)parte.push([ETI[t],q])});
-    meta.sort(function(a,b){return a[1]-b[1]});parte.sort(function(a,b){return a[1]-b[1]});
-    h+='<p>'+(meta.length?'<b>Oltre 15 minuti a piedi per più della metà dei residenti:</b> '+meta.map(function(z){return esc(z[0])+' ('+pc(z[1])+' arriva)'}).join('; ')+'.':'<b>Nessun servizio è oltre 15 minuti per la maggioranza dei residenti.</b>')+(parte.length?' Oltre 15 minuti per una parte (10-50%): '+parte.map(function(z){return esc(z[0])+' ('+pc(z[1])+' arriva)'}).join('; ')+'.':'')+'</p>';
-    h+='<div class="scroll"><table><tr><th>Servizio</th><th class="r">Residenti entro 15 min</th></tr>';
-    var ord=TIPI.map(function(t,k){return[t,p.q[k]]}).sort(function(a,b){return a[1]-b[1]});
-    ord.forEach(function(z){h+='<tr><td>'+esc(ETI[z[0]])+'</td><td class="r"><span class="bar" style="width:'+Math.round(z[1]*80)+'px"></span>'+pc(z[1])+'</td></tr>'});
-    h+='</table></div>';
-    if(ee){
-      var eo=EXT.ordine.map(function(t,k){return[t,ee[3+k]]}).sort(function(a,b){return a[1]-b[1]});
-      h+='<details'+(modo==='20'?' open':'')+'><summary>Servizi extra: '+f1(ee[0])+' su 10 (con gli extra '+f1(ee[1])+' su 20)</summary><div class="scroll"><table><tr><th>Servizio extra</th><th class="r">Residenti entro 15 min</th></tr>';
-      eo.forEach(function(z){h+='<tr><td>'+esc(eti(z[0]))+'</td><td class="r"><span class="bar" style="width:'+Math.round(z[1]*80)+'px"></span>'+pc(z[1])+'</td></tr>'});
-      h+='</table></div></details>';
-    }
-  }
-  document.getElementById('card').innerHTML=h;
+/* ---------- numeri grandi ---------- */
+function weakest(o){var m=1,k=-1;o.q.forEach(function(v,i){if(v<m){m=v;k=i}});return m<0.9?{t:TIPI[k],q:m}:null}
+function highlights(){
+  var c=M.citta,cp=M.cap,te=cp.terzi,q5=HX.t.vicinato,n=HX.n,tot=0,ok5=0;
+  for(var i=0;i<n.length;i++){tot+=n[i];if(q5[i]>=0&&q5[i]<=50)ok5+=n[i]}
+  var nb=0,nn=0;N.forEach(function(o){if(o.s==='ok'||o.s==='pochi'){nn++;var w=weakest(o);if(w&&w.t==='biblioteche')nb++}});
+  var H=[
+    {c:C.mi,h:'t-mappa',n:f1(c.p)+'<small> su 10</small>',p:'servizi raggiunti in media a piedi in 15 minuti da un milanese.'},
+    {c:C.m3,h:'t-quanti',n:pc(c.tutti),p:'dei milanesi li raggiunge tutti e 10. Con 9 su 10 ci sono altri '+pc(c.distribuzione['9'])+'.'},
+    {c:C.m2,h:'t-cursore',n:pc(cityQ('biblioteche')),p:'dei milanesi arriva a una biblioteca in 15 minuti: è il servizio che manca di più.'},
+    {c:C.m4,h:'t-manca',n:nb+'<small> su '+nn+'</small>',p:'quartieri in cui il servizio che manca di più è la biblioteca.'},
+    {c:C.m5,h:'t-reddito',n:f1(te.basso.punteggio)+'<small>&rarr;</small>'+f1(te.alto.punteggio),p:'servizi su 10 nel terzo di CAP più povero e nel terzo più ricco: il reddito conta poco.'},
+    {c:C.ora,h:'t-cursore',n:f0(ok5/tot*100)+'<small>%</small>',p:'degli indirizzi ha un negozio alimentare entro 5 minuti a piedi.'}
+  ];
+  $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
-/* ---------- esagoni (canvas) ---------- */
-function hexLayer(map,colorFn,tipFn,clickFn){
-  var rend=L.canvas({padding:.3}),grp=L.featureGroup(),DX=.00064,DY=.00052,DS=.00026,tip=L.tooltip({sticky:true,direction:'top'}),polys=[];
-  for(var k=0;k<HX.x.length;k++){
-    var cx=HX.x[k]/1e5,cy=HX.y[k]/1e5;
-    var pl=L.polygon([[cy+DY,cx],[cy+DS,cx+DX],[cy-DS,cx+DX],[cy-DY,cx],[cy-DS,cx-DX],[cy+DS,cx-DX]],{renderer:rend,stroke:true,weight:.8,opacity:.85,color:colorFn(k),fillColor:colorFn(k),fillOpacity:.85,interactive:true});
-    pl._k=k;polys.push(pl);grp.addLayer(pl);
-  }
-  grp.on('mouseover',function(e){var k=e.layer._k;e.layer.bindTooltip(tipFn(k),{sticky:true}).openTooltip(e.latlng)});
-  grp.on('mouseout',function(e){e.layer.unbindTooltip()});
-  grp.on('click',function(e){clickFn(e.layer._k,e)});
-  grp._polys=polys;
-  grp.recolor=function(fn){polys.forEach(function(pl){var c=fn(pl._k);pl.setStyle({fillColor:c,color:c})})};
-  return grp;
+/* ---------- tutto ---------- */
+function tutto(){
+  $('elenco').innerHTML=N.filter(function(o){return o.s!=='senza'}).sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  var q=$('q');
+  function trova(k){var m=N.filter(function(x){return x.s!=='senza'&&(nz(x.n)===k||nz(x.sn)===k)});return m.length===1?m[0]:null}
+  q.addEventListener('input',function(){var k=nz(q.value),c=k?trova(k):null;if(c)pick(c.id,false);else if(!k)pick(null,false)});
+  q.addEventListener('change',function(){var k=nz(q.value);if(!k)return;var c=trova(k);if(c){pick(c.id,false);return}
+    var m=N.filter(function(x){return x.s!=='senza'&&(nz(x.n).indexOf(k)===0||nz(x.sn).indexOf(k)===0)});
+    if(m.length===1)pick(m[0].id,false);else if(m.length>1)$('ris').innerHTML='Ci sono più quartieri che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'.';
+    else $('ris').innerHTML='Non trovo questo quartiere: scegli dall’elenco che si apre scrivendo.'});
+  document.addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('[data-n]');if(p)pick(+p.getAttribute('data-n'),false,true)});
+  draw(cursore);draw(manca);draw(mappa);draw(quanti);draw(servizio);draw(reddito);
+  initA();initServizio();anni();scheda();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()});scheda()},150)});
+}
+function pick(id,scrivi,daGrafico){
+  sel=id;if(id&&!scrivi&&daGrafico)$('q').value=BY[id].n;else if(id&&!daGrafico&&!scrivi)$('q').value=BY[id].n;
+  scheda();RD.forEach(function(f){f()});
 }
 
-/* ---------- mappa 2: un servizio alla volta ---------- */
-var map2,hex2,tipo='farmacie';
-function minStr(v){return v<0?'oltre 43 minuti':f1(v/10)+' min'}
-function initMap2(){
-  map2=baseMap('map2');
-  map2.fitBounds(nilLayer.getBounds());
-  hex2=hexLayer(map2,function(k){return tColor(k)},function(k){
-    return HX.nil[k]===73?'Cascina Merlata: dato non affidabile':esc(eti(tipo))+': '+minStr(TA(tipo)[k])+' a piedi ('+HX.n[k]+' civici)'+(NBY[HX.nil[k]]?' &middot; '+esc(NBY[HX.nil[k]].n):'');
-  },function(){});
-  hex2.addTo(map2);
-  var s=document.getElementById('sel-tipo'),h='<optgroup label="I 10 servizi essenziali">';TIPI.forEach(function(t){h+='<option value="'+t+'">'+esc(ETI[t])+'</option>'});h+='</optgroup>';
+/* ---------- il quartiere scelto ---------- */
+function scheda(){
+  var r=$('ris');
+  if(!sel){r.style.borderLeftColor='';r.innerHTML='Scrivi un quartiere o toccalo sulla mappa: qui vedi quanto è servito.';return}
+  var o=BY[sel],h='';r.style.borderLeftColor=C.mi;
+  if(o.s==='nonaff'){r.innerHTML='<b class="big">'+esc(o.n)+'</b>Dato non affidabile: nel registro degli indirizzi del Comune questo nuovo quartiere (ex Expo) ha solo '+o.c+' indirizzi e i servizi recenti mancano nei dati. Il punteggio non è mostrato. Residenti 2025: '+f0(o.r)+'.';return}
+  var w=weakest(o);
+  h='<b class="big">'+esc(o.n)+': '+f1(o.p)+' servizi su 10</b>'+
+   (o.rk?'Posto '+o.rk+' su '+okN().length+' quartieri. ':'<span style="color:var(--mut)">Quartiere piccolo, fuori dalla classifica. </span>')+
+   'Residenti 2025: '+f0(o.r)+'. Tutti e 10 i servizi entro 15 minuti: '+pc(o.t)+' dei residenti.'+
+   '<p>'+(w?'Quello che manca di più: <b>'+esc(ETI[w.t].toLowerCase())+'</b>, la raggiunge il '+pc(w.q)+' dei residenti.':'<b>Niente che manchi</b>: ogni servizio è raggiunto da almeno il 90% dei residenti.')+'</p>'+
+   '<div class="ch" id="ch-sch"></div>';
+  r.innerHTML=h;
+  var ord=TIPI.map(function(t,k){return[t,o.q[k]]}).sort(function(a,b){return a[1]-b[1]});
+  var W=Math.max(250,$('ch-sch').clientWidth||300),s=svgOpen(W,ord.length*24+2);
+  ord.forEach(function(z,i){var y=i*24+2,lw=Math.min(150,W*.45),bw=W-lw-44;
+    s+=T(0,y+14,esc(sn(z[0])),{st:'font-size:12px'})+hbar(lw,lw+Math.max(1,bw*z[1]),y+3,14,z[1]<.5?C.mi:C.m4)+T(lw+Math.max(1,bw*z[1])+4,y+15,pc(z[1]),{c:'k'})});
+  $('ch-sch').innerHTML=s+'</svg>';
+}
+
+/* ---------- il cursore dei minuti ---------- */
+function minShare(t,m){var v=HX.t[t],n=HX.n,a=0,b=0,lim=m*10;for(var i=0;i<v.length;i++){b+=n[i];if(v[i]>=0&&v[i]<=lim)a+=n[i]}return a/b}
+function initA(){$('minuti').addEventListener('input',function(){$('minuti-v').textContent=this.value;cursore()})}
+function cursore(){
+  var m=+$('minuti').value,rows=TIPI.map(function(t){return{t:t,q:minShare(t,m)}}).sort(function(a,b){return b.q-a.q}),tot=0;
+  rows.forEach(function(r){tot+=r.q});
+  var best=rows[0],worst=rows[rows.length-1];
+  $('t-cursore').textContent='A '+m+' minut'+(m===1?'o':'i')+' a piedi il tuo indirizzo ha in media '+f1(tot)+' servizi su 10';
+  $('s-cursore').textContent='Muovi il cursore: ogni barra dice quanti indirizzi di Milano raggiungono quel servizio nei minuti scelti. A 15 minuti si vede quello che manca.';
+  $('mn-n').textContent=f1(tot);
+  $('mn-t').textContent='servizi su 10 raggiunti in media. Il più facile: '+sn(best.t).toLowerCase()+' ('+pc(best.q)+'). Il più difficile: '+sn(worst.t).toLowerCase()+' ('+pc(worst.q)+').';
+  var W=width('ch-cursore'),rh=28,s=svgOpen(W,rows.length*rh+22),lw=Math.min(158,W*.46),bw=W-lw-46;
+  s+=L(lw,0,lw,rows.length*rh,C.axis,1);
+  [0.5,1].forEach(function(v){s+=L(lw+bw*v,0,lw+bw*v,rows.length*rh,C.grid,1)+T(lw+bw*v,rows.length*rh+15,pc(v),{a:v===1?'end':'middle',c:'m'})});
+  s+=T(lw,rows.length*rh+15,'0%',{a:'start',c:'m'});
+  rows.forEach(function(r,i){var y=i*rh+5,col=r.q<0.5?C.mi:C.m4;
+    s+=T(lw-8,y+14,esc(sn(r.t)),{a:'end',st:'font-size:12px'})+hbar(lw,lw+bw*r.q,y,18,col,tip('<b>'+esc(ETI[r.t])+'</b><br>'+pc(r.q,1)+' degli indirizzi in '+m+' min'))+T(lw+bw*r.q+4,y+14,pc(r.q),{c:'k'})});
+  $('ch-cursore').innerHTML=s+'</svg>';
+}
+
+var CAT={biblioteche:{c:C.m4,w:'#fff',n:'Biblioteca'},poste:{c:C.m3,w:'#0b0d12',n:'Ufficio postale'},parchi:{c:C.m2,w:'#fff',n:'Parco'},altro:{c:C.m5,w:'#fff',n:'Altro servizio'},nessuno:{c:'#ffffff',w:'#0b0d12',n:'Niente che manchi'}};
+function catOf(o){if(o.s!=='ok'&&o.s!=='pochi')return null;var w=weakest(o);if(!w)return'nessuno';return CAT[w.t]?w.t:'altro'}
+function manca(){
+  var W=width('ch-manca'),P=proj(W),s=svgOpen(W,P.H),lab='',cnt={},tot=0,sS='';
+  N.forEach(function(o){var c=catOf(o),b=P.bb(o.f),isS=o.id===sel;
+    var col=c?CAT[c].c:'#c3c8d0';if(c){cnt[c]=(cnt[c]||0)+1;tot++}
+    var w=c&&c!=='nessuno'?weakest(o):null;
+    var tp='<b>'+esc(o.n)+'</b><br>'+(c?(w?'Manca di più: '+esc(ETI[w.t].replace(/ \(.*\)/,'').toLowerCase())+' ('+pc(w.q)+' dei residenti arriva)':'Niente che manchi: ogni servizio arriva ad almeno il 90%'):(o.s==='nonaff'?'Dato non affidabile':'Senza residenti'));
+    var el='<path d="'+P.path(o.f)+'" fill="'+col+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+'/>';
+    if(isS)sS=el;else s+=el;
+    if(w&&b.w>=40&&b.h>=17)lab+=T(Math.min(Math.max(b.x,14),W-14),b.y+4,f0(w.q*100),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+CAT[c].w})});
+  s+=sS+lab;
+  $('ch-manca').innerHTML=s+'</svg>';
+  var order=['biblioteche','poste','parchi','altro','nessuno'];
+  $('lg-manca').innerHTML=order.map(function(k){return '<span><i style="background:'+CAT[k].c+(k==='nessuno'?';border:1px solid '+C.axis:'')+'"></i>'+CAT[k].n+' <b>&nbsp;'+(cnt[k]||0)+'</b></span>'}).join('')+'<span><i style="background:#c3c8d0"></i>senza dato <b>&nbsp;2</b></span>';
+  $('t-manca').textContent='In '+cnt.biblioteche+' quartieri su '+tot+' il servizio che manca di più è la biblioteca';
+  $('s-manca').textContent='Ogni quartiere ha il colore del servizio che meno residenti raggiungono in 15 minuti. Il numero scritto è la quota di residenti che ci arriva.';
+  $('nn-manca').textContent='La biblioteca è l’unico servizio sotto il 50% in tutta la città. «Altro» sono farmacie, medici e mercati dei pochi quartieri dove mancano. Il quartiere scelto ha il bordo rosso.';
+}
+
+/* ---------- mappa del punteggio ---------- */
+var SC=['#7FB5E3','#4A97D6','#0072BC','#00508A','#002E52'],SCT=['#0b0d12','#0b0d12','#fff','#fff','#fff'];
+function classi(){
+  var v=N.filter(function(o){return o.s==='ok'||o.s==='pochi'}).map(function(o){return o.p}).sort(function(a,b){return a-b}),n=v.length;
+  var th=[1,2,3,4].map(function(i){return Math.round(v[Math.floor(n*i/5)]*10)/10});
+  return th;
+}
+function mappa(){
+  var W=width('ch-mappa'),P=proj(W),s=svgOpen(W,P.H),lab='',th=classi(),cnt=[0,0,0,0,0],sS='';
+  function bin(p){return p<th[0]?0:p<th[1]?1:p<th[2]?2:p<th[3]?3:4}
+  var big=0,nn=0;
+  N.forEach(function(o){var ok=o.s==='ok'||o.s==='pochi',b=P.bb(o.f),isS=o.id===sel,c=ok?bin(o.p):-1;if(ok){cnt[c]++;nn++;if(o.p>=9)big++}
+    var col=ok?SC[c]:o.s==='nonaff'?'#c3c8d0':'#e6e8ec';
+    var tp='<b>'+esc(o.n)+'</b><br>'+(ok?f1(o.p)+' servizi su 10 · '+f0(o.r)+' residenti'+(o.rk?' · posto '+o.rk+' su 75':' · quartiere piccolo'):o.s==='nonaff'?'Dato non affidabile':'Senza residenti');
+    var el='<path d="'+P.path(o.f)+'" fill="'+col+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+'/>';
+    if(isS)sS=el;else s+=el;
+    if(ok&&!isS&&b.w>=30&&b.h>=17)lab+=T(Math.min(Math.max(b.x,12),W-12),b.y+4,f1(o.p),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+SCT[c]})});
+  s+=sS+lab;
+  if(sel&&BY[sel]){var o=BY[sel],b=P.bb(o.f),t=o.sn,w=tw(t,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),y=Math.max(14,Math.min(P.H-4,b.y-b.h/2-5));
+    s+='<g pointer-events="none">'+T(x,y,esc(t),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
+  $('ch-mappa').innerHTML=s+'</svg>';
+  var lb=['meno di '+f1(th[0]),f1(th[0])+' – '+f1(th[1]),f1(th[1])+' – '+f1(th[2]),f1(th[2])+' – '+f1(th[3]),f1(th[3])+' e più'];
+  $('lg-mappa').innerHTML=SC.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+lb[i]+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#c3c8d0"></i>senza dato <b>&nbsp;1</b></span>';
+  $('t-mappa').textContent='In '+big+' quartieri su '+nn+' si raggiungono almeno 9 servizi su 10 a piedi';
+  $('s-mappa').textContent='Più il blu è scuro, più servizi si raggiungono in 15 minuti. I colori dividono i quartieri in cinque gruppi di numero simile. Tocca un quartiere per leggerlo.';
+  $('nn-mappa').textContent='In grigio Cascina Merlata, dove il dato non è affidabile (vedi i limiti dei dati). Il quartiere senza residenti è in grigio chiaro.';
+}
+
+/* ---------- quanti servizi ---------- */
+function quanti(){
+  var d=M.citta.distribuzione,W=width('ch-quanti'),rh=26,s=svgOpen(W,11*rh+2),lw=88,bw=W-lw-52,mx=0;
+  for(var k=0;k<=10;k++)mx=Math.max(mx,d[k]);
+  for(k=10;k>=0;k--){var i=10-k,y=i*rh+3,v=d[k];
+    s+=T(lw-8,y+15,k+(k===1?' servizio':' servizi'),{a:'end',st:'font-size:12px'+(k===10?';font-weight:800':'')})+hbar(lw,lw+bw*v/mx,y,19,k===10?C.m2:'#4cc58a',tip('<b>'+k+' servizi su 10</b><br>'+pc(v,1)+' dei residenti'))+T(lw+bw*v/mx+4,y+15,v<.1?pc(v,1):pc(v),{c:'k'})}
+  $('ch-quanti').innerHTML=s+'</svg>';
+  var c=M.citta;
+  $('t-quanti').textContent='Il '+pc(c.tutti)+' dei milanesi raggiunge tutti e 10 i servizi; il '+pc(d['9'])+' ne raggiunge 9';
+  $('s-quanti').textContent='Per ogni numero di servizi raggiunti in 15 minuti, la quota dei residenti di Milano che sta in quel gruppo.';
+}
+
+/* ---------- un servizio alla volta ---------- */
+var tipo='farmacie',HC2=[],GRID={};
+var TC=['#3DD1C6','#00A19A','#00605C',C.ora,'#8C3A00'],TL=['fino a 5 minuti','5 – 10 minuti','10 – 15 minuti','15 – 30 minuti','oltre 30 minuti'];
+function TA(t){return HX.t[t]||EXT.hex.t[t]}
+function eti(t){return ETI[t]||(EXT&&EXT.etichette[t])||t}
+function tbin(v){return v<0?4:v<=50?0:v<=100?1:v<=150?2:v<=300?3:4}
+function initServizio(){
+  var s=$('sel-tipo'),h='<optgroup label="I 10 servizi essenziali">';TIPI.forEach(function(t){h+='<option value="'+t+'">'+esc(ETI[t])+'</option>'});h+='</optgroup>';
   if(EXT){h+='<optgroup label="Servizi extra">';EXT.ordine.forEach(function(t){h+='<option value="'+t+'">'+esc(EXT.etichette[t])+'</option>'});h+='</optgroup>'}
-  s.innerHTML=h;
-  s.onchange=function(){setTipo(s.value)};
-  legend('lg2',CTM,LTM);setTipo('farmacie');
+  s.innerHTML=h;s.value=tipo;s.onchange=function(){tipo=s.value;servizio()};
 }
-function tColor(k){var v=TA(tipo)[k];return HX.nil[k]===73?GREY:CTM[binT(v<0?-1:v/10)]}
-function setTipo(t){
-  tipo=t;document.getElementById('sel-tipo').value=t;hex2.recolor(tColor);
-  var isx=!HX.t[t],r=(isx?EXT.tipi:M.tipi).filter(function(z){return z.t===t})[0];
-  var n=t==='mercati'?' Include i mercati settimanali (aperti 1-2 giorni a settimana); con i soli mercati coperti arriva il 37% dei residenti.':t==='nidi'?' Dati degli asili nido: anno scolastico 2018/19.':t==='parchi'?' Parchi di almeno 5.000 m²; il Parco Agricolo Sud non è nei dati.':t==='biblioteche'?' Solo le 26 sedi del Sistema bibliotecario; con le biblioteche di OpenStreetMap si arriva al '+pc(M.citta.biblio_osm.quota_residenti_entro15)+'.':'';
-  if(isx)n=' '+extraNota(t);
-  document.getElementById('tipo-nota').innerHTML='<b>'+esc(eti(t))+':</b> '+pc(r.q,1)+' dei residenti arriva in 15 minuti; tempo mediano '+f1(r.med)+' minuti.'+n;
-  document.querySelectorAll('#tab-tipi tr.click').forEach(function(tr){tr.classList.toggle('sel',tr.getAttribute('data-t')===t)});
-}
-function tabTipi(){
-  var h='<tr><th>Servizio</th><th class="r">Residenti entro 15 min</th><th class="r">Minuti mediani</th></tr>';
-  M.tipi.forEach(function(r){h+='<tr class="click" data-t="'+r.t+'"><td>'+esc(ETI[r.t])+'</td><td class="r"><span class="bar" style="width:'+Math.round(r.q*100)+'px"></span>'+pc(r.q,1)+'</td><td class="r">'+f1(r.med)+'</td></tr>'});
-  if(EXT){h+='<tr><th colspan="3" style="padding-top:14px;color:var(--ink)">Servizi extra <span class="sub" style="font-weight:400">(a parte: non fanno parte del punteggio a 10)</span></th></tr>';
-    EXT.tipi.forEach(function(r){h+='<tr class="click" data-t="'+r.t+'"><td>'+esc(EXT.etichette[r.t])+' <span class="sub">&middot; '+f0(r.n)+' punti</span></td><td class="r"><span class="bar" style="width:'+Math.round(r.q*100)+'px"></span>'+pc(r.q,1)+'</td><td class="r">'+f1(r.med)+'</td></tr>'})}
-  var tb=document.getElementById('tab-tipi');tb.innerHTML=h;
-  tb.querySelectorAll('tr.click').forEach(function(tr){tr.onclick=function(){setTipo(tr.getAttribute('data-t'));document.getElementById('map2').scrollIntoView({behavior:'smooth',block:'center'})}});
-  setTipo(tipo);
-}
-
-/* ---------- scatter ---------- */
-function scatter(){
-  var cp=M.cap,L_=cp.lista,box=document.getElementById('scatter');
-  var w=Math.max(280,box.clientWidth||600),narrow=w<560,H=narrow?320:400,ml=narrow?38:50,mr=12,mt=14,mb=narrow?44:50,pw=w-ml-mr,ph=H-mt-mb;
-  var x0=15000,x1=90000,y0=7,y1=10;
-  function X(v){return ml+(v-x0)/(x1-x0)*pw} function Y(v){return mt+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg class="sc" viewBox="0 0 '+w+' '+H+'" width="'+w+'" height="'+H+'" role="img" aria-label="Punteggio dei servizi e reddito imponibile medio per CAP">';
-  for(var v=7;v<=10;v+=1){s+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e5e5e5"/><text class="mu" x="'+(ml-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>'}
-  var xt=narrow?[20000,40000,60000,80000]:[20000,30000,40000,50000,60000,70000,80000,90000];
-  xt.forEach(function(v){s+='<line x1="'+X(v)+'" x2="'+X(v)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph+4)+'" stroke="#999"/><text class="mu" x="'+X(v)+'" y="'+(mt+ph+17)+'" text-anchor="middle">'+(v/1000)+(narrow?'':' mila')+'</text>'});
-  s+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph)+'" stroke="#111"/><line x1="'+ml+'" x2="'+ml+'" y1="'+mt+'" y2="'+(mt+ph)+'" stroke="#111"/>';
-  s+='<text class="mu" x="'+(ml+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+(narrow?'Reddito imponibile medio, 2024 (mila euro)':'Reddito imponibile medio per contribuente, 2024 (euro)')+'</text>';
-  s+='<text class="mu" transform="translate(12,'+(mt+ph/2)+') rotate(-90)" text-anchor="middle">Punteggio medio (asse da 7 a 10)</text>';
-  var pt=[];for(var r=20000;r<=87000;r+=1500){var yv=cp.retta[0]*Math.log(r)+cp.retta[1];pt.push((pt.length?'L':'M')+X(r).toFixed(1)+' '+Y(Math.min(y1,yv)).toFixed(1))}
-  s+='<path d="'+pt.join('')+'" fill="none" stroke="#111" stroke-width="1.4" stroke-dasharray="6 4"/>';
-  var lab={};cp.meno_del_previsto.concat(cp.piu_del_previsto).forEach(function(z){if(Math.abs(z.z)>=1.5)lab[z.cap]=1});cp.poveri_serviti.concat(cp.ricchi_poco).forEach(function(z){lab[z.cap]=1});
-  var placed=[],pts=L_.map(function(z){return{x:X(z.red),y:Y(z.p)}});
-  function free(b){
-    for(var i=0;i<placed.length;i++){var o=placed[i];if(b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1])return false}
-    for(var j=0;j<pts.length;j++){if(pts[j].x>b[0]-6&&pts[j].x<b[2]+6&&pts[j].y>b[1]-6&&pts[j].y<b[3]+6)return false}
-    return b[0]>=ml-4&&b[2]<=w-2&&b[1]>=mt-2&&b[3]<=mt+ph+2;
-  }
-  var labs='';
-  L_.forEach(function(z,i){
-    var cx=pts[i].x,cy=pts[i].y,hl=lab[z.cap];
-    s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+(hl?6:5)+'" data-c="'+z.cap+'" fill="'+(hl?'#00695c':'#fff')+'" fill-opacity=".9" stroke="#00695c" stroke-width="1.6"><title>'+z.cap+' '+esc(z.zona)+': '+f0(z.red)+' euro, punteggio '+f1(z.p)+'</title></circle>';
-  });
-  L_.forEach(function(z,i){
-    if(!lab[z.cap])return;var cx=pts[i].x,cy=pts[i].y,W=36,Hh=13;
-    var cand=[[cx+9,cy+4,'start'],[cx-9,cy+4,'end'],[cx-W/2,cy-10,'start'],[cx-W/2,cy+19,'start'],[cx+9,cy-9,'start'],[cx-9,cy-9,'end'],[cx+9,cy+17,'start'],[cx-9,cy+17,'end']],pick=cand[0];
-    for(var k=0;k<cand.length;k++){var c=cand[k],x0b=c[2]==='end'?c[0]-W:c[0];if(free([x0b,c[1]-Hh+2,x0b+W,c[1]+3])){pick=c;break}}
-    var x0b=pick[2]==='end'?pick[0]-W:pick[0];placed.push([x0b,pick[1]-Hh+2,x0b+W,pick[1]+3]);
-    labs+='<text x="'+pick[0].toFixed(1)+'" y="'+pick[1].toFixed(1)+'" text-anchor="'+pick[2]+'" font-weight="700" style="fill:#00695c;pointer-events:none">'+z.cap+'</text>';
-  });
-  s+=labs;
-  s+='</svg>';box.innerHTML=s;
-  var BY={};L_.forEach(function(z){BY[z.cap]=z});
-  function show(el){var z=BY[el.getAttribute('data-c')];document.getElementById('sc-info').innerHTML='<b>CAP '+z.cap+'</b> ('+esc(z.zona)+', zona prevalente): reddito imponibile medio '+f0(z.red)+' euro; punteggio <b>'+f1(z.p)+'</b> su 10 (la tendenza prevede '+f1(z.prev)+'); circa '+f0(z.res)+' residenti.'}
-  box.querySelectorAll('circle').forEach(function(el){el.addEventListener('mouseover',function(){show(el)});el.addEventListener('click',function(){show(el)})});
-  var d=cp.terzi,low=function(t){return '<b>'+f1(d[t].punteggio)+'</b>'};
-  document.getElementById('sc-testo').innerHTML='Correlazione di Spearman tra reddito e punteggio: <b>'+f2(cp.rho)+'</b>, intervallo di confidenza al 95% '+f2(cp.ic[0])+'&ndash;'+f2(cp.ic[1])+' ('+cp.n+' CAP; intervallo calcolato ricampionando i CAP 5.000 volte). Lo Spearman va da 0 (nessun legame tra l&rsquo;ordine dei CAP per reddito e per punteggio) a 1 (i CAP più ricchi sono sempre i più serviti). Il reddito spiega circa un quarto delle differenze tra CAP (R² '+f2(cp.R2)+'). I '+d.basso.cap+' CAP più poveri (imponibile '+f0(d.basso.red_min)+'-'+f0(d.basso.red_max)+' euro) hanno in media '+low('basso')+' servizi su 10, i '+d.alto.cap+' più ricchi ('+f0(d.alto.red_min)+'-'+f0(d.alto.red_max)+' euro) '+low('alto')+'. Per la sola biblioteca la correlazione è '+f2(cp.cor_tipo.biblioteche)+': il reddito non dice nulla su chi ha una biblioteca vicina; è invece alta per poste ('+f2(cp.cor_tipo.poste)+'), scuole ('+f2(cp.cor_tipo.scuole)+') e farmacie ('+f2(cp.cor_tipo.farmacie)+').';
-}
-function tabEcc(L_){
-  var h='<table><tr><th>CAP, zona prevalente</th><th class="r">Reddito</th><th class="r">Punteggio</th><th class="r">Previsto</th></tr>';
-  L_.forEach(function(z){h+='<tr><td><b>'+z.cap+'</b> '+esc(z.zona)+'</td><td class="r">'+f0(z.red)+'</td><td class="r"><b>'+f1(z.p)+'</b></td><td class="r">'+f1(z.prev)+' ('+(z.z>0?'+':'−')+f1(Math.abs(z.z))+')</td></tr>'});
-  return h+'</table>';
-}
-function eccezioni(){
-  var cp=M.cap,mn=cp.lista.slice().sort(function(a,b){return a.red-b.red})[0],poor=' Il CAP con il reddito più basso ('+mn.cap+', '+esc(mn.zona)+', '+f0(mn.red)+' euro) ha '+f1(mn.p)+' su 10 ('+(Math.abs(mn.p-M.citta.p)<.1?'in linea con la media di città, '+f1(M.citta.p):mn.p<M.citta.p?'sotto la media di città, '+f1(M.citta.p)+', ma non tra i peggiori':'sopra la media di città, '+f1(M.citta.p))+').';
-  document.getElementById('ecc1').innerHTML=tabEcc(cp.meno_del_previsto);document.getElementById('ecc2').innerHTML=tabEcc(cp.piu_del_previsto);
-  var pv=cp.poveri_serviti.map(function(z){return z.cap+' '+z.zona+' (punteggio '+f1(z.p)+')'}).join('; ');
-  document.getElementById('ecc-testo').innerHTML='<b>CAP del terzo più povero e del terzo più servito:</b> '+(pv||'nessuno')+'. <b>CAP del terzo più ricco e del terzo meno servito:</b> '+(cp.ricchi_poco.length?cp.ricchi_poco.map(function(z){return z.cap+' '+z.zona}).join('; '):'nessuno')+'. '+poor;
-}
-
-/* ---------- esagoni e reddito (canvas) ---------- */
-function hexScatter(){
-  var box=document.getElementById('hexsc');if(!HC||!EXT){box.parentNode.removeChild(box);return}
-  var st=HC.stat,w=Math.max(280,box.clientWidth||600),narrow=w<560,H=narrow?330:420,ml=narrow?34:46,mr=12,mt=14,mb=narrow?44:50,pw=w-ml-mr,ph=H-mt-mb;
-  var x0=15000,x1=90000,y0=0,y1=20,dpr=window.devicePixelRatio||1;
-  function X(v){return ml+(v-x0)/(x1-x0)*pw} function Y(v){return mt+ph-(v-y0)/(y1-y0)*ph}
-  function rnd(k,s){var v=Math.sin(k*12.9898+s*78.233)*43758.5453;return v-Math.floor(v)}
-  box.innerHTML='<canvas role="img" aria-label="Punteggio con gli extra di ogni esagono da 100 m e reddito del suo CAP" style="width:'+w+'px;height:'+H+'px;display:block;cursor:crosshair"></canvas>';
-  var cv=box.firstChild;cv.width=w*dpr;cv.height=H*dpr;var g=cv.getContext('2d');g.scale(dpr,dpr);
-  g.font='12px system-ui,Arial,sans-serif';g.fillStyle='#666';g.strokeStyle='#e5e5e5';g.lineWidth=1;
-  for(var v=0;v<=20;v+=5){g.beginPath();g.moveTo(ml,Y(v)+.5);g.lineTo(ml+pw,Y(v)+.5);g.stroke();g.textAlign='right';g.fillText(v,ml-6,Y(v)+4)}
-  var xt=narrow?[20000,40000,60000,80000]:[20000,30000,40000,50000,60000,70000,80000,90000];
-  g.textAlign='center';xt.forEach(function(v){g.fillText((v/1000)+(narrow?'':' mila'),X(v),mt+ph+17)});
-  g.fillText(narrow?'Reddito del CAP, 2024 (mila euro)':'Reddito imponibile medio per contribuente del CAP, 2024 (euro)',ml+pw/2,H-6);
-  g.save();g.translate(12,mt+ph/2);g.rotate(-Math.PI/2);g.fillText('Punteggio dell’esagono con gli extra (0-20)',0,0);g.restore();
-  g.strokeStyle='#111';g.beginPath();g.moveTo(ml,mt);g.lineTo(ml,mt+ph);g.lineTo(ml+pw,mt+ph);g.stroke();
-  var jx=narrow?3:4,gold=[];
-  g.fillStyle='rgba(0,105,92,.22)';
-  for(var k=0;k<HX.x.length;k++){
-    var c=HC.cap[k];if(c<0||HX.nil[k]===73)continue;
-    var px=X(HC.red[c])+(rnd(k,1)-.5)*2*jx,py=Y(Math.min(20,EXT.hex.p20[k]/10+(rnd(k,2)-.5)*.6));
-    if(premium(k)){gold.push([px,py]);continue}
-    g.fillRect(px-1,py-1,2.2,2.2);
-  }
-  g.fillStyle=GOLD;g.strokeStyle='#8a6d00';g.lineWidth=.6;
-  gold.forEach(function(p){g.beginPath();g.arc(p[0],p[1],2.4,0,6.3);g.fill();g.stroke()});
-  g.strokeStyle='#111';g.lineWidth=2;
-  st.per_cap.forEach(function(z){var x=X(z.red),y=Y(z.p20[2]);g.beginPath();g.moveTo(x-jx-3,y);g.lineTo(x+jx+3,y);g.stroke()});
-  function show(ev){
-    var r=cv.getBoundingClientRect(),mx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left,best=null,bd=1e9;
-    st.per_cap.forEach(function(z){var d=Math.abs(X(z.red)-mx);if(d<bd){bd=d;best=z}});
-    if(!best||bd>14)return;
-    document.getElementById('hexsc-info').innerHTML='<b>CAP '+best.cap+'</b> ('+esc(best.zona)+', zona prevalente): reddito '+f0(best.red)+' euro; '+f0(best.esagoni)+' esagoni, mediana <b>'+f1(best.p20[2])+'</b> su 20 (il 10% peggiore sotto '+f1(best.p20[0])+', il 10% migliore sopra '+f1(best.p20[4])+'); premium: <b>'+best.premium+'</b>.';
-  }
-  cv.addEventListener('mousemove',show);cv.addEventListener('click',show);cv.addEventListener('touchstart',show,{passive:true});
-  var t=st.terzi,pc_=st.per_cap.filter(function(z){return z.premium>0}).sort(function(a,b){return b.premium-a.premium}),gu=pc_[0];
-  var minp=st.per_cap.filter(function(z){return z.premium>0}).reduce(function(m,z){return Math.min(m,z.red)},1e9);
-  document.getElementById('hexsc-testo').innerHTML='<b>Gli esagoni premium sono '+f0(st.premium)+'</b> (con '+f0(st.civici_premium)+' civici, il '+pc(st.civici_premium/st.civici,1)+' di quelli di Milano), e stanno tutti nel terzo di esagoni con il reddito del CAP più alto: nessuno nei CAP sotto i '+f0(minp)+' euro. '+(gu?'Il CAP '+gu.cap+' ('+esc(gu.zona)+') da solo ne ha '+gu.premium+'. ':'')+
-   'Con i soli 10 servizi essenziali il legame esagono per esagono è debole (Spearman <b>'+f2(st.rho10)+'</b>); con gli extra (cinema, teatri, metro, ospedali&hellip;) diventa forte (<b>'+f2(st.rho20)+'</b>). Il punteggio mediano degli esagoni va da '+f1(t.basso.p20_mediana)+' su 20 nel terzo più povero a '+f1(t.alto.p20_mediana)+' nel più ricco. '+
-   'Le differenze dentro lo stesso CAP restano grandi: con gli extra il '+pc(1-st.tra_cap20)+' della variabilità tra esagoni è dentro i CAP, non tra un CAP e l&rsquo;altro (con i soli essenziali il '+pc(1-st.tra_cap10)+').';
-}
-
-/* ---------- classifica ---------- */
-function tabRank(L_,start,dir){
-  var h='<table><tr><th>#</th><th>Quartiere (NIL)</th><th class="r">Punteggio</th><th class="r">Residenti</th><th>Servizi oltre 15 minuti per più della metà dei residenti</th></tr>';
-  L_.forEach(function(z,k){
-    var m=z.meta.length>6?'<b>'+z.meta.length+' servizi su 10</b>: resta entro 15 minuti solo '+TIPI.filter(function(t){return !z.meta.some(function(a){return a[0]===t})}).map(function(t){return esc(ETI[t]).toLowerCase()}).join(', ')+' (0% arriva negli altri)':z.meta.length?z.meta.map(function(a){return esc(ETI[a[0]])+' ('+pc(a[1])+' arriva)'}).join('; '):(z.peggio3[0][1]>=.995?'nessuno':'nessuno (il più scarso: '+esc(ETI[z.peggio3[0][0]])+', '+pc(z.peggio3[0][1])+' arriva)');
-    h+='<tr><td>'+(start+dir*k)+'</td><td><b>'+esc(z.n)+'</b></td><td class="r"><b>'+f2(z.p)+'</b></td><td class="r">'+f0(z.r)+'</td><td>'+m+'</td></tr>'});
-  return h+'</table>';
-}
-function classifica(){
-  document.getElementById('class-intro').innerHTML='Classifica dei '+M.rank_n+' quartieri con almeno 1.000 residenti e 30 civici, senza Cascina Merlata. Punteggio medio dei residenti, da 0 a 10.';
-  document.getElementById('top5').innerHTML=tabRank(M.top,1,1);document.getElementById('bot5').innerHTML=tabRank(M.bottom,M.rank_n,-1);
-  document.getElementById('class-nota').innerHTML='Il quartiere Duomo è solo '+M.duomo.pos+'° su '+M.rank_n+' ('+f2(M.duomo.p)+'): la biblioteca arriva a circa metà dei residenti ('+pc(M.duomo.biblio)+'). I quartieri in fondo sono ai margini, spesso con strade agricole: a Chiaravalle i servizi sono davvero lontani (e il Parco Agricolo Sud non è nei dati dei parchi).';
-  var fs=NIL.features.map(function(f){return f.properties}).filter(function(p){return p.s!=='senza'});
-  var rk=fs.filter(function(p){return p.s==='ok'}).sort(function(a,b){return b.p-a.p}),rest=fs.filter(function(p){return p.s!=='ok'}).sort(function(a,b){return(b.p||-1)-(a.p||-1)});
-  var h='<table><tr><th>#</th><th>Quartiere</th><th class="r">Punteggio</th><th class="r">Residenti</th><th class="r">Tutti i 10 servizi</th></tr>';
-  rk.forEach(function(p,k){h+='<tr><td>'+(k+1)+'</td><td>'+esc(p.n)+'</td><td class="r">'+f2(p.p)+'</td><td class="r">'+f0(p.r)+'</td><td class="r">'+pc(p.t)+'</td></tr>'});
-  rest.forEach(function(p){h+='<tr style="color:var(--mut)"><td>&mdash;</td><td>'+esc(p.n)+(p.s==='nonaff'?' (dato non affidabile)':' (non in classifica: pochi civici o residenti)')+'</td><td class="r">'+(p.s==='nonaff'?'':f2(p.p))+'</td><td class="r">'+f0(p.r)+'</td><td class="r">'+(p.s==='nonaff'?'':pc(p.t))+'</td></tr>'});
-  document.getElementById('tutti').innerHTML=h+'</table>';
-}
-
-/* ---------- servizi extra ---------- */
-var XSRC={cinema:['Cinema aperti oggi (OpenStreetMap)','OpenStreetMap, 29/10/2026'],
- teatri_musei:['OpenStreetMap (teatri e musei) più i musei civici della Milano Musei Card del Comune','OpenStreetMap 30/10/2026; Musei Card aprile 2024'],
- giochi:['Comune di Milano, aree gioco','file del 25/11/2024'],
- piscine:['Comune di Milano, centri balneari e piscine, più piscine aperte al pubblico da OpenStreetMap','Comune: file 2019-2020 (vecchio); OpenStreetMap 30/10/2026'],
- cani:['Comune di Milano, aree cani, più le poche aree in più di OpenStreetMap','Comune: file del 21/11/2024; OpenStreetMap 30/10/2026'],
- metro:['Fermate della metropolitana aperte oggi (M1-M5), con le date di apertura','aperture dal 1964 al 2024'],
- bikemi:['Comune di Milano, stazioni BikeMi','<b>file del 2022</b>: le stazioni nate o chiuse da allora non ci sono'],
- supermercati:['OpenStreetMap, negozi segnati come supermercato','30/10/2026; OpenStreetMap può non averli tutti'],
- ospedali:['Comune (posti letto delle strutture ospedaliere) e Regione Lombardia (posizione delle strutture); pronto soccorso da OpenStreetMap','dati 2023 (Comune) e 2018 (Regione)'],
- librerie:['OpenStreetMap, negozi segnati come libreria, anche di libri usati','30/10/2026; OpenStreetMap può non averle tutte']};
 function extraNota(t){
   var r=EXT.tipi.filter(function(z){return z.t===t})[0],x=r.n+' punti.';
   if(t==='bikemi')return x+' Sono le stazioni del file del Comune del 2022: quelle nate o chiuse da allora non ci sono.';
-  if(t==='ospedali')return x+' Case di cura private e centri specialistici senza pronto soccorso esclusi; il punto è il centro della struttura, quindi per i grandi campus il tempo è sovrastimato. '+pc(EXT.ps.q)+' dei residenti arriva a un ospedale con pronto soccorso ('+EXT.ps.n+' sedi, tempo mediano '+f1(EXT.ps.med)+' minuti; il pronto soccorso è segnato su OpenStreetMap e l&rsquo;elenco è incompleto).';
-  if(t==='teatri_musei')return x+' Sono '+EXT.tm.teatri+' teatri e '+EXT.tm.musei+' musei: con i soli teatri arriva il '+pc(EXT.tm.q_teatri)+' dei residenti, con i soli musei il '+pc(EXT.tm.q_musei)+'.';
+  if(t==='ospedali')return x+' Case di cura private e centri specialistici senza pronto soccorso esclusi; il punto è il centro della struttura, quindi per i grandi campus il tempo è sovrastimato.';
+  if(t==='teatri_musei')return x+' Sono '+EXT.tm.teatri+' teatri e '+EXT.tm.musei+' musei.';
   if(t==='cinema')return x+' Solo i cinema aperti oggi.';
   if(t==='piscine')return x+' Un impianto con più vasche conta una volta; il dato del Comune è vecchio (2019-2020).';
   if(t==='librerie')return x+' Anche le librerie di libri usati; OpenStreetMap può non avere tutte le librerie.';
   if(t==='metro')return x+' Solo le fermate dentro il Comune (una per linea).';
   return x;
 }
-function extraBlocchi(){
-  if(!EXT){var b=document.getElementById('m-extra');if(b)b.style.display='none';return}
-  var c=EXT.citta,cp=EXT.cap,te=cp.terzi;
-  function rr(a){return f2(a[0])+' (intervallo di confidenza al 95%: '+f2(a[1])+'&ndash;'+f2(a[2])+')'}
-  function riga(z){return esc(z.n)+' ('+z.pos10+'&deg; &rarr; '+z.pos20+'&deg;)'}
-  document.getElementById('extra-testo').innerHTML='<h3>Con gli extra: cosa cambia</h3>'+
-   '<p>Con i dieci servizi extra il punteggio medio dei residenti è <b>'+f1(c.p20)+' su 20</b> ('+f1(M.citta.p)+' su 10 dagli essenziali, '+f1(c.pe)+' su 10 dagli extra). Solo il <b>'+pc(c.tutti20,1)+'</b> dei residenti li ha tutti e 20 entro 15 minuti; tutti e 10 gli extra il '+pc(c.tutti_extra,1)+'. Gli extra distinguono molto più degli essenziali: il punteggio dei servizi extra è lontano da quello dei dieci essenziali (correlazione tra civici '+f2(c.rho_civici)+') e la classifica dei quartieri cambia ('+f2(c.rho_classifica_nil)+' di Spearman tra le due classifiche).</p>'+
-   '<p>Sono servizi più concentrati nel centro, e il legame con il reddito lo mostra: tra i '+cp.n+' CAP, Spearman con il reddito imponibile 2024 <b>'+rr(cp.rho_10)+'</b> per i dieci essenziali, <b>'+rr(cp.rho_extra)+'</b> per i soli extra. Il terzo di CAP più povero ha '+f1(te.basso.pe)+' extra su 10, il più ricco '+f1(te.alto.pe)+'. Correlazione non vuol dire causa: metropolitana, BikeMi, cinema, teatri, musei e librerie stanno dove la città è più densa e più cara.</p>'+
-   '<p><b>Salgono di più in classifica</b> (posizione tra i '+EXT.rank_n+' quartieri, da essenziali a con gli extra): '+EXT.salgono.map(riga).join('; ')+'. <b>Scendono di più:</b> '+EXT.scendono.map(riga).join('; ')+'.</p>'+
-   '<div class="warn">Tutti i servizi extra pesano uguale e ognuno vale un punto: non dice che cosa conti di più per chi abita in un quartiere. Alcuni dati sono vecchi o incompleti (BikeMi 2022, piscine del Comune 2019-2020, OpenStreetMap per supermercati, librerie, teatri e musei).</div>';
-  var h='',el=document.getElementById('m-extra');
-  h='<b>Servizi extra (a parte).</b> Dieci servizi in più, calcolati come i dieci essenziali (minuti a piedi lungo la rete fino al più vicino, soglia 15 minuti, stesse ipotesi); il punteggio a 10 non cambia e con gli extra si arriva a 20. Punti usati: '+EXT.tipi.map(function(r){return esc(EXT.etichette[r.t])+' '+f0(r.n)}).join('; ')+'. Contano solo i punti dentro il Comune (più 200 m di tolleranza), senza duplicati (per esempio un supermercato segnato due volte su OpenStreetMap conta uno). Cinema: sono 29 quelli aperti oggi. Teatri e musei contano come un solo tipo.';
-  el.innerHTML=h;
-  var tb=document.getElementById('tab-anni'),t2='';
-  EXT.ordine.forEach(function(t){t2+='<tr><td>Extra: '+esc(EXT.etichette[t])+'</td><td>'+XSRC[t][0]+'</td><td>'+XSRC[t][1]+'</td></tr>'});
-  tb.insertAdjacentHTML('beforeend',t2);
+function servizio(){
+  var W=width('ch-servizio'),P=proj(W),k=Math.cos(0),isx=!HX.t[tipo],v=TA(tipo),n=HX.n;
+  var paths=['','','','',''],cm='',cnt=[0,0,0,0,0],tot=0;
+  var DX=.00064,DY=.00052,DS=.00026;
+  for(var i=0;i<HX.x.length;i++){
+    var cx=HX.x[i]/1e5,cy=HX.y[i]/1e5,pts=[[cx,cy+DY],[cx+DX,cy+DS],[cx+DX,cy-DS],[cx,cy-DY],[cx-DX,cy-DS],[cx-DX,cy+DS]];
+    var d='M'+pts.map(function(p){var q=P.pt(p);return r1(q[0])+' '+r1(q[1])}).join('L')+'Z';
+    if(HX.nil[i]===73){cm+=d;continue}
+    var b=tbin(v[i]);paths[b]+=d;cnt[b]++;tot++;
+  }
+  var s=svgOpen(W,P.H);
+  paths.forEach(function(d,b){if(d)s+='<path d="'+d+'" fill="'+TC[b]+'" stroke="'+TC[b]+'" stroke-width=".6"/>'});
+  if(cm)s+='<path d="'+cm+'" fill="#c3c8d0" stroke="#c3c8d0" stroke-width=".6"/>';
+  N.forEach(function(o){s+='<path d="'+P.path(o.f)+'" fill="none" stroke="'+C.ink+'" stroke-opacity=".5" stroke-width=".7" stroke-linejoin="round" pointer-events="none"/>'});
+  s+='<rect id="hx-hit" x="0" y="0" width="'+W+'" height="'+P.H+'" fill="transparent" data-hx="1"/><g id="hx-sel" pointer-events="none"></g>';
+  $('ch-servizio').innerHTML=s+'</svg>';
+  /* indice spaziale per toccare un esagono */
+  GRID={};var gx=.0013,gy=.001;
+  for(i=0;i<HX.x.length;i++){var kk=Math.floor(HX.x[i]/1e5/gx)+','+Math.floor(HX.y[i]/1e5/gy);(GRID[kk]=GRID[kk]||[]).push(i)}
+  function near(e){
+    var box=$('hx-hit').getBoundingClientRect(),ll=P.inv(e.clientX-box.left,e.clientY-box.top),best=-1,bd=1e9;
+    var ix=Math.floor(ll[0]/gx),iy=Math.floor(ll[1]/gy);
+    for(var a=-1;a<=1;a++)for(var c=-1;c<=1;c++){var L_=GRID[(ix+a)+','+(iy+c)];if(L_)L_.forEach(function(j){var dx=(HX.x[j]/1e5-ll[0])*0.7,dy=HX.y[j]/1e5-ll[1],dd=dx*dx+dy*dy;if(dd<bd){bd=dd;best=j}})}
+    return bd<.0000015?best:-1;
+  }
+  function onHex(e){
+    var j=near(e);if(j<0){TIP.style.display='none';return}
+    var nl=BY[HX.nil[j]],m=v[j];
+    TIP.innerHTML=(HX.nil[j]===73?'Cascina Merlata: dato non affidabile':'<b>'+esc(eti(tipo))+'</b><br>'+(m<0?'oltre 43 minuti a piedi':f1(m/10)+' minuti a piedi')+' · '+n[j]+' indirizzi'+(nl?'<br>'+esc(nl.sn):''));
+    TIP.style.display='block';
+    var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth,x=e.pageX+12,y=e.pageY-h-14;
+    if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;if(x<window.scrollX+8)x=window.scrollX+8;if(y<window.scrollY+8)y=e.pageY+18;
+    TIP.style.left=x+'px';TIP.style.top=y+'px';
+  }
+  var hit=$('hx-hit');hit.addEventListener('pointermove',function(e){if(e.pointerType==='mouse')onHex(e)});hit.addEventListener('click',onHex);
+  var nome=eti(tipo),r=(isx?EXT.tipi:M.tipi).filter(function(z){return z.t===tipo})[0];
+  var share=cnt[0]+cnt[1]+cnt[2];
+  $('lg-servizio').innerHTML=TC.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+TL[i]+' <b>&nbsp;'+f0(cnt[i]/tot*100)+'%</b></span>'}).join('')+'<span><i style="background:#c3c8d0"></i>senza dato</span>';
+  $('t-servizio').textContent=nome+': il '+pc(r.q)+' dei milanesi ci arriva in 15 minuti, e la mediana è '+f1(r.med)+' minuti';
+  $('s-servizio').textContent='Ogni esagono è di 100 metri. Più il colore è scuro o arancione, più si cammina fino al servizio più vicino. Tocca la mappa per leggere i minuti; la percentuale nella legenda è la quota di esagoni.';
+  var nt=tipo==='mercati'?'Include i mercati settimanali (aperti 1-2 giorni a settimana); con i soli mercati coperti arriva il 37% dei residenti.':tipo==='nidi'?'Dati degli asili nido: anno scolastico 2018/19.':tipo==='parchi'?'Parchi di almeno 5.000 m²; il Parco Agricolo Sud non è nei dati.':tipo==='biblioteche'?'Solo le 26 sedi del Sistema bibliotecario; con le biblioteche di OpenStreetMap si arriva al '+pc(M.citta.biblio_osm.quota_residenti_entro15)+'.':isx?extraNota(tipo):'';
+  $('nn-servizio').textContent=nt;
+}
+
+/* ---------- redditi ---------- */
+function reddito(){
+  var cp=M.cap,Lc=cp.lista,W=width('ch-reddito'),narrow=W<520,H=narrow?340:380,ml=narrow?34:42,mr=12,mt=26,mb=44,pw=W-ml-mr,ph=H-mt-mb;
+  var x0=15000,x1=90000,y0=7.5,y1=10;
+  function X(v){return ml+(v-x0)/(x1-x0)*pw}function Y(v){return mt+ph-(v-y0)/(y1-y0)*ph}
+  var s=svgOpen(W,H);
+  [8,9,10].forEach(function(v){s+=L(ml,Y(v),ml+pw,Y(v),C.grid,1)+T(ml-6,Y(v)+4,String(v),{a:'end',c:'m'})});
+  [20000,40000,60000,80000].forEach(function(v){s+=L(X(v),mt+ph,X(v),mt+ph+4,C.axis,1)+T(X(v),mt+ph+18,(v/1000)+(narrow?'':' mila €'),{a:'middle',c:'m'})});
+  s+=L(ml,mt+ph,ml+pw,mt+ph,C.ink,1)+L(ml,mt,ml,mt+ph,C.ink,1);
+  s+=T(ml+pw/2,H-4,'Reddito imponibile medio, 2024 ('+(narrow?'mila euro':'euro per contribuente')+')',{a:'middle',c:'m'});
+  var d='';for(var r=20000;r<=87000;r+=1500){var yv=cp.retta[0]*Math.log(r)+cp.retta[1];d+=(d?'L':'M')+r1(X(r))+' '+r1(Y(Math.min(y1,yv)))}
+  s+='<path d="'+d+'" fill="none" stroke="'+C.ink+'" stroke-width="1.5" stroke-dasharray="5 4" pointer-events="none"/>';
+  var lab=cp.meno_del_previsto.slice(0,3).concat(cp.piu_del_previsto.slice(0,3)).map(function(z){return z.cap});
+  Lc.forEach(function(z){var col=z.z>=0?C.ora:C.m4,rad=3+Math.sqrt(z.res)/38;
+    s+='<circle cx="'+r1(X(z.red))+'" cy="'+r1(Y(z.p))+'" r="'+r1(rad)+'" fill="'+col+'" fill-opacity=".85" stroke="#fff" stroke-width="1" data-t="'+esc('<b>'+z.zona+'</b> (CAP '+z.cap+')<br>Reddito medio '+f0(z.red)+' euro<br>'+f1(z.p)+' servizi su 10 · '+f0(z.res)+' residenti')+'"/>'});
+  var tl='',ls=[];
+  Lc.filter(function(z){return lab.indexOf(z.cap)>=0}).forEach(function(z){
+    var t=short(z.zona.replace(/^Q\.re /,'')),w=tw(t,12,true),x=X(z.red),y=Y(z.p),right=x+10+w<ml+pw+4;
+    ls.push({t:t,x:right?x+10:x-10,y:y+4,a:right?'start':'end'})});
+  ls.sort(function(a,b){return a.y-b.y});
+  for(var j=1;j<ls.length;j++)if(Math.abs(ls[j].y-ls[j-1].y)<15&&Math.abs(ls[j].x-ls[j-1].x)<110)ls[j].y=ls[j-1].y+15;
+  ls.forEach(function(l){tl+=T(l.x,l.y,esc(l.t),{a:l.a,c:'halo',st:'font-size:12px'})});
+  tl+=T(ml-30,12,'servizi su 10 (asse da 7,5 a 10)',{c:'m'});
+  $('ch-reddito').innerHTML=s+tl+'</svg>';
+  $('lg-reddito').innerHTML='<span><i class="dot" style="background:'+C.ora+'"></i>più servizi di quanto il reddito farebbe prevedere</span><span><i class="dot" style="background:'+C.m4+'"></i>meno servizi del previsto</span><span><i class="ln" style="background:'+C.ink+'"></i>tendenza media</span>';
+  var te=cp.terzi;
+  $('t-reddito').textContent='I CAP più ricchi hanno qualche servizio in più: '+f1(te.alto.punteggio)+' su 10 contro '+f1(te.basso.punteggio)+' dei più poveri';
+  $('s-reddito').textContent='Ogni pallino è un CAP: a destra il reddito medio, in alto i servizi raggiunti in media. Più il pallino è grande, più residenti ha. Tocca un pallino per il nome.';
+  $('nn-reddito').innerHTML='Sono '+cp.n+' CAP, poche zone. <b>Correlazione non vuol dire causa: i dati non dicono perché.</b> I CAP più ricchi sono anche quelli del centro, dove i servizi sono più fitti per storia e densità. Il reddito è quello dei contribuenti, non di tutti i residenti. Il terzo di CAP più povero ha redditi tra '+f0(te.basso.red_min)+' e '+f0(te.basso.red_max)+' euro, il più ricco tra '+f0(te.alto.red_min)+' e '+f0(te.alto.red_max)+'.';
 }
 
 /* ---------- anno dei dati ---------- */
 function anni(){
-  var R=[['Civici (punti di partenza)','Comune, numeri civici con coordinate, solo «applicati»','aggiornato al 1/10/2026'],
+  var R=[['Indirizzi (punti di partenza)','Comune, numeri civici con coordinate','aggiornato al 1/10/2026'],
    ['Residenti','Comune, popolazione per quartiere','2025'],
    ['Quartieri (NIL)','Comune, NIL vigenti (PGT Milano 2030)','in vigore dal 5/2/2020'],
    ['Farmacie','Comune (elenco regionale), CC0','15/10/2026'],
    ['Medici di base','Comune, CC BY-NC: pubblicati solo i tempi derivati','29/10/2026'],
-   ['Asili nido','Comune','<b>anno scolastico 2018/19</b> (l&rsquo;ultimo disponibile)'],
+   ['Asili nido','Comune','<b>anno scolastico 2018/19</b> (l’ultimo disponibile)'],
    ['Scuole','Comune: infanzia, primarie, medie','anno scolastico 2025/26'],
    ['Biblioteche','Comune, Sistema bibliotecario (26 sedi)','caricato il 10/7/2026'],
    ['Mercati','Comune: coperti, settimanali, agricoltori','maggio 2024 (agricoltori: anno non indicato)'],
@@ -478,10 +546,20 @@ function anni(){
    ['Impianti sportivi','Comune','anno non indicato'],
    ['Uffici postali','Comune','anno non indicato'],
    ['Negozi alimentari di vicinato','Comune, esercizi di vicinato','caricato il 31/8/2026'],
-   ['Redditi per CAP','Comune, Irpef sub-comunale','anni d&rsquo;imposta 2019-2024 (qui il 2024)'],
+   ['Redditi per CAP','Comune, Irpef sub-comunale','anni d’imposta 2019-2024 (qui il 2024)'],
    ['Rete pedonale e controlli','OpenStreetMap contributors, ODbL','scaricata il 29/10/2026']];
-  var h='<tr><th>Dato</th><th>Fonte</th><th>Anno</th></tr>';R.forEach(function(r){h+='<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'});
-  document.getElementById('tab-anni').innerHTML=h;
+  var XS={cinema:['Cinema aperti oggi (OpenStreetMap)','OpenStreetMap, 29/10/2026'],
+   teatri_musei:['OpenStreetMap (teatri e musei) più i musei civici della Milano Musei Card del Comune','OpenStreetMap 30/10/2026; Musei Card aprile 2024'],
+   giochi:['Comune di Milano, aree gioco','file del 25/11/2024'],
+   piscine:['Comune di Milano, centri balneari e piscine, più piscine aperte al pubblico da OpenStreetMap','Comune: file 2019-2020 (vecchio); OpenStreetMap 30/10/2026'],
+   cani:['Comune di Milano, aree cani, più le poche aree in più di OpenStreetMap','Comune: file del 21/11/2024; OpenStreetMap 30/10/2026'],
+   metro:['Fermate della metropolitana aperte oggi (M1-M5), con le date di apertura','aperture dal 1964 al 2024'],
+   bikemi:['Comune di Milano, stazioni BikeMi','<b>file del 2022</b>: le stazioni nate o chiuse da allora non ci sono'],
+   supermercati:['OpenStreetMap, negozi segnati come supermercato','30/10/2026; OpenStreetMap può non averli tutti'],
+   ospedali:['Comune (posti letto delle strutture ospedaliere) e Regione Lombardia (posizione delle strutture); pronto soccorso da OpenStreetMap','dati 2023 (Comune) e 2018 (Regione)'],
+   librerie:['OpenStreetMap, negozi segnati come libreria, anche di libri usati','30/10/2026; OpenStreetMap può non averle tutte']};
+  if(EXT)EXT.ordine.forEach(function(t){R.push(['Extra: '+EXT.etichette[t],XS[t][0],XS[t][1]])});
+  $('tab-anni').innerHTML='<caption style="text-align:left;font-weight:700;padding:8px 0 2px">Anno dei dati</caption><tr><th>Dato</th><th>Fonte</th><th>Anno</th></tr>'+R.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'}).join('');
 }
 })();
 </script>

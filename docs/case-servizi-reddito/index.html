@@ -1,347 +1,459 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · Case, servizi e reddito</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · Servizi e prezzi delle case</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp p.src{font-size:.8rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.map{height:66vh;min-height:360px;border:1px solid var(--ink)} .map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button,.ctl select{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;cursor:pointer;max-width:100%}
-.ctl button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto} .card{border:1px solid var(--line);padding:8px 12px;margin:.6em 0}
-.card h3{margin:.1em 0 .1em} .card table td,.card table th{padding:3px 6px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px} @media(max-width:760px){.grid2{grid-template-columns:1fr} th,td{padding:5px 4px;font-size:.88rem}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.leaflet-tooltip{font:13px system-ui,Arial,sans-serif}
-.tabmax{max-height:380px;overflow:auto}
-.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:.6em 0} @media(max-width:620px){.kpi{grid-template-columns:1fr}}
-.kpi div{border:1px solid var(--line);padding:8px 12px} .kpi b{display:block;font-size:1.5rem;color:var(--acc);line-height:1.2} .kpi span{font-size:.85rem;color:var(--mut)}
-.sv{margin:.4em 0} .sv .row{display:grid;grid-template-columns:minmax(110px,31%) 1fr 44px;gap:6px;align-items:center;padding:3px 0;border-bottom:1px solid #f0f0f0}
-.sv .nm{font-size:.9rem;line-height:1.2} .sv .nm small{display:block;color:var(--mut);font-size:.75rem}
-.sv .pl{position:relative;height:20px} .sv .pl .z{position:absolute;top:0;bottom:0;width:1px;background:#888}
-.sv .pl .ci{position:absolute;top:9px;height:2px;background:#9a9a9a} .sv .pl .ci.on{background:var(--acc);height:3px;top:8.5px}
-.sv .pl .d{position:absolute;top:4px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;border:2px solid #777} .sv .pl .d.on{background:var(--acc);border-color:var(--acc)}
-.sv .v{text-align:right;font-variant-numeric:tabular-nums;font-size:.88rem}
-.sv .ax{display:grid;grid-template-columns:minmax(110px,31%) 1fr 44px;gap:6px;font-size:.75rem;color:var(--mut)} .sv .ax .pl{height:16px} .sv .ax .pl span{position:absolute;transform:translateX(-50%)}
-.t6 td.b{font-weight:700} svg.sc circle{cursor:pointer}
-#sc-info{min-height:2.8em;font-size:.92rem} #sc-mode{min-height:4.6em} #sc-lg span,#lg-dm span,#lg-map span{white-space:normal}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --m1:#E30613;--m3:#FFD500;--m2:#00A651;--m4:#0072BC;--m5:#7B3FA0;--or:#F58220;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl>a.gl{background:var(--m3)}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .h{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:700}
+.ch [data-t]{cursor:pointer}
+.ch svg .h{pointer-events:none}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px;flex:0 0 12px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.warn{font-size:.9rem;line-height:1.35;border-left:5px solid var(--or);background:var(--soft);padding:8px 12px;margin:.8em 0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+#ch-m{max-width:560px;margin:0 auto}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.6em 0}
+.ctl label{font-size:.9rem;font-weight:700}
+.ctl input[type=text]{font:inherit;border:2px solid var(--ink);padding:8px 10px;min-height:44px;width:100%;max-width:340px;border-radius:0;background:#fff}
+.sl{display:block;width:100%;margin:.2em 0 0;height:36px;accent-color:var(--or)}
+.slr{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut);gap:8px}
+.big{font-size:1.05rem;margin:.3em 0}
+.big b{font-size:1.5rem}
+.card{border:2px solid var(--ink);padding:10px 12px;margin:.8em 0}
+.card h4{margin:0 0 .3em;font-size:1.1rem}
+.card dl{display:grid;grid-template-columns:1fr auto;gap:2px 12px;margin:.4em 0;font-size:.92rem}
+.card dt{color:var(--ink2)} .card dd{margin:0;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>I servizi sotto casa fanno il prezzo?</h1>
-<p>Le zone di Milano con più servizi a portata di cammino (farmacia, scuola, parco, metro, supermercato&hellip;) costano di più? E quanto vale <b>un servizio in più</b> sotto casa? Per rispondere abbiamo messo insieme due pagine di questo sito: i prezzi stimati dall&rsquo;Agenzia delle Entrate per ogni zona (<a href="../prezzi-case/">Prezzi delle case</a>) e il punteggio dei servizi raggiungibili in 15 minuti a piedi (<a href="../citta-15-minuti/">La città dei 15 minuti</a>). <b>I prezzi OMI sono stime dell&rsquo;Agenzia delle Entrate, non i prezzi pagati davvero</b> nelle vendite.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<h1>Servizi e prezzi delle case</h1>
+<p class="lead">Le zone di Milano con più servizi a portata di cammino costano di più: ma quanto è merito dei servizi, e quanto del centro e dei redditi?</p>
 
-<h2 id="grafico">Più servizi, prezzi più alti: ma quanto è merito dei servizi?</h2>
-<div id="sc-intro"></div>
-<div class="ctl" id="sc-btn"><span class="sub">Che cosa togliamo:</span></div>
-<div class="lgd" id="sc-lg"></div>
-<div id="sc-mode"></div>
-<div class="ch" id="sc" role="img" aria-label="Grafico a punti: una zona OMI per punto, servizi su 20 in orizzontale e prezzo stimato al metro quadro in verticale, con la retta di tendenza"></div>
-<p class="src">I prezzi OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Asse verticale a scala logaritmica: a uguale distanza in verticale corrisponde la stessa differenza in percentuale. Un punto per zona (41 zone, senza D39 e R2: vedi &laquo;Come &egrave; fatto&raquo;). Tocca o passa sopra un punto per i dettagli.</p>
-<div id="sc-info" class="sub">Tocca un punto per vedere la zona.</div>
-<div id="sc-testo"></div>
-<div class="warn" id="warn1"></div>
+<div class="hl" id="hl"></div>
+<p class="src">Prezzi: stime dell'Agenzia delle Entrate (OMI, 2026/1), non prezzi pagati davvero. Servizi raggiungibili in 15 minuti a piedi: Comune di Milano e altre fonti aperte. Redditi per CAP: Ministero dell'Economia e delle Finanze (anno d'imposta 2024). 41 zone del confronto. Pagine collegate: <a href="../prezzi-case/">Prezzi delle case</a> e <a href="../citta-15-minuti/">La città dei 15 minuti</a>.</p>
 
-<h2 id="tabella">Ben servite ma economiche, care ma poco servite</h2>
-<div id="tb-intro"></div>
-<div class="ctl" id="tb-btn"><span class="sub">Conta:</span></div>
-<div><div><h3>Ben servite, ma economiche</h3><div class="scroll"><table id="tb-a" class="t6"></table></div></div>
-<div><h3>Care, ma poco servite</h3><div class="scroll"><table id="tb-b" class="t6"></table></div></div></div>
-<p class="src">I prezzi OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. &laquo;Posto&raquo; = posizione tra le 41 zone (1 = la prima). Un asterisco (*) segna le zone con pochi civici residenziali (meno di 100): la loro media di servizi &egrave; meno solida. Fonte: <code>sorprese_zone.csv</code>.</p>
+<!-- ============ 1 ============ -->
+<h2 id="legame">Il legame tra servizi e prezzo</h2>
+<div class="fig" id="firma">
+  <h3 id="t-b"></h3>
+  <p class="sub"><b>Che cosa si vede.</b> Ogni cerchio è una zona di Milano. Più è a destra, più servizi ha a portata di cammino (su 20). Più è in alto, più costa al metro quadro. La linea nera è l'andamento: sale, cioè le zone con più servizi costano di più. Muovi il cursore: i cerchi si spostano come se tutte le zone fossero alla stessa distanza dal Duomo e con lo stesso reddito, e la linea si appiattisce.</p>
+  <div class="lg" id="lg-b"><span><i class="dot" style="background:var(--m4)"></i>una zona di Milano</span><span><i class="dot" style="background:var(--or)"></i>zona con il nome scritto</span><span><i class="dot" style="background:var(--m2)"></i>la zona che hai scelto</span><span><i style="background:var(--ink);height:3px;border-radius:0"></i>andamento</span></div>
+  <div class="slr"><span>Senza togliere nulla</span><span>Tolti centro e reddito</span></div>
+  <input class="sl" type="range" id="sl-b" min="0" max="100" value="0" aria-label="Quanto di distanza dal Duomo e reddito togliamo">
+  <p class="big" id="bg-b"></p>
+  <div class="ctl"><label for="in-c">Trova una zona</label><input type="text" id="in-c" list="dl-zona" placeholder="Scrivi o scegli una zona" autocomplete="off"></div>
+  <div class="ch" id="ch-b" role="img" aria-label="Grafico a punti: servizi su 20 e prezzo al metro quadro per 41 zone, con la retta di tendenza che si abbassa quando si tolgono distanza e reddito"></div>
+  <p class="src">Prezzi: stime dell'Agenzia delle Entrate (OMI), non prezzi di vendite reali. Scala dei prezzi a logaritmo: a uguale distanza in verticale corrisponde la stessa differenza in percentuale. Tocca un cerchio per il nome della zona e i suoi valori, oppure scegli la zona qui sopra. Il conto è fatto su 41 zone: sono pochi punti, il risultato è un ordine di grandezza.</p>
+</div>
+<div class="warn"><b>Correlazione non vuol dire causa.</b> Le zone con più servizi sono anche le più centrali e le più ricche, e di solito le più care in ogni caso: i dati non dicono quanto del prezzo sia dovuto ai servizi e quanto al fatto di stare in centro o in un quartiere ricco.</div>
 
-<h2 id="servizi">Servizio per servizio: chi conta davvero</h2>
-<div id="sv-intro"></div>
-<div class="sv" id="sv"></div>
-<div class="warm" id="sv-warn"></div>
-<div id="sv-testo"></div>
-<div class="scroll"><table id="tab-par"></table></div>
+<div class="fig" id="duomo">
+  <h3 id="t-d"></h3>
+  <p class="sub">Prezzo mediano al metro quadro: a sinistra la metà delle zone con meno servizi, a destra la metà con più servizi, in tre gruppi di distanza dal Duomo.</p>
+  <div class="ch" id="ch-d" role="img" aria-label="Linee inclinate: prezzo delle zone con meno e con più servizi, in tre gruppi di distanza dal Duomo"></div>
+  <p class="note" id="nt-d"></p>
+  <p class="src">Prezzi: stime dell'Agenzia delle Entrate (OMI), non prezzi di vendite reali. Mediane di 6-7 zone per metà: pochi numeri.</p>
+</div>
 
-<h2 id="mappa">La mappa: dove si paga pi&ugrave; (o meno) del previsto</h2>
-<div id="mp-intro"></div>
-<div class="ctl"><label class="sub" for="sel-zona">Scheda di:</label><select id="sel-zona" aria-label="Scegli una zona"></select></div>
-<div id="map" class="map" role="img" aria-label="Mappa delle zone OMI di Milano colorate secondo quanto il prezzo stimato è sopra o sotto quello previsto dal modello"></div>
-<div class="lgd" id="lg-map"></div>
-<p class="src">I prezzi OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Mappa &copy; OpenStreetMap contributors; zone: Agenzia delle Entrate &ndash; OMI, servizio GEOPOI (perimetri semplificati, gli stessi della pagina Prezzi delle case; qui sono 42 zone: manca la rurale R2, senza prezzo). In grigio scuro D39 Cascina Merlata, esclusa dal confronto.</p>
-<div id="scheda" class="card"><span class="sub">Scegli una zona sulla mappa o dall&rsquo;elenco.</span></div>
-<div id="mp-testo"></div>
-<details><summary>Tabella di tutte le zone</summary><div class="scroll tabmax"><table id="tab-zone"></table></div></details>
+<!-- ============ 2 ============ -->
+<h2 id="servizi">Quali servizi contano</h2>
+<div class="fig">
+  <h3 id="t-s"></h3>
+  <p class="sub">Per ognuno dei 20 servizi: quanto resta di legame con il prezzo dopo aver tolto distanza dal Duomo e reddito. Il pallino è la stima, la linea va dal minimo al massimo plausibile. A destra dello zero: le zone con quel servizio sono più care. Se la linea passa dallo zero, un legame non si può escludere né provare.</p>
+  <div class="lg"><span><i class="dot" style="background:var(--m2)"></i>legame chiaro</span><span><i class="ring"></i>legame non chiaro</span></div>
+  <div class="ch" id="ch-s" role="img" aria-label="Pallini con intervallo: legame di ognuno dei 20 servizi con il prezzo, dopo aver tolto distanza dal Duomo e reddito"></div>
+  <p class="note" id="nt-s"></p>
+  <p class="src">Prezzi: stime dell'Agenzia delle Entrate (OMI). Correlazione parziale di Spearman: 0 = nessun legame, 1 = le zone con quel servizio sono sempre le più care. Venti confronti su 41 zone: con tanti confronti qualche valore alto può essere un caso. Sotto lo zero non c'è un «effetto negativo»: quelle zone non sono più care e basta.</p>
+</div>
 
-<h2 id="duomo">Vicino al Duomo il legame si rovescia</h2>
-<div id="dm-testo"></div>
-<div class="lgd" id="lg-dm"></div>
-<div class="ch" id="ch-dm" role="img" aria-label="Prezzo mediano delle zone con più e con meno servizi, in tre gruppi di distanza dal Duomo"></div>
-<p class="src">I prezzi OMI sono stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite reali. Mediane di 6-7 zone per metà: pochi numeri. Fonte: <code>stessa_distanza.csv</code>.</p>
-<div class="scroll"><table id="tab-dm"></table></div>
+<!-- ============ 3 ============ -->
+<h2 id="zone">Zona per zona</h2>
+<div class="fig" id="mappa">
+  <h3 id="t-m"></h3>
+  <p class="sub">Il colore dice di quanto il prezzo stimato è sopra o sotto quello «previsto» da servizi, distanza dal Duomo e reddito. Il numero accanto a ogni colore conta le zone. Tocca una zona o scrivila qui sotto.</p>
+  <div class="ctl"><label for="in-z">La tua zona</label><input type="text" id="in-z" list="dl-zona" placeholder="Scrivi o scegli una zona" autocomplete="off"></div>
+  <div class="lg" id="lg-m"></div>
+  <div class="ch" id="ch-m" role="img" aria-label="Mappa delle zone OMI di Milano colorate secondo quanto il prezzo stimato è sopra o sotto quello previsto dal modello"></div>
+  <div class="card" id="scheda"></div>
+  <p class="note" id="nt-m"></p>
+  <p class="src">Prezzi: stime dell'Agenzia delle Entrate (OMI), non prezzi di vendite reali. Perimetri delle zone: Agenzia delle Entrate, servizio GEOPOI (semplificati, come nella pagina Prezzi delle case): 42 zone, manca la rurale R2 che non ha prezzo. «Previsto» vuol dire calcolato con servizi, distanza e reddito: non è un prezzo giusto o sbagliato. Cascina Merlata è fuori dal confronto (vedi i limiti).</p>
+</div>
 
-<h2 id="valore">Quanto vale un servizio in pi&ugrave;?</h2>
-<div id="vl-testo"></div>
-<div class="kpi" id="vl-kpi"></div>
-<div class="warm" id="vl-warn"></div>
-<h3>Perch&eacute; &egrave; un massimo e non una cifra sicura</h3>
-<ul class="m" id="vl-lista"></ul>
-<h3>Un controllo con i quartieri (NIL)</h3>
-<div id="nil-testo"></div>
-<details><summary>Lo stesso conto in modi diversi</summary><div class="scroll"><table id="tab-rob"></table></div><p class="src">Percentuale di prezzo in pi&ugrave; per ogni servizio in pi&ugrave; (su 20), a seconda di come si fa il conto. Fonte: <code>robustezza.csv</code>. Stime dell&rsquo;Agenzia delle Entrate, non prezzi di vendite.</p></details>
+<div class="fig" id="sorprese">
+  <h3 id="t-r"></h3>
+  <p class="sub">Per ogni zona due posti su 41: a sinistra il posto per servizi essenziali (farmacia, medico, scuola, parco…), a destra il posto per prezzo. Più i due pallini sono lontani, più la zona sorprende.</p>
+  <div class="lg"><span><i class="ring"></i>posto per servizi</span><span><i class="dot" style="background:var(--or)"></i>posto per prezzo</span></div>
+  <div class="ch" id="ch-r" role="img" aria-label="Pallini collegati: posto per servizi essenziali e posto per prezzo, per le zone più sorprendenti"></div>
+  <p class="src">Prezzi: stime dell'Agenzia delle Entrate (OMI). Posto 1 = il più alto. Le zone con meno di 100 civici residenziali (CityLife, Porta Nuova) hanno una media dei servizi poco solida. I servizi essenziali sono raggiunti da quasi tutti quasi ovunque: per questo le differenze tra zone sono piccole.</p>
+</div>
 
-<h2 id="metodo">Come &egrave; fatto, e i limiti dei dati</h2>
-<ul class="m" id="metodo-lista"></ul>
+<!-- ============ 4 ============ -->
+<h2 id="valore">Quanto vale un servizio in più</h2>
+<div class="fig">
+  <h3 id="t-v"></h3>
+  <p class="sub">Cifra in euro su una casa di 70 m² al prezzo mediano delle zone, in quattro modi di fare il conto. La linea va dal minimo al massimo plausibile; il pallino è la stima.</p>
+  <div class="ch" id="ch-v" role="img" aria-label="Intervalli in euro: quanto si associa a un servizio in più su una casa di 70 metri quadrati, secondo quattro modi di fare il conto"></div>
+  <div class="warn" id="wv"></div>
+  <p class="src">Prezzi: stime dell'Agenzia delle Entrate (OMI), non prezzi di vendite reali. Non è il valore di un servizio: è l'ordine di grandezza del legame che resta tra prezzo e servizi dopo aver tolto centralità e reddito, e potrebbe non essere una causa.</p>
+</div>
 
-<h2 id="download">File</h2>
-<p><a href="data/zone_servizi_prezzo.csv">zone_servizi_prezzo.csv</a> (una riga per zona: prezzo, servizi, reddito, distanza, previsto dal modello), <a href="data/servizi_singoli.csv">servizi_singoli.csv</a> (i 20 servizi), <a href="data/modelli.csv">modelli.csv</a> (le regressioni), <a href="data/robustezza.csv">robustezza.csv</a> (le varianti del conto), <a href="data/spearman_parziale.csv">spearman_parziale.csv</a>, <a href="data/stessa_distanza.csv">stessa_distanza.csv</a>, <a href="data/gruppi_terzili.csv">gruppi_terzili.csv</a>, <a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina). I perimetri delle zone sono in <a href="../prezzi-case/data/zone.geojson">prezzi-case/data/zone.geojson</a>. Sono tutti valori aggregati per zona o per citt&agrave;.</p>
-<p>Pagine collegate: <a href="../prezzi-case/">Prezzi delle case</a> (i prezzi OMI nel tempo, zona per zona) e <a href="../citta-15-minuti/">La citt&agrave; dei 15 minuti</a> (il punteggio dei servizi e i redditi per CAP).</p>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Prezzo OMI</dt><dd>La stima che l'Agenzia delle Entrate pubblica per ogni zona di Milano: un minimo e un massimo al metro quadro. Qui è il centro dell'intervallo, per le abitazioni civili.</dd>
+<dt>Servizi su 20</dt><dd>Quanti dei 20 servizi (10 essenziali e 10 extra) si raggiungono in 15 minuti a piedi da casa, in media per i residenti della zona.</dd>
+<dt>Essenziali ed extra</dt><dd>Essenziali: farmacie, medici di base, scuole, asili nido, parchi, mercati, negozi di vicinato, impianti sportivi, uffici postali, biblioteche. Extra: metro, BikeMi, supermercati, ospedali, teatri e musei, cinema, librerie, piscine, aree gioco, aree cani.</dd>
+<dt>Togliere distanza e reddito</dt><dd>Confrontare le zone come se fossero alla stessa distanza dal Duomo e con lo stesso reddito, per vedere che cosa resta ai servizi.</dd>
+<dt>Intervallo plausibile</dt><dd>Il minimo e il massimo tra cui sta quasi certamente il valore vero (intervallo al 95%). Se passa dallo zero, non si può escludere che il legame non ci sia.</dd>
+<dt>Correlazione di Spearman</dt><dd>Misura se due cose salgono insieme guardando solo l'ordine delle zone. 0 = nessun legame, 1 = stesso ordine.</dd>
+<dt>Previsto</dt><dd>Il prezzo che una zona dovrebbe avere, secondo un conto che usa servizi, distanza dal Duomo e reddito.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati per zona o per città, nessun dato su persone.</p>
+<ul>
+<li><a href="data/zone_servizi_prezzo.csv">Una riga per zona</a>: prezzo, servizi, reddito, distanza, prezzo previsto</li>
+<li><a href="data/servizi_singoli.csv">I 20 servizi</a> uno per uno</li>
+<li><a href="data/modelli.csv">I conti principali</a>, <a href="data/robustezza.csv">le varianti del conto</a> e <a href="data/spearman_parziale.csv">i legami dopo aver tolto distanza e reddito</a></li>
+<li><a href="data/stessa_distanza.csv">Zone alla stessa distanza dal Duomo</a> e <a href="data/gruppi_terzili.csv">i tre gruppi di zone</a></li>
+<li><a href="data/riepilogo.json">Tutti i numeri di questa pagina</a></li>
+<li><a href="../prezzi-case/data/zone.geojson">I perimetri delle zone</a></li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze.</b> Quotazioni immobiliari (prezzi di vendita e affitti per zona) e perimetri delle zone: Agenzia delle Entrate &ndash; Osservatorio del Mercato Immobiliare (OMI), semestre 2026/1, licenza CC BY 4.0, consultazione pubblica del servizio GEOPOI, dati scaricati il 30 ottobre 2026. Civici con coordinate, residenti per quartiere, confini dei quartieri (NIL) e servizi raggiungibili a piedi: dati aperti del <a href="https://dati.comune.milano.it/">Comune di Milano</a> (CC BY, farmacie CC0, medici di base CC BY-NC: qui non se ne pubblica l&rsquo;elenco ma solo punteggi aggregati per zona), con servizi extra dal Comune, da Regione Lombardia (CC0) e da OpenStreetMap; dati scaricati il 29 ottobre 2026. Redditi: Redditi e variabili Irpef su base sub-comunale (per CAP, anno d&rsquo;imposta 2024), Ministero dell&rsquo;Economia e delle Finanze, pubblicati dal Comune di Milano come dati aperti (CC BY). Rete pedonale e mappa di sfondo: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
+<p><b>Fonti e licenze.</b> Quotazioni immobiliari (prezzi di vendita e affitti per zona) e perimetri delle zone: Agenzia delle Entrate &ndash; Osservatorio del Mercato Immobiliare (OMI), semestre 2026/1, licenza CC BY 4.0, consultazione pubblica del servizio GEOPOI, dati scaricati il 30 ottobre 2026. Civici con coordinate, residenti per quartiere, confini dei quartieri (NIL) e servizi raggiungibili a piedi: dati aperti del <a href="https://dati.comune.milano.it/">Comune di Milano</a> (CC BY, farmacie CC0, medici di base CC BY-NC: qui non se ne pubblica l&rsquo;elenco ma solo punteggi aggregati per zona), con servizi extra dal Comune, da Regione Lombardia (CC0) e da OpenStreetMap; dati scaricati il 29 ottobre 2026. Redditi: Redditi e variabili Irpef su base sub-comunale (per CAP, anno d&rsquo;imposta 2024), Ministero dell&rsquo;Economia e delle Finanze, pubblicati dal Comune di Milano come dati aperti (CC BY). Rete pedonale: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, licenza ODbL.</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<datalist id="dl-zona"></datalist>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null,ZF=null,BY={},RD=[];
-var ACC='#00695c',GRY='#8a8a8a',WARM='#c26a1b';
+var C={m1:'#E30613',m3:'#FFD500',m2:'#00A651',m4:'#0072BC',m5:'#7B3FA0',or:'#F58220',ink:'#0b0d12',ink2:'#2f3440',mut:'#5f6673',grid:'#e6e8ec',axis:'#9aa1ad',light:'#c9ced6'};
+var D,GEO,ZC,BY={},RD=[],SEL='C14',HC='';
 /* ---------- formati ---------- */
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function f1(x){return nf(x,1)} function f2(x){return nf(x,2)}
-function sg(v,d){d=d==null?1:d;var t=nf(Math.abs(v),d),z=Number(t.replace(/\./g,'').replace(',','.'))===0;return (v<0&&!z?'−':'+')+t+'%'}
-function sn(v,d){d=d==null?2:d;var t=nf(Math.abs(v),d);return (v<0?'−':'')+t}
-function ic(a){return 'da '+sg(a[0])+' a '+sg(a[1])}
-function icn(a){return 'da '+sn(a[0])+' a '+sn(a[1])}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function eur(x){return f0(x)+' €'}
-function rk(x){return nf(x,x%1?1:0)}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function lgdLine(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function f2(x){var r=(Math.round(Math.abs(x)*100)/100).toFixed(2).split('.');return (x<0&&+r.join('.')>0?'−':'')+r[0]+','+r[1]}
+function sg(v,d){d=d==null?1:d;var a=Math.abs(v),t=d?f1(a):f0(a);return (v<0&&+t.replace(',','.')!==0?'−':'+')+t+'%'}
+function sn(v){var t=f2(Math.abs(v));return (v<0?'−':'')+t}
+function sE(v){return (v<0?'−':'+')+f0(Math.abs(v))}
+function nth(n){return f0(n)+'º'}
+function $(id){return document.getElementById(id)}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function nm(z){return z.nome_breve.replace(/^Centro Storico - /,'').replace(/City Life/g,'CityLife')}
+function nmc(z){var n=nm(z).split(',')[0];return n}
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ('data/riepilogo.json'),getJ('../prezzi-case/data/zone.geojson')]).then(function(r){
+  D=r[0];GEO=r[1];D.zone.forEach(function(z){BY[z.zona]=z});ZC=D.zone.filter(function(z){return z.in_campione});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
 function modo(id){return D.modi.filter(function(m){return m.id===id})[0]}
-function zn(z){return BY[z]}
-
-Promise.all([J('data/riepilogo.json'),J('../prezzi-case/data/zone.geojson')]).then(function(a){
-  D=a[0];ZF=a[1];D.zone.forEach(function(z){BY[z.zona]=z});
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
-
+function draw(f){f();RD.push(f)}
+function rankBy(key,desc){var s=ZC.slice().sort(function(a,b){return desc?b[key]-a[key]:a[key]-b[key]}),o={};s.forEach(function(z,i){o[z.zona]=i+1});return o}
 function tutto(){
-  sorpresa();scatterSez();tabellaSez();serviziSez();mappa();duomo();valore();metodo();
+  var dl='';D.zone.slice().sort(function(a,b){return nm(a).localeCompare(nm(b),'it')}).forEach(function(z){dl+='<option value="'+esc(nm(z))+' ('+z.zona+')"></option>'});$('dl-zona').innerHTML=dl;
+  highlights();
+  chartBinit();draw(chartB);draw(duomo);draw(servizi);draw(mappa);draw(ranghi);draw(valore);
+  limiti();metodo();
+  wireInput('in-z',function(c){SEL=c;mappa();scheda()});
+  wireInput('in-c',function(c){HC=c;chartB()});
+  scheda();
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},200)});
 }
-
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var S=D.sorpresa,q=S.quarto_oggiaro,c=S.citylife,n=S.porta_nuova,a=S.sant_ambrogio,ess=D.essenziali,ext=D.extra,metro=D.servizi.filter(function(s){return s.id==='metro'})[0];
-  var h='<p><b>Quarto Oggiaro ha pi&ugrave; servizi essenziali di CityLife, Porta Nuova e Sant&rsquo;Ambrogio, ma &egrave; la zona pi&ugrave; economica di Milano.</b> Su 10 servizi essenziali raggiungibili in 15 minuti a piedi (farmacia, medico, scuola, parco&hellip;) ha un punteggio medio di <b>'+f2(q.s10)+'</b>, contro '+f2(c.s10)+' di CityLife, '+f2(n.s10)+' di Porta Nuova e '+f2(a.s10)+' di Sant&rsquo;Ambrogio&ndash;Via Dante. Ma il prezzo stimato &egrave; di <b>'+f0(q.prezzo)+' &euro;/m&sup2;</b>, contro '+f0(c.prezzo)+', '+f0(n.prezzo)+' e '+f0(a.prezzo)+'.</p>';
-  h+='<p>Quello che il prezzo sembra premiare non sono i servizi di base, che ci sono quasi ovunque, ma <b>la metro e i servizi &laquo;in pi&ugrave;&raquo;</b> (cinema, teatri, supermercati, ospedali&hellip;). Tolti distanza dal Duomo e reddito, ogni servizio essenziale in pi&ugrave; si associa a un prezzo del '+sg(ess.pct)+' (intervallo al 95%: '+ic(ess.ic)+', cio&egrave; nessun effetto misurabile), ogni extra a '+sg(ext.pct)+' ('+ic(ext.ic)+'). La metro &egrave; l&rsquo;unico servizio il cui legame con il prezzo resta chiaramente positivo: correlazione parziale '+f2(metro.parz)+' ('+icn(metro.ic)+').</p>';
-  h+='<p class="src">CityLife e Porta Nuova hanno pochi civici residenziali ('+c.n_civici_res+' e '+n.n_civici_res+'): le loro medie sono meno solide. Prezzi: stime dell&rsquo;Agenzia delle Entrate (OMI 2026/1), non prezzi di vendite reali. Fonti: <code>sorprese_zone.csv</code>, <code>modelli.csv</code>, <code>servizi_singoli.csv</code>.</p>';
-  setH('sorpresa',h);
+function wireInput(id,cb){
+  var inp=$(id);
+  function go(){var v=inp.value.trim().toLowerCase();if(!v){return}
+    var hit=D.zone.filter(function(z){return (nm(z)+' ('+z.zona+')').toLowerCase()===v||z.zona.toLowerCase()===v||nm(z).toLowerCase()===v})[0];
+    if(!hit){var p=D.zone.filter(function(z){return nm(z).toLowerCase().indexOf(v)>=0});if(p.length===1)hit=p[0]}
+    if(hit)cb(hit.zona)}
+  inp.addEventListener('input',go);inp.addEventListener('change',go);
 }
-
-/* ---------- il grafico principale ---------- */
-var MODE='nessuno';
-var BTN={nessuno:'Senza togliere nulla',dist:'Togliendo la distanza dal Duomo',red:'Togliendo il reddito',dist_red:'Togliendo distanza e reddito'};
-function scatterSez(){
-  var sp=D.spearman['prezzo vs servizi su 20'],T=D.terzili.filter(function(t){return t.criterio==='servizi su 20'}),
-      alto=T.filter(function(t){return t.terzile==='alto'})[0],basso=T.filter(function(t){return t.terzile==='basso'})[0],r2=D.valore.r2;
-  setH('sc-intro','<p>Ogni punto &egrave; una zona OMI. Pi&ugrave; a destra, pi&ugrave; servizi a portata di cammino: il punteggio va da 0 a 20 (10 servizi essenziali e 10 extra raggiungibili in 15 minuti a piedi, media dei residenti della zona). Pi&ugrave; in alto, prezzo stimato pi&ugrave; alto.</p><p><b>Il legame c&rsquo;&egrave; ed &egrave; forte</b>: correlazione di Spearman '+f2(sp[0])+' (da '+f2(sp[1])+' a '+f2(sp[2])+'; 1 vorrebbe dire che le zone pi&ugrave; servite sono sempre le pi&ugrave; care). Il terzo di zone con pi&ugrave; servizi ha un prezzo mediano di <b>'+f0(alto.prezzo)+' &euro;/m&sup2;</b>, il terzo con meno servizi di <b>'+f0(basso.prezzo)+' &euro;/m&sup2;</b>. Ma le zone con pi&ugrave; servizi sono anche le pi&ugrave; centrali e le pi&ugrave; ricche. Usa i pulsanti per <b>togliere</b> questi due fattori e guarda che cosa resta.</p>');
-  var b='<span class="sub">Che cosa togliamo:</span>';
-  ['nessuno','dist','red','dist_red'].forEach(function(k){b+='<button type="button" data-k="'+k+'"'+(k===MODE?' class="on"':'')+'>'+BTN[k]+'</button>'});
-  setH('sc-btn',b);
-  Array.prototype.forEach.call(el('sc-btn').querySelectorAll('button'),function(x){x.addEventListener('click',function(){MODE=x.getAttribute('data-k');Array.prototype.forEach.call(el('sc-btn').querySelectorAll('button'),function(y){y.classList.toggle('on',y===x)});scatter()})});
-  scatter();RD.push(scatter);
-  var m=modo('dist_red');
-  setH('sc-testo','<p>Il grafico compone il quadro in una frase: <b>distanza dal Duomo e reddito spiegano da soli l&rsquo;'+nf(r2.distanza_reddito*100,1)+'% delle differenze tra i prezzi</b>; aggiungere i servizi porta la quota a '+nf(r2.distanza_reddito_servizi20*100,1)+'% (R&sup2; '+nf(r2.distanza_reddito,3)+' &rarr; '+nf(r2.distanza_reddito_servizi20,3)+'). Dei '+sg(modo('nessuno').pct)+' per servizio che si vedono &laquo;senza togliere nulla&raquo; ne resta circa un quinto ('+D.valore.sopravvive+'% del coefficiente), e l&rsquo;intervallo arriva a zero: <b>non possiamo escludere che, a parit&agrave; di centralit&agrave; e reddito, i servizi non cambino il prezzo.</b></p>');
-  setH('warn1','<b>Correlazione non vuol dire causa.</b> Le zone con pi&ugrave; servizi sono anche le pi&ugrave; centrali e le pi&ugrave; ricche, e di solito le pi&ugrave; care in ogni caso: non possiamo sapere quanto del prezzo sia dovuto ai servizi e quanto al fatto di essere in centro o in un quartiere ricco. Le zone sono poche ('+D.meta.n_zone+') e grandi, e i redditi sono per CAP: il risultato &egrave; un ordine di grandezza, non una cifra per valutare una casa.');
+/* ---------- numeri in alto ---------- */
+function highlights(){
+  var T3=D.terzili.filter(function(t){return t.criterio==='servizi su 20'}),alto=T3.filter(function(t){return t.terzile==='alto'})[0],basso=T3.filter(function(t){return t.terzile==='basso'})[0];
+  var g=D.stessa_distanza[0],dpc=(g.prezzo_piu/g.prezzo_meno-1)*100;
+  var on=D.servizi.filter(function(s){return s.ic[0]>0});
+  var e8=BY.E8,c14=BY.C14,m=modo('dist_red');
+  var H=[
+   {c:C.m1,n:(alto.prezzo/basso.prezzo).toFixed(1).replace('.',',').replace(',0','')+'<small>×</small>',p:'Il terzo di zone con più servizi costa il doppio del terzo con meno: '+f0(alto.prezzo)+' contro '+f0(basso.prezzo)+' €/m².',h:'firma'},
+   {c:C.m3,n:sg(dpc,0).replace('%','')+'<small>%</small>',p:'Vicino al Duomo le zone con più servizi costano meno di quelle con meno servizi ('+f0(g.prezzo_piu)+' contro '+f0(g.prezzo_meno)+' €/m²).',h:'duomo'},
+   {c:C.m2,n:on.length+'<small>su 20</small>',p:'servizi restano legati al prezzo dopo aver tolto centro e reddito: '+on.map(function(s){return s.nome.toLowerCase()}).join(', ')+'.',h:'servizi'},
+   {c:C.m4,n:nth(e8.rango_prezzo),p:'Quarto Oggiaro è '+nth(e8.rango_s10).replace('º','ª')+' su 41 per servizi essenziali ma ultima per prezzo.',h:'sorprese'},
+   {c:C.m5,n:sg(c14.residuo_pct,0).replace('%','')+'<small>%</small>',p:'Porta Nuova costa quasi il doppio di quanto servizi, distanza e reddito prevedono.',h:'mappa'},
+   {c:C.or,n:sg(m.pct,0).replace('%','')+'<small>%</small>',p:'è il prezzo in più per ogni servizio in più, a parità di centro e reddito: da '+sg(m.ic[0])+' a '+sg(m.ic[1])+'.',h:'valore'}
+  ];
+  $('hl').innerHTML=H.map(function(x){return '<a href="#'+x.h+'" style="--c:'+x.c+'"><span class="n"'+(x.c===C.m3?'':'')+'>'+x.n+'</span><p>'+x.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
-function scatter(){
-  var box=el('sc'),Z=D.zone.filter(function(z){return z.in_campione}),m=modo(MODE),m0=modo('nessuno');
-  var w=Math.max(280,box.clientWidth||600),narrow=w<560,H=narrow?340:420,ml=narrow?42:54,mr=narrow?14:18,mt=14,mb=narrow?46:50,pw=w-ml-mr,ph=H-mt-mb;
+/* ---------- B: i punti scendono ---------- */
+function chartBinit(){var sl=$('sl-b');sl.addEventListener('input',chartB)}
+function chartB(){
+  var t=$('sl-b').value/100,m0=modo('nessuno'),m3=modo('dist_red');
+  var a=m0.a*(1-t)+m3.a*t,b=m0.b*(1-t)+m3.b*t,pct=(Math.exp(b)-1)*100;
+  $('t-b').textContent='Più servizi, prezzo più alto: ma togliendo centro e reddito la salita si appiattisce';
+  $('bg-b').innerHTML='Ogni servizio in più va con un prezzo più alto del <b>'+sg(pct)+'</b>'+(t>=1?' (da '+sg(m3.ic[0])+' a '+sg(m3.ic[1])+': arriva a zero)':'')+'.';
+  var W=width('ch-b'),narrow=W<520,H=narrow?360:420,ml=narrow?54:60,mr=12,mt=12,mb=46,pw=W-ml-mr,ph=H-mt-mb;
   var x0=10.5,x1=20.2,p0=2000,p1=14000,l0=Math.log(p0),l1=Math.log(p1);
   function X(v){return ml+(v-x0)/(x1-x0)*pw} function Y(p){return mt+ph-(Math.log(p)-l0)/(l1-l0)*ph}
-  var s='<svg class="sc" viewBox="0 0 '+w+' '+H+'" width="'+w+'" height="'+H+'" aria-hidden="true">';
-  [2000,3000,4000,6000,8000,12000].forEach(function(v){s+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="#e5e5e5"/><text class="mu" x="'+(ml-6)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end">'+f0(v)+'</text>'});
-  for(var v=11;v<=20;v+=(narrow?3:1)){s+='<line x1="'+X(v).toFixed(1)+'" x2="'+X(v).toFixed(1)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph+4)+'" stroke="#999"/><text class="mu" x="'+X(v).toFixed(1)+'" y="'+(mt+ph+17)+'" text-anchor="middle">'+v+'</text>'}
-  s+='<line x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+(mt+ph)+'" y2="'+(mt+ph)+'" stroke="#111"/><line x1="'+ml+'" x2="'+ml+'" y1="'+mt+'" y2="'+(mt+ph)+'" stroke="#111"/>';
-  s+='<text class="mu" x="'+(ml+pw/2)+'" y="'+(H-6)+'" text-anchor="middle">Servizi raggiungibili in 15 minuti a piedi (su 20)</text>';
-  s+='<text class="mu" transform="translate(11,'+(mt+ph/2)+') rotate(-90)" text-anchor="middle">'+(MODE==='nessuno'?'Prezzo OMI stimato (€/m²)':'Prezzo corretto (€/m²)')+'</text>';
-  function line(mm,st){var sa=Math.max(x0,(l0-mm.a)/mm.b),sb=Math.min(x1,(l1-mm.a)/mm.b);
-    return '<line x1="'+X(sa).toFixed(1)+'" y1="'+Y(Math.exp(mm.a+mm.b*sa)).toFixed(1)+'" x2="'+X(sb).toFixed(1)+'" y2="'+Y(Math.exp(mm.a+mm.b*sb)).toFixed(1)+'" '+st+'/>'}
-  if(MODE!=='nessuno')s+=line(m0,'stroke="#999" stroke-width="1.6" stroke-dasharray="6 4"');
-  s+=line(m,'stroke="#111" stroke-width="2.4"');
-  s+='<text x="'+(ml+pw-4)+'" y="'+(mt+ph-8)+'" text-anchor="end" font-weight="700">tendenza: '+sg(m.pct)+' per servizio</text>';
-  var lab={};D.meta.etichette_scatter.forEach(function(c){lab[c]=1});
-  var pts=Z.map(function(z){return {x:X(z.s20),y:Y(z.adj[MODE]),z:z}});
-  pts.forEach(function(p){var hl=lab[p.z.zona];
-    s+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(hl?6:4.6)+'" data-z="'+p.z.zona+'" fill="'+(hl?ACC:'#fff')+'" fill-opacity=".92" stroke="'+ACC+'" stroke-width="1.6"><title>'+p.z.zona+' '+esc(p.z.nome_breve)+'</title></circle>'});
+  var s=svgOpen(W,H);
+  [2000,3000,4000,6000,8000,12000].forEach(function(v){s+=L(ml,Y(v),ml+pw,Y(v))+T(ml-6,Y(v)+4,f0(v),{a:'end',c:'m'})});
+  for(var v=11;v<=20;v+=3){s+=L(X(v),mt+ph,X(v),mt+ph+4,C.axis)+T(X(v),mt+ph+18,v,{a:'middle',c:'m'})}
+  s+=L(ml,mt+ph,ml+pw,mt+ph,C.ink)+L(ml,mt,ml,mt+ph,C.ink);
+  s+=T(ml+pw/2,H-6,'Servizi a portata di cammino (su 20)',{a:'middle',c:'m'});
+  s+='<text class="m" transform="translate(11,'+(mt+ph/2)+') rotate(-90)" text-anchor="middle">Prezzo al metro quadro (€)</text>';
+  var sa=Math.max(x0,(l0-a)/b),sb=Math.min(x1,(l1-a)/b);
+  s+=L(X(sa),Y(Math.exp(a+b*sa)),X(sb),Y(Math.exp(a+b*sb)),C.ink,2.6);
+  var lab={E8:'Quarto Oggiaro',B19:'Venezia',C14:'Porta Nuova',B15:'Brera',C13:'CityLife'};if(HC&&BY[HC]&&!lab[HC])lab[HC]=nmc(BY[HC]);
+  var pts=ZC.map(function(z){var y=Math.exp(Math.log(z.prezzo)*(1-t)+Math.log(z.adj.dist_red)*t);return{x:X(z.s20),y:Y(y),z:z,p:y}});
+  pts.forEach(function(p){var hl=lab[p.z.zona],sel=p.z.zona===HC;
+    s+='<circle cx="'+r1(p.x)+'" cy="'+r1(p.y)+'" r="'+(sel?8:hl?6.5:5)+'" fill="'+(sel?C.m2:hl?C.or:C.m4)+'" fill-opacity=".9" stroke="'+(sel?C.ink:'#fff')+'" stroke-width="'+(sel?2.2:1.2)+'"/>'});
+  pts.slice().reverse().forEach(function(p){
+    s+='<circle cx="'+r1(p.x)+'" cy="'+r1(p.y)+'" r="18" fill="transparent"'+tip('<b>'+esc(nm(p.z))+'</b> ('+p.z.zona+')<br>'+f2(p.z.s20)+' servizi su 20<br>prezzo OMI '+f0(p.z.prezzo)+' €/m²'+(t>0?'<br>prezzo corretto '+f0(p.p)+' €/m²':''))+'/>'});
   var placed=[];
-  function free(b){for(var i=0;i<placed.length;i++){var o=placed[i];if(b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1])return false}
-    for(var j=0;j<pts.length;j++){if(pts[j].x>b[0]-6&&pts[j].x<b[2]+6&&pts[j].y>b[1]-6&&pts[j].y<b[3]+6)return false}
-    return b[0]>=ml-4&&b[2]<=w-2&&b[1]>=mt-2&&b[3]<=mt+ph+2}
-  pts.forEach(function(p){if(!lab[p.z.zona])return;var cx=p.x,cy=p.y,W=26,Hh=13,
-    cand=[[cx+9,cy+4,'start'],[cx-9,cy+4,'end'],[cx-W/2,cy-10,'start'],[cx-W/2,cy+19,'start'],[cx+9,cy-9,'start'],[cx-9,cy-9,'end'],[cx+9,cy+17,'start'],[cx-9,cy+17,'end']],pk=cand[0];
-    for(var k=0;k<cand.length;k++){var c=cand[k],xb=c[2]==='end'?c[0]-W:c[0];if(free([xb,c[1]-Hh+2,xb+W,c[1]+3])){pk=c;break}}
-    var xb=pk[2]==='end'?pk[0]-W:pk[0];placed.push([xb,pk[1]-Hh+2,xb+W,pk[1]+3]);
-    s+='<text x="'+pk[0].toFixed(1)+'" y="'+pk[1].toFixed(1)+'" text-anchor="'+pk[2]+'" font-weight="700" style="fill:'+ACC+';pointer-events:none">'+p.z.zona+'</text>'});
-  box.innerHTML=s+'</svg>';
-  Array.prototype.forEach.call(box.querySelectorAll('circle'),function(c){function sh(){infoPunto(c.getAttribute('data-z'))}c.addEventListener('mouseover',sh);c.addEventListener('click',sh)});
-  setH('sc-lg',lgdLine([{color:'#111',t:'tendenza: '+BTN[MODE].toLowerCase()+' ('+sg(m.pct)+' per servizio, '+ic(m.ic)+')'}].concat(MODE==='nessuno'?[]:[{color:'#999',dash:1,t:'tendenza di &laquo;senza togliere nulla&raquo; ('+sg(m0.pct)+'), per confronto'}]))+'<span><i style="background:'+ACC+'"></i>zone con etichetta: '+D.meta.etichette_scatter.join(', ')+'</span>');
-  var t='';
-  if(MODE==='nessuno')t='<p><b>Senza togliere nulla</b>: ogni servizio in pi&ugrave; va con un prezzo del <b>'+sg(m.pct)+'</b> pi&ugrave; alto (intervallo al 95%: '+ic(m.ic)+'). &Egrave; la pendenza della linea, un legame netto ma che mescola tutto.</p>';
-  else{var ctl=MODE==='dist'?'la zona stesse alla distanza mediana dal Duomo ('+f2(D.meta.dist_ref_km)+' km)':MODE==='red'?'la zona avesse il reddito mediano ('+f0(D.meta.red_ref)+' &euro; imponibili per contribuente)':'la zona stesse alla distanza mediana dal Duomo ('+f2(D.meta.dist_ref_km)+' km) e avesse il reddito mediano ('+f0(D.meta.red_ref)+' &euro;)';
-    t='<p><b>'+BTN[MODE]+'</b>: i punti sono spostati come se '+ctl+'. La pendenza scende a <b>'+sg(m.pct)+'</b> per servizio ('+ic(m.ic)+'; R&sup2; '+f2(m.r2)+').'+(MODE==='dist_red'?' L&rsquo;intervallo comprende lo zero.':'')+'</p>'}
-  setH('sc-mode',t);
+  function free(bx){for(var i=0;i<placed.length;i++){var o=placed[i];if(bx[0]<o[2]&&bx[2]>o[0]&&bx[1]<o[3]&&bx[3]>o[1])return false}
+    for(var j=0;j<pts.length;j++){if(pts[j].x>bx[0]-5&&pts[j].x<bx[2]+5&&pts[j].y>bx[1]-5&&pts[j].y<bx[3]+5)return false}
+    return bx[0]>=ml-2&&bx[2]<=W-2&&bx[1]>=mt-2&&bx[3]<=mt+ph+2}
+  pts.forEach(function(p){var n=lab[p.z.zona];if(!n)return;var w=tw(n,13,true),cx=p.x,cy=p.y,
+    cand=[[cx+10,cy+4,'start'],[cx-10,cy+4,'end'],[cx-w/2,cy-11,'start'],[cx-w/2,cy+20,'start'],[cx+10,cy-10,'start'],[cx-10,cy-10,'end'],[cx+10,cy+18,'start'],[cx-10,cy+18,'end']],pk=cand[0];
+    var ok=false;for(var k=0;k<cand.length;k++){var c=cand[k],xb=c[2]==='end'?c[0]-w:c[0];if(free([xb,c[1]-12,xb+w,c[1]+3])){pk=c;ok=true;break}}
+    if(!ok){for(var k2=0;k2<cand.length;k2++){var c2=cand[k2],x2=c2[2]==='end'?c2[0]-w:c2[0];if(x2>=ml-2&&x2+w<=W-2){pk=c2;break}}}
+    var xb=pk[2]==='end'?pk[0]-w:pk[0];placed.push([xb,pk[1]-12,xb+w,pk[1]+3]);
+    s+=T(pk[0],pk[1],n,{a:pk[2],c:'h',st:p.z.zona===HC?'fill:#007a3d':''})});
+  $('ch-b').innerHTML=s+'</svg>';
 }
-function infoPunto(zc){
-  var z=BY[zc],h='<b>'+z.zona+' '+esc(z.nome_breve)+'</b>: '+nf(z.s20,2)+' servizi su 20 ('+nf(z.s10,2)+' essenziali su 10); prezzo OMI stimato <b>'+f0(z.prezzo)+' &euro;/m&sup2;</b>';
-  if(MODE!=='nessuno')h+=', prezzo corretto '+f0(z.adj[MODE])+' &euro;/m&sup2;';
-  h+='. A '+f2(z.dist_km)+' km dal Duomo, reddito '+f0(z.reddito)+' &euro;. '+(z.stato==='OTTIMO'?'Stato prevalente OTTIMO (edifici nuovi). ':'')+(z.n_civici_res<100?'Pochi civici residenziali ('+z.n_civici_res+'). ':'');
-  el('sc-info').innerHTML=h;
-}
-
-/* ---------- tabella ben servite / care ma poco servite ---------- */
-var TC='s10';
-function tabellaSez(){
-  var Z=D.zone.filter(function(z){return z.in_campione}),e8=D.sorpresa;
-  setH('tb-intro','<p>Mettiamo in fila le zone per servizi e per prezzo (posto 1 = la prima di 41). Le zone con il posto per servizi molto migliore del posto per prezzo sono &laquo;ben servite ma economiche&raquo;; il contrario sono &laquo;care ma poco servite&raquo;. Con i soli servizi essenziali Quarto Oggiaro &egrave; <b>'+rk(e8.rango_s10_e8)+'&ordf; per servizi e '+rk(e8.rango_prezzo_e8)+'&ordf; per prezzo</b> (l&rsquo;ultima).</p>');
-  setH('tb-btn','<span class="sub">Conta:</span><button type="button" data-c="s10" class="on">Servizi essenziali (su 10)</button><button type="button" data-c="s20">Tutti i servizi (su 20)</button>');
-  Array.prototype.forEach.call(el('tb-btn').querySelectorAll('button'),function(x){x.addEventListener('click',function(){TC=x.getAttribute('data-c');Array.prototype.forEach.call(el('tb-btn').querySelectorAll('button'),function(y){y.classList.toggle('on',y===x)});tab()})});
-  function tab(){
-    var sk='scarto_'+TC,rkk='rango_'+TC,A=Z.slice().sort(function(a,b){return b[sk]-a[sk]}).slice(0,6),B=Z.slice().sort(function(a,b){return a[sk]-b[sk]}).slice(0,6);
-    function rows(L){return L.map(function(z){return ['<b>'+z.zona+'</b> '+esc(z.nome_breve)+(z.n_civici_res<100?' *':''),nf(z[TC],2),rk(z[rkk])+'º',rk(z.rango_prezzo)+'º',f0(z.prezzo)]})}
-    var hd=['Zona','Servizi ('+(TC==='s10'?'su 10':'su 20')+')','Posto servizi','Posto prezzo','€/m²'];
-    table('tb-a',hd,rows(A));table('tb-b',hd,rows(B));
-  }
-  tab();
-}
-
-/* ---------- servizio per servizio ---------- */
-function serviziSez(){
-  var S=D.servizi,ndue=S.filter(function(s){return s.quota>=98}).length,lo=-0.7,hi=0.8,pcx=function(v){return ((v-lo)/(hi-lo)*100).toFixed(2)+'%'};
-  var bib=S.filter(function(s){return s.id==='biblioteche'})[0],met=S.filter(function(s){return s.id==='metro'})[0],on=S.filter(function(s){return s.ic[0]>0});
-  setH('sv-intro','<p>Per ognuno dei 20 servizi: quanto resta di legame con il prezzo <b>dopo aver tolto distanza dal Duomo e reddito</b> (correlazione parziale di Spearman: 0 = nessun legame, 1 = le zone con quel servizio sono sempre le pi&ugrave; care). Il punto &egrave; la stima; la linea va dal minimo al massimo plausibile (intervallo al 95%). Se la linea attraversa lo zero non si pu&ograve; escludere nessun legame. In verde, il servizio la cui linea sta tutta a destra dello zero: <b>'+on.map(function(s){return s.nome.toLowerCase()}).join(', ')+'</b> ('+sn(met.parz)+', '+icn(met.ic)+').</p>');
-  var h='<div class="ax"><span></span><div class="pl">';
-  [-0.5,0,0.5].forEach(function(v){h+='<span style="left:'+pcx(v)+'">'+sn(v,1)+'</span>'});
-  h+='</div><span></span></div>';
-  S.forEach(function(s){var on=s.ic[0]>0;
-    h+='<div class="row" title="'+esc(s.nome)+': correlazione parziale '+sn(s.parz)+', intervallo '+icn(s.ic)+'"><div class="nm">'+esc(s.nome)+'<small>'+(s.tipo==='extra'?'extra':'essenziale')+' · raggiunto dal '+s.quota+'% dei residenti</small></div><div class="pl"><span class="z" style="left:'+pcx(0)+'"></span><span class="ci'+(on?' on':'')+'" style="left:'+pcx(s.ic[0])+';width:'+((s.ic[1]-s.ic[0])/(hi-lo)*100).toFixed(2)+'%"></span><span class="d'+(on?' on':'')+'" style="left:'+pcx(s.parz)+'"></span></div><div class="v">'+sn(s.parz)+'</div></div>'});
-  setH('sv',h);
-  setH('sv-warn','<b>20 confronti su '+D.meta.n_zone+' zone: esplorativo.</b> Con tanti confronti qualche valore alto pu&ograve; essere un caso, e le differenze tra un servizio e l&rsquo;altro sono piccole rispetto alla loro incertezza. Prendi sul serio soprattutto il fatto che <b>la metro sta in cima</b> e che <b>le biblioteche stanno in fondo</b> ('+sn(bib.parz)+', '+icn(bib.ic)+': le biblioteche non si associano al prezzo, come gi&agrave; visto nella pagina sui redditi). Sotto lo zero non c&rsquo;&egrave; un &laquo;effetto negativo&raquo;: &egrave; solo che quelle zone non sono pi&ugrave; care.');
-  var P=D.parziale,E=D.essenziali,X=D.extra;
-  setH('sv-testo','<p>I servizi essenziali (farmacie, medici di base, scuole, asili nido, parchi, mercati, negozi di vicinato, impianti sportivi, uffici postali, biblioteche) sono raggiunti da quasi tutti in quasi tutte le zone: '+ndue+' servizi su 20 hanno una quota media di residenti serviti pari o sopra il 98%, quindi non c&rsquo;&egrave; molta differenza tra zone da mettere in relazione con il prezzo. Il risultato per gruppi:</p>');
-  var cn=['nessun controllo','controllo distanza','controllo reddito','controllo distanza + reddito'],nm={S20:'Tutti i servizi (su 20)',S10:'Servizi essenziali (su 10)',SX:'Servizi extra (10)'};
-  table('tab-par',['Correlazione con il prezzo','Senza togliere nulla','Togliendo la distanza','Togliendo il reddito','Togliendo distanza e reddito'],['S20','S10','SX'].map(function(k){return [nm[k]].concat(cn.map(function(c,i){var v=P[k][c];return i===3?'<b>'+sn(v[0])+'</b> ('+icn([v[1],v[2]])+')':sn(v[0])}))}));
-}
-
-/* ---------- mappa del residuo ---------- */
-var MAP=null,LAY=null,SEL=null;
-var CB=[-15,-5,5,15,40],CC=['#136459','#62b0a4','#ffffff','#f0c08a','#d98a3d','#8a4a10'];
-function colR(z){if(!z||!z.in_campione)return '#8f8f8f';var v=z.residuo_pct,i=0;while(i<CB.length&&v>=CB[i])i++;return CC[i]}
-function mappa(){
-  var C14=BY.C14,B15=BY.B15,C13=BY.C13;
-  setH('mp-intro','<p>Il modello usa tre cose (servizi, distanza dal Duomo, reddito) per dire quanto dovrebbe costare ogni zona. Qui il colore &egrave; la <b>differenza tra il prezzo stimato dall&rsquo;Agenzia e quello &laquo;previsto&raquo;</b>: in arancione le zone che costano <b>pi&ugrave; del previsto</b>, in verde-azzurro quelle che costano <b>meno</b>. Clic su una zona per la scheda.</p>');
-  setH('mp-testo','<p><b>Il &laquo;troppo caro&raquo; &egrave; nuovo e di moda, non &laquo;servito&raquo;.</b> Porta Nuova, Brera e CityLife costano molto pi&ugrave; di quanto servizi, distanza e reddito prevedano: '+sg(C14.residuo_pct,0)+', '+sg(B15.residuo_pct,0)+' e '+sg(C13.residuo_pct,0)+'. Due di queste zone (Porta Nuova e CityLife) sono segnate dall&rsquo;OMI come stato prevalente &laquo;OTTIMO&raquo;, cio&egrave; edifici nuovi: il loro prezzo &egrave; quello di un quartiere di grattacieli, non confrontabile con il resto. &laquo;Pi&ugrave; del previsto&raquo; non vuol dire &laquo;sopravvalutata&raquo;: vuol dire che nel modello mancano cose (prestigio, edifici, brand del quartiere).</p>');
-  var lg='';CC.forEach(function(c,i){var t=i===0?'meno di '+sg(CB[0],0)+' (costa meno)':i===CB.length?'oltre '+sg(CB[i-1],0)+' (costa di più)':sg(CB[i-1],0)+' … '+sg(CB[i],0);lg+='<span><i style="background:'+c+'"></i>'+t+'</span>'});
-  lg+='<span><i style="background:#8f8f8f"></i>grigio scuro: fuori dal confronto (D39)</span>';setH('lg-map',lg);
-  MAP=L.map('map',{scrollWheelZoom:false}).setView([45.4655,9.19],11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(MAP);
-  function sty(f){var sel=SEL===f.properties.zona;return {fillColor:colR(BY[f.properties.zona]),fillOpacity:.84,color:sel?'#000':'#555',weight:sel?3:1}}
-  LAY=L.geoJSON(ZF,{style:sty,onEachFeature:function(f,l){
-    l.bindTooltip(function(){var z=BY[f.properties.zona];if(!z)return esc(f.properties.nome_breve);return '<b>'+esc(z.nome_breve)+'</b> ('+z.zona+')<br>'+(z.in_campione?f0(z.prezzo)+' €/m² stimati · '+sg(z.residuo_pct,0)+' sul previsto':'fuori dal confronto')},{sticky:true});
-    l.on('click',function(){scegli(f.properties.zona)})}}).addTo(MAP);
-  MAP.fitBounds(LAY.getBounds());
-  var sel=el('sel-zona'),h='<option value="">— scegli —</option>';
-  D.zone.slice().sort(function(a,b){return a.nome_breve.localeCompare(b.nome_breve,'it')}).forEach(function(z){h+='<option value="'+z.zona+'">'+esc(z.nome_breve)+' ('+z.zona+')</option>'});
-  sel.innerHTML=h;sel.addEventListener('change',function(){if(sel.value)scegli(sel.value)});
-  function scegli(zc){SEL=zc;sel.value=zc;LAY.setStyle(sty);LAY.eachLayer(function(l){if(l.feature.properties.zona===zc)l.bringToFront()});scheda(zc)}
-  RD.push(function(){MAP.invalidateSize()});
-  table('tab-zone',['Zona','Servizi su 20','Essenziali su 10','Reddito €','Km dal Duomo','Prezzo €/m²','Previsto €/m²','Differenza'],D.zone.map(function(z){return ['<b>'+z.zona+'</b> '+esc(z.nome_breve),f2(z.s20),f2(z.s10),f0(z.reddito),f2(z.dist_km),f0(z.prezzo),z.in_campione?f0(z.prezzo_atteso):'–',z.in_campione?sg(z.residuo_pct,0):'fuori dal confronto']}));
-}
-function scheda(zc){
-  var z=BY[zc];if(!z)return;
-  var h='<h3>'+esc(z.nome)+' <span class="sub">('+z.zona+', fascia '+esc(z.fascia.toLowerCase())+')</span></h3><div class="scroll"><table><tbody>';
-  h+='<tr><td>Prezzo di vendita stimato dall&rsquo;OMI</td><td class="r">'+f0(z.prezzo_min)+' – '+f0(z.prezzo_max)+' €/m² (centro '+f0(z.prezzo)+')</td></tr>';
-  if(z.in_campione)h+='<tr><td>Prezzo previsto da servizi, distanza e reddito</td><td class="r">'+f0(z.prezzo_atteso)+' €/m² → <b>'+sg(z.residuo_pct,0)+'</b></td></tr>';
-  h+='<tr><td>Servizi in 15 minuti a piedi</td><td class="r"><b>'+f2(z.s20)+'</b> su 20 ('+f2(z.s10)+' essenziali su 10, '+f2(z.sx)+' extra su 10)</td></tr>';
-  h+='<tr><td>Reddito imponibile medio, per CAP</td><td class="r">'+f0(z.reddito)+' € ('+z.n_cap+(z.n_cap===1?' CAP':' CAP')+')</td></tr>';
-  h+='<tr><td>Distanza dal Duomo (centro della zona)</td><td class="r">'+f2(z.dist_km)+' km</td></tr>';
-  h+='<tr><td>Civici residenziali</td><td class="r">'+f0(z.n_civici_res)+'</td></tr></tbody></table></div>';
-  var av=[];if(z.stato==='OTTIMO')av.push('stato prevalente OTTIMO (edifici nuovi): prezzo non confrontabile con le altre zone');if(z.n_civici_res<100)av.push('pochi civici residenziali: la media dei servizi è poco solida');if(!z.in_campione)av.push('esclusa dal confronto: nei dati del Comune mancano molti servizi, il punteggio è falsato');
-  if(av.length)h+='<div class="warm">Attenzione: '+av.join('; ')+'.</div>';
-  h+='<p class="sub">Abitazioni civili, '+D.meta.semestre+'. Le quotazioni OMI sono stime dell’Agenzia delle Entrate, non prezzi di vendite reali.</p>';
-  setH('scheda',h);
-}
-
-/* ---------- vicino al Duomo ---------- */
+/* ---------- Duomo: linee inclinate ---------- */
 function duomo(){
-  var G=D.stessa_distanza,v=G[0],NM={vicino:'Vicino al Duomo',medio:'A distanza media',lontano:'Lontano'};
-  setH('dm-testo','<p>Per non confondere i servizi con la distanza abbiamo diviso le '+D.meta.n_zone+' zone in tre gruppi di distanza dal Duomo e, dentro ogni gruppo, in metà con più e metà con meno servizi. <b>Vicino al Duomo succede il contrario di quanto ci si aspetta</b>: le zone con più servizi costano <b>meno</b> ('+f0(v.prezzo_piu)+' contro '+f0(v.prezzo_meno)+' &euro;/m&sup2;). Pi&ugrave; lontano il legame torna positivo: a distanza media '+f0(G[1].prezzo_piu)+' contro '+f0(G[1].prezzo_meno)+' ('+sg((G[1].prezzo_piu/G[1].prezzo_meno-1)*100,0)+'), lontano '+f0(G[2].prezzo_piu)+' contro '+f0(G[2].prezzo_meno)+' ('+sg((G[2].prezzo_piu/G[2].prezzo_meno-1)*100,0)+').</p><p>Un legame che sparisce o si rovescia vicino al centro non &egrave; un prezzo dei servizi: nel centro i servizi ci sono ovunque e i prezzi seguono altro (prestigio, edifici, reddito: in questo gruppo le zone con meno servizi hanno anche il reddito pi&ugrave; alto, '+f0(v.red_meno)+' contro '+f0(v.red_piu)+' &euro;).</p>');
-  setH('lg-dm','<span><i style="background:'+ACC+'"></i>metà delle zone con più servizi</span><span><i style="background:#b9b9b9"></i>metà con meno servizi</span>');
-  function draw(){
-    var box=el('ch-dm'),W=box.clientWidth||320,H=270,mm={l:46,r:8,t:22,b:52},pw=W-mm.l-mm.r,ph=H-mm.t-mm.b,mx=0;
-    G.forEach(function(g){mx=Math.max(mx,g.prezzo_piu,g.prezzo_meno)});var st=niceStep(mx/4);mx=Math.ceil(mx/st)*st;
-    function Y(x){return mm.t+ph-x/mx*ph}
-    var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-    for(var t=0;t<=mx+st/2;t+=st)s+='<line x1="'+mm.l+'" x2="'+(W-mm.r)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="#e3e3e3"/><text class="mu" x="'+(mm.l-6)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+f0(t)+'</text>';
-    var gw=pw/3,bw=Math.min(54,gw*0.32);
-    G.forEach(function(g,i){var cx=mm.l+gw*i+gw/2;
-      [[g.prezzo_piu,cx-bw-1,ACC],[g.prezzo_meno,cx+1,'#b9b9b9']].forEach(function(b){s+='<rect x="'+b[1]+'" y="'+Y(b[0])+'" width="'+bw+'" height="'+(Y(0)-Y(b[0]))+'" fill="'+b[2]+'"/><text x="'+(b[1]+bw/2)+'" y="'+(Y(b[0])-4)+'" text-anchor="middle" style="font-weight:700">'+f0(b[0])+'</text>'});
-      s+='<text x="'+cx+'" y="'+(H-30)+'" text-anchor="middle">'+NM[g.fascia]+'</text><text class="mu" x="'+cx+'" y="'+(H-16)+'" text-anchor="middle">'+nf(g.km[0],1)+'–'+nf(g.km[1],1)+' km · '+g.n+' zone</text>'});
-    s+='<line x1="'+mm.l+'" x2="'+(W-mm.r)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#888"/></svg>';box.innerHTML=s;
-  }
-  draw();RD.push(draw);
-  table('tab-dm',['Distanza dal Duomo','Zone','Prezzo €/m² (più servizi)','Prezzo €/m² (meno servizi)','Servizi su 20 (più / meno)','Reddito € (più / meno)'],G.map(function(g){return [NM[g.fascia]+' ('+nf(g.km[0],1)+'–'+nf(g.km[1],1)+' km)',g.n,f0(g.prezzo_piu),f0(g.prezzo_meno),nf(g.s20_piu,1)+' / '+nf(g.s20_meno,1),f0(g.red_piu)+' / '+f0(g.red_meno)]}));
+  var G=D.stessa_distanza,NM={vicino:'Vicino al Duomo',medio:'Distanza media',lontano:'Lontano'},COL={vicino:C.or,medio:C.m4,lontano:C.m5};
+  var v=G[0],dpc=function(g){return (g.prezzo_piu/g.prezzo_meno-1)*100};
+  $('t-d').textContent='Vicino al Duomo le zone con più servizi costano il '+f0(Math.abs(dpc(v)))+'% in meno; più lontano costano di più';
+  $('nt-d').innerHTML='A distanza media '+sg(dpc(G[1]),0)+', lontano '+sg(dpc(G[2]),0)+'. Vicino al centro i servizi ci sono ovunque e i prezzi seguono altro: in quel gruppo le zone con meno servizi hanno anche il reddito più alto ('+f0(v.red_meno)+' contro '+f0(v.red_piu)+' €). <b>Un legame che si rovescia non è un prezzo dei servizi.</b>';
+  var W=width('ch-d'),mt=26,mb=30,ml=50,mr=W<400?118:150,H=300,pw=W-ml-mr,ph=H-mt-mb,p0=2000,p1=8500;
+  function Y(p){return mt+ph-(p-p0)/(p1-p0)*ph}
+  var s=svgOpen(W,H),xa=ml,xb=ml+pw;
+  [2000,4000,6000,8000].forEach(function(p){s+=L(xa,Y(p),xb,Y(p))});
+  s+=T(xa,mt-10,'meno servizi',{a:'middle',c:'b'})+T(xb,mt-10,'più servizi',{a:'middle',c:'b'});
+  s+=L(xa,mt,xa,mt+ph,C.axis,1.5)+L(xb,mt,xb,mt+ph,C.axis,1.5);
+  G.forEach(function(g){var c=COL[g.fascia],y1=Y(g.prezzo_meno),y2=Y(g.prezzo_piu),t='<b>'+NM[g.fascia]+'</b> ('+f1(g.km[0])+'–'+f1(g.km[1])+' km, '+g.n+' zone)<br>meno servizi: '+f0(g.prezzo_meno)+' €/m²<br>più servizi: '+f0(g.prezzo_piu)+' €/m²';
+    s+=L(xa,y1,xb,y2,c,4)+'<circle cx="'+xa+'" cy="'+r1(y1)+'" r="6" fill="'+c+'"/><circle cx="'+xb+'" cy="'+r1(y2)+'" r="6" fill="'+c+'"/>';
+    s+=T(xa-10,y1+5,f0(g.prezzo_meno),{a:'end',c:'b'})+T(xb+12,y2+1,f0(g.prezzo_piu)+' €',{c:'b'})+T(xb+12,y2+15,NM[g.fascia],{c:'m',st:'fill:'+c+';font-weight:700'});
+    s+='<line x1="'+xa+'" y1="'+r1(y1)+'" x2="'+xb+'" y2="'+r1(y2)+'" stroke="transparent" stroke-width="22"'+tip(t)+'/>'});
+  s+=T(xa-10,mt-10,'€/m²',{a:'end',c:'m'});
+  $('ch-d').innerHTML=s+'</svg>';
 }
-
-/* ---------- quanto vale un servizio ---------- */
+/* ---------- servizi uno per uno ---------- */
+function servizi(){
+  var S=D.servizi.slice().sort(function(a,b){return b.parz-a.parz}),on=S.filter(function(s){return s.ic[0]>0}),bib=S.filter(function(s){return s.id==='biblioteche'})[0],ess=D.essenziali,ext=D.extra;
+  $('t-s').textContent=on.length===1?'Dopo aver tolto centro e reddito, solo '+on[0].nome.toLowerCase()+' resta chiaramente legata al prezzo':'Dopo aver tolto centro e reddito, restano legati al prezzo: '+on.map(function(s){return s.nome.toLowerCase()}).join(', ');
+  $('nt-s').innerHTML='I 10 servizi essenziali messi insieme non spiegano il prezzo ('+sg(ess.pct)+' per servizio, da '+sg(ess.ic[0])+' a '+sg(ess.ic[1])+'), gli extra un po\' di più ('+sg(ext.pct)+', da '+sg(ext.ic[0])+' a '+sg(ext.ic[1])+'). In fondo ci sono le biblioteche ('+sn(bib.parz)+').';
+  var W=width('ch-s'),ml=W<400?112:150,mr=40,rh=26,mt=22,H=mt+S.length*rh+6,pw=W-ml-mr,lo=-0.7,hi=0.8;
+  function X(v){return ml+(v-lo)/(hi-lo)*pw}
+  var s=svgOpen(W,H);
+  [-0.5,0,0.5].forEach(function(v){s+=L(X(v),mt-4,X(v),H-4,v===0?C.ink:C.grid,v===0?1.5:1)+T(X(v),mt-8,sn(v).replace(',50',',5'),{a:'middle',c:'m'})});
+  S.forEach(function(sv,i){var y=mt+i*rh+rh/2,on=sv.ic[0]>0,col=on?C.m2:C.axis;
+    s+=T(ml-8,y+4,esc(sv.nome),{a:'end',c:on?'b':''});
+    s+=L(X(sv.ic[0]),y,X(sv.ic[1]),y,on?C.m2:C.axis,3);
+    s+='<circle cx="'+r1(X(sv.parz))+'" cy="'+r1(y)+'" r="6" fill="'+(on?C.m2:'#fff')+'" stroke="'+col+'" stroke-width="2.4"/>';
+    s+=T(W-4,y+4,sn(sv.parz),{a:'end',c:on?'b':'m'});
+    s+='<rect x="0" y="'+r1(y-rh/2)+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+esc(sv.nome)+'</b> ('+(sv.tipo==='extra'?'extra':'essenziale')+')<br>legame '+sn(sv.parz)+', da '+sn(sv.ic[0])+' a '+sn(sv.ic[1])+'<br>raggiunto dal '+sv.quota+'% dei residenti')+'/>'});
+  $('ch-s').innerHTML=s+'</svg>';
+}
+/* ---------- mappa ---------- */
+var CLS=null;
+function classi(){
+  var v=ZC.map(function(z){return z.residuo_pct}).sort(function(a,b){return a-b}),n=v.length,br;
+  br=[1,2,3,4].map(function(k){return Math.round((v[Math.floor(k*n/5)-1]+v[Math.floor(k*n/5)])/2)});
+  for(var i=1;i<br.length;i++)if(br[i]<=br[i-1])br[i]=br[i-1]+1;
+  var cols=[C.m4,'#5BB4E5',C.m3,C.or,'#B84A00'];
+  function cl(r){var i=0;while(i<br.length&&r>=br[i])i++;return i}
+  var cnt=[0,0,0,0,0];ZC.forEach(function(z){cnt[cl(z.residuo_pct)]++});
+  CLS={br:br,cols:cols,cl:cl,cnt:cnt};
+}
+function mCol(z){if(!z||!z.in_campione)return '#C8CCD2';return CLS.cols[CLS.cl(z.residuo_pct)]}
+function mappa(){
+  if(!CLS)classi();
+  var top=ZC.slice().sort(function(a,b){return b.residuo_pct-a.residuo_pct}).slice(0,3);
+  $('t-m').textContent='Costano più del previsto soprattutto '+top.map(function(z){return nmc(z)}).join(', ').replace(/, ([^,]*)$/,' e $1')+' ('+top.map(function(z){return sg(z.residuo_pct,0)}).join(', ')+')';
+  $('nt-m').innerHTML='<b>Il «troppo caro» è nuovo e di moda, non «servito».</b> Porta Nuova e CityLife sono segnate dall\'Agenzia come stato prevalente «OTTIMO»: edifici nuovi, un quartiere di grattacieli che non si confronta con il resto. «Più del previsto» non vuol dire «sopravvalutata»: nel conto mancano il prestigio, gli edifici, il marchio del quartiere.';
+  var br=CLS.br,lab=['meno di '+sg(br[0],0),sg(br[0],0)+' … '+sg(br[1],0),sg(br[1],0)+' … '+sg(br[2],0),sg(br[2],0)+' … '+sg(br[3],0),'oltre '+sg(br[3],0)];
+  $('lg-m').innerHTML=CLS.cols.map(function(c,i){return '<span>'+sw(c)+lab[i]+' · <b>&nbsp;'+CLS.cnt[i]+'</b></span>'}).join('')+'<span>'+sw('#C8CCD2')+'fuori dal confronto · <b>&nbsp;1</b></span>';
+  var W=width('ch-m'),k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  function rings(f){var g=f.geometry,out=[];(g.type==='Polygon'?[g.coordinates]:g.coordinates).forEach(function(p){p.forEach(function(r){out.push(r)})});return out}
+  GEO.features.forEach(function(f){rings(f).forEach(function(r){r.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var sc=(W-2)/(x1-x0),H=Math.round((y1-y0)*sc)+2;
+  function pa(f){return rings(f).map(function(r){return 'M'+r.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')}
+  var s=svgOpen(W,H),selF=null,bb={};
+  GEO.features.forEach(function(f){var z=BY[f.properties.zona],c=f.properties.zona;if(c===SEL){selF=f;return}
+    var zz=z||{};s+='<path d="'+pa(f)+'" fill-rule="evenodd" fill="'+mCol(z)+'" stroke="#fff" stroke-width="1" data-z="'+c+'"'+tip('<b>'+esc(nm(zz.nome_breve?zz:{nome_breve:f.properties.nome_breve}))+'</b> ('+c+')<br>'+(z&&z.in_campione?f0(z.prezzo)+' €/m² stimati<br>'+sg(z.residuo_pct,0)+' sul previsto':'fuori dal confronto'))+'/>'});
+  if(selF){var z=BY[SEL];s+='<path d="'+pa(selF)+'" fill-rule="evenodd" fill="'+mCol(z)+'" stroke="'+C.ink+'" stroke-width="3" data-z="'+SEL+'"'+tip('<b>'+esc(nm(z))+'</b> ('+SEL+')<br>'+(z.in_campione?f0(z.prezzo)+' €/m² stimati<br>'+sg(z.residuo_pct,0)+' sul previsto':'fuori dal confronto'))+'/>'}
+  /* etichette: tre più care del previsto e la zona scelta */
+  var toL=top.map(function(z){return z.zona});if(SEL&&toL.indexOf(SEL)<0)toL.push(SEL);
+  var placed=[];
+  toL.forEach(function(c){var f=GEO.features.filter(function(g){return g.properties.zona===c})[0];if(!f)return;
+    var sx=0,sy=0,cn=0;rings(f).forEach(function(r){r.forEach(function(p){sx+=p[0]*k;sy+=p[1];cn++})});
+    var cx=1+(sx/cn-x0)*sc,cy=1+(y1-sy/cn)*sc,name=nmc(BY[c]),w=tw(name,13,true),px=Math.min(Math.max(cx,w/2+2),W-w/2-2),py=cy;
+    for(var t=0;t<6;t++){var hit=placed.some(function(o){return Math.abs(o[0]-px)<(o[2]+w)/2&&Math.abs(o[1]-py)<14});if(!hit)break;py+=14}
+    placed.push([px,py,w]);
+    s+=T(px,py+4,esc(name),{a:'middle',c:'h',st:'pointer-events:none'})});
+  s+=T(W-4,H-4,'↑ nord',{a:'end',c:'m'});
+  $('ch-m').innerHTML=s+'</svg>';
+  Array.prototype.forEach.call($('ch-m').querySelectorAll('[data-z]'),function(p){p.addEventListener('click',function(){var c=p.getAttribute('data-z');if(BY[c]){SEL=c;$('in-z').value=nm(BY[c])+' ('+c+')';mappa();scheda()}})});
+}
+function scheda(){
+  var z=BY[SEL];if(!z)return;
+  var h='<h4>'+esc(z.nome)+' <span style="font-weight:400;color:var(--mut)">('+z.zona+', fascia '+esc(z.fascia.toLowerCase())+')</span></h4>';
+  h+='<dl><dt>Prezzo stimato (OMI)</dt><dd>'+f0(z.prezzo_min)+'–'+f0(z.prezzo_max)+' €/m²</dd>';
+  if(z.in_campione)h+='<dt>Prezzo previsto da servizi, centro e reddito</dt><dd>'+f0(z.prezzo_atteso)+' €/m² → '+sg(z.residuo_pct,0)+'</dd>';
+  h+='<dt>Servizi in 15 minuti a piedi</dt><dd>'+f1(z.s20)+' su 20</dd><dt>Reddito imponibile medio (per CAP)</dt><dd>'+f0(z.reddito)+' €</dd><dt>Distanza dal Duomo</dt><dd>'+f1(z.dist_km)+' km</dd></dl>';
+  var av=[];if(z.stato==='OTTIMO')av.push('stato prevalente OTTIMO (edifici nuovi): prezzo non confrontabile con le altre zone');if(z.n_civici_res<100)av.push('pochi civici residenziali ('+z.n_civici_res+'): la media dei servizi è poco solida');if(!z.in_campione)av.push('esclusa dal confronto: nei dati del Comune mancano molti servizi, il punteggio è falsato');
+  if(av.length)h+='<p class="note"><b>Attenzione:</b> '+av.join('; ')+'.</p>';
+  h+='<p class="src" style="margin-bottom:0">Abitazioni civili, '+D.meta.semestre+'. Stime dell\'Agenzia delle Entrate, non prezzi di vendite reali.</p>';
+  $('scheda').innerHTML=h;
+}
+/* ---------- posti: servizi contro prezzo ---------- */
+function ranghi(){
+  var Z=ZC.slice(),A=Z.slice().sort(function(a,b){return (b.rango_prezzo-b.rango_s10)-(a.rango_prezzo-a.rango_s10)}).slice(0,6),B=Z.slice().sort(function(a,b){return (a.rango_prezzo-a.rango_s10)-(b.rango_prezzo-b.rango_s10)}).slice(0,6),e8=BY.E8;
+  $('t-r').textContent='Quarto Oggiaro è '+nth(e8.rango_s10).replace('º','ª')+' per servizi essenziali e '+nth(e8.rango_prezzo).replace('º','ª')+' per prezzo';
+  var W=width('ch-r'),ml=26,mr=26,pw=W-ml-mr,n=41,rh=54,gh=30,H=2*gh+12*rh+30;
+  function X(r){return ml+(r-1)/(n-1)*pw}
+  var s=svgOpen(W,H),y=0;
+  [['Ben servite, ma economiche',A],['Care, ma poco servite',B]].forEach(function(g,gi){
+    s+=T(ml,y+18,g[0],{c:'b',st:'font-size:14px'});y+=gh;
+    g[1].forEach(function(z){
+      var a=X(z.rango_s10),b=X(z.rango_prezzo),cy=y+43;
+      s+=T(14,y+14,esc(nm(z))+(z.n_civici_res<100?' *':''),{c:'b'});
+      s+=L(ml,cy,ml+pw,cy,C.grid,1)+L(a,cy,b,cy,C.ink2,3);
+      s+='<circle cx="'+r1(a)+'" cy="'+cy+'" r="7" fill="#fff" stroke="'+C.m4+'" stroke-width="3"/><circle cx="'+r1(b)+'" cy="'+cy+'" r="7" fill="'+C.or+'"/>';
+      var ra=nth(z.rango_s10),rb=nth(z.rango_prezzo);
+      function cx(v){return Math.min(Math.max(v,16),W-16)}
+      var dy=Math.abs(a-b)<34?(a<b?-1:1):0;
+      s+=T(cx(a),cy-12,ra,{a:'middle',c:'b',st:'fill:'+C.m4})+T(cx(b),cy-12,rb,{a:'middle',c:'b',st:'fill:#b85c00'});
+      s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+esc(z.nome)+'</b><br>Posto per servizi essenziali: '+ra+' su 41<br>Posto per prezzo: '+rb+' ('+f0(z.prezzo)+' €/m²)')+'/>';
+      y+=rh});
+    y+=6});
+  s+=T(ml,H-6,'1º (il più alto)',{c:'m'})+T(ml+pw,H-6,'41º',{a:'end',c:'m'});
+  $('ch-r').innerHTML=s+'</svg>';
+}
+/* ---------- quanto vale ---------- */
 function valore(){
-  var V=D.valore,m=modo('dist_red'),N=D.nil,F=D.fasce_omi,R=D.robustezza;
-  function rob(sub){return R.filter(function(r){return r.variante.indexOf(sub)===0})[0]}
-  setH('vl-testo','<p>Se i servizi fossero davvero la causa, un servizio in pi&ugrave; sotto casa varrebbe circa <b>'+sg(m.pct)+'</b> di prezzo, ma l&rsquo;intervallo va da '+sg(m.ic[0])+' a '+sg(m.ic[1])+': arriva a zero. Applicato al prezzo mediano delle zone ('+f0(V.prezzo_mediano)+' &euro;/m&sup2;):</p>');
-  setH('vl-kpi','<div><b>'+sg(m.pct)+'</b><span>di prezzo per servizio in pi&ugrave; (su 20), a parit&agrave; di distanza dal Duomo e reddito. '+ic(m.ic)+'</span></div><div><b>circa '+f0(V.eur_m2)+' &euro;/m&sup2;</b><span>da '+f0(V.eur_m2_ic[0]).replace('-','−')+' a +'+f0(V.eur_m2_ic[1])+' &euro;/m&sup2;</span></div><div><b>circa '+f0(V.eur_70)+' &euro;</b><span>su una casa di 70 m&sup2;: da '+f0(V.eur_70_ic[0]).replace('-','−')+' a +'+f0(V.eur_70_ic[1])+' &euro;</span></div>');
-  setH('vl-warn','<b>&Egrave; un massimo ragionevole, non un prezzo.</b> Non significa che un servizio sotto casa valga '+f0(V.eur_70)+' euro: &egrave; l&rsquo;ordine di grandezza del legame che resta tra prezzo e servizi dopo aver tolto centralit&agrave; e reddito, e il legame potrebbe non essere causale. Una differenza tipica tra le zone ('+f2(V.sd)+' servizi, una deviazione standard) vale '+sg(V.sd_pct)+' a parit&agrave; di distanza e reddito. I servizi vanno da '+f2(V.range_s20[0])+' a '+f2(V.range_s20[1])+' su 20 tra le zone.');
-  var T=D.tracce,r1=rob('solo zone con stato'),r2=rob('senza zone con meno');
-  setH('vl-lista','<li><b>Il reddito &egrave; del CAP, non della zona.</b> In '+T.zone_con_2_cap_ge10+' zone su '+T.n_zone_omi+' almeno due CAP pesano pi&ugrave; del 10%, e in '+T.zone_con_un_cap_ge90+' un solo CAP copre oltre il 90% dei residenti. Un controllo cos&igrave; grossolano assorbe solo in parte la ricchezza del quartiere: ci&ograve; che resta ai servizi pu&ograve; essere ricchezza non misurata. Questo spinge il numero verso l&rsquo;alto.</li>'
-   +'<li><b>Con le fasce OMI (centrale, semicentrale, periferica, suburbana) il coefficiente va a zero</b>: '+sg(F.pct)+' ('+ic(F.ic)+').</li>'
-   +'<li><b>Le zone sono '+D.meta.n_zone+' e non indipendenti</b>: zone vicine si assomigliano, quindi gli intervalli sono probabilmente un po&rsquo; troppo stretti.</li>'
-   +'<li><b>Togliendo una zona alla volta</b> il valore va da '+sg(V.loo.min[1])+' (senza '+V.loo.min[0]+') a '+sg(V.loo.max[1])+' (senza '+V.loo.max[0]+'). Senza le zone con stato OTTIMO: '+sg(r1.pct)+' ('+ic(r1.ic)+'); senza quelle con meno di 100 civici residenziali: '+sg(r2.pct)+' ('+ic(r2.ic)+').</li>'
-   +'<li><b>Sull&rsquo;altro lato</b>, il punteggio dei servizi &egrave; grezzo (un servizio conta 1 sia se &egrave; a 2 sia a 14 minuti, e tutti i servizi contano uguale): questo attenua il legame e lo spinge verso il basso. I due effetti non si compensano in modo noto.</li>');
-  setH('nil-testo','<p>Rifatto sui '+N.n_ammessi+' quartieri (NIL) con abbastanza civici e residenti, il valore &egrave; <b>'+sg(N.controllato[0])+' per servizio ('+ic(N.controllato[1])+')</b>, contro '+sg(N.lordo[0])+' senza togliere nulla: stesso segno e stesso ordine di grandezza, correlazione di Spearman '+f2(N.spearman_servizi20[0])+' tra prezzo e servizi. Un riscontro, non un risultato migliore: il prezzo OMI esiste per zona, non per quartiere, quindi il prezzo di un quartiere &egrave; un valore derivato dalla zona (o dalle zone) che lo copre. I '+N.n_ammessi+' quartieri non sono '+N.n_ammessi+' osservazioni indipendenti (le zone OMI &laquo;dominanti&raquo; sono '+N.zone_dominanti+'): il '+nf(N.quota_due_zone,1)+'% dei quartieri tocca due o pi&ugrave; zone per almeno il 10% dell&rsquo;area e solo il '+nf(N.quota_dominante_80,1)+'% ha una zona dominante sopra l&rsquo;80%. Dentro una zona i servizi variano ma il prezzo no, quindi il valore dei quartieri &egrave; probabilmente una sottostima. Per questo la stima principale &egrave; quella per zone: <b>tra '+sg(N.puliti[1])+' e '+sg(m.pct)+' per servizio</b>, con la seconda cifra dalle zone.</p><p class="src">Fonte: <code>nil_risultati.json</code> (intervalli a grappoli per zona OMI; solo quartieri con almeno l&rsquo;80% dell&rsquo;area in una zona: '+sg(N.puliti[1])+', '+ic(N.puliti[2])+', '+N.puliti[0]+' quartieri).</p>');
-  table('tab-rob',['Come si fa il conto','Zone','% per servizio','Intervallo al 95%'],R.map(function(r){return [esc(r.variante),r.n,sg(r.pct),r.ic?ic(r.ic):'–']}));
+  var V=D.valore,m=modo('dist_red'),N=D.nil,F=D.fasce_omi,k=4000*70/100;
+  $('t-v').textContent='Un servizio in più si associa al massimo a circa '+f0(Math.round(V.eur_70/500)*500)+' € su una casa di 70 m²: e potrebbe valere zero';
+  var R=[
+   {n:'Per zone, tolti distanza e reddito',s:'41 zone: stima principale',v:V.eur_70,a:V.eur_70_ic[0],b:V.eur_70_ic[1],c:C.or},
+   {n:'Per zone, con anche le fasce OMI',s:'centrale, semicentrale, periferica, suburbana',v:F.pct*k,a:F.ic[0]*k,b:F.ic[1]*k,c:C.m4},
+   {n:'Per quartieri, tolti distanza e reddito',s:N.n_ammessi+' quartieri',v:N.controllato[0]*k,a:N.controllato[1][0]*k,b:N.controllato[1][1]*k,c:C.m5},
+   {n:'Quartieri con una zona dominante',s:N.puliti[0]+' quartieri quasi tutti in una zona',v:N.puliti[1]*k,a:N.puliti[2][0]*k,b:N.puliti[2][1]*k,c:C.m2}];
+  var W=width('ch-v'),ml=8,mr=10,pw=W-ml-mr,rh=64,mt=22,H=mt+R.length*rh+24,lo=-10000,hi=25000;
+  function X(v){return ml+(v-lo)/(hi-lo)*pw}
+  var s=svgOpen(W,H),yb=mt+R.length*rh;
+  [-10000,0,10000,20000].forEach(function(v){s+=L(X(v),mt-4,X(v),yb,v===0?C.ink:C.grid,v===0?1.5:1)+T(X(v),yb+16,(v>0?'+':v<0?'−':'')+f0(Math.abs(v)),{a:v===lo?'start':'middle',c:'m'})});
+  R.forEach(function(r,i){var y=mt+i*rh,cy=y+46;
+    s+=T(ml,y+14,r.n,{c:'b'})+T(ml,y+30,r.s,{c:'m'});
+    s+=L(X(r.a),cy,X(r.b),cy,r.c,6)+'<circle cx="'+r1(X(r.v))+'" cy="'+cy+'" r="8" fill="'+r.c+'" stroke="#fff" stroke-width="2"/>';
+    s+=T(W-4,y+14,sE(r.v)+' €',{c:'b',a:'end',st:'font-size:14px'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+r.n+'</b><br>stima '+sE(r.v)+' €, da '+sE(r.a)+' a '+sE(r.b)+' €')+'/>'});
+  s+=T(ml+pw,mt-8,'euro su una casa di 70 m²',{a:'end',c:'m'});
+  $('ch-v').innerHTML=s+'</svg>';
+  $('wv').innerHTML='<b>È un massimo ragionevole, non un prezzo.</b> In euro al metro quadro è circa '+f0(V.eur_m2)+' (da '+f0(V.eur_m2_ic[0])+' a +'+f0(V.eur_m2_ic[1])+'). Una differenza tipica tra le zone ('+f2(V.sd)+' servizi) vale '+sg(V.sd_pct)+' di prezzo a parità di distanza e reddito. Correlazione non vuol dire causa.';
 }
-
-/* ---------- metodo ---------- */
+/* ---------- testi in fondo ---------- */
+function limiti(){
+  var T=D.tracce,V=D.valore,R=D.robustezza,sp=D.spearman,z39=BY.D39;
+  function rob(sub){return R.filter(function(r){return r.variante.indexOf(sub)===0})[0]}
+  var d39=rob('tutte le 42'),ot=rob('solo zone con stato'),pc=rob('senza zone con meno'),N=D.nil;
+  var L=['<b>I prezzi OMI sono stime, non prezzi pagati.</b> L\'Osservatorio del Mercato Immobiliare dell\'Agenzia delle Entrate pubblica per ogni zona un intervallo (minimo e massimo) al metro quadro. Qui il «prezzo» è il centro dell\'intervallo, per le abitazioni civili nello stato di conservazione prevalente, semestre '+D.meta.semestre+'. Per vederli nel tempo: <a href="../prezzi-case/">Prezzi delle case</a>.',
+   '<b>Correlazione non è causa.</b> Ricchi, centrali e serviti sono quasi la stessa cosa (legame tra servizi e reddito '+f2(sp['servizi 20 vs reddito'][0])+', tra servizi e distanza dal Duomo '+sn(sp['servizi 20 vs distanza'][0])+', tra reddito e distanza '+sn(sp['reddito vs distanza'][0])+', dove 1 è lo stesso ordine): separarne gli effetti è difficile.',
+   '<b>Solo '+D.meta.n_zone+' zone nel confronto.</b> Le zone OMI sono '+T.n_zone_omi+': la rurale R2 non ha prezzo e Cascina Merlata (D39) è esclusa. Poche zone, grandi e non indipendenti (zone vicine si assomigliano): i risultati sono ordini di grandezza.',
+   '<b>Cascina Merlata è esclusa.</b> Nei dati del Comune ha solo '+z39.n_civici_res+' civici residenziali e un punteggio di '+f2(z39.s10)+' su 10, falsato dai servizi che mancano nei registri del nuovo quartiere (stesso limite della pagina sulla <a href="../citta-15-minuti/">città dei 15 minuti</a>). Con questa zona dentro, il prezzo per servizio diventa '+sg(d39.pct)+' (da '+sg(d39.ic[0])+' a '+sg(d39.ic[1])+').',
+   '<b>Zone con stato prevalente OTTIMO</b> (Porta Nuova, CityLife, Cascina Merlata): il prezzo è quello di edifici nuovi, più alto per costruzione. Senza di loro il valore per servizio è '+sg(ot.pct)+' (da '+sg(ot.ic[0])+' a '+sg(ot.ic[1])+'); senza le zone con meno di 100 civici residenziali '+sg(pc.pct)+' (da '+sg(pc.ic[0])+' a '+sg(pc.ic[1])+').',
+   '<b>I redditi sono del CAP, non della zona.</b> In '+T.zone_con_2_cap_ge10+' zone su '+T.n_zone_omi+' almeno due CAP pesano più del 10%. Un controllo così grossolano assorbe solo in parte la ricchezza del quartiere: ciò che resta ai servizi può essere ricchezza non misurata, e questo spinge il numero verso l\'alto. Il punteggio dei servizi è invece grezzo (un servizio conta 1 sia a 2 sia a 14 minuti): questo attenua il legame. I due effetti non si compensano in modo noto.',
+   '<b>Con le fasce OMI il legame va a zero</b> ('+sg(D.fasce_omi.pct)+', da '+sg(D.fasce_omi.ic[0])+' a '+sg(D.fasce_omi.ic[1])+'). Togliendo una zona alla volta il valore va da '+sg(V.loo.min[1])+' (senza '+V.loo.min[0]+') a '+sg(V.loo.max[1])+' (senza '+V.loo.max[0]+').',
+   '<b>Il controllo con i quartieri (NIL)</b> dà '+sg(N.controllato[0])+' per servizio (da '+sg(N.controllato[1][0])+' a '+sg(N.controllato[1][1])+'), contro '+sg(N.lordo[0])+' senza togliere nulla: stesso segno e stesso ordine di grandezza. Un riscontro, non un risultato migliore: il prezzo OMI esiste per zona, non per quartiere, e i '+N.n_ammessi+' quartieri non sono osservazioni indipendenti (il '+f1(N.quota_due_zone)+'% tocca due o più zone per almeno il 10% dell\'area). Per questo la stima principale è quella per zone.',
+   '<b>Venti servizi, venti confronti.</b> Con tanti confronti qualche valore alto può essere un caso: le differenze tra un servizio e l\'altro sono piccole rispetto alla loro incertezza.',
+   '<b>Che cosa non c\'è:</b> età e qualità delle case, rumore, verde, stazioni ferroviarie, scuole di prestigio, immigrazione, effetto «marchio» del quartiere. Distanza e reddito non li assorbono, e potrebbero spiegare parte di ciò che qui sembra effetto dei servizi.'];
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
 function metodo(){
-  var T=D.tracce,V=D.valore,R=D.robustezza,d39=R.filter(function(r){return r.variante.indexOf('tutte le 42')===0})[0],sp=D.spearman,z39=BY.D39,ot=R.filter(function(r){return r.variante.indexOf('solo zone con stato')===0})[0];
-  var L=[
-   '<b>I prezzi OMI sono stime, non prezzi pagati.</b> L&rsquo;Osservatorio del Mercato Immobiliare dell&rsquo;Agenzia delle Entrate pubblica per ogni zona un intervallo (minimo e massimo) al metro quadro. Qui il &laquo;prezzo&raquo; &egrave; il centro dell&rsquo;intervallo, per le abitazioni civili nello stato di conservazione prevalente, semestre '+D.meta.semestre+'. Per vedere come cambiano nel tempo: <a href="../prezzi-case/">Prezzi delle case</a>.',
-   '<b>Correlazione non &egrave; causa.</b> Ricchi, centrali e serviti sono quasi la stessa cosa (correlazioni tra loro: servizi&ndash;reddito '+f2(sp['servizi 20 vs reddito'][0])+', servizi&ndash;distanza '+sn(sp['servizi 20 vs distanza'][0])+', reddito&ndash;distanza '+sn(sp['reddito vs distanza'][0])+'), quindi separarne gli effetti &egrave; difficile: il fattore di inflazione della varianza &egrave; '+f1(V.vif.S20)+' per i servizi, '+f1(V.vif.lnD)+' per la distanza, '+f1(V.vif.lnY)+' per il reddito.',
-   '<b>Solo '+D.meta.n_zone+' zone nel confronto principale.</b> Le zone OMI sono '+T.n_zone_omi+': R2 (rurale) non ha prezzo e D39 &egrave; esclusa. Poche zone, grandi, non indipendenti: i risultati sono ordini di grandezza.',
-   '<b>D39 Cascina Merlata &egrave; esclusa.</b> Nei dati del Comune ha solo '+z39.n_civici_res+' civici residenziali e un punteggio di '+f2(z39.s10)+' su 10, falsato dai servizi che mancano nei registri del nuovo quartiere (stesso limite della pagina sulla citt&agrave; dei 15 minuti). Con D39 dentro, il valore per servizio diventa '+sg(d39.pct)+' ('+ic(d39.ic)+') e R&sup2; scende a '+f2(d39.r2)+'.',
-   '<b>Zone con stato prevalente OTTIMO</b> (Porta Nuova, CityLife, Cascina Merlata; '+T.n_ottimo+' su '+(T.n_ottimo+T.n_normale)+' con prezzo): il prezzo &egrave; quello di edifici nuovi, pi&ugrave; alto per costruzione. Senza le zone OTTIMO il valore per servizio &egrave; '+sg(ot.pct)+' ('+ic(ot.ic)+').',
-   '<b>I redditi sono per CAP, non per zona.</b> Il Comune pubblica i redditi per CAP (38 CAP), non per quartiere o per zona. Il CAP di ogni civico &egrave; una stima (giusto nel 96,6% dei casi, test della pagina sulla citt&agrave; dei 15 minuti); il reddito della zona &egrave; la media dei CAP, pesata sui residenti stimati. Il legame prezzo&ndash;reddito ('+f2(sp['prezzo vs reddito medio (per CAP)'][0])+') &egrave; probabilmente gonfiato dal fatto che zone e CAP coincidono in gran parte.',
-   '<b>Servizi.</b> 10 essenziali (farmacie, medici di base, scuole, asili nido, parchi, mercati, negozi di vicinato, impianti sportivi, uffici postali, biblioteche) e 10 extra (metro, BikeMi, supermercati, ospedali, teatri e musei, cinema, librerie, piscine, aree gioco, aree cani), tutti entro 15 minuti a piedi. Il punteggio di una zona &egrave; la media dei suoi civici, pesata con i residenti stimati: i residenti di ogni quartiere sono divisi in parti uguali tra i civici residenziali. In alcune zone il peso &egrave; poco realistico (D16: '+f0(BY.D16.residenti)+' residenti stimati su '+BY.D16.n_civici_res+' civici residenziali). Zone con pochi civici residenziali (C13 '+BY.C13.n_civici_res+', C14 '+BY.C14.n_civici_res+', D34 '+BY.D34.n_civici_res+'): medie instabili.',
-   '<b>Dai civici alle zone.</b> I '+f0(T.n_civici)+' civici sono assegnati alla zona che li contiene. Le zone si sovrappongono un po&rsquo; ('+f0(T.area_sovrapposta_m2)+' m&sup2;): '+T.civici_in_due_zone+' civici cadono in due zone e se ne tiene la prima; '+T.civici_fuori_zona+' non cadono in nessuna e sono assegnati alla pi&ugrave; vicina (entro 50 metri). I perimetri OMI hanno pi&ugrave; anelli, letti con la regola pari/dispari: l&rsquo;area totale &egrave; '+nf(T.area_km2,2)+' km&sup2;. La mappa usa invece i perimetri semplificati di Prezzi delle case.',
-   '<b>Distanza dal Duomo</b>: in linea d&rsquo;aria dal centro della zona a Piazza del Duomo.',
-   '<b>Statistica.</b> Correlazione di Spearman (conta l&rsquo;ordine delle zone, non i valori). Intervalli al 95% con 5.000 ricampionamenti delle zone. Regressione sul logaritmo del prezzo con servizi, logaritmo della distanza e logaritmo del reddito; il coefficiente dei servizi &egrave; trasformato in percentuale. I punti &laquo;corretti&raquo; del grafico sono il prezzo di ogni zona riportato alla distanza e al reddito mediani, con i coefficienti del modello.',
-   '<b>Che cosa non c&rsquo;&egrave;</b>: et&agrave; e qualit&agrave; delle case, rumore, verde, stazioni ferroviarie, scuole di prestigio, immigrazione, effetto &laquo;marchio&raquo; del quartiere. Distanza e reddito non li assorbono, e potrebbero spiegare parte di ci&ograve; che qui sembra effetto dei servizi.',
-   '<b>Pagina costruita da programmi</b> che leggono i file puliti e scrivono i dati di questa pagina: si pu&ograve; rilanciare quando arrivano nuovi dati.'];
-  setH('metodo-lista',L.map(function(x){return '<li>'+x+'</li>'}).join(''));
+  var T=D.tracce,V=D.valore;
+  var L=['<b>Servizi.</b> 10 essenziali e 10 extra, tutti entro 15 minuti a piedi lungo la rete pedonale. Il punteggio di una zona è la media dei suoi civici, pesata con i residenti stimati: i residenti di ogni quartiere sono divisi in parti uguali tra i civici residenziali. In alcune zone il peso è poco realistico (D16: '+f0(BY.D16.residenti)+' residenti stimati su '+BY.D16.n_civici_res+' civici residenziali).',
+   '<b>Dai civici alle zone.</b> I '+f0(T.n_civici)+' civici sono assegnati alla zona che li contiene. Le zone si sovrappongono un po\' ('+f0(T.area_sovrapposta_m2)+' m²): '+T.civici_in_due_zone+' civici cadono in due zone e se ne tiene la prima; '+T.civici_fuori_zona+' non cadono in nessuna e vanno alla più vicina (entro 50 metri). La mappa usa i perimetri semplificati di Prezzi delle case.',
+   '<b>Reddito.</b> Il Comune pubblica i redditi per CAP (38 CAP). Il CAP di ogni civico è una stima (giusto nel 96,6% dei casi, test della pagina sulla città dei 15 minuti); il reddito della zona è la media dei CAP, pesata sui residenti stimati.',
+   '<b>Distanza dal Duomo:</b> in linea d\'aria dal centro della zona a Piazza del Duomo.',
+   '<b>Statistica.</b> Correlazione di Spearman (conta l\'ordine delle zone, non i valori). Intervalli al 95% con 5.000 ricampionamenti delle zone. Il prezzo per servizio viene da un conto sul logaritmo del prezzo con servizi, logaritmo della distanza e logaritmo del reddito. I punti «corretti» sono il prezzo di ogni zona riportato alla distanza ('+f1(D.meta.dist_ref_km)+' km) e al reddito ('+f0(D.meta.red_ref)+' €) mediani. Quando i tre fattori si assomigliano tanto il conto è più incerto: i fattori di sovrapposizione sono '+f1(V.vif.S20)+' per i servizi, '+f1(V.vif.lnD)+' per la distanza e '+f1(V.vif.lnY)+' per il reddito.',
+   '<b>Altre varianti del conto</b> (affitti al posto dei prezzi, servizi su 10, distanza in chilometri) sono tra i file in fondo: il prezzo per servizio va da '+sg(-0.8)+' a '+sg(8.8)+' a seconda di che cosa si toglie, sempre con intervalli larghi.',
+   '<b>Pagina costruita da programmi</b> che leggono i file puliti e scrivono i dati di questa pagina: si può rilanciare quando arrivano nuovi dati.'];
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 })();
 </script>

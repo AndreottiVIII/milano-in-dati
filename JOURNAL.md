@@ -3050,3 +3050,15 @@ Bici, auto o mezzi pubblicata definitiva: mappe e tabellone (opzioni A e C).
 Derby pubblicata definitiva: saldo derby dopo derby (opzione C), marcatori in barre orizzontali semplici.
 Acqua del sindaco pubblicata definitiva: etichetta con prima la media di Milano e menu a tendina delle zone (opzione B).
 Appalti pubblicata definitiva: quadranti (opzione C) con il riquadro che spiega ARIA e le altre voci.
+Servizi e prezzi delle case pubblicata definitiva: grafico servizi/prezzo (opzione B) spiegato meglio, cerchi facili da toccare, CityLife unificato.
+Scuole pubblicata definitiva: opzione A; 'ragazzi' per medie e superiori, quadranti bambini/alunni rifatti, retta e R sui punteggi, istituto sceglibile.
+Ristoranti pubblicata definitiva: sei piccole mappe (opzione B) più l'elenco delle 130 cucine.
+Morti pubblicata definitiva: una riga per anno (opzione A).
+Botteghe pubblicata definitiva: barre per decennio (opzione A).
+Hinterland pubblicata definitiva: barre per anno (opzione B); mappa del cambiamento verde/rosso.
+Donne nelle vie pubblicata definitiva: mestieri e anni di nascita (opzioni A e C).
+Beni culturali pubblicata definitiva: strati per secolo (opzione C).
+Città dei 15 minuti pubblicata definitiva: cursore dei minuti e mappa di quello che manca (opzioni A e C).
+La Scala pubblicata definitiva: compositori e direttori (opzioni A e B).
+Pietre d'inciampo pubblicata definitiva: pallini sopra i mesi (opzione B).
+Beni confiscati pubblicata definitiva: flussi (opzione A).

@@ -1,306 +1,578 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milano in dati · I beni culturali nel Catalogo generale</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>Milano in dati · I beni culturali di Milano</title>
 <style>
-:root{--acc:#9c4a00;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#fbf1e6}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px} h1{font-size:1.7rem;margin:.6em 0 .2em}
-h2{font-size:1.25rem;margin:2em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1.05rem;margin:1.4em 0 .3em}
-a{color:var(--acc)} code{font-size:.9em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top} th{font-size:.82rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap} tr.mut td{color:var(--mut)} td.bar{width:28%;padding-right:0} td.bar i{display:block;height:10px;background:var(--acc);margin-top:6px} td.bar i.g{background:#aaa}
-.big{font-size:2.4rem;font-weight:700;color:var(--acc);line-height:1.1} .sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut)}
-.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:1em 0}
-.kpi div{border-top:2px solid var(--ink);padding-top:6px} .kpi b{display:block;font-size:1.5rem;color:var(--acc);line-height:1.2}
-#map{height:62vh;min-height:360px;border:1px solid var(--ink)} #map .leaflet-tile-pane{filter:grayscale(1) brightness(1.08) contrast(.85)}
-.leaflet-popup-content{max-height:320px;overflow:auto;font-size:.88rem;line-height:1.35} .leaflet-popup-content ul{margin:.4em 0;padding-left:1.1em} .leaflet-popup-content li{margin:.25em 0}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px} @media(max-width:760px){.cols{grid-template-columns:1fr}}
-input[type=search],select{font:inherit;padding:7px 9px;border:1px solid var(--ink);border-radius:0;background:#fff;max-width:100%} input[type=search]{width:60%;min-width:180px}
-button{font:inherit;padding:5px 10px;border:1px solid var(--ink);background:#fff;cursor:pointer} button:hover{background:var(--soft)}
-#ris td.tit{min-width:180px} .scroll{overflow-x:auto}
-details{margin:.6em 0} summary{cursor:pointer;font-weight:600}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-@media(max-width:640px){.big{font-size:1.9rem} th,td{padding:5px 4px;font-size:.88rem} td.bar{display:none}}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --it:#0b0d12;     /* Italia */
+  --hint:#0072BC;   /* comuni intorno: blu M4 */
+  --tur:#F58220;    /* turisti: arancio della home */
+  --ind:#4b5563;--umi:#00A651;--car:#0072BC;--vpm:#FFD500;--alt:#7B3FA0; /* tipi di rifiuto: grigio, verde M2, blu M4, giallo M3, viola M5 */
+  --pos:#F58220;--neg:#0072BC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* highlights */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* sections */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+
+/* beni culturali */
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch svg .w2{fill:#fff;font-size:12px}
+.ch svg .k2{fill:var(--ink);font-size:12px}
+.ch svg.mp{overflow:hidden;background:#fff}
+.find{margin:14px 0 0}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input,.find select{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus,.find select:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.45em 0 0}
+.stk{display:flex;height:16px;margin:8px 0 4px;background:#fff}
+.stk i{display:block;height:100%}
+.stl{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:.85rem}
+.stl span{white-space:nowrap}
+.stl i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px}
+ul.ex,ul.rl{padding-left:1.1em;margin:.3em 0}
+ul.ex li,ul.rl li{margin:.5em 0;line-height:1.3}
+ul.rl{list-style:none;padding:0}
+ul.rl li{border-bottom:1px solid var(--grid);padding-bottom:.5em}
+.m{color:var(--mut)}
+button{font:inherit;font-weight:700;padding:10px 16px;border:2px solid var(--ink);background:#fff;cursor:pointer;border-radius:0;min-height:44px}
+.find select{appearance:auto}
+.ch svg text.m,.ch svg .m{fill:var(--mut)}
 </style><script src="../menu.js" defer></script></head><body><main>
-<h1>Quanti beni culturali di Milano sono schedati nel Catalogo generale?</h1>
-<p>Dipinti, disegni, stampe, reperti, strumenti scientifici, architetture: il Catalogo generale dei beni culturali (ICCD, Ministero della Cultura) descrive ogni bene con una scheda. Qui contiamo le schede dei beni che sono a Milano, che cosa sono, di che secolo, dove sono e chi le ha fatte.</p>
 
-<h2>In breve</h2>
-<div class="kpi">
-<div><span class="big">27.459</span><br>schede di beni a Milano</div>
-<div><b>47,0%</b>con l'autore indicato (mancante in 53,0%)</div>
-<div><b>21,7%</b>con un luogo o un indirizzo pi&ugrave; preciso di &laquo;Milano&raquo;</div>
-<div><b>48,0%</b>con le coordinate (13.193 schede)</div>
-</div>
-<p>Il dato &egrave; il <b>dump ArCo 2.0 del 1&deg; dicembre 2023</b> (ultime schede aggiornate nel 2022-2023): contiene 30.721 schede legate a Milano in qualche modo, ma 3.262 sono beni di altre citt&agrave; che hanno solo un luogo collegato a Milano (fabbricazione, collocazione precedente, ripresa fotografica). Tutti i numeri qui sotto contano solo le <b>27.459 schede dei beni che sono a Milano</b>.</p>
-<table>
-<tr><th>Che cosa c'&egrave; nella scheda</th><th class="r">Schede</th><th class="r">Quota</th></tr>
-<tr><td>autore indicato</td><td class="r">12.894</td><td class="r">47,0%</td></tr>
-<tr><td>data (almeno un testo)</td><td class="r">25.916</td><td class="r">94,4%</td></tr>
-<tr><td>detentore con nome (museo, raccolta)</td><td class="r">8.610</td><td class="r">31,4%</td></tr>
-<tr><td>luogo con nome o via (pi&ugrave; preciso di &laquo;Milano&raquo;)</td><td class="r">5.945</td><td class="r">21,7%</td></tr>
-<tr><td>luogo: solo &laquo;Milano&raquo;</td><td class="r">10.799</td><td class="r">39,3%</td></tr>
-<tr><td>nessun luogo</td><td class="r">10.715</td><td class="r">39,0%</td></tr>
-<tr><td>coordinate dentro il Comune</td><td class="r">13.193</td><td class="r">48,0%</td></tr>
-</table>
-<p class="src">Autore mancante &egrave; normale per reperti, architetture e stampe anonime. Dettagli dei difetti dei dati: <a href="data/problemi.md">limiti dei dati</a>.</p>
+<h1>I beni culturali di Milano</h1>
+<p class="lead">Quadri, disegni, vasi, orologi, strumenti: quante schede del Catalogo generale descrivono beni che stanno a Milano, di che secolo sono, chi li ha fatti, chi li conserva e dove.</p>
 
-<h2>La mappa</h2>
-<div id="map" role="img" aria-label="Mappa di Milano con i punti dove sono conservate le schede dei beni culturali"></div>
-<p class="sub" id="mapmsg"></p>
-<p class="sub">13.193 schede hanno le coordinate, raccolte in 769 punti. Un cerchio = un punto, pi&ugrave; grande se ha pi&ugrave; schede (il pi&ugrave; grande ne ha 3.195). Le coordinate sono quelle di dove &egrave; conservato l'oggetto (di solito un museo), non dell'oggetto stesso. Clic su un cerchio per l'elenco delle schede, con il link alla scheda del catalogo.</p>
+<div class="hl" id="hl"></div>
+<p class="src">Tutti i numeri: Catalogo generale dei beni culturali (ICCD, Ministero della Cultura), tramite ArCo 2.0 del CNR-ISTC, copia del 1 dicembre 2023 (CC BY-SA 4.0). Si contano le <b>schede</b>, non gli oggetti: una scheda può descrivere un insieme o una sola parte.</p>
 
-<h2>Di che tipo sono</h2>
-<p class="sub">La sigla &egrave; quella delle schede ICCD. In senso comune &laquo;opere d'arte&raquo; (OA + disegni D + stampe S + arte contemporanea OAC) sono 23.500 schede.</p>
-<table><tr><th>Sigla</th><th>Tipo di bene</th><th class="r">Schede</th><th class="r">Quota</th><th></th></tr>
-<tr><td><b>OA</b></td><td>opera d&#x27;arte: dipinto, scultura, oggetto</td><td class='r'>17.292</td><td class='r'>63,0%</td><td class='bar'><i style='width:100.0%'></i></td></tr>
-<tr><td><b>D</b></td><td>disegno</td><td class='r'>4.464</td><td class='r'>16,3%</td><td class='bar'><i style='width:25.8%'></i></td></tr>
-<tr><td><b>RA</b></td><td>reperto archeologico</td><td class='r'>2.204</td><td class='r'>8,0%</td><td class='bar'><i style='width:12.7%'></i></td></tr>
-<tr><td><b>S</b></td><td>stampa</td><td class='r'>1.578</td><td class='r'>5,7%</td><td class='bar'><i style='width:9.1%'></i></td></tr>
-<tr><td><b>PST</b></td><td>strumento scientifico o tecnologico</td><td class='r'>788</td><td class='r'>2,9%</td><td class='bar'><i style='width:4.6%'></i></td></tr>
-<tr><td><b>A</b></td><td>architettura</td><td class='r'>665</td><td class='r'>2,4%</td><td class='bar'><i style='width:3.8%'></i></td></tr>
-<tr><td><b>BDM</b></td><td>bene demoetnoantropologico</td><td class='r'>199</td><td class='r'>0,7%</td><td class='bar'><i style='width:1.2%'></i></td></tr>
-<tr><td><b>OAC</b></td><td>opera d&#x27;arte contemporanea</td><td class='r'>166</td><td class='r'>0,6%</td><td class='bar'><i style='width:1.0%'></i></td></tr>
-<tr><td><b>MA</b></td><td>monumento archeologico</td><td class='r'>38</td><td class='r'>0,1%</td><td class='bar'><i style='width:0.2%'></i></td></tr>
-<tr><td><b>F</b></td><td>fotografia</td><td class='r'>36</td><td class='r'>0,1%</td><td class='bar'><i style='width:0.2%'></i></td></tr>
-<tr><td><b>NU</b></td><td>moneta o medaglia (numismatica)</td><td class='r'>16</td><td class='r'>0,1%</td><td class='bar'><i style='width:0.1%'></i></td></tr>
-<tr><td><b>CA</b></td><td>complesso archeologico</td><td class='r'>11</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.1%'></i></td></tr>
-<tr><td><b>PG</b></td><td>parco o giardino</td><td class='r'>2</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-</table>
-<p class="src">Fonte: <a href="data/beni_milano.csv.gz">data/beni_milano.csv.gz</a>, campi <code>tipo_scheda</code>, <code>sede_milano</code>.</p>
-
-<h2>Chi li conserva (primi 20)</h2>
-<p class="sub">Per la maggior parte delle schede il catalogo non dice chi le conserva. Per 3.195 schede il catalogo d&agrave; solo un codice senza nome, e tutte hanno le coordinate di Brera: probabilmente &egrave; una raccolta di Brera, ma il nome non &egrave; scritto nel dato e non lo abbiamo dedotto.</p>
-<table><tr><th>Detentore</th><th class="r">Schede</th><th class="r">Quota</th><th></th></tr>
-<tr class='mut'><td>non indicata nel catalogo</td><td class='r'>18.849</td><td class='r'>68,6%</td><td class='bar'><i class='g' style='width:100.0%'></i></td></tr>
-<tr><td>Raccolte storiche dell&#x27;Accademia di Brera</td><td class='r'>1.593</td><td class='r'>5,8%</td><td class='bar'><i style='width:8.5%'></i></td></tr>
-<tr><td>Civica Raccolta delle Stampe &quot;Achille Bertarelli&quot;</td><td class='r'>1.256</td><td class='r'>4,6%</td><td class='bar'><i style='width:6.7%'></i></td></tr>
-<tr><td>Raccolte Grafiche e Fotografiche del Castello Sforzesco</td><td class='r'>1.137</td><td class='r'>4,1%</td><td class='bar'><i style='width:6.0%'></i></td></tr>
-<tr><td>Raccolte Artistiche del Castello Sforzesco</td><td class='r'>1.081</td><td class='r'>3,9%</td><td class='bar'><i style='width:5.7%'></i></td></tr>
-<tr><td>Museo Poldi Pezzoli</td><td class='r'>1.076</td><td class='r'>3,9%</td><td class='bar'><i style='width:5.7%'></i></td></tr>
-<tr><td>Museo Archeologico</td><td class='r'>636</td><td class='r'>2,3%</td><td class='bar'><i style='width:3.4%'></i></td></tr>
-<tr><td>Villa Necchi Campiglio</td><td class='r'>633</td><td class='r'>2,3%</td><td class='bar'><i style='width:3.4%'></i></td></tr>
-<tr><td>Museo Teatrale alla Scala, medagliere Eisner von Eisenhof Angelo</td><td class='r'>322</td><td class='r'>1,2%</td><td class='bar'><i style='width:1.7%'></i></td></tr>
-<tr><td>Collezione Istituto dei Ciechi di Milano</td><td class='r'>236</td><td class='r'>0,9%</td><td class='bar'><i style='width:1.3%'></i></td></tr>
-<tr><td>Collezione Torno</td><td class='r'>211</td><td class='r'>0,8%</td><td class='bar'><i style='width:1.1%'></i></td></tr>
-<tr><td>Soprintendenza Archeologica</td><td class='r'>206</td><td class='r'>0,8%</td><td class='bar'><i style='width:1.1%'></i></td></tr>
-<tr><td>Museo Teatrale alla Scala</td><td class='r'>93</td><td class='r'>0,3%</td><td class='bar'><i style='width:0.5%'></i></td></tr>
-<tr><td>Polo del Novecento e Arte Contemporanea</td><td class='r'>84</td><td class='r'>0,3%</td><td class='bar'><i style='width:0.4%'></i></td></tr>
-<tr><td>Pinacoteca di Brera Archivio Cagnola</td><td class='r'>19</td><td class='r'>0,1%</td><td class='bar'><i style='width:0.1%'></i></td></tr>
-<tr><td>Fondo Alfredo Coppola, scatola 2</td><td class='r'>11</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.1%'></i></td></tr>
-<tr><td>Pinacoteca di Brera Collezione Vitali</td><td class='r'>5</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-<tr><td>Collezione dell&#x27;Accademia di Belle Arti di Brera</td><td class='r'>3</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-<tr><td>Università degli Studi di Milano</td><td class='r'>2</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-<tr><td>Civiche Raccolte</td><td class='r'>1</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-<tr><td>Museo della Basilica minore romana di S. Ambrogio</td><td class='r'>1</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-</table>
-
-<h2>Di che secolo sono</h2>
-<p class="sub">Secolo del punto medio della data indicata (&laquo;1800-1899&raquo; &rarr; XIX). Date oltre i 300 anni di ampiezza e date illeggibili sono nell'ultima riga.</p>
-<table><tr><th>Secolo</th><th class="r">Schede</th><th class="r">Quota</th><th></th></tr>
-<tr><td>a.C. (tutti i secoli prima di Cristo)</td><td class='r'>866</td><td class='r'>3,2%</td><td class='bar'><i style='width:9.2%'></i></td></tr>
-<tr><td>I secolo (1&ndash;100)</td><td class='r'>69</td><td class='r'>0,3%</td><td class='bar'><i style='width:0.7%'></i></td></tr>
-<tr><td>II secolo (101&ndash;200)</td><td class='r'>73</td><td class='r'>0,3%</td><td class='bar'><i style='width:0.8%'></i></td></tr>
-<tr><td>III secolo (201&ndash;300)</td><td class='r'>24</td><td class='r'>0,1%</td><td class='bar'><i style='width:0.3%'></i></td></tr>
-<tr><td>IV secolo (301&ndash;400)</td><td class='r'>59</td><td class='r'>0,2%</td><td class='bar'><i style='width:0.6%'></i></td></tr>
-<tr><td>V secolo (401&ndash;500)</td><td class='r'>51</td><td class='r'>0,2%</td><td class='bar'><i style='width:0.5%'></i></td></tr>
-<tr><td>VI secolo (501&ndash;600)</td><td class='r'>14</td><td class='r'>0,1%</td><td class='bar'><i style='width:0.1%'></i></td></tr>
-<tr><td>VII secolo (601&ndash;700)</td><td class='r'>4</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-<tr><td>VIII secolo (701&ndash;800)</td><td class='r'>4</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.0%'></i></td></tr>
-<tr><td>IX secolo (801&ndash;900)</td><td class='r'>48</td><td class='r'>0,2%</td><td class='bar'><i style='width:0.5%'></i></td></tr>
-<tr><td>X secolo (901&ndash;1000)</td><td class='r'>5</td><td class='r'>0,0%</td><td class='bar'><i style='width:0.1%'></i></td></tr>
-<tr><td>XI secolo (1001&ndash;1100)</td><td class='r'>77</td><td class='r'>0,3%</td><td class='bar'><i style='width:0.8%'></i></td></tr>
-<tr><td>XII secolo (1101&ndash;1200)</td><td class='r'>161</td><td class='r'>0,6%</td><td class='bar'><i style='width:1.7%'></i></td></tr>
-<tr><td>XIII secolo (1201&ndash;1300)</td><td class='r'>82</td><td class='r'>0,3%</td><td class='bar'><i style='width:0.9%'></i></td></tr>
-<tr><td>XIV secolo (1301&ndash;1400)</td><td class='r'>204</td><td class='r'>0,7%</td><td class='bar'><i style='width:2.2%'></i></td></tr>
-<tr><td>XV secolo (1401&ndash;1500)</td><td class='r'>1.334</td><td class='r'>4,9%</td><td class='bar'><i style='width:14.2%'></i></td></tr>
-<tr><td>XVI secolo (1501&ndash;1600)</td><td class='r'>2.268</td><td class='r'>8,3%</td><td class='bar'><i style='width:24.2%'></i></td></tr>
-<tr><td>XVII secolo (1601&ndash;1700)</td><td class='r'>3.803</td><td class='r'>13,8%</td><td class='bar'><i style='width:40.6%'></i></td></tr>
-<tr><td>XVIII secolo (1701&ndash;1800)</td><td class='r'>3.786</td><td class='r'>13,8%</td><td class='bar'><i style='width:40.4%'></i></td></tr>
-<tr><td>XIX secolo (1801&ndash;1900)</td><td class='r'>9.376</td><td class='r'>34,1%</td><td class='bar'><i style='width:100.0%'></i></td></tr>
-<tr><td>XX secolo (1901&ndash;2000)</td><td class='r'>3.338</td><td class='r'>12,2%</td><td class='bar'><i style='width:35.6%'></i></td></tr>
-<tr><td>XXI secolo (2001&ndash;2100)</td><td class='r'>21</td><td class='r'>0,1%</td><td class='bar'><i style='width:0.2%'></i></td></tr>
-<tr class='mut'><td>data mancante o non interpretabile</td><td class='r'>1.792</td><td class='r'>6,5%</td><td class='bar'></td></tr>
-</table>
-
-<div class="cols">
-<div>
-<h2>Gli autori pi&ugrave; frequenti</h2>
-<p class="sub">Schede per autore (30 su 3.192 nomi). &laquo;Attribuito a&raquo;, &laquo;bottega di&raquo; contano come l'autore.</p>
-<table><tr><th>Autore</th><th class="r">Schede</th><th></th></tr>
-<tr><td>Luigi Cagnola</td><td class='r'>1.175</td><td class='bar'><i style='width:100.0%'></i></td></tr>
-<tr><td>Andrea Appiani</td><td class='r'>499</td><td class='bar'><i style='width:42.5%'></i></td></tr>
-<tr><td>Anselmo Bucci</td><td class='r'>408</td><td class='bar'><i style='width:34.7%'></i></td></tr>
-<tr><td>Carlo Ferrario</td><td class='r'>275</td><td class='bar'><i style='width:23.4%'></i></td></tr>
-<tr><td>Ferdinando Tamberlani</td><td class='r'>200</td><td class='bar'><i style='width:17.0%'></i></td></tr>
-<tr><td>Camillo Procaccini</td><td class='r'>129</td><td class='bar'><i style='width:11.0%'></i></td></tr>
-<tr><td>Filippo Abbiati</td><td class='r'>124</td><td class='bar'><i style='width:10.6%'></i></td></tr>
-<tr><td>Bernardino Luini</td><td class='r'>123</td><td class='bar'><i style='width:10.5%'></i></td></tr>
-<tr><td>Giulio Cesare Procaccini</td><td class='r'>116</td><td class='bar'><i style='width:9.9%'></i></td></tr>
-<tr><td>Francesco Londonio</td><td class='r'>113</td><td class='bar'><i style='width:9.6%'></i></td></tr>
-<tr><td>Federico Bianchi</td><td class='r'>101</td><td class='bar'><i style='width:8.6%'></i></td></tr>
-<tr><td>Antonio Campi</td><td class='r'>98</td><td class='bar'><i style='width:8.3%'></i></td></tr>
-<tr><td>Daniele Crespi</td><td class='r'>96</td><td class='bar'><i style='width:8.2%'></i></td></tr>
-<tr><td>Donato Bramante</td><td class='r'>90</td><td class='bar'><i style='width:7.7%'></i></td></tr>
-<tr><td>Ambrogio Da Fossano Detto Bergognone</td><td class='r'>90</td><td class='bar'><i style='width:7.7%'></i></td></tr>
-<tr><td>Ercole Il Giovane Detto Procaccini Il Giovane</td><td class='r'>81</td><td class='bar'><i style='width:6.9%'></i></td></tr>
-<tr><td>Bernardino Butinone</td><td class='r'>72</td><td class='bar'><i style='width:6.1%'></i></td></tr>
-<tr><td>Della Rovere Giovanni Battista Detto Fiammenghino</td><td class='r'>72</td><td class='bar'><i style='width:6.1%'></i></td></tr>
-<tr><td>Della Rovere Giovanni Mauro Detto Fiammenghino</td><td class='r'>70</td><td class='bar'><i style='width:6.0%'></i></td></tr>
-<tr><td>Carlo Antonio Buffagnotti</td><td class='r'>66</td><td class='bar'><i style='width:5.6%'></i></td></tr>
-<tr><td>Carlo Bossoli</td><td class='r'>64</td><td class='bar'><i style='width:5.4%'></i></td></tr>
-<tr><td>Nava Ambrogio</td><td class='r'>63</td><td class='bar'><i style='width:5.4%'></i></td></tr>
-<tr><td>Ferdinando Detto Bibiena</td><td class='r'>62</td><td class='bar'><i style='width:5.3%'></i></td></tr>
-<tr><td>Raffaello Morghen</td><td class='r'>62</td><td class='bar'><i style='width:5.3%'></i></td></tr>
-<tr><td>Guglielmo Detto Moncalvo</td><td class='r'>56</td><td class='bar'><i style='width:4.8%'></i></td></tr>
-<tr><td>Giacomo Bianconi</td><td class='r'>56</td><td class='bar'><i style='width:4.8%'></i></td></tr>
-<tr><td>Giovanni Donato Montorfano</td><td class='r'>55</td><td class='bar'><i style='width:4.7%'></i></td></tr>
-<tr><td>Fernanda Enrica Leonia Vigo</td><td class='r'>55</td><td class='bar'><i style='width:4.7%'></i></td></tr>
-<tr><td>Heinrich Aldegrever</td><td class='r'>54</td><td class='bar'><i style='width:4.6%'></i></td></tr>
-<tr><td>Vincenzo Campi</td><td class='r'>52</td><td class='bar'><i style='width:4.4%'></i></td></tr>
-</table>
-</div>
-<div>
-<h2>I soggetti pi&ugrave; frequenti</h2>
-<p class="sub">Campo &laquo;soggetto&raquo; della scheda: spesso il tipo di oggetto (reliquiario, capitello).</p>
-<table><tr><th>Soggetto</th><th class="r">Schede</th><th></th></tr>
-<tr><td>reliquiario</td><td class='r'>275</td><td class='bar'><i style='width:100.0%'></i></td></tr>
-<tr><td>paramento liturgico</td><td class='r'>201</td><td class='bar'><i style='width:73.1%'></i></td></tr>
-<tr><td>decorazione plastica</td><td class='r'>168</td><td class='bar'><i style='width:61.1%'></i></td></tr>
-<tr><td>capitello</td><td class='r'>165</td><td class='bar'><i style='width:60.0%'></i></td></tr>
-<tr><td>angelo</td><td class='r'>163</td><td class='bar'><i style='width:59.3%'></i></td></tr>
-<tr><td>paliotto</td><td class='r'>159</td><td class='bar'><i style='width:57.8%'></i></td></tr>
-<tr><td>angeli</td><td class='r'>157</td><td class='bar'><i style='width:57.1%'></i></td></tr>
-<tr><td>candeliere</td><td class='r'>150</td><td class='bar'><i style='width:54.5%'></i></td></tr>
-<tr><td>sedia</td><td class='r'>137</td><td class='bar'><i style='width:49.8%'></i></td></tr>
-<tr><td>dipinto</td><td class='r'>130</td><td class='bar'><i style='width:47.3%'></i></td></tr>
-<tr><td>calice</td><td class='r'>117</td><td class='bar'><i style='width:42.5%'></i></td></tr>
-<tr><td>croce d&#x27;altare</td><td class='r'>110</td><td class='bar'><i style='width:40.0%'></i></td></tr>
-<tr><td>orologio</td><td class='r'>96</td><td class='bar'><i style='width:34.9%'></i></td></tr>
-<tr><td>capitello composito</td><td class='r'>94</td><td class='bar'><i style='width:34.2%'></i></td></tr>
-<tr><td>putti</td><td class='r'>90</td><td class='bar'><i style='width:32.7%'></i></td></tr>
-<tr><td>altare</td><td class='r'>88</td><td class='bar'><i style='width:32.0%'></i></td></tr>
-<tr><td>lapide commemorativa</td><td class='r'>87</td><td class='bar'><i style='width:31.6%'></i></td></tr>
-<tr><td>motivi decorativi vegetali</td><td class='r'>86</td><td class='bar'><i style='width:31.3%'></i></td></tr>
-<tr><td>paesaggio</td><td class='r'>83</td><td class='bar'><i style='width:30.2%'></i></td></tr>
-<tr><td>madonna con bambino</td><td class='r'>76</td><td class='bar'><i style='width:27.6%'></i></td></tr>
-<tr><td>lapide</td><td class='r'>76</td><td class='bar'><i style='width:27.6%'></i></td></tr>
-<tr><td>candeliere d&#x27;altare</td><td class='r'>75</td><td class='bar'><i style='width:27.3%'></i></td></tr>
-<tr><td>motivi decorativi</td><td class='r'>71</td><td class='bar'><i style='width:25.8%'></i></td></tr>
-<tr><td>lapide tombale</td><td class='r'>69</td><td class='bar'><i style='width:25.1%'></i></td></tr>
-<tr><td>candelabro</td><td class='r'>68</td><td class='bar'><i style='width:24.7%'></i></td></tr>
-<tr><td>cornice di dipinto</td><td class='r'>66</td><td class='bar'><i style='width:24.0%'></i></td></tr>
-<tr><td>figura femminile</td><td class='r'>66</td><td class='bar'><i style='width:24.0%'></i></td></tr>
-<tr><td>cornice</td><td class='r'>66</td><td class='bar'><i style='width:24.0%'></i></td></tr>
-<tr><td>skyphos</td><td class='r'>65</td><td class='bar'><i style='width:23.6%'></i></td></tr>
-<tr><td>poltrona</td><td class='r'>64</td><td class='bar'><i style='width:23.3%'></i></td></tr>
-</table>
-</div>
+<!-- ============ 1 tempo ============ -->
+<h2 id="tempo">Di che secolo sono</h2>
+<div class="fig" id="secoli">
+  <h3 id="t-c"></h3>
+  <p class="sub">Una riga per secolo, dal più antico in alto al più recente in basso. La lunghezza è il numero di schede, i colori sono i tipi di bene. Tocca una riga.</p>
+  <div class="ch" id="ch-c" role="img" aria-label="Strati: schede per secolo e per tipo di bene"></div>
+  <div class="lg" id="lg-c"></div>
+  <p class="src">Fonte: ICCD, ArCo 2.0 (CC BY-SA 4.0). Il secolo è quello del punto di mezzo della data della scheda.</p>
 </div>
 
-<h2>Cerca una scheda</h2>
-<p><input type="search" id="q" placeholder="titolo, autore o soggetto (es. Hayez, reliquiario)" aria-label="Cerca per titolo, autore o soggetto" disabled>
-<select id="tp" aria-label="Tipo di scheda" disabled><option value="">tutti i tipi</option></select></p>
-<p class="sub" id="qmsg">Carico l'elenco delle schede&hellip;</p>
-<div class="scroll"><table id="ris"><thead><tr><th>Titolo</th><th>Autore</th><th>Data</th><th>Tipo</th><th>Catalogo</th></tr></thead><tbody></tbody></table></div>
-<p><button id="piu" hidden>Mostra altre 50</button></p>
+<div class="fig">
+  <h3 id="t-sec">Scegli un secolo</h3>
+  <div class="find">
+    <label for="sec">Quale secolo?</label>
+    <select id="sec"></select>
+  </div>
+  <div class="ris" id="ris-sec" aria-live="polite"></div>
+</div>
 
-<h2>Limiti dei dati: come sono fatti i dati, in breve</h2>
-<details><summary>I principali limiti dei dati</summary>
-<ul>
-<li>Il dato &egrave; fermo al 2022-2023; il catalogo di oggi ha certamente pi&ugrave; schede, ma non si &egrave; riusciti a leggerlo (controllo anti-bot).</li>
-<li>Una scheda non &egrave; sempre un oggetto: molte sono parti di uno stesso insieme (ad esempio 1.843 gruppi di schede identiche per titolo, autore, data e luogo). Qui si contano <b>schede</b>.</li>
-<li>Il titolo &egrave; spesso solo il tipo di oggetto (per il 62,5% delle schede).</li>
-<li>Gli indirizzi sono quasi sempre solo &laquo;Milano&raquo;; le coordinate sono quelle del museo, non dell'oggetto.</li>
-<li>Nel 68,6% delle schede il detentore non ha un nome: manca del tutto oppure nel dump c'&egrave; solo un codice (3.262 schede).</li>
-<li>Una coordinata (Cascina Mirabello) cade a circa 18 km da Milano e due avevano latitudine e longitudine scambiate: sistemate.</li>
+<!-- ============ 2 tipi ============ -->
+<h2 id="tipi">Che cosa sono</h2>
+<div class="fig">
+  <h3 id="t-tipi"></h3>
+  <p class="sub">Ogni rettangolo è un tipo di bene: più è grande, più schede ha. Tocca per vedere le sigle del catalogo che ci sono dentro.</p>
+  <div class="ch" id="ch-tipi" role="img" aria-label="Rettangoli: schede per tipo di bene"></div>
+  <table class="kt" id="tab-tipi"></table>
+  <p class="src">Fonte: ICCD, ArCo 2.0 (CC BY-SA 4.0). I tipi sono raggruppati da noi a partire dalle sigle delle schede.</p>
+</div>
+
+<!-- ============ 3 autori ============ -->
+<h2 id="autori">Chi li ha fatti</h2>
+<div class="fig">
+  <h3 id="t-aut"></h3>
+  <p class="sub">I 14 autori con più schede. La barra va dalla data più bassa alla più alta tra quelle della maggior parte delle sue schede; il pallino è la data di mezzo. Accanto al nome, il numero di schede.</p>
+  <div class="ch" id="ch-aut" role="img" aria-label="Segmenti su un asse del tempo: i 14 autori con più schede e il periodo delle loro opere"></div>
+  <p class="src">Fonte: ICCD, ArCo 2.0 (CC BY-SA 4.0). «Attribuito a» e «bottega di» contano come l'autore. Il colore è il tipo di bene più frequente.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-find">Cerca un artista</h3>
+  <div class="find">
+    <label for="qa">Scrivi un autore</label>
+    <input id="qa" type="text" list="el-aut" placeholder="per esempio: Luigi Cagnola" autocomplete="off" autocapitalize="words" spellcheck="false">
+    <datalist id="el-aut"></datalist>
+  </div>
+  <div class="ris" id="ris-aut" aria-live="polite"></div>
+</div>
+
+<!-- ============ 4 detentori ============ -->
+<h2 id="detentori">Chi li conserva</h2>
+<div class="fig">
+  <h3 id="t-det"></h3>
+  <p class="sub">Schede per raccolta o museo che le conserva, le prime 12 con un nome. In grigio, quelle senza nome.</p>
+  <div class="ch" id="ch-det" role="img" aria-label="Barre: schede per raccolta o museo"></div>
+  <p class="src">Fonte: ICCD, ArCo 2.0 (CC BY-SA 4.0). Raccolte dello stesso museo con nomi diversi restano separate.</p>
+</div>
+
+<!-- ============ 5 mappa ============ -->
+<h2 id="dove">Dove sono</h2>
+<div class="fig">
+  <h3 id="t-map"></h3>
+  <p class="sub">Ogni cerchio è un punto con schede: più grande se ne ha di più. I confini sono quelli dei quartieri. Tocca un cerchio per leggere.</p>
+  <div class="ch" id="ch-map" role="img" aria-label="Mappa dei quartieri di Milano con i punti dove sono conservate le schede"></div>
+  <p class="note" id="nt-map"></p>
+  <p class="src">Fonte: ICCD, ArCo 2.0 (CC BY-SA 4.0); quartieri (NIL): Comune di Milano. Le coordinate sono quelle di dove è conservato l'oggetto, di solito un museo, non dell'oggetto stesso.</p>
+</div>
+
+<!-- ============ 6 complete ============ -->
+<h2 id="complete">Che cosa dice la scheda</h2>
+<div class="fig">
+  <h3 id="t-com"></h3>
+  <p class="sub">Per ogni informazione, la quota di schede che la riporta, su una scala da 0 a 100.</p>
+  <div class="ch" id="ch-com" role="img" aria-label="Pallini su una scala da 0 a 100: quota di schede con data, coordinate, autore, detentore con nome e luogo preciso"></div>
+  <p class="note">Autore mancante è normale per reperti, architetture e stampe anonime: non è per forza un errore.</p>
+  <p class="src">Fonte: ICCD, ArCo 2.0 (CC BY-SA 4.0).</p>
+</div>
+
+<!-- ============ 7 cerca ============ -->
+<h2 id="cerca">Cerca una scheda</h2>
+<div class="find">
+  <label for="q">Titolo, autore o soggetto</label>
+  <input id="q" type="search" placeholder="per esempio: Hayez, reliquiario" autocomplete="off" disabled>
+</div>
+<div class="find">
+  <label for="tp">Tipo di scheda</label>
+  <select id="tp" disabled><option value="">tutti i tipi</option></select>
+</div>
+<p class="note" id="qmsg">Carico l'elenco delle schede…</p>
+<ul class="rl" id="ris"></ul>
+<p><button id="piu" hidden>Mostra altre 30</button></p>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
+<li>Il dato è fermo al 2022-2023. Il catalogo di oggi ha certamente più schede, ma non si è riusciti a leggerlo: è protetto da un controllo anti-bot che non abbiamo aggirato.</li>
+<li>Una scheda non è sempre un oggetto: molte sono parti di uno stesso insieme (1.843 gruppi di schede uguali per titolo, autore, data e luogo). Qui si contano schede.</li>
+<li>Il titolo è spesso solo il tipo di oggetto («dipinto», «disegno»): succede per il 62,5% delle schede.</li>
+<li>Gli indirizzi sono quasi sempre solo «Milano». Le coordinate sono quelle del museo, non dell'oggetto, e a volte non coincidono con il nome: le 829 schede delle «Raccolte Artistiche del Castello Sforzesco» hanno coordinate in zona Porta Genova, non al Castello.</li>
+<li>Nel 68,6% delle schede il detentore non ha un nome: manca del tutto, oppure nei dati c'è solo un codice (3.262 schede). Le 3.195 schede con coordinate di Brera sono probabilmente di una raccolta di Brera, ma il nome non è scritto e non lo abbiamo dedotto.</li>
+<li>Le date sono intervalli scritti in tanti modi. Per il secolo si usa il punto di mezzo; 1.792 schede non hanno una data leggibile o hanno un intervallo di oltre 300 anni, e restano fuori dai grafici del tempo.</li>
+<li>I nomi degli autori sono scritti in più modi («Reni Guido», «Guido Reni»): abbiamo unito quelli con le stesse parole, ma alcune forme della stessa persona restano separate.</li>
+<li>Una coordinata (Cascina Mirabello) cade a circa 18 km da Milano e due avevano latitudine e longitudine scambiate: sistemate o non disegnate.</li>
+<li>Dentro la copia dei dati ci sono 3.262 schede di beni di altre città che hanno solo un luogo collegato a Milano (dove sono stati fatti o ripresi): non sono contate.</li>
 </ul>
-<p><a href="data/problemi.md">Elenco completo dei limiti dei dati</a> (con i numeri).</p>
-</details>
+<p><a href="data/problemi.md">Elenco completo dei limiti dei dati</a>, con i numeri.</p></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Scheda</dt><dd>La descrizione di un bene nel catalogo: che cos'è, chi l'ha fatto, quando, dove si trova.</dd>
+<dt>Catalogo generale</dt><dd>L'archivio nazionale dei beni culturali italiani, tenuto dall'Istituto centrale per il catalogo e la documentazione (ICCD).</dd>
+<dt>Detentore</dt><dd>Chi conserva il bene: un museo, una raccolta, un ente.</dd>
+<dt>Sigla della scheda</dt><dd>Il tipo di scheda del catalogo: OA opere d'arte, D disegni, S stampe, RA reperti archeologici, PST strumenti scientifici, A architetture, e altre più piccole.</dd>
+<dt>Secolo</dt><dd>Il secolo del punto di mezzo della data della scheda: «1800-1899» va nel XIX.</dd>
+<dt>Quartiere (NIL)</dt><dd>Nucleo di identità locale: le 88 zone in cui il Comune divide Milano.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul>
+<li>Si parte dalla copia completa del catalogo (ArCo 2.0, 1 dicembre 2023): 2,6 milioni di schede in tutta Italia. Si tengono le 27.459 schede dei beni che stanno a Milano.</li>
+<li>Una scheda è «di Milano» se il bene ha un indirizzo nel Comune di Milano o se la sua sede attuale è lì. I comuni della provincia restano fuori.</li>
+<li>I tipi di bene sono raggruppati così: opere d'arte (opere d'arte e arte contemporanea); disegni e stampe; archeologia (reperti, monumenti e complessi archeologici); strumenti scientifici; architetture; altro (beni demoetnoantropologici, fotografie, monete, parchi).</li>
+<li>La data è il punto di mezzo del primo intervallo scritto nella scheda. Le date prima di Cristo sono numeri negativi. Gli intervalli di oltre 300 anni non hanno secolo.</li>
+<li>Gli autori sono contati una volta per scheda; quelli con almeno 4 schede sono nel campo «Cerca un artista».</li>
+<li>Il quartiere di ogni punto della mappa è calcolato dalle coordinate, sui confini degli 88 quartieri.</li>
+<li>Il link di ogni scheda porta al catalogo: il formato è verificato su altre schede dello stesso catalogo, ma non è stato aperto per ogni scheda di Milano.</li>
+</ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Dati puliti, con il punto per i decimali.</p>
+<ul>
+<li><a href="data/beni_milano.csv.gz">Le 30.721 schede, una riga ciascuna</a> (compresso)</li>
+<li><a href="data/v2.json">Conti di questa pagina</a>: schede per periodo e tipo, autori, raccolte, punti sulla mappa</li>
+<li><a href="data/numeri.json">I numeri di riepilogo</a></li>
+<li><a href="data/punti.json">I 769 punti con coordinate</a>, con l'elenco delle schede</li>
+<li><a href="data/oggetti.json">L'elenco breve delle schede</a> usato dalla ricerca</li>
+<li><a href="data/problemi.md">Limiti dei dati</a>, in dettaglio</li>
+</ul></div></details>
+</div>
 
 <footer>
-<p><b>Dati:</b> ICCD &ndash; Catalogo generale dei beni culturali, tramite ArCo 2.0 (CNR-ISTC), CC BY-SA 4.0; elaborazione Milano in dati, CC BY-SA 4.0. Il dato derivato (30.721 schede, una riga ciascuna, campi puliti) &egrave; scaricabile in <a href="data/beni_milano.csv.gz">data/beni_milano.csv.gz</a>; i numeri della pagina sono in <a href="data/numeri.json">data/numeri.json</a>. Mappa: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</p>
-<p>Scaricato il 29 ottobre 2026 da <code>arco.istc.cnr.it/arco-data/2.0/</code> (dump del 1&deg; dicembre 2023). Il dump si ferma al 2023; il catalogo aggiornato (<code>catalogo.beniculturali.it</code>) non si &egrave; potuto leggere perch&eacute; protetto da un controllo anti-bot, che non abbiamo aggirato. I link alle schede usano il formato <code>catalogo.beniculturali.it/detail/&hellip;</code>, verificato su altre schede dello stesso catalogo ma non aperto per ogni scheda di Milano. Le licenze dichiarate dal catalogo (CC BY 4.0 per i metadati) e dalla pubblicazione ArCo (CC BY-SA 4.0) sono diverse: qui si usa la pi&ugrave; restrittiva.</p>
-<p>Come &egrave; stato fatto e che cosa ci sono: <a href="data/problemi.md">limiti dei dati</a>. Progetto Milano in dati. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+<p><b>Fonti e licenze.</b> ICCD, Catalogo generale dei beni culturali, tramite ArCo 2.0 (CNR-ISTC), CC BY-SA 4.0; elaborazione Milano in dati, CC BY-SA 4.0. Il dato derivato (30.721 schede, una riga ciascuna, campi puliti) è scaricabile dalla sezione «File». Quartieri (NIL): Comune di Milano.</p>
+<p>Scaricato il 29 ottobre 2026 da <a href="http://arco.istc.cnr.it/arco-data/2.0/">arco.istc.cnr.it</a> (copia del 1° dicembre 2023). La copia si ferma al 2023; il catalogo aggiornato (catalogo.beniculturali.it) non si è potuto leggere perché protetto da un controllo anti-bot, che non abbiamo aggirato. I link alle schede usano il formato del sito catalogo.beniculturali.it, verificato su altre schede dello stesso catalogo ma non aperto per ogni scheda di Milano. Le licenze dichiarate dal catalogo (CC BY 4.0 per i metadati) e dalla pubblicazione ArCo (CC BY-SA 4.0) sono diverse: qui si usa la più restrittiva.</p>
+<p>Come è stato fatto e quali sono i limiti: vedi le sezioni sopra. Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<div class="tip" id="tip"></div>
+
 <script>
 (function(){
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function nf(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
-var voci=null, classi=null, pts=null, hay=null;
-function url(v){var c=v[4].charAt(0); return 'https://catalogo.beniculturali.it/detail/'+classi[c]+'/'+v[4].slice(1);}
-function riga(v){
-  var t=esc(v[0]); if(v[5]) t+=' <span class="sub">&middot; '+esc(v[5])+'</span>';
-  return '<tr><td class="tit">'+t+'</td><td>'+esc(v[1].split(' | ').join(', '))+'</td><td>'+esc(v[2])+'</td><td>'+esc(v[3])+'</td><td><a href="'+url(v)+'" target="_blank" rel="noopener">scheda</a></td></tr>';
+'use strict';
+var DATA='data/';
+var C={mi:'#E30613',m3:'#FFD500',m2:'#00A651',m4:'#0072BC',m5:'#7B3FA0',ora:'#F58220',teal:'#00A19A',mar:'#8C5A32',gri:'#8a919c',ink:'#0b0d12',ink2:'#2f3440',mut:'#5f6673',grid:'#e6e8ec',axis:'#9aa1ad',soft:'#f4f5f7'};
+var GR=[
+ {id:'oa',nome:"Opere d'arte",lungo:"Dipinti, sculture e oggetti d'arte",col:C.ora,tx:'k',sigle:"OA opere d'arte, OAC arte contemporanea"},
+ {id:'ds',nome:'Disegni e stampe',lungo:'Disegni e stampe',col:C.m5,tx:'w',sigle:'D disegni, S stampe'},
+ {id:'ar',nome:'Archeologia',lungo:'Reperti archeologici',col:C.m2,tx:'k',sigle:'RA reperti, MA monumenti, CA complessi archeologici'},
+ {id:'ps',nome:'Strumenti scientifici',lungo:'Strumenti scientifici',col:C.m4,tx:'w',sigle:'PST strumenti scientifici o tecnologici'},
+ {id:'ax',nome:'Architetture',lungo:'Architetture',col:C.mar,tx:'w',sigle:'A architettura'},
+ {id:'al',nome:'Altro',lungo:'Altro',col:C.gri,tx:'k',sigle:'BDM beni demoetnoantropologici, F fotografie, NU monete e medaglie, PG parchi e giardini'}];
+var V,NIL,RD=[];
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function pc(x){return Math.round(x*100)}
+function p1(x){return (Math.round(x*1000)/10).toFixed(1).replace('.',',')}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function sum(o){var s=0;for(var k in o)s+=o[k];return s}
+var ROM=[[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+function rom(n){var s='';[[20,'XX'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']].forEach(function(p){while(n>=p[0]){s+=p[1];n-=p[0]}});return s}
+function secNome(k){k=+k;if(k>0)return rom(k)+' secolo';if(k===-6)return 'prima del V secolo a.C.';return rom(-k)+' secolo a.C.'}
+function secAnni(k){k=+k;if(k>0)return ((k-1)*100+1)+'–'+(k*100);if(k===-6)return 'prima del 500 a.C.';return (-k*100)+'–'+(-k*100-99)+' a.C.'}
+function gtot(o){return sum(o)}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s)).width}
+function r1(v){return Math.round(v*10)/10}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H,cls){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'"'+(cls?' class="'+cls+'"':'')+' aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function fit(s,maxw,size,bold){if(tw(s,size,bold)<=maxw)return s;while(s.length>3&&tw(s+'…',size,bold)>maxw)s=s.slice(0,-1);return s.replace(/\s+$/,'')+'…'}
+function legGr(ids){return GR.filter(function(g){return !ids||ids.indexOf(g.id)>=0}).map(function(g){return '<span><i style="background:'+g.col+'"></i>'+g.nome+'</span>'}).join('')}
+function tipGr(o,intest){var h=intest||'';GR.forEach(function(g){if(o[g.id])h+='<br>'+sw(g.col)+g.nome+': '+f0(o[g.id])});return h}
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
 }
-var tipiNome={"OA": "opera d'arte: dipinto, scultura, oggetto", "S": "stampa", "D": "disegno", "RA": "reperto archeologico", "BDM": "bene demoetnoantropologico", "A": "architettura", "F": "fotografia", "PST": "strumento scientifico o tecnologico", "OAC": "opera d'arte contemporanea", "MA": "monumento archeologico", "CA": "complesso archeologico", "PG": "parco o giardino", "NU": "moneta o medaglia (numismatica)"};
-/* ----- caricamento dati ----- */
-var pOgg=fetch('data/oggetti.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json();});
-var pPun=fetch('data/punti.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json();});
-/* ----- mappa ----- */
-var map=L.map('map',{scrollWheelZoom:false,preferCanvas:true}).setView([45.4642,9.19],12);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
-var canvas=L.canvas({padding:0.5});
-function elencoPunto(p,da){
-  var out='<ul>';
-  var fine=Math.min(p.ids.length,da+20);
-  for(var k=da;k<fine;k++){var v=voci[p.ids[k]]; out+='<li>'+esc(v[0])+(v[5]?' &middot; '+esc(v[5]):'')+(v[1]?' &ndash; '+esc(v[1].split(' | ').join(', ')):'')+(v[2]?' ('+esc(v[2])+')':'')+' <a href="'+url(v)+'" target="_blank" rel="noopener">scheda</a></li>';}
-  out+='</ul>';
-  if(fine<p.ids.length) out+='<button data-da="'+fine+'">Altre 20 (di '+(p.ids.length-fine)+' rimaste)</button>';
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+Promise.all([getJ(DATA+'v2.json'),getJ('data/nil_quartieri.geojson')]).then(function(r){
+  V=r[0];NIL=r[1];
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+function draw(f){f();RD.push(f)}
+function tutto(){
+  highlights();
+  draw(chC);schedaSecolo();draw(chTipi);draw(chAut);cercaAutore();draw(chDet);draw(chMap);draw(chCom);
+  cercaSchede();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+
+/* ---------- numeri in alto ---------- */
+function totSec(k){return gtot(V.mat[k])}
+function highlights(){
+  var N=V.num,tot=N.schede_sede_milano,xix=totSec('19'),p0=V.punti[0];
+  var cards=[
+    {c:C.mi,h:'tipi',n:f0(tot),p:'schede descrivono beni che stanno a Milano'},
+    {c:C.m3,h:'tempo',n:pc(xix/tot)+'<small>%</small>',p:'delle schede è dell’Ottocento: '+f0(xix)+', più di ogni altro secolo'},
+    {c:C.m2,h:'autori',n:pc(N.autore_presente/tot)+'<small>%</small>',p:'delle schede dice chi è l’autore. Gli autori diversi sono '+f0(N.autori_distinti)},
+    {c:C.m4,h:'dove',n:pc(p0.n/N.coordinate_in_comune)+'<small>%</small>',p:'delle schede con coordinate sta in un solo punto: quello di Brera'},
+    {c:C.m5,h:'detentori',n:pc(V.det_non/tot)+'<small>%</small>',p:'delle schede non dice chi le conserva, con un nome'},
+    {c:C.ora,h:'complete',n:pc(N.luogo_preciso_sito_o_indirizzo/tot)+'<small>%</small>',p:'delle schede dice un luogo più preciso di «Milano»'}];
+  $('hl').innerHTML=cards.map(function(k){return '<a href="#'+k.h+'" style="--c:'+k.c+'"><span class="n">'+k.n+'</span><p>'+k.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- strati per secolo ---------- */
+function chC(){
+  var M=V.mat,W=width('ch-c'),rh=17,gap=5,lw=64,right=44;
+  var rows=[];
+  var ac={oa:0,ds:0,ar:0,ps:0,ax:0,al:0};
+  [-6,-5,-4,-3,-2,-1].forEach(function(k){GR.forEach(function(g){ac[g.id]+=M[k][g.id]})});
+  rows.push({lab:'a.C.',o:ac,nome:'prima di Cristo'});
+  for(var k=1;k<=21;k++)rows.push({lab:rom(k)+' sec.',o:M[k],nome:secNome(k)+' ('+secAnni(k)+')'});
+  rows.push({lab:'senza data',o:{nd:V.nodata},nome:'senza una data leggibile',nd:1});
+  var mx=0;rows.forEach(function(r){if(!r.nd)mx=Math.max(mx,gtot(r.o))});
+  var H=rows.length*(rh+gap)+4,bw=W-lw-right-4,s=svgOpen(W,H);
+  rows.forEach(function(r,i){
+    var y=i*(rh+gap)+2,t=gtot(r.o),x=lw,w;
+    s+=T(lw-8,y+rh-4,r.lab,{a:'end',c:r.nd?'m':'b'});
+    if(r.nd){w=bw*t/mx;s+='<rect x="'+x+'" y="'+y+'" width="'+r1(w)+'" height="'+rh+'" rx="3" fill="#d5d9df"/>'}
+    else GR.forEach(function(g){
+      var v=r.o[g.id];if(!v)return;w=bw*v/mx;
+      s+='<rect x="'+r1(x)+'" y="'+y+'" width="'+r1(Math.max(w,0.8))+'" height="'+rh+'" fill="'+g.col+'" stroke="#fff" stroke-width=".6"/>';
+      if(w>tw(g.nome,12,true)+10)s+=T(x+w/2,y+rh-4,g.nome,{a:'middle',c:g.tx});
+      x+=w;
+    });
+    s+=T(lw+bw*t/mx+6,y+rh-4,f0(t),{c:'b'});
+    s+='<rect x="0" y="'+(y-2)+'" width="'+W+'" height="'+(rh+gap)+'" fill="transparent"'+tip(tipGr(r.o,'<b>'+r.nome+'</b><br>'+f0(t)+' schede'))+'/>';
+  });
+  $('ch-c').innerHTML=s+'</svg>';
+  $('lg-c').innerHTML=legGr();
+  var mxOld=0;for(var kk=-6;kk<=14;kk++)if(kk!==0)mxOld=Math.max(mxOld,gtot(M[kk]));
+  var acTot=gtot(ac);mxOld=Math.max(mxOld,acTot);
+  $('t-c').textContent='Prima del XV secolo nessun secolo arriva a '+f0(Math.ceil(mxOld/100)*100)+' schede; l’Ottocento ne ha '+f0(gtot(M[19]))+' e il Novecento '+f0(gtot(M[20]));
+}
+
+/* ---------- scegli un secolo ---------- */
+function schedaSecolo(){
+  var sel=$('sec'),tot=V.num.schede_sede_milano,ks=[];
+  Object.keys(V.mat).map(Number).sort(function(a,b){return a-b}).forEach(function(k){if(gtot(V.mat[k])>0)ks.push(k)});
+  sel.innerHTML=ks.map(function(k){return '<option value="'+k+'"'+(k===19?' selected':'')+'>'+secNome(k)+' ('+secAnni(k)+') · '+f0(gtot(V.mat[k]))+' schede</option>'}).join('');
+  function mostra(){
+    var k=sel.value,o=V.mat[k],t=gtot(o),e=V.esempi[k]||{ex:[],aut:[]};
+    var h='<b class="big">'+f0(t)+' schede</b>'+secNome(k)+': il '+p1(t/tot).replace(/,0$/,'')+'% di tutte quelle di Milano.';
+    h+='<div class="stk">'+GR.map(function(g){return o[g.id]?'<i style="width:'+(100*o[g.id]/t)+'%;background:'+g.col+'"></i>':''}).join('')+'</div>';
+    h+='<p class="stl">'+GR.filter(function(g){return o[g.id]}).map(function(g){return '<span>'+sw(g.col)+g.nome+' <b>'+f0(o[g.id])+'</b></span>'}).join(' ')+'</p>';
+    if(e.aut.length)h+='<p><b>Autori con più schede:</b> '+e.aut.map(function(a){return esc(a[0])+' ('+f0(a[1])+')'}).join(', ')+'.</p>';
+    if(e.ex.length)h+='<p><b>Alcune schede:</b></p><ul class="ex">'+e.ex.map(esEl).join('')+'</ul>';
+    $('ris-sec').innerHTML=h;
+  }
+  sel.addEventListener('change',mostra);sel.addEventListener('input',mostra);mostra();
+}
+function urlScheda(iri){return 'https://catalogo.beniculturali.it/detail/'+iri}
+function fmtData(t){t=t.replace(/\/\d\d\/\d\d/g,'').replace(/\/00/g,'').replace(/\(\?\)\s*/g,'').replace(/ca |post |ante /g,'').replace(/(^|[^\d])0+(\d)/g,'$1$2').trim();var m=t.match(/^(-?\d+)-(-?\d+)$/);if(m&&m[1]===m[2])return m[1];return t}
+function esEl(x){return '<li>'+esc(x[0])+(x[1]?' · '+esc(x[1]):'')+(x[2]?' <span class="m">('+esc(fmtData(x[2]))+')</span>':'')+' <a href="'+urlScheda(x[3])+'" target="_blank" rel="noopener">scheda</a></li>'}
+
+/* ---------- treemap dei tipi ---------- */
+function squarify(items,x,y,w,h){
+  var total=0;items.forEach(function(i){total+=i.v});
+  var sc=w*h/total,rest=items.map(function(i){return{it:i,a:i.v*sc}}),out=[];
+  while(rest.length){
+    var sh=Math.min(w,h),row=[],ra=0,worst=Infinity;
+    function wr(r,a){var mn=Infinity,mx=0;r.forEach(function(q){mn=Math.min(mn,q.a);mx=Math.max(mx,q.a)});var s2=sh*sh,a2=a*a;return Math.max(s2*mx/a2,a2/(s2*mn))}
+    while(rest.length){
+      var nx=rest[0],nr=row.concat([nx]),w2=wr(nr,ra+nx.a);
+      if(row.length&&w2>worst)break;
+      row=nr;ra+=nx.a;worst=w2;rest.shift();
+    }
+    var th=ra/sh,pos=0;
+    if(w>=h){row.forEach(function(q){var ch=q.a/th;out.push({it:q.it,x:x,y:y+pos,w:th,h:ch});pos+=ch});x+=th;w-=th}
+    else{row.forEach(function(q){var cw=q.a/th;out.push({it:q.it,x:x+pos,y:y,w:cw,h:th});pos+=cw});y+=th;h-=th}
+  }
   return out;
 }
-function popupPunto(p){
-  var tp=Object.keys(p.tipi).map(function(k){return p.tipi[k]+' '+(tipiNome[k]||k);}).join(', ');
-  return '<div><b>'+esc(p.nome||'detentore senza nome nel catalogo')+'</b><br>'+nf(p.n)+(p.n===1?' scheda':' schede')+(tp?' ('+esc(tp)+(Object.keys(p.tipi).length<4?'':', altro')+')':'')+'<div class="elenco">'+(voci?elencoPunto(p,0):'<i>carico l\'elenco&hellip;</i>')+'</div></div>';
-}
-pPun.then(function(P){
-  pts=P;
-  P.forEach(function(p){
-    var r=Math.max(3,Math.min(24,2+Math.sqrt(p.n)*0.42));
-    var c=L.circleMarker([p.la,p.lo],{renderer:canvas,radius:r,color:'#111',weight:1,fillColor:'#9c4a00',fillOpacity:0.55}).addTo(map);
-    c.bindPopup(function(){return popupPunto(p);},{maxWidth:360});
-    c.on('popupopen',function(e){
-      var el=e.popup.getElement(); if(!el) return;
-      function lega(){var b=el.querySelector('button[data-da]'); if(!b) return; b.onclick=function(ev){ev.stopPropagation(); var da=+b.getAttribute('data-da'); var box=el.querySelector('.elenco'); var tmp=document.createElement('div'); tmp.innerHTML=elencoPunto(p,da); b.parentNode.removeChild(b); while(tmp.firstChild) box.appendChild(tmp.firstChild); lega();};}
-      if(voci){lega(); return;}
-      pOgg.then(function(){var box=el.querySelector('.elenco'); if(box){box.innerHTML=elencoPunto(p,0); lega();}});
-    });
+function chTipi(){
+  var W=width('ch-tipi'),H=Math.round(Math.min(340,W*1.0)),tot=V.num.schede_sede_milano;
+  var items=GR.map(function(g){return{g:g,v:V.tot_g[g.id]}}).sort(function(a,b){return b.v-a.v});
+  var rects=squarify(items,0,0,W,H),s=svgOpen(W,H);
+  rects.forEach(function(r){
+    var g=r.it.g,n=r.it.v;
+    s+='<rect x="'+r1(r.x)+'" y="'+r1(r.y)+'" width="'+r1(r.w)+'" height="'+r1(r.h)+'" fill="'+g.col+'" stroke="#fff" stroke-width="2"'+tip('<b>'+g.lungo+'</b><br>'+f0(n)+' schede ('+p1(n/tot)+'%)<br>Sigle: '+g.sigle)+'/>';
+    var nm=g.nome;
+    if(r.w>tw(nm,13,true)+14&&r.h>40)s+=T(r.x+8,r.y+20,nm,{c:g.tx})+T(r.x+8,r.y+37,f0(n)+' · '+pc(n/tot)+'%',{c:g.tx==='w'?'w2':'k2'});
+    else if(r.w>tw(nm,12,true)+8&&r.h>22)s+=T(r.x+5,r.y+17,nm,{c:g.tx});
   });
-  document.getElementById('mapmsg').textContent=P.length+' punti sulla mappa.';
-}).catch(function(){document.getElementById('mapmsg').textContent='Mappa non caricata.';});
-/* ----- ricerca ----- */
-var risultati=[], mostrati=0;
-function disegna(reset){
-  var tb=document.querySelector('#ris tbody'); if(reset){tb.innerHTML='';mostrati=0;}
-  var fine=Math.min(risultati.length,mostrati+50), h='';
-  for(var k=mostrati;k<fine;k++) h+=riga(voci[risultati[k]]);
-  tb.insertAdjacentHTML('beforeend',h); mostrati=fine;
-  document.getElementById('piu').hidden=mostrati>=risultati.length;
-  document.getElementById('qmsg').textContent=nf(risultati.length)+' schede'+(risultati.length>mostrati?' (ne mostro '+mostrati+')':'')+'.';
+  $('ch-tipi').innerHTML=s+'</svg>';
+  var oa=V.tot_g.oa,ds=V.tot_g.ds;
+  $('t-tipi').textContent='Il '+pc(oa/tot)+'% delle schede è un dipinto, una scultura o un oggetto d’arte; disegni e stampe sono il '+pc(ds/tot)+'%';
+  $('tab-tipi').innerHTML='<tr><th>Tipo di bene</th><th>Schede</th><th>Quota</th></tr>'+items.map(function(i){return '<tr><td>'+sw(i.g.col)+i.g.nome+'</td><td>'+f0(i.v)+'</td><td>'+p1(i.v/tot)+'%</td></tr>'}).join('')+'<tr class="tot"><td>Totale</td><td>'+f0(tot)+'</td><td>100%</td></tr>';
 }
-function cerca(){
-  var q=document.getElementById('q').value.trim().toLowerCase(), tp=document.getElementById('tp').value;
-  var parole=q?q.split(/\s+/):[]; risultati=[];
-  for(var i=0;i<voci.length;i++){
-    if(tp && voci[i][3]!==tp) continue;
-    var ok=true; for(var j=0;j<parole.length;j++){ if(hay[i].indexOf(parole[j])<0){ok=false;break;} }
-    if(ok) risultati.push(i);
+
+/* ---------- autori su asse del tempo ---------- */
+function domGr(tg){var b=null,bv=-1;GR.forEach(function(g){if((tg[g.id]||0)>bv){bv=tg[g.id]||0;b=g}});return b}
+function chAut(){
+  var A=V.autori.slice(0,14),W=width('ch-aut'),rh=44,m={l:8,r:8,t:4,b:24},pw=W-m.l-m.r,H=A.length*rh+m.t+m.b;
+  var mn=Math.floor(Math.min.apply(null,A.map(function(a){return a.p10}))/50)*50,mx=Math.ceil(Math.max.apply(null,A.map(function(a){return a.p90}))/50)*50;
+  function X(y){return m.l+pw*(y-mn)/(mx-mn)}
+  var s=svgOpen(W,H),y;
+  for(y=Math.ceil(mn/100)*100;y<=mx;y+=100)s+=L(X(y),m.t,X(y),H-m.b,C.grid)+T(X(y),H-m.b+16,y,{a:'middle',c:'m'});
+  A.forEach(function(a,i){
+    var oy=m.t+i*rh,g=domGr(a.tg),ny=oy+16,ty=oy+33,nn=f0(a.c)+' schede';
+    var nw=tw(nn,12,false);
+    s+=T(m.l,ny,esc(fit(a.n,pw-nw-12,13,true)),{c:'b'})+T(W-m.r,ny,nn,{a:'end',c:'m'});
+    var x1=X(a.p10),x2=Math.max(X(a.p90),x1+4);
+    s+='<line x1="'+r1(x1)+'" y1="'+ty+'" x2="'+r1(x2)+'" y2="'+ty+'" stroke="'+g.col+'" stroke-width="9" stroke-linecap="round"/>';
+    s+='<circle cx="'+r1(X(a.md))+'" cy="'+ty+'" r="5" fill="'+C.ink+'" stroke="#fff" stroke-width="2"/>';
+    s+='<rect x="0" y="'+oy+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+esc(a.n)+'</b><br>'+f0(a.c)+' schede<br>Quasi tutte tra il '+a.p10+' e il '+a.p90+', di mezzo '+a.md+'<br>'+sw(g.col)+'Soprattutto: '+g.nome.toLowerCase())+'/>';
+  });
+  $('ch-aut').innerHTML=s+'</svg>';
+  var a0=V.autori[0],a1=V.autori[1];
+  $('t-aut').textContent='Un solo autore, '+a0.n+', ha '+f0(a0.c)+' schede, '+(a0.c>=2*a1.c?'più del doppio':'più')+' del secondo ('+a1.n+', '+f0(a1.c)+')';
+}
+
+/* ---------- cerca un artista ---------- */
+function cercaAutore(){
+  var inp=$('qa'),dl=$('el-aut'),idx={};
+  dl.innerHTML=V.autori.map(function(a){idx[a.n.toLowerCase()]=a;return '<option value="'+esc(a.n)+'"></option>'}).join('');
+  var vuoto='<p>Scrivi un nome e scegli dal menu: ci sono i '+f0(V.autori.length)+' autori con almeno 4 schede.</p>';
+  function mostra(){
+    var v=inp.value.trim().toLowerCase(),a=idx[v],box=$('ris-aut');
+    if(!v){box.innerHTML=vuoto;return}
+    if(!a){box.innerHTML='<p>Nessun autore con questo nome tra quelli con almeno 4 schede. Prova a scrivere solo una parte e scegli dal menu.</p>';return}
+    var g=domGr(a.tg),h='<b class="big">'+esc(a.n)+'</b>'+f0(a.c)+' schede, soprattutto di tipo «'+g.nome.toLowerCase()+'».';
+    if(a.nd)h+='<p>La maggior parte è datata tra il '+a.p10+' e il '+a.p90+' (di mezzo, il '+a.md+').</p>';
+    h+='<div class="stk">'+GR.map(function(q){return a.tg[q.id]?'<i style="width:'+(100*a.tg[q.id]/a.c)+'%;background:'+q.col+'"></i>':''}).join('')+'</div>';
+    h+='<p class="stl">'+GR.filter(function(q){return a.tg[q.id]}).map(function(q){return '<span>'+sw(q.col)+q.nome+' <b>'+f0(a.tg[q.id])+'</b></span>'}).join(' ')+'</p>';
+    h+='<p><b>Alcune schede:</b></p><ul class="ex">'+a.ex.map(esEl).join('')+'</ul>';
+    box.innerHTML=h;
   }
-  disegna(true);
+  inp.addEventListener('input',mostra);inp.addEventListener('change',mostra);mostra();
 }
-pOgg.then(function(O){
-  voci=O.voci; classi=O.classi;
-  hay=voci.map(function(v){return (v[0]+' '+v[1]+' '+v[5]).toLowerCase();});
-  var sel=document.getElementById('tp'), cont={};
-  voci.forEach(function(v){cont[v[3]]=(cont[v[3]]||0)+1;});
-  Object.keys(cont).sort(function(a,b){return cont[b]-cont[a];}).forEach(function(k){var o=document.createElement('option'); o.value=k; o.textContent=k+' ('+(tipiNome[k]||k)+') '+nf(cont[k]); sel.appendChild(o);});
-  var q=document.getElementById('q'); q.disabled=false; sel.disabled=false;
-  var t=null; q.addEventListener('input',function(){clearTimeout(t); t=setTimeout(cerca,180);}); sel.addEventListener('change',cerca);
-  document.getElementById('piu').addEventListener('click',function(){disegna(false);});
-  cerca();
-}).catch(function(){document.getElementById('qmsg').textContent='Elenco non caricato.';});
+
+/* ---------- chi li conserva ---------- */
+function chDet(){
+  var tot=V.num.schede_sede_milano,W=width('ch-det'),rh=40,items=[{n:'Senza nome nel catalogo',v:V.det_non,g:1}].concat(V.det.map(function(d){return{n:d[0],v:d[1]}}));
+  var H=items.length*rh+4,mx=V.det_non,right=96,bw=W-16-right,s=svgOpen(W,H);
+  items.forEach(function(it,i){
+    var y=i*rh+2,w=bw*it.v/mx,col=it.g?'#b3b9c3':C.teal;
+    s+=T(8,y+14,esc(fit(it.n,W-16,13,false)),{c:it.g?'m':''});
+    s+='<rect x="8" y="'+(y+20)+'" width="'+r1(Math.max(w,1.5))+'" height="13" rx="3" fill="'+col+'"/>';
+    s+=T(8+w+6,y+31,f0(it.v)+' · '+(it.v/tot<0.1?p1(it.v/tot):pc(it.v/tot))+'%',{c:'b'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+esc(it.n)+'</b><br>'+f0(it.v)+' schede ('+p1(it.v/tot)+'%)')+'/>';
+  });
+  $('ch-det').innerHTML=s+'</svg>';
+  $('t-det').textContent='Per il '+pc(V.det_non/tot)+'% delle schede il catalogo non dice chi le conserva; tra le raccolte con un nome, in testa c’è '+V.det[0][0].replace("dell'Accademia","dell’Accademia");
+}
+
+/* ---------- mappa ---------- */
+var BREVE={'Civica Raccolta delle Stampe "Achille Bertarelli"':'Raccolta Bertarelli','Raccolte Grafiche e Fotografiche del Castello Sforzesco':'Castello: grafiche','Raccolte Artistiche del Castello Sforzesco':'Castello: raccolte artistiche','Museo Poldi Pezzoli':'Poldi Pezzoli','Villa Necchi Campiglio':'Villa Necchi','Museo Archeologico':'Museo Archeologico'};
+function ringPath(ring,px,py){var d='';for(var i=0;i<ring.length;i++)d+=(i?'L':'M')+r1(px(ring[i][0]))+' '+r1(py(ring[i][1]));return d+'Z'}
+function chMap(){
+  var W=width('ch-map'),lon0=9.1545,lon1=9.2075,lat0=45.4500,lat1=45.4800,k=Math.cos(45.465*Math.PI/180),sx=W/((lon1-lon0)*k),H=Math.round((lat1-lat0)*sx);
+  function px(lo){return (lo-lon0)*k*sx}function py(la){return (lat1-la)*sx}
+  var s=svgOpen(W,H,'mp'),i;
+  NIL.features.forEach(function(f){
+    var g=f.geometry,polys=g.type==='MultiPolygon'?g.coordinates:[g.coordinates],d='';
+    polys.forEach(function(p){p.forEach(function(r){d+=ringPath(r,px,py)})});
+    s+='<path d="'+d+'" fill="#f1f3f6" stroke="#b9c0cb" stroke-width=".8" fill-rule="evenodd"/>';
+  });
+  var P=V.punti,inside=[],fuori=0,fuoriP=0;
+  P.forEach(function(p){if(p.lo>=lon0&&p.lo<=lon1&&p.la>=lat0&&p.la<=lat1)inside.push(p);else{fuori+=p.n;fuoriP++}});
+  var cir=inside.map(function(p){return{p:p,x:px(p.lo),y:py(p.la),r:Math.min(20,2.8+Math.sqrt(p.n)*0.3)}});
+  cir.forEach(function(c){var g=domGr(c.p.tg),nm=c.p.nome||'Senza nome nel catalogo',og=c.p.og.map(function(o){return o[0]+' '+f0(o[1])}).join(', ');
+    s+='<circle cx="'+r1(c.x)+'" cy="'+r1(c.y)+'" r="'+r1(c.r)+'" fill="'+g.col+'" fill-opacity=".8" stroke="#fff" stroke-width="1"'+tip('<b>'+esc(nm)+'</b><br>'+f0(c.p.n)+(c.p.n===1?' scheda':' schede')+(c.p.q?' · quartiere '+esc(c.p.q):'')+'<br>Più frequenti: '+esc(og))+'/>'});
+  /* numeri sui punti più grandi */
+  var lab=cir.filter(function(c){return c.p.n>=600}).sort(function(a,b){return b.p.n-a.p.n});
+  function nomeP(p){
+    if(p.nome&&p.nn/p.n>=0.7)return p.nome;
+    var g=domGr(p.tg);
+    if(g.id==='ps')return 'Senza nome nel catalogo (quasi tutti strumenti scientifici)';
+    if(p.la>45.4715&&p.la<45.4725&&p.lo>9.188&&p.lo<9.189)return 'Brera, senza nome nel catalogo';
+    return 'Senza nome nel catalogo';
+  }
+  lab.forEach(function(c,i){
+    s+='<circle cx="'+r1(c.x)+'" cy="'+r1(c.y)+'" r="9" fill="'+C.ink+'" stroke="#fff" stroke-width="1.5" pointer-events="none"/>'+T(c.x,c.y+4.2,i+1,{a:'middle',c:'w'});
+  });
+  $('ch-map').innerHTML=s+'</svg>';
+  var tot=V.num.coordinate_in_comune,run=0,kk=0;
+  for(i=0;i<P.length;i++){run+=P[i].n;kk++;if(run>=tot/2)break}
+  $('t-map').textContent='Metà delle schede con coordinate sta in soli '+kk+' punti su '+P.length;
+  var q=V.quartieri;
+  $('nt-map').textContent='Per quartiere: '+q.slice(0,3).map(function(x){return x[0]+' '+f0(x[1])}).join(', ')+'. Tutti gli altri quartieri insieme hanno '+f0(q.slice(3).reduce(function(a,x){return a+x[1]},0))+' schede. In questa vista non entrano '+f0(fuori)+' schede in '+fuoriP+' punti, più lontani dal centro.';
+  var key=lab.map(function(c,i){var p=c.p;return '<li><b class="nb">'+(i+1)+'</b><span>'+esc(nomeP(p))+': <b>'+f0(p.n)+' schede</b>'+(p.q?', quartiere '+esc(p.q):'')+'</span></li>'}).join('');
+  if(!$('key-map')){var ol=document.createElement('ol');ol.className='notes';ol.id='key-map';$('ch-map').parentNode.insertBefore(ol,$('nt-map'))}
+  $('key-map').innerHTML=key;
+  var lgp=GR.filter(function(g){return cir.some(function(c){return domGr(c.p.tg).id===g.id})});
+  if(!$('lg-map')){var d=document.createElement('div');d.className='lg';d.id='lg-map';$('ch-map').parentNode.insertBefore(d,$('nt-map'))}
+  $('lg-map').innerHTML='<span class="m">Colore = tipo più frequente nel punto:</span>'+legGr(lgp.map(function(g){return g.id}));
+}
+
+/* ---------- che cosa dice la scheda ---------- */
+function chCom(){
+  var N=V.num,tot=N.schede_sede_milano,W=width('ch-com'),rh=46;
+  var it=[['Ha una data',N.datazione_presente],['Ha le coordinate',N.coordinate_in_comune],['Dice chi è l’autore',N.autore_presente],['Dice chi la conserva, con un nome',N.istituzione_nominata],['Dice un luogo più preciso di «Milano»',N.luogo_preciso_sito_o_indirizzo]].sort(function(a,b){return b[1]-a[1]});
+  var H=it.length*rh+30,x0=10,x1=W-10,s=svgOpen(W,H);
+  [0,50,100].forEach(function(v){var x=x0+(x1-x0)*v/100;s+=L(x,0,x,it.length*rh-8,C.grid)+T(x,it.length*rh+10,v+(v===100?'%':''),{a:v===0?'start':v===100?'end':'middle',c:'m'})});
+  it.forEach(function(r,i){
+    var y=i*rh,q=r[1]/tot,cx=x0+(x1-x0)*q,ty=y+34;
+    s+=T(x0,y+15,r[0],{c:'b'});
+    s+=L(x0,ty,x1,ty,'#cfd4db',3);
+    s+=L(x0,ty,cx,ty,C.teal,3);
+    s+='<circle cx="'+r1(cx)+'" cy="'+ty+'" r="9" fill="'+C.teal+'" stroke="#fff" stroke-width="2"/>';
+    var lab=p1(q)+'%',w=tw(lab,13,true);
+    if(cx+w+18>x1)s+=T(cx-14,ty-8,lab,{a:'end',c:'halo'});else s+=T(cx+14,ty+5,lab,{c:'halo'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip('<b>'+r[0]+'</b><br>'+f0(r[1])+' schede su '+f0(tot)+' ('+p1(q)+'%)')+'/>';
+  });
+  $('ch-com').innerHTML=s+'</svg>';
+  $('t-com').textContent='Quasi tutte le schede hanno una data ('+pc(N.datazione_presente/tot)+'%), ma solo il '+pc(N.luogo_preciso_sito_o_indirizzo/tot)+'% dice dove si trova meglio di «Milano»';
+}
+
+/* ---------- cerca una scheda ---------- */
+function cercaSchede(){
+  var voci=null,classi=null,hay=null,ris=[],mostrati=0,STEP=30;
+  var tipiNome={"OA":"opera d'arte","S":"stampa","D":"disegno","RA":"reperto archeologico","BDM":"bene demoetnoantropologico","A":"architettura","F":"fotografia","PST":"strumento scientifico","OAC":"arte contemporanea","MA":"monumento archeologico","CA":"complesso archeologico","PG":"parco o giardino","NU":"moneta o medaglia"};
+  function url(v){return 'https://catalogo.beniculturali.it/detail/'+classi[v[4].charAt(0)]+'/'+v[4].slice(1)}
+  function riga(v){var t='<b>'+esc(v[0])+'</b>'+(v[5]?' · '+esc(v[5]):'');var a=v[1]?esc(v[1].split(' | ').join(', ')):'';return '<li>'+t+'<br><span class="m">'+[a,esc(v[2]),esc(tipiNome[v[3]]||v[3])].filter(Boolean).join(' · ')+'</span> <a href="'+url(v)+'" target="_blank" rel="noopener">scheda</a></li>'}
+  function disegna(reset){
+    var ul=$('ris');if(reset){ul.innerHTML='';mostrati=0}
+    var fine=Math.min(ris.length,mostrati+STEP),h='';
+    for(var k=mostrati;k<fine;k++)h+=riga(voci[ris[k]]);
+    ul.insertAdjacentHTML('beforeend',h);mostrati=fine;
+    $('piu').hidden=mostrati>=ris.length;
+    $('qmsg').textContent=f0(ris.length)+' schede'+(ris.length>mostrati?' (ne mostro '+mostrati+')':'')+'.';
+  }
+  function cerca(){
+    var q=$('q').value.trim().toLowerCase(),tp=$('tp').value,pa=q?q.split(/\s+/):[];ris=[];
+    for(var i=0;i<voci.length;i++){
+      if(tp&&voci[i][3]!==tp)continue;
+      var ok=true;for(var j=0;j<pa.length;j++){if(hay[i].indexOf(pa[j])<0){ok=false;break}}
+      if(ok)ris.push(i);
+    }
+    disegna(true);
+  }
+  getJ(DATA+'oggetti.json').then(function(O){
+    voci=O.voci;classi=O.classi;
+    hay=voci.map(function(v){return (v[0]+' '+v[1]+' '+v[5]).toLowerCase()});
+    var sel=$('tp'),cont={};voci.forEach(function(v){cont[v[3]]=(cont[v[3]]||0)+1});
+    Object.keys(cont).sort(function(a,b){return cont[b]-cont[a]}).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=(tipiNome[k]||k)+' ('+k+') · '+f0(cont[k]);sel.appendChild(o)});
+    var q=$('q');q.disabled=false;sel.disabled=false;
+    var t=null;q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(cerca,180)});sel.addEventListener('change',cerca);
+    $('piu').addEventListener('click',function(){disegna(false)});
+    cerca();
+  }).catch(function(){$('qmsg').textContent='Elenco non caricato.'});
+}
 })();
 </script></body></html>
