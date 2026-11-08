@@ -3080,3 +3080,4 @@ Elezioni ripubblicata: grafico dei quartieri rifatto a barre ordinate con la rig
 Milano nei film e nei libri pubblicata definitiva: specchio film/libri (opzione A) con 9 immagini libere da Wikimedia Commons, autore e licenza sotto ognuna.
 Nomi delle fermate pubblicata definitiva: binari per linea (opzione A), confronto metro-tram spiegato in parole semplici.
 Cinema spariti pubblicata definitiva: sale attive anno per anno (opzione B) e farfalla aperture/chiusure più in basso (C).
+Viaggio in linea pubblicata definitiva: schema del metrò con barre per fermata e salti più grandi in giallo (idea A).
