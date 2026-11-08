@@ -3045,3 +3045,8 @@ python -I scripts\inventario.py <cartella censimenti>
 Benessere pubblicata definitiva: tenuto il profilo a ragnatela (opzione C); 'com'è cambiata dal 2019' verde dove migliora, rosso dove peggiora.
 Chi governa Milano pubblicata definitiva: staffetta dei sindaci (opzione A) con i colori del partito.
 Povertà educativa pubblicata definitiva: strisce di pallini (opzione A), confronto CAP ricchi/altri più chiaro, colori fissi in tutta la pagina.
+Elezioni pubblicata definitiva: fasce dei voti per anno e mappe in serie (opzioni A e C).
+Bici, auto o mezzi pubblicata definitiva: mappe e tabellone (opzioni A e C).
+Derby pubblicata definitiva: saldo derby dopo derby (opzione C), marcatori in barre orizzontali semplici.
+Acqua del sindaco pubblicata definitiva: etichetta con prima la media di Milano e menu a tendina delle zone (opzione B).
+Appalti pubblicata definitiva: quadranti (opzione C) con il riquadro che spiega ARIA e le altre voci.
