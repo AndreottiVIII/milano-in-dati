@@ -2,333 +2,582 @@
 <html lang="it"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Milano in dati · Quanto costa vivere a Milano</title>
 <style>
-:root{--acc:#00695c;--ink:#111;--bg:#fff;--mut:#666;--line:#ddd;--soft:#eef6f4;--warm:#8a4a10;--warmbg:#fbf0e2}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-main{max-width:980px;margin:0 auto;padding:16px;overflow-wrap:break-word} h1{font-size:1.7rem;margin:.6em 0 .2em} h2{font-size:1.2rem;margin:1.8em 0 .4em;border-top:2px solid var(--ink);padding-top:.6em} h3{font-size:1rem;margin:1.2em 0 .3em}
-table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{font-size:.85rem;color:var(--mut);font-weight:600}
-td.r,th.r{text-align:right;white-space:nowrap}
-.sub{font-size:.85rem;color:var(--mut)} .src{font-size:.8rem;color:var(--mut);margin:.3em 0 .8em} a{color:var(--acc)} code{font-size:.9em}
-.surp{border-left:4px solid var(--acc);background:var(--soft);padding:8px 12px;margin:.8em 0} .surp p{margin:.4em 0;font-size:1.05rem} .surp b{color:var(--acc)}
-.warn{background:var(--soft);border-left:4px solid var(--acc);padding:6px 10px;margin:.6em 0;font-size:.92rem}
-.warm{background:var(--warmbg);border-left:4px solid #c26a1b;padding:6px 10px;margin:.6em 0;font-size:.92rem} .warm ul{margin:.3em 0;padding-left:1.2em} .warm li{margin:.2em 0}
-.ctl{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:.5em 0}
-.ctl button{font:inherit;font-size:.88rem;border:1px solid var(--line);background:#fff;color:var(--ink);padding:3px 10px;border-radius:14px;cursor:pointer;max-width:100%;text-align:left}
-.ctl button.on{border-color:var(--ink);font-weight:700}
-.ctl button i{display:inline-block;width:14px;height:0;border-top:3px solid;vertical-align:3px;margin-right:6px}
-.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:.5em 0} .lgd span{white-space:nowrap} .lgd i{display:inline-block;width:16px;height:12px;vertical-align:-1px;margin-right:4px;border:1px solid #888}
-.lgd i.ln{height:0;border:0;border-top:3px solid;vertical-align:3px;width:22px} .lgd i.ln.d{border-top-style:dashed}
-.scroll{overflow-x:auto}
-.rule{margin:.5em 0} .rule .row{display:grid;grid-template-columns:minmax(110px,30%) 1fr 150px;gap:6px;align-items:center;font-size:.9rem;padding:5px 0}
-.rule .tr{background:#f1f1f1;height:16px;position:relative} .rule .fill{position:absolute;left:0;top:0;height:16px;background:var(--acc)} .rule .mk{position:absolute;top:-5px;height:26px;border-left:3px dashed #c26a1b}
-.rule .v{font-variant-numeric:tabular-nums} .rule .v i{display:block;font-style:normal;font-size:.78rem;color:var(--mut)}
-@media(max-width:760px){th,td{padding:5px 4px;font-size:.88rem} .rule .row{grid-template-columns:1fr}}
-.ch{position:relative;width:100%} .ch svg{display:block;width:100%;font:11px system-ui,Arial,sans-serif} .ch svg text{fill:#111} .ch svg .mu{fill:#666}
-.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #888;padding:4px 8px;font-size:.8rem;line-height:1.35;white-space:nowrap;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-.tip i{display:inline-block;width:10px;height:3px;margin-right:5px;vertical-align:3px}
-details{margin:.4em 0} summary{cursor:pointer;color:var(--acc)} ul.m li{margin:.35em 0}
-footer{margin:2.5em 0 1em;font-size:.82rem;color:var(--mut);border-top:1px solid var(--line);padding-top:.8em}
-.pill{display:inline-block;font-size:.78rem;border:1px solid #c26a1b;color:#8a4a10;background:var(--warmbg);border-radius:10px;padding:0 6px;margin-left:4px}
-.big{font-size:1.5rem;font-weight:700;color:var(--acc)}
-#tab-prezzi{min-width:560px} #tab-rent{min-width:480px}
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano e "euro di oggi": rosso M1 */
+  --pos:#F58220;--neg:#0072BC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.lg i.dash{background:#fff!important;border:2px dashed var(--axis)}
+.lg i.out{background:#fff!important;border:2px solid var(--ink2)}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+.pick{display:flex;align-items:center;gap:12px;margin:.4em 0 .6em}
+.pick input[type=range]{flex:1;min-width:0;height:36px;accent-color:var(--mi)}
+.pick output{font-size:2rem;font-weight:800;min-width:3.4ch;text-align:right;font-variant-numeric:tabular-nums}
+.big{font-size:1.05rem;margin:.2em 0 .6em;line-height:1.35}
+.big b{font-weight:800}
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+select{font:inherit;font-weight:700;width:100%;max-width:100%;min-height:48px;padding:8px 10px;border:2px solid var(--ink);border-radius:6px;background:#fff;color:var(--ink);margin:.3em 0 .6em}
+.sl{display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:center;margin:.1em 0}
+.sl label{font-size:.92rem;font-weight:700}
+.sl output{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;min-width:5ch}
+.sl input[type=range]{grid-column:1/3;margin:0;width:100%;min-width:0;height:34px;accent-color:var(--mi)}
+.tot{display:flex;justify-content:space-between;border-top:2px solid var(--ink);margin:.5em 0 .8em;padding-top:.4em;font-weight:800}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+footer li{margin:.3em 0}
 </style><script src="../menu.js" defer></script></head><body><main>
+
 <h1>Quanto costa vivere a Milano</h1>
-<p>Un caff&egrave;, un biglietto del tram, un mese d&rsquo;affitto, la benzina: quanto sono saliti i prezzi a Milano, e quali pi&ugrave; dell&rsquo;inflazione? I prezzi <b>in euro</b> di prodotti veri si trovano solo dal gennaio 2021; per il passato ci sono i <b>numeri indice</b> (&laquo;100 = anno di partenza&raquo;), che dicono di quanto sale un prezzo, non quanto costa. In questa pagina si usano tutti e due, dichiarando sempre quale.</p>
+<p class="lead">Un caffè, un biglietto del tram, la luce, la benzina, l’affitto: quanto costavano nel 2005 e quanto costano oggi, anche togliendo l’inflazione.</p>
 
-<div class="surp" id="sorpresa"><p class="sub">Caricamento&hellip;</p></div>
+<div class="hl" id="hl"></div>
+<p class="src">Prezzi di Milano: Osservatorio Prezzi del Ministero (MIMIT), carburanti MIMIT, ATM, affitti OMI (Agenzia delle Entrate). Indici dei prezzi: Comune di Milano su dati ISTAT (CC BY). «Oggi» = settembre 2026. Prima del 2021 molti prezzi in euro sono stimati: i limiti dei dati sono in fondo.</p>
 
-<div class="warm"><b>Prima di leggere.</b> I prezzi in euro del Ministero sono <b>medie di quello che &egrave; stato rilevato</b> ogni mese: possono riferirsi a marche, confezioni e negozi diversi da un mese all&rsquo;altro. Il Ministero stesso scrive che i confronti nel tempo vanno fatti con gli indici dei prezzi, non con i livelli in euro. Per questo i prezzi in euro qui sono &laquo;una buona indicazione&raquo;, mentre la crescita vera si legge negli indici.</div>
+<!-- ============ 1 ============ -->
+<h2 id="carrello">Il carrello della spesa, 2005 contro oggi</h2>
+<div class="fig">
+  <h3 id="t-cesta"></h3>
+  <p class="sub">Sette cose di tutti i giorni. A sinistra il prezzo del 2005, a destra quello di oggi. Sotto, se i prezzi sono saliti più o meno dell’inflazione.</p>
+  <div class="lg"><span><i class="out"></i>prezzo misurato</span><span><i class="dash"></i>prezzo stimato dall’indice dei prezzi</span><span><i class="dot" style="background:var(--mi)"></i>oggi</span></div>
+  <div class="ch" id="ch-cesta" role="img" aria-label="Sette oggetti con il loro prezzo nel 2005 e oggi: caffè, pane, pizza, biglietto del tram, benzina, luce, affitto"></div>
+  <p class="src">Prezzi di oggi: MIMIT (caffè, pane, pizza, settembre 2026), archivio carburanti MIMIT, ATM, OMI. Prezzi del 2005: biglietto ATM, misurato; caffè, pane, pizza e benzina stimati riportando indietro un prezzo vero con l’indice ISTAT di Milano; luce: solo l’indice, quindi «100 euro di bolletta del 2005». Affitto: OMI, parte dal 2006.</p>
+</div>
 
-<h2 id="affitti">L&rsquo;affitto e quanto si guadagna</h2>
-<div id="aff-testo"></div>
-<h3>Un mese d&rsquo;affitto, in quota del reddito mensile mediano</h3>
-<div class="ch" id="ch-quota" role="img" aria-label="Grafico: quota del reddito mensile mediano che serve per un mese d'affitto di 60 metri quadrati, 2006-2024"></div>
-<p class="src">Affitto: stima OMI (Agenzia delle Entrate), mediana delle zone di Milano, &laquo;abitazioni civili&raquo;, 60 m&sup2;. Reddito: mediana del reddito complessivo dichiarato ai fini Irpef dai residenti (anno d&rsquo;imposta), <b>calcolata da noi</b> per interpolazione dalle classi di reddito del Comune: non &egrave; un dato ufficiale. Ore di lavoro: affitto diviso reddito mensile, per 173 ore al mese (tempo pieno): un conto illustrativo.</p>
-<p class="src"><b>Perché qui 34,5% e in &laquo;Chi può permettersi dove&raquo; 38,2%?</b> Il reddito è lo stesso (circa 25.900 euro l&rsquo;anno nel 2024), cambia l&rsquo;affitto: qui è la <b>mediana delle zone</b> OMI (12,43 &euro; al m&sup2;, 745,5 &euro; al mese per 60 m&sup2;); nell&rsquo;altra pagina è la <b>media sui civici residenziali</b> (13,74 &euro; al m&sup2;, circa 824 &euro; al mese), che pesa di più le zone dove ci sono più case. Sono due modi legittimi di leggere lo stesso mercato: <a href="../permettersi/">vai alla pagina</a>.</p>
-<div class="scroll"><table id="tab-rent"></table></div>
-<h3>Due misure degli affitti</h3>
-<div id="aff-testo2"></div>
-<div class="ch" id="ch-aff" role="img" aria-label="Grafico: affitti ISTAT e affitti OMI di Milano, 2015 uguale a 100"></div>
-<div class="lgd" id="lg-aff"></div>
-<p class="src">2015 = 100. ISTAT: indice &laquo;affitti reali&raquo; di Milano (media annua). OMI: euro al m&sup2; al mese, mediana delle zone (media dei due semestri). Dati OMI fino al 2024 nel grafico; i confronti 2015&ndash;2025 nel testo usano anche il 2025.</p>
+<!-- ============ 1b ============ -->
+<h2 id="cento">Con 100 euro</h2>
+<div class="fig">
+  <h3 id="t-cento"></h3>
+  <p class="sub">Per ogni cosa, quanta se ne comprava con 100 euro nel 2005 e quanta se ne compra oggi. La barra tratteggiata è quello che si comprava allora (tutto); la parte rossa è quello che compri adesso. La linea nera è la media dei prezzi: chi sta a sinistra della linea è salito più dei prezzi.</p>
+  <div class="ch" id="ch-cento" role="img" aria-label="Sette barre: quanto si compra oggi con 100 euro rispetto al 2005, per caffè, pane, pizza, tram, benzina, luce e affitto"></div>
+  <p class="note">Per l’affitto il confronto parte dal 2006, primo anno dei dati. Per la luce non abbiamo i chilowattora: «100» è la luce che si comprava con 100 euro nel 2005.</p>
+  <p class="src">Calcolo su prezzi e indici dei grafici di questa pagina: 100 euro divisi per il prezzo. Prezzi misurati e stimati come sopra (MIMIT, ATM, OMI; indici Comune di Milano / ISTAT, CC BY).</p>
+</div>
 
-<h2 id="indici">Quanto sono saliti i prezzi dal 2005</h2>
-<div id="ind-testo"></div>
-<div class="ctl" id="ind-chips" role="group" aria-label="Scegli le voci da mostrare"></div>
-<div class="ch" id="ch-ind" role="img" aria-label="Grafico: indice dei prezzi di Milano, 2005 uguale a 100, per voce, con l'indice generale"></div>
-<p class="src">2005 = 100, medie annue, Milano. Linea grigia: indice generale (tutti i prezzi). <span id="ind-nota"></span> Fonti: indici NIC di Milano (ISTAT, pubblicati dal Comune di Milano, CC BY); per l&rsquo;indice generale 2005&ndash;2010 il livello &egrave; ricostruito dai tassi annui (<a href="#metodo">vedi metodo</a>).</p>
-<div id="ind-voci"></div>
+<!-- ============ 2 ============ -->
+<h2 id="due-linee">Ogni prezzo, con e senza inflazione</h2>
+<div class="fig">
+  <h3 id="t-multi"></h3>
+  <p class="sub">La linea grigia è il prezzo pagato in ogni anno. La linea rossa è lo stesso prezzo in euro di oggi. La fascia tra le due è l’inflazione. Se la rossa sale, quella cosa è salita più dei prezzi.</p>
+  <div class="lg"><span><i class="ln" style="background:var(--mi)"></i>euro di oggi</span><span><i class="ln" style="background:var(--ink2)"></i>euro di quell’anno</span><span><i style="background:var(--mi);opacity:.18"></i>inflazione</span></div>
+  <div class="ch" id="ch-multi" role="img" aria-label="Sette piccoli grafici a due linee: prezzo in euro di quell'anno e in euro di oggi, dal 2005 a oggi"></div>
+  <p class="note">Il tratto prima del 2021 per caffè, pane e pizza, prima del 2015 per la benzina, e tutta la luce, sono stime dall’indice dei prezzi. Tocca un grafico per leggere un anno.</p>
+  <p class="src">Euro di oggi: prezzo di quell’anno × indice generale dei prezzi di Milano di settembre 2026 diviso quello di quell’anno (Comune di Milano / ISTAT, CC BY). Prezzi: MIMIT, ATM, OMI (CC BY 4.0).</p>
+</div>
 
-<h2 id="biglietto">Il biglietto del tram, in quattro gradini</h2>
-<div id="atm-testo"></div>
-<div class="rule" id="atm-bars"></div>
-<p class="src">Biglietto ordinario urbano ATM. In euro del 2025: il prezzo di ogni gradino riportato ai prezzi di Milano del 2025 (indice generale, media dell&rsquo;anno in cui il gradino &egrave; partito). La linea arancione tratteggiata &egrave; il biglietto del 2002 se fosse salito come i prezzi.</p>
-<div id="atm-abb"></div>
-<div class="warm"><b>Quanto sono sicuri questi numeri.</b> <span id="atm-verifica"></span></div>
+<!-- ============ 3 ============ -->
+<h2 id="chi-corre">Chi è salito più dei prezzi</h2>
+<div class="fig">
+  <h3 id="t-dumb"></h3>
+  <p class="sub">Di quanto è salito ogni prezzo dal 2005 al 2025, in percento. Il cerchio vuoto è l’inflazione: chi sta a destra è salito più dei prezzi, chi sta a sinistra meno.</p>
+  <div class="lg"><span><i class="ring"></i>inflazione</span><span><i class="dot" style="background:var(--pos)"></i>più dei prezzi</span><span><i class="dot" style="background:var(--neg)"></i>meno dei prezzi</span></div>
+  <div class="ch" id="ch-dumb" role="img" aria-label="Punti collegati: variazione dal 2005 al 2025 di diciotto voci di spesa a Milano, rispetto all'inflazione"></div>
+  <p class="note" id="nt-dumb"></p>
+  <p class="src">Fonte: indici dei prezzi di Milano per voce (Comune di Milano / ISTAT, CC BY), medie annue 2005 e 2025. Sono indici: dicono di quanto sale un prezzo, non quanto costa.</p>
+</div>
 
-<h2 id="energia">Lo shock dell&rsquo;energia, 2022&ndash;2023</h2>
-<div id="en-testo"></div>
-<div class="ch" id="ch-en" role="img" aria-label="Grafico: indici mensili di elettricit&agrave;, gas, benzina e gasolio a Milano, 2020-2026"></div>
-<div class="lgd" id="lg-en"></div>
-<p class="src">Indici di Milano, 2015 = 100, mensili (fonte: ISTAT / Comune di Milano, CC BY). Linea verticale: novembre 2022. Il 2026 &egrave; un nuovo rialzo (vedi <a href="#carburanti">carburanti</a>). L&rsquo;interruzione nel 2024 &egrave; aprile 2024, che manca nei file del Comune.</p>
-<div class="scroll"><table id="tab-en"></table></div>
+<!-- ============ 4 ============ -->
+<h2 id="affitto">L’affitto e le ore di lavoro</h2>
+<div class="fig">
+  <h3 id="t-ore"></h3>
+  <p class="sub">Ore di lavoro a tempo pieno che servono per pagare un mese d’affitto di 60 metri quadri, con il reddito mediano dei milanesi che dichiarano.</p>
+  <div class="ch" id="ch-ore" role="img" aria-label="Linea: ore di lavoro per un mese d'affitto, 2006-2024"></div>
+  <p class="note">Per vedere chi guadagna quanto, vai a <a href="../redditi/">Redditi dal 2000</a>; per i prezzi delle case, <a href="../prezzi-case/">Prezzi delle case</a>; per quanto resta dopo le tasse, <a href="../tasse/">Tasse</a>.</p>
+  <p class="src">Affitto: stima OMI (Agenzia delle Entrate, CC BY 4.0), mediana delle zone di Milano, abitazioni civili. Reddito: Irpef dei residenti (Ministero dell’Economia, via Comune di Milano, CC BY), mediana calcolata da noi: non è un dato ufficiale. Il conto delle ore è illustrativo (173 ore al mese).</p>
+</div>
 
-<h2 id="prezzi">Gennaio 2021 contro settembre 2026, in euro</h2>
-<div id="pr-testo"></div>
-<div class="scroll"><table id="tab-prezzi"></table></div>
-<div class="warn" id="pr-avviso"></div>
-<p class="src">Fonte: Ministero delle Imprese e del Made in Italy, Osservatorio Prezzi e Tariffe, prezzo medio dei locali rilevati a Milano (letto il 1/11/2026). Qui sono pubblicate solo le due medie di ciascun prodotto, non i dati originali. Colonna &laquo;Se fosse salito come i prezzi in generale&raquo;: prezzo di gennaio 2021 moltiplicato per la variazione dell&rsquo;indice generale di Milano nello stesso periodo.</p>
+<!-- ============ 5 ============ -->
+<h2 id="anno">Scegli un anno</h2>
+<div class="fig">
+  <h3 id="t-anno"></h3>
+  <p class="sub">Sposta il cursore sull’anno in cui sei arrivato a Milano, o sull’anno che vuoi. Per ogni cosa vedi tre barre: quanto costava allora, quanto sarebbe in euro di oggi, quanto costa oggi.</p>
+  <div class="pick"><label for="anno-in" style="font-weight:700">Anno</label><input type="range" id="anno-in" min="2005" max="2025" step="1" value="2010"><output id="anno-v" for="anno-in">2010</output></div>
+  <p class="big" id="anno-big"></p>
+  <div class="lg"><span><i style="background:var(--axis)"></i>allora, euro di quell’anno</span><span><i class="out"></i>allora, in euro di oggi</span><span><i style="background:var(--mi)"></i>oggi</span></div>
+  <div class="ch" id="ch-anno" role="img" aria-label="Barre: prezzo di sette cose nell'anno scelto e oggi"></div>
+  <p class="src">Prezzi e indici come sopra. Le cose senza prezzo vero in quell’anno sono stimate (vedi i limiti dei dati).</p>
+</div>
 
-<h2 id="carburanti">La benzina e il gasolio dal 2015</h2>
-<div id="ca-testo"></div>
-<div class="ch" id="ch-ca" role="img" aria-label="Grafico: prezzo mensile di benzina e gasolio self a Milano, 2015-2026"></div>
-<div class="lgd" id="lg-ca"></div>
-<p class="src">Euro al litro, modalit&agrave; self, impianti di Milano: mediana dei prezzi di ogni giorno, media dei giorni del mese (archivio &laquo;prezzo alle 8&raquo; del MIMIT, IODL 2.0). Linee tratteggiate: massimo mensile del 2022.</p>
+<!-- ============ 6 ============ -->
+<h2 id="voce">Scegli una voce di spesa</h2>
+<div class="fig">
+  <h3 id="t-voce"></h3>
+  <p class="sub">Scegli dal menu una cosa che compri. La linea colorata è di quanto sono saliti i suoi prezzi dal 2005 (partendo da 100); la linea nera è la media di tutti i prezzi. La fascia è la differenza.</p>
+  <label for="voce-in" style="font-weight:700">Voce di spesa</label>
+  <select id="voce-in"></select>
+  <p class="big" id="voce-big"></p>
+  <div class="ch" id="ch-voce" role="img" aria-label="Linea: indice dei prezzi della voce scelta contro l'indice generale, 2005-2025"></div>
+  <p class="src">Indici dei prezzi di Milano, medie annue, 2005 = 100 (Comune di Milano su dati ISTAT, CC BY). Sono indici: dicono di quanto sale un prezzo, non quanto costa. Il 2026 non c’è: è un anno incompleto.</p>
+</div>
 
-<h2 id="milano-italia">Milano contro l&rsquo;Italia</h2>
-<div id="mi-testo"></div>
-<div class="scroll"><table id="tab-mi"></table></div>
-<h3>Per tipo di spesa, 2020&ndash;2025</h3>
-<div class="scroll"><table id="tab-div"></table></div>
-<p class="src">Variazione dell&rsquo;indice dei prezzi al consumo (NIC, medie annue). Milano: Comune di Milano / ISTAT; Italia: ISTAT. Un indice dice di quanto salgono i prezzi, non dove costano di pi&ugrave;: da qui non si pu&ograve; dire che Milano sia &laquo;pi&ugrave; cara&raquo; di un&rsquo;altra citt&agrave; (vedi <a href="#metodo">metodo</a>).</p>
+<!-- ============ 7 ============ -->
+<h2 id="tuo">La tua inflazione</h2>
+<div class="fig">
+  <h3 id="t-tuo"></h3>
+  <p class="sub">L’inflazione di cui si parla è una media. Scegli un esempio o sposta i cursori: quanto spendi ogni mese per ogni cosa. Vedi quanto sono saliti i prezzi per te, dal 2005 al 2025.</p>
+  <label for="prof-in" style="font-weight:700">Un esempio</label>
+  <select id="prof-in"></select>
+  <div id="calc-sl"></div>
+  <div class="tot"><span>Totale al mese</span><span id="calc-tot"></span></div>
+  <p class="big" id="tuo-big"></p>
+  <div class="lg"><span><i class="dot" style="background:var(--pos)"></i>più della tua inflazione</span><span><i class="dot" style="background:var(--neg)"></i>meno</span><span><i class="ln" style="background:var(--mi)"></i>la tua inflazione</span><span><i class="ln" style="background:var(--ink)"></i>i prezzi in generale</span></div>
+  <div class="ch" id="ch-tuo" role="img" aria-label="Barre: di quanto sono saliti dal 2005 al 2025 i prezzi delle voci di spesa scelte, con la linea della tua inflazione e quella generale"></div>
+  <p class="note">Gli esempi sono inventati per far capire come funziona: non sono spese medie di nessuno. Il conto prende le tue spese di oggi e le riporta al 2005 con i prezzi di ogni voce. Chi spende più in affitto o in luce ha avuto un’inflazione diversa da quella generale.</p>
+  <p class="src">Aumenti per voce: indici dei prezzi di Milano, medie annue 2025 su 2005 (Comune di Milano su dati ISTAT, CC BY). Dove una voce ha più indici (per esempio luce, gas e acqua) è la media semplice degli indici.</p>
+</div>
 
-<h2 id="metodo">Come &egrave; fatto, e i limiti dei dati</h2>
-<ul class="m" id="metodo-lista"></ul>
-
-<h2 id="download">File</h2>
-<p><a href="data/riepilogo.json">riepilogo.json</a> (tutti i numeri di questa pagina e i controlli fatti), <a href="data/indici_annui_2005_100.csv">indici_annui_2005_100.csv</a> (le 10 voci e l&rsquo;indice generale, 2005 = 100), <a href="data/serie_mensili_energia.csv">serie_mensili_energia.csv</a> (elettricit&agrave;, gas, benzina, gasolio, indice generale, mensili 2020&ndash;2026), <a href="data/carburanti_milano_mensile.csv">carburanti_milano_mensile.csv</a> (benzina e gasolio self, mensili dal 2015), <a href="data/biglietto_atm.csv">biglietto_atm.csv</a> (i prezzi ATM con la fonte di ogni riga), <a href="data/prezzi_gen2021_set2026.csv">prezzi_gen2021_set2026.csv</a> (le due medie di ogni prodotto), <a href="data/affitto_vs_reddito.csv">affitto_vs_reddito.csv</a>, <a href="data/milano_vs_italia.csv">milano_vs_italia.csv</a>. Sono tutti valori aggregati. <b>Non ripubblichiamo</b> i dati originali dell&rsquo;Osservatorio del Ministero (la licenza dei dati non &egrave; scritta), n&eacute; i testi degli articoli citati: solo i numeri e il nome della fonte.</p>
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Euro di quell’anno</dt><dd>Il prezzo che si pagava davvero in quell’anno.</dd>
+<dt>Euro di oggi</dt><dd>Lo stesso prezzo, riportato a quanto varrebbe oggi: si moltiplica per quanto sono saliti i prezzi in generale. Con 149 € di oggi si compra quello che nel 2005 si comprava con 100.</dd>
+<dt>Inflazione</dt><dd>Di quanto salgono in media i prezzi di tutte le cose che le famiglie comprano. Non è uguale per ogni famiglia: dipende da che cosa compra.</dd>
+<dt>Indice dei prezzi</dt><dd>Un numero che parte da 100 nell’anno scelto e dice di quanto sale un prezzo. Esempio: se un carrello costava 100 euro nel 2005 e 149 oggi, l’indice oggi è 149. Dice di quanto sale, non quanto costa.</dd>
+<dt>Prezzo stimato</dt><dd>Un prezzo che non abbiamo misurato: si parte da un prezzo vero di un anno più recente e si va indietro con l’indice di quella voce.</dd>
+<dt>Self</dt><dd>La benzina che ti metti da solo, senza il benzinaio: costa meno di quella con servizio.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati, separati da punto e virgola, con il punto per i decimali.</p>
+<ul>
+<li><a href="data/prezzi_2005_oggi.csv">I sette prezzi anno per anno</a>: euro di quell’anno, euro di oggi, e se il prezzo è misurato o stimato</li>
+<li><a href="data/paniere_v2.json">Tutti i numeri di questa pagina</a> (sette prezzi, variazioni 2005-2025, ore di lavoro per l’affitto)</li>
+<li><a href="data/indici_annui_2005_100.csv">Indici annui 2005 = 100</a>: indice generale di Milano e dieci voci</li>
+<li><a href="data/biglietto_atm.csv">Prezzi ATM</a> con la fonte di ogni riga</li>
+<li><a href="data/carburanti_milano_mensile.csv">Benzina e gasolio self</a>, mese per mese dal 2015</li>
+<li><a href="data/affitto_vs_reddito.csv">Affitto e reddito</a>, 2006-2024</li>
+<li><a href="data/voci_annue_2005_100_v3.json">Indici annui 2005 = 100</a> di 24 voci e di 9 gruppi di spesa, 2005-2025</li>
+</ul>
+<p>Non ripubblichiamo i dati originali dell’Osservatorio del Ministero (la licenza dei dati non è scritta), né i testi degli articoli citati: solo medie annue di tre prodotti, i numeri e il nome della fonte.</p>
+</div></details>
+</div>
 
 <footer>
-<p><b>Fonti e licenze</b> (tutte scaricate o lette il 1 novembre 2026).</p>
-<ul class="m">
-<li><b>Indici dei prezzi di Milano</b>: Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, indici dei prezzi al consumo per Milano elaborati dal Comune su dati ISTAT (dataset ds240&ndash;248, ds91, ds1431&ndash;1437, ds2976&ndash;2982), tassi di inflazione mensile e annuale (ds1499, ds1821): licenza Creative Commons Attribution (CC BY, versione non indicata dal portale). Controllo: l&rsquo;indice generale coincide con quello ISTAT (flusso ITC45) su 189 mesi.</li>
-<li><b>Indici dell&rsquo;Italia</b>: <a href="https://www.istat.it/">ISTAT</a>, indici NIC, esploradati. Licenza CC BY 4.0, come scritto nelle <a href="https://www.istat.it/note-legali/">note legali ISTAT</a> (lette il 1/11/2026: ISTAT chiede di citare la fonte e dire se i dati sono stati modificati; qui sono stati riportati a base 2015 = 100 e rielaborati).</li>
-<li><b>Redditi</b>: Comune di Milano, redditi e principali variabili Irpef su base comunale (dati del Ministero dell&rsquo;Economia, anni d&rsquo;imposta 2000&ndash;2024) e classi di reddito (ds310, ds531), CC BY, versione non indicata.</li>
-<li><b>Affitti OMI</b>: Agenzia delle Entrate, Osservatorio del Mercato Immobiliare, quotazioni di locazione (&laquo;abitazioni civili&raquo;), 2006&ndash;1&deg; semestre 2026: licenza CC BY 4.0 (pagina delle forniture dati OMI). Sono stime, non contratti.</li>
-<li><b>Prezzi in euro</b>: Ministero delle Imprese e del Made in Italy, <a href="https://osservaprezzi.mise.gov.it/">Osservatorio Prezzi e Tariffe</a>, Milano, gennaio 2021 &ndash; settembre 2026. Le <a href="https://osservaprezzi.mise.gov.it/strumenti-per-l-utente/note-legali">note legali</a> mettono i <i>testi</i> sotto CC BY 3.0 e dicono che i dati si usano alle condizioni &laquo;della licenza con cui sono pubblicati&raquo;, senza nominarla: per prudenza qui sono pubblicate solo medie di prodotti scelti, con questa citazione, non i file originali.</li>
-<li><b>Carburanti</b>: Ministero delle Imprese e del Made in Italy, <a href="https://opendatacarburanti.mise.gov.it/">archivio dei prezzi dei carburanti</a> (prezzo alle 8, impianti del Comune di Milano), 2015&ndash;settembre 2026: licenza IODL 2.0, dichiarata nella pagina.</li>
+<p><b>Fonti e licenze</b> (scaricate o lette il 1 novembre 2026).</p>
+<ul>
+<li><b>Indici dei prezzi di Milano</b>: Comune di Milano, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, indici dei prezzi al consumo per Milano elaborati dal Comune su dati ISTAT (dataset ds240–248, ds91, ds1431–1437, ds2976–2982): licenza Creative Commons Attribution (CC BY, versione non indicata dal portale). Controllo: l’indice generale coincide con quello ISTAT (flusso ITC45) su 189 mesi. ISTAT pubblica con licenza CC BY 4.0, come scritto nelle <a href="https://www.istat.it/note-legali/">note legali ISTAT</a> (lette il 1/11/2026): qui gli indici sono stati riportati a una base comune e rielaborati.</li>
+<li><b>Redditi</b>: Comune di Milano, redditi e principali variabili Irpef su base comunale (dati del Ministero dell’Economia, anni d’imposta 2000–2024) e classi di reddito, CC BY, versione non indicata.</li>
+<li><b>Affitti OMI</b>: Agenzia delle Entrate, Osservatorio del Mercato Immobiliare, quotazioni di locazione («abitazioni civili»), 2006–1° semestre 2026: licenza CC BY 4.0 (pagina delle forniture dati OMI). Sono stime, non contratti.</li>
+<li><b>Prezzi in euro</b>: Ministero delle Imprese e del Made in Italy, <a href="https://osservaprezzi.mise.gov.it/">Osservatorio Prezzi e Tariffe</a>, Milano, gennaio 2021 – settembre 2026. Le <a href="https://osservaprezzi.mise.gov.it/strumenti-per-l-utente/note-legali">note legali</a> mettono i <i>testi</i> sotto CC BY 3.0 e dicono che i dati si usano alle condizioni «della licenza con cui sono pubblicati», senza nominarla: per prudenza qui sono pubblicate solo medie di prodotti scelti, con questa citazione, non i file originali.</li>
+<li><b>Carburanti</b>: Ministero delle Imprese e del Made in Italy, <a href="https://opendatacarburanti.mise.gov.it/">archivio dei prezzi dei carburanti</a> (prezzo alle 8, impianti del Comune di Milano), 2015–settembre 2026: licenza IODL 2.0, dichiarata nella pagina.</li>
 <li><b>Biglietti ATM</b>: pagine ufficiali ATM (biglietti e abbonamenti, lette il 1/11/2026); articoli di Il Giorno (9/1/2023 e 22/7/2011), Open (26/6/2019), Sky TG24 (9/1/2023), Il Giornale (22/7/2011), Il Post (30/1/2019), Libero Quotidiano (8/9/2013). Non riproduciamo i testi: solo i numeri e la fonte.</li>
 </ul>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>, cartella <code>costo-vita/</code>.</p>
 </footer>
 </main>
+<div class="tip" id="tip"></div>
 <script>
 (function(){
 'use strict';
-var D=null;
-var ACC='#00695c',GRY='#8a8a8a',WARM='#c26a1b';
-var COL={pane:'#c26a1b',caffe_prodotto:'#7b3f98',ristoranti:'#c2185b',affitti:'#00695c',elettricita:'#d4a000',gas:'#1f5fa8',benzina:'#b3261e',bus_tram_metro:'#00838f',alberghi:'#6b7d1a',telefonia_mobile:'#444444',gasolio_auto:'#7b3f98'};
-/* ---------- formati ---------- */
-function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function nf(x,d){return x==null?'':Number(x).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d})}
-function f0(x){return x==null?'':Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-function sg(x,d){var v=Math.abs(x);return (x<0?'−':(x>0?'+':''))+nf(v,d)}
-function sgp(x,d){return sg(x,d==null?0:d)+'%'}
-function eu(x,d){d=d==null?2:d;return (d===0?f0(x):nf(x,d))+' €'}
-function J(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
-function el(id){return document.getElementById(id)}
-function setH(id,h){el(id).innerHTML=h}
-function niceStep(r){var p=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),f=r/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
-function table(id,head,rows){setH(id,'<thead><tr>'+head.map(function(h,i){return '<th'+(i?' class="r"':'')+'>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i?' class="r"':'')+'>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody>')}
-function lgd(items){return items.map(function(it){return '<span><i class="ln'+(it.dash?' d':'')+'" style="border-top-color:'+it.color+'"></i>'+it.t+'</span>'}).join('')}
-var MESI=['','gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-var MESIL=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-function mese(p,lungo){var a=p.split('-');return (lungo?MESIL:MESI)[parseInt(a[1],10)]+' '+a[0]}
-var RD=[];
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),pos:cv('--pos'),neg:cv('--neg')};
+var D,V,OG={},RD=[];
+var ORD=['caffe','pane','pizza','biglietto','benzina','luce','affitto'];
+var COL={caffe:'#8C5A32',pane:'#F58220',pizza:'#00A651',biglietto:'#0072BC',benzina:'#7B3FA0',luce:'#FFD500',affitto:'#00A19A'};
+var CORTO={caffe:'un espresso',pane:'1 chilo',pizza:'un pasto',biglietto:'ordinario',benzina:'40 litri',luce:'100 € del 2005',affitto:'60 m², al mese'};
+var NOME={caffe:'Caffè',pane:'Pane',pizza:'Pizza fuori',biglietto:'Biglietto tram',benzina:'Pieno di benzina',luce:'Luce di casa',affitto:'Affitto'};
+var BREVE={elettricita:'Luce',gas:'Gas',alberghi:'Alberghi',acqua:'Acqua',treno:'Treno',sigarette:'Sigarette',uova:'Uova',taxi:'Taxi',pane:'Pane',ristoranti:'Ristoranti',benzina:'Benzina',cinema_teatri:'Cinema',affitti:'Affitti',bus_tram_metro:'Trasporto urb.',assic_auto:'Assic. auto',rifiuti:'Rifiuti',medicinali:'Medicinali',telefonia_mobile:'Telefono'};
 
-J('data/riepilogo.json').then(function(d){
-  D=d;
-  try{ tutto(); }catch(e){ console.error(e); setH('sorpresa','<b>Errore nella pagina.</b> '+esc(e.message)); }
-}).catch(function(e){setH('sorpresa','<b>Dati non caricati.</b> '+esc(e.message))});
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function fd(x,d){var r=(Math.round(Math.abs(x)*Math.pow(10,d))/Math.pow(10,d)).toFixed(d).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+(d?','+r[1]:'')}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function eu(o,v){return fd(v,o.decimali)+' €'}
+function ser(o,y){for(var i=0;i<o.serie.length;i++)if(o.serie[i].anno===y)return o.serie[i];return null}
 
-function tutto(){
-  sorpresa();affitti();indici();biglietto();energia();prezzi();carburanti();milanoItalia();metodo();
-  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
-}
-
-/* ---------- grafico a linee ---------- */
-/* o: xs[], series[{k,name,color,w,dash,vals[]}], x0,x1,y0,y1, xf(v), yf(v), xticks[], tip(i,visibili)->html, hl[{y,label,color}], vl[{x,label}], plabels[{si,i,text}] */
-function lineChart(box,o){
-  box.innerHTML='';
-  var W=box.clientWidth||320,H=o.h||300,m={l:o.ml||44,r:12,t:14,b:30};
-  var pw=W-m.l-m.r,ph=H-m.t-m.b,x0=o.x0,x1=o.x1,y0=o.y0,y1=o.y1;
-  function X(v){return m.l+(v-x0)/(x1-x0)*pw} function Y(v){return m.t+ph-(v-y0)/(y1-y0)*ph}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">';
-  var sy=o.sy||niceStep((y1-y0)/5),v;
-  for(v=y0;v<=y1+sy/2;v+=sy)s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e3e3"/><text class="mu" x="'+(m.l-6)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+o.yf(v)+'</text>';
-  var lastx=-99;
-  o.xticks.forEach(function(t){var xx=X(t);if(xx-lastx>(o.xgap||34)){lastx=xx;s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph+4)+'" stroke="#888"/><text class="mu" x="'+xx+'" y="'+(m.t+ph+16)+'" text-anchor="middle">'+o.xf(t)+'</text>'}});
-  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ph)+'" y2="'+(m.t+ph)+'" stroke="#888"/>';
-  (o.hl||[]).forEach(function(h){s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(h.y)+'" y2="'+Y(h.y)+'" stroke="'+h.color+'" stroke-dasharray="5 4"/><text x="'+(m.l+4)+'" y="'+(Y(h.y)+(h.dy==null?-4:h.dy))+'" style="fill:'+h.color+'">'+h.label+'</text>'});
-  (o.vl||[]).forEach(function(h){var xx=X(h.x);s+='<line x1="'+xx+'" x2="'+xx+'" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#555" stroke-dasharray="2 3"/><text x="'+(xx+(h.left?-4:4))+'" y="'+(m.t+10)+'" text-anchor="'+(h.left?'end':'start')+'">'+h.label+'</text>'});
-  o.series.forEach(function(se){
-    var d='',pen=false;
-    se.vals.forEach(function(y,i){if(y==null){pen=false;return}d+=(pen?'L':'M')+X(o.xs[i]).toFixed(1)+' '+Y(y).toFixed(1);pen=true});
-    s+='<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="'+(se.w||2)+'" stroke-linejoin="round"'+(se.dash?' stroke-dasharray="6 4"':'')+'/>';
-  });
-  (o.plabels||[]).forEach(function(p){var se=o.series[p.si],xx=X(o.xs[p.i]),yy=Y(se.vals[p.i]);
-    s+='<circle cx="'+xx.toFixed(1)+'" cy="'+yy.toFixed(1)+'" r="4.5" fill="'+se.color+'" stroke="#fff" stroke-width="1.5"/><text x="'+(xx+(p.dx||0)).toFixed(1)+'" y="'+(yy+(p.dy==null?-9:p.dy)).toFixed(1)+'" text-anchor="'+(p.anchor||'middle')+'" style="font-weight:700">'+p.text+'</text>'});
-  s+='<line id="cur" y1="'+m.t+'" y2="'+(m.t+ph)+'" stroke="#111" stroke-width="1" style="display:none"/><rect x="'+m.l+'" y="'+m.t+'" width="'+pw+'" height="'+ph+'" fill="transparent" style="touch-action:pan-y"/></svg>';
-  box.innerHTML=s+'<div class="tip" style="display:none"></div>';
-  var svg=box.firstChild,tip=box.lastChild,cur=svg.querySelector('#cur'),rect=svg.querySelector('rect:last-of-type');
-  function show(ev){var t=ev.touches?ev.touches[0]:ev,r=svg.getBoundingClientRect(),k=W/r.width,px=(t.clientX-r.left)*k,bi=0,bd=1e9;
-    o.xs.forEach(function(x,i){var d=Math.abs(X(x)-px);if(d<bd){bd=d;bi=i}});
-    var xx=X(o.xs[bi]);cur.setAttribute('x1',xx);cur.setAttribute('x2',xx);cur.style.display='';
-    tip.innerHTML=o.tip(bi);tip.style.display='';var tw=tip.offsetWidth,left=xx/k+10;if(left+tw>r.width)left=xx/k-tw-10;if(left<0)left=0;tip.style.left=left+'px';tip.style.top='8px'}
-  function hide(){tip.style.display='none';cur.style.display='none'}
-  rect.addEventListener('mousemove',show);rect.addEventListener('mouseleave',hide);rect.addEventListener('touchstart',show,{passive:true});rect.addEventListener('touchmove',show,{passive:true});
-}
+/* ---------- svg ---------- */
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function r1(v){return Math.round(v*10)/10}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
 function sw(c){return '<i style="background:'+c+'"></i>'}
-
-/* ---------- cosa sorprende ---------- */
-function sorpresa(){
-  var S=D.sorpresa,A=D.affitti.confronto,T=D.atm,P=D.prezzi,esp=null;
-  P.righe.forEach(function(r){if(r.nome.indexOf('espresso')>=0)esp=r});
-  var h='<p><b>Un mese d&rsquo;affitto pesa di pi&ugrave; oggi che nel 2006.</b> Per un appartamento di 60&nbsp;m&sup2; (stima OMI) un mese d&rsquo;affitto valeva il <b>'+nf(S.quota_2006,1)+'%</b> del reddito mensile mediano dichiarato dai milanesi nel 2006, il <b>'+nf(S.quota_2021,1)+'%</b> nel 2021 (il minimo) e il <b>'+nf(S.quota_2024,1)+'%</b> nel 2024. In ore di lavoro a tempo pieno: '+f0(S.ore_2006)+', '+f0(S.ore_2021)+', '+f0(S.ore_2024)+'. <a href="#affitti">Vedi</a></p>';
-  h+='<p><b>Due misure degli affitti, due storie.</b> Dal 2015 al 2025 gli affitti ISTAT di Milano sono saliti del <b>'+sgp(A.istat_2015_2025_pct)+'</b>, i valori OMI del <b>'+sgp(A.omi_2015_2025_pct)+'</b>. Non si contraddicono: sono due cose diverse (spiegato <a href="#affitti">qui</a>).</p>';
-  h+='<p><b>Il biglietto del tram &egrave; salito pi&ugrave; dei prezzi</b>: da '+eu(T.gradini[0].prezzo)+' (2002) a '+eu(T.oggi)+' ('+sgp(T.aumento_biglietto_pct)+'), mentre i prezzi di Milano sono saliti del '+f0(T.inflazione_2002_2025_pct)+'%. Gli abbonamenti, invece, sono fermi: <b>'+f0(T.mensile.oggi)+' euro al mese dal 2019</b>. <a href="#biglietto">Vedi</a></p>';
-  h+='<p><b>Il caff&egrave; non ha tradito.</b> Da '+eu(esp.gen_2021)+' (gennaio 2021) a '+eu(esp.set_2026)+' (settembre 2026): '+sgp(esp.var_pct,1)+', quanto i prezzi in generale ('+sgp(P.inflazione_generale_gen2021_set2026_pct,1)+'). <a href="#prezzi">Vedi</a></p>';
-  h+='<p class="src">Fonti: affitti OMI (Agenzia delle Entrate) e ISTAT; redditi Irpef dei residenti (Comune di Milano); ATM; Osservatorio Prezzi del Ministero. Dettagli e limiti nelle sezioni.</p>';
-  setH('sorpresa',h);
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);if(w<0.5)return '';
+  return '<path d="M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z" fill="'+col+'"'+(extra||'')+'/>';
+}
+/* piccole icone 44x44, una per oggetto */
+function icon(id,x,y){
+  var c=COL[id],k='stroke="#0b0d12" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"',p;
+  if(id==='caffe')p='<path d="M9 16H31V26Q31 34 20 34Q9 34 9 26Z" fill="'+c+'" '+k+'/><path d="M31 19H35Q39 19 39 23Q39 27 35 27H31" fill="none" '+k+'/><path d="M5 38H35" '+k+'/><path d="M16 5Q13 8 16 11M23 5Q20 8 23 11" fill="none" '+k+'/>';
+  else if(id==='pane')p='<path d="M4 28Q4 13 22 13Q40 13 40 28Q40 35 33 35H11Q4 35 4 28Z" fill="'+c+'" '+k+'/><path d="M14 19L18 29M22 17L26 28M30 19L33 29" fill="none" '+k+'/>';
+  else if(id==='pizza')p='<path d="M22 41L5 12Q22 3 39 12Z" fill="'+c+'" '+k+'/><path d="M5 12Q22 3 39 12" fill="none" stroke="#0b0d12" stroke-width="5" stroke-linecap="round"/><circle cx="16" cy="19" r="3.5" fill="#E30613" '+k+'/><circle cx="27" cy="18" r="3.5" fill="#E30613" '+k+'/><circle cx="22" cy="29" r="3.5" fill="#E30613" '+k+'/>';
+  else if(id==='biglietto')p='<path d="M4 10H40V19A3.5 3.5 0 0 0 40 26V34H4V26A3.5 3.5 0 0 0 4 19Z" fill="'+c+'" '+k+'/><path d="M29 13V31" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/><path d="M11 22H22" stroke="#fff" stroke-width="3" stroke-linecap="round"/>';
+  else if(id==='benzina')p='<rect x="7" y="5" width="21" height="33" rx="2" fill="'+c+'" '+k+'/><rect x="11" y="9" width="13" height="10" fill="#fff" '+k+'/><path d="M28 14H34Q38 14 38 18V30Q38 34 34 34" fill="none" '+k+'/><path d="M4 39H31" '+k+'/>';
+  else if(id==='luce')p='<circle cx="22" cy="18" r="11" fill="'+c+'" '+k+'/><rect x="17" y="30" width="10" height="7" rx="1" fill="#fff" '+k+'/><path d="M22 2V5M6 7L9 10M38 7L35 10M3 18H6M41 18H38" fill="none" '+k+'/>';
+  else p='<path d="M4 22L22 6L40 22Z" fill="'+c+'" '+k+'/><rect x="9" y="22" width="26" height="16" fill="'+c+'" '+k+'/><rect x="18" y="28" width="8" height="10" fill="#fff" '+k+'/>';
+  return '<g transform="translate('+r1(x)+' '+r1(y)+')">'+p+'</g>';
 }
 
-/* ---------- affitti ---------- */
-function affitti(){
-  var S=D.sorpresa,R=D.affitti.serie,A=D.affitti.confronto;
-  setH('aff-testo','<p>Quanto pesa la casa sul bilancio di chi vive a Milano? Mettiamo insieme due cose: quanto costa al mese un appartamento di 60&nbsp;m&sup2; (stima dei valori di mercato dell&rsquo;Agenzia delle Entrate, zona mediana) e quanto guadagna, al mese, il milanese mediano (reddito dichiarato, <b>non lo stipendio</b>: comprende pensionati, chi lavora parte dell&rsquo;anno, redditi bassi). Nel 2006 l&rsquo;affitto era di '+eu(S.affitto_2006,0)+' contro un reddito di '+eu(S.reddito_2006,0)+': il '+nf(S.quota_2006,1)+'%. Poi la quota scende fino al <b>'+nf(S.quota_2021,1)+'% del 2021</b> (affitto '+eu(S.affitto_2021,0)+', reddito '+eu(S.reddito_2021,0)+') e risale fino al <b>'+nf(S.quota_2024,1)+'% del 2024</b> ('+eu(S.affitto_2024,0)+' contro '+eu(S.reddito_2024,0)+'). Tra il 2021 e il 2024 l&rsquo;affitto stimato &egrave; salito del '+f0((S.affitto_2024/S.affitto_2021-1)*100)+'%, il reddito del '+f0((S.reddito_2024/S.reddito_2021-1)*100)+'%.</p><p>Il reddito &egrave; disponibile solo fino al 2024: per il 2026 si pu&ograve; dire solo che l&rsquo;affitto OMI mediano del primo semestre era di '+nf(A.omi_2026_s1_m2,2)+'&nbsp;&euro; al m&sup2; al mese, cio&egrave; <b>'+f0(A.omi_2026_s1_60m2)+' euro</b> per 60&nbsp;m&sup2;, ma non si pu&ograve; confrontare con i redditi.</p>');
-  var yrs=R.map(function(r){return r.anno});
-  function draw(){
-    var i06=0,i21=yrs.indexOf(2021),i24=yrs.indexOf(2024);
-    lineChart(el('ch-quota'),{xs:yrs,x0:2006,x1:2024,y0:20,y1:40,sy:5,h:260,xticks:yrs,xf:function(v){return v},yf:function(v){return v+'%'},
-      series:[{name:'Quota',color:ACC,w:3,vals:R.map(function(r){return r.quota})}],
-      plabels:[{si:0,i:i06,text:nf(S.quota_2006,1)+'%',dx:0,dy:-10,anchor:'start'},{si:0,i:i21,text:nf(S.quota_2021,1)+'%',dy:16},{si:0,i:i24,text:nf(S.quota_2024,1)+'%',dx:2,dy:-10,anchor:'end'}],
-      tip:function(i){var r=R[i];return '<b>'+r.anno+'</b><br>affitto 60 m² (stima OMI): '+eu(r.affitto,0)+'<br>reddito mensile mediano (calcolato): '+eu(r.reddito,0)+'<br><b>quota: '+nf(r.quota,1)+'%</b><br>ore di lavoro: '+nf(r.ore,0)}});
-    var ci=A.istat,co=A.omi,ys=Object.keys(co).map(Number);
-    lineChart(el('ch-aff'),{xs:ys,x0:2006,x1:2024,y0:80,y1:160,sy:20,h:260,xticks:ys,xf:function(v){return v},yf:function(v){return v},
-      series:[{name:'ISTAT',color:ACC,w:3,vals:ys.map(function(a){return ci[a]})},{name:'OMI',color:WARM,w:3,vals:ys.map(function(a){return co[a]})}],
-      tip:function(i){var a=ys[i];return '<b>'+a+'</b> (2015 = 100)<br><i style="background:'+ACC+'"></i>ISTAT, contratti in corso: '+nf(ci[a],1)+'<br><i style="background:'+WARM+'"></i>OMI, stima contratti nuovi: '+nf(co[a],1)}});
-  }
-  draw();RD.push(draw);
-  var pick=[2006,2010,2015,2019,2021,2022,2023,2024];
-  table('tab-rent',['Anno','Affitto 60 m² al mese (stima OMI)','Reddito mensile mediano (calcolato)','Quota','Ore di lavoro'],R.filter(function(r){return pick.indexOf(r.anno)>=0}).map(function(r){return [r.anno,eu(r.affitto,0),eu(r.reddito,0),'<b>'+nf(r.quota,1)+'%</b>',nf(r.ore,0)]}));
-  setH('lg-aff',lgd([{color:ACC,t:'ISTAT: canoni dei contratti in corso'},{color:WARM,t:'OMI: stima dei prezzi dei contratti nuovi'}]));
-  setH('aff-testo2','<p>Dal 2015 al 2025 gli affitti ISTAT di Milano sono saliti del <b>'+sgp(A.istat_2015_2025_pct)+'</b> (negli ultimi cinque anni, 2020&ndash;2025, '+sgp(A.istat_2020_2025_pct)+'); i valori OMI del <b>'+sgp(A.omi_2015_2025_pct)+'</b> ('+sgp(A.omi_2020_2025_pct)+'). Non c&rsquo;&egrave; un errore: <b>misurano due cose diverse</b>. L&rsquo;ISTAT osserva i canoni di <i>tutti</i> i contratti in corso, anche quelli firmati anni fa e che cambiano poco. L&rsquo;OMI &egrave; una <i>stima dei prezzi di mercato</i>, zona per zona, fatta dai rilevatori dell&rsquo;Agenzia delle Entrate: dice quanto costa affittare una casa oggi, non quanto paga chi ha un contratto vecchio. Chi cerca casa vede la seconda; chi ce l&rsquo;ha gi&agrave; &egrave; pi&ugrave; vicino alla prima. E l&rsquo;OMI &egrave; una stima, non un elenco di contratti veri: il numero di zone cambia nel tempo (55 fino al 2013, 40&ndash;42 dopo) e la mediana non &egrave; pesata, quindi pu&ograve; muoversi anche per questo. Un dato curioso: l&rsquo;OMI nominale era <b>quasi identico</b> nel 2006 ('+nf(D.affitti.serie[0].affitto_m2,2)+' &euro;/m&sup2;) e nel 2015 ('+nf(D.affitti.serie.filter(function(r){return r.anno===2015})[0].affitto_m2,2)+'), poi &egrave; salito.</p>');
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
 }
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
 
-/* ---------- indici ---------- */
-var SEL={};
-function indici(){
-  var I=D.indici,V=I.voci,G=I.generale,GI=I.generale_italia;
-  ['affitti','pane','benzina','telefonia_mobile','bus_tram_metro','caffe_prodotto'].forEach(function(k){SEL[k]=true});
-  var big=V.slice().sort(function(a,b){return b.var_pct_2005_2025-a.var_pct_2005_2025});
-  setH('ind-testo','<p>Per ogni voce, il prezzo del 2005 vale 100: se oggi l&rsquo;indice &egrave; 160, quella voce &egrave; salita del 60%. L&rsquo;indice generale di Milano (tutti i prezzi, linea grigia) &egrave; arrivato a <b>'+nf(G.valori[G.valori.length-1],0)+'</b> nel 2025, cio&egrave; '+sgp(G.var_pct_2005_2025,1)+' (Italia: '+sgp(GI.var_pct_2005_2025,1)+'). Le voci salite di pi&ugrave;: <b>'+big.filter(function(v){return v.var_pct_2005_2025>G.var_pct_2005_2025}).map(function(v){return v.nome.toLowerCase()+' ('+sgp(v.var_pct_2005_2025)+')'}).slice(0,4).join(', ')+'</b>; sotto, <b>la telefonia ('+sgp(V.filter(function(v){return v.chiave==='telefonia_mobile'})[0].var_pct_2005_2025)+')</b> e i trasporti urbani ('+sgp(V.filter(function(v){return v.chiave==='bus_tram_metro'})[0].var_pct_2005_2025)+'). Scegli le voci con i pulsanti: con l&rsquo;energia elettrica si vede lo scossone del 2022; la telefonia scende da sola.</p>');
-  var h='';
-  V.forEach(function(v){h+='<button type="button" data-k="'+v.chiave+'"><i style="border-top-color:'+COL[v.chiave]+'"></i>'+esc(v.nome)+' <span class="sub">'+sgp(v.var_pct_2005_2025)+'</span></button>'});
-  h+='<button type="button" data-k="_tutte">Tutte</button><button type="button" data-k="_nessuna">Nessuna</button>';
-  setH('ind-chips',h);
-  Array.prototype.forEach.call(el('ind-chips').querySelectorAll('button'),function(b){b.addEventListener('click',function(){
-    var k=b.getAttribute('data-k');
-    if(k==='_tutte')V.forEach(function(v){SEL[v.chiave]=true});else if(k==='_nessuna')SEL={};else SEL[k]=!SEL[k];
-    marca();draw()})});
-  function marca(){Array.prototype.forEach.call(el('ind-chips').querySelectorAll('button[data-k]'),function(b){var k=b.getAttribute('data-k');if(k.charAt(0)!=='_'){b.classList.toggle('on',!!SEL[k]);b.setAttribute('aria-pressed',SEL[k]?'true':'false')}})}
-  function draw(){
-    var ser=[{name:G.nome,color:GRY,w:5,vals:G.valori}];
-    V.forEach(function(v){if(SEL[v.chiave])ser.push({name:v.nome,color:COL[v.chiave],w:2.4,vals:v.valori})});
-    var ymax=Math.max(160,20*Math.ceil(Math.max.apply(null,ser.map(function(s){return Math.max.apply(null,s.vals)}))/20));
-    lineChart(el('ch-ind'),{xs:I.anni,x0:2005,x1:2025,y0:40,y1:ymax,sy:ymax>200?40:20,h:340,xticks:I.anni,xf:function(v){return v},yf:function(v){return v},series:ser,
-      tip:function(i){var a=I.anni[i],rows=ser.map(function(s){return {n:s.name,c:s.color,v:s.vals[i]}}).sort(function(x,y){return y.v-x.v});
-        return '<b>'+a+'</b> (2005 = 100)<br>'+rows.map(function(r){return '<i style="background:'+r.c+'"></i>'+esc(r.n)+': <b>'+nf(r.v,0)+'</b>'}).join('<br>')}});
-  }
-  marca();draw();RD.push(draw);
-  var note=V.filter(function(v){return v.nota}).map(function(v){return '<b>'+esc(v.nome)+'</b>: '+esc(v.nota)}).join(' ');
-  setH('ind-nota',note);
-  var top=V.filter(function(v){return v.chiave==='elettricita'})[0];
-  setH('ind-voci','<div class="warn">Sono 10 voci su un paniere di circa 200: le abbiamo scelte perch&eacute; si capiscono (pane, caff&egrave; di casa, affitti, bollette, benzina, bus, alberghi, telefono, ristoranti). L&rsquo;energia elettrica &egrave; la pi&ugrave; salita ('+sgp(top.var_pct_2005_2025)+' dal 2005) ma con molti su e gi&ugrave;: vedi <a href="#energia">lo shock 2022&ndash;2023</a>. Il caff&egrave; &laquo;al bar&raquo; non c&rsquo;&egrave; in questo grafico: l&rsquo;indice delle consumazioni al bar finisce nel 2015 (poi il bar &egrave; dentro &laquo;ristoranti, pizzerie, bar&raquo;); per il bar ci sono i prezzi in euro dal 2021 (<a href="#prezzi">qui sotto</a>).</div>');
+/* ---------- dati ---------- */
+fetch(DATA+'paniere_v2.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error('dati');return r.json()}).then(function(d){
+  D=d;D.oggetti.forEach(function(o){OG[o.id]=o});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+function tutto(){
+  highlights();
+  draw(cesta);draw(cento);draw(multi);draw(dumb);draw(ore);draw(anno);
+  limiti();metodo();
+  fetch(DATA+'voci_annue_2005_100_v3.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error('dati');return r.json()}).then(function(v){V=v;initVoce();initTuo();draw(voce);draw(tuo)}).catch(function(e){console.error(e);$('t-voce').textContent='Dati non caricati';$('t-tuo').textContent='Dati non caricati'});
+  $('anno-in').addEventListener('input',function(){anno()});
+  $('anno-in').addEventListener('change',function(){anno()});
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
 }
+/* variazione dopo l'inflazione: prezzo di oggi contro il prezzo di allora in euro di oggi */
+function reale(o,y){var s=ser(o,y),e=last(o.serie);return (e.euro_oggi/s.euro_oggi-1)*100}
+function nom(o,y){var s=ser(o,y),e=last(o.serie);return (e.euro_allora/s.euro_allora-1)*100}
 
-/* ---------- biglietto ---------- */
-function biglietto(){
-  var T=D.atm,G=T.gradini,mx=2.6;
-  var nomi={'2002-01':'gennaio 2002','2011-09-01':'1 settembre 2011','2019-07-15':'15 luglio 2019','2023-01-09':'9 gennaio 2023'};
-  setH('atm-testo','<p>Il biglietto ordinario ATM (corsa urbana, oggi 90 minuti) &egrave; passato da <b>1,00 a 2,20 euro</b> in vent&rsquo;anni: '+sgp(T.aumento_biglietto_pct)+'. Nello stesso tempo i prezzi di Milano sono saliti del '+nf(T.inflazione_2002_2025_pct,0)+'% (medie annue 2002&ndash;2025): <b>se il biglietto fosse salito come i prezzi, oggi costerebbe '+eu(T.biglietto_2002_con_inflazione)+'</b>, non '+eu(T.oggi)+'. Il prezzo di oggi vale '+nf(T.oggi/(1+T.inflazione_2002_2025_pct/100),2)+' volte il valore reale del 2002. Da 1,50 (2011) a 2,20 l&rsquo;aumento &egrave; '+sgp((2.2/1.5-1)*100)+' contro un’inflazione del '+nf(T.inflazione_2011_2025_pct,0)+'%.</p>');
-  var h='<div class="row" style="padding-bottom:0"><span></span><span class="sub">linea tratteggiata = '+eu(T.biglietto_2002_con_inflazione)+' (il 2002 con l&rsquo;inflazione)</span><span></span></div>';
-  G.forEach(function(g){var l=g.data.length===7?'gennaio 2002':nomi[g.data];
-    h+='<div class="row"><span>'+l+'</span><span class="tr"><span class="fill" style="width:'+(g.prezzo/mx*100)+'%"></span><span class="mk" style="left:'+(T.biglietto_2002_con_inflazione/mx*100)+'%"></span></span><span class="v"><b>'+eu(g.prezzo)+'</b><i>in euro del 2025: '+eu(g.in_euro_2025)+'</i></span></div>'});
-  setH('atm-bars',h);
-  setH('atm-abb','<p><b>Gli abbonamenti sono fermi.</b> L&rsquo;abbonamento mensile urbano ordinario &egrave; passato da '+f0(T.mensile.prima)+' a <b>'+f0(T.mensile.dal_2019)+' euro nel luglio 2019 e costa ancora '+f0(T.mensile.oggi)+' euro</b> (lettura del sito ATM, 1 novembre 2026); l&rsquo;annuale &egrave; di '+f0(T.annuale_oggi)+' euro, fermo dal 2019; il mensile per i giovani fino a 27 anni &egrave; di '+f0(T.mensile_giovani_oggi)+' euro. Per questo l&rsquo;indice ISTAT dei trasporti urbani (guidato dagli abbonamenti e dagli altri servizi su gomma) &egrave; salito solo del '+nf(T.indice_istat_autobus['2005_2025'],0)+'% dal 2005, molto meno del biglietto occasionale. Il prezzo del biglietto rilevato dal Ministero (2,00&nbsp;&euro; nel gennaio 2021, 2,20 oggi) coincide con le tariffe ATM.</p>');
-  setH('atm-verifica','Il 2,00 (15 luglio 2019) e il 2,20 (9 gennaio 2023) sono confermati da pi&ugrave; fonti (Open, 26/6/2019; Il Giorno e Sky TG24, 9/1/2023) e dal sito ATM. Per il <b>1,50 del settembre 2011</b> ci sono tre riscontri: Il Giorno (9/1/2023), Il Giornale (22/7/2011: &laquo;da un euro a un euro e cinquanta centesimi&raquo; da settembre) e Il Post (30/1/2019: 1 euro fino al 2011, poi 1,50); il giorno preciso, 1&deg; settembre, &egrave; per&ograve; nel solo Il Giorno, gli altri dicono &laquo;da settembre&raquo;. Per il <b>1,00 del gennaio 2002</b> (1.950 lire, cio&egrave; circa 1 euro) c&rsquo;&egrave; <b>un solo riscontro (Il Giorno, 9/1/2023)</b> sulla data e sul passaggio da 1.500 lire; Il Post conferma solo che il biglietto costava 1 euro fino al 2011. Non abbiamo trovato una delibera o una fonte dell&rsquo;epoca. La stampa non &egrave; uniforme sul giorno del 2019 (Il Giorno e Open danno date diverse): usiamo il 15 luglio di Open, che cita la delibera del Consiglio comunale del 25/6/2019.');
-}
-
-/* ---------- energia ---------- */
-function energia(){
-  var E=D.energia,V=E.voci,ms=E.mesi,xs=ms.map(function(p){var a=p.split('-');return +a[0]+(+a[1]-1)/12});
-  var el_=V.elettricita,ga=V.gas,be=V.benzina,gs=V.gasolio_auto;
-  setH('en-testo','<p>Nel 2022 le bollette sono diventate un problema nazionale, e a Milano si vede bene. L&rsquo;indice dell&rsquo;<b>energia elettrica</b> ha toccato <b>'+nf(el_.picco,0)+' nel '+mese(el_.mese_picco,true)+'</b> (2015 = 100), contro una media del 2021 di '+nf(el_.media_2021,0)+': <b>'+sgp(el_.picco_su_2021_pct)+'</b>. Il gas di rete: '+nf(ga.picco,0)+' contro '+nf(ga.media_2021,0)+' ('+sgp(ga.picco_su_2021_pct)+'). Benzina e gasolio hanno avuto picchi pi&ugrave; bassi ('+sgp(be.picco_su_2021_pct)+' a '+mese(be.mese_picco,true)+', '+sgp(gs.picco_su_2021_pct)+' a '+mese(gs.mese_picco,true)+'). L&rsquo;inflazione mensile di Milano ha raggiunto il <b>'+nf(E.inflazione_mensile_picco.tasso,1)+'% nel '+mese(E.inflazione_mensile_picco.mese,true)+'</b> (rispetto allo stesso mese dell&rsquo;anno prima); in media annua '+nf(E.tasso_annuo_2022,1)+'% nel 2022 e '+nf(E.tasso_annuo_2023,1)+'% nel 2023, dopo anni intorno all&rsquo;1%.</p><p>Poi i prezzi non sono tornati dov&rsquo;erano: nel 2025 elettricit&agrave; e gas stanno ancora '+sgp(el_.media_2025_su_2021_pct)+' e '+sgp(ga.media_2025_su_2021_pct)+' sopra il 2021, e a settembre 2026 sono di nuovo in salita (elettricit&agrave; '+nf(el_.set_2026,0)+', gas '+nf(ga.set_2026,0)+'). L&rsquo;inflazione mensile di Milano a settembre 2026 &egrave; del '+nf(E.inflazione_mensile_set_2026,1)+'%.</p>');
-  var ser=[{k:'elettricita',name:'Energia elettrica',color:COL.elettricita,w:2.6},{k:'gas',name:'Gas di rete',color:COL.gas,w:2.6},{k:'benzina',name:'Benzina',color:COL.benzina,w:2},{k:'gasolio_auto',name:'Gasolio per auto',color:COL.gasolio_auto,w:2,dash:true},{k:'generale',name:'Indice generale',color:GRY,w:3.5}];
-  ser.forEach(function(s){s.vals=E.serie[s.k]});
-  var ticks=[];for(var a=2020;a<=2026;a++)ticks.push(a);
-  function draw(){
-    var pk=ms.indexOf(el_.mese_picco);
-    lineChart(el('ch-en'),{xs:xs,x0:2020,x1:2026.9,y0:80,y1:440,sy:60,h:340,xticks:ticks,xf:function(v){return v},yf:function(v){return v},series:ser,
-      vl:[{x:xs[pk],label:mese(el_.mese_picco)+': elettricità '+nf(el_.picco,0),left:true}],
-      tip:function(i){return '<b>'+mese(ms[i],true)+'</b> (2015 = 100)<br>'+ser.map(function(s){return s.vals[i]==null?'':'<i style="background:'+s.color+'"></i>'+s.name+': <b>'+nf(s.vals[i],0)+'</b>'}).join('<br>')}});
-  }
-  draw();RD.push(draw);
-  setH('lg-en',lgd(ser.map(function(s){return {color:s.color,dash:s.dash,t:s.name}})));
-  table('tab-en',['Voce','Media 2021','Picco','Picco su media 2021','Media 2025 su 2021','Set 2026 su media 2021'],['elettricita','gas','benzina','gasolio_auto'].map(function(k){var v=V[k];return [v.nome,nf(v.media_2021,0),nf(v.picco,0)+' <span class="sub">('+mese(v.mese_picco)+')</span>',sgp(v.picco_su_2021_pct),sgp(v.media_2025_su_2021_pct),sgp(v.set_2026_su_2021_pct)]}).concat([['Indice generale',nf(E.generale_media_2021,0),'','','','<b>'+sgp((E.generale_set_2026/E.generale_media_2021-1)*100)+'</b>']]));
-}
-
-/* ---------- prezzi ---------- */
-function prezzi(){
-  var P=D.prezzi,R=P.righe;
-  setH('pr-testo','<p>Cosa costava a Milano a gennaio 2021 e cosa a settembre 2026, secondo il prezzo medio dei locali rilevati dal Ministero. I prezzi generali, nello stesso periodo, sono saliti del <b>'+nf(P.inflazione_generale_gen2021_set2026_pct,1)+'%</b>: i prodotti che sono saliti di pi&ugrave; sono quelli dei pasti fuori casa (fast food, pizzeria, panino); i servizi alla persona e il cinema sono rimasti quasi fermi.</p>');
-  table('tab-prezzi',['Prodotto','Gennaio 2021','Settembre 2026','Cambio','Se fosse salito come i prezzi in generale'],R.map(function(r){
-    var first=r.primo_mese==='2021-01'?'':' <span class="pill">'+mese(r.primo_mese)+'</span>';
-    return [esc(r.nome)+' <span class="sub">('+esc(r.unita)+')</span>',eu(r.gen_2021,r.dec)+first,eu(r.set_2026,r.dec),'<b>'+sgp(r.var_pct,1)+'</b>',eu(r.con_inflazione,r.dec)]}));
-  setH('pr-avviso','<b>Attenzione:</b> il Ministero avverte che i confronti nel tempo vanno fatti con gli indici dei prezzi, non con i prezzi in euro: marca, confezione e punto vendita possono cambiare da un mese all&rsquo;altro, quindi questi livelli sono <b>un ordine di grandezza</b>, non una misura al centesimo. Il pane &egrave; la media dei prezzi rilevati per il &laquo;pane fresco&raquo; (il Ministero ha cambiato il nome del prodotto nel 2022). Il cinema di gennaio 2021 non c&rsquo;&egrave; (sale chiuse): si parte da maggio 2021. Il prezzo del biglietto del tram (2,00 &rarr; 2,20) e la benzina sono nelle sezioni dedicate.');
-}
-
-/* ---------- carburanti ---------- */
-function carburanti(){
-  var C=D.carburanti,B=C.benzina,G=C.gasolio,ms=C.mesi,xs=ms.map(function(p){var a=p.split('-');return +a[0]+(+a[1]-1)/12});
-  setH('ca-testo','<p>Nel 2022 la benzina self a Milano ha toccato un massimo mensile di <b>'+nf(B.picco_2022,3)+'&nbsp;&euro;/litro</b> ('+mese(B.mese_picco_2022,true)+') e il gasolio di <b>'+nf(G.picco_2022,3)+'</b> ('+mese(G.mese_picco_2022,true)+'). Nel dicembre 2025 erano scesi a '+nf(B.dic_2025,2)+' e '+nf(G.dic_2025,2)+'. Poi, nel 2026, un nuovo rialzo: a <b>settembre 2026 la benzina self costa '+nf(B.set_2026,3)+' e il gasolio self '+nf(G.set_2026,3)+'</b>, cio&egrave; <b>pi&ugrave; del massimo mensile del 2022</b> per tutti e due. Nel gennaio 2015 erano '+nf(B.gen_2015,2)+' e '+nf(G.gen_2015,2)+'. Il gasolio aveva gi&agrave; superato quel livello in '+G.mesi_sopra_picco_2022.map(function(p){return MESIL[parseInt(p.split('-')[1],10)]}).join(', ')+' 2026; la benzina solo a settembre.</p>');
-  var ser=[{name:'Benzina self',color:COL.benzina,w:2.4,vals:B.serie},{name:'Gasolio self',color:COL.gasolio_auto,w:2.4,vals:G.serie}];
-  var ticks=[];for(var a=2015;a<=2026;a++)ticks.push(a);
-  function draw(){
-    lineChart(el('ch-ca'),{xs:xs,x0:2015,x1:2026.9,y0:1.2,y1:2.4,sy:.2,h:320,xticks:ticks,xf:function(v){return v},yf:function(v){return nf(v,1)},series:ser,
-      hl:[{y:B.picco_2022,color:COL.benzina,label:'massimo 2022, benzina '+nf(B.picco_2022,2),dy:-4},{y:G.picco_2022,color:COL.gasolio_auto,label:'massimo 2022, gasolio '+nf(G.picco_2022,2),dy:14}],
-      tip:function(i){return '<b>'+mese(ms[i],true)+'</b><br>'+ser.map(function(s){return '<i style="background:'+s.color+'"></i>'+s.name+': <b>'+nf(s.vals[i],3)+'</b> €/l'}).join('<br>')}});
-  }
-  draw();RD.push(draw);
-  setH('lg-ca',lgd([{color:COL.benzina,t:'Benzina self'},{color:COL.gasolio_auto,t:'Gasolio self'}]));
-}
-
-/* ---------- Milano e Italia ---------- */
-function milanoItalia(){
-  var M=D.milano_italia,G=M.generale,Dv=M.divisioni_2020_2025;
-  var d25=G.filter(function(x){return x.da===2020})[0];
-  setH('mi-testo','<p><b>La differenza &egrave; piccola.</b> Dal 2000 i prezzi sono saliti del '+nf(G[0].milano,1)+'% a Milano e del '+nf(G[0].italia,1)+'% in Italia; dal 2010 '+nf(G[2].milano,1)+'% contro '+nf(G[2].italia,1)+'%; dal 2020 '+nf(d25.milano,1)+'% contro '+nf(d25.italia,1)+'%. Prima del 2010 i prezzi sono saliti un po&rsquo; meno a Milano; dopo, praticamente uguale. Questo vale per il totale: per tipo di spesa le differenze sono pi&ugrave; grandi (fino a sei punti in cinque anni), e vanno in direzioni diverse.</p>');
-  table('tab-mi',['Da','A','Milano','Italia','Differenza (punti)'],G.map(function(x){return [x.da,2025,sgp(x.milano,1),sgp(x.italia,1),sg(x.diff,1)]}));
-  table('tab-div',['Tipo di spesa','Milano','Italia','Differenza (punti)'],Dv.map(function(x){return [esc(x.nome),sgp(x.milano,1),sgp(x.italia,1),'<b>'+sg(x.diff,1)+'</b>']}));
-}
-
-/* ---------- metodo ---------- */
-function metodo(){
-  var L=[
-   '<b>Indici e basi.</b> Gli indici di Milano arrivano in quattro file con basi diverse (1998, 2010, 2015, 2025 = 100): li abbiamo portati tutti a 2015 = 100 con la media annua degli anni di aggancio (2010, 2015, 2025). Qui sono poi ricalcolati con 2005 = 100, sulla media dell&rsquo;anno. Gli indici hanno una cifra decimale: l&rsquo;errore tipico dei raccordi &egrave; 0,2&ndash;0,5 punti percentuali.',
-   '<b>Indice generale 2005&ndash;2010 ricostruito.</b> Per Milano l&rsquo;indice generale vero parte dal 2011. Prima l&rsquo;abbiamo ricostruito concatenando i tassi di inflazione annui del Comune: dove si pu&ograve; controllare (2011&ndash;2025) l&rsquo;errore massimo &egrave; 0,08 punti; per il 2000&ndash;2010 non &egrave; controllabile e gli arrotondamenti possono sommare 0,3&ndash;0,5 punti.',
-   '<b>Aprile 2024.</b> In tutte le voci manca il mese di aprile 2024 nei file: la media annua del 2024 usa gli 11 mesi presenti. Gli zeri nei file del Comune sono dati mancanti, non indice zero, e sono stati scartati.',
-   '<b>Voci cambiate.</b> &laquo;Ristoranti e pizzerie&raquo;: dal 2016 comprende anche il bar (rottura, raccordata con la media 2015). &laquo;Bus, tram, metro&raquo;: dal 2011 &egrave; &laquo;autobus e pullman&raquo; e comprende l&rsquo;extraurbano. &laquo;Telefonia&raquo;: fino al 2010 fisso e cellulare insieme. Alberghi: prezzi molto stagionali (&plusmn;10% da un mese all&rsquo;altro). Il Comune cambia ogni tanto le definizioni: ogni cambio &egrave; annotato nei file.',
-   '<b>I prezzi in euro non sono una serie.</b> Sono medie di quello che il Ministero ha rilevato in ogni mese. Per gli alimentari confezionati sono medie pesate su circa 1.800 punti vendita; per carburanti e servizi, medie semplici delle quotazioni raccolte dai Comuni. Il Ministero sconsiglia di confrontarli tra mesi e tra citt&agrave;. Prima del 2021 non c&rsquo;&egrave; nessuna fonte aperta di prezzi in euro per Milano.',
-   '<b>Affitti: due misure.</b> ISTAT = canoni dei contratti in corso. OMI = stima del valore di mercato dei contratti nuovi, zona per zona, come intervallo minimo&ndash;massimo scelto dal rilevatore: ne prendiamo il centro, la mediana tra le zone di Milano (non pesata per numero di case), per 60&nbsp;m&sup2; (ipotesi nostra). Le zone sono 55 fino al 2013, 40&ndash;42 dopo.',
-   '<b>Reddito mediano calcolato.</b> Non esiste nei file la mediana ufficiale: l&rsquo;abbiamo interpolata dalle classi di reddito (0&ndash;10, 10&ndash;15, 15&ndash;26, 26&ndash;55 mila euro&hellip;) dei residenti che presentano la dichiarazione; la mediana 2024 cade nella classe 15&ndash;26 mila euro. Chi non presenta dichiarazione non c&rsquo;&egrave;. Il reddito dichiarato non &egrave; lo stipendio. Con il solo reddito da lavoro dipendente (3.230&nbsp;&euro; al mese nel 2024) le ore di lavoro sarebbero meno, ma la forma della curva (minimo nel 2021, salita dopo) resterebbe. L&rsquo;anno &egrave; quello d&rsquo;imposta (la dichiarazione si presenta l&rsquo;anno dopo).',
-   '<b>Ore di lavoro.</b> Affitto diviso reddito mensile per 173 ore al mese (40 ore &times; 52 settimane / 12): un conto illustrativo, non un salario orario vero.',
-   '<b>Carburanti.</b> Prezzo &laquo;alle 8&raquo; comunicato dai gestori, impianti con comune Milano e provincia MI; un impianto che non aggiorna resta con il vecchio prezzo (non l&rsquo;abbiamo escluso). Le anagrafiche degli impianti sono 33 campioni (tutti i trimestri fino al 2021, poi uno all&rsquo;anno): gli impianti chiusi tra un campione e l&rsquo;altro potrebbero mancare. Scartate 411 righe su 4 milioni (prezzo fuori da 0,4&ndash;4,0 &euro;); alcuni giorni senza file sono saltati. Controllo: la benzina dell&rsquo;Osservatorio a settembre 2026 &egrave; 2,099 contro 2,108.',
-   '<b>Milano e Italia: solo variazioni.</b> Un indice confronta i prezzi di una citt&agrave; con se stessa nel tempo. Non dice se a Milano un caff&egrave; costi pi&ugrave; che a Torino: il Ministero stesso sconsiglia i confronti tra citt&agrave;, e noi non li facciamo.',
-   '<b>Il biglietto.</b> I prezzi ATM sono trascritti da pagine ufficiali e articoli; la fonte di ogni riga &egrave; in <a href="data/biglietto_atm.csv">biglietto_atm.csv</a>. In euro 2025 si usa l&rsquo;indice generale di Milano, media dell&rsquo;anno di partenza del gradino: un’approssimazione.',
-   '<b>Il 2026 non &egrave; completo.</b> Gli indici del Comune arrivano a settembre 2026, i redditi al 2024, gli affitti OMI al primo semestre 2026. I prezzi dell&rsquo;Osservatorio per l&rsquo;energia nel 2026 esistono solo per settembre.',
-   '<b>Controlli.</b> Ogni numero di questa pagina viene da <a href="data/riepilogo.json">riepilogo.json</a>, scritto da un programma a partire dai file ripuliti; il programma si ferma se un controllo fallisce (ad esempio: la variazione 2005&ndash;2025 di ogni voce deve coincidere con il riepilogo della raccolta dati).'
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var luce=OG.luce,bi=OG.biglietto,ca=OG.caffe,bz=OG.benzina,af=D.affitto_lavoro;
+  var l26=last(luce.serie).euro_allora;
+  var c21=ser(ca,2021).euro_allora,c26=last(ca.serie).euro_allora;
+  var a06=af[0],a24=last(af),amin=af.reduce(function(m,x){return x.ore<m.ore?x:m},af[0]);
+  var T=[
+    {c:'#E30613',h:'t-multi',n:'×'+fd(l26/100,1),u:'',p:'la luce: 100 € di bolletta del 2005 oggi sono '+f0(l26)+' € (stessi consumi, indice dei prezzi di Milano).'},
+    {c:'#FFD500',h:'t-cesta',n:sg0(nom(bi,2005))+'%',u:'',p:'il biglietto del tram: da '+eu(bi,ser(bi,2005).euro_allora)+' nel 2005 a '+eu(bi,last(bi.serie).euro_allora)+'. I prezzi in generale sono saliti del '+f0(D.inflazione_2005_oggi_pct)+'%.'},
+    {c:'#00A651',h:'t-multi',n:fd(c26,2),u:'€',p:'un espresso a settembre 2026. Nel 2021 costava '+fd(c21,2)+' € in media: '+sg0((c26/c21-1)*100)+'%, i prezzi in generale '+sg0(D.inflazione_2021_oggi_pct)+'%.'},
+    {c:'#0072BC',h:'t-multi',n:fd(D.benzina_set2026_litro,2),u:'€',p:'al litro la benzina self a settembre 2026: più del massimo del 2022 ('+fd(D.benzina_picco_2022_litro,2)+' €).'},
+    {c:'#7B3FA0',h:'t-ore',n:f0(a24.ore),u:'ore',p:'di lavoro per un mese d’affitto nel '+a24.anno+' (60 m², zona mediana); erano '+f0(a06.ore)+' nel '+a06.anno+' e '+f0(amin.ore)+' nel '+amin.anno+'.'},
+    {c:'#F58220',h:'t-anno',n:f0(D.cento_euro_2005_oggi?10000/D.cento_euro_2005_oggi:0),u:'€',p:'è quanto valgono oggi 100 € del 2005: i prezzi in generale sono saliti del '+f0(D.inflazione_2005_oggi_pct)+'%.'}
   ];
-  setH('metodo-lista',L.map(function(t){return '<li>'+t+'</li>'}).join(''));
+  $('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- 1. IL CARRELLO: oggetti con due cartellini ---------- */
+function cesta(){
+  var box=$('ch-cesta'),W=width('ch-cesta'),cols=W>=680?2:1,gap=24,cw=(W-gap*(cols-1))/cols,rowH=122;
+  var rows=Math.ceil(ORD.length/cols),H=rows*rowH,s=svgOpen(W,H);
+  ORD.forEach(function(id,k){
+    var o=OG[id],c=k%cols,r=Math.floor(k/cols),x0=c*(cw+gap),y0=r*rowH+6;
+    var a=o.serie[0],e=last(o.serie),re=(e.euro_oggi/a.euro_oggi-1)*100;
+    var avail=cw-54,tw=(avail-28)/2,x1=x0+54,x2=x1+tw+28,ty=y0+42;
+    s+=icon(id,x0,y0+2)+T(x1,y0+16,esc(NOME[id]),{c:'b',st:'font-size:15px'})+T(x1,y0+32,esc(o.unita),{c:'m'});
+    // cartellino di allora
+    var misurato=a.tipo==='misurato';
+    s+='<rect x="'+r1(x1)+'" y="'+ty+'" width="'+r1(tw)+'" height="42" rx="6" fill="#f4f5f7" stroke="'+(misurato?C.ink2:C.axis)+'" stroke-width="2"'+(misurato?'':' stroke-dasharray="5 4"')+tip('<b>'+esc(NOME[id])+', '+a.anno+'</b><br>'+eu(o,a.euro_allora)+(misurato?' (misurato)':id==='luce'?' (dall’indice dei prezzi)':' (stimato dall’indice dei prezzi)')+'<br>In euro di oggi: '+eu(o,a.euro_oggi))+'/>';
+    s+=T(x1+9,ty+16,a.anno,{c:'m'})+T(x1+9,ty+36,eu(o,a.euro_allora),{c:'b',st:'font-size:17px'});
+    // freccia
+    var ax=x1+tw+4,ay=ty+21;
+    s+=L(ax,ay,ax+18,ay,C.ink,2)+'<path d="M'+r1(ax+13)+' '+r1(ay-5)+'L'+r1(ax+19)+' '+ay+'L'+r1(ax+13)+' '+r1(ay+5)+'" fill="none" stroke="'+C.ink+'" stroke-width="2" stroke-linecap="round"/>';
+    // cartellino di oggi
+    s+='<rect x="'+r1(x2)+'" y="'+ty+'" width="'+r1(tw)+'" height="42" rx="6" fill="'+C.mi+'"'+tip('<b>'+esc(NOME[id])+', oggi</b><br>'+eu(o,e.euro_allora))+'/>';
+    s+=T(x2+9,ty+16,'oggi',{c:'w',st:'font-size:12px'})+T(x2+9,ty+36,eu(o,e.euro_allora),{c:'w',st:'font-size:17px'});
+    // giudizio con l'inflazione
+    var col=re>3?C.pos:re<-3?C.neg:C.axis,txt=re>3?'Contando l’inflazione costa il '+f0(re)+'% in più':re<-3?'Contando l’inflazione costa il '+f0(-re)+'% in meno':'Contando l’inflazione costa come prima';
+    s+='<circle cx="'+r1(x1+6)+'" cy="'+(ty+62)+'" r="6" fill="'+col+'"/>'+T(x1+18,ty+66,txt,{c:'b',st:'font-size:13px'});
+  });
+  box.innerHTML=s+'</svg>';
+  var bi=OG.biglietto,lu=OG.luce,ca=OG.caffe;
+  $('t-cesta').textContent='Dal 2005 il biglietto del tram costa il '+f0(nom(bi,2005))+'% in più e la luce '+fd(last(lu.serie).euro_allora/100,1)+' volte tanto; il caffè il '+f0(nom(ca,2005))+'% in più, i prezzi in generale il '+f0(D.inflazione_2005_oggi_pct)+'%';
+}
+
+/* ---------- 2. DUE LINEE: piccoli grafici ripetuti ---------- */
+function multi(){
+  var box=$('ch-multi'),W=width('ch-multi'),cols=W>=700?4:2,gap=14,cw=(W-gap*(cols-1))/cols,cellH=176;
+  var rows=Math.ceil(ORD.length/cols),H=rows*cellH,s=svgOpen(W,H);
+  ORD.forEach(function(id,k){
+    var o=OG[id],c=k%cols,r=Math.floor(k/cols),x0=c*(cw+gap),y0=r*cellH;
+    var ml=44,mr=40,pt=46,ph=96,pw=cw-ml-mr,sr=o.serie,y1=sr[0].anno,y2=2026,n=y2-y1;
+    var hi=0;sr.forEach(function(p){hi=Math.max(hi,p.euro_oggi,p.euro_allora)});hi*=1.12;
+    function X(a){return x0+ml+(a-y1)/n*pw}function Y(v){return y0+pt+ph-v/hi*ph}
+    s+=T(x0,y0+14,esc(NOME[id]),{c:'b',st:'font-size:14px'})+T(x0,y0+30,esc(CORTO[id]),{c:'m'});
+    s+=L(x0+ml,Y(0),x0+ml+pw,Y(0),C.axis);
+    // fascia dell'inflazione
+    var d='M'+sr.map(function(p){return r1(X(p.anno))+' '+r1(Y(p.euro_oggi))}).join('L')+'L'+sr.slice().reverse().map(function(p){return r1(X(p.anno))+' '+r1(Y(p.euro_allora))}).join('L')+'Z';
+    s+='<path d="'+d+'" fill="'+C.mi+'" fill-opacity=".14"/>';
+    function lin(key,col,w){return '<path d="M'+sr.map(function(p){return r1(X(p.anno))+' '+r1(Y(p[key]))}).join('L')+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round"/>'}
+    s+=lin('euro_allora',C.ink2,2)+lin('euro_oggi',C.mi,3);
+    var a=sr[0],e=last(sr),yr=Y(a.euro_oggi),yg=Y(a.euro_allora);
+    var dy=Math.abs(yr-yg),push=dy<14?(14-dy)/2:0;
+    s+='<circle cx="'+r1(X(a.anno))+'" cy="'+r1(yr)+'" r="3.5" fill="'+C.mi+'"/><circle cx="'+r1(X(a.anno))+'" cy="'+r1(yg)+'" r="3.5" fill="'+C.ink2+'"/>';
+    s+=T(X(a.anno)-6,yr+4-push,fd(a.euro_oggi,o.decimali),{a:'end',c:'b',st:'fill:'+C.mi})+T(X(a.anno)-6,yg+4+push,fd(a.euro_allora,o.decimali),{a:'end',c:'b',st:'fill:'+C.ink2});
+    s+='<circle cx="'+r1(X(2026))+'" cy="'+r1(Y(e.euro_allora))+'" r="4" fill="'+C.mi+'"/>'+T(X(2026)+7,Y(e.euro_allora)+4,fd(e.euro_allora,o.decimali),{c:'b',st:'fill:'+C.mi});
+    // massimo in mezzo (luce 2022)
+    var mx=sr.reduce(function(m,p){return p.euro_oggi>m.euro_oggi?p:m},sr[0]);
+    if(mx.anno!==y1&&mx.anno!==2026&&mx.euro_oggi>e.euro_allora*1.2)s+='<circle cx="'+r1(X(mx.anno))+'" cy="'+r1(Y(mx.euro_oggi))+'" r="3.5" fill="'+C.mi+'"/>'+T(X(mx.anno)-6,Y(mx.euro_oggi)-5,fd(mx.euro_oggi,o.decimali)+' ('+mx.anno+')',{a:'middle',c:'b',st:'fill:'+C.mi+';font-size:12px'});
+    s+=T(X(y1),y0+pt+ph+16,y1,{a:'start',c:'m'})+T(X(2026),y0+pt+ph+16,'oggi',{a:'end',c:'m'});
+    // tocco: un anno alla volta
+    sr.forEach(function(p){var w=pw/n;
+      s+='<rect x="'+r1(X(p.anno)-w/2)+'" y="'+(y0+pt)+'" width="'+r1(w)+'" height="'+ph+'" fill="transparent"'+tip('<b>'+esc(NOME[id])+', '+(p.anno===2026?'settembre 2026':p.anno)+'</b><br>'+sw(C.ink2)+'euro di quell’anno: '+eu(o,p.euro_allora)+'<br>'+sw(C.mi)+'euro di oggi: '+eu(o,p.euro_oggi)+'<br>'+(p.tipo==='misurato'?'prezzo misurato':p.tipo==='indice'?'dall’indice dei prezzi':'prezzo stimato'))+'/>'});
+  });
+  box.innerHTML=s+'</svg>';
+  var tt=ORD.map(function(id){return[id,reale(OG[id],id==='affitto'?2006:2005)]}).sort(function(a,b){return b[1]-a[1]});
+  $('t-multi').textContent='Tolta l’inflazione, '+NOME[tt[0][0]].toLowerCase()+' ('+sg0(tt[0][1])+'%) e '+NOME[tt[1][0]].toLowerCase()+' ('+sg0(tt[1][1])+'%) sono saliti di più; '+NOME[last(tt)[0]].toLowerCase()+' solo '+sg0(last(tt)[1])+'%';
+}
+
+/* ---------- 3. CHI CORRE PIÙ DEI PREZZI: pallini collegati in classifica ---------- */
+function dumb(){
+  var box=$('ch-dumb'),W=width('ch-dumb'),R=D.voci_2005_2025,n=R.length,rowH=27,m={l:104,r:50,t:34,b:30};
+  var lo=-60,hi=165,pw=W-m.l-m.r,H=m.t+n*rowH+m.b,inf=D.inflazione_2005_2025_pct;
+  function X(v){return m.l+(v-lo)/(hi-lo)*pw}
+  var s=svgOpen(W,H);
+  [-50,0,50,100,150].forEach(function(v){s+=L(X(v),m.t-4,X(v),m.t+n*rowH,v===0?C.axis:C.grid)+T(X(v),m.t+n*rowH+16,sg0(v)==='0'?'0':sg0(v)+'%',{a:'middle',c:'m'})});
+  s+=L(X(inf),m.t-10,X(inf),m.t+n*rowH,C.ink,1.5,' stroke-dasharray="4 3"');
+  s+=T(X(inf),m.t-16,'inflazione '+sg0(inf)+'%',{a:'middle',c:'b',st:'font-size:12px'});
+  R.forEach(function(r,i){
+    var y=m.t+i*rowH+rowH/2,up=r.var_pct>inf,col=up?C.pos:C.neg,xd=X(r.var_pct),xi=X(inf);
+    s+=T(0,y+4,esc(BREVE[r.id]||r.nome),{c:'b'});
+    s+=L(xi,y,xd,y,col,4)+'<circle cx="'+r1(xi)+'" cy="'+r1(y)+'" r="5" fill="#fff" stroke="'+C.axis+'" stroke-width="2"/>';
+    s+='<circle cx="'+r1(xd)+'" cy="'+r1(y)+'" r="6.5" fill="'+col+'"/>';
+    s+=T(up?xd+11:xd-11,y+4,sg0(r.var_pct)+'%',{a:up?'start':'end',c:'b'});
+    s+='<rect x="0" y="'+r1(y-rowH/2)+'" width="'+W+'" height="'+rowH+'" fill="transparent"'+tip('<b>'+esc(BREVE[r.id]||r.nome)+'</b><br>Dal 2005 al 2025: '+sg0(r.var_pct)+'%<br>Prezzi in generale: '+sg0(inf)+'%')+'/>';
+  });
+  box.innerHTML=s+'</svg>';
+  var sopra=R.filter(function(r){return r.var_pct>inf}).length,a=R[0],b=last(R);
+  $('t-dumb').textContent=sopra+' voci su '+n+' sono salite più dei prezzi: dalla luce ('+sg0(a.var_pct)+'%) al telefono ('+sg0(b.var_pct)+'%)';
+  var tr=R.filter(function(r){return r.id==='bus_tram_metro'})[0],bi=OG.biglietto;
+  $('nt-dumb').innerHTML='Il biglietto del tram, da solo, è salito del '+f0(nom(bi,2005))+'%: ma «trasporto urbano» ('+sg0(tr.var_pct)+'%) pesa soprattutto gli abbonamenti, fermi a 39 euro al mese dal luglio 2019. Il caffè al bar non ha una serie continua dal 2005 e qui non compare; c’è la voce «ristoranti».';
+}
+
+/* ---------- 4. L'AFFITTO IN ORE DI LAVORO: una linea semplice ---------- */
+function ore(){
+  var box=$('ch-ore'),W=width('ch-ore'),A=D.affitto_lavoro,n=A.length,H=250,m={l:34,r:56,t:24,b:26};
+  var lo=40,hi=65,pw=W-m.l-m.r,ph=H-m.t-m.b;
+  function X(i){return m.l+i*pw/(n-1)}function Y(v){return m.t+ph-(v-lo)/(hi-lo)*ph}
+  var s=svgOpen(W,H);
+  [40,50,60].forEach(function(v){s+=L(m.l,Y(v),W-m.r,Y(v),C.grid)+T(m.l-6,Y(v)+4,v,{a:'end',c:'m'})});
+  s+=L(m.l,m.t+ph,W-m.r,m.t+ph,C.axis);
+  A.forEach(function(p,i){if([2006,2010,2015,2020,2024].indexOf(p.anno)>=0)s+=T(X(i),m.t+ph+16,p.anno,{a:i===0?'start':i===n-1?'end':'middle',c:'m'})});
+  s+='<path d="M'+A.map(function(p,i){return r1(X(i))+' '+r1(Y(p.ore))}).join('L')+'" fill="none" stroke="'+C.mi+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  var imin=0;A.forEach(function(p,i){if(p.ore<A[imin].ore)imin=i});
+  [[0,0,-10,'start'],[imin,0,22,'middle'],[n-1,9,5,'start']].forEach(function(z){var p=A[z[0]];
+    s+='<circle cx="'+r1(X(z[0]))+'" cy="'+r1(Y(p.ore))+'" r="5" fill="'+C.mi+'" stroke="#fff" stroke-width="2"/>'+T(X(z[0])+z[1],Y(p.ore)+z[2],f0(p.ore)+' ore',{a:z[3],c:'b'})});
+  A.forEach(function(p,i){var w=pw/(n-1);s+='<rect x="'+r1(X(i)-w/2)+'" y="'+m.t+'" width="'+r1(w)+'" height="'+ph+'" fill="transparent"'+tip('<b>'+p.anno+'</b><br>Affitto 60 m²: '+f0(p.affitto)+' € al mese<br>Reddito mensile mediano: '+f0(p.reddito)+' €<br>= '+f0(p.ore)+' ore di lavoro ('+fd(p.quota,1)+'% del reddito)')+'/>'});
+  box.innerHTML=s+'</svg>';
+  var a=A[0],z=last(A);
+  $('t-ore').textContent='Un mese d’affitto valeva '+f0(a.ore)+' ore di lavoro nel '+a.anno+', '+f0(A[imin].ore)+' nel '+A[imin].anno+' e '+f0(z.ore)+' nel '+z.anno+': oggi pesa più di allora';
+}
+
+/* ---------- 5. SCEGLI UN ANNO: tre barre per cosa ---------- */
+function anno(){
+  var y=+$('anno-in').value;$('anno-v').textContent=y;
+  var box=$('ch-anno'),W=width('ch-anno'),rowH=94,H=ORD.length*rowH,s=svgOpen(W,H),ml=0,mr=62,pw=W-ml-mr;
+  var fat=D.indice_generale_2005_100[2026]||D.indice_generale_2005_100['2026'],fy=D.indice_generale_2005_100[y]||D.indice_generale_2005_100[String(y)];
+  var vale=100*fat/fy;
+  ORD.forEach(function(id,k){
+    var o=OG[id],a=ser(o,y),e=last(o.serie),y0=k*rowH;
+    s+=icon(id,0,y0+2)+T(52,y0+16,esc(NOME[id]),{c:'b',st:'font-size:15px'})+T(52,y0+32,esc(o.unita),{c:'m'});
+    if(!a){s+=T(52,y0+54,'Non c’è il dato del '+y+': parte dal '+o.serie[0].anno+'.',{c:'m'});return}
+    var mx=Math.max(a.euro_allora,a.euro_oggi,e.euro_allora),x0=52,bw=W-x0-mr;
+    var re=(e.euro_oggi/a.euro_oggi-1)*100,col=re>3?C.pos:re<-3?C.neg:C.axis;
+    var bars=[[a.euro_allora,'grey'],[a.euro_oggi,'out'],[e.euro_allora,'red']],by=y0+42;
+    bars.forEach(function(b,j){var yy=by+j*15,x1=x0+b[0]/mx*bw;
+      if(b[1]==='grey')s+=hbar(x0,x1,yy,11,C.axis);
+      else if(b[1]==='out')s+='<rect x="'+x0+'" y="'+(yy+1)+'" width="'+r1(Math.max(1,x1-x0-1))+'" height="9" rx="2" fill="#fff" stroke="'+C.ink2+'" stroke-width="2"/>';
+      else s+=hbar(x0,x1,yy,11,C.mi);
+      s+=T(x1+6,yy+10,eu(o,b[0]),{c:'b',st:'font-size:12px'})});
+    s+='<circle cx="'+(W-58+6)+'" cy="'+(y0+12)+'" r="5" fill="'+col+'"/>'+T(W-58+16,y0+16,sg0(re)+'%',{c:'b'});
+    s+='<rect x="0" y="'+y0+'" width="'+W+'" height="'+(rowH-6)+'" fill="transparent"'+tip('<b>'+esc(NOME[id])+'</b><br>Nel '+y+': '+eu(o,a.euro_allora)+(a.tipo==='misurato'?'':' (stimato)')+'<br>Nel '+y+' in euro di oggi: '+eu(o,a.euro_oggi)+'<br>Oggi: '+eu(o,e.euro_allora)+'<br>Contando l’inflazione: '+sg0(re)+'%')+'/>';
+  });
+  box.innerHTML=s+'</svg>';
+  $('t-anno').textContent='Nel '+y+' un euro valeva come '+fd(fat/fy,2)+' euro di oggi';
+  $('anno-big').innerHTML='Per comprare quello che nel <b>'+y+'</b> costava 100 euro oggi ne servono <b>'+f0(vale)+'</b>. Al contrario, 100 euro di oggi valgono come <b>'+f0(10000/vale)+' euro</b> del '+y+'. A destra di ogni cosa, di quanto costa di più o di meno contando l’inflazione.';
+}
+
+
+/* ---------- 1b. CON 100 EURO: quanto resta del carrello ---------- */
+function cento(){
+  var box=$('ch-cento'),W=width('ch-cento'),rowH=82,m={t:36},H=m.t+ORD.length*rowH,x0=52,mr=4,tw=W-x0-mr;
+  var inf=10000/D.cento_euro_2005_oggi;
+  var R=ORD.map(function(id){var o=OG[id],a=o.serie[0],e=last(o.serie),f=a.euro_allora/e.euro_allora,n0,n1,u;
+    if(id==='caffe'){n0=100/a.euro_allora;n1=100/e.euro_allora;u='caffè'}
+    else if(id==='pane'){n0=100/a.euro_allora;n1=100/e.euro_allora;u='chili di pane'}
+    else if(id==='pizza'){n0=100/a.euro_allora;n1=100/e.euro_allora;u='pasti in pizzeria'}
+    else if(id==='biglietto'){n0=100/a.euro_allora;n1=100/e.euro_allora;u='biglietti del tram'}
+    else if(id==='benzina'){n0=100/a.euro_allora*40;n1=100/e.euro_allora*40;u='litri di benzina'}
+    else if(id==='luce'){n0=100;n1=100*f;u='di luce'}
+    else{n0=100/a.euro_allora*60;n1=100/e.euro_allora*60;u='m² d’affitto al mese'}
+    return{id:id,f:f*100,n0:n0,n1:n1,u:u,anno:a.anno}}).sort(function(a,b){return a.f-b.f});
+  function X(p){return x0+p/100*tw}
+  function txt(r){return f0(r.n0)+' → '+f0(r.n1)+' '+r.u}
+  var s=svgOpen(W,H);
+  s+=L(X(inf),m.t-8,X(inf),H,C.ink,1.5,' stroke-dasharray="4 3"')+T(X(inf),m.t-16,'prezzi in generale: '+f0(inf)+'%',{a:'middle',c:'b',st:'font-size:12px'});
+  R.forEach(function(r,k){var y0=m.t+k*rowH,by=y0+36,bh=22;
+    s+=icon(r.id,0,y0+8)+T(x0,y0+16,esc(NOME[r.id]),{c:'b',st:'font-size:15px'});
+    s+=T(W,y0+16,'−'+f0(100-r.f)+'%',{a:'end',c:'b',st:'fill:'+(r.f<inf?C.pos:C.neg)});
+    s+='<rect x="'+x0+'" y="'+by+'" width="'+r1(tw)+'" height="'+bh+'" rx="4" fill="#fff" stroke="'+C.axis+'" stroke-width="1.5" stroke-dasharray="5 4"/>';
+    s+=hbar(x0,X(r.f),by,bh,C.mi);
+    s+=T(x0,by+bh+16,txt(r),{c:'b',st:'font-size:13px'});
+    s+='<rect x="0" y="'+y0+'" width="'+W+'" height="'+(rowH-4)+'" fill="transparent"'+tip('<b>'+esc(NOME[r.id])+'</b><br>Con 100 € nel '+r.anno+': '+f0(r.n0)+' '+r.u+'<br>Con 100 € oggi: '+f0(r.n1)+' '+r.u+'<br>Si compra il '+f0(r.f)+'% di prima')+'/>';
+  });
+  box.innerHTML=s+'</svg>';
+  var a=R[0],z=last(R);
+  $('t-cento').textContent='Con 100 euro oggi compri in media il '+f0(inf)+'% di quello che compravi nel 2005: '+NOME[a.id].toLowerCase()+' solo il '+f0(a.f)+'%, '+NOME[z.id].toLowerCase()+' il '+f0(z.f)+'%';
+}
+
+/* ---------- 6. SCEGLI UNA VOCE ---------- */
+function initVoce(){
+  var sel=$('voce-in'),L=V.voci.slice().sort(function(a,b){return a.nome.localeCompare(b.nome,'it')});
+  sel.innerHTML=L.map(function(v){return '<option value="'+v.id+'">'+esc(v.nome)+'</option>'}).join('');
+  sel.value='ristoranti';
+  sel.addEventListener('change',voce);sel.addEventListener('input',voce);
+}
+function voce(){
+  var id=$('voce-in').value,v=V.voci.filter(function(x){return x.id===id})[0];if(!v)return;
+  var box=$('ch-voce'),W=width('ch-voce'),H=270,m={l:6,r:84,t:20,b:28},pw=W-m.l-m.r,ph=H-m.t-m.b,n=V.anni.length-1;
+  var g=V.generale,sr=v.serie,up=last(sr)>last(g)+0.5,col=up?C.pos:C.neg;
+  var lo=Math.min(100,Math.min.apply(null,sr),Math.min.apply(null,g)),hi=Math.max(Math.max.apply(null,sr),Math.max.apply(null,g));
+  lo=Math.floor(lo/50)*50;hi=Math.ceil(hi*1.04/50)*50;
+  function X(i){return m.l+i/n*pw}function Y(x){return m.t+ph-(x-lo)/(hi-lo)*ph}
+  var s=svgOpen(W,H);
+  for(var t=lo;t<=hi;t+=50)s+=L(m.l,Y(t),W-m.r,Y(t),t===100?C.axis:C.grid)+T(m.l,Y(t)-4,t,{c:'m'});
+  V.anni.forEach(function(y,i){if(y%5===0)s+=T(X(i),H-8,y,{a:i===0?'start':i===n?'end':'middle',c:'m'})});
+  var d='M'+sr.map(function(x,i){return r1(X(i))+' '+r1(Y(x))}).join('L')+'L'+g.map(function(x,i){return[i,x]}).reverse().map(function(p){return r1(X(p[0]))+' '+r1(Y(p[1]))}).join('L')+'Z';
+  s+='<path d="'+d+'" fill="'+col+'" fill-opacity=".16"/>';
+  function lin(a,c,w){return '<path d="M'+a.map(function(x,i){return r1(X(i))+' '+r1(Y(x))}).join('L')+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round"/>'}
+  s+=lin(g,C.ink,2.5)+lin(sr,col,3.5);
+  var yv=Y(last(sr)),yg=Y(last(g)),sep=Math.abs(yv-yg),push=sep<30?(30-sep)/2:0,sv=yv<yg?-1:1;
+  s+='<circle cx="'+r1(X(n))+'" cy="'+r1(yv)+'" r="5" fill="'+col+'"/><circle cx="'+r1(X(n))+'" cy="'+r1(yg)+'" r="4.5" fill="'+C.ink+'"/>';
+  s+=T(X(n)+9,yv+sv*push-2,esc(v.nome.split(' ')[0]),{c:'b',st:'fill:'+col})+T(X(n)+9,yv+sv*push+11,f0(last(sr)),{c:'b',st:'fill:'+col});
+  s+=T(X(n)+9,yg-sv*push-2,'Tutti i prezzi',{c:'b',st:'font-size:12px'})+T(X(n)+9,yg-sv*push+11,f0(last(g)),{c:'b'});
+  s+='<circle cx="'+r1(X(0))+'" cy="'+r1(Y(100))+'" r="4" fill="'+C.ink+'"/>';
+  V.anni.forEach(function(y,i){var w=pw/n;s+='<rect x="'+r1(X(i)-w/2)+'" y="'+m.t+'" width="'+r1(w)+'" height="'+ph+'" fill="transparent"'+tip('<b>'+y+'</b><br>'+sw(col)+esc(v.nome)+': '+fd(sr[i],0)+'<br>'+sw(C.ink)+'Tutti i prezzi: '+fd(g[i],0))+'/>'});
+  box.innerHTML=s+'</svg>';
+  var vv=last(sr)-100,gg=last(g)-100;
+  $('voce-big').innerHTML='<b>'+esc(v.nome)+'</b>: '+sg0(vv)+'% dal 2005 al 2025. I prezzi in generale: '+sg0(gg)+'%. '+(up?'È salita più dei prezzi.':vv<gg-0.5?'È salita meno dei prezzi.':'È salita come i prezzi.');
+  $('t-voce').textContent='Cento euro di spesa del 2005 per «'+v.nome.toLowerCase()+'» oggi sarebbero '+f0(last(sr))+', contro '+f0(last(g))+' in media';
+}
+
+/* ---------- 7. LA TUA INFLAZIONE ---------- */
+var PROF=[
+  ['Studente fuori sede',[450,40,150,120,0,40,0,10,80]],
+  ['Famiglia con due figli, in auto',[900,220,600,150,120,40,60,40,150]],
+  ['Pensionato che vive da solo',[500,150,300,60,30,20,30,15,60]],
+  ['Chi va ovunque in auto',[700,120,350,150,250,0,80,30,100]],
+  ['Chi non ha l’auto',[700,100,350,200,0,60,0,30,150]]];
+var SMAX=[1500,500,800,500,400,200,200,100,300];
+function initTuo(){
+  var sel=$('prof-in');
+  sel.innerHTML=PROF.map(function(p,i){return '<option value="'+i+'">'+esc(p[0])+'</option>'}).join('')+'<option value="x">Scelgo io</option>';
+  var h='';V.gruppi.forEach(function(g,i){h+='<div class="sl"><label for="sl'+i+'">'+esc(g.nome)+'</label><output id="so'+i+'" for="sl'+i+'"></output><input type="range" id="sl'+i+'" min="0" max="'+SMAX[i]+'" step="10" value="0"></div>'});
+  $('calc-sl').innerHTML=h;
+  function setP(i){PROF[i][1].forEach(function(v,k){$('sl'+k).value=v})}
+  setP(0);
+  sel.addEventListener('change',function(){if(sel.value!=='x')setP(+sel.value);tuo()});
+  V.gruppi.forEach(function(g,i){var f=function(){sel.value='x';tuo()};$('sl'+i).addEventListener('input',f);$('sl'+i).addEventListener('change',f)});
+}
+function tuo(){
+  var G=V.gruppi,sp=G.map(function(g,i){return +$('sl'+i).value}),tot=sp.reduce(function(a,b){return a+b},0);
+  G.forEach(function(g,i){$('so'+i).textContent=f0(sp[i])+' €'});
+  $('calc-tot').textContent=f0(tot)+' €';
+  var box=$('ch-tuo'),gen=last(V.generale)-100;
+  if(!tot){box.innerHTML='';$('tuo-big').textContent='Scegli almeno una spesa.';$('t-tuo').textContent='Scegli cosa compri';return}
+  var mine=sp.reduce(function(a,x,i){return a+x*last(G[i].serie)/100},0)/tot*100-100;
+  var rows=G.map(function(g,i){return{n:g.nome,sp:sp[i],r:last(g.serie)-100}}).filter(function(r){return r.sp>0}).sort(function(a,b){return b.r-a.r});
+  var W=width('ch-tuo'),rowH=44,m={t:56,l:0,r:48},H=m.t+rows.length*rowH+4,mx=Math.max(Math.ceil(Math.max(mine,gen,rows[0].r)*1.12/50)*50,50),pw=W-m.l-m.r;
+  function X(v){return m.l+Math.max(0,v)/mx*pw}
+  var s=svgOpen(W,H);
+  s+=L(X(0),m.t-6,X(0),H-4,C.axis);
+  var gx=X(gen),mx2=X(mine),HL='paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round';
+  s+=L(gx,m.t-30,gx,H-4,C.ink,2,' stroke-dasharray="4 3"')+L(mx2,m.t-14,mx2,H-4,C.mi,3);
+  function cl(x,w){return Math.max(w/2,Math.min(W-w/2,x))}
+  s+=T(cl(gx,120),m.t-34,'in generale '+sg0(gen)+'%',{a:'middle',c:'b',st:'font-size:12px;'+HL})+T(cl(mx2,60),m.t-18,'tu '+sg0(mine)+'%',{a:'middle',c:'b',st:'font-size:12px;fill:'+C.mi+';'+HL});
+  rows.forEach(function(r,i){var y=m.t+i*rowH;
+    s+=T(0,y+12,esc(r.n)+' · '+f0(r.sp)+' €',{c:'b',st:'font-size:13px;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round'});
+    s+=hbar(X(0),X(r.r),y+20,12,r.r>mine?C.pos:C.neg)+T(Math.min(X(r.r)+6,W-44),y+31,sg0(r.r)+'%',{c:'b',st:'paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+(rowH-2)+'" fill="transparent"'+tip('<b>'+esc(r.n)+'</b><br>Spendi '+f0(r.sp)+' € al mese ('+f0(r.sp/tot*100)+'% del totale)<br>Prezzi dal 2005 al 2025: '+sg0(r.r)+'%')+'/>'});
+  box.innerHTML=s+'</svg>';
+  $('tuo-big').innerHTML='Per la tua spesa i prezzi sono saliti del <b>'+fd(mine,1)+'%</b> dal 2005 al 2025. In generale sono saliti del <b>'+fd(gen,1)+'%</b>: '+(mine>gen+0.5?'per te '+fd(mine-gen,1)+' punti in più.':mine<gen-0.5?'per te '+fd(gen-mine,1)+' punti in meno.':'come per tutti.');
+  $('t-tuo').textContent='Con la tua spesa l’inflazione 2005-2025 è '+fd(mine,0)+'%, non '+fd(gen,0)+'%: '+(mine>gen+0.5?'tu hai pagato di più':mine<gen-0.5?'tu hai pagato meno':'sei nella media');
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var L=[];
+  L.push('<b>Prima del 2021 in euro ci sono pochi prezzi veri.</b> I prezzi di prodotti veri a Milano esistono, mese per mese, solo dal gennaio 2021 (Osservatorio Prezzi del Ministero). Per il passato, in questa pagina, il caffè, il pane e la pizza del 2005-2020 sono <b>stimati</b>: si prende il prezzo vero del 2021 (2022 per il pane) e si va indietro con l’indice dei prezzi di quella voce a Milano. Con la benzina si parte dal 2015, quando comincia l’archivio dei carburanti. Sono ordini di grandezza, non prezzi rilevati.');
+  L.push('<b>Il caffè al bar non ha un indice continuo.</b> «Consumazioni al bar» si ferma al 2015; dal 2016 il bar è dentro «ristoranti, pizzerie, bar e simili», una voce diversa, agganciata alla media del 2015. Il caffè stimato dal 2005 al 2015 segue il bar, dopo segue quella voce unica.');
+  L.push('<b>Il pane cambia nome.</b> Nei dati del Ministero «pane fresco» c’è solo nel 2021, dal 2022 il prodotto è «pane fresco con farina di grano»: abbiamo usato il secondo. I prezzi in euro del Ministero sono medie di quello che è stato rilevato ogni mese, su marche e negozi che cambiano; il Ministero stesso consiglia di confrontare nel tempo gli indici, non i livelli in euro.');
+  L.push('<b>La luce non ha prezzi in euro.</b> Abbiamo solo l’indice dei prezzi dell’elettricità di Milano: «100 euro di luce nel 2005» significa che ciò che costava 100 euro allora, con gli stessi consumi, oggi costa quanto dice l’indice. Dal 2022 il prezzo è molto salito (picco a novembre 2022); l’ultimo mese (settembre 2026) è sopra la media del 2025.');
+  L.push('<b>Il biglietto è misurato, ma con poche fonti.</b> Il 2,00 (15 luglio 2019) e il 2,20 (9 gennaio 2023) sono confermati da più fonti e dal sito ATM. Per il 1,50 del settembre 2011 ci sono tre riscontri, ma il giorno preciso è nel solo Il Giorno. Per il 1,00 del 2002 c’è un solo riscontro; una fonte dell’epoca non l’abbiamo trovata. Prima di gennaio 2002 il biglietto era di 1.500 lire. Nel grafico il prezzo di ogni anno è la media pesata sui giorni in cui ogni tariffa è valsa.');
+  L.push('<b>La benzina è un prezzo «alle 8».</b> Il prezzo comunicato dai gestori degli impianti di Milano, modalità self; un impianto che non aggiorna resta con il vecchio prezzo. Le anagrafiche degli impianti sono campioni: gli impianti chiusi tra un campione e l’altro potrebbero mancare. Un pieno è 40 litri (ipotesi nostra). Controllo: la benzina dell’Osservatorio a settembre 2026 è 2,099 euro contro 2,108.');
+  L.push('<b>L’affitto è una stima di mercato.</b> Le quotazioni OMI sono un intervallo scelto da un rilevatore, non contratti firmati: prendiamo il centro dell’intervallo, la mediana tra le zone di Milano (non pesata per numero di case), per 60 m² (ipotesi nostra). Le zone sono 55 fino al 2013, 40–42 dopo. I dati partono dal 2006, per questo nella pagina l’affitto non ha il 2005. I contratti già in corso (indice ISTAT, «affitti» nel grafico a pallini) sono saliti molto meno dei contratti nuovi.');
+  L.push('<b>Il reddito mediano è calcolato da noi.</b> Non esiste nei file la mediana ufficiale: l’abbiamo interpolata dalle classi di reddito dei residenti che presentano la dichiarazione. Chi non presenta dichiarazione non c’è, e il reddito dichiarato non è lo stipendio. Le ore di lavoro sono l’affitto diviso il reddito mensile, per 173 ore al mese (tempo pieno): un conto illustrativo. L’anno è quello d’imposta e i redditi arrivano al 2024. Nella pagina <a href="../permettersi/">Chi può permettersi dove</a> l’affitto 2024 pesa il 38,2% e non il 34,5%: il reddito è lo stesso, ma lì l’affitto è la media sui civici residenziali (circa 824 € al mese) e non la mediana delle zone (745,5 €).');
+  L.push('<b>L’indice generale 2005–2010 è ricostruito.</b> Per Milano l’indice generale vero parte dal 2011. Prima l’abbiamo ricostruito concatenando i tassi di inflazione annui del Comune: dove si può controllare (2011–2025) l’errore massimo è 0,08 punti; prima del 2011 gli arrotondamenti possono sommare 0,3–0,5 punti. «Euro di oggi» dipende da questo indice.');
+  L.push('<b>L’inflazione non è uguale per tutti.</b> «Euro di oggi» usa l’indice di tutti i prezzi: una famiglia che spende molto in luce o in affitto ha avuto un’inflazione diversa. Un indice confronta una città con se stessa nel tempo: non dice che a Milano le cose costino più che altrove.');
+  L.push('<b>Aprile 2024 manca.</b> In tutte le voci manca aprile 2024 nei file del Comune: la media del 2024 usa gli 11 mesi presenti. Gli zeri nei file sono dati mancanti e sono stati scartati.');
+  L.push('<b>Il 2026 non è completo.</b> «Oggi» è settembre 2026, ultimo mese disponibile: un solo mese al posto di una media annua. Il grafico a pallini si ferma alla media del 2025, l’ultimo anno completo.');
+  L.push('<b>«Con 100 euro» e «La tua inflazione» sono esempi.</b> Il primo divide 100 euro per i prezzi di questa pagina, misurati o stimati: dove il prezzo è stimato, lo è anche il conto. Nel secondo le spese degli esempi sono inventate; l’aumento di ogni gruppo è la media semplice degli indici delle voci che contiene, senza pesi per quanto pesa ogni voce. Non è un indice ufficiale e non sostituisce quello dell’ISTAT.');
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function metodo(){
+  var L=[];
+  L.push('<b>Indici e basi.</b> Gli indici di Milano arrivano in quattro file con basi diverse (1998, 2010, 2015, 2025 = 100): li abbiamo portati tutti alla stessa base con la media annua degli anni di aggancio (2010, 2015, 2025). L’errore tipico dei raccordi è 0,2–0,5 punti percentuali. Qui sono poi ricalcolati con 2005 = 100, sulla media dell’anno.');
+  L.push('<b>Euro di oggi.</b> Prezzo di quell’anno × (indice generale di Milano di settembre 2026 ÷ indice generale di Milano di quell’anno). L’indice di settembre 2026 è l’indice generale del 2025 aggiornato con il rapporto tra settembre 2026 e la media 2025 ('+fd(D.indice_generale_2005_100['2026'],1)+' contro 100 nel 2005: '+fd(D.inflazione_2005_oggi_pct,1)+'% in più).');
+  L.push('<b>Prezzi stimati.</b> Prezzo di un anno X = primo prezzo vero × (indice della voce nell’anno X ÷ indice della voce nell’anno del prezzo vero). I prezzi veri sono medie annue del Ministero (2021–2025) e il prezzo di settembre 2026; per la benzina le medie annue dell’archivio carburanti (2015–2025) e settembre 2026. Il prezzo di oggi è sempre quello di settembre 2026.');
+  L.push('<b>Voci scelte.</b> Caffè: indice «consumazioni al bar» fino al 2015, poi «ristoranti, pizzerie, bar e simili». Pizza: «ristoranti e pizzerie». Pane: «pane». Benzina: «benzina». Luce: «energia elettrica».');
+  L.push('<b>Il grafico a pallini.</b> Per ogni voce, la variazione della media annua 2025 sulla media annua 2005. Il cerchio vuoto è la variazione dell’indice generale. Diciotto delle 29 voci di spesa che abbiamo raccolto, scelte perché si capiscono e hanno una serie continua dal 2005.');
+  L.push('<b>Affitto e ore di lavoro.</b> Affitto OMI (60 m²) diviso reddito mensile mediano interpolato, per 173 ore al mese.');
+  L.push('<b>Controlli.</b> Ogni numero della pagina viene da un file scritto da un programma a partire dai dati ripuliti; le variazioni 2005–2025 coincidono con il riepilogo della raccolta dati.');
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
 }
 })();
 </script>

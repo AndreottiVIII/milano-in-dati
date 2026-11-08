@@ -3039,3 +3039,5 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-08 — tribunale: pubblicata definitiva nel nuovo schema, ok di Davide.
 - 2026-11-08 — area-c: pubblicata definitiva; colore verde di Area C (#00843D, scelta nostra ispirata ai segnali) e distintivo «C» disegnato da noi, non il logo del Comune (Davide).
 - 2026-11-08 — cani: pubblicata definitiva; il riquadro «Quanti sono i cani?» chiuso in fondo, si apre al click (Davide).
+- 2026-11-08 — suolo: pubblicata definitiva; primo grafico rifatto in barre con «già costruito nel 2006 / costruito dopo / ancora libero» e spiegazione di «suolo consumato» (Davide); via le griglie da 100.
+- 2026-11-08 — costo-vita: pubblicata definitiva e arricchita su richiesta di Davide: «Con 100 euro», voce di spesa a scelta (menu vero), «La tua inflazione» con esempi e cursori; dati già nel progetto.
