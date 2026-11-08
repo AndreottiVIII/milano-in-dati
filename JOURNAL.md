@@ -3086,3 +3086,4 @@ Milano nei dati più importanti pubblicata: 12 dati scelti da Davide con il loro
 Redditi: il confronto 43% dal 9% sostituito dal grafico col cursore su quanto prende chi dichiara di più (1-50%), stesso gruppo nel 2000 e nel 2024.
 Dati importanti: sezione 9 con il grafico col cursore su quanto prende chi dichiara di più.
 Il sito pubblicata: pagine, grafici, numeri, fonti, anni e file contati da strumenti/conta_sito.py, ricalcolati da una GitHub Action a ogni push; autore Davide Caniatti con sito e Substack. Voce 'Il sito' nella barra in alto. Favicon: Duomo rosso nella ciambella delle cinque linee del metrò, in tutte le pagine.
+Anteprime dei link (stile A scelto da Davide): un'immagine condividi.png e i meta Open Graph/Twitter per tutte le 108 pagine, create da strumenti/anteprime_link.py. Va rilanciato dopo ogni pubblicazione di pagina.
