@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="it"><head><base href="../../viaggio-linea/"><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Un viaggio in tram</title>
+<style>
+
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --it:#0b0d12;     /* Italia */
+  --hint:#0072BC;   /* comuni intorno: blu M4 */
+  --tur:#F58220;    /* turisti: arancio della home */
+  --ind:#4b5563;--umi:#00A651;--car:#0072BC;--vpm:#FFD500;--alt:#7B3FA0; /* tipi di rifiuto: grigio, verde M2, blu M4, giallo M3, viola M5 */
+  --pos:#F58220;--neg:#0072BC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* highlights */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* sections */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.lg i.ring{border-radius:50%;background:#fff!important;border:2px solid var(--axis)}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.notes li{display:flex;gap:8px;margin:.35em 0;line-height:1.3}
+.notes li b.nb{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+.mt{font-weight:700;font-size:.95rem;margin:1em 0 .2em}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:4px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.kt tr.tot td{font-weight:700;border-bottom:0}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+:root{--m1:#E30613;--m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;--ora:#F58220;--acq:#00A19A;--mag:#E6007E;--mar:#8C5A32;--ros:#F06EAA}
+.find{margin:14px 0 0}
+.find label,.sel label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus,.sel select:focus{outline:3px solid var(--mi);outline-offset:1px}
+.sel{margin:10px 0 8px}
+.sel select{width:100%;max-width:420px;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris.m{border-left-color:var(--mi)}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris p{margin:.3em 0 0}
+.opz{display:inline-block;background:var(--ink);color:#fff;font-size:1.7rem;line-height:1;font-weight:800;padding:8px 16px;margin:2.2em 0 .2em}
+.opz+.fig{margin-top:.6em}
+.hl>a .n{overflow-wrap:anywhere}
+.hl>a.g{color:#000}
+.hl>a.g p{color:#222}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl .v{font-weight:800;font-size:1.3rem}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.8rem;font-weight:700;color:#fff}
+
+.sl .nm{font-weight:800;font-size:1.25rem;line-height:1.2;margin:.2em 0}
+.sl .qq{font-size:.9rem;color:var(--ink2);margin:0 0 .4em}
+.vl{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 0}
+</style><script src="../menu.js" defer></script></head><body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../viaggio-linea/" style="color:#000">Pagina attuale</a></div><main>
+
+<h1>Un viaggio in tram</h1>
+<p class="lead">Come cambia la città lungo le linee di metro, tram e filobus: reddito, prezzo delle case, età, stranieri, alberi, Airbnb, servizi, scuole e voto. <b>I numeri sono del quartiere attorno alla fermata, non della fermata</b>: fermate nello stesso quartiere, stesso valore.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Linee e fermate: orari ATM/AMAT, Comune di Milano (CC BY), versione 425, valida dal 26 ottobre al 30 novembre 2026. Quartieri, residenti, età e cittadinanza, scuole, elezioni: Comune di Milano (CC BY). Prezzi: Agenzia delle Entrate, OMI (CC BY 4.0). Redditi: Ministero dell'Economia e delle Finanze (CC BY 3.0). Airbnb: Inside Airbnb (CC BY 4.0) e ISTAT (CC BY 4.0). Alberi, servizi: Comune di Milano e OpenStreetMap (ODbL). Ogni dato ha la sua fonte e il suo anno nelle fonti in fondo.</p>
+
+<!-- ============ scelta ============ -->
+<h2 id="scegli">Scegli la linea e il dato</h2>
+<div class="sel"><label for="sl-l">Linea</label><select id="sl-l"></select></div>
+<div class="sel"><label for="sl-d">Dato</label><select id="sl-d"></select></div>
+<p class="note" id="nt-d"></p>
+
+<!-- ============ 1 ============ -->
+<h2 id="lungo">Lungo la linea</h2>
+
+<div class="opz">Opzione A</div>
+<div class="fig">
+  <h3 id="t-fa"></h3>
+  <p class="sub" id="s-fa"></p>
+  <div class="ch" id="ch-fa" role="img" aria-label="Linea del valore del dato fermata per fermata lungo la linea scelta"></div>
+  <p class="note" id="nt-fa"></p>
+  <p class="src" id="src-fa"></p>
+</div>
+
+<div class="opz">Opzione B</div>
+<div class="fig">
+  <h3 id="t-fb"></h3>
+  <p class="sub">I quartieri colorati per il dato scelto; il tracciato della linea in nero e le fermate in bianco. Il numero accanto a ogni colore conta i quartieri attraversati. Tocca un quartiere o una fermata.</p>
+  <div class="lg" id="lg-fb"></div>
+  <div class="ch" id="ch-fb" role="img" aria-label="Mappa dei quartieri attraversati dalla linea, colorati per il dato scelto, con il tracciato e le fermate"></div>
+  <p class="src" id="src-fb"></p>
+</div>
+
+<div class="opz">Opzione C</div>
+<div class="fig">
+  <h3 id="t-fc"></h3>
+  <p class="sub">Una striscia per ogni linea: ogni quadretto è una fermata, nell'ordine del viaggio. Il colore dice dove sta il quartiere nella classifica di Milano, in cinque gruppi di uguale grandezza. Grigio = fuori da Milano o senza dato. Tocca un quadretto.</p>
+  <div class="lg" id="lg-fc"></div>
+  <div class="ch" id="ch-fc" role="img" aria-label="Strisce: il dato scelto fermata per fermata su tutte le linee"></div>
+  <p class="src" id="src-fc"></p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="passo">Fermata per fermata</h2>
+<div class="fig sl">
+  <h3 id="t-sl"></h3>
+  <p class="sub">Sali sulla linea scelta e scorri le fermate con il cursore. Le righe mostrano dove sta il quartiere della fermata tra il più basso e il più alto di Milano: il pallino pieno è questa fermata, quello vuoto è la fermata prima, il trattino nero è la mediana.</p>
+  <input type="range" id="rg" min="0" max="1" value="0" aria-label="Fermata della linea">
+  <p class="nm" id="sl-nm"></p>
+  <p class="qq" id="sl-qq"></p>
+  <div class="ch" id="ch-sl" role="img" aria-label="Posizione di ogni dato per la fermata scelta, tra il valore più basso e il più alto di Milano"></div>
+  <p class="src" id="src-sl"></p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="salti">I salti più grandi</h2>
+<div class="fig">
+  <h3 id="t-sal"></h3>
+  <p class="sub">Per ogni dato, il salto più grande tra due fermate vicine di tutte le linee. In ogni riga la barra va dal valore più basso al più alto di Milano: il cerchio vuoto è la prima fermata, il pieno la seconda.</p>
+  <div class="ch" id="ch-sal" role="img" aria-label="Pallini collegati: il salto più grande tra due fermate vicine per ognuno dei dieci dati"></div>
+  <p class="note">Il salto è la differenza di posizione nella classifica dei quartieri (o delle zone dei prezzi). Contate solo coppie di fermate in due quartieri diversi, entrambi con almeno 5.000 residenti; la stessa coppia può stare su più linee, qui conta una volta. Un salto non dice perché.</p>
+  <p class="src" id="src-sal"></p>
+</div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul>
+<li><b>Il valore è del quartiere attorno alla fermata, non della fermata.</b> Se una via passa da un quartiere ricco a uno povero in cento metri, il grafico fa un gradino; ma la gente non cambia di colpo. Il confine tra due quartieri è una linea decisa a tavolino.</li>
+<li><b>Nessuna causa.</b> Una linea che attraversa quartieri ricchi e poveri non dice perché sono diversi, né che il mezzo c'entri. Questa pagina mette in fila numeri di zone diverse, e non dice nulla delle persone che abitano o prendono il mezzo in una fermata.</li>
+<li><b>Gli anni sono diversi.</b> <span id="l-anni"></span>. Confronti tra dati diversi mettono insieme fotografie di momenti diversi.</li>
+<li><b>Redditi.</b> Il Ministero li dà per CAP (38 CAP), non per quartiere. Il valore del quartiere è una media dei CAP dei suoi civici e, dove un CAP è diviso tra più quartieri, è una stima. Reddito complessivo medio per contribuente, in euro del 2025: non è lo stipendio e non conta chi non fa la dichiarazione.</li>
+<li><b>Prezzo delle case.</b> È una quotazione OMI (un intervallo stimato per zona e per tipo di abitazione), non un prezzo di vendita registrato. Le zone sono ampie: dentro una zona i prezzi reali possono variare molto.</li>
+<li><b>Quartieri piccoli.</b> Sotto i 5.000 residenti (parchi, cascine, aree quasi disabitate) i valori per abitante (alberi, scuole) non si calcolano e gli altri sono poco stabili. I testi automatici e i salti non li usano. Sotto i 1.000 residenti non c'è nessun valore di quartiere.</li>
+<li><b>Stranieri</b> vuol dire cittadinanza non italiana, non nascita all'estero. <b>Voto</b>: una sola elezione, il sindaco del 3 ottobre 2021 (affluenza al <span id="l-aff"></span>%); in tutta Milano il candidato del centrosinistra ha preso il <span id="l-sx"></span>% dei voti ai candidati e quello del centrodestra il <span id="l-dx"></span>%. Non dice per chi votano gli abitanti della fermata, ma come ha votato il quartiere. <b>Airbnb</b>: annunci di settembre 2026 ogni 100 abitazioni del censimento 2023, con quartieri di pochissime abitazioni lasciati vuoti. <b>Scuole</b>: scuole che hanno sede nel quartiere (infanzia, primaria, media) ogni 10.000 residenti; non dice dove vanno i bambini.</li>
+<li><b>Le linee.</b> I percorsi sono quelli degli orari in vigore dal 26 ottobre 2026, con i lavori in corso: il tram 9 e i filobus 90 e 91 possono non coincidere con il percorso consueto. La M1 è il ramo Rho Fiera-Sesto 1° Maggio (senza il ramo di Bisceglie); la M2 il ramo Abbiategrasso-Gessate (senza il ramo di Assago). La M4 si ferma a Linate Aeroporto, fuori dal Comune.</li>
+<li><b>Le fermate non sono a distanze vere.</b> Nei grafici ogni fermata occupa lo stesso spazio: una linea di metrò ha fermate più rade di un tram.</li>
+</ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Quartiere (NIL)</dt><dd>Gli 88 «nuclei di identità locale» in cui il Comune divide Milano.</dd>
+<dt>Zona dei prezzi (OMI)</dt><dd>Una delle 42 zone in cui l'Agenzia delle Entrate divide Milano per le quotazioni delle case.</dd>
+<dt>Mediana</dt><dd>Il valore in mezzo: metà dei quartieri sta sopra, metà sotto.</dd>
+<dt>Cinque gruppi</dt><dd>Tutti i quartieri di Milano messi in fila e divisi in cinque gruppi della stessa grandezza: il primo ha i valori più bassi, l'ultimo i più alti.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul>
+<li><b>Linee e fermate.</b> Dagli orari ATM/AMAT (versione 425, in vigore dal 26 ottobre al 30 novembre 2026): per ogni linea la corsa con più fermate sul percorso scelto, nell'ordine in cui il mezzo le tocca. Per i filobus 90 e 91 il giro è spezzato in due metà negli orari; qui sono attaccate. La circolare vera non è il tram 9 ma il filobus 90/91: il 90 gira in un verso, il 91 nell'altro.</li>
+<li><b>Dal punto al quartiere.</b> Ogni fermata cade in uno degli 88 quartieri (NIL) con un semplice «punto dentro il poligono» sui confini ufficiali del Comune. Le fermate fuori dal Comune di Milano non hanno quartiere e restano senza valori; una fermata a meno di 40 metri dal bordo prende il quartiere più vicino.</li>
+<li><b>Dal punto alla zona dei prezzi.</b> Lo stesso per la zona OMI (42 zone) con i perimetri del primo semestre 2026. Il prezzo è il valore centrale dell'intervallo di quotazione per abitazioni civili, in euro al metro quadro. È l'unico dato con una zona diversa dal quartiere: per questo sulla mappa il prezzo è scritto sulle fermate e non sui quartieri.</li>
+<li><b>I valori.</b> Sono letti, senza ricalcolarli, dai dati già pubblicati su questo sito. Per i redditi, che il Ministero dà per CAP, il valore del quartiere è la media dei CAP dei suoi civici; per il voto, i risultati delle sezioni sono portati ai quartieri con i civici.</li>
+<li><b>Cinque gruppi e mediana.</b> I colori usano i quinti di tutti i quartieri di Milano, non solo di quelli della linea. La mediana è quella dei quartieri (o delle zone dei prezzi).</li>
+<li><b>Testi automatici.</b> Per ogni linea e verso, il testo prende le fermate con valore, trova la più bassa e la più alta (solo in quartieri con almeno 5.000 residenti) e le mette in ordine di viaggio. Non ci sono altri numeri.</li>
+<li><b>Idea.</b> Viene dalla linea M29 di Berlino, raccontata dal Berliner Morgenpost.</li>
+</ul></div></details>
+<details id="fonti"><summary>Fonti e data di ogni dato</summary><div class="in"><ul id="fonti-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Sono tutti valori aggregati per quartiere o zona. Per il metrò in sé vedi <a href="../metro/">Il metrò di Milano, in numeri</a>.</p>
+<ul>
+<li><a href="data/fermate_indicatori.csv">Le fermate</a>: una riga per fermata e linea, con quartiere, zona dei prezzi e tutti i valori</li>
+<li><a href="data/nil_indicatori.csv">I quartieri</a>: i valori di ogni quartiere</li>
+<li><a href="data/salti.csv">I salti</a>: i 300 salti più grandi tra fermate vicine</li>
+<li><a href="data/linee.json">Linee, fermate, tracciati e testi</a> usati da questa pagina</li>
+<li><a href="data/nil_linee.geojson">I confini, semplificati, dei quartieri attraversati</a></li>
+<li><a href="data/riepilogo.json">Fonte, anno e soglie di ogni dato</a></li>
+</ul></div></details>
+</div>
+
+<footer>
+<p><b>Licenze.</b> Linee e fermate: orari in formato GTFS del Comune di Milano / AMAT (ATM), versione 425, validità dal 26 ottobre al 30 novembre 2026, scaricati il 29 ottobre 2026, Creative Commons Attribution (CC BY). Confini dei quartieri (NIL), residenti, età, cittadinanza e scuole: Comune di Milano, CC BY. Prezzi e zone: Agenzia delle Entrate – OMI, CC BY 4.0. Redditi: Ministero dell'Economia e delle Finanze (CC BY 3.0). Airbnb: Inside Airbnb (CC BY 4.0) e ISTAT (CC BY 4.0). Servizi: Comune di Milano e OpenStreetMap (ODbL). Scuole: Ministero dell'Istruzione e del Merito (IODL 2.0). Elezioni: Comune di Milano (CC BY 4.0). Mappa: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (ODbL).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function sg0(x){var r=Math.round(x);return (r>0?'+':r<0?'−':'')+Math.abs(r)}
+function sg1(x){var v=Math.round(x*10)/10;return (v>0?'+':v<0?'−':'')+f1(Math.abs(v))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function yi(y){return D.meta.anni.indexOf(y)}
+function G(id){for(var i=0;i<D.milano.gruppi.length;i++)if(D.milano.gruppi[i].id===id)return D.milano.gruppi[i]}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/&[a-z]+;/g,'x')).width}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function r1(v){return Math.round(v*10)/10}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+/* barra orizzontale con estremo arrotondato (4px) lontano dalla base */
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  var d=x1>=x0?
+    'M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z':
+    'M'+r1(r)+' '+r1(y)+'H'+r1(l+rr)+'Q'+r1(l)+' '+r1(y)+' '+r1(l)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(l)+' '+r1(y+h)+' '+r1(l+rr)+' '+r1(y+h)+'H'+r1(r)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+/* colonna verticale, estremo arrotondato lontano dalla base */
+function vbar(x,w,y0,y1,col,extra){
+  var t=Math.min(y0,y1),b=Math.max(y0,y1),h=b-t,rr=Math.min(4,h,w/2);if(h<0.5)return '';
+  var d=y1<=y0?
+    'M'+r1(x)+' '+r1(b)+'V'+r1(t+rr)+'Q'+r1(x)+' '+r1(t)+' '+r1(x+rr)+' '+r1(t)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(t)+' '+r1(x+w)+' '+r1(t+rr)+'V'+r1(b)+'Z':
+    'M'+r1(x)+' '+r1(t)+'V'+r1(b-rr)+'Q'+r1(x)+' '+r1(b)+' '+r1(x+rr)+' '+r1(b)+'H'+r1(x+w-rr)+'Q'+r1(x+w)+' '+r1(b)+' '+r1(x+w)+' '+r1(b-rr)+'V'+r1(t)+'Z';
+  return '<path d="'+d+'" fill="'+col+'"'+(extra||'')+'/>';
+}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function yearTicks(years,X,yb){var s='',show=[2010,2015,2020,2024];years.forEach(function(a,i){if(show.indexOf(a)>=0)s+=T(X(i),yb+16,a,{a:i===0?'start':i===years.length-1?'end':'middle',c:'m'})});return s}
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getCSV(u,sep){sep=sep||';';return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){
+  var Ls=t.replace(/\r/g,'').split('\n').filter(Boolean),h=Ls[0].split(sep);
+  return Ls.slice(1).map(function(l){var v=l.split(sep),o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
+function parseCSV(t,sep){var rows=[],row=[],f='',q=false;for(var i=0;i<t.length;i++){var c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===sep){row.push(f);f=''}else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}else if(c!=='\r')f+=c}if(f!==''||row.length){row.push(f);rows.push(row)}return rows}
+function getCSVq(u,sep){sep=sep||',';return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){var R=parseCSV(t.replace(/^\ufeff/,''),sep),h=R[0];return R.slice(1).filter(function(r){return r.length>1}).map(function(v){var o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
+function nz(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
+var RD=[];
+function draw(f){f();RD.push(f)}
+function startResize(){var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)})}
+function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+/* proiezione di una lista di feature geojson (longitudine schiacciata col coseno della latitudine) */
+function geoProj(F,W,lat,bd){
+  var k=Math.cos((lat||45.46)*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  F.forEach(function(f){anelli(f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  if(bd){x0=bd[0]*k;x1=bd[1]*k;y0=bd[2];y1=bd[3]}
+  var sc=(W-2)/(x1-x0);
+  return{H:Math.ceil((y1-y0)*sc)+2,k:k,sc:sc,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+(p[0]*k-x0)*sc)+' '+r1(1+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(lon,la){return[1+(lon*k-x0)*sc,1+(y1-la)*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+(q[0]*k-x0)*sc,y=1+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c}}};
+}
+/* classi bilanciate per quantili: restituisce le soglie (n-1) */
+function quantSoglie(v,n){var a=v.slice().sort(function(x,y){return x-y}),o=[];for(var i=1;i<n;i++)o.push(a[Math.floor(i*a.length/n)]);return o}
+function clsQ(v,s){var i=0;while(i<s.length&&v>=s[i])i++;return i}
+function hlRender(T){$('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" class="'+(t.c==='#FFD500'?'g':'')+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('')}
+/* campo "scrivi il tuo ..." con elenco lungo */
+function campo(inp,datalist,items,onPick,nomeKey,msg){
+  datalist.innerHTML=items.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(c){return '<option value="'+esc(c.n)+'">'}).join('');
+  function trova(k){var m=items.filter(function(x){return nz(x.n)===k||(x.sn&&nz(x.sn)===k)});return m.length===1?m[0]:null}
+  inp.addEventListener('input',function(){var k=nz(inp.value),c=k?trova(k):null;if(c)onPick(c,false);else if(!k)onPick(null,false)});
+  inp.addEventListener('change',function(){var k=nz(inp.value);if(!k)return;var c=trova(k);if(c){onPick(c,true);return}
+    var m=items.filter(function(x){return nz(x.n).indexOf(k)===0});
+    if(m.length===1)onPick(m[0],true);else onPick(null,true,m.length?'Ci sono più scelte che iniziano così: '+m.slice(0,6).map(function(x){return esc(x.n)}).join(', ')+(m.length>6?'…':'')+'. Scrivi qualche lettera in più.':msg||'Non lo trovo. Controlla come è scritto.')});
+}
+/* etichette senza sovrapposizioni: items {x,y,r,txt,cls}, occ = rettangoli già occupati */
+function placeLabels(items,W,H,occ){
+  var boxes=(occ||[]).slice(),out='';
+  items.forEach(function(it){
+    var w=tw(it.txt,12,true),h=14,pos=[[it.r+4,4,'start'],[-it.r-4,4,'end'],[0,-it.r-5,'middle'],[0,it.r+15,'middle'],[-it.r-4,-14,'end'],[it.r+4,-14,'start'],[0,-it.r-20,'middle'],[0,it.r+31,'middle']];
+    for(var k=0;k<pos.length;k++){
+      var p=pos[k],tx=it.x+p[0],ty=it.y+p[1],x1=p[2]==='start'?tx:p[2]==='end'?tx-w:tx-w/2,b={x:x1,y:ty-11,w:w,h:h};
+      if(b.x<0||b.x+b.w>W||b.y<0||b.y+b.h>H)continue;
+      if(boxes.some(function(o){return b.x<o.x+o.w&&b.x+b.w>o.x&&b.y<o.y+o.h&&b.y+b.h>o.y}))continue;
+      boxes.push(b);out+=T(tx,ty,it.txt,{a:p[2],c:it.cls||'k'});return;
+    }
+  });
+  return out;
+}
+
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),ink:cv('--ink'),ink2:cv('--ink2'),grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),m2:cv('--m2'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),m3:'#FFD500',nd:'#8a93a0',light:'#c9ced6'};
+var D,NI,GEO,IM={},LN=null,IND='reddito',LAB={M1:'M1',M2:'M2',M3:'M3',M4:'M4',M5:'M5',T9:'Tram 9',T15:'Tram 15',F90:'Filobus 90',F91:'Filobus 91'};
+var LC={M1:'#E30613',M2:'#00A651',M3:'#E0B800',M4:'#0072BC',M5:'#7B3FA0',T9:'#8C5A32',T15:'#8C5A32',F90:'#00A19A',F91:'#00A19A'};
+var CL=['#FFD500','#F9A11B','#F0502C','#C2185B','#5E1B6B'];
+
+Promise.all([getJ(DATA+'linee.json'),getCSV(DATA+'nil_indicatori.csv'),getJ(DATA+'nil_linee.geojson')]).then(function(r){
+  D=r[0];NI={};r[1].forEach(function(x){NI[+x.id_nil]=x});GEO=r[2];
+  D.indicatori.forEach(function(m){IM[m.id]=m});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function lab(l){return LAB[l.id]||l.nome}
+function fv(id,v){if(v==null)return '–';var m=IM[id];
+  if(id==='reddito')return f0(v)+' €';if(id==='prezzo')return f0(v)+' €/m²';if(id==='eta')return f1(v)+' anni';
+  if(id==='stranieri'||id==='voto_sx'||id==='voto_dx')return f1(v)+'%';if(id==='alberi')return f0(v);if(id==='servizi')return f1(v)+'/10';return f1(v)}
+function cls(m,v){var s=m.soglie,i=0;while(i<s.length&&v>=s[i])i++;return i}
+function clName(m,i){var s=m.soglie,u=function(v){return fv(m.id,v)};return i===0?'meno di '+u(s[0]):i===s.length?u(s[s.length-1])+' e più':'da '+u(s[i-1])+' a '+u(s[i])}
+function fer(){return LN.fermate}
+
+function tutto(){
+  var l=$('sl-l');l.innerHTML=D.linee.map(function(x,i){var f=x.fermate;return '<option value="'+i+'">'+esc(lab(x))+' · '+esc(f[0].n)+' → '+esc(f[f.length-1].n)+'</option>'}).join('');
+  var d=$('sl-d');d.innerHTML=D.indicatori.map(function(m){return '<option value="'+m.id+'">'+esc(m.lungo)+'</option>'}).join('');
+  LN=D.linee[0];
+  l.addEventListener('change',function(){LN=D.linee[+l.value];resetRg();figA();figB();passo()});
+  d.addEventListener('change',function(){IND=d.value;nota();figA();figB();figC();passo()});
+  $('rg').addEventListener('input',passo);
+  highlights();nota();resetRg();
+  draw(figA);draw(figB);draw(figC);draw(passo);draw(salti);
+  fondo();startResize();
+}
+function nota(){var m=IM[IND];$('nt-d').textContent=m.lungo+' ('+m.anno+'). '+(m.liv==='OMI'?'Valore della zona dei prezzi della fermata.':'Valore del quartiere della fermata.')+' Fonte: '+m.fonte+'.'}
+
+/* ---------- in alto ---------- */
+function best(id){var b=null;D.linee.forEach(function(l){var v=l.fermate.filter(function(f){return f.v[id]!=null&&f.res>=5000});if(v.length<2)return;var lo=v.reduce(function(a,f){return f.v[id]<a.v[id]?f:a}),hi=v.reduce(function(a,f){return f.v[id]>a.v[id]?f:a});var r=hi.v[id]/lo.v[id];if(!b||r>b.r)b={r:r,l:l,lo:lo,hi:hi}});return b}
+function highlights(){
+  var rd=best('reddito'),pr=best('prezzo'),nil={},nf=0,nout=0,sp=D.salti_primi[0],vx=D.salti_primi.filter(function(s){return s.ind==='voto_sx'})[0]||D.salti_per_indicatore.filter(function(s){return s.ind==='voto_sx'})[0],ai=D.salti_per_indicatore.filter(function(s){return s.ind==='airbnb'})[0];
+  D.linee.forEach(function(l){nf+=l.fermate.length;l.fermate.forEach(function(f){if(f.nil_id==null)nout++;else nil[f.nil_id]=1})});
+  var T=[
+   {c:C.mi,h:'t-fa',n:'×'+f1(rd.r),u:'',p:'il reddito del quartiere sulla '+lab(rd.l)+': da '+fv('reddito',rd.hi.v.reddito)+' ('+rd.hi.nil+') a '+fv('reddito',rd.lo.v.reddito)+' ('+rd.lo.nil+').'},
+   {c:'#FFD500',h:'t-fc',n:'×'+f1(pr.r),u:'',p:'il prezzo delle case sulla '+lab(pr.l)+': da '+fv('prezzo',pr.lo.v.prezzo)+' a '+fv('prezzo',pr.hi.v.prezzo)+'.'},
+   {c:C.m2,h:'t-fb',n:Object.keys(nil).length+' su 88',u:'',p:'i quartieri attraversati dalle 9 linee: metro, tram e filobus.'},
+   {c:C.m4,h:'t-sl',n:f0(nf),u:'fermate',p:'su 9 linee: 5 di metro, 2 di tram e 2 di filobus. '+nout+' sono fuori dal Comune e senza dati.'},
+   {c:C.m5,h:'t-sal',n:'×'+f0(ai.rapporto),u:'',p:'gli annunci Airbnb ogni 100 abitazioni tra '+ai.da_n+' e '+ai.a_n+' ('+ai.linea_nome+'): da '+f1(ai.v_da)+' a '+f1(ai.v_a)+'.'},
+   {c:C.ora,h:'t-sal',n:f0(Math.abs(vx.v_a-vx.v_da)),u:'punti',p:'di voto al centrosinistra in più tra '+vx.da_n+' e '+vx.a_n+' ('+vx.linea_nome+'): da '+f1(vx.v_da)+'% a '+f1(vx.v_a)+'%.'}
+  ];
+  hlRender(T);
+}
+
+/* ---------- A: profilo lungo la linea ---------- */
+function figA(){
+  var m=IM[IND],F=fer(),n=F.length,W=width('ch-fa'),H=300,mg={l:52,r:10,t:30,b:34},pw=W-mg.l-mg.r,ph=H-mg.t-mg.b,col=LC[LN.id];
+  var vals=F.map(function(f){return f.v[IND]}),ok=vals.filter(function(v){return v!=null});
+  var lo=Math.min.apply(null,ok.concat([m.mediana])),hi=Math.max.apply(null,ok.concat([m.mediana])),pad=(hi-lo)*.12||1;lo=Math.max(0,lo-pad);hi=hi+pad;
+  var X=function(i){return mg.l+(n>1?i*pw/(n-1):pw/2)},Y=function(v){return mg.t+ph-(v-lo)/(hi-lo)*ph};
+  var s=svgOpen(W,H);
+  var step=niceStep((hi-lo)/4);for(var v=Math.ceil(lo/step)*step;v<=hi;v+=step)s+=L(mg.l,Y(v),W-mg.r,Y(v),C.grid)+T(mg.l-6,Y(v)+4,tick(v),{a:'end',c:'m'});
+  s+=L(mg.l,Y(m.mediana),W-mg.r,Y(m.mediana),C.ink,1.2,' stroke-dasharray="4 3"')+T(W-mg.r,Y(m.mediana)-5,'mediana di Milano '+tick(m.mediana),{a:'end',c:'m',st:'paint-order:stroke;stroke:#fff;stroke-width:3px'});
+  // area e linea a tratti continui
+  var seg=[],cur=[];vals.forEach(function(v,i){if(v==null){if(cur.length)seg.push(cur);cur=[]}else cur.push(i)});if(cur.length)seg.push(cur);
+  seg.forEach(function(sg){var d='M'+sg.map(function(i){return r1(X(i))+' '+r1(Y(vals[i]))}).join('L'),a=d+'L'+r1(X(sg[sg.length-1]))+' '+r1(Y(lo))+'L'+r1(X(sg[0]))+' '+r1(Y(lo))+'Z';
+    s+='<path d="'+a+'" fill="'+col+'" fill-opacity=".18"/><path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="3.5" stroke-linejoin="round"/>'});
+  var iMin=vals.indexOf(Math.min.apply(null,ok)),iMax=vals.indexOf(Math.max.apply(null,ok));
+  F.forEach(function(f,i){var v=vals[i];if(v==null){s+='<circle cx="'+r1(X(i))+'" cy="'+(mg.t+ph)+'" r="3" fill="#fff" stroke="'+C.nd+'" stroke-width="1.5"/>';return}
+    s+='<circle cx="'+r1(X(i))+'" cy="'+r1(Y(v))+'" r="'+(i===iMin||i===iMax?6:3.2)+'" fill="'+(i===iMin||i===iMax?'#fff':col)+'" stroke="'+(i===iMin||i===iMax?C.ink:'#fff')+'" stroke-width="'+(i===iMin||i===iMax?2.5:1)+'"/>'});
+  var items=[];[iMax,iMin].forEach(function(i,k){if(i>=0)items.push({x:X(i),y:Y(vals[i]),r:6,txt:short1(F[i].n,18)+' '+fv(IND,vals[i])})});
+  var occ=[];F.forEach(function(f,i){if(vals[i]!=null)occ.push({x:X(i)-3,y:Y(vals[i])-3,w:6,h:6})});
+  s+=placeLabels(items,W,H-mg.b,occ);
+  s+=L(mg.l,mg.t+ph,W-mg.r,mg.t+ph,C.axis)+T(mg.l,H-10,short1(F[0].n,16),{c:'m'})+T(W-mg.r,H-10,short1(F[n-1].n,16),{a:'end',c:'m'})+T(W/2,H-10,'fermate →',{a:'middle',c:'m'});
+  F.forEach(function(f,i){s+='<rect x="'+r1(X(i)-pw/Math.max(1,n-1)/2)+'" y="'+mg.t+'" width="'+r1(pw/Math.max(1,n-1))+'" height="'+ph+'" fill="transparent"'+tip('<b>'+esc(f.n)+'</b><br>'+(f.nil_id==null?'fuori da Milano: nessun dato':esc(f.nil)+'<br>'+esc(m.et)+': <b>'+fv(IND,vals[i])+'</b>'))+'/>'});
+  $('ch-fa').innerHTML=s+'</svg>';
+  var tr=LN.d[0].tratti[IND];
+  $('t-fa').textContent=tr?tr.testo:('Lungo la '+lab(LN)+' il dato cambia da '+fv(IND,Math.min.apply(null,ok))+' a '+fv(IND,Math.max.apply(null,ok)));
+  $('s-fa').textContent=m.lungo+' ('+m.unita+'), '+lab(LN)+', fermata per fermata da '+F[0].n+' a '+F[n-1].n+'. La linea tratteggiata è la mediana di Milano. Cerchi vuoti: fuori da Milano.';
+  var nn=F.filter(function(f){return f.nil_id==null}).length;
+  $('nt-fa').textContent=nn?nn+' fermate sono fuori dal Comune di Milano e non hanno dati.':'';
+  $('src-fa').textContent='Fonte: '+m.fonte+' ('+m.anno+'); orari ATM/AMAT, Comune di Milano (CC BY); quartieri: Comune di Milano (CC BY).';
+}
+function niceStep(x){var p=Math.pow(10,Math.floor(Math.log10(x))),f=x/p;return (f<1.5?1:f<3.5?2:f<7.5?5:10)*p}
+function tick(v){var m=IM[IND];if(IND==='reddito')return f0(v/1000)+' mila';if(IND==='prezzo')return f0(v);return (Math.abs(v)<10?f1(v):f0(v))}
+function fitT(t,w){if(tw(t,12,true)<=w)return t;while(t.length>4&&tw(t+'…',12,true)>w)t=t.slice(0,-1);return t+'…'}
+function short1(s,n){return s.length>n?s.slice(0,n-1)+'…':s}
+
+/* ---------- B: mappa con tracciato ---------- */
+function figB(){
+  var m=IM[IND],F=fer(),W=width('ch-fb'),pts=F.filter(function(f){return f.nil_id!=null}),lons=pts.map(function(f){return f.lon}),lats=pts.map(function(f){return f.lat});
+  var bx=[Math.min.apply(null,lons),Math.max.apply(null,lons)],by=[Math.min.apply(null,lats),Math.max.apply(null,lats)],k=Math.cos(45.46*Math.PI/180),dx=(bx[1]-bx[0])||.01,dy=(by[1]-by[0])||.01,mx=dx*.12,my=dy*.12;
+  var bd=[bx[0]-mx,bx[1]+mx,by[0]-my,by[1]+my],P=geoProj(GEO.features,W,45.46,bd),H=Math.min(P.H,Math.round(W*1.35));
+  var s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="overflow:hidden" aria-hidden="true">';
+  var visit={};F.forEach(function(f){if(f.nil_id!=null)visit[f.nil_id]=1});
+  var cnt=[0,0,0,0,0],isN=m.liv==='NIL';
+  GEO.features.forEach(function(f){var id=f.properties.i,v=NI[id]?parseFloat(NI[id][IND==='voto_sx'||IND==='voto_dx'?IND:IND]):NaN,vis=visit[id],fill='#eef0f3';
+    if(isN&&vis&&!isNaN(v)){var c=cls(m,v);cnt[c]++;fill=CL[c]}else if(vis&&isN)fill='#d5d9df';
+    s+='<path d="'+P.path(f)+'" fill="'+fill+'" stroke="#fff" stroke-width="1.2"'+(vis?tip('<b>'+esc(f.properties.n)+'</b><br>'+(isN&&!isNaN(v)?esc(m.et)+': '+fv(IND,v):'senza dato')):'')+'/>'});
+  var line=LN.shape.map(function(p){var q=P.pt(p[1],p[0]);return r1(q[0])+' '+r1(q[1])}).join('L');
+  s+='<path d="M'+line+'" fill="none" stroke="#fff" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/><path d="M'+line+'" fill="none" stroke="'+C.ink+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  F.forEach(function(f,i){var q=P.pt(f.lon,f.lat),v=f.v[IND],c=v!=null?CL[cls(m,v)]:'#fff';
+    s+='<circle cx="'+r1(q[0])+'" cy="'+r1(q[1])+'" r="'+(F.length>40?3.6:5)+'" fill="'+(isN?'#fff':c)+'" stroke="'+C.ink+'" stroke-width="1.6"'+tip('<b>'+esc(f.n)+'</b><br>'+(f.nil_id==null?'fuori da Milano':esc(f.nil)+'<br>'+esc(m.et)+': '+fv(IND,v)))+'/>'});
+  var f0_=F[0],f1_=F[F.length-1],q0=P.pt(f0_.lon,f0_.lat),q1=P.pt(f1_.lon,f1_.lat);
+  var occ=[];F.forEach(function(f){var q=P.pt(f.lon,f.lat);occ.push({x:q[0]-5,y:q[1]-5,w:10,h:10})});
+  var it=[{x:q0[0],y:q0[1],r:6,txt:short1(f0_.n,18)},{x:q1[0],y:q1[1],r:6,txt:short1(f1_.n,18)}].filter(function(o){return o.x>0&&o.x<W&&o.y>0&&o.y<H});
+  s+=placeLabels(it,W,H,occ);
+  $('ch-fb').innerHTML=s+'</svg>';
+  var lg='';if(isN){lg=CL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+clName(m,i)+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')}else lg='<span>Il prezzo è per zona dei prezzi, non per quartiere: sulla mappa è scritto sulle fermate (colore pieno).</span>';
+  if(!isN)lg=CL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+clName(m,i)+'</span>'}).join('');
+  $('lg-fb').innerHTML=lg;
+  var nv=Object.keys(visit).length;
+  $('t-fb').textContent='La '+lab(LN)+' attraversa '+nv+' quartieri'+(isN?': ' + (function(){var vs=Object.keys(visit).map(function(i){return[i,NI[i]?parseFloat(NI[i][IND]):NaN]}).filter(function(x){return !isNaN(x[1])}).sort(function(a,b){return a[1]-b[1]});return vs.length?'dal valore più basso ('+esc(m.et.toLowerCase())+' '+fv(IND,vs[0][1])+', '+NI[vs[0][0]].nil+') al più alto ('+fv(IND,vs[vs.length-1][1])+', '+NI[vs[vs.length-1][0]].nil+')':''})():'');
+  $('src-fb').textContent='Fonte: '+m.fonte+' ('+m.anno+'); tracciato e fermate: orari ATM/AMAT, Comune di Milano (CC BY); confini dei quartieri (NIL): Comune di Milano (CC BY).';
+}
+
+/* ---------- C: strisce di tutte le linee ---------- */
+function figC(){
+  var m=IM[IND],W=width('ch-fc'),rh=62,H=D.linee.length*rh+4,s=svgOpen(W,H),cnt=[0,0,0,0,0];
+  D.linee.forEach(function(l,r){var y=4+r*rh,F=l.fermate,n=F.length,cw=W/n;
+    s+='<rect x="0" y="'+(y+3)+'" width="12" height="12" rx="2" fill="'+LC[l.id]+'"/>'+T(18,y+14,fitT(lab(l)+' · '+F[0].n+' → '+F[n-1].n,W-20),{c:'b'});
+    F.forEach(function(f,i){var v=f.v[IND],c=v==null?'#d5d9df':CL[cls(m,v)];if(v!=null)cnt[cls(m,v)]++;
+      s+='<rect x="'+r1(i*cw)+'" y="'+(y+22)+'" width="'+r1(Math.max(1,cw-1))+'" height="26" fill="'+c+'"'+tip('<b>'+esc(f.n)+'</b> ('+esc(lab(l))+')<br>'+(f.nil_id==null?'fuori da Milano':esc(f.nil)+'<br>'+esc(m.et)+': '+fv(IND,v)))+'/>'});
+  });
+  $('ch-fc').innerHTML=s+'</svg>';
+  $('lg-fc').innerHTML=CL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+clName(m,i)+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#d5d9df"></i>fuori Milano o senza dato</span>';
+  // quale linea è più alta/bassa: media delle posizioni
+  var av=D.linee.map(function(l){var v=l.fermate.map(function(f){return f.v[IND]}).filter(function(x){return x!=null});return{l:l,m:v.reduce(function(a,b){return a+b},0)/v.length}}).sort(function(a,b){return b.m-a.m});
+  $('t-fc').textContent='Con '+m.lungo.toLowerCase()+' le linee non sono uguali: in media la più alta è la '+lab(av[0].l)+' ('+fv(IND,av[0].m)+'), la più bassa la '+lab(av[av.length-1].l)+' ('+fv(IND,av[av.length-1].m)+')';
+  $('src-fc').textContent='Fonte: '+m.fonte+' ('+m.anno+'); orari ATM/AMAT, Comune di Milano (CC BY). Il numero accanto a ogni colore conta le fermate (una fermata su due linee conta due volte).';
+}
+
+/* ---------- fermata per fermata ---------- */
+function resetRg(){var r=$('rg'),F=fer(),k=0;while(k<F.length-1&&F[k].nil_id==null)k++;r.max=F.length-1;r.value=k}
+function pos0(m,v){return Math.max(0,Math.min(1,(v-m.min)/(m.max-m.min)))}
+function passo(){
+  var F=fer(),k=+$('rg').value,f=F[k],p=k>0?F[k-1]:null,W=width('ch-sl'),rh=54,H=D.indicatori.length*rh+6,s=svgOpen(W,H);
+  var ord=D.indicatori.slice().sort(function(a,b){return (a.id===IND?-1:0)-(b.id===IND?-1:0)});
+  var x0=6,x1=W-6,pw=x1-x0;
+  ord.forEach(function(m,i){var y=4+i*rh,v=f.v[m.id],pv=p?p.v[m.id]:null;
+    s+=T(x0,y+14,m.et,{c:'b'})+T(x1,y+14,v==null?'nessun dato':fv(m.id,v),{a:'end',c:'b'});
+    s+='<rect x="'+x0+'" y="'+(y+26)+'" width="'+pw+'" height="8" rx="4" fill="#e6e8ec"/>';
+    s+=L(x0+pos0(m,m.mediana)*pw,y+22,x0+pos0(m,m.mediana)*pw,y+38,C.ink,2);
+    if(v!=null&&pv!=null&&Math.abs(pos0(m,v)-pos0(m,pv))>.001)s+=L(x0+pos0(m,pv)*pw,y+30,x0+pos0(m,v)*pw,y+30,LC[LN.id],4,' stroke-linecap="round"');
+    if(pv!=null)s+='<circle cx="'+r1(x0+pos0(m,pv)*pw)+'" cy="'+(y+30)+'" r="6" fill="#fff" stroke="'+C.ink+'" stroke-width="2"/>';
+    if(v!=null)s+='<circle cx="'+r1(x0+pos0(m,v)*pw)+'" cy="'+(y+30)+'" r="7" fill="'+LC[LN.id]+'" stroke="'+C.ink+'" stroke-width="2"'+tip('<b>'+esc(m.lungo)+'</b><br>'+fv(m.id,v)+(pv!=null?'<br>fermata prima: '+fv(m.id,pv):''))+'/>';
+    s+=T(x0,y+50,fv(m.id,m.min),{c:'m'})+T(x1,y+50,fv(m.id,m.max),{a:'end',c:'m'})+(pv!=null&&Math.abs(pos0(m,v)-pos0(m,pv))>.001?T(W/2,y+50,'prima: '+fv(m.id,pv),{a:'middle',c:'m'}):'');
+  });
+  $('ch-sl').innerHTML=s+'</svg>';
+  $('sl-nm').textContent=(k+1)+'. '+f.n;
+  $('sl-qq').innerHTML=f.nil_id==null?'Fuori dal Comune di Milano: nessun dato per questa fermata.':'Quartiere <b>'+esc(f.nil)+'</b>'+(f.res!=null?', '+f0(f.res)+' residenti':'')+(f.res!=null&&f.res<5000?' (quartiere piccolo: valori meno stabili)':'')+(f.omi_nome?' · zona dei prezzi '+esc(f.omi_nome):'')+'. I valori sono del quartiere, non della fermata.';
+  $('t-sl').textContent='Fermata '+(k+1)+' di '+F.length+' della '+lab(LN)+': scorri il cursore e guarda come cambia il quartiere';
+  $('src-sl').textContent='Fonte: orari ATM/AMAT, Comune di Milano (CC BY); i valori vengono dalle fonti elencate in fondo alla pagina, ciascuna con il suo anno. Ogni riga va dal valore più basso al più alto di Milano.';
+}
+
+/* ---------- salti ---------- */
+function salti(){
+  var rows=D.salti_per_indicatore.slice().sort(function(a,b){return b.perc-a.perc}),W=width('ch-sal'),rh=82,H=rows.length*rh+6,s=svgOpen(W,H),x0=6,x1=W-6,pw=x1-x0;
+  rows.forEach(function(r,i){var m=IM[r.ind],y=4+i*rh,c=LC[r.linea]||C.ink,xa=x0+pos0(m,r.v_da)*pw,xb=x0+pos0(m,r.v_a)*pw;
+    s+=T(x0,y+14,m.et+' · '+Math.round(r.perc*100)+' su 100',{c:'b'});
+    s+=T(x0,y+31,short1(r.da_n+' → '+r.a_n,30)+' ('+r.linea_nome+')',{c:'m'});
+    s+='<rect x="'+x0+'" y="'+(y+42)+'" width="'+pw+'" height="8" rx="4" fill="#e6e8ec"/>'+L(xa,y+46,xb,y+46,c,4,' stroke-linecap="round"');
+    var th='<b>'+esc(m.et)+'</b><br>'+esc(r.testo);
+    s+='<circle cx="'+r1(xa)+'" cy="'+(y+46)+'" r="6.5" fill="#fff" stroke="'+C.ink+'" stroke-width="2"'+tip(th)+'/><circle cx="'+r1(xb)+'" cy="'+(y+46)+'" r="7" fill="'+c+'" stroke="'+C.ink+'" stroke-width="2"'+tip(th)+'/>';
+    s+=T(x0,y+68,fv(m.id,m.min),{c:'m'})+T(x1,y+68,fv(m.id,m.max),{a:'end',c:'m'})+T(W/2,y+68,fv(r.ind,r.v_da)+' → '+fv(r.ind,r.v_a),{a:'middle',c:'k'});
+    s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+(rh-4)+'" fill="transparent"'+tip('<b>'+esc(m.et)+'</b><br>'+esc(r.testo))+'/>';
+  });
+  $('ch-sal').innerHTML=s+'</svg>';
+  var a=rows[0],ma=IM[a.ind];
+  $('t-sal').textContent='Il salto più grande è '+ma.et.toLowerCase()+' tra '+a.da_n+' e '+a.a_n+' ('+a.linea_nome+'): da '+fv(a.ind,a.v_da)+' a '+fv(a.ind,a.v_a)+', in una sola fermata';
+  $('src-sal').textContent='Fonte: orari ATM/AMAT, Comune di Milano (CC BY); dati di ogni riga come nelle fonti in fondo alla pagina.';
+}
+
+/* ---------- in fondo ---------- */
+function fondo(){
+  $('l-anni').textContent=D.indicatori.map(function(m){return m.et+': '+m.anno}).join('; ');
+  $('l-aff').textContent=f1(D.voto.affluenza_pct);$('l-sx').textContent=f1(D.voto.centrosinistra_pct);$('l-dx').textContent=f1(D.voto.centrodestra_pct);
+  var f='';D.indicatori.forEach(function(m){f+='<li><b>'+esc(m.et)+'</b> ('+esc(m.anno)+'): '+esc(m.fonte)+'. Valore '+(m.liv==='OMI'?'della zona dei prezzi':'del quartiere')+'. <a href="'+esc(m.pagina)+'">Pagina su questo sito: '+esc(m.pagina_et)+'</a></li>'});
+  f+='<li><b>Fermate e linee</b> (versione 425, validità 26/10-30/11/2026): orari GTFS del Comune di Milano / AMAT (ATM), CC BY, scaricati il 29 ottobre 2026. Dati di questa pagina elaborati il '+esc(D.generato.split('-').reverse().join('/'))+'.</li>';
+  $('fonti-lista').innerHTML=f;
+}
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1),el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();el.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname+'#'+id)},true);
+</script></body></html>
