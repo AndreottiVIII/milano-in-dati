@@ -3032,3 +3032,8 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-07 — sfratti: pubblicata definitiva; «Perché si viene sfrattati» passa dalle griglie da 100 a linee 2013-2025, Milano piena e Italia tratteggiata (Davide).
 - 2026-11-07 — costruzioni: rifatta da capo su richiesta di Davide ("noiosa") e pubblicata: mappa con bolle che crescono anno per anno, linea col crollo 2024, barre a farfalla permesso/SCIA, demolito vs nuovo, skyline dei 10 più grandi, trimestri.
 - 2026-11-07 — palazzi: pubblicata definitiva; le epoche di costruzione su un asse vero degli anni (Davide: "sposta su asse x").
+- 2026-11-08 — reati: pubblicata definitiva nel nuovo schema, ok di Davide.
+- 2026-11-08 — omicidi: pubblicata definitiva nel nuovo schema, ok di Davide.
+- 2026-11-08 — matrimoni: pubblicata definitiva nel nuovo schema, ok di Davide.
+- 2026-11-08 — antenne: pubblicata definitiva nel nuovo schema, ok di Davide.
+- 2026-11-08 — tribunale: pubblicata definitiva nel nuovo schema, ok di Davide.
