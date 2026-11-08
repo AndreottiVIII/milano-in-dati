@@ -105,8 +105,9 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <h2 id="donne">Chi sono le vittime: donne e uomini</h2>
 <div class="fig">
   <h3 id="t-donne"></h3>
-  <p class="how">Ogni quadretto è una persona su 100 uccise: rosa le donne, blu gli uomini. A sinistra l&rsquo;area milanese, a destra l&rsquo;Italia; sopra il periodo più vecchio, sotto il più recente.</p>
-  <div class="ch" id="ch-donne" role="img" aria-label="Quadretti: su 100 vittime di omicidio, quante donne, area milanese e Italia, due periodi"></div>
+  <p class="how">Su 100 persone uccise, quante donne (rosa) e quanti uomini (blu), in due periodi. Il collegamento in mezzo mostra come cambia la quota di donne.</p>
+  <div class="lg" style="display:flex;gap:14px;font-size:.85rem;margin:.2em 0 .4em"><span><b style="color:#F06EAA">■</b> donne</span><span><b style="color:#0072BC">■</b> uomini</span></div>
+  <div class="ch" id="ch-donne" role="img" aria-label="Barre divise rosa e blu: su 100 vittime, quante donne e quanti uomini, area milanese e Italia, due periodi, con il collegamento che mostra come cambia la quota di donne"></div>
   <table class="kt" id="tab-donne"></table>
   <p class="src">Fonte: ISTAT, cause di morte, decessi per omicidio e aggressione nel luogo dove è avvenuto il decesso (CC BY 4.0). Sono quote, non tassi: non abbiamo la popolazione divisa per sesso. Per la violenza sulle donne vedi la pagina <a href="../violenza-donne/">La violenza contro le donne</a>.</p>
 </div>
@@ -272,7 +273,7 @@ function linea(){
   // valori scritti: inizio, picchi, fine
   var a=A[0],z=last(A),pi=S.pk.anno-i0,ipk=A.reduce(function(b,r,i){return r.italia_tasso>A[b].italia_tasso?i:b},0);
   var HL='paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;';
-  s+=T(X(0)+2,Y(a.italia_tasso)-13,f2(a.italia_tasso),{c:'b',st:HL});
+  s+=T(X(0)+2,Y(a.italia_tasso)+17,f2(a.italia_tasso),{c:'b',st:HL});
   s+=T(X(0)+2,Y(a.tasso)+19,f2(a.tasso),{c:'b',st:HL+'fill:'+C.mi});
   s+=T(X(ipk)+4,Y(A[ipk].italia_tasso)-8,f2(A[ipk].italia_tasso),{a:'middle',c:'b',st:HL});
   s+=T(X(pi)-8,Y(S.pk.tasso)+3,f2(S.pk.tasso),{a:'end',c:'b',st:HL+'fill:'+C.mi});
@@ -358,21 +359,20 @@ function comuni(){
 
 /* ---------- 4. quadretti: su 100 vittime, quante donne ---------- */
 function donne(){
-  var box=$('ch-donne'),W=width('ch-donne');
-  var P4=[[['Area milanese','2003-2007','2003-07'],['Italia','2003-2007','2003-07']],[['Area milanese','2018-2023','2018-23'],['Italia','2018-2023','2018-23']]];
-  var gap=14,colW=(W-gap)/2,cell=Math.min(17,Math.floor((colW-2)/10)),gw=cell*10,sq=cell-2,hh=46,top=0,sepY=14;
-  var panelH=hh+gw,H=top+2*panelH+sepY+4,s=svgOpen(W,H);
-  P4.forEach(function(row,ri){row.forEach(function(p,ci){
-    var d=S.d(p[0],p[1]),q=Math.round(d.quota_donne),x0=ci*(colW+gap)+(colW-gw)/2,y0=top+ri*(panelH+sepY),mi=p[0]==='Area milanese';
-    s+=T(x0,y0+14,p[0]+' · '+p[2],{c:'b',st:mi?'fill:'+C.mi:''});
-    s+=T(x0,y0+34,'<tspan style="font-weight:800;font-size:18px;fill:'+C.don+'">'+q+'</tspan> donne su 100',{c:'m'});
-    var yb=y0+hh,h='<b>'+esc(p[0])+' '+p[2]+'</b><br>'+f0(d.donne)+' donne e '+f0(d.uomini)+' uomini<br>quota di donne: '+f1(d.quota_donne)+'%';
-    s+='<g'+tip(h)+'>';
-    for(var j=0;j<100;j++){var r=Math.floor(j/10),c=j%10;
-      s+='<rect x="'+r1(x0+c*cell)+'" y="'+r1(yb+r*cell)+'" width="'+sq+'" height="'+sq+'" rx="2" fill="'+(j<q?C.don:C.uom)+'"/>'}
-    s+='</g>';
-  })});
-  box.innerHTML=s+'</svg>';
+  var W=width('ch-donne');
+  var P=[['Area milanese',C.mi],['Italia',C.ink]],PE=[['2003-2007','2003-07'],['2018-2023','2018-23']];
+  var v=P.map(function(p){return PE.map(function(e){return S.d(p[0],e[0]).quota_donne})});
+  var lw=58,bx=lw,bw=W-lw-2,bh=34,gap=46,blk=18+bh+gap+bh+22,s=svgOpen(W,blk*2);
+  P.forEach(function(p,i){
+    var y0=i*blk,y1=y0+22,y2=y1+bh+gap,q0=v[i][0],q1=v[i][1],x0=bx+q0/100*bw,x1=bx+q1/100*bw,d=q1-q0;
+    s+=T(0,y0+14,p[0],{c:'b',st:'font-size:16px;fill:'+p[1]});
+    [[y1,q0,0],[y2,q1,1]].forEach(function(r){var wq=r[1]/100*bw,e=PE[r[2]],dd=S.d(p[0],e[0]);
+      s+=T(0,r[0]+bh/2+5,e[1],{c:'b'});
+      s+='<g'+tip('<b>'+p[0]+' '+e[1]+'</b><br>'+f0(dd.donne)+' donne e '+f0(dd.uomini)+' uomini<br>quota di donne: '+f1(r[1])+'%')+'><rect x="'+bx+'" y="'+r[0]+'" width="'+r1(wq)+'" height="'+bh+'" fill="'+C.don+'"/><rect x="'+r1(bx+wq)+'" y="'+r[0]+'" width="'+r1(bw-wq)+'" height="'+bh+'" fill="'+C.uom+'"/></g>';
+      s+=T(bx+wq/2,r[0]+bh/2+7,f0(r[1]),{a:'middle',st:'font-size:20px;font-weight:800;fill:#0b0d12'})+T(bx+wq+(bw-wq)/2,r[0]+bh/2+7,f0(100-r[1]),{a:'middle',st:'font-size:20px;font-weight:800;fill:#fff'})});
+    s+=L(x0,y1+bh,x1,y2,C.ink,3)+'<circle cx="'+r1(x0)+'" cy="'+(y1+bh)+'" r="4" fill="'+C.ink+'"/><circle cx="'+r1(x1)+'" cy="'+y2+'" r="4" fill="'+C.ink+'"/>';
+    s+=T(Math.max(x0,x1)+14,y1+bh+gap/2+5,'quota di donne '+sg1(d)+' punti',{c:'b',st:'font-size:14px'})});
+  $('ch-donne').innerHTML=s+'</svg>';
   var a0=S.d('Area milanese','2003-2007'),a1=S.d('Area milanese','2018-2023'),i0=S.d('Italia','2003-2007'),i1=S.d('Italia','2018-2023');
   $('t-donne').textContent='Nell’area milanese le donne sono sempre circa un terzo delle vittime; in Italia la quota sale da '+f0(i0.quota_donne)+' a '+f0(i1.quota_donne)+' su 100';
   var h='<thead><tr><th>Quota di donne</th><th>2003-07</th><th>2018-23</th><th>Variazione</th></tr></thead><tbody>';

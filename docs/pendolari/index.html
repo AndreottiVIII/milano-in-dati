@@ -106,14 +106,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 
 <!-- ============ 1 ============ -->
 <h2 id="quanti">Quanti sono</h2>
-<div class="fig">
-  <h3 id="t-omini-lavoro"></h3>
-  <p class="sub">Ogni omino è un posto di lavoro a Milano su cento. Blu: occupato da chi abita fuori Milano. Grigio: da un milanese.</p>
-  <div class="lg"><span><i style="background:var(--m4)"></i>abita fuori Milano</span><span><i style="background:#c9ced6"></i>abita a Milano</span></div>
-  <div class="pan q4" id="pan-lavoro"></div>
-  <p class="note">* Stima. Arrotondato a cento omini. Il «posto di lavoro» è quello dichiarato dalla persona (1991-2011) o registrato negli archivi (2021).</p>
-  <p class="src">Fonte: ISTAT, matrici del pendolarismo (CC BY 4.0); 2021 stima con modello. Solo chi lavora, gli studenti non ci sono.</p>
-</div>
+<div class="fig"><h3 id="t-omini-lavoro"></h3><p class="sub">Quota dei posti di lavoro a Milano occupati da chi abita fuori Milano, ogni dieci anni. Dopo il 2011 la linea è tratteggiata: il 2021 è una stima.</p><div class="ch" id="ch-lav-a" role="img" aria-label="Linea: quota dei posti di lavoro a Milano occupati da chi abita fuori Milano, 1991-2021"></div><p class="note">* Stima. Il «posto di lavoro» è quello dichiarato dalla persona (1991-2011) o registrato negli archivi (2021).</p><p class="src">Fonte: ISTAT, matrici del pendolarismo (CC BY 4.0); 2021 stima con modello. Solo chi lavora, gli studenti non ci sono.</p></div>
 
 <div class="fig">
   <h3 id="t-linee"></h3>
@@ -143,15 +136,8 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 
 <!-- ============ 3 ============ -->
 <h2 id="come">Come arrivano</h2>
-<div class="fig">
-  <h3 id="t-omini-mezzi"></h3>
-  <p class="sub">Cento pendolari che entrano a Milano, ognuno nel suo mezzo. Dal 2011 non ci sono dati più recenti.</p>
-  <div class="lg" id="lg-mezzi"></div>
-  <div class="pan" id="pan-mezzi"></div>
-  <table class="kt" id="tab-mezzi"></table>
-  <p class="note">Nel 1991 l’ISTAT ha accettato il rientro in giornata dalle province più lontane solo per chi viaggia in treno: il treno del 1991 è un po’ gonfiato e il confronto va letto con prudenza.</p>
-  <p class="src">Fonte: ISTAT, matrici del pendolarismo 1991, 2001 e 2011 (CC BY 4.0), mezzo dichiarato nel censimento. Lavoro e studio insieme; sono escluse le persone che non hanno indicato il mezzo (3% nel 1991). Il 2021 non ha il dato.</p>
-</div>
+<div class="fig"><h3 id="t-omini-mezzi"></h3><p class="sub">Per ogni mezzo, la quota dei pendolari nel 1991 e nel 2011. Dal 2011 non ci sono dati più recenti.</p><div class="ch" id="ch-mezzi-b" role="img" aria-label="Barre: quota di pendolari per mezzo, 1991 e 2011"></div></div>
+<div class="fig"><table class="kt" id="tab-mezzi"></table><p class="note">Nel 1991 l’ISTAT ha accettato il rientro in giornata dalle province più lontane solo per chi viaggia in treno: il treno del 1991 è un po’ gonfiato e il confronto va letto con prudenza.</p><p class="src">Fonte: ISTAT, matrici del pendolarismo 1991, 2001 e 2011 (CC BY 4.0), mezzo dichiarato nel censimento. Lavoro e studio insieme; sono escluse le persone che non hanno indicato il mezzo (3% nel 1991). Il 2021 non ha il dato.</p></div>
 
 <div class="fig">
   <h3 id="t-mekko"></h3>
@@ -356,6 +342,49 @@ Lab.prototype.put=function(cx,cy,lines,ux,uy,tipAttr,leader){
 };
 
 /* ====================================================== */
+/* ---------- grafici nuovi al posto della griglia "su 100" (g3) ---------- */
+function gT(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+' style="font-size:'+(o.sz||12)+'px;font-weight:'+(o.b?800:400)+';fill:'+(o.col||'#0b0d12')+(o.halo?';paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round':'')+'">'+s+'</text>'}
+function gStack(W,rows,parts,o){
+  o=o||{};var bh=o.bh||50,out='',y=0,fm=o.fmt||function(v){return f0(v)};
+  var H=0,blocks=rows.map(function(r){
+    var xs=0,segs=r.v.map(function(v,i){var w=W*v/100,seg={i:i,x:xs,w:w,v:v};xs+=w;return seg});
+    var inside=function(sg){return sg.w>=30},nameIn=function(sg){return tw(parts[sg.i].n,12,true)+8<=sg.w};
+    var call=segs.filter(function(sg){return !(inside(sg)&&nameIn(sg))});
+    var h=26+bh+(call.length?10+call.length*18:0)+16;
+    return{r:r,segs:segs,call:call,h:h,inside:inside,nameIn:nameIn}});
+  blocks.forEach(function(b){
+    var r=b.r;
+    out+=gT(0,y+16,r.t,{b:1,sz:o.tsz||16})+(r.s?gT(W,y+16,r.s,{a:'end',col:'#5f6673'}):'');
+    var by=y+24;
+    b.segs.forEach(function(sg){
+      var p=parts[sg.i],tt=(r.tt&&r.tt[sg.i])||('<b>'+r.t+'</b><br>'+p.n+': '+fm(sg.v));
+      if(sg.w<0.5)return;
+      out+='<g'+tip(tt)+'><rect x="'+r1(sg.x)+'" y="'+by+'" width="'+r1(sg.w)+'" height="'+bh+'" fill="'+p.c+'" stroke="#fff" stroke-width="2"/>';
+      if(b.inside(sg)){
+        var cx=sg.x+sg.w/2,tc=p.tc||'#fff';
+        if(b.nameIn(sg))out+=gT(cx,by+bh/2-2,fm(sg.v),{a:'middle',b:1,sz:16,col:tc})+gT(cx,by+bh/2+15,p.n,{a:'middle',b:1,sz:12,col:tc});
+        else out+=gT(cx,by+bh/2+6,fm(sg.v),{a:'middle',b:1,sz:16,col:tc})}
+      out+='</g>'});
+    var cy=by+bh+22;
+    b.call.forEach(function(sg,k){var p=parts[sg.i],t=(b.inside(sg)?'':fm(sg.v)+' ')+p.n;
+      out+='<rect x="0" y="'+r1(cy+k*18-11)+'" width="12" height="12" rx="2" fill="'+p.c+'"/>'+gT(18,cy+k*18,(b.inside(sg)?'':'<tspan style="font-weight:800">'+fm(sg.v)+'</tspan> ')+p.n,{})});
+    y+=b.h});
+  return svgOpen(W,Math.ceil(y))+out+'</svg>';
+}
+/* barre orizzontali con etichette e valori. rows: [{n, sub, s:[{v,c,y,tt}]}], max = valore a fondo scala */
+function gBars(W,rows,o){
+  o=o||{};var vw=o.vw||96,bw=W-vw,bh=o.bh||22,gp=3,out='',y=0,mx=o.max,fm=o.fmt||function(v){return f0(v)};
+  rows.forEach(function(r){
+    out+=gT(0,y+15,r.n,{b:1,sz:14})+(r.sub?gT(W,y+15,r.sub,{a:'end',col:'#5f6673'}):'');
+    var by=y+22;
+    r.s.forEach(function(s,k){var w=Math.max(3,s.v/mx*bw),yy=by+k*(bh+gp);
+      out+='<g'+tip(s.tt||('<b>'+r.n+'</b><br>'+(s.y?s.y+': ':'')+fm(s.v)))+'><rect x="0" y="'+r1(yy)+'" width="'+r1(w)+'" height="'+bh+'" fill="'+s.c+'"/>'+
+        gT(w+6,yy+bh/2+5,(s.y?'<tspan style="font-weight:400;fill:#5f6673">'+s.y+'</tspan> ':'')+fm(s.v)+(o.unit||''),{b:1,sz:o.vsz||15})+'<rect x="0" y="'+r1(yy)+'" width="'+W+'" height="'+bh+'" fill="transparent"/></g>'});
+    y=by+r.s.length*(bh+gp)+(o.gap||12)});
+  return svgOpen(W,Math.ceil(y))+out+'</svg>';
+}
+/* slope chart: items [{n,a,b,c}], labs ['1991','2011'] */
+
 function tutto(){
   highlights();
   draw(omini);draw(linee);
@@ -385,14 +414,24 @@ function highlights(){
   $('hl').innerHTML=H.map(function(h){return '<a href="#'+h.h+'" style="--c:'+h.c+'"><span class="n">'+h.n+(h.u?'<small>'+h.u+'</small>':'')+'</span><p>'+h.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
-/* ---------- 1. omini: posti di lavoro ---------- */
+/* ---------- 1. posti di lavoro ---------- */
 function omini(){
-  var q=R.quota_di_fuori_lavoro,Y=['1991','2001','2011','2021'];
-  $('t-omini-lavoro').textContent='A Milano un posto di lavoro su due è di chi abita altrove: erano '+f0(q['1991']*100)+' su 100 nel 1991, sono '+f0(q['2021']*100)+' su 100 nel 2021';
-  var box=$('pan-lavoro'),cols=window.innerWidth>=700?4:2,pw=Math.floor((box.clientWidth-(cols-1)*12)/cols);
-  box.innerHTML=Y.map(function(y){var v=q[y]*100,n=Math.round(v);
-    return '<div class="p"><div class="ph"><b>'+y+(y==='2021'?'*':'')+'</b><span>'+f1(v)+' su 100</span></div>'+
-      '<div class="ch" role="img" aria-label="'+y+': '+n+' omini blu su 100">'+ominiSvg(pw,[{n:n,col:C.m4},{n:100-n,col:C.light}])+'</div></div>'}).join('');
+  var q=R.quota_di_fuori_lavoro,Y=['1991','2001','2011','2021'],v=Y.map(function(y){return q[y]*100});
+  $('t-omini-lavoro').textContent='A Milano un posto di lavoro su due è di chi abita altrove: erano '+f0(v[0])+' su 100 nel 1991, sono '+f0(v[3])+' su 100 nel 2021';
+  /* A: linea */
+  var W=width('ch-lav-a'),H=250,m={l:44,r:22,t:22,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,lo=40,hi=60;
+  function X(i){return m.l+pw*i/3}function Yp(x){return m.t+ph*(1-(x-lo)/(hi-lo))}
+  var s=svgOpen(W,H);
+  [40,45,50,55,60].forEach(function(t){s+=L(m.l,Yp(t),W-m.r,Yp(t),t===50?C.ink:C.grid,t===50?2:1)+gT(m.l-6,Yp(t)+4,t+'%',{a:'end',col:C.mut})});
+  s+='<rect x="'+r1(X(2))+'" y="'+m.t+'" width="'+r1(X(3)-X(2))+'" height="'+ph+'" fill="#f4f5f7"/>'+gT((X(2)+X(3))/2,H-m.b-8,'stima',{a:'middle',col:C.mut});
+  s+=gT(m.l+6,Yp(50)-6,'metà dei posti di lavoro',{b:1});
+  s+='<path d="M'+v.slice(0,3).map(function(x,i){return r1(X(i))+' '+r1(Yp(x))}).join('L')+'" fill="none" stroke="'+C.m4+'" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>';
+  s+='<path d="M'+r1(X(2))+' '+r1(Yp(v[2]))+'L'+r1(X(3))+' '+r1(Yp(v[3]))+'" fill="none" stroke="'+C.m4+'" stroke-width="4" stroke-dasharray="2 7" stroke-linecap="round"/>';
+  v.forEach(function(x,i){
+    s+='<g'+tip('<b>'+Y[i]+(i===3?' (stima)':'')+'</b><br>Posti di lavoro di chi abita fuori Milano: '+f1(x)+'%')+'><circle cx="'+r1(X(i))+'" cy="'+r1(Yp(x))+'" r="6" fill="'+(i===3?'#fff':C.m4)+'" stroke="'+C.m4+'" stroke-width="3"/><circle cx="'+r1(X(i))+'" cy="'+r1(Yp(x))+'" r="16" fill="transparent"/></g>';
+    s+=gT(X(i),Yp(x)+(x<50?24:-14),f1(x)+'%',{a:i===3?'end':i===0?'start':'middle',b:1,sz:15,col:C.m4,halo:1});
+    s+=gT(X(i),H-8,Y[i]+(i===3?'*':''),{a:i===3?'end':i===0?'start':'middle',col:C.mut})});
+  $('ch-lav-a').innerHTML=s+'</svg>';
 }
 
 /* ---------- 2. linee ---------- */
@@ -510,17 +549,14 @@ function hinterland(){
   $('tab-hin').innerHTML='<caption>Pendolari verso Milano dai comuni della mappa, per settore</caption><thead><tr><th>Settore</th><th>1991</th><th>2021</th><th>Variazione</th></tr></thead><tbody>'+rows+'<tr class="tot"><td>Totale</td><td>'+f0(t91)+'</td><td>'+f0(t21)+'</td><td>'+vp(t91,t21)+'</td></tr></tbody>';
 }
 
-/* ---------- 5. mezzi: omini 1991 vs 2011 ---------- */
+/* ---------- 5. mezzi 1991 e 2011 ---------- */
 function mezziOmini(){
   var A=G.modiAnno,m91=grpModi(A['1991']),m11=grpModi(A['2011']),m01=grpModi(A['2001']);
-  var a91=alloc(m91,100),a11=alloc(m11,100),a01=alloc(m01,100);
+  var a91=alloc(m91,100),a11=alloc(m11,100),s91=sum(m91),s11=sum(m11);
   $('t-omini-mezzi').textContent='Su 100 pendolari, in auto o moto erano '+a91[0]+' nel 1991 e sono '+a11[0]+' nel 2011; il treno è passato da '+a91[1]+' a '+a11[1]+', l’autobus da '+a91[2]+' a '+a11[2];
-  $('lg-mezzi').innerHTML=MG.map(function(g){return '<span>'+sw(g.col)+g.n+'</span>'}).join('');
-  var box=$('pan-mezzi'),pw=Math.floor((box.clientWidth-12)/2);
-  function panel(y,a){var gs=MG.map(function(g,i){return{n:a[i],col:g.col}});
-    return '<div class="p"><div class="ph"><b>'+y+'</b><span>100 pendolari</span></div><div class="ch" role="img" aria-label="'+y+': '+MG.map(function(g,i){return a[i]+' '+g.n}).join(', ')+'">'+ominiSvg(pw,gs)+'</div>'+
-      '<ul class="lst">'+MG.map(function(g,i){return '<li><i style="background:'+g.col+'"></i>'+g.n+'<b>'+a[i]+'</b></li>'}).join('')+'</ul></div>'}
-  box.innerHTML=panel('1991',a91)+panel('2011',a11);
+  var W=width('ch-mezzi-b');
+  var mx=0;MG.forEach(function(g,i){mx=Math.max(mx,m91[i]/s91*100,m11[i]/s11*100)});
+  $('ch-mezzi-b').innerHTML=gBars(W,MG.map(function(g,i){return{n:g.n,s:[{v:m91[i]/s91*100,c:'#2f3440',y:'1991'},{v:m11[i]/s11*100,c:g.col,y:'2011'}]}}),{max:mx,unit:'%',vw:104});
   var rows=MG.map(function(g,i){return '<tr><td>'+sw(g.col)+g.n+'</td><td>'+f1(m91[i]/sum(m91)*100)+'%</td><td>'+f1(m01[i]/sum(m01)*100)+'%</td><td>'+f1(m11[i]/sum(m11)*100)+'%</td><td>'+sg0((m11[i]/sum(m11))/(m91[i]/sum(m91))*100-100)+'%</td></tr>'}).join('');
   $('tab-mezzi').innerHTML='<caption>Quota di ogni mezzo sui pendolari che hanno indicato il mezzo</caption><thead><tr><th>Mezzo</th><th>1991</th><th>2001</th><th>2011</th><th>Variaz. 1991-2011</th></tr></thead><tbody>'+rows+'</tbody>';
 }
@@ -626,7 +662,7 @@ function pick(pc){
   var tb91=G.tempiBanda['1991'][G.BANDE[bi]],tb11=G.tempiBanda['2011'][G.BANDE[bi]],o91=tb91[3]/sum(tb91)*100,o11=tb11[3]/sum(tb11)*100;
   var w=Math.max(220,Math.min(300,Math.floor(($('tuo-out').clientWidth||320)/(window.innerWidth>=700?2:1)-8)));
   var gs=MG.map(function(m,i){return{n:a[i],col:m.col}});
-  var h1='<div><h4>Come viaggia chi abita '+(bi===0?'entro 10 km':bi===5?'oltre 80 km':'tra '+bn.replace(' km','')+' km')+' da Milano, su 100 (2011)</h4><div class="ch" role="img" aria-label="Cento pendolari divisi per mezzo">'+ominiSvg(w,gs)+'</div><ul class="lst">'+MG.map(function(m,i){return '<li><i style="background:'+m.col+'"></i>'+m.n+'<b>'+a[i]+'</b></li>'}).join('')+'</ul>'+
+  var h1='<div><h4>Come viaggia chi abita '+(bi===0?'entro 10 km':bi===5?'oltre 80 km':'tra '+bn.replace(' km','')+' km')+' da Milano, su 100 (2011)</h4><div class="ch" role="img" aria-label="Barra divisa per mezzo">'+gStack(w,[{t:'Su 100 pendolari',v:a}],MG.map(function(m){return{n:m.n,c:m.col,tc:m.col==='#8a919c'?'#0b0d12':'#fff'}}),{bh:44,tsz:14})+'</div>'+
     '<p class="note">Più di un’ora di viaggio: <b>'+f0(o11)+'</b> su 100 nel 2011, <b>'+f0(o91)+'</b> su 100 nel 1991.</p></div>';
   /* mini mappa: zoom su Milano e sul comune */
   var w2=w,kmLon=111*COSL,dkm=Math.hypot((c.lon-9.19)*kmLon,(c.lat-45.4666)*111),half=Math.max(14,dkm*.62+9);

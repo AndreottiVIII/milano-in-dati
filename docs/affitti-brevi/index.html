@@ -82,6 +82,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 .ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
 .ris p{margin:.3em 0 0}
 .ris .ch{margin-top:8px}
+.ris .tg{font-size:1rem;font-weight:750;margin:6px 0 0;line-height:1.25}
 .ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
 .vedi{margin:2em 0 0;padding:10px 12px;background:var(--soft);border-left:6px solid var(--ink);font-size:.95rem}
 .vedi b{display:block;margin-bottom:2px}
@@ -275,11 +276,6 @@ function mnome(i){return i===0?'meno di 1,5':i===BR.length?'oltre 4':String(BR[i
 /* gruppi di host */
 var HG=[{n:'1 annuncio',f:['1'],col:C.m4,txt:'#fff'},{n:'2-4 annunci',f:['2','3-4'],col:C.m2,txt:C.ink},{n:'5-19 annunci',f:['5-9','10-19'],col:C.tur,txt:C.ink},{n:'20 o più annunci',f:['20 o piu'],col:C.m5,txt:'#fff'}];
 function hgrp(){return HG.map(function(g){var h=0,a=0;D.host.forEach(function(r){if(g.f.indexOf(r.fascia)>=0){h+=r.host;a+=r.annunci}});return{g:g,h:h,a:a}})}
-function quad(vals){ // 100 quadretti, resti piu' grandi
-  var tot=vals.reduce(function(a,b){return a+b},0),raw=vals.map(function(v){return v/tot*100}),fl=raw.map(Math.floor),
-  rest=100-fl.reduce(function(a,b){return a+b},0),ord=raw.map(function(v,i){return[v-Math.floor(v),i]}).sort(function(a,b){return b[0]-a[0]});
-  for(var k=0;k<rest;k++)fl[ord[k][1]]++;return fl;
-}
 
 function tutto(){
   prepara();
@@ -360,29 +356,32 @@ function notti(){
   $('nt-notti').innerHTML='La quota delle notti fuori dagli alberghi è passata dal <b>'+f0(S.quota0*100)+'%</b> del 2019 al <b>'+f0(S.quota1*100)+'%</b> del 2025: quasi una notte su due. Non vuol dire che gli affitti brevi abbiano tolto clienti agli alberghi: dice solo dove sono finite le notti in più. «Fuori dagli alberghi» non è solo Airbnb.';
 }
 
-/* ---------- casette ---------- */
-function casette(W,n){
-  var c=Math.floor(Math.min(W,380)/10),s=svgOpen(c*10,c*10);
-  for(var i=0;i<100;i++){
-    var x=(i%10)*c,y=Math.floor(i/10)*c,p=function(a,b){return r1(x+a*c)+' '+r1(y+b*c)};
-    s+='<path d="M'+p(.5,.1)+'L'+p(.94,.5)+'L'+p(.82,.5)+'L'+p(.82,.92)+'L'+p(.18,.92)+'L'+p(.18,.5)+'L'+p(.06,.5)+'Z" fill="'+(i<n?C.tur:C.light)+'"/>';
-  }
+/* ---------- scheda del quartiere: due opzioni ---------- */
+function barreQ(W,o){
+  var Cc=D.citta,rows=[],mx=NB[0].p100;
+  if(o&&!o.piccolo)rows.push({n:o.sn,v:o.p100,c:C.ink});
+  rows.push({n:'Milano, media',v:Cc.annunci_per_100,c:C.mi});
+  NB.slice(0,3).forEach(function(q){if(!o||q!==o)rows.push({n:q.sn,v:q.p100,c:C.tur})});
+  var lw=0;rows.forEach(function(r){lw=Math.max(lw,tw(r.n,13,true))});lw=Math.ceil(Math.min(lw+10,W*.46));
+  var bh=26,gap=10,H=rows.length*(bh+gap),s=svgOpen(W,H),X=function(v){return lw+v/mx*(W-lw-86)};
+  rows.forEach(function(r,k){var y=k*(bh+gap),w=Math.max(3,X(r.v)-lw);
+    s+=T(0,y+bh/2+4.5,r.n,{c:'b',st:'font-size:13px'});
+    s+=hbar(lw,lw+w,y,bh,r.c,tip('<b>'+esc(r.n)+'</b><br>'+f1(r.v)+' annunci ogni 100 abitazioni'));
+    s+=T(lw+w+7,y+bh/2+4.5,f1(r.v),{c:'b',st:'font-size:14px'})});
   return s+'</svg>';
 }
 function scheda(){
   var r=$('ris'),Cc=D.citta,o=sel?BY[sel]:null,W=Math.max(240,r.clientWidth-30),h;
+  function due(o){return '<p class="tg" id="t-schedaA">'+(o?esc(o.sn)+' contro la media di Milano e i quartieri con più annunci':'Milano e i quartieri con più annunci, ogni 100 abitazioni')+'</p><div class="ch" role="img" aria-label="Barre: annunci di affitto breve ogni 100 abitazioni, quartiere, Milano e quartieri con più annunci">'+barreQ(W,o)+'</div>'}
   if(!o){
-    var n=Math.round(Cc.annunci_per_100);
     h='<b class="big">In tutta Milano: '+f0(Cc.annunci_per_100)+' abitazioni ogni 100 hanno un annuncio di affitto breve</b>'+
-      '<div class="ch" aria-hidden="true">'+casette(W,n)+'</div>'+
-      '<p>'+f0(D.ultimo.annunci)+' annunci su '+f0(Cc.abitazioni)+' abitazioni. Ogni casetta colorata è un’abitazione ogni 100. Scrivi il tuo quartiere qui sopra, o toccalo sulla mappa, per vedere il suo.</p>';
+      '<p>'+f0(D.ultimo.annunci)+' annunci su '+f0(Cc.abitazioni)+' abitazioni. Scrivi il tuo quartiere qui sopra, o toccalo sulla mappa, per vedere il suo.</p>'+due(null);
   }else if(o.piccolo){
     h='<b class="big">'+esc(o.n)+'</b><p>Troppo piccolo per un confronto: '+f0(o.ab)+(o.ab===1?' abitazione':' abitazioni')+' e '+f0(o.res)+(o.res===1?' residente':' residenti')+' nel 2023, con '+f0(o.ann)+' annunci. Il rapporto non avrebbe senso, e il quartiere resta in grigio sulla mappa.</p>';
   }else{
-    var rank=NB.indexOf(o)+1,n2=Math.round(o.p100);
+    var rank=NB.indexOf(o)+1;
     h='<b class="big">'+esc(o.sn)+': '+f1(o.p100)+' abitazioni ogni 100 hanno un annuncio di affitto breve</b>'+
-      '<div class="ch" aria-hidden="true">'+casette(W,n2)+'</div>'+
-      '<p>Ogni casetta colorata è un’abitazione ogni 100'+(n2===0?' (qui meno di una: nessuna colorata)':'')+'. Posto '+rank+' su '+NB.length+' tra i quartieri confrontabili; a Milano la media è '+f1(Cc.annunci_per_100)+'. Gli annunci sono '+f0(o.ann)+' su '+f0(o.ab)+' abitazioni ('+f0(o.int)+' case intere, '+f0(o.st)+' stanze private).</p>'+
+      '<p>Posto '+rank+' su '+NB.length+' tra i quartieri confrontabili; a Milano la media è '+f1(Cc.annunci_per_100)+'. Gli annunci sono '+f0(o.ann)+' su '+f0(o.ab)+' abitazioni ('+f0(o.int)+' case intere, '+f0(o.st)+' stanze private).</p>'+due(o)+
       '<p>'+(o.prezzo!=null?'Prezzo mediano di una casa intera: '+f0(o.prezzo)+' € a notte (quotazione di fine settembre, '+f0(o.np)+' annunci con prezzo). ':'')+f0(o.vuote)+' abitazioni su '+f0(o.ab)+' non sono occupate da residenti: il rapporto è un ordine di grandezza.</p>';
   }
   r.innerHTML=h;
@@ -400,14 +399,14 @@ function proj(W){
 }
 function mappa(){
   var W=width('ch-mappa'),P=proj(W),H=P.H,s=svgOpen(W,H),sS='',lab='';
+  var nm=NB.slice(0,3);if(sel&&!BY[sel].piccolo&&nm.indexOf(BY[sel])<0)nm.push(BY[sel]);
   var cnt=[0,0,0,0],piccoli=0;N.forEach(function(o){var c=mcl(o);if(c>=0)cnt[c]++;else piccoli++});
   N.forEach(function(o){var c=mcl(o),isS=o.id===sel,b=P.bb(o.f);
     var tp=c>=0?('<b>'+esc(o.n)+'</b><br>'+f1(o.p100)+' ogni 100 abitazioni · '+f0(o.ann)+' annunci'):('<b>'+esc(o.n)+'</b><br>Troppo piccolo per il confronto ('+f0(o.ab)+' abitazioni)');
     var el='<path d="'+P.path(o.f)+'" fill="'+(c>=0?MCOL[c]:'#e6e8ec')+'" stroke="'+(isS?C.ink:'#fff')+'" stroke-width="'+(isS?3.5:0.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip(tp)+' style="cursor:pointer"/>';
     if(isS)sS=el;else s+=el;
-    if(c>=0&&!isS&&b.w>=30&&b.h>=17)lab+=T(Math.min(b.x,W-12),b.y+4,f0(o.p100),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+MTXT[c]})});
+    if(c>=0&&nm.indexOf(o)<0&&b.w>=30&&b.h>=17)lab+=T(Math.min(b.x,W-12),b.y+4,f0(o.p100),{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+MTXT[c]})});
   s+=sS+lab;
-  var nm=NB.slice(0,3);if(sel&&!BY[sel].piccolo&&nm.indexOf(BY[sel])<0)nm.push(BY[sel]);
   nm.forEach(function(o,i){var b=P.bb(o.f);
     s+='<g pointer-events="none"><circle cx="'+r1(b.x)+'" cy="'+r1(b.y)+'" r="10" fill="'+C.ink+'" stroke="#fff" stroke-width="1.5"/>'+T(b.x,b.y+4.5,i+1,{a:'middle',st:'font-size:12px;font-weight:700;fill:#fff'})+'</g>'});
   $('nl-mappa').innerHTML=nm.map(function(o,i){return '<li><b class="nb">'+(i+1)+'</b><span><b>'+esc(o.sn)+'</b>: '+f1(o.p100)+' ogni 100 abitazioni ('+f0(o.ann)+' annunci)</span></li>'}).join('');
@@ -415,7 +414,7 @@ function mappa(){
   $('lg-mappa').innerHTML=MCOL.map(function(c,i){return '<span><i style="background:'+c+'"></i>'+mnome(i)+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('')+'<span><i style="background:#e6e8ec"></i>troppo piccolo <b>&nbsp;'+piccoli+'</b></span>';
   var Cc=D.citta;
   $('t-mappa').textContent='In '+Cc.nil_5_o_piu+' quartieri su '+NB.length+' ci sono almeno 5 annunci ogni 100 abitazioni; in '+Cc.nil_10_o_piu+' più di 10';
-  $('s-mappa').textContent='Colore: annunci di affitto breve ogni 100 abitazioni. Il numero accanto a ogni colore conta i quartieri; il numero scritto sul quartiere è il suo valore. Tocca un quartiere per vederlo qui sopra con le casette.';
+  $('s-mappa').textContent='Colore: annunci di affitto breve ogni 100 abitazioni. Il numero accanto a ogni colore conta i quartieri; il numero scritto sul quartiere è il suo valore. Tocca un quartiere per vederlo qui sopra.';
   $('nt-mappa').innerHTML='I dieci quartieri più «densi» tengono il '+f0(Cc.quota_annunci_10_nil_densi*100)+'% di tutti gli annunci. In centro molte abitazioni non sono occupate da residenti (seconde case, uffici, case già in affitto breve): il rapporto è un ordine di grandezza. Il quartiere scelto ha il bordo nero.';
 }
 

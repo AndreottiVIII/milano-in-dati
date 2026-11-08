@@ -83,7 +83,7 @@ table.kt tr.tot td{font-weight:700;border-bottom:0}
 .chip.on.dk{color:#0b0d12}
 .chip:focus-visible{outline:3px solid var(--mi);outline-offset:1px}
 /* coppie di omini */
-.dueom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:.5em 0 .3em}
+.ris .dueom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:.5em 0 .3em}
 .dueom b{display:block;font-size:.92rem;margin-bottom:2px}
 .dueom>div{min-width:0}
 .pm{margin:10px 0 0}
@@ -127,11 +127,11 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 
 <div class="fig">
   <h3 id="t-omini"></h3>
-  <p class="sub">Ogni omino è 1 straniero su 100. Il colore e il nome dicono la cittadinanza. Muovi il cursore: gli omini cambiano anno per anno.</p>
+  <p class="sub">Su 100 stranieri, quanti hanno ciascuna cittadinanza. Il colore e il nome dicono quale. Muovi il cursore: le barre cambiano anno per anno.</p>
   <div class="sl"><label for="yr1">Anno: <b class="yv"></b></label><input class="yrng" id="yr1" type="range" min="0" max="26" step="1" value="26" aria-label="Anno"><div class="ex"><span>1999</span><span>2025</span></div></div>
-  <div class="ch" id="ch-omini" role="img" aria-label="Cento omini colorati per cittadinanza degli stranieri residenti a Milano"></div>
+  <div class="ch" id="ch-omini" role="img" aria-label="Barre: su 100 stranieri residenti a Milano, quanti hanno ciascuna cittadinanza nell’anno scelto"></div>
   <p class="note" id="nn-omini"></p>
-  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza (ds27, CC BY). Gli omini sono arrotondati a numeri interi, quindi sommano 100. Le 10 cittadinanze più numerose nel 2025 hanno un colore; tutte le altre sono in grigio. Cittadinanza, non origine.</p>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza (ds27, CC BY). Le cifre sono arrotondate a numeri interi, quindi sommano 100. Le 10 cittadinanze più numerose nel 2025 hanno un colore; tutte le altre sono in grigio. Cittadinanza, non origine.</p>
 </div>
 
 <div class="fig">
@@ -191,7 +191,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
   <div class="lg" id="lg-B"></div>
   <div class="ch" id="ch-B" role="img" aria-label="Mappa dei quartieri di Milano colorati per la cittadinanza straniera più numerosa"></div>
   <p class="note" id="nn-B"></p>
-  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza e quartiere, tutte le voci del registro (ds27, CC BY); confini dei quartieri: Comune di Milano (CC BY). In grigio chiaro i quartieri dove la più numerosa non è tra le 10 con un colore. In bianco con il bordo grigio i quartieri con meno di 3.000 residenti o meno di 300 stranieri.</p>
+  <p class="src">Fonte: Comune di Milano, residenti per cittadinanza e quartiere, tutte le voci del registro (ds27, CC BY); confini dei quartieri: Comune di Milano (CC BY). In grigio i quartieri dove la più numerosa non è tra le 10 con un colore. In bianco con il bordo grigio i quartieri con meno di 3.000 residenti o meno di 300 stranieri.</p>
 </div>
 
 <!-- ============ CERCA ============ -->
@@ -255,7 +255,7 @@ var CS=getComputedStyle(document.documentElement);
 function cv(n){return CS.getPropertyValue(n).trim()}
 var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),mag:cv('--mag'),bro:cv('--bro'),
   grid:cv('--grid'),axis:cv('--axis'),mut:cv('--mut'),ink:cv('--ink'),ink2:cv('--ink2'),light:'#e3e6eb',gry:'#9aa1ad'};
-var OTH='#d5d9df';
+var OTH='#8a919e';
 /* le 10 cittadinanze con il loro colore (le stesse in tutta la pagina) */
 var PAL=[
  {l:'Egitto',col:C.ora,adj:'egiziana'},{l:'Cina',col:C.mag},{l:'Filippine',col:C.m4},{l:'Perù',col:C.m2},{l:'Sri Lanka',col:C.m5},
@@ -416,20 +416,6 @@ function nilGroups(id,y){
   a.forEach(function(z){var l=TU.cit[z[0]].l;m[l]=(m[l]||0)+z[1];tot+=z[1]});
   return{g:mkGroups(function(l){return m[l]},tot),tot:tot};
 }
-function omino(x,y,w,h,col){
-  var cx=x+w/2,u=Math.min(w,h/1.05);
-  var s='<circle cx="'+r1(cx)+'" cy="'+r1(y+h*.2)+'" r="'+r1(u*.17)+'" fill="'+col+'"/>';
-  s+='<rect x="'+r1(cx-u*.26)+'" y="'+r1(y+h*.4)+'" width="'+r1(u*.52)+'" height="'+r1(h*.54)+'" rx="'+r1(u*.2)+'" fill="'+col+'"/>';
-  return s;
-}
-function persone(groups,x0,y0,cw,chh,tipf){
-  var s='',k=0;
-  groups.forEach(function(g){for(var j=0;j<g.q;j++,k++){
-    var cx=x0+(k%10)*cw,cy=y0+Math.floor(k/10)*chh;
-    s+='<g'+(tipf?tip(tipf(g)):'')+'><rect x="'+r1(cx)+'" y="'+r1(cy)+'" width="'+r1(cw)+'" height="'+r1(chh)+'" fill="#fff" fill-opacity="0"/>'+omino(cx+1,cy,cw-2,chh,g.col)+(g.col===C.m3?'<g opacity=".0"></g>':'')+'</g>'}});
-  return s;
-}
-
 /* ---------- numeri grandi ---------- */
 function topN(i,n){var a=D.cit.map(function(c){return{l:c.l,v:c.c[i]}}).sort(function(a,b){return b.v-a.v});return a.slice(0,n)}
 function highlights(){
@@ -478,17 +464,15 @@ function serie(){
   $('nt-serie').innerHTML='<li><b class="nb" style="background:transparent;color:var(--ink);width:auto;flex:1 1 100%;font-weight:700">In numeri: '+f0(cityStr(0))+' stranieri nel 1999, '+f0(cityStr(NY-1))+' nel 2025.</b></li>'+nts.map(function(t,i){return '<li><b class="nb">'+(i+1)+'</b><span>'+t+'</span></li>'}).join('');
 }
 
-/* ---------- 2. cento stranieri ---------- */
+/* ---------- 2. su 100 stranieri: barre ---------- */
 function omini(){
-  var W=width('ch-omini'),cw=Math.min(32,Math.floor((W-118)/10)),chh=Math.round(cw*1.15),G=cityGroups(yi),gw=cw*10,H=chh*10+4;
-  var s=svgOpen(W,H);
-  s+=persone(G,0,2,cw,chh,function(g){return '<b>'+g.l+'</b><br>'+g.q+' su 100 stranieri nel '+Y[yi]+(g.oth?'':'<br>'+f0(cnt(g.l,yi))+' residenti')});
-  /* nomi a destra, all'altezza del gruppo */
-  var k=0,lab=[];
-  G.forEach(function(g){var a=k,b=k+g.q-1;k+=g.q;lab.push({g:g,y:2+((Math.floor(a/10)+Math.floor(b/10))/2+.5)*chh+4})});
-  spread(lab,16,14,H-4);
-  lab.forEach(function(o){var nm=o.g.oth?'Altre':o.g.l;
-    s+='<circle cx="'+(gw+12)+'" cy="'+r1(o.y-4)+'" r="5" fill="'+o.g.col+'" stroke="rgba(0,0,0,.2)" stroke-width=".8"/>'+T(gw+22,o.y,nm+' <tspan class="b">'+o.g.q+'</tspan>',{st:'font-size:13px'})});
+  var W=width('ch-omini'),G=cityGroups(yi),bh=22,gap=8,H=G.length*(bh+gap),s=svgOpen(W,H),lw=0;
+  G.forEach(function(g){lw=Math.max(lw,tw(g.oth?'Altre':g.l,13,true))});lw=Math.ceil(Math.min(lw+10,W*.4));
+  var mx=Math.max.apply(null,G.map(function(g){return g.p})),X=function(v){return lw+v/mx*(W-lw-40)};
+  G.forEach(function(g,k){var y=k*(bh+gap),w=Math.max(3,X(g.p)-lw);
+    s+=T(0,y+bh/2+4.5,g.oth?'Altre':g.l,{c:'b',st:'font-size:13px'});
+    s+=hbar(lw,lw+w,y,bh,g.col,tip('<b>'+g.l+'</b><br>'+g.q+' su 100 stranieri nel '+Y[yi]+(g.oth?'':'<br>'+f0(cnt(g.l,yi))+' residenti')));
+    s+=T(lw+w+7,y+bh/2+5,g.q,{c:'b',st:'font-size:14px'})});
   $('ch-omini').innerHTML=s+'</svg>';
   $('t-omini').textContent='Nel '+Y[yi]+', su 100 stranieri di Milano '+G[0].q+' hanno la cittadinanza '+(G[0].oth?'di altri paesi':del_(G[0].l));
   var a=cityGroups(0).slice(0,4),b=cityGroups(NY-1).slice(0,4);
@@ -761,9 +745,16 @@ function pair(id,titolo,qv,cv,qcol,fmt,u){
       var w=Math.max(3,r.v/mx*bw);s+=hbar(lw,lw+w,y,20,r.col)+T(lw+w+6,y+16,fmt(r.v)+(u||''),{c:'b'})});
     box.innerHTML=s+'</svg>'}};
 }
-function miniGrid(G,id,y){
-  var box=$(id),W=Math.floor(box.clientWidth),cw=Math.floor(W/10),chh=Math.round(cw*1.15);
-  box.innerHTML=svgOpen(W,chh*10+2)+persone(G,0,1,cw,chh,function(g){return '<b>'+g.l+'</b><br>'+g.q+' su 100 stranieri'})+'</svg>';
+function barreScheda(id,NGg,MGg,order,nome){
+  var box=$(id),W=Math.max(240,Math.floor(box.clientWidth)),lw=0;
+  var rows=order.map(function(l){var q=0,m=0;NGg.forEach(function(g){if(g.l===l)q=g.q});MGg.forEach(function(g){if(g.l===l)m=g.q});return{l:l,q:q,m:m}});
+  rows.forEach(function(r){lw=Math.max(lw,tw(r.l==='Altre cittadinanze'?'Altre':r.l,13,true))});lw=Math.ceil(Math.min(lw+10,W*.38));
+  var mx=Math.max.apply(null,rows.map(function(r){return Math.max(r.q,r.m)}))||1,bh=15,gap=11,rh=2*bh+2+gap,H=rows.length*rh,s=svgOpen(W,H),X=function(v){return lw+v/mx*(W-lw-36)};
+  rows.forEach(function(r,k){var y=k*rh;
+    s+=T(0,y+bh+2,r.l==='Altre cittadinanze'?'Altre':r.l,{c:'b',st:'font-size:13px'});
+    [[r.q,C.m4,'Qui'],[r.m,C.mi,'Milano']].forEach(function(b,j){var yy=y+j*(bh+2),w=Math.max(2,X(b[0])-lw);
+      s+=hbar(lw,lw+w,yy,bh,b[1],tip('<b>'+r.l+'</b><br>'+b[2]+': '+b[0]+' su 100 stranieri'))+T(lw+w+6,yy+bh/2+4.5,b[0],{c:'b',st:'font-size:13px'})})});
+  box.innerHTML=s+'</svg>';
 }
 function scheda(){
   var r=$('ris');
@@ -776,15 +767,15 @@ function scheda(){
   h+='<p>Dal 1999 la quota di stranieri è '+(dp>=0?'salita':'scesa')+' di <b>'+f1(Math.abs(dp))+' punti</b> (Milano: '+(cdp>=0?'salita':'scesa')+' di '+f1(Math.abs(cdp))+' punti).</p>';
   var P=[pair('pq1','Stranieri ogni 100 residenti, nel 2025',q25,cq25,C.m4,f1),pair('pq2','Stranieri ogni 100 residenti, nel 1999',q99,cq99,C.m4,f1)];
   h+=P.map(function(p){return p.h}).join('');
-  h+='<div class="pm"><b>Come sono divisi i 100 stranieri, nel 2025</b></div><div class="dueom"><div><b>'+esc(o.sn)+'</b><div class="ch" id="om-q"></div></div><div><b>Milano</b><div class="ch" id="om-m"></div></div></div><div id="tab-q"></div>';
+  h+='<div class="pm"><b>Come sono divisi i 100 stranieri, nel 2025</b></div><div class="ch" id="om-q" role="img" aria-label="Barre: su 100 stranieri del quartiere e di Milano, quanti hanno ciascuna cittadinanza"></div><div id="tab-q"></div>';
   r.className='ris m';r.innerHTML=h;
   P.forEach(function(p){p.draw()});
   var NG=nilGroups(sel,2025),MG=cityGroups(NY-1);
-  miniGrid(NG.g,'om-q',2025);miniGrid(MG,'om-m',2025);
   /* tabella: le comunità, qui e a Milano */
   var rows={};NG.g.forEach(function(g){rows[g.l]={q:g.q}});MG.forEach(function(g){(rows[g.l]=rows[g.l]||{}).m=g.q});
   var ord_=Object.keys(rows).filter(function(l){return l!=='Altre cittadinanze'}).sort(function(a,b){return ((rows[b].q||0)+(rows[b].m||0))-((rows[a].q||0)+(rows[a].m||0))}).slice(0,6);
   ord_.push('Altre cittadinanze');
+  barreScheda('om-q',NG.g,MG,ord_,o.sn);
   var t='<table class="kt"><thead><tr><th>Su 100 stranieri</th><th>'+esc(o.sn)+'</th><th>Milano</th></tr></thead><tbody>';
   ord_.forEach(function(l){var c=(PB[l]||{}).col||OTH,x=rows[l]||{};t+='<tr><td><i style="background:'+c+'"></i>'+esc(l)+'</td><td>'+(x.q||0)+'</td><td>'+(x.m||0)+'</td></tr>'});
   $('tab-q').innerHTML=t+'</tbody></table><p class="note">Le cifre sono arrotondate: nel quartiere piccoli numeri possono dare salti grandi. Una cittadinanza fuori dall’elenco può restare in «Altre».</p>';
@@ -830,7 +821,7 @@ function metodo(){
   var L_=[
    '<b>Residenti.</b> Persone iscritte all’anagrafe del Comune al 31 dicembre di ogni anno, per quartiere (NIL) e per cittadinanza.',
    '<b>Quota.</b> Residenti con la cittadinanza scelta diviso tutti i residenti del quartiere (o della città). La variazione di una quota è scritta in punti, mai in percentuale, per non avere numeri assurdi.',
-   '<b>Cento omini.</b> I residenti stranieri sono divisi per cittadinanza e riportati a 100 con arrotondamento ai numeri interi, assegnando i resti più grandi, così sommano sempre 100.',
+   '<b>Su 100 stranieri.</b> I residenti stranieri sono divisi per cittadinanza e riportati a 100 con arrotondamento ai numeri interi, assegnando i resti più grandi, così sommano sempre 100.',
    '<b>Classifica.</b> Per ogni anno le 30 cittadinanze più numerose nel 2025 sono ordinate per numero di residenti; si mostrano le linee che sono state nei primi dieci posti almeno una volta.',
    '<b>Soglie di colore.</b> Per ogni cittadinanza le classi della mappa sono calcolate su tutti i quartieri con almeno 3.000 residenti e su tutti gli anni insieme: i colori hanno lo stesso significato in ogni anno. Per «Tutti gli stranieri» le soglie sono 5, 10, 15 e 25 residenti su 100.',
    '<b>Cittadinanza più numerosa.</b> Per ogni quartiere con almeno 3.000 residenti e almeno 300 stranieri, la voce del registro con più residenti stranieri nell’anno.',

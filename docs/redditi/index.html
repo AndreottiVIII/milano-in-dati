@@ -150,14 +150,8 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
   <p class="src">Fonte: Ministero dell’Economia e delle Finanze, redditi IRPEF per fasce di reddito, base comunale, anni d’imposta 2000-2024 (CC BY 3.0).</p>
 </div>
 
-<div class="fig">
-  <h3 id="t-soldi"></h3>
-  <p class="sub">Ogni quadretto è un euro su 100 dichiarati dai milanesi, per tipo di reddito. Nel 2010 e nel 2024.</p>
-  <div class="ch" id="ch-soldi" role="img" aria-label="Quadretti: da quali tipi di reddito vengono i soldi dichiarati dai milanesi, 2010 e 2024"></div>
-  <table class="kt" id="tab-soldi"></table>
-  <p class="note" id="nt-soldi"></p>
-  <p class="src">Fonte: MEF, file comunali (CC BY 3.0). Quota del reddito complessivo. «Altro» = tutto il resto (redditi di capitale, assegni e altre voci). Le voci cambiano nome nel 2008 e il calo dei fabbricati dal 2011 segue le riforme su affitti e IMU: i confronti sono dal 2010, nello stesso blocco di anni.</p>
-</div>
+<div class="fig"><h3 id="t-soldi"></h3><p class="sub">Ogni barra è tutto il reddito dichiarato dai milanesi, diviso per tipo. Nel 2010 e nel 2024.</p><div class="ch" id="ch-soldi" role="img" aria-label="Due barre divise per tipo di reddito: 2010 e 2024"></div></div>
+<div class="fig"><table class="kt" id="tab-soldi"></table><p class="note" id="nt-soldi"></p><p class="src">Fonte: MEF, file comunali (CC BY 3.0). Quota del reddito complessivo. «Altro» = tutto il resto (redditi di capitale, assegni e altre voci). Le voci cambiano nome nel 2008 e il calo dei fabbricati dal 2011 segue le riforme su affitti e IMU: i confronti sono dal 2010, nello stesso blocco di anni.</p></div>
 
 <!-- ============ 3 ============ -->
 <h2 id="cap">Dentro la città: i CAP</h2>
@@ -300,6 +294,37 @@ Promise.all([getCSV(DATA+'serie_citta.csv'),getJ(DATA+'quote_dei_primi.json'),ge
 }).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
 
 function draw(f){f();RD.push(f)}
+/* ---------- grafici nuovi al posto della griglia "su 100" (g3) ---------- */
+function gT(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+' style="font-size:'+(o.sz||12)+'px;font-weight:'+(o.b?800:400)+';fill:'+(o.col||'#0b0d12')+(o.halo?';paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round':'')+'">'+s+'</text>'}
+function gStack(W,rows,parts,o){
+  o=o||{};var bh=o.bh||50,out='',y=0,fm=o.fmt||function(v){return f0(v)};
+  var H=0,blocks=rows.map(function(r){
+    var xs=0,segs=r.v.map(function(v,i){var w=W*v/100,seg={i:i,x:xs,w:w,v:v};xs+=w;return seg});
+    var inside=function(sg){return sg.w>=30},nameIn=function(sg){return tw(parts[sg.i].n,12,true)+8<=sg.w};
+    var call=segs.filter(function(sg){return !(inside(sg)&&nameIn(sg))});
+    var h=26+bh+(call.length?10+call.length*18:0)+16;
+    return{r:r,segs:segs,call:call,h:h,inside:inside,nameIn:nameIn}});
+  blocks.forEach(function(b){
+    var r=b.r;
+    out+=gT(0,y+16,r.t,{b:1,sz:o.tsz||16})+(r.s?gT(W,y+16,r.s,{a:'end',col:'#5f6673'}):'');
+    var by=y+24;
+    b.segs.forEach(function(sg){
+      var p=parts[sg.i],tt=(r.tt&&r.tt[sg.i])||('<b>'+r.t+'</b><br>'+p.n+': '+fm(sg.v));
+      if(sg.w<0.5)return;
+      out+='<g'+tip(tt)+'><rect x="'+r1(sg.x)+'" y="'+by+'" width="'+r1(sg.w)+'" height="'+bh+'" fill="'+p.c+'" stroke="#fff" stroke-width="2"/>';
+      if(b.inside(sg)){
+        var cx=sg.x+sg.w/2,tc=p.tc||'#fff';
+        if(b.nameIn(sg))out+=gT(cx,by+bh/2-2,fm(sg.v),{a:'middle',b:1,sz:16,col:tc})+gT(cx,by+bh/2+15,p.n,{a:'middle',b:1,sz:12,col:tc});
+        else out+=gT(cx,by+bh/2+6,fm(sg.v),{a:'middle',b:1,sz:16,col:tc})}
+      out+='</g>'});
+    var cy=by+bh+22;
+    b.call.forEach(function(sg,k){var p=parts[sg.i],t=(b.inside(sg)?'':fm(sg.v)+' ')+p.n;
+      out+='<rect x="0" y="'+r1(cy+k*18-11)+'" width="12" height="12" rx="2" fill="'+p.c+'"/>'+gT(18,cy+k*18,(b.inside(sg)?'':'<tspan style="font-weight:800">'+fm(sg.v)+'</tspan> ')+p.n,{})});
+    y+=b.h});
+  return svgOpen(W,Math.ceil(y))+out+'</svg>';
+}
+/* barre orizzontali con etichette e valori. rows: [{n, sub, s:[{v,c,y,tt}]}], max = valore a fondo scala */
+
 function tutto(){
   CAPS.forEach(function(c){var u=c.y[2024];c.v=u.eur;c.zona=ZONA[c.cap]||''});
   var rk=CAPS.slice().sort(function(a,b){return b.v-a.v});rk.forEach(function(c,i){c.rank=i+1});
@@ -447,18 +472,12 @@ var SG=[
   {id:'aut',nome:'Autonomi e imprese',col:'#F58220',f:function(t){return t.autonomo_quota_del_reddito_complessivo+t.impresa_quota_del_reddito_complessivo}},
   {id:'par',nome:'Partecipazioni',col:'#FFD500',f:function(t){return t.partecipazione_quota_del_reddito_complessivo}},
   {id:'fab',nome:'Case e terreni',col:'#00A651',f:function(t){return t.fabbricati_quota_del_reddito_complessivo}},
-  {id:'alt',nome:'Altro',col:'#b4bac4',f:null}];
+  {id:'alt',nome:'Altro',col:'#6b7280',f:null}];
 function quote(y){var t=TP[y],v=SG.map(function(g){return g.f?g.f(t)*100:0}),s=v.slice(0,5).reduce(function(a,b){return a+b},0);v[5]=100-s;return v}
 function resti(v){var fl=v.map(Math.floor),rest=100-fl.reduce(function(a,b){return a+b},0),ord=v.map(function(x,i){return[x-Math.floor(x),i]}).sort(function(a,b){return b[0]-a[0]});for(var k=0;k<rest;k++)fl[ord[k][1]]++;return fl}
 function soldi(){
-  var box=$('ch-soldi'),W=width('ch-soldi'),yrs=[2010,2024],gap=24,cell=Math.min(20,Math.floor((W-gap)/20)),sq=cell-2,gw=cell*10,H=gw+30;
-  var q=yrs.map(quote),n=q.map(resti),s=svgOpen(W,H),ox=[Math.max(0,(W-gap-2*gw)/2),0];ox[1]=ox[0]+gw+gap;
-  yrs.forEach(function(yy,j){
-    s+=T(ox[j],14,yy,{c:'b'});
-    var seq=[];n[j].forEach(function(c,i){for(var k=0;k<c;k++)seq.push(i)});
-    seq.forEach(function(g,p){var col=p%10,row=Math.floor(p/10);s+='<rect x="'+(ox[j]+col*cell)+'" y="'+(24+row*cell)+'" width="'+sq+'" height="'+sq+'" fill="'+SG[g].col+'"'+tip('<b>'+SG[g].nome+'</b> '+yy+': '+f1(q[j][g])+' euro su 100')+'/>'});
-  });
-  box.innerHTML=s+'</svg>';
+  var W=width('ch-soldi'),yrs=[2010,2024],q=yrs.map(quote),n=q.map(resti);
+  $('ch-soldi').innerHTML=gStack(W,yrs.map(function(yy,j){return{t:String(yy),v:n[j]}}),SG.map(function(g){return{n:g.nome,c:g.col,tc:g.id==='par'?'#0b0d12':'#fff'}}),{fmt:function(x){return f0(x)}});
   var rows=SG.map(function(g,i){var a=q[0][i],b=q[1][i];return '<tr><td><i style="background:'+g.col+'"></i>'+g.nome+'</td><td>'+f1(a)+'</td><td>'+f1(b)+'</td><td>'+sg1(b-a)+' punti</td></tr>'}).join('');
   $('tab-soldi').innerHTML='<tr><th>Su 100 euro</th><th>2010</th><th>2024</th><th>Variazione</th></tr>'+rows;
   $('t-soldi').innerHTML='Su 100 euro dichiarati dai milanesi, '+f0(q[1][0])+' vengono dal lavoro dipendente (nel 2010: '+f0(q[0][0])+') e '+f0(q[1][1])+' dalle pensioni';

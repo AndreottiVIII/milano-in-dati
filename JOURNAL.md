@@ -3090,3 +3090,19 @@ Anteprime dei link (stile A scelto da Davide): un'immagine condividi.png e i met
 Correzioni dopo il controllo del sito dell'8/11: numeri della home allineati alle pagine (temi.json, con strumenti/controlla_numeri_home.py), una sola definizione di pagina (107, le voci del menu) in home, Il sito e Fonti, anni d'inizio giusti in conta_sito.py, "all'8 novembre", 240,7 milioni senza M, link rotti, nomi di file tolti dal testo, testi sotto 12 px in 6 pagine, 30 licenze trovate e messe nel programma della pagina Fonti (fonti/scripts/licenze.json), permettersi con le due misure spiegate.
 Pronto per Google: strumenti/seo.py (description, canonical, JSON-LD Dataset/WebSite/Person, sitemap.xml, 404.html, manifest), strumenti/statico.py (numeri in alto e titoli dei grafici scritti nell'HTML, tolti da menu.js con JavaScript), strumenti/controllo.py e strumenti/dopo_pubblicazione.py da lanciare dopo ogni pubblicazione. menu.js corregge da solo "il 8%" in "l'8%" anche nei testi scritti dai grafici.
 Aeroporti: la griglia su 100 delle merci sostituita dalle barre per aeroporto (opzione A scelta da Davide); numeri in alto da 9 a 6.
+Pendolari: griglie su 100 sostituite (lavoro: linea che supera la metà; mezzi 1991-2011: barre; il tuo comune: barra divisa), scelte di Davide.
+Reati: griglia su 100 sostituita dalle barre per tipo Milano contro Italia con il cursore degli anni (opzione A).
+Redditi: griglia su 100 dei tipi di reddito sostituita da due barre divise 2010 e 2024 (opzione B).
+Impianti sportivi: griglie su 100 sostituite (minuti a piedi: barre divise; piscine: barra divisa; gestione: barre divise), scelte di Davide.
+Matrimoni: griglia su 100 cerimonie sostituita da due barre divise 1963 e 2024 (opzione A).
+Età: griglia su 100 sostituita dalla curva per età con la tua segnata (opzione B); scheda del quartiere parte da Isola.
+Imprese: griglia su 100 dei settori sostituita da barre doppie 2009/2025, verde se il settore pesa di più e rosso se di meno; numeri in alto da 9 a 6.
+Incroci: griglie su 100 sostituite dalla linea dei pedoni morti anno per anno e dai punti su asse per la concentrazione degli incidenti (opzioni B a colori).
+Medici e farmacie: griglia su 100 sostituita dalle linee entro 5, 10, 15 minuti a piedi (opzione B).
+Musei: griglia su 100 sostituita dai 10 musei più visitati (opzione B); numeri in alto da 9 a 6; musei civici fermi al 2017 detto chiaro.
+Omicidi: griglia su 100 vittime sostituita da barre rosa/blu per periodo con il cambio della quota di donne (misto delle opzioni A e B).
+Affitti brevi: griglia su 100 casette sostituita dalle barre del quartiere scelto contro Milano e i primi 3 (opzione A).
+Area C: griglia su 100 dei motori sostituita dalle linee 2017-2024 per tipo di motore (opzione B); Covid tolto (numero, grafico e fasce), resta il link; distintivo senza scritta piccola; 6 colori in ordine.
+Biblioteche: griglia su 100 omini per età sostituita da due barre divise 2013 e 2025 (opzione A); Covid tolto dai numeri in alto, resta il link.
+Comunità: griglie su 100 sostituite dalle barre per cittadinanza con il cursore e dalle barre doppie quartiere contro Milano (opzioni A).
+Quanto è divisa Milano: griglia su 100 sostituita dalle barre 'X su 100 dovrebbero cambiare quartiere' (opzione A).

@@ -81,19 +81,8 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <p class="src">Tutti i numeri: Istat e Comune di Milano, delitti denunciati dalle forze di polizia all'autorità giudiziaria (CC BY 4.0 e CC BY). «Ogni 100.000» vuol dire ogni 100.000 abitanti.</p>
 
 <h2 id="quante">Quante denunce, e di che tipo</h2>
-<div class="fig">
-  <h3 id="t-cento"></h3>
-  <p class="sub">Ogni quadretto è una denuncia ogni 100: a sinistra Milano, a destra l'Italia. I colori sono i tipi di delitto. Sposta il cursore per cambiare anno.</p>
-  <div class="cur">
-    <div class="y"><b id="cy">2024</b><span id="cn"></span></div>
-    <input type="range" id="yr" min="2006" max="2024" step="1" value="2024" aria-label="Scegli l'anno">
-    <div class="ex"><span>2006</span><span>2024</span></div>
-  </div>
-  <div class="ch" id="ch-cento" role="img" aria-label="Cento quadretti colorati per tipo di delitto: Milano e Italia a confronto"></div>
-  <table class="kt" id="tab-cento"></table>
-  <p class="note" id="nt-cento"></p>
-  <p class="src">Fonte: Istat, delitti denunciati (CC BY 4.0), comune di Milano e Italia. «Tutto il resto» è la parte del totale che non rientra nei tipi elencati. Le quote sono arrotondate a 100 quadretti.</p>
-</div>
+<div class="fig"><h3 id="t-cento"></h3><p class="sub">Ogni barra dice quante denunce, ogni 100, sono di quel tipo: in rosso Milano, in nero l’Italia. Sposta il cursore per cambiare anno.</p><div class="cur"><div class="y"><b id="cy">2024</b><span id="cn"></span></div><input type="range" id="yr" min="2006" max="2024" step="1" value="2024" aria-label="Scegli l'anno"><div class="ex"><span>2006</span><span>2024</span></div></div><div class="ch" id="ch-cento" role="img" aria-label="Barre: su 100 denunce, quante sono di ogni tipo di delitto, a Milano e in Italia"></div></div>
+<div class="fig"><table class="kt" id="tab-cento"></table><p class="note" id="nt-cento"></p><p class="src">Fonte: Istat, delitti denunciati (CC BY 4.0), comune di Milano e Italia. «Tutto il resto» è la parte del totale che non rientra nei tipi elencati. Le quote sono arrotondate in modo che la somma faccia 100.</p></div>
 
 <div class="fig">
   <h3 id="t-linea"></h3>
@@ -233,6 +222,21 @@ Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'serie_totale.json'),getJ(DAT
 function draw(f){f();RD.push(f)}
 function tipo(c){for(var i=0;i<D.tipi.length;i++)if(D.tipi[i].codice===c)return D.tipi[i]}
 function provByName(n){for(var i=0;i<D.rp.province.length;i++)if(D.rp.province[i].n===n)return D.rp.province[i]}
+/* ---------- grafici nuovi al posto della griglia "su 100" (g3) ---------- */
+function gT(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+' style="font-size:'+(o.sz||12)+'px;font-weight:'+(o.b?800:400)+';fill:'+(o.col||'#0b0d12')+(o.halo?';paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round':'')+'">'+s+'</text>'}
+function gBars(W,rows,o){
+  o=o||{};var vw=o.vw||96,bw=W-vw,bh=o.bh||22,gp=3,out='',y=0,mx=o.max,fm=o.fmt||function(v){return f0(v)};
+  rows.forEach(function(r){
+    out+=gT(0,y+15,r.n,{b:1,sz:14})+(r.sub?gT(W,y+15,r.sub,{a:'end',col:'#5f6673'}):'');
+    var by=y+22;
+    r.s.forEach(function(s,k){var w=Math.max(3,s.v/mx*bw),yy=by+k*(bh+gp);
+      out+='<g'+tip(s.tt||('<b>'+r.n+'</b><br>'+(s.y?s.y+': ':'')+fm(s.v)))+'><rect x="0" y="'+r1(yy)+'" width="'+r1(w)+'" height="'+bh+'" fill="'+s.c+'"/>'+
+        gT(w+6,yy+bh/2+5,(s.y?'<tspan style="font-weight:400;fill:#5f6673">'+s.y+'</tspan> ':'')+fm(s.v)+(o.unit||''),{b:1,sz:o.vsz||15})+'<rect x="0" y="'+r1(yy)+'" width="'+W+'" height="'+bh+'" fill="transparent"/></g>'});
+    y=by+r.s.length*(bh+gp)+(o.gap||12)});
+  return svgOpen(W,Math.ceil(y))+out+'</svg>';
+}
+/* slope chart: items [{n,a,b,c}], labs ['1991','2011'] */
+
 function tutto(){
   highlights();
   draw(cento);draw(linea);draw(varia);draw(rango);draw(presenti);draw(omicidi);
@@ -269,19 +273,10 @@ function cento(){
   var C0=D.cento,yi=C0.anni.indexOf(yearSel),W=width('ch-cento');
   var mv=GR.map(function(g){return C0.milano[g.id][yi]}),iv=GR.map(function(g){return C0.italia[g.id][yi]});
   var mq=resti(mv),iq=resti(iv),mt=C0.milano.totale[yi],it=C0.italia.totale[yi];
-  var col=W/2,gw=Math.min(col-12,176),cell=Math.floor(gw/10),sq=cell-2,g2=cell*10,top=44;
-  var xs=[(col-g2)/2,col+(col-g2)/2],H=top+g2+4,s=svgOpen(W,H);
-  [[mq,mv,mt,'Milano',C.mi],[iq,iv,it,'Italia',C.ink]].forEach(function(z,k){
-    var x0=xs[k],q=z[0],idx=0;
-    s+=T(x0,17,z[3],{c:'b',st:'font-size:16px;fill:'+z[4]})+T(x0,34,k?f1(it/1e6)+' milioni di denunce':f0(mt)+' denunce',{c:'m'});
-    for(var g=0;g<GR.length;g++){
-      for(var j=0;j<q[g];j++,idx++){
-        var r=Math.floor(idx/10),cc=idx%10;
-        s+='<rect x="'+r1(x0+cc*cell)+'" y="'+r1(top+r*cell)+'" width="'+sq+'" height="'+sq+'" rx="2" fill="'+GR[g].col+'"'+tip('<b>'+z[3]+', '+yearSel+'</b><br>'+sw(GR[g].col)+GR[g].nome+': '+q[g]+' ogni 100<br>('+f0(z[1][g])+' denunce)')+'/>';
-      }
-    }
-  });
-  $('ch-cento').innerHTML=s+'</svg>';
+  var rowsA=GR.map(function(g,k){return{n:g.nome,s:[
+    {v:mq[k],c:C.mi,y:'Milano',tt:'<b>'+g.nome+', '+yearSel+'</b><br>Milano: '+mq[k]+' ogni 100 denunce<br>('+f0(mv[k])+' denunce)'},
+    {v:iq[k],c:C.ink,y:'Italia',tt:'<b>'+g.nome+', '+yearSel+'</b><br>Italia: '+iq[k]+' ogni 100 denunce<br>('+f0(iv[k])+' denunce)'}]}});
+  $('ch-cento').innerHTML=gBars(W,rowsA,{max:Math.max(80,Math.max.apply(null,mq),Math.max.apply(null,iq)),bh:20,vw:104,gap:10});
   $('cy').textContent=yearSel;
   $('cn').textContent='denunce a Milano: '+f0(mt)+' · in Italia: '+f0(it);
   var h='<thead><tr><th>Ogni 100 denunce</th><th>Milano</th><th>Italia</th></tr></thead><tbody>';
@@ -396,13 +391,13 @@ function rango(){
 /* ---------- 4b. per residente e per presente ---------- */
 function presenti(){
   var G=D.gc.per_anno['2024'].slice().sort(function(a,b){return b.tasso-a.tasso}),P=last(D.pres.righe);
-  var W=width('ch-pres'),lw=66,rw=48,rh=28,top=52,H=top+G.length*rh+6,lo=4000,hi=12000;
+  var W=width('ch-pres'),lw=66,rw=48,rh=28,top=66,H=top+G.length*rh+6,lo=4000,hi=12000;
   var X=function(v){return lw+(v-lo)/(hi-lo)*(W-lw-rw)};
   var s=svgOpen(W,H),xp=X(P.con_turisti_e_saldo);
   [4000,6000,8000,10000,12000].forEach(function(v){s+=L(X(v),top-8,X(v),H-4,C.grid)+T(X(v),top-14,f0(v),{a:v===4000?'start':v===12000?'end':'middle',c:'m'})});
   s+=L(xp,top-8,xp,H-4,C.mi,1.8,' stroke-dasharray="5 4"');
   var lbl='Milano per presenti '+f0(P.con_turisti_e_saldo);
-  s+=T(Math.min(xp,W-4-tw(lbl,12,true)/2),30,lbl,{a:'middle',c:'b',st:'fill:'+C.mi+';font-size:12px'});
+  s+=T(Math.min(xp,W-4-tw(lbl,12,true)/2),16,lbl,{a:'middle',c:'b',st:'fill:'+C.mi+';font-size:12px'});
   G.forEach(function(g,k){
     var y=top+k*rh+rh/2,isM=g.nome==='Milano',col=isM?C.mi:C.ink2;
     s+=T(0,y+4,g.nome,{c:isM?'b':'',st:isM?'fill:'+C.mi:''});

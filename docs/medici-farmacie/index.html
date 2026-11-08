@@ -106,9 +106,6 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 /* quartiere e persone */
 .pm{margin:10px 0 0}
 .pm>b{display:block;font-size:.88rem;line-height:1.25;margin-bottom:2px}
-.pers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:.4em 0 .6em}
-.pers b{display:block;font-size:.95rem;margin-bottom:4px}
-.pers>div{min-width:0}
 .lg i.dot{border-radius:50%}
 .find{margin:14px 0 0}
 </style>
@@ -192,12 +189,8 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <h2 id="cammino">Quanto si cammina</h2>
 <div class="fig">
   <h3 id="t-persone"></h3>
-  <p class="sub">Ogni omino è 1 milanese su 100. Il colore dice quanti minuti a piedi ci mette da casa all’ambulatorio o alla farmacia più vicini.</p>
-  <div class="lg" id="lg-pers"></div>
-  <div class="pers" id="pers">
-    <div><b>Farmacia</b><div class="ch" id="ch-pers-f" role="img" aria-label="Cento omini colorati per minuti a piedi dalla farmacia più vicina"></div></div>
-    <div><b>Medico di famiglia</b><div class="ch" id="ch-pers-d" role="img" aria-label="Cento omini colorati per minuti a piedi dall’ambulatorio più vicino"></div></div>
-  </div>
+  <p class="sub">Quanti milanesi arrivano a piedi, da casa, alla farmacia e al medico di famiglia più vicini entro 5, 10 e 15 minuti.</p>
+  <div class="ch" id="ch-pers-b" role="img" aria-label="Linee: quota di milanesi che arriva a piedi alla farmacia e al medico entro 5, 10 e 15 minuti"></div>
   <table class="kt" id="tab-pers"></table>
   <p class="src">Stima su rete pedonale di OpenStreetMap a 4,5 km/h (75 metri al minuto), da 46.885 civici residenziali con i residenti 2025 distribuiti in parti uguali tra i civici del quartiere. Calcolo della pagina <a href="../citta-15-minuti/">La città dei 15 minuti</a>. Mappa e rete: © OpenStreetMap contributors (ODbL); civici: Comune di Milano (CC BY).</p>
 </div>
@@ -501,8 +494,8 @@ function pediatri(){
   s+=T(m.l,14,'pediatri nel quartiere ↑',{c:'m'})+T(W-m.r,H-6,'bambini da 0 a 13 anni nel quartiere →',{a:'end',c:'m'});
   var slope=1/D.bambini_0_13_per_pls,xe=Math.min(xm,ym/slope);
   s+=L(X(0),Y(0),X(xe),Y(xe*slope),C.ink,2);
-  var LT='Milano: 1 ogni '+f0(D.bambini_0_13_per_pls),ang=Math.atan2(Y(xe*slope)-Y(0),X(xe)-X(0)),ax0=X(xe)-8,ay0=Y(xe*slope)+(Y(0)-Y(xe*slope))*0.03;
-  s+='<g transform="translate('+r1(ax0+Math.sin(ang)*9)+' '+r1(Y(xe*slope)-Math.cos(ang)*9+8)+') rotate('+r1(ang*180/Math.PI)+')">'+T(0,0,LT,{a:'end',c:'halo',st:'font-size:12px'})+'</g>';
+  var LT='Milano: 1 ogni '+f0(D.bambini_0_13_per_pls),ang=Math.atan2(Y(xe*slope)-Y(0),X(xe)-X(0)),ax0=X(xe)-8;
+  s+='<g transform="translate('+r1(ax0+Math.sin(ang)*14)+' '+r1(Y(xe*slope)-Math.cos(ang)*14+8)+') rotate('+r1(ang*180/Math.PI)+')">'+T(0,0,LT,{a:'end',c:'halo',st:'font-size:12px'})+'</g>';
   var lab=[];
   var zero=NB.filter(function(o){return o.pl===0}).sort(function(a,b){return b.b13-a.b13}).slice(0,2),mxp=NB.slice().sort(function(a,b){return b.pl-a.pl})[0];
   lab=zero.concat([mxp]);
@@ -576,29 +569,31 @@ function cambi(){
 }
 
 /* ---------- 6. cammino ---------- */
-var WC=[{nome:'fino a 5 minuti',col:C.m2},{nome:'da 5 a 10 minuti',col:C.m3},{nome:'da 10 a 15 minuti',col:C.ora},{nome:'più di 15 minuti',col:C.mag}];
+var WC=[{nome:'fino a 5 minuti',col:C.m2},{nome:'da 5 a 10 minuti',col:C.m3},{nome:'da 10 a 15 minuti',col:C.ora},{nome:'più di 15 minuti',col:C.mi}];
 function quadretti(vals,tot){
   var raw=vals.map(function(v){return v/tot*100}),fl=raw.map(Math.floor),rest=100-fl.reduce(function(a,b){return a+b},0),
       ord=raw.map(function(v,i){return[v-Math.floor(v),i]}).sort(function(a,b){return b[0]-a[0]});
   for(var k=0;k<rest;k++)fl[ord[k][1]]++;return fl;
 }
-function omino(cx,cy,s,col){
-  return '<circle cx="'+r1(cx)+'" cy="'+r1(cy-s*0.6)+'" r="'+r1(s*0.2)+'" fill="'+col+'"/><path d="M'+r1(cx-s*0.36)+' '+r1(cy+s*0.46)+'V'+r1(cy-s*0.1)+'Q'+r1(cx-s*0.36)+' '+r1(cy-s*0.3)+' '+r1(cx)+' '+r1(cy-s*0.3)+'Q'+r1(cx+s*0.36)+' '+r1(cy-s*0.3)+' '+r1(cx+s*0.36)+' '+r1(cy-s*0.1)+'V'+r1(cy+s*0.46)+'Z" fill="'+col+'"/>';
-}
 function persone(){
   var cf=D.cammino_farmacia_citta,cd=D.cammino_medico_citta;
   function sh(c){return[1-c.oltre5,c.oltre5-c.oltre10,c.oltre10-c.oltre15,c.oltre15]}
   var sf=sh(cf),sd=sh(cd),qf=quadretti(sf,1),qd=quadretti(sd,1);
-  function grid(id,q,nome,sv){
-    var W=Math.floor($(id).clientWidth)||160,cw=Math.min(Math.floor(W/10),24),ch=Math.round(cw*1.15),H=ch*10,SW=cw*10,s=svgOpen(SW,H),j=0;
-    WC.forEach(function(g,gi){for(var c=0;c<q[gi];c++){var r=Math.floor(j/10),cc=j%10;
-      s+='<g'+tip('<b>'+nome+'</b><br>'+sw(g.col)+g.nome+': '+q[gi]+' milanesi su 100')+'>'+omino(cc*cw+cw/2,r*ch+ch/2,ch*0.86,g.col)+'<rect x="'+cc*cw+'" y="'+r*ch+'" width="'+cw+'" height="'+ch+'" fill="transparent"/></g>';j++}});
-    $(id).innerHTML=s+'</svg>';
-  }
-  grid('ch-pers-f',qf,'Farmacia più vicina');grid('ch-pers-d',qd,'Ambulatorio più vicino');
-  $('lg-pers').innerHTML=WC.map(function(g){return '<span><i style="background:'+g.col+'"></i>'+g.nome+'</span>'}).join('');
+  /* quanti arrivano entro X minuti */
+  var W2=width('ch-pers-b'),H2=250,m={l:40,r:16,t:24,b:44};
+  var X=function(k){return m.l+k/15*(W2-m.l-m.r)},Y=function(v){return H2-m.b-v/100*(H2-m.t-m.b)};
+  function cum(c){return[0,(1-c.oltre5)*100,(1-c.oltre10)*100,(1-c.oltre15)*100]}
+  var cF=cum(cf),cD=cum(cd),s2=svgOpen(W2,H2);
+  [0,25,50,75,100].forEach(function(g){s2+=L(m.l,Y(g),W2-m.r,Y(g),g?C.grid:C.axis,1)+T(m.l-5,Y(g)+4,g+'%',{a:'end',c:'m'})});
+  [0,5,10,15].forEach(function(k){s2+=L(X(k),Y(0),X(k),Y(0)+5,C.axis,1)+T(X(k),H2-24,k,{a:k===0?'start':k===15?'end':'middle',c:'m'})});
+  s2+=T(W2/2,H2-5,'minuti a piedi da casa',{a:'middle',c:'m'});
+  [[cF,C.m4,'Farmacia',-10],[cD,C.m5,'Medico',20]].forEach(function(z){var v=z[0];
+    s2+='<path d="M'+v.map(function(x,i){return r1(X(i*5))+' '+r1(Y(x))}).join('L')+'" fill="none" stroke="'+z[1]+'" stroke-width="3"/>';
+    v.forEach(function(x,i){if(i)s2+='<circle cx="'+r1(X(i*5))+'" cy="'+r1(Y(x))+'" r="5.5" fill="'+z[1]+'" stroke="#fff" stroke-width="1.5"'+tip('<b>'+z[2]+'</b><br>Entro '+(i*5)+' minuti: '+f1(x)+' milanesi su 100')+'/>'+T(X(i*5)+(i===3?-2:0),Y(x)+z[3]+(i===3&&z[3]>0?4:0),f0(x),{a:i===3?'end':'middle',c:'b',st:'fill:'+z[1]})})});
+  s2+=T(X(0)+8,Y(0)-8,'',{});
+  $('ch-pers-b').innerHTML=s2+'</svg>'+'<div class="lg" style="margin-top:6px"><span><i class="ln" style="background:'+C.m4+'"></i>farmacia</span><span><i class="ln" style="background:'+C.m5+'"></i>medico di famiglia</span></div>';
   function p1(x){return f1(x*100)+'%'}
-  var h='<caption>La quota esatta dei milanesi (gli omini sono arrotondati)</caption><thead><tr><th>Minuti a piedi</th><th>Farmacia</th><th>Medico di famiglia</th></tr></thead><tbody>';
+  var h='<caption>La quota esatta dei milanesi</caption><thead><tr><th>Minuti a piedi</th><th>Farmacia</th><th>Medico di famiglia</th></tr></thead><tbody>';
   WC.forEach(function(g,i){h+='<tr><td>'+sw(g.col)+g.nome+'</td><td>'+p1(sf[i])+'</td><td>'+p1(sd[i])+'</td></tr>'});
   h+='<tr class="tot"><td>Metà dei milanesi ci mette meno di</td><td>'+f1(cf.mediana_min)+' min</td><td>'+f1(cd.mediana_min)+' min</td></tr></tbody>';
   $('tab-pers').innerHTML=h;

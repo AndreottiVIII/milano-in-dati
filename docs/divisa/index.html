@@ -142,11 +142,12 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <div class="ris m" id="esempio"></div>
 <div class="fig">
   <h3 id="g-omini"></h3>
-  <p class="sub">Ogni omino è una persona su 100 del gruppo; quelli colorati sono quelli che dovrebbero traslocare. Più omini colorati, più il gruppo vive separato dagli altri. Muovi il cursore sugli anni.</p>
+  <p class="sub">Per ogni gruppo: su 100 persone, quante dovrebbero cambiare quartiere per mescolarsi con gli altri. Più la barra è lunga, più il gruppo vive separato. Muovi il cursore sugli anni.</p>
   <div class="sl"><label for="anno">Anno: <output id="yr">2025</output></label>
     <input type="range" id="anno" min="1999" max="2025" step="1" value="2025" aria-label="Anno">
     <div class="ex"><span>1999</span><span>2025</span></div></div>
-  <div id="ch-omini" role="img" aria-label="Tre gruppi di cento omini: quanti dovrebbero cambiare quartiere per mescolarsi, per cittadinanza, età e reddito"></div>
+  <div class="ch" id="ch-omini" role="img" aria-label="Barre: su 100 persone del gruppo, quante dovrebbero cambiare quartiere per mescolarsi, per cittadinanza, età e reddito"></div>
+  <div id="nt-omini"></div>
   <p class="src">Fonte: anagrafe del Comune di Milano (CC BY) per cittadinanza ed età, 88 quartieri; Ministero dell’Economia (CC BY 3.0) per il reddito, 38 CAP, solo anni d’imposta 2011, 2015 e 2019–2024. Conti nostri. Sono tre misure diverse, su zone di dimensioni diverse: servono per vedere come cambiano nel tempo, non per dire quale divisione è più grande.</p>
 </div>
 
@@ -406,26 +407,26 @@ function highlights(){
   $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+(t.c===C.m3?';--k:#0b0d12':'')+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
 
-/* ---------- 1. cento omini ---------- */
+/* ---------- 1. su 100: barre e punti ---------- */
 function omini(){
   var y=+$('anno').value;$('yr').textContent=y;
   var c=sery(Q.cittadinanza,y),e=sery(Q.eta,y),r=lastLE(Q.reddito,y);
   var c99=sery(Q.cittadinanza,1999),e99=sery(Q.eta,1999),r11=Q.reddito[0];
-  function fig(n,col){
-    var s='<svg viewBox="0 0 150 150" width="150" height="150" aria-hidden="true">';
-    for(var i=0;i<100;i++){var cx=(i%10)*15+7.5,cy=Math.floor(i/10)*15+7.5,fc=(n!=null&&i<n)?col:C.stay;
-      s+='<circle cx="'+cx+'" cy="'+(cy-4.8)+'" r="2.7" fill="'+fc+'"/><rect x="'+(cx-4.2)+'" y="'+(cy-1.6)+'" width="8.4" height="6.8" rx="3" fill="'+fc+'"/>'}
-    return s+'</svg>';
-  }
-  function riga(tit,col,d,txt,extra){
-    var n=d==null?null:Math.round(d*100);
-    return '<div class="om">'+fig(n,col)+'<div><span class="tt" style="color:'+col+'">'+tit+'</span>'+(d==null?'<span class="bg" style="font-size:1.3rem">nessun dato</span>':'<span class="bg">'+f0(d*100)+'<small>su 100</small></span>')+'<p>'+txt+'</p>'+(extra?'<p class="mm">'+extra+'</p>':'')+'</div></div>';
-  }
-  var s='';
-  s+=riga('Cittadinanza',C.m4,c.d,'<b>stranieri</b> dovrebbero cambiare quartiere per essere distribuiti come gli italiani. Sono il '+f0(c.q*100)+'% dei residenti.',y===1999?'':'Nel 1999: '+f0(c99.d*100)+' su 100.');
-  s+=riga('Età',C.m5,e.d,'<b>over 65</b> dovrebbero cambiare quartiere per essere distribuiti come gli under 35. Sono il '+f0(e.q*100)+'% dei residenti.',y===1999?'':'Nel 1999: '+f0(e99.d*100)+' su 100.');
-  s+=riga('Reddito',C.m2,r?r.d:null,r?'<b>contribuenti del quarto più ricco</b> dovrebbero cambiare CAP per essere distribuiti come quelli del quarto più povero.':'Per il reddito non ci sono dati prima del 2011.',r?(r.a===y?'Anno d’imposta '+y+'.':'Dato più vicino: anno d’imposta '+r.a+'.')+(r.a===2011?'':' Nel 2011: '+f0(r11.d*100)+' su 100.'):'');
-  $('ch-omini').innerHTML=s;
+  var R=[
+    {tit:'Cittadinanza',col:C.m4,d:c.d,a0:1999,d0:c99.d,txt:'<b>stranieri</b> dovrebbero cambiare quartiere per essere distribuiti come gli italiani. Sono il '+f0(c.q*100)+'% dei residenti.'},
+    {tit:'Età',col:C.m5,d:e.d,a0:1999,d0:e99.d,txt:'<b>over 65</b> dovrebbero cambiare quartiere per essere distribuiti come gli under 35. Sono il '+f0(e.q*100)+'% dei residenti.'},
+    {tit:'Reddito',col:C.m2,d:r?r.d:null,a0:2011,d0:r11.d,txt:r?'<b>contribuenti del quarto più ricco</b> dovrebbero cambiare CAP per essere distribuiti come quelli del quarto più povero.'+(r.a===y?' Anno d’imposta '+y+'.':' Dato più vicino: anno d’imposta '+r.a+'.'):'Per il reddito non ci sono dati prima del 2011.'}
+  ];
+  var MX=40;
+  var W=width('ch-omini'),bh=30,rh=bh+34,H=R.length*rh+24,s=svgOpen(W,H),X=function(v){return 2+v/MX*(W-70)};
+  [0,10,20,30,40].forEach(function(v){s+=L(X(v),0,X(v),H-22,v?C.grid:C.axis)+T(X(v),H-6,v,{a:v===0?'start':'middle',c:'m'})});
+  R.forEach(function(q,k){var yy=k*rh;
+    s+=T(2,yy+14,q.tit,{c:'b',st:'font-size:14px;fill:'+q.col});
+    if(q.d==null){s+=T(2,yy+rh-18,'nessun dato',{c:'m'});return}
+    s+=hbar(X(0),X(q.d*100),yy+20,bh,q.col,tip('<b>'+q.tit+'</b><br>'+f0(q.d*100)+' su 100 dovrebbero cambiare'));
+    s+=T(X(q.d*100)+8,yy+20+bh/2+6,f0(q.d*100)+' su 100',{c:'b',st:'font-size:15px'})});
+  $('ch-omini').innerHTML=s+'</svg>';
+  $('nt-omini').innerHTML=R.map(function(q){return '<p class="note"><b style="color:'+q.col+'">'+q.tit+'.</b> '+(q.d==null?q.txt:'<b>'+f0(q.d*100)+' su 100</b> '+q.txt+(q.a0===y||q.d0==null?'':' Nel '+q.a0+': '+f0(q.d0*100)+' su 100.'))+'</p>'}).join('');
   var c25=sery(Q.cittadinanza,2025);
   $('g-omini').textContent='In 26 anni gli stranieri sono passati dall’'+f0(c99.q*100)+'% al '+f0(c25.q*100)+'% dei residenti, ma la separazione è cambiata poco: '+f0(c99.d*100)+' su 100 nel 1999, '+f0(c25.d*100)+' nel 2025';
 }
