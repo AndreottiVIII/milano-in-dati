@@ -498,10 +498,14 @@
     }
   } catch (e1) { /* niente blocco, pagina intatta */ }
 
-  // ---- Menu a tendina per i campi "scrivi il tuo quartiere / comune / via" (Davide, 7/11/2026):
-  // ogni <input list="..."> della pagina mostra sotto di sé l'elenco delle scelte, filtrato mentre si scrive.
+  // ---- Menu a tendina per i campi con elenco di scelte (Davide, 7/11/2026, rifatto l'8/11):
+  // - elenco corto (30 scelte o meno, senza data-mid-cerca): il campo diventa un vero <select>;
+  //   il campo originale resta nella pagina, nascosto, e il codice della pagina continua a leggerlo e scriverlo.
+  // - elenco lungo (quartieri, comuni, vie): pannello con ricerca. Al tocco mostra TUTTE le scelte, evidenzia
+  //   quella attuale e seleziona il testo; filtra solo quando si scrive. Freccia a destra.
   // Le scelte si leggono dal <datalist> ogni volta (alcune pagine lo riempiono dopo).
   try {
+    var ARROW = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E\")";
     var st2 = document.createElement('style');
     st2.textContent =
       '.mid-tendina{position:absolute;z-index:1600;background:#fff;border:1.5px solid #000;border-top:0;max-height:264px;overflow-y:auto;' +
@@ -510,23 +514,31 @@
       '.mid-tendina button{display:block;width:100%;text-align:left;font:inherit;color:#000;background:#fff;border:0;border-top:1px solid #eee;' +
       'padding:10px 12px;margin:0;cursor:pointer;min-height:44px}' +
       '.mid-tendina button:hover,.mid-tendina button.on{background:#ffe1d6}' +
-      '.mid-tendina .mid-vuota{padding:10px 12px;color:#555}';
+      '.mid-tendina button.cur{font-weight:700;background:#f3f3f3}' +
+      '.mid-tendina button.cur.on{background:#ffe1d6}' +
+      '.mid-tendina .mid-vuota{padding:10px 12px;color:#555}' +
+      'input[data-mid-list]{background-image:' + ARROW + '!important;background-repeat:no-repeat!important;' +
+      'background-position:right 12px center!important;background-size:12px 8px!important;padding-right:36px!important;text-overflow:ellipsis}' +
+      'select.mid-sel{box-sizing:border-box;width:100%;max-width:100%;min-height:44px;-webkit-appearance:menulist;appearance:auto;cursor:pointer}';
     document.head.appendChild(st2);
     var tend = document.createElement('div');
     tend.className = 'mid-tendina';
     tend.hidden = true;
     tend.setAttribute('role', 'listbox');
     document.body.appendChild(tend);
-    var attivo = null, scelte = [], evid = -1;
+    var attivo = null, scelte = [], evid = -1, corr = -1;
     var normT = function (x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').trim(); };
-    function opzioni(inp) {
-      var dl = document.getElementById(inp.getAttribute('data-mid-list') || '');
-      if (!dl) return [];
+    var DESC = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    function leggiOpzioni(dl) {
       var out = [];
+      if (!dl) return out;
       Array.prototype.forEach.call(dl.querySelectorAll('option'), function (o) {
         var v = o.value || o.textContent; if (v) out.push({ v: v, t: o.label && o.label !== v ? v + ' · ' + o.label : v });
       });
       return out;
+    }
+    function opzioni(inp) {
+      return leggiOpzioni(document.getElementById(inp.getAttribute('data-mid-list') || ''));
     }
     function posiziona() {
       if (!attivo) return;
@@ -535,28 +547,34 @@
       tend.style.top = (r.bottom + window.scrollY) + 'px';
       tend.style.width = Math.max(200, r.width) + 'px';
     }
-    function apri(inp) {
+    // filtra=false: tutte le scelte (apertura); filtra=true: solo quelle che corrispondono a quanto scritto
+    function apri(inp, filtra) {
       attivo = inp;
-      var q = normT(inp.value), tutte = opzioni(inp);
+      var cur = normT(inp.value), q = filtra ? cur : '', tutte = opzioni(inp);
+      if (!tutte.length) { chiudi(); return; }
       scelte = tutte.filter(function (o) { return !q || normT(o.v).indexOf(q) !== -1 || normT(o.t).indexOf(q) !== -1; });
       // prima quelle che cominciano con quanto scritto
       if (q) scelte.sort(function (a, b) { return (normT(a.v).indexOf(q) === 0 ? 0 : 1) - (normT(b.v).indexOf(q) === 0 ? 0 : 1); });
-      if (!tutte.length) { chiudi(); return; }
-      if (scelte.length === 1 && normT(scelte[0].v) === q) { chiudi(); return; }
       tend.innerHTML = '';
-      evid = -1;
+      evid = -1; corr = -1;
       if (!scelte.length) {
         var vv = document.createElement('div'); vv.className = 'mid-vuota'; vv.textContent = 'Nessun risultato'; tend.appendChild(vv);
       }
-      scelte.slice(0, 200).forEach(function (o) {
+      scelte.slice(0, 400).forEach(function (o, i) {
         var b = document.createElement('button');
         b.type = 'button'; b.setAttribute('role', 'option'); b.textContent = o.t;
+        if (!filtra && cur && normT(o.v) === cur) { b.className = 'cur'; b.setAttribute('aria-selected', 'true'); corr = i; }
         b.addEventListener('pointerdown', function (e) { e.preventDefault(); });
         b.addEventListener('click', function () { scegli(o.v); });
         tend.appendChild(b);
       });
       posiziona();
       tend.hidden = false;
+      tend.scrollTop = 0;
+      if (corr >= 0) {
+        var bc = tend.querySelectorAll('button')[corr];
+        if (bc) tend.scrollTop = Math.max(0, bc.offsetTop - tend.clientHeight / 2 + bc.offsetHeight / 2);
+      }
     }
     function chiudi() { tend.hidden = true; evid = -1; }
     function scegli(v) {
@@ -568,27 +586,110 @@
       inp.dispatchEvent(new Event('change', { bubbles: true }));
       try { inp.blur(); } catch (e5) { /* niente */ }
     }
-    function aggancia(inp) {
-      if (inp.getAttribute('data-mid-list')) return;
-      var id = inp.getAttribute('list');
-      if (!id) return;
+    function agganciaPannello(inp, id) {
       inp.setAttribute('data-mid-list', id);
       inp.removeAttribute('list'); // niente doppio elenco del browser
       inp.setAttribute('autocomplete', 'off');
-      inp.addEventListener('focus', function () { apri(inp); });
-      inp.addEventListener('input', function () { if (document.activeElement === inp) apri(inp); });
+      var primo = false, eraAperto = false;
+      inp.addEventListener('pointerdown', function () { eraAperto = !tend.hidden && attivo === inp; });
+      inp.addEventListener('focus', function () {
+        apri(inp, false);
+        primo = true; setTimeout(function () { primo = false; }, 400);
+        try { inp.select(); } catch (e7) { /* niente */ }
+      });
+      // il click che dà il focus non deve togliere la selezione del testo
+      inp.addEventListener('mouseup', function (e) { if (primo) { e.preventDefault(); primo = false; } });
+      inp.addEventListener('click', function (e) {
+        var r = inp.getBoundingClientRect();
+        if (e.clientX > r.right - 40) { // freccia: apre o chiude
+          if (eraAperto) { chiudi(); } else if (tend.hidden || attivo !== inp) { apri(inp, false); }
+        } else if (tend.hidden || attivo !== inp) { apri(inp, false); }
+        eraAperto = false;
+      });
+      inp.addEventListener('input', function () { if (document.activeElement === inp) apri(inp, true); });
       inp.addEventListener('blur', function () { setTimeout(function () { if (attivo === inp) chiudi(); }, 150); });
       inp.addEventListener('keydown', function (e) {
-        if (tend.hidden) return;
+        if (tend.hidden) {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); apri(inp, false); }
+          return;
+        }
         var bs = tend.querySelectorAll('button');
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
           e.preventDefault();
-          evid = Math.max(0, Math.min(bs.length - 1, evid + (e.key === 'ArrowDown' ? 1 : -1)));
+          var base = evid >= 0 ? evid : (corr >= 0 ? corr : (e.key === 'ArrowDown' ? -1 : bs.length));
+          evid = Math.max(0, Math.min(bs.length - 1, base + (e.key === 'ArrowDown' ? 1 : -1)));
           Array.prototype.forEach.call(bs, function (b, i) { b.classList.toggle('on', i === evid); });
           if (bs[evid]) bs[evid].scrollIntoView({ block: 'nearest' });
         } else if (e.key === 'Enter' && evid >= 0 && scelte[evid]) { e.preventDefault(); scegli(scelte[evid].v); }
         else if (e.key === 'Escape') chiudi();
       });
+    }
+    function agganciaSelect(inp, dl, id) {
+      inp.setAttribute('data-mid-sel', id);
+      var cs = window.getComputedStyle(inp);
+      var sel = document.createElement('select');
+      sel.className = 'mid-sel';
+      var lab = inp.id ? document.querySelector('label[for="' + inp.id + '"]') : null;
+      var nome = inp.getAttribute('aria-label') || (lab && lab.textContent.trim()) || inp.getAttribute('placeholder') || '';
+      if (nome) sel.setAttribute('aria-label', nome);
+      ['fontSize', 'fontWeight', 'fontFamily', 'color', 'backgroundColor', 'borderRadius',
+       'paddingTop', 'paddingBottom', 'paddingLeft', 'lineHeight', 'marginTop', 'marginBottom'].forEach(function (p) {
+        try { if (cs[p]) sel.style[p] = cs[p]; } catch (e8) { /* niente */ }
+      });
+      if (parseFloat(cs.borderTopWidth)) {
+        sel.style.borderWidth = cs.borderTopWidth; sel.style.borderStyle = cs.borderTopStyle; sel.style.borderColor = cs.borderTopColor;
+      } else { sel.style.border = '1.5px solid #000'; }
+      inp.style.setProperty('display', 'none', 'important');
+      inp.setAttribute('tabindex', '-1');
+      inp.setAttribute('aria-hidden', 'true');
+      inp.removeAttribute('list');
+      inp.parentNode.insertBefore(sel, inp.nextSibling);
+      function valoreVero() { return DESC.get.call(inp); }
+      function sync(v) {
+        if (v == null) v = valoreVero();
+        var trovato = false;
+        Array.prototype.forEach.call(sel.options, function (o) { if (o.value === v) trovato = true; });
+        sel.value = trovato ? v : '';
+      }
+      function popola() {
+        var op = leggiOpzioni(dl), cur = valoreVero();
+        sel.innerHTML = '';
+        var p = document.createElement('option'); p.value = ''; p.textContent = inp.getAttribute('placeholder') || 'Scegli…'; sel.appendChild(p);
+        op.forEach(function (o) { var e = document.createElement('option'); e.value = o.v; e.textContent = o.t; sel.appendChild(e); });
+        sync(cur);
+      }
+      // se il codice della pagina scrive input.value, il select segue
+      Object.defineProperty(inp, 'value', {
+        configurable: true, enumerable: true,
+        get: function () { return DESC.get.call(inp); },
+        set: function (v) { DESC.set.call(inp, v); sync(valoreVero()); }
+      });
+      sel.addEventListener('change', function () {
+        DESC.set.call(inp, sel.value);
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        inp.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      popola();
+      try { new MutationObserver(popola).observe(dl, { childList: true, subtree: true, characterData: true }); } catch (e9) { /* niente */ }
+    }
+    function aggancia(inp) {
+      if (inp.getAttribute('data-mid-list') || inp.getAttribute('data-mid-sel')) return;
+      var id = inp.getAttribute('list');
+      if (!id) return;
+      var dl = document.getElementById(id);
+      var n = leggiOpzioni(dl).length;
+      if (!dl || !n) { // elenco ancora vuoto: si aspetta che la pagina lo riempia
+        if (dl && !dl._midOss) {
+          dl._midOss = true;
+          try {
+            var oss = new MutationObserver(function () { if (leggiOpzioni(dl).length) { oss.disconnect(); dl._midOss = false; aggancia(inp); } });
+            oss.observe(dl, { childList: true, subtree: true });
+          } catch (e10) { /* niente */ }
+        }
+        return;
+      }
+      var corto = n <= 30 && !inp.hasAttribute('data-mid-cerca') && inp.parentNode;
+      if (corto) agganciaSelect(inp, dl, id); else agganciaPannello(inp, id);
     }
     function cercaCampi() { Array.prototype.forEach.call(document.querySelectorAll('input[list]'), aggancia); }
     cercaCampi();

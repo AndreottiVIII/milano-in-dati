@@ -3041,3 +3041,4 @@ python -I scripts\inventario.py <cartella censimenti>
 - 2026-11-08 — cani: pubblicata definitiva; il riquadro «Quanti sono i cani?» chiuso in fondo, si apre al click (Davide).
 - 2026-11-08 — suolo: pubblicata definitiva; primo grafico rifatto in barre con «già costruito nel 2006 / costruito dopo / ancora libero» e spiegazione di «suolo consumato» (Davide); via le griglie da 100.
 - 2026-11-08 — costo-vita: pubblicata definitiva e arricchita su richiesta di Davide: «Con 100 euro», voce di spesa a scelta (menu vero), «La tua inflazione» con esempi e cursori; dati già nel progetto.
+- 2026-11-08 — bilancio-comune: pubblicata definitiva; la voce di spesa è un menu a tendina vero (Davide: «così è macchinoso»). menu.js: le tendine mostrano tutte le scelte al tocco, freccia ▾, elenchi corti diventano <select>.
