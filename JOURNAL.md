@@ -3077,3 +3077,6 @@ Terzo settore pubblicata definitiva: fasce min-max (opzione C) con le schede che
 Quartieri che cambiano pubblicata definitiva: livello contro cambiamento (opzione A) con quadranti spiegati e tutti i nomi.
 Statue pubblicata definitiva: opzioni A e B, senza le opere di soggetto non determinato.
 Elezioni ripubblicata: grafico dei quartieri rifatto a barre ordinate con la riga di Milano.
+Milano nei film e nei libri pubblicata definitiva: specchio film/libri (opzione A) con 9 immagini libere da Wikimedia Commons, autore e licenza sotto ognuna.
+Nomi delle fermate pubblicata definitiva: binari per linea (opzione A), confronto metro-tram spiegato in parole semplici.
+Cinema spariti pubblicata definitiva: sale attive anno per anno (opzione B) e farfalla aperture/chiusure più in basso (C).
