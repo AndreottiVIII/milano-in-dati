@@ -565,7 +565,7 @@ for Y in range(1778, 1951):
         elif rom_first is not None and rom_first.titolo: t0 = pulisci_ocr(rom_first.titolo); ric = "Romani 1862 (primo titolo del Carnevale)"
         title = t0; first_title = t0
         if t0:
-            note.append(f"Stagione assente dalla lista WP: titolo ricostruito da {ric} (lettura OCR: da controllare sul libro)")
+            note.append(f"Stagione assente dalla lista WP: titolo ricostruito da {ric} (letto in automatico dalla scansione del libro: da controllare)")
             fonti = [f for f in fonti if f != "WP"]
             if ric.startswith("Cambiasi"): fonti.append("CA")
             if ric.startswith("Romani"): fonti.append("RO")

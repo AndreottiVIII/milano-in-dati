@@ -116,6 +116,8 @@ def blocco_home():
     T = json.load(open(DOCS / 'temi.json', encoding='utf-8'))
     out = []
     for t in T['temi']:
+        if t.get('fuori_home'):
+            continue  # riepiloghi e guide: nella home stanno solo nella barra in alto
         voci = [p for p in T['pagine'] if p['tema'] == t['id']]
         if not voci:
             continue

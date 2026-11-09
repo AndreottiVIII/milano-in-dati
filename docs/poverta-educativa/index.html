@@ -312,11 +312,11 @@ function highlights(){
   var g=capGroups(),itD=R.tp_italia_2024_tot-R.tp_italia_2015_tot;
   var H=[
     {c:C.mi,h:'t-nidi',n:f1(R.nidi_milano_p100_2024),p:'posti nei nidi ogni 100 bambini di 0-2 anni. Milano è '+ord(rn[0])+' tra le '+rn[1]+' grandi città; l’Italia è a '+f1(R.nidi_italia_p100_2024)+'.'},
-    {c:C.sta,h:'t-sp',n:f1(R.tp_milano_2024_statale)+'<small>%</small>',p:'degli alunni delle primarie statali fa il tempo pieno: il valore più alto tra le grandi città. Nelle paritarie è il '+f1(R.tp_milano_2024_paritaria)+'%.'},
+    {c:C.m3,h:'t-sp',n:f1(R.tp_milano_2024_statale)+'<small>%</small>',p:'degli alunni delle primarie statali fa il tempo pieno: il valore più alto tra le grandi città. Nelle paritarie è il '+f1(R.tp_milano_2024_paritaria)+'%.'},
     {c:C.m2,h:'t-tp',n:'+'+f1(itD)+'<small> punti</small>',p:'di tempo pieno in Italia dal 2015 al 2024. Milano è ferma a '+f1(R.tp_milano_2024_tot)+' alunni su 100 (nel 2015 era '+f1(R.tp_milano_2015_tot)+').'},
     {c:C.m4,h:'t-inv',n:f1(R.invalsi8_milano_2024)+'<small>%</small>',p:'degli studenti di terza media è a rischio di restare senza competenze di base. Milano è '+ord(R.invalsi8_posizione_milano[0])+' tra le grandi città; l’Italia è al '+f1(R.invalsi8_italia_2024)+'%.'},
     {c:C.m5,h:'t-map1',n:n100+'<small> su '+ns.length+'</small>',p:'quartieri dove tutte le scuole statali fanno il tempo pieno per tutti gli alunni.'},
-    {c:C.ric,h:'t-cap',n:f0(g.top)+'<small> su 100</small>',p:'alunni nelle paritarie, nei 10 CAP con il reddito più alto. Negli altri 28 CAP sono '+f0(g.rest)+' su 100.'}
+    {c:C.ora,h:'t-cap',n:f0(g.top)+'<small> su 100</small>',p:'alunni nelle paritarie, nei 10 CAP con il reddito più alto. Negli altri 28 CAP sono '+f0(g.rest)+' su 100.'}
   ];
   $('hl').innerHTML=H.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+''+'"><b class="n">'+t.n+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
 }
@@ -382,10 +382,12 @@ function opA(){
     s+='<path d="M'+r1(ix_)+' '+(axisY-7)+'L'+r1(ix_+6)+' '+axisY+'L'+r1(ix_)+' '+(axisY+7)+'L'+r1(ix_-6)+' '+axisY+'Z" fill="'+C.ink+'" stroke="#fff" stroke-width="1"'+tip('<b>Italia</b><br>'+ind.fmt(ITA[ind.k])+ind.u+' · '+ind.nome)+'/>';
     s+='<circle cx="'+r1(mi.x)+'" cy="'+r1(axisY-r-1-mi.yo)+'" r="'+(r+2)+'" fill="'+C.mi+'" stroke="#fff" stroke-width="1.5"'+tip('<b>Milano</b><br>'+ind.fmt(mi.c[ind.k])+ind.u+' · '+ind.nome+'<br>'+ord(rk)+' su 14')+'/>';
     var mt='Milano '+ord(rk),mw=tw(mt,13,true),mx=Math.min(Math.max(mi.x,pl_+mw/2),W-4-mw/2);
-    s+=T(mx,axisY-r-1-mi.yo-r-6,mt,{a:'middle',c:'r halo'});
+    var ytop=axisY-r-1-mi.yo-r-2;
+    pts.forEach(function(p){if(Math.abs(p.x-mx)<mw/2+r+2)ytop=Math.min(ytop,axisY-r-1-p.yo-r-(p.c.citta==='Milano'?2:0))});
+    s+=T(mx,ytop-5,mt,{a:'middle',c:'r halo'});
     var labs=[{x:X(bn[ind.k]),t:bn.citta+' '+ind.fmt(bn[ind.k])+ind.u},{x:X(wn[ind.k]),t:wn.citta+' '+ind.fmt(wn[ind.k])+ind.u},{x:ix_,t:'Italia '+ind.fmt(ITA[ind.k])+ind.u,it:true}];
     var used=[];
-    labs.forEach(function(l){var w2=tw(l.t,12,false),x0=Math.min(Math.max(l.x-w2/2,0),W-w2),row=0;
+    labs.forEach(function(l){var w2=tw(l.t,l.it?13:12,!!l.it)+10,x0=Math.min(Math.max(l.x-w2/2,0),W-w2-4),row=0;
       while(row<3&&used.some(function(u){return u.row===row&&x0<u.x1+6&&x0+w2>u.x0-6}))row++;
       used.push({row:row,x0:x0,x1:x0+w2});
       s+=T(x0,axisY+34+row*15,esc(l.t),{c:'m',st:l.it?'font-weight:700;fill:#0b0d12':''})});
@@ -527,10 +529,10 @@ function chartCap(){
     var t='<b>'+esc(r.n)+'</b><br>'+(100-r.p)+' su 100 alla statale<br>'+r.p+' su 100 alla paritaria';
     s+='<rect x="0" y="'+(y+28)+'" width="'+r1(ws)+'" height="'+bh+'" fill="'+C.sta+'"'+tip(t)+'/>';
     s+='<rect x="'+r1(ws)+'" y="'+(y+28)+'" width="'+r1(wp)+'" height="'+bh+'" fill="'+C.par+'"'+tip(t)+'/>';
-    s+='<text x="12" y="'+(y+28+bh/2+11)+'" style="font-size:34px;font-weight:800;fill:#fff;pointer-events:none">'+(100-r.p)+'</text>';
-    s+='<text x="'+r1(ws+wp/2)+'" y="'+(y+28+bh/2+11)+'" text-anchor="middle" style="font-size:34px;font-weight:800;fill:#0b0d12;pointer-events:none">'+r.p+'</text>';
-    s+='<text x="12" y="'+(y+28+bh-8)+'" style="font-size:13px;font-weight:700;fill:#fff;pointer-events:none">statale</text>';
-    s+='<text x="'+r1(ws+wp/2)+'" y="'+(y+28+bh-8)+'" text-anchor="middle" style="font-size:13px;font-weight:700;fill:#0b0d12;pointer-events:none">paritaria</text>';
+    s+='<text x="12" y="'+(y+28+bh/2+6)+'" style="font-size:34px;font-weight:800;fill:#fff;pointer-events:none">'+(100-r.p)+'</text>';
+    s+='<text x="'+r1(ws+wp/2)+'" y="'+(y+28+bh/2+6)+'" text-anchor="middle" style="font-size:34px;font-weight:800;fill:#0b0d12;pointer-events:none">'+r.p+'</text>';
+    s+='<text x="12" y="'+(y+28+bh-5)+'" style="font-size:13px;font-weight:700;fill:#fff;pointer-events:none">statale</text>';
+    s+='<text x="'+r1(ws+wp/2)+'" y="'+(y+28+bh-5)+'" text-anchor="middle" style="font-size:13px;font-weight:700;fill:#0b0d12;pointer-events:none">paritaria</text>';
   });
   $('ch-cap').innerHTML=s+'</svg>';
   $('t-cap').textContent='Nei 10 CAP con più reddito '+f0(g.top)+' alunni su 100 vanno a una scuola paritaria, negli altri '+f0(g.rest);

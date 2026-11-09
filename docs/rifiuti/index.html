@@ -175,7 +175,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 <div class="fig">
   <h3 id="t-tdot"></h3>
   <p class="sub">In un giorno medio del 2024, per ogni 100 residenti.</p>
-  <div class="ch" id="ch-tdot" role="img" aria-label="Pallini: turisti presenti in media per ogni 100 residenti"></div>
+  <div class="ch" id="ch-tdot" role="img" aria-label="Barre: turisti presenti in media per ogni 100 residenti, 2010 e 2024"></div>
   <p class="note" id="nt-tdot"></p>
   <p class="src">Turisti presenti in media = notti in strutture ricettive divise per i giorni dell'anno. Non conta chi dorme da amici o in affitti non dichiarati, né chi viene in giornata.</p>
 </div>
@@ -600,15 +600,11 @@ function turisti(){
   $('t-tur').textContent='Le notti dei turisti sono '+(x>1.9&&x<2.1?'raddoppiate':'cresciute di '+f0((x-1)*100)+'%')+' dal 2010, i rifiuti sono calati '+(/^(1|11|8\d*)$/.test(f0(Math.abs(last(ru)-100)))?'dell’':'del ')+f0(Math.abs(last(ru)-100))+'%';
 }
 function turDot(){
-  var box=$('ch-tdot'),W=width('ch-tdot'),t24=last(D.turisti),t10=D.turisti[0],k=t24.su_residenti_pct,nt=Math.round(k);
-  var d=Math.min(18,Math.floor((W-4)/(10+0)) ),cols=10,r=d/2-2,rows=10,H=rows*d+d+10;
-  if(W>=520){cols=20;rows=5;d=Math.min(22,Math.floor((W-4)/cols));r=d/2-2;H=rows*d+d+10}
-  var s=svgOpen(W,H),i;
-  for(i=0;i<100;i++){var cx=(i%cols)*d+d/2+2,cy=Math.floor(i/cols)*d+d/2;s+='<circle cx="'+r1(cx)+'" cy="'+r1(cy)+'" r="'+r1(r)+'" fill="'+C.light+'"/>'}
-  var yT=rows*d+d/2+6;
-  for(i=0;i<nt;i++){s+='<circle cx="'+r1(i*d+d/2+2)+'" cy="'+r1(yT)+'" r="'+r1(r)+'" fill="'+C.tur+'"'+tip('Turisti presenti in media nel 2024: '+f0(t24.presenti_medi))+'/>'}
-  s+=T(nt*d+8,yT+5,f1(k)+' turisti',{c:'b'});
-  s+='<rect x="0" y="0" width="'+(cols*d+4)+'" height="'+(rows*d)+'" fill="transparent"'+tip('Residenti nel 2024: '+f0(D.milano.popolazione[yi(2024)]))+'/>';
+  var box=$('ch-tdot'),W=width('ch-tdot'),t24=last(D.turisti),t10=D.turisti[0],k=t24.su_residenti_pct;
+  var rows=[{l:'2010',v:t10.su_residenti_pct,c:C.light,t:'Turisti presenti in media nel 2010: '+f0(t10.presenti_medi)},{l:'2024',v:k,c:C.tur,t:'Turisti presenti in media nel 2024: '+f0(t24.presenti_medi)}];
+  var lw=44,rw=96,bw=W-lw-rw,rh=40,mx=Math.ceil(k),H=rows.length*rh+4,s=svgOpen(W,H);
+  rows.forEach(function(r,i){var y=i*rh+4,w=bw*r.v/mx;
+    s+=T(0,y+21,r.l,{c:'b',st:'font-size:14px'})+'<rect x="'+lw+'" y="'+y+'" width="'+r1(w)+'" height="28" fill="'+r.c+'"'+tip(r.t)+'/>'+T(lw+w+6,y+21,f1(r.v)+' ogni 100',{c:'b',st:'font-size:14px'})});
   box.innerHTML=s+'</svg>';
   $('t-tdot').textContent='I turisti sono pochi: '+f1(k).replace(',0','')+' ogni 100 residenti';
   $('nt-tdot').innerHTML='In media '+f0(t24.presenti_medi)+' turisti al giorno nel 2024 (nel 2010: '+f1(t10.su_residenti_pct)+' ogni 100). Contandoli come abitanti, i chili a testa del 2024 scendono da '+f0(t24.kg_per_residente)+' a '+f0(t24.kg_per_residente_e_turista)+'.';
@@ -617,6 +613,7 @@ function turDot(){
 /* ---------- in fondo ---------- */
 function limiti(){
   var L=[];
+  L.push('<b>Le notti dei turisti arrivano al 2024.</b> Dal 2025 l’ISTAT conta anche gli affitti brevi privati: il 2025 non sarebbe confrontabile con gli anni prima, e per questo non è in questa pagina. Il 2020 e il 2021 sono nella pagina <a href="../anno-covid/">L’anno del Covid</a>.');
   L.push('<b>Gli abitanti del 2011 e del 2012 non sono confrontabili.</b> I residenti di quei due anni sono quelli del censimento 2011 (Milano: 1.242.123 nel 2011 e 1.240.173 nel 2012), mentre nel 2010 erano 1.324.110 e nel 2013 1.324.169. Dividere per questi numeri farebbe sembrare che i rifiuti a testa salgano e poi scendano di colpo. Succede in tutte le città. Per questo i valori «a testa» del 2011 e del 2012 non ci sono; le tonnellate e le quote in percento non risentono del problema. Anche tra il 2019 e il 2021 gli abitanti hanno una piccola correzione (1.406.242, 1.397.715, 1.371.498): probabilmente una revisione dopo il censimento permanente (ipotesi nostra, non verificata).');
   L.push('<b>La quota di differenziata non è calcolata nello stesso modo in tutti gli anni.</b> Dal 2016 entrano nel conteggio le macerie e la pulizia delle strade a recupero (quasi 30 mila tonnellate a Milano nel 2016, circa 4 punti). Lo stesso scalino c’è in Italia e nei comuni intorno. Le tonnellate totali, invece, sono confrontabili.');
   L.push('<b>Vetro, plastica e metalli cambiano di classe.</b> Le tonnellate di plastica e vetro hanno salti improvvisi (la plastica di Milano va da 31 mila t nel 2010 a 20 mila nel 2018 e a 45 mila nel 2020) e nel 2018 e 2019 c’è una voce «altro» molto più grande del solito. Probabilmente dipende da come il materiale raccolto insieme viene diviso nelle statistiche (ipotesi nostra): per questo i tre sono sommati.');

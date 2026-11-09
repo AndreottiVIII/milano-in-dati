@@ -389,7 +389,15 @@ function cercaSchede(){
     }
     disegna(true);
   }
-  getJ(DATA+'oggetti.json').then(function(O){
+  /* l'elenco e' diviso in parti sotto 1 MB (regola dei 2 MB); si carica solo quando la ricerca sta per comparire */
+  var PARTI_OGGETTI=4,avviata=false;
+  function caricaOggetti(){
+    var u=[];for(var i=1;i<=PARTI_OGGETTI;i++)u.push(getJ(DATA+'oggetti_'+i+'.json'));
+    return Promise.all(u).then(function(P){return {classi:P[0].classi,voci:[].concat.apply([],P.map(function(x){return x.voci}))}});
+  }
+  function avvia(){
+    if(avviata)return;avviata=true;
+    caricaOggetti().then(function(O){
     voci=O.voci;classi=O.classi;
     hay=voci.map(function(v){return (v[0]+' '+v[1]+' '+v[5]).toLowerCase()});
     var sel=$('tp'),cont={};voci.forEach(function(v){cont[v[3]]=(cont[v[3]]||0)+1});
@@ -398,6 +406,13 @@ function cercaSchede(){
     var t=null;q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(cerca,180)});sel.addEventListener('change',cerca);
     $('piu').addEventListener('click',function(){disegna(false)});
     cerca();
-  }).catch(function(){$('qmsg').textContent='Elenco non caricato.'});
+  }).catch(function(){avviata=false;$('qmsg').textContent='Elenco non caricato.'});
+  }
+  var qq=$('q'),sezione=qq.closest?qq.closest('.fig')||qq.parentNode:qq.parentNode;
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){if(es.some(function(e){return e.isIntersecting})){io.disconnect();avvia()}},{rootMargin:'800px 0px'});
+    io.observe(sezione);
+    qq.addEventListener('focus',avvia);
+  }else avvia();
 }
 })();

@@ -3106,3 +3106,37 @@ Area C: griglia su 100 dei motori sostituita dalle linee 2017-2024 per tipo di m
 Biblioteche: griglia su 100 omini per età sostituita da due barre divise 2013 e 2025 (opzione A); Covid tolto dai numeri in alto, resta il link.
 Comunità: griglie su 100 sostituite dalle barre per cittadinanza con il cursore e dalle barre doppie quartiere contro Milano (opzioni A).
 Quanto è divisa Milano: griglia su 100 sostituita dalle barre 'X su 100 dovrebbero cambiare quartiere' (opzione A).
+auto: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+consumi: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+carceri: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+poverta-educativa: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+imprese: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+rigenerazione: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+bici-auto-mezzi: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+fondi-quartieri: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+case-servizi-reddito: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+omicidi: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+area-c: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+metro: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+prezzi-case: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+dati-importanti: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+appalti: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+censimenti: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+derby: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+turisti: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+affitti-brevi: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+temperature: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+musei: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+permettersi: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+hinterland: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+verde: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+redditi: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+voto-reddito: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+viaggio-linea: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+bilancio-comune: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+tasse: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+caldo: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+incroci: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+sfratti: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+divisa: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+costo-vita: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).

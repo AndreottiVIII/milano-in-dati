@@ -147,7 +147,7 @@ def problemi(r):
 async def lavora(pagine):
     async with async_playwright() as pw:
         b = await pw.chromium.launch(channel='msedge')
-        sem = asyncio.Semaphore(6)
+        sem = asyncio.Semaphore(3)  # con più pagine insieme il server locale rifiuta qualche richiesta
         ris = await asyncio.gather(*[una(b, p, w, sem) for p in pagine for w in (375, 1000)])
         await b.close()
     return ris

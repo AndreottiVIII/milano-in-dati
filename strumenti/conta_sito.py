@@ -273,7 +273,7 @@ def main():
         if n:
             per_tema.append({'id': tid, 'nome': t['nome'], 'colore': t['colore'], 'pagine': n})
     n = sum(1 for r in righe if r['tema'] == GRUPPO_ALTRO['id'])
-    if n:
+    if n and GRUPPO_ALTRO['id'] not in temi:  # se il gruppo è già in temi.json non va contato due volte
         per_tema.append({'id': GRUPPO_ALTRO['id'], 'nome': GRUPPO_ALTRO['nome'], 'colore': GRUPPO_ALTRO['colore'], 'pagine': n})
     per_tema.sort(key=lambda x: -x['pagine'])
     # il titolo di testa parte dalle misure vere: un catalogo di eventi lontani (terremoti dal 1065) resta nella sua pagina
@@ -286,6 +286,13 @@ def main():
         'anno_da': min(da), 'anno_a': max(a), 'anni': max(a) - min(da) + 1, 'quartieri': 88,
         'per_tema': per_tema, 'elenco': righe,
     }
+    # la data cambia solo quando cambiano i conti, non ogni giorno
+    try:
+        vecchio = json.load(open(OUT, encoding='utf-8'))
+        if {k: v for k, v in vecchio.items() if k != 'aggiornato'} == {k: v for k, v in conti.items() if k != 'aggiornato'}:
+            conti['aggiornato'] = vecchio.get('aggiornato', conti['aggiornato'])
+    except Exception:
+        pass
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(conti, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print({k: v for k, v in conti.items() if k not in ('per_tema', 'elenco')})

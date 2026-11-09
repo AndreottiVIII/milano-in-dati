@@ -574,11 +574,16 @@ function mappa(){
   $('t-mappa').textContent=lo.area+' ha '+mlt(lo.finanziato)+', quasi la metà dei soldi localizzati; Quarto Oggiaro nessun progetto nel nucleo';
   GEO.features.forEach(function(f){var v=f.properties.f;if(!v)grigi++});
   A.forEach(function(a){var c=colA(a.finanziato);cnt[TS.indexOf(c)]++});
+  /* un'area fatta di più quartieri (Lorenteggio e Giambellino): il valore si scrive una volta sola, sul quartiere più grande */
+  var GRANDE={};
+  GEO.features.forEach(function(f){var p=f.properties;if(!p.a)return;var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+    anelli(f).forEach(function(r){r.forEach(function(c){x0=Math.min(x0,c[0]);x1=Math.max(x1,c[0]);y0=Math.min(y0,c[1]);y1=Math.max(y1,c[1])})});
+    var ar=(x1-x0)*(y1-y0);if(!GRANDE[p.a]||ar>GRANDE[p.a].ar)GRANDE[p.a]={ar:ar,f:f}});
   $('lg-mappa').innerHTML=lgd([{c:TS[0],t:'meno di 5 milioni',n:cnt[0]},{c:TS[1],t:'5-15',n:cnt[1]},{c:TS[2],t:'15-60',n:cnt[2]},{c:TS[3],t:'oltre 60',n:cnt[3]},{c:'#e3e6eb',t:'nessun progetto',n:grigi}]);
   mapDraw({box:'ch-mappa',feats:GEO.features,id:function(f){return f.properties.a||('n'+f.properties.i)},sel:SEL==='Quarto Oggiaro'?'n76':SEL,
     fill:function(f){return colA(f.properties.f)},
     tip:function(f){var p=f.properties;return '<b>'+esc(p.n)+'</b><br>'+(p.f?esc(p.a)+': '+mlt(p.f)+' in '+pl(p.np,'progetto','progetti'):'Nessun progetto del nucleo localizzato qui')},
-    lab:function(f,b){var p=f.properties;if(!p.f||p.f<1e6||b.w<30||b.h<17)return null;return{t:ml(p.f),col:colA(p.f)===TS[3]||colA(p.f)===TS[2]?'#fff':C.ink}}});
+    lab:function(f,b){var p=f.properties;if(!p.f||p.f<1e6||b.w<30||b.h<17)return null;if(p.a&&GRANDE[p.a]&&GRANDE[p.a].f!==f)return null;return{t:ml(p.f),col:colA(p.f)===TS[3]||colA(p.f)===TS[2]?'#fff':C.ink}}});
   $('nn-mappa').innerHTML='Lorenteggio e Giambellino sono contati insieme. Sono localizzati '+f0(100*(1-D.non_localizzati.finanziato/T.nucleo_finanziato))+'% dei soldi del nucleo: gli altri '+D.non_localizzati.progetti+' progetti ('+mlt(D.non_localizzati.finanziato)+') non hanno un luogo nel testo.';
 }
 function scheda(){

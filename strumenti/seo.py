@@ -40,8 +40,10 @@ URL_LICENZE = {
     'ODbL': 'https://opendatacommons.org/licenses/odbl/1-0/',
     'IODL 2.0': 'https://www.dati.gov.it/content/italian-open-data-license-v20',
     'NLOD 2.0': 'https://data.norge.no/nlod/en/2.0',
+    'Dominio pubblico': 'https://creativecommons.org/publicdomain/mark/1.0/',
 }
-NON_LICENZE = ('non indicata', 'uso con citazione', 'tutti i diritti riservati', 'autorizzazione dichiarata')
+NON_LICENZE = ('non indicata', 'uso con citazione', 'tutti i diritti riservati', 'autorizzazione dichiarata',
+               'nessuna licenza', 'diritti riservati', 'libero accesso', 'quella di ogni')
 
 e = lambda s: html.escape(s, quote=True)
 
@@ -65,7 +67,11 @@ def licenze(fonti_pagina):
             continue
         if l in ('CC BY', 'CC BY-SA') and any(t.startswith(l + ' ') for t in tutte):
             continue  # "CC BY" senza versione, quando la stessa pagina ha anche "CC BY 4.0"
-        v = URL_LICENZE.get(l, l)
+        v = URL_LICENZE.get(l)
+        if not v and l in ('CC BY', 'CC BY-SA'):
+            v = x.get('licenza_url')  # senza versione: la pagina della licenza della fonte, se c'e'
+        if not v or not v.startswith('http'):
+            continue  # nel JSON-LD la licenza e' sempre un indirizzo, mai un testo
         if v not in out:
             out.append(v)
     return out[0] if len(out) == 1 else (out or None)

@@ -38,6 +38,12 @@ def pagine(con_home=True):
     out = sorted(d.name for d in DOCS.iterdir()
                  if d.is_dir() and d.name not in ESCLUSE and not d.name.startswith('_')
                  and (d / 'index.html').is_file())
+    # sottopagine con il loro index.html (per ora scala/prime): contano come pagine per i programmi
+    sub = sorted('%s/%s' % (d.name, s.name) for d in DOCS.iterdir()
+                 if d.is_dir() and d.name not in ESCLUSE and not d.name.startswith('_')
+                 for s in d.iterdir() if s.is_dir() and not s.name.startswith('_') and s.name != 'data'
+                 and (s / 'index.html').is_file())
+    out = sorted(out + sub)
     return [''] + out if con_home else out
 
 

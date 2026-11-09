@@ -421,10 +421,8 @@ function tocco(){
   cand.sort(function(p,q){return q.b.w*q.b.h-p.b.w*p.b.h}).forEach(function(c0){var x=Math.min(c0.b.x,W-12);if(ok(x,c0.b.y,String(c0.t).length*8+6,14))lab+=T(x,c0.b.y+4,c0.t,{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+MTXT[c0.k]})});
   s+=sD+sS+lab;
   function etich(o,txt){var b=P.bb(o.f),w=tw(txt,13,true),x=Math.min(Math.max(b.x,w/2+2),W-w/2-2),y=Math.max(14,Math.min(H-4,b.y-b.h/2-5));return '<g pointer-events="none">'+T(x,y,esc(txt),{a:'middle',c:'halo',st:'font-size:13px'})+'</g>'}
-  s+=etich(O,'Partenza: '+O.sn);
-  if(S.d!=null&&S.d!==S.o)s+=etich(BY[S.d],'Arrivo: '+BY[S.d].sn);
   $('ch-tocco').innerHTML=s+'</svg>';
-  $('lg-tocco').innerHTML=legModi(cnt,'<span class="m">numero = minuti del mezzo più veloce</span>');
+  $('lg-tocco').innerHTML=legModi(cnt,'<span class="m">numero = minuti del mezzo più veloce</span><span class="m">contorno nero pieno: partenza,&nbsp;<b>'+esc(O.sn)+'</b></span>'+(S.d!=null&&S.d!==S.o?'<span class="m">contorno tratteggiato: arrivo,&nbsp;<b>'+esc(BY[S.d].sn)+'</b></span>':''));
   $('t-tocco').textContent='Da '+O.sn+', alle '+HL[h]+', la bici arriva prima in '+cnt[0]+' quartieri su 88, l’auto in '+cnt[1]+', i mezzi in '+cnt[2]+'.';
   /* scheda del tragitto */
   var r=$('ris');
@@ -499,12 +497,13 @@ function rischioMappa(){
     var tp='<b>'+esc(o.n)+'</b><br>'+f0(n)+' incidenti con la bici (2010–2024)<br>'+f1(n/QN.km2[o.k])+' per km² · tutti gli incidenti: '+f0(QN.inc.a15[o.k]);
     s+='<path d="'+P.path(o.f)+'" fill="'+RAMP[c]+'" stroke="#fff" stroke-width="0.8" stroke-linejoin="round"'+tip(tp)+'/>';
     if(b.w>=30&&b.h>=17)cand.push({b:b,t:f0(n),c:c})});
+  /* i 10 incroci: cerchi staccati tra loro, e i numeri dei quartieri non finiscono sotto i cerchi */
+  var pts=QN.incroci.slice(0,10).map(function(c,i){var p=P.pt(c.lon,c.lat);return{x:p[0],y:p[1],i:i,c:c}});
+  for(var it=0;it<60;it++)for(var a=0;a<pts.length;a++)for(var b2=a+1;b2<pts.length;b2++){var dx=pts[b2].x-pts[a].x,dy=pts[b2].y-pts[a].y,d=Math.sqrt(dx*dx+dy*dy)||0.1;
+    if(d<23){var f=(23-d)/2/d;pts[a].x-=dx*f;pts[a].y-=dy*f;pts[b2].x+=dx*f;pts[b2].y+=dy*f}}
+  pts.forEach(function(p){ok(p.x,p.y,42,42)});
   cand.sort(function(p,q){return q.b.w*q.b.h-p.b.w*p.b.h}).forEach(function(c0){var x=Math.min(c0.b.x,W-12);if(ok(x,c0.b.y,String(c0.t).length*8+6,14))lab+=T(x,c0.b.y+4,c0.t,{a:'middle',st:'font-size:12px;font-weight:700;pointer-events:none;fill:'+RTX[c0.c]})});
   s+=lab;
-  /* i 10 incroci */
-  var pts=QN.incroci.slice(0,10).map(function(c,i){var p=P.pt(c.lon,c.lat);return{x:p[0],y:p[1],i:i,c:c}});
-  for(var it=0;it<40;it++)for(var a=0;a<pts.length;a++)for(var b2=a+1;b2<pts.length;b2++){var dx=pts[b2].x-pts[a].x,dy=pts[b2].y-pts[a].y,d=Math.sqrt(dx*dx+dy*dy)||0.1;
-    if(d<23){var f=(23-d)/2/d;pts[a].x-=dx*f;pts[a].y-=dy*f;pts[b2].x+=dx*f;pts[b2].y+=dy*f}}
   pts.forEach(function(p){s+='<g'+tip('<b>'+(p.i+1)+'. '+esc(p.c.a)+' / '+esc(p.c.b)+'</b><br>'+p.c.n+' incidenti con la bici (2010–2024)')+'><circle cx="'+r1(p.x)+'" cy="'+r1(p.y)+'" r="10" fill="#fff" stroke="'+C.ink+'" stroke-width="2"/>'+T(p.x,p.y+4,p.i+1,{a:'middle',c:'k',st:'pointer-events:none'})+'</g>'});
   $('ch-inm').innerHTML=s+'</svg>';
   $('lg-inm').innerHTML=th.map(function(t,i){return '<span><i style="background:'+RAMP[i]+'"></i>'+(t[0]===t[1]?t[0]:t[0]+'–'+t[1])+' <b>&nbsp;'+t[2]+'</b></span>'}).join('');

@@ -1,6 +1,7 @@
 """Da lanciare dopo aver cambiato testi o dati di una o piu' pagine, prima di pubblicare.
 
 Lancia in ordine:
+  0. conta_sito.py      (i conti di "Il sito": pagine, grafici, numeri; prima di tutto, perche' gli altri li leggono)
   1. anteprime_link.py  (immagine e meta di condivisione)
   2. statico.py         (testo visibile anche senza JavaScript)
   3. seo.py             (description, canonical, JSON-LD, sitemap, manifest, 404)
@@ -16,9 +17,10 @@ QUI = pathlib.Path(__file__).resolve().parent
 
 def main():
     nomi = [a for a in sys.argv[1:] if not a.startswith('--')]
-    for prog in ('anteprime_link.py', 'statico.py', 'seo.py'):
+    for prog in ('conta_sito.py', 'anteprime_link.py', 'statico.py', 'seo.py'):
         print('==', prog, flush=True)
-        r = subprocess.run([sys.executable, '-I', '-X', 'utf8', str(QUI / prog)] + nomi)
+        # conta_sito.py conta sempre tutto il sito e non vuole nomi di pagine
+        r = subprocess.run([sys.executable, '-I', '-X', 'utf8', str(QUI / prog)] + ([] if prog == 'conta_sito.py' else nomi))
         if r.returncode:
             print('%s e\' finito con errore (%d): mi fermo.' % (prog, r.returncode))
             return r.returncode

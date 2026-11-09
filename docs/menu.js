@@ -312,14 +312,41 @@
     return temiP;
   }
   function norm(x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
-  var temaDi = {}, descDi = {}, filtroTema = '';
+  var temaDi = {}, descDi = {}, nomeTemaDi = {}, filtroTema = '';
+  // Ricerca tollerante, senza librerie: ignora maiuscole e accenti, singolare/plurale (aeroporto/aeroporti, scuola/scuole),
+  // parole in qualsiasi ordine; cerca anche nella descrizione e nel nome del tema. Prima le pagine col nome che corrisponde.
+  function radice(w) { return w.length > 3 ? w.replace(/[aeiou]+$/, '') : w; }
+  function parole(x) { return norm(x).split(/[^a-z0-9]+/).filter(Boolean); }
+  var lisFisse = null, dati = [];
   function filtra() {
-    var w = norm(q.value).split(/\s+/).filter(Boolean), n = 0;
+    if (!lisFisse) lisFisse = Array.prototype.slice.call(ul.children);
+    var w = parole(q.value), n = 0, punti = [];
     for (var m = 0; m < SEZIONI.length; m++) {
-      var l = norm(SEZIONI[m].label + ' ' + (descDi[SEZIONI[m].path] || ''));
-      var ok = (!filtroTema || temaDi[SEZIONI[m].path] === filtroTema) && w.every(function (x) { return l.indexOf(x) !== -1; });
-      lis[m].hidden = !ok; if (ok) n++;
+      var pt = 0, ok = !filtroTema || temaDi[SEZIONI[m].path] === filtroTema;
+      if (ok && w.length) {
+        if (!dati[m]) {
+          var eti = parole(SEZIONI[m].label), alt = parole((descDi[SEZIONI[m].path] || '') + ' ' + (nomeTemaDi[SEZIONI[m].path] || ''));
+          dati[m] = { e: eti, er: eti.map(radice), a: alt, ar: alt.map(radice) };
+        }
+        var d = dati[m];
+        for (var k = 0; k < w.length && ok; k++) {
+          var r = radice(w[k]), p = 0;
+          for (var j = 0; j < d.e.length && p < 3; j++) {
+            if (d.er[j] === r) p = 3; else if (d.e[j].indexOf(w[k]) === 0 || d.er[j].indexOf(r) === 0) p = Math.max(p, 2);
+          }
+          for (j = 0; j < d.a.length && p < 1; j++) {
+            if (d.ar[j] === r || d.a[j].indexOf(w[k]) === 0 || d.ar[j].indexOf(r) === 0) p = 1;
+          }
+          if (!p) ok = false; else pt += p;
+        }
+      }
+      lisFisse[m].hidden = !ok; if (ok) n++;
+      punti.push(ok ? pt : -1);
     }
+    // con qualcosa scritto: prima le corrispondenze migliori; senza: l'ordine di sempre
+    var ordine = lisFisse.map(function (_, i) { return i; });
+    if (w.length) ordine.sort(function (a, b) { return (punti[b] - punti[a]) || (a - b); });
+    ordine.forEach(function (i) { ul.appendChild(lisFisse[i]); });
     vuoto.hidden = n !== 0;
     Array.prototype.forEach.call(chipBox.children, function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-tema') === filtroTema ? 'true' : 'false'); });
   }
@@ -330,7 +357,8 @@
       try {
         if (!T || !T.temi || !T.pagine || chipBox.children.length) return;
         var cont = {};
-        T.pagine.forEach(function (p) { temaDi[p.path] = p.tema; descDi[p.path] = p.descrizione || ''; cont[p.tema] = (cont[p.tema] || 0) + 1; });
+        var nomiT = {}; T.temi.forEach(function (t) { nomiT[t.id] = t.nome; });
+        T.pagine.forEach(function (p) { temaDi[p.path] = p.tema; descDi[p.path] = p.descrizione || ''; nomeTemaDi[p.path] = nomiT[p.tema] || ''; cont[p.tema] = (cont[p.tema] || 0) + 1; });
         T.temi.forEach(function (t) {
           if (!cont[t.id]) return;
           var b = document.createElement('button');
@@ -372,13 +400,15 @@
     var prog = document.createElement('div');
     prog.className = 'mid-prog';
     var cap = null, capH = [];
-    var FUORI = /limiti|come (è|e'|&egrave;) fatto|metodo|^file|scaricabil|download|^fonti|pagine collegate|pagine vicine/i;
+    // capitoli di servizio in fondo alla pagina: "Limiti dei dati" sì, "Milano contro i limiti" no
+    var FUORI = /^(i )?limiti\b|^fonti e limiti|come (è|e'|&egrave;) fatto|metodo|^file|scaricabil|download|^fonti|pagine collegate|pagine vicine/i;
+    var FUORI_ID = /come-(e|è)-fatto|metodo|^file|scaricabil|download|^fonti|pagine-collegate|pagine-vicine/i;
     function costruisciCapitoli() {
       if (cap || isHome || !current || current === 'elenco/' || current.indexOf('storia-') === 0) return;
       var hs = Array.prototype.filter.call(document.querySelectorAll('h2'), function (h) {
         var t = (h.textContent || '').trim();
         return t && !h.closest('#mid-menu') && !h.closest('#mid-vicine') && !h.closest('details') &&
-          h.offsetParent !== null && !FUORI.test(t) && !FUORI.test(h.id || '');
+          h.offsetParent !== null && !FUORI.test(t) && !FUORI_ID.test(h.id || '');
       });
       if (hs.length < 4) return;
       cap = document.createElement('div');
@@ -597,7 +627,8 @@
     // filtra=false: tutte le scelte (apertura); filtra=true: solo quelle che corrispondono a quanto scritto
     function apri(inp, filtra) {
       attivo = inp;
-      var cur = normT(inp.value), q = filtra ? cur : '', tutte = opzioni(inp);
+      // si filtra su quello che ha scritto la persona, non sul valore che la pagina può aver completato da sola
+      var cur = normT(inp.value), q = filtra ? normT(inp._midTipo != null ? inp._midTipo : inp.value) : '', tutte = opzioni(inp);
       if (!tutte.length) { chiudi(); return; }
       scelte = tutte.filter(function (o) { return !q || normT(o.v).indexOf(q) !== -1 || normT(o.t).indexOf(q) !== -1; });
       // prima quelle che cominciano con quanto scritto
@@ -653,7 +684,19 @@
         } else if (tend.hidden || attivo !== inp) { apri(inp, false); }
         eraAperto = false;
       });
-      inp.addEventListener('input', function () { if (document.activeElement === inp) apri(inp, true); });
+      // Il testo scritto si segue in fase di cattura, prima che la pagina possa riscrivere il valore (es. completare il nome)
+      var dopoPagina = null;
+      inp.addEventListener('input', function (e) {
+        var v = inp.value, d = (e && e.data) || '';
+        if (dopoPagina !== null && inp._midTipo != null && e && e.inputType === 'insertText' && v === dopoPagina + d) inp._midTipo = inp._midTipo + d;
+        else if (dopoPagina !== null && inp._midTipo != null && e && e.inputType === 'deleteContentBackward' && v === dopoPagina.slice(0, -1)) inp._midTipo = inp._midTipo.slice(0, -1);
+        else inp._midTipo = v;
+      }, true);
+      inp.addEventListener('focus', function () { dopoPagina = null; inp._midTipo = null; });
+      inp.addEventListener('input', function () {
+        if (document.activeElement === inp) apri(inp, true);
+        setTimeout(function () { dopoPagina = inp.value; }, 0);
+      });
       inp.addEventListener('blur', function () { setTimeout(function () { if (attivo === inp) chiudi(); }, 150); });
       inp.addEventListener('keydown', function (e) {
         if (tend.hidden) {
