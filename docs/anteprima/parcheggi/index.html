@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="it"><head><base href="../../parcheggi/"><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="icon" href="../favicon.ico" sizes="48x48"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milano in dati · Parcheggi</title>
+<style>
+:root{
+  --ink:#0b0d12;--ink2:#2f3440;--mut:#5f6673;--grid:#e6e8ec;--axis:#9aa1ad;--bg:#fff;--soft:#f4f5f7;
+  --mi:#E30613;     /* Milano: rosso M1 */
+  --m2:#00A651;--m3:#FFD500;--m4:#0072BC;--m5:#7B3FA0;
+  --ora:#F58220;--teal:#00A19A;--mag:#E6007E;--bro:#8C5A32;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:8px 16px 32px;overflow-wrap:break-word}
+a{color:#0b57d0}
+h1{font-size:2rem;line-height:1.1;margin:.5em 0 .25em;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0 0 1em;color:var(--ink2);font-size:1.02rem}
+/* numeri in alto */
+.hl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+@media(min-width:640px){.hl{grid-template-columns:1fr 1fr 1fr}}
+.hl>a{display:block;color:inherit;text-decoration:none;border-top:6px solid var(--c);background:var(--soft);padding:10px 12px 12px;border-radius:0}
+.hl>a:hover,.hl>a:focus-visible{background:#e9ebef}
+.hl .vai{display:block;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+.hl .n{display:block;font-size:2.4rem;line-height:1;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.hl .n small{font-size:1.05rem;font-weight:700;letter-spacing:0;margin-left:2px}
+.hl p{margin:0;font-size:.9rem;line-height:1.3;color:var(--ink2)}
+.src{font-size:.78rem;color:var(--mut);margin:.4em 0 1.2em;line-height:1.35}
+/* capitoli */
+h2{font-size:1.45rem;line-height:1.15;margin:2.2em 0 .2em;font-weight:800;padding-top:.5em;border-top:3px solid var(--ink)}
+.fig{margin:1.4em 0 0}
+.fig h3{font-size:1.12rem;line-height:1.25;margin:0 0 .15em;font-weight:750}
+.fig .sub{font-size:.9rem;color:var(--mut);margin:0 0 .5em;line-height:1.3}
+.ch{position:relative;width:100%}
+.ch svg{display:block;overflow:visible;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:13px}
+.ch svg text{fill:var(--ink)}
+.ch svg .m{fill:var(--mut);font-size:12px}
+.ch svg .b{font-weight:700}
+.ch svg .w{fill:#fff;font-weight:700;font-size:12px}
+.ch svg .k{fill:var(--ink);font-weight:700;font-size:12px}
+.ch svg .halo{paint-order:stroke;stroke:#fff;stroke-width:3.5px;stroke-linejoin:round;font-weight:800}
+.ch [data-t]{cursor:pointer}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink2);margin:.2em 0 .5em}
+.lg span{white-space:nowrap;display:inline-flex;align-items:center}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:5px;border-radius:2px}
+.lg i.ln{height:3px;width:18px;border-radius:2px}
+.lg i.dot{border-radius:50%}
+.notes{list-style:none;padding:0;margin:.5em 0 0;font-size:.88rem;color:var(--ink2)}
+.note{font-size:.88rem;color:var(--ink2);margin:.4em 0 0;line-height:1.35}
+table.kt{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0 0}
+table.kt th,table.kt td{padding:5px 4px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top}
+table.kt th{color:var(--mut);font-weight:600;font-size:.8rem}
+table.kt th:first-child,table.kt td:first-child,table.kt td.l,table.kt th.l{text-align:left}
+table.kt td:first-child i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px}
+.tip i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+/* cursore */
+.sl{margin:8px 0 0;padding:8px 12px 10px;background:var(--soft);border-top:6px solid var(--m4)}
+.sl label{display:block;font-weight:750;font-size:.92rem;margin-bottom:2px}
+.sl input[type=range]{width:100%;height:34px;margin:0;accent-color:var(--m4);background:transparent}
+.sl input[type=range]::-webkit-slider-thumb{height:28px;width:28px}
+.sl input[type=range]::-moz-range-thumb{height:28px;width:28px}
+.sl .ex{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+/* il tuo quartiere */
+.find{margin:14px 0 0}
+.find label{display:block;font-weight:750;margin:0 0 4px}
+.find input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:0;background:#fff;color:var(--ink)}
+.find input:focus{outline:3px solid var(--mi);outline-offset:1px}
+.ris{background:var(--soft);border-left:6px solid var(--ink);padding:10px 12px;margin:10px 0 12px;font-size:.92rem;line-height:1.35}
+.ris.m{border-left-color:var(--mi)}
+.ris b.big{font-size:1.25rem;display:block;line-height:1.15;margin-bottom:2px}
+.ris .cel{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin-top:8px}
+.ris .cel div{min-width:0}
+.ris .cel b{display:block;font-size:1.5rem;line-height:1.05;font-weight:800}
+.ris .cel b small{font-size:.9rem;font-weight:700}
+.ris .cel span{display:block;font-size:.85rem;line-height:1.25;color:var(--ink2)}
+/* in fondo */
+.fondo{margin-top:2.6em;border-top:3px solid var(--ink)}
+details{border-bottom:1px solid var(--grid)}
+summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:750;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;font-weight:400;color:var(--mut)}
+details[open] summary::after{content:"−"}
+details .in{padding:0 0 14px;font-size:.92rem;color:var(--ink2)}
+details .in li{margin:.45em 0}
+details .in ul{padding-left:1.1em;margin:.2em 0}
+dl.par dt{font-weight:700;margin-top:.6em} dl.par dd{margin:0}
+footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
+</style>
+<script src="../menu.js" defer></script></head><body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../parcheggi/" style="color:#000">Pagina attuale</a></div><main>
+
+<h1>Parcheggi a Milano</h1>
+<p class="lead">Quanto spazio prendono le auto ferme in strada, che regole hanno, quanto costano e dove sono i parcheggi fuori strada. Scrivi il tuo quartiere e vedi dove sei.</p>
+
+<div class="hl" id="hl"></div>
+<p class="src">Il Comune non pubblica quanti stalli ci sono in strada: il totale di circa 297.000 e le quote per tipo vengono da una presentazione del Comune ripresa dai giornali, non letta nel documento originale. Superfici e confronti sono quindi stime. Ambiti, parcheggi e ciclabili: Comune di Milano (CC BY). Auto: ACI e Comune (CC BY). Piazzali: OpenStreetMap (ODbL). Tariffe: ATM.</p>
+
+<!-- ============ 1 ============ -->
+<h2 id="spazio">Quanto spazio prendono</h2>
+
+<div class="fig">
+    <h3 id="t-fa"></h3>
+    <p class="sub">Il quadrato rosso ha la stessa superficie di tutti gli stalli su strada di Milano. Trascinalo sulla mappa, o tocca un punto: sotto leggi che quartieri copre. Il cursore cambia lo spazio che si conta per un posto auto.</p>
+    <div class="sl"><label for="m2">Spazio per un posto auto, manovra compresa: <b id="m2v"></b></label><input id="m2" type="range" min="10" max="15" step="1" value="12"><div class="ex"><span>10 m²</span><span>15 m²</span></div></div>
+    <div class="ch" id="ch-fa" role="img" aria-label="Mappa di Milano con un quadrato grande quanto tutti gli stalli su strada, trascinabile"></div>
+    <p class="note" id="fa-cov" aria-live="polite"></p>
+    <p class="src">Stima: circa 297.000 stalli su strada × spazio per stallo (ipotesi nostra), diviso 7.140 m² (un campo da calcio di 105 × 68 metri). Totale degli stalli: presentazione «La sosta a Milano» del Comune di Milano, come riportata dalla stampa (non verificata sul documento). Ciclabili: itinerari ciclabili del Comune (CC BY), con larghezze ipotizzate da noi. Aree pedonali: Comune di Milano (CC BY). Confini dei quartieri: Comune di Milano (CC BY).</p>
+</div>
+
+<div class="fig">
+    <h3 id="t-fb"></h3>
+    <p class="sub">Se tutti gli stalli su strada fossero messi in fila, uno dopo l’altro, farebbero una strada lunga quasi quanto tutte le strade di Milano. Colori: tipo di sosta.</p>
+    <div class="lg" id="lg-fb"></div>
+    <div class="ch" id="ch-fb" role="img" aria-label="Barre in chilometri: stalli in fila, strade del Comune, ciclabili"></div>
+    <p class="src">Stima: circa 297.000 stalli × 6 metri di strada per stallo (ipotesi nostra). Strade: rete stradale di OpenStreetMap dentro il Comune, escluse autostrade, vie pedonali e cortili, contate una volta sola. Ciclabili: itinerari ciclabili del Comune (CC BY). Totale e quote degli stalli: presentazione del Comune come riportata dalla stampa (non verificata).</p>
+</div>
+
+<div class="fig">
+    <h3 id="t-fc"></h3>
+    <p class="sub">Ogni quadrato ha la superficie, in metri quadrati, che spetta a un milanese: tutti disegnati nella stessa scala. Tocca un quadrato per leggerlo.</p>
+    <div class="ch" id="ch-fc" role="img" aria-label="Quadrati in scala: metri quadrati a testa di sosta, ciclabili, aree pedonali e parchi"></div>
+    <p class="src">Stima: superfici diviso 1.407.044 residenti (2024). Sosta: stalli × 12 m² (ipotesi nostra). Parchi e giardini: la stima completa della pagina <a href="../verde/">Parchi e verde</a>, 10,7 m² a testa (Comune di Milano, CC BY). Ciclabili e aree pedonali: Comune di Milano (CC BY).</p>
+    <p class="note">I due numeri sul verde sono misure diverse: qui usiamo la stima completa di Parchi e verde (10,7 m² a testa). I 18,8 m² del «verde urbano» dell’ISTAT sono un’altra misura e non si confrontano con questa.</p>
+</div>
+
+<div class="fig" id="sv-fig">
+    <h3 id="t-sv"></h3>
+    <p class="sub">Metri quadrati a testa, quartiere per quartiere. Il pallino arancio è la sosta su strada, il pallino verde i parchi disegnati dal Comune, l’anello verde la stima completa del verde. Tocca un quartiere per leggerlo.</p>
+    <div class="lg" id="lg-sv"></div>
+    <div class="ch" id="ch-sv" role="img" aria-label="Pallini collegati: metri quadrati a testa di sosta su strada e di parchi in ogni quartiere dove la sosta ha più spazio"></div>
+    <p class="note" id="nt-sv"></p>
+    <p class="src">Sosta: stima nostra, ripartita tra i quartieri in proporzione ai chilometri di strada (stalli totali da una presentazione del Comune ripresa dalla stampa; il Comune non conta gli stalli per quartiere). Parchi e verde: Comune di Milano (CC BY), pagina <a href="../verde/">Parchi e verde</a>. Sono mostrati i quartieri con almeno 5.000 residenti. Il confronto non dice se la sosta toglie spazio ai parchi: sono due misure messe vicine.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="tipi">Che sosta è</h2>
+<div class="fig">
+  <h3 id="t-tipi"></h3>
+  <p class="sub">Stalli su strada per tipo di striscia, in percento sul totale e in numero. Ogni barra ha il colore della sua striscia.</p>
+  <div class="ch" id="ch-tipi" role="img" aria-label="Barre: stalli su strada per tipo di sosta"></div>
+  <p class="note" id="nt-tipi"></p>
+  <p class="src">Quote: presentazione «La sosta a Milano» del Comune di Milano, come riportata da Sicurauto (7/2/2025). Il numero degli stalli e i campi da calcio sono calcolati da noi (297.000 in totale, 12 m² a stallo). Le cinque quote regolate sommano il 60,8%.</p>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="costi">Dove si paga</h2>
+<div class="fig">
+  <h3 id="t-tar"></h3>
+  <p class="sub">I 36 ambiti della sosta, colorati per quanto costa un’ora. Il numero accanto al colore conta gli ambiti. Fuori dagli ambiti, in grigio, nei dati non c’è sosta regolata. Tocca un ambito per leggerlo.</p>
+  <div class="lg" id="lg-tar"></div>
+  <div class="ch" id="ch-tar" role="img" aria-label="Mappa dei 36 ambiti della sosta colorati per tariffa oraria"></div>
+  <table class="kt" id="tab-tar"></table>
+  <p class="note">Il centro dentro i Bastioni è anche Area C: per quanto costa entrare in auto e quanti veicoli entrano, vedi <a href="../area-c/">Area C</a>.</p>
+  <p class="src">Ambiti della sosta: Comune di Milano (CC BY). Tariffe: ATM, «Tariffe della sosta su strada», in vigore dal 1° novembre 2023, e Sicurauto (16/6/2026) per l’elenco degli ambiti. Orari ed eccezioni cambiano da ambito ad ambito: vale il cartello in strada.</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="auto-stalli">Auto e posti</h2>
+<div class="fig">
+  <h3 id="t-auto"></h3>
+  <p class="sub">Autovetture iscritte a Milano, anno per anno, contro i posti che conosciamo: gli stalli su strada e i parcheggi ufficiali fuori strada.</p>
+  <div class="ch" id="ch-auto" role="img" aria-label="Linea: autovetture di Milano dal 2007 al 2025 e posti noti"></div>
+  <p class="note">Gli stalli su strada sono un solo valore, senza anno certo (probabilmente 2023-2025), disegnato come linea dritta per confronto. Le auto «senza posto noto» stanno in box, cortili e autorimesse private, che nei dati aperti non ci sono, o in strada senza uno stallo disegnato. Per le auto, i tipi di alimentazione e la classe Euro, vedi <a href="../auto/">Le auto dei milanesi</a>.</p>
+  <p class="src">Autovetture: parco veicolare del Comune (PRA/ACI, CC BY), iscritte a Milano e non per forza ferme a Milano. Stalli: presentazione del Comune come riportata dalla stampa. Parcheggi ufficiali: Comune di Milano (CC BY).</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="fuori">Fuori strada</h2>
+<div class="fig">
+  <h3 id="t-ic"></h3>
+  <p class="sub">Parcheggi di interscambio (punti grandi, colore della linea a cui si collegano) e parcheggi del Comune (punti piccoli neri). La grandezza è il numero di posti. Tocca un punto per leggerlo.</p>
+  <div class="lg" id="lg-ic"></div>
+  <div class="ch" id="ch-ic" role="img" aria-label="Mappa dei parcheggi di interscambio e dei parcheggi del Comune"></div>
+  <p class="note">Di quanto siano pieni non c’è un dato aperto. Due parcheggi di interscambio, Cologno Nord e Gessate (1.114 posti), sono fuori dal Comune e non sono sulla mappa.</p>
+  <p class="src">Parcheggi di interscambio e parcheggi pubblici: Comune di Milano (CC BY). L’elenco non ha una data e non dice quanti posti sono liberi. Per chi va al lavoro in auto e in treno, vedi <a href="../bici-auto-mezzi/">Bici, auto e mezzi pubblici</a>.</p>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2 id="quartiere">Il tuo quartiere</h2>
+<div class="find">
+  <label for="q">Scrivi il tuo quartiere</label>
+  <input id="q" type="text" list="elenco" placeholder="per esempio: Isola" autocomplete="off" autocapitalize="words" spellcheck="false" aria-controls="ris">
+  <datalist id="elenco"></datalist>
+</div>
+<div class="ris" id="ris" aria-live="polite"></div>
+<div class="fig">
+  <h3 id="t-qm"></h3>
+  <p class="sub">Quanta parte di ogni quartiere è occupata da piazzali di parcheggio a cielo aperto mappati. Il numero accanto al colore conta i quartieri. Tocca un quartiere per leggerlo.</p>
+  <div class="lg" id="lg-qm"></div>
+  <div class="ch" id="ch-qm" role="img" aria-label="Mappa dei quartieri colorati per quota di superficie a piazzale di parcheggio"></div>
+  <p class="src">Piazzali a cielo aperto: OpenStreetMap contributors (ODbL), estratto del 29/10/2026; la mappatura è incompleta e dice quanta area c’è, non quanti posti. Quartieri: Comune di Milano (CC BY). Sono quartieri anche parchi e zone quasi senza abitanti.</p>
+</div>
+
+<!-- ============ in fondo ============ -->
+<div class="fondo">
+<details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
+<details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
+<dt>Stallo</dt><dd>Un posto auto su strada, segnato o no.</dd>
+<dt>Strisce blu, gialle, bianche</dt><dd>Blu: si paga. Gialle: riservate ai residenti. Bianche: senza regole di pagamento o di riserva.</dd>
+<dt>Ambito della sosta</dt><dd>Una delle 36 zone disegnate dal Comune dove la sosta è regolata. Ogni ambito ha la sua tariffa.</dd>
+<dt>Cerchia filoviaria</dt><dd>La fascia di città intorno al centro, delimitata dalla linea dei filobus (la 90 e la 91): sosta a 2 euro l’ora.</dd>
+<dt>Area C</dt><dd>Il centro dentro i Bastioni, dove si paga anche per entrare in auto. Qui la sosta costa 3 euro l’ora.</dd>
+<dt>Parcheggio di interscambio</dt><dd>Un parcheggio grande ai margini della città, vicino a una fermata di metropolitana o di un altro mezzo, per lasciare l’auto e proseguire.</dd>
+<dt>A raso</dt><dd>Un piazzale scoperto, a livello della strada, in contrasto con un parcheggio in un edificio o sotto terra.</dd>
+<dt>Quartiere</dt><dd>Gli 88 quartieri di Milano (Nuclei di Identità Locale) usati dal Comune.</dd>
+</dl></div></details>
+<details id="metodo"><summary>Come è fatto</summary><div class="in"><ul id="metodo-lista"></ul></div></details>
+<details id="download"><summary>File</summary><div class="in">
+<p>Valori aggregati, separati da punto e virgola, con il punto per i decimali.</p>
+<ul>
+<li><a href="data/nil.csv">Quartiere per quartiere</a>: area dentro gli ambiti, chilometri di strada, parcheggi, ciclabili (le colonne di stima sono segnate come tali)</li>
+<li><a href="data/nil_cerchie.csv">Quartieri e zone tariffarie</a>: quanta area di ogni quartiere sta in ciascuna zona</li>
+<li><a href="data/nil.geojson">Confini semplificati dei quartieri</a> con gli stessi valori</li>
+<li><a href="data/ambiti.geojson">Gli ambiti della sosta</a> (mappa) e <a href="data/ambiti.csv">l’elenco con la zona tariffaria</a></li>
+<li><a href="data/interscambio.csv">Parcheggi di interscambio</a> e <a href="data/parcheggi_ufficiali.csv">parcheggi del Comune</a></li>
+<li><a href="data/sosta_contro_verde.json">Sosta e parchi a testa, quartiere per quartiere</a> (stima della sosta)</li>
+<li><a href="data/auto_serie.csv">Autovetture di Milano anno per anno</a></li>
+<li><a href="data/riepilogo.json">Tutti i numeri di questa pagina, con le ipotesi</a></li>
+</ul>
+<p>I parcheggi di OpenStreetMap uno per uno non sono ripubblicati: solo somme per quartiere.</p></div></details>
+</div>
+
+<footer>
+<p><b>Fonti e licenze.</b> Comune di Milano, dati.comune.milano.it, licenza Creative Commons Attribution (CC BY, versione non indicata dal portale), scaricati il 1 novembre 2026: ambiti della sosta (ds83), parcheggi pubblici (ds342), parcheggi di interscambio (ds45), itinerari ciclabili (ds60), aree pedonali e ZTL (ds51), parco veicolare (ds529), verde urbano per abitante (ds2926), confini dei quartieri (ds964), residenti per quartiere (ds205, anno 2024). ACI, Autoritratto 2024 (CC BY 4.0, <a href="https://aci.gov.it/attivita-e-progetti/studi-e-ricerche/open-data/">aci.gov.it</a>). OpenStreetMap contributors (ODbL), estratto del 29/10/2026. Tariffe: ATM, Azienda Trasporti Milanesi (diritti riservati, scaricamento solo per uso informativo: si riportano i valori, non il documento). Totale e quote degli stalli su strada: presentazione «La sosta a Milano» (Comune di Milano), così come riportata da <a href="https://www.sicurauto.it/news/strisce-bianche-milano-vuole-azzerare-la-sosta-gratuita/">Sicurauto</a>, 7/2/2025 (stesse cifre su Motori Magazine, 8/2/2025).</p>
+<p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
+</footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+'use strict';
+var DATA='data/';
+var CS=getComputedStyle(document.documentElement);
+function cv(n){return CS.getPropertyValue(n).trim()}
+var C={mi:cv('--mi'),m2:cv('--m2'),m3:cv('--m3'),m4:cv('--m4'),m5:cv('--m5'),ora:cv('--ora'),teal:cv('--teal'),ink:cv('--ink'),ink2:cv('--ink2'),mut:cv('--mut'),grid:cv('--grid'),axis:cv('--axis'),base:'#d9dce2'};
+var SV=null,D,N=[],BY={},AMB,IC=[],CER={},AUTO=[],sel=null,RD=[],M2=12;
+
+/* ---------- formattazione ---------- */
+function grp(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function f0(x){if(x==null)return '';var r=Math.round(x);return (r<0?'−':'')+grp(String(Math.abs(r)))}
+function f1(x){if(x==null)return '';var r=(Math.round(Math.abs(x)*10)/10).toFixed(1).split('.');return (x<0&&+r.join('.')>0?'−':'')+grp(r[0])+','+r[1]}
+function f2(x){var r=(Math.round(Math.abs(x)*100)/100).toFixed(2).split('.');return grp(r[0])+','+r[1]}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function last(a){return a[a.length-1]}
+function r1(v){return Math.round(v*10)/10}
+function nz(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
+function shortN(n){return n.replace(/^Q\.re /,'').split(' - ')[0]}
+function tcase(s){return s.toLowerCase().replace(/(^|[\s\-'])([a-zà-ù])/g,function(m,a,b){return a+b.toUpperCase()}).replace(/ Di /g,' di ').replace(/ Da /g,' da ')}
+
+/* ---------- svg ---------- */
+var cvs=document.createElement('canvas').getContext('2d');
+function tw(s,size,bold){cvs.font=(bold?'700 ':'400 ')+(size||13)+'px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';return cvs.measureText(String(s).replace(/&[a-z]+;/g,'x')).width}
+function T(x,y,s,o){o=o||{};return '<text x="'+r1(x)+'" y="'+r1(y)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.c?' class="'+o.c+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+s+'</text>'}
+function L(x1,y1,x2,y2,col,w,extra){return '<line x1="'+r1(x1)+'" y1="'+r1(y1)+'" x2="'+r1(x2)+'" y2="'+r1(y2)+'" stroke="'+(col||C.grid)+'" stroke-width="'+(w||1)+'"'+(extra||'')+'/>'}
+function tip(h){return ' data-t="'+esc(h)+'"'}
+function svgOpen(W,H,extra){return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"'+(extra||'')+'>'}
+function sw(c){return '<i style="background:'+c+'"></i>'}
+function width(id){return Math.max(300,Math.floor($(id).clientWidth))}
+function hbar(x0,x1,y,h,col,extra){
+  var l=Math.min(x0,x1),r=Math.max(x0,x1),w=r-l,rr=Math.min(4,w,h/2);
+  if(w<0.5)return '';
+  return '<path d="M'+r1(l)+' '+r1(y)+'H'+r1(r-rr)+'Q'+r1(r)+' '+r1(y)+' '+r1(r)+' '+r1(y+rr)+'V'+r1(y+h-rr)+'Q'+r1(r)+' '+r1(y+h)+' '+r1(r-rr)+' '+r1(y+h)+'H'+r1(l)+'Z" fill="'+col+'"'+(extra||'')+'/>';
+}
+
+/* ---------- tooltip ---------- */
+var TIP=$('tip');
+function showTip(e,el){
+  TIP.innerHTML=el.getAttribute('data-t');TIP.style.display='block';
+  var w=TIP.offsetWidth,h=TIP.offsetHeight,vw=document.documentElement.clientWidth;
+  var x=e.pageX+12,y=e.pageY-h-14;
+  if(x+w>window.scrollX+vw-8)x=e.pageX-w-12;
+  if(x<window.scrollX+8)x=window.scrollX+8;
+  if(y<window.scrollY+8)y=e.pageY+18;
+  TIP.style.left=x+'px';TIP.style.top=y+'px';
+}
+document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')return;var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-t]');if(el)showTip(e,el);else TIP.style.display='none'});
+window.addEventListener('scroll',function(){if(TIP.style.display==='block'&&!matchMedia('(hover:hover)').matches)TIP.style.display='none'},{passive:true});
+
+/* ---------- dati ---------- */
+function getJ(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.json()})}
+function getCSV(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u);return r.text()}).then(function(t){
+  var Ls=t.replace(/\r/g,'').split('\n').filter(Boolean),h=Ls[0].split(';');
+  return Ls.slice(1).map(function(l){var v=l.split(';'),o={};h.forEach(function(k,i){o[k]=v[i]});return o})})}
+Promise.all([getJ(DATA+'riepilogo.json'),getJ(DATA+'nil.geojson'),getJ(DATA+'ambiti.geojson'),getCSV(DATA+'interscambio.csv'),getCSV(DATA+'nil_cerchie.csv'),getCSV(DATA+'auto_serie.csv'),getJ(DATA+'sosta_contro_verde.json')]).then(function(r){
+  D=r[0];SV=r[6];AMB=r[2];
+  r[1].features.forEach(function(f){var p=f.properties;
+    var o={id:p.i,n:p.n,sn:shortN(p.n),ab:p.ab,km2:p.km2,qa:p.qa,ps:p.ps,pk:p.pk,ic:p.ic,raso:p.raso,rasoha:p.rasoha,cic:p.cic,kin:p.kin,kout:p.kout,f:f};
+    N.push(o);BY[o.id]=o});
+  var cnt={};N.forEach(function(o){cnt[o.sn]=(cnt[o.sn]||0)+1});
+  N.forEach(function(o){if(cnt[o.sn]>1){var pp=o.n.split(' - ');o.sn=pp[0]+' ('+pp[pp.length-1].split(' ')[0]+')'}});
+  r[4].forEach(function(x){CER[+x.id_nil]=[+x.area_c_pct,+x.filoviaria_pct,+x.extra_filoviaria_pct,+x.interscambio_pct]});
+  IC=r[3].filter(function(x){return +x.id_nil>=0}).map(function(x){
+    var l=/MM1/.test(x.collegamento)?'M1':/MM2/.test(x.collegamento)?'M2':/MM3/.test(x.collegamento)?'M3':'altro';
+    return{n:tcase(x.nome),p:+x.posti,l:l,lon:+x.LONG_X_4326,lat:+x.LAT_Y_4326,coll:x.collegamento.replace(/^CORRISPONDENZA\s+/,'').replace(/\s+/g,' ')}});
+  AUTO=r[5].map(function(x){return{a:+x.anno,v:+x.autovetture}});
+  try{tutto()}catch(e){console.error(e);$('hl').innerHTML='<p>Errore nella pagina: '+esc(e.message)+'</p>'}
+}).catch(function(e){$('hl').innerHTML='<p>Dati non caricati: '+esc(e.message)+'</p>'});
+
+function draw(f){f();RD.push(f)}
+function tutto(){
+  highlights();
+  draw(firmaA);draw(firmaB);draw(firmaC);draw(sostaVerde);draw(tipi);draw(tariffe);draw(autoLinea);draw(interscambio);draw(mappaQ);
+  elenco();limiti();metodo();
+  var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
+}
+
+/* ---------- misure comuni ---------- */
+function stalli(){return D.ipotesi.stalli_totali}
+function areaKm2(m2){return stalli()*m2/1e6}
+function campi(m2){return stalli()*m2/D.ipotesi.campo_calcio_m2}
+var CERN=[
+ {k:'Area C / Bastioni',nome:'Area C e Bastioni',eur:'3,00 €',col:C.m5,txt:'#fff'},
+ {k:'Cerchia filoviaria',nome:'Cerchia filoviaria',eur:'2,00 €',col:C.ora,txt:C.ink},
+ {k:'Extra-filoviaria',nome:'Fuori dalla cerchia filoviaria',eur:'1,20 €',col:C.teal,txt:C.ink},
+ {k:'Interscambio (via Impastato)',nome:'Interscambio (via Impastato)',eur:'a fasce',col:C.ink,txt:'#fff'}];
+function cerStat(){var s=CERN.map(function(c){return{n:0,km2:0}});
+  D.ambiti.cerchie.forEach(function(c,i){s[i].km2=c.area_km2});
+  AMB.features.forEach(function(f){var i=CERN.map(function(c){return c.k}).indexOf(f.properties.c);if(i>=0)s[i].n++});return s}
+function icTot(){return IC.reduce(function(a,b){return a+b.p},0)}
+
+/* ---------- in alto: i numeri ---------- */
+function highlights(){
+  var S=D.sintesi,tl=D.tipi.filter(function(t){return t.k==='lib'})[0],raso=D.osm_fuori_strada.per_classe['a raso'];
+  var T=[
+    {c:C.mi,h:'t-fa',n:f0(campi(12)),u:'',p:'campi da calcio: tanto è lo spazio degli stalli su strada, '+f1(S.area_km2)+' km², il '+f1(S.quota_citta_pct)+'% della città (stima).'},
+    {c:C.m3,h:'t-tipi',n:f0(tl.pct),u:'%',p:'degli stalli su strada sono strisce bianche, senza regole: circa '+f0(tl.stalli/1000)+' mila posti.'},
+    {c:C.m2,h:'t-tar',n:'3',u:'€',p:'l’ora per sostare in centro, 1,20 € fuori dalla cerchia filoviaria. Il '+f0(D.ambiti.quota_citta_pct)+'% di Milano è sosta regolata.'},
+    {c:C.m4,h:'t-auto',n:f2(S.stalli_per_autovettura),u:'',p:'stalli su strada per ogni auto: '+f1(S.autovetture_per_stallo)+' auto per stallo. Le auto sono '+f0(D.citta.autovetture_2025)+'.'},
+    {c:C.m5,h:'t-ic',n:f0(S.ufficiali_posti),u:'',p:'posti nei parcheggi ufficiali fuori strada: '+f1(S.ufficiali_ogni_100_auto)+' ogni 100 auto.'},
+    {c:C.ora,h:'t-qm',n:f1(raso.area_km2),u:'km²',p:'di piazzali di parcheggio a cielo aperto mappati in città: '+f0(raso.n)+' aree.'}
+  ];
+  $('hl').innerHTML=T.map(function(t){return '<a href="#'+t.h+'" style="--c:'+t.c+'"><b class="n">'+t.n+(t.u?'<small>'+t.u+'</small>':'')+'</b><p>'+t.p+'</p><span class="vai">↓ il grafico</span></a>'}).join('');
+}
+
+/* ---------- mappa: proiezione comune ---------- */
+function anelli(f){var g=f.geometry;return g.type==='Polygon'?g.coordinates:[].concat.apply([],g.coordinates)}
+var PJ={};
+function proj(W){
+  if(PJ[W])return PJ[W];
+  var k=Math.cos(45.46*Math.PI/180),x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  N.forEach(function(o){anelli(o.f).forEach(function(rg){rg.forEach(function(p){var x=p[0]*k,y=p[1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y})})});
+  var pad=Math.round(W*.045),sc=(W-2-2*pad)/(x1-x0);
+  var P={H:Math.ceil((y1-y0)*sc)+2+2*pad,k:k,sc:sc,pxkm:sc/111.19,
+   path:function(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(1+pad+(p[0]*k-x0)*sc)+' '+r1(1+pad+(y1-p[1])*sc)}).join('L')+'Z'}).join('')},
+   pt:function(lon,lat){return[1+pad+(lon*k-x0)*sc,1+pad+(y1-lat)*sc]},
+   bb:function(f){var a=1e9,b=-1e9,c=1e9,d=-1e9;anelli(f).forEach(function(rg){rg.forEach(function(q){var x=1+pad+(q[0]*k-x0)*sc,y=1+pad+(y1-q[1])*sc;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y)})});return{x:(a+b)/2,y:(c+d)/2,w:b-a,h:d-c,x0:a,x1:b,y0:c,y1:d}}};
+  PJ[W]=P;return P;
+}
+function baseMap(P,fill,stroke){return N.map(function(o){return '<path d="'+P.path(o.f)+'" fill="'+(fill||C.base)+'" stroke="'+(stroke||'#fff')+'" stroke-width=".8" stroke-linejoin="round"/>'}).join('')}
+/* posiziona etichette senza farle toccare */
+function placer(W,H,dots){
+  var used=[];
+  function hit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+  return{
+   put:function(x,y,rad,text,bold,size){
+     size=size||13;var w=tw(text,size,bold)+4,h=size+3,c=[
+      {x:x+rad+3,y:y-h/2,a:'start',tx:x+rad+5},{x:x-rad-3-w,y:y-h/2,a:'end',tx:x-rad-5},
+      {x:x-w/2,y:y-rad-3-h,a:'middle',tx:x},{x:x-w/2,y:y+rad+3,a:'middle',tx:x},
+      {x:x+rad*.7,y:y-rad*.7-h,a:'start',tx:x+rad*.7+2},{x:x-rad*.7-w,y:y-rad*.7-h,a:'end',tx:x-rad*.7-2},
+      {x:x+rad*.7,y:y+rad*.7,a:'start',tx:x+rad*.7+2},{x:x-rad*.7-w,y:y+rad*.7,a:'end',tx:x-rad*.7-2}];
+     [26,44].forEach(function(dd){[0,180,270,90,315,225,45,135].forEach(function(an){var cs=Math.cos(an*Math.PI/180),sn=Math.sin(an*Math.PI/180),ax=x+cs*(rad+dd),ay=y+sn*(rad+dd),side=cs>.3?'start':cs<-.3?'end':'middle';
+       c.push({x:side==='start'?ax+2:side==='end'?ax-2-w:ax-w/2,y:sn>.3?ay:sn<-.3?ay-h:ay-h/2,a:side,tx:side==='start'?ax+4:side==='end'?ax-4:ax,ln:[x+cs*rad,y+sn*rad,ax,ay]})})});
+     for(var i=0;i<c.length;i++){var r={x:c[i].x,y:c[i].y,w:w,h:h};
+       if(r.x<0||r.x+r.w>W||r.y<0||r.y+r.h>H)continue;
+       if(used.some(function(u){return hit(u,r)}))continue;
+       if(dots.some(function(d){return d.x+d.r>r.x&&d.x-d.r<r.x+r.w&&d.y+d.r>r.y&&d.y-d.r<r.y+r.h&&!(d.x===x&&d.y===y)}))continue;
+       used.push(r);return (c[i].ln?L(c[i].ln[0],c[i].ln[1],c[i].ln[2],c[i].ln[3],C.ink,1.2,' pointer-events="none"'):'')+T(c[i].tx,r.y+h-4,esc(text),{a:c[i].a,c:'halo',st:'font-size:'+size+'px;pointer-events:none'})}
+     return ''},
+   block:function(x,y,w,h){used.push({x:x,y:y,w:w,h:h})}}
+}
+
+/* ---------- 1A. il parcheggio gigante ---------- */
+var FA={fx:null,fy:null};
+function pip(x,y,rings){var inside=false;rings.forEach(function(rg){for(var i=0,j=rg.length-1;i<rg.length;j=i++){var xi=rg[i][0],yi=rg[i][1],xj=rg[j][0],yj=rg[j][1];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)inside=!inside}});return inside}
+function firmaA(){
+  var box=$('ch-fa'),W=width('ch-fa'),P=proj(W),H=P.H;
+  var m2=M2,A=areaKm2(m2),side=Math.sqrt(A)*P.pxkm,sc=areaKm2(12);
+  var rings=N.map(function(o){var rg=anelli(o.f).map(function(r){return r.map(function(p){return P.pt(p[0],p[1])})});return{o:o,rg:rg,bb:P.bb(o.f)}});
+  if(FA.fx==null){var b=P.bb(BY[1].f);FA.fx=b.x/W;FA.fy=b.y/H}
+  var HS=H+10,sb=[{n:'Tutti gli stalli su strada',a:A,col:C.mi},{n:'Tutte le piste e corsie ciclabili',a:D.ciclabili.area_km2,col:C.m4},{n:'Tutte le aree pedonali',a:D.pedonali.area_km2,col:C.m5}];
+  var y=HS,leg='';
+  sb.forEach(function(s,i){var sd=Math.sqrt(s.a)*P.pxkm,rh=Math.max(sd,20);
+    leg+='<rect x="2" y="'+r1(y+(rh-sd)/2)+'" width="'+r1(sd)+'" height="'+r1(sd)+'" fill="'+s.col+'"/>'+
+      T(Math.max(sd,40)+12,y+rh/2-2,s.n,{c:'b'})+T(Math.max(sd,40)+12,y+rh/2+13,f2(s.a)+' km²'+(i?' · '+f0(A/s.a)+' volte meno':''),{c:'m'});
+    y+=rh+8});
+  var HT=Math.ceil(y);
+  var s=svgOpen(W,HT,' style="touch-action:pan-y;user-select:none;-webkit-user-select:none"')+baseMap(P);
+  s+='<g id="fa-sq" style="cursor:grab;touch-action:none"><rect id="fa-r" fill="'+C.mi+'" fill-opacity=".88" stroke="#fff" stroke-width="2"/><rect id="fa-h" fill="transparent"/></g>';
+  s+='<g id="fa-lab"></g>'+leg+'</svg>';
+  box.innerHTML=s;
+  var svg=box.querySelector('svg'),sq=$('fa-r'),hit=$('fa-h'),lab=$('fa-lab'),pend=false;
+  function cov(cx,cy){
+    var n=12,cnt={},tot=0,x0=cx-side/2,y0=cy-side/2;
+    for(var i=0;i<n;i++)for(var j=0;j<n;j++){var px=x0+(i+.5)*side/n,py=y0+(j+.5)*side/n;
+      for(var q=0;q<rings.length;q++){var r=rings[q],b=r.bb;if(px<b.x0||px>b.x1||py<b.y0||py>b.y1)continue;if(pip(px,py,r.rg)){cnt[r.o.id]=(cnt[r.o.id]||0)+1;tot++;break}}}
+    var arr=Object.keys(cnt).map(function(k){return[k,cnt[k]]}).sort(function(a,b){return b[1]-a[1]});
+    return{n:arr.length,top:arr.slice(0,4).map(function(a){return BY[a[0]].sn}),dentro:tot/(n*n)}}
+  function put(){
+    var cx=FA.fx*W,cy=FA.fy*H,h=Math.max(side,44);
+    cx=Math.max(side/2,Math.min(W-side/2,cx));cy=Math.max(side/2,Math.min(H-side/2,cy));
+    sq.setAttribute('x',r1(cx-side/2));sq.setAttribute('y',r1(cy-side/2));sq.setAttribute('width',r1(side));sq.setAttribute('height',r1(side));
+    hit.setAttribute('x',r1(cx-h/2));hit.setAttribute('y',r1(cy-h/2));hit.setAttribute('width',h);hit.setAttribute('height',h);
+    var t=f2(A)+' km²',w=tw(t,13,true),lx=Math.max(w/2+2,Math.min(W-w/2-2,cx)),ly=cy-side/2-6;if(ly<14)ly=cy+side/2+16;
+    lab.innerHTML=T(lx,ly,t,{a:'middle',c:'halo'});
+    var c=cov(cx,cy);
+    $('fa-cov').innerHTML='<b>Il quadrato copre '+c.n+' quartieri</b>, soprattutto '+c.top.map(esc).join(', ')+'. '+(c.dentro<.95?'Una parte cade fuori dai confini della città.':'')+' Sono circa '+f0(campi(m2))+' campi da calcio.';
+  }
+  function move(e){var r=svg.getBoundingClientRect();FA.fx=(e.clientX-r.left)/r.width;FA.fy=(e.clientY-r.top)/r.height*HT/H;if(!pend){pend=true;requestAnimationFrame(function(){pend=false;put()})}}
+  var drag=false;
+  $('fa-sq').addEventListener('pointerdown',function(e){drag=true;try{svg.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault();this.style.cursor='grabbing'});
+  svg.addEventListener('pointermove',function(e){if(drag)move(e)});
+  svg.addEventListener('pointerup',function(){drag=false;$('fa-sq').style.cursor='grab'});
+  svg.addEventListener('pointercancel',function(){drag=false});
+  svg.addEventListener('click',function(e){if(!drag&&e.target.closest&&!e.target.closest('#fa-sq')){var r=svg.getBoundingClientRect(),yy=(e.clientY-r.top);if(yy<H*r.height/HT){move(e)}}});
+  put();
+  $('m2v').textContent=m2+' m²';
+  $('t-fa').textContent='Gli stalli su strada occupano circa '+f1(A)+' km²: '+f0(campi(m2))+' campi da calcio, il '+f1(A/D.citta.area_km2*100)+'% della città';
+}
+$('m2').addEventListener('input',function(){M2=+this.value;firmaA()});
+
+/* ---------- 1B. gli stalli in fila ---------- */
+function firmaB(){
+  var W=width('ch-fb'),mL=0,mR=0,sl=6,km=stalli()*sl/1000,roads=D.ambiti.km_tot,cic=D.ciclabili.km;
+  var rows=[{n:'Tutti gli stalli, uno dopo l’altro',v:km,seg:true},{n:'Tutte le strade, una volta sola',v:roads,col:C.ink},{n:'Tutte le piste ciclabili',v:cic,col:C.m4}];
+  var mx=2000,X=function(v){return mL+v/mx*(W-mL-mR)},rh=64,top=4,H=top+rows.length*rh+30,s=svgOpen(W,H);
+  [0,500,1000,1500,2000].forEach(function(t){s+=L(X(t),top,X(t),top+rows.length*rh-6,C.grid)+T(X(t),top+rows.length*rh+10,f0(t)+(t===2000?' km':''),{a:t===0?'start':t===2000?'end':'middle',c:'m'})});
+  rows.forEach(function(r,i){var y=top+i*rh;
+    s+=T(0,y+14,r.n,{c:'b'});
+    var vt=f0(r.v)+' km';
+    s+=T(W,y+14,vt,{a:'end',c:'b'});
+    if(r.seg){var x=0;D.tipi.forEach(function(t){var w=t.pct/100*X(r.v);s+='<rect x="'+r1(x)+'" y="'+(y+22)+'" width="'+r1(w)+'" height="28" fill="'+TIPOCOL[t.k].col+'"'+(t.k==='lib'?' stroke="'+C.ink+'" stroke-width="1.5"':'')+tip('<b>'+esc(t.nome)+'</b><br>'+f0(t.stalli)+' stalli · '+f0(t.stalli*sl/1000)+' km in fila')+'/>';x+=w})}
+    else{s+=hbar(0,X(r.v),y+22,28,r.col,tip('<b>'+esc(r.n)+'</b><br>'+vt))}
+  });
+  $('ch-fb').innerHTML=s+'</svg>';
+  $('lg-fb').innerHTML=D.tipi.map(function(t){return '<span><i style="background:'+TIPOCOL[t.k].col+';'+(t.k==='lib'?'border:1.5px solid '+C.ink:'')+'"></i>'+esc(TIPOCOL[t.k].corto)+'</span>'}).join('');
+  $('t-fb').textContent='Gli stalli su strada messi in fila farebbero '+f0(km)+' km: le strade di Milano ne misurano '+f0(roads);
+}
+
+/* ---------- 1C. lo spazio di un milanese ---------- */
+function firmaC(){
+  var W=width('ch-fc'),S=D.sintesi,ab=D.citta.abitanti_2024,u=18;
+  var rows=[
+   {n:'Parchi e giardini',a:SV.citta.B,col:C.m2,s:'a testa, stima completa'},
+   {n:'Un solo posto auto, manovra compresa',a:12,col:C.ink,s:'uno stallo'},
+   {n:'Sosta su strada',a:S.m2_per_abitante,col:C.mi,s:'a testa: tutti gli stalli diviso i milanesi'},
+   {n:'Piste e corsie ciclabili',a:D.ciclabili.area_km2*1e6/ab,col:C.m4,s:'a testa'},
+   {n:'Aree pedonali',a:D.pedonali.area_km2*1e6/ab,col:C.m5,s:'a testa'}];
+  var y=4,s='',gap=12;
+  rows.forEach(function(r){var sd=Math.sqrt(r.a)*u,rh=Math.max(sd,36);
+    var tx=Math.max(sd,24)+14,tp='<b>'+esc(r.n)+'</b><br>'+f1(r.a)+' m² '+esc(r.s);
+    s+='<rect x="2" y="'+r1(y+rh-sd)+'" width="'+r1(sd)+'" height="'+r1(sd)+'" fill="'+r.col+'"'+tip(tp)+'/>'+
+       T(tx,y+rh/2-2,esc(r.n),{c:'b'})+T(tx,y+rh/2+13,(r.a<1?f2(r.a):f1(r.a))+' m² · '+esc(r.s),{c:'m'});
+    y+=rh+gap});
+  var H=Math.ceil(y);
+  $('ch-fc').innerHTML=svgOpen(W,H)+s+'</svg>';
+  $('t-fc').textContent='A ogni milanese toccano '+f1(S.m2_per_abitante)+' m² di sosta su strada e '+f1(SV.citta.B)+' m² di parchi e giardini: '+f1(SV.citta.B/S.m2_per_abitante)+' volte di più';
+}
+
+/* ---------- sosta contro parchi, quartiere per quartiere ---------- */
+function sostaVerde(){
+  var Q=SV.q.map(function(o){return{id:o.id,n:o.n,sn:shortN(o.n),ab:o.ab,s:o.s,a:o.a,b:o.b}});
+  var cA=Q.filter(function(o){return o.s>o.a}),cB=Q.filter(function(o){return o.s>o.b});
+  var popA=cA.reduce(function(t,o){return t+o.ab},0),popT=Q.reduce(function(t,o){return t+o.ab},0);
+  var both=cB.slice().sort(function(a,b){return (b.s-b.b)-(a.s-a.b)});
+  var onlyA=cA.filter(function(o){return !(o.s>o.b)}).sort(function(a,b){return (b.s-b.a)-(a.s-a.a)});
+  var W=width('ch-sv'),LW=Math.min(124,Math.round(W*.34)),VW=66,x0=LW+8,x1=W-VW-6,mx=10,rh=30,top=26;
+  function X(v){return x0+(x1-x0)*Math.min(v,mx)/mx}
+  var groups=[['La sosta vince con tutte e due le misure ('+both.length+')',both],['Vince solo con i parchi disegnati ('+onlyA.length+')',onlyA]];
+  var me=sel!=null?Q.filter(function(o){return o.id===sel})[0]:null;
+  if(me&&cA.indexOf(me)<0)groups.push(['Il quartiere che hai scelto',[me]]);
+  function wrap(t,w){var ws=t.split(' '),ls=[],c='';ws.forEach(function(x){var u=c?c+' '+x:x;if(tw(u,12,false)<=w||!c)c=u;else{ls.push(c);c=x}});if(c)ls.push(c);return ls.slice(0,2)}
+  var y=top,body='',grid='';
+  // asse in alto
+  [0,2,4,6,8,10].forEach(function(v){grid+=T(X(v),12,v+(v===10?' m²':''),{a:'middle',c:'m'})});
+  groups.forEach(function(g,gi){
+    body+=T(0,y+14,esc(g[0]),{c:'b'});y+=22;
+    g[1].forEach(function(o){
+      var cy=y+rh/2,ls=wrap(o.sn,LW-2),isMe=me&&o.id===me.id;
+      var th='<b>'+esc(o.n)+'</b><br>Sosta su strada (stima): '+f1(o.s)+' m² a testa<br>Parchi disegnati: '+f1(o.a)+' m² a testa<br>Stima completa del verde: '+f1(o.b)+' m² a testa<br>'+f0(o.ab)+' residenti';
+      ls.forEach(function(l,i){body+=T(0,cy+4+(i-(ls.length-1)/2)*13,esc(l),{st:'font-size:13px'+(isMe?';font-weight:800':'')})});
+      body+=L(x0,cy,x1,cy,C.grid,1)+
+        L(X(o.a),cy,X(o.s),cy,C.ink2,3)+
+        '<circle cx="'+r1(X(o.b))+'" cy="'+r1(cy)+'" r="6" fill="#fff" stroke="'+C.m2+'" stroke-width="3"/>'+
+        '<circle cx="'+r1(X(o.a))+'" cy="'+r1(cy)+'" r="6" fill="'+C.m2+'"/>'+
+        '<circle cx="'+r1(X(o.s))+'" cy="'+r1(cy)+'" r="7" fill="'+C.ora+'" stroke="#fff" stroke-width="1.5"/>'+
+        '<rect x="0" y="'+r1(y)+'" width="'+W+'" height="'+rh+'" fill="transparent"'+tip(th)+'/>'+
+        T(W,cy-1,'<tspan fill="#B85A00">'+f1(o.s)+'</tspan> · <tspan fill="#007A3A">'+f1(o.a)+'</tspan>',{a:'end',c:'b',st:'font-size:13px'})+T(W,cy+12,'stima <tspan class="b" fill="#007A3A">'+f1(o.b)+'</tspan>',{a:'end',c:'m'});
+      y+=rh});
+    y+=8});
+  var H=Math.ceil(y);
+  grid=L(x0,top-8,x0,H-8,C.axis,1)+grid;
+  $('ch-sv').innerHTML=svgOpen(W,H)+grid+body+'</svg>';
+  $('lg-sv').innerHTML='<span><i class="dot" style="background:'+C.ora+'"></i>sosta su strada (stima)</span><span><i class="dot" style="background:'+C.m2+'"></i>parchi disegnati</span><span><i class="dot" style="background:#fff;border:3px solid '+C.m2+';width:14px;height:14px"></i>stima completa del verde</span><span>numeri a destra: sosta · parchi disegnati · stima</span>';
+  $('t-sv').textContent='In '+cA.length+' quartieri su '+Q.length+' la sosta su strada ha più spazio dei parchi: ci vivono '+f0(popA/1000)+' mila milanesi. Contando tutto il verde stimato, i quartieri sono '+cB.length;
+  $('nt-sv').textContent='Due misure del verde. I «parchi disegnati» sono i parchi che il Comune ha disegnato sulla mappa: '+f1(SV.citta.A)+' m² a testa in tutta Milano; con loro la sosta ha più spazio in '+cA.length+' quartieri. La «stima completa» aggiunge anche le aree verdi dell’elenco del 2014: '+f1(SV.citta.B)+' m² a testa, la misura che usiamo nella pagina Parchi e verde e qui sopra; con questa i quartieri scendono a '+cB.length+'. La sosta è una stima: gli stalli sono ripartiti secondo i chilometri di strada, quindi nei quartieri con strade lunghe e pochi residenti il numero è più alto del vero. Box e cortili privati non sono contati. Dove il verde supera i 10 m² a testa, l’anello è disegnato sul bordo del grafico e il numero a destra dà il valore vero.';
+}
+/* ---------- 2. che sosta è ---------- */
+var TIPOCOL={blu:{col:C.m4,corto:'Strisce blu (si paga)',txt:'#fff'},gialli:{col:C.m3,corto:'Strisce gialle (residenti)',txt:C.ink},disabili:{col:C.m5,corto:'Disabili',txt:'#fff'},cs:{col:C.ora,corto:'Carico e scarico',txt:C.ink},aut:{col:C.teal,corto:'Veicoli autorizzati',txt:C.ink},lib:{col:'#fff',corto:'Strisce bianche (senza regole)',txt:C.ink}};
+function tipi(){
+  var W=width('ch-tipi'),mx=Math.max.apply(null,D.tipi.map(function(t){return t.pct})),rh=66,H=D.tipi.length*rh+2,s=svgOpen(W,H);
+  D.tipi.forEach(function(t,i){var y=i*rh+2,w=Math.max(3,t.pct/mx*W),c=TIPOCOL[t.k],big=t.k==='lib';
+    var tp='<b>'+esc(t.nome)+'</b><br>'+f1(t.pct)+'% · circa '+f0(t.stalli)+' stalli<br>'+f2(t.area_km2)+' km² · '+f0(t.campi)+' campi da calcio';
+    s+=T(0,y+14,esc(c.corto),{c:'b'})+T(W,y+14,f1(t.pct)+'% · '+f0(t.stalli),{a:'end',c:'b'});
+    s+=hbar(0,w,y+20,22,c.col,(big?' stroke="'+C.ink+'" stroke-width="2"':'')+tip(tp))+T(0,y+55,f2(t.area_km2)+' km² · '+f0(t.campi)+' campi da calcio',{c:'m'})});
+  $('ch-tipi').innerHTML=s+'</svg>';
+  var lib=D.tipi.filter(function(t){return t.k==='lib'})[0],blu=D.tipi.filter(function(t){return t.k==='blu'})[0];
+  $('t-tipi').textContent='Circa '+f0(lib.stalli/1000)+' mila stalli su strada, il '+f0(lib.pct)+'%, sono strisce bianche: nessuna regola, nessun pagamento';
+  $('nt-tipi').innerHTML='Le strisce blu, quelle che si pagano, sono il '+f0(blu.pct)+'%. Le quote vengono dal Comune ma i giornali riportano anche altri numeri per le strisce blu (circa 83.000 invece di '+f0(Math.round(blu.stalli/1000)*1000)+'): vedi i limiti dei dati.';
+}
+
+/* ---------- 3. dove si paga: mappa degli ambiti ---------- */
+function tariffe(){
+  var box=$('ch-tar'),W=width('ch-tar'),P=proj(W),H=P.H,st=cerStat(),ki=CERN.map(function(c){return c.k});
+  var s=svgOpen(W,H)+baseMap(P,'#e6e8ec','#fff'),selF=null;
+  AMB.features.forEach(function(f){var p=f.properties,i=ki.indexOf(p.c),c=CERN[i];
+    var tp='<b>Ambito '+p.a+' · '+esc(p.n)+'</b><br>'+esc(c.nome)+': '+(p.t!=null?f2(p.t).replace('.',',')+' € l’ora':'tariffa a fasce');
+    s+='<path d="'+P.path(f)+'" fill="'+c.col+'" fill-opacity=".92" stroke="#fff" stroke-width=".9" stroke-linejoin="round"'+tip(tp)+'/>'});
+  if(sel!=null){s+='<path d="'+P.path(BY[sel].f)+'" fill="none" stroke="'+C.mi+'" stroke-width="3.2" stroke-linejoin="round" pointer-events="none"/>'}
+  box.innerHTML=s+'</svg>';
+  $('lg-tar').innerHTML=CERN.map(function(c,i){return '<span>'+sw(c.col)+esc(c.nome)+' · '+c.eur+' <b>&nbsp;'+st[i].n+'</b></span>'}).join('')+'<span>'+sw('#e6e8ec')+'fuori dagli ambiti</span>';
+  $('tab-tar').innerHTML='<tr><th class="l">Zona</th><th>€ l’ora</th><th class="l">Quando si paga</th><th>km²</th></tr>'+D.tariffe.slice(0,4).map(function(t,i){
+    var q=['8-19 tutti i giorni, massimo 2 ore','feriali 8-19; in alcune zone anche festivi','feriali 8-19; in alcune zone tutti i giorni','tutti i giorni 6-1, a fasce'][i];
+    return '<tr><td>'+sw(CERN[i].col)+esc(CERN[i].nome)+'</td><td>'+(t.euro_h!=null?f2(t.euro_h):'1,50-4')+'</td><td class="l">'+q+'</td><td>'+f1(st[i].km2)+'</td></tr>'}).join('');
+  var out=100-D.ambiti.quota_citta_pct;
+  $('t-tar').textContent='Il '+f0(D.ambiti.quota_citta_pct)+'% di Milano è dentro gli ambiti della sosta: in centro si pagano 3 € l’ora, nella parte esterna 1,20 €';
+}
+
+/* ---------- 4. auto e posti: la linea ---------- */
+function autoLinea(){
+  var W=width('ch-auto'),H=330,m={l:8,r:8,t:52,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b,mx=800000,yr0=AUTO[0].a,yr1=last(AUTO).a;
+  var X=function(a){return m.l+(a-yr0)/(yr1-yr0)*pw},Y=function(v){return m.t+ph-v/mx*ph};
+  var st=stalli(),uf=D.sintesi.ufficiali_posti,pos=st+uf,au=last(AUTO).v,s=svgOpen(W,H);
+  [0,200000,400000,600000,800000].forEach(function(t){s+=L(m.l,Y(t),W-m.r,Y(t),C.grid)});
+  AUTO.forEach(function(d){if((d.a%4===3&&yr1-d.a>=3)||d.a===yr0||d.a===yr1)s+=T(X(d.a),H-8,d.a,{a:d.a===yr0?'start':d.a===yr1?'end':'middle',c:'m'})});
+  /* fascia: auto senza un posto noto */
+  var pts=AUTO.map(function(d){return X(d.a)+' '+Y(d.v)}).join('L'),low=Y(pos);
+  s+='<path d="M'+pts+'L'+X(yr1)+' '+low+'L'+X(yr0)+' '+low+'Z" fill="'+C.ora+'" fill-opacity=".38"/>';
+  [200000,400000,600000].forEach(function(t){s+=T(m.l,Y(t)-4,f0(t/1000)+' mila',{c:'m'})});
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+Y(st)+'" y2="'+Y(st)+'" stroke="'+C.m4+'" stroke-width="3" stroke-dasharray="7 5"/>';
+  s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+low+'" y2="'+low+'" stroke="'+C.m5+'" stroke-width="3" stroke-dasharray="7 5"/>';
+  s+='<path d="M'+pts+'" fill="none" stroke="'+C.mi+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  AUTO.forEach(function(d){s+='<circle cx="'+r1(X(d.a))+'" cy="'+r1(Y(d.v))+'" r="14" fill="transparent"'+tip('<b>'+d.a+'</b><br>'+f0(d.v)+' autovetture')+'/>'});
+  s+=T(X(yr0),Y(AUTO[0].v)-10,f0(AUTO[0].v),{a:'start',c:'halo'})+T(X(yr1),Y(au)-10,f0(au),{a:'end',c:'halo'});
+  s+=T(m.l+2,H-m.b-ph-34,'Autovetture iscritte a Milano',{c:'halo',st:'fill:'+C.mi});
+  s+=T(W-m.r,Y(st)+17,'stalli su strada: circa '+f0(st),{a:'end',c:'halo',st:'fill:'+C.m4});
+  s+=T(W-m.r,low-7,'con i parcheggi ufficiali: '+f0(pos),{a:'end',c:'halo',st:'fill:'+C.m5});
+  s+=T(m.l+2,(Y(au)+low)/2+4,f0(au-pos)+' auto senza un posto noto (2025)',{c:'halo',st:'fill:#8a4a10;font-size:13px'}).replace('<text','<text');
+  $('ch-auto').innerHTML=s+'</svg>';
+  $('t-auto').textContent='Milano ha '+f0(au)+' auto e circa '+f0(pos/1000)+' mila posti noti: per '+f0((au-pos)/1000)+' mila auto il posto non è nei dati';
+}
+
+/* ---------- 5. fuori strada: la mappa dei parcheggi ---------- */
+var LC={M1:{col:C.mi,nome:'Metro M1'},M2:{col:C.m2,nome:'Metro M2'},M3:{col:C.m3,nome:'Metro M3'},altro:{col:'#5f6673',nome:'Tram, treno e altro'}};
+function interscambio(){
+  var box=$('ch-ic'),W=width('ch-ic'),P=proj(W),H=P.H,s=svgOpen(W,H)+baseMap(P);
+  /* San Donato: due parcheggi vicini diventano un punto */
+  var pts=[],sd=IC.filter(function(x){return /^San Donato/.test(x.n)});
+  IC.forEach(function(x){if(/^San Donato/.test(x.n)){if(x===sd[0])pts.push({n:'San Donato',p:sd[0].p+sd[1].p,l:'M3',lon:sd[0].lon,lat:sd[0].lat,coll:'MM3 (due parcheggi)'});return}pts.push(x)});
+  var maxP=Math.max.apply(null,pts.map(function(x){return x.p})),R=function(p){return 4.5+Math.sqrt(p/maxP)*(W<500?13:18)};
+  var dots=pts.map(function(x){var q=P.pt(x.lon,x.lat);return{x:q[0],y:q[1],r:R(x.p),d:x}});
+  /* parcheggi del Comune: punti piccoli */
+  var ps=D.parcheggi_pubblici_punti.map(function(x){var q=P.pt(x.lon,x.lat);return{x:q[0],y:q[1],r:2+Math.sqrt(x.p/maxP)*8,d:x}});
+  ps.forEach(function(d){s+='<circle cx="'+r1(d.x)+'" cy="'+r1(d.y)+'" r="'+r1(d.r)+'" fill="'+C.ink+'" stroke="#fff" stroke-width="1"'+tip('<b>'+esc(d.d.n)+'</b><br>Parcheggio del Comune · '+f0(d.d.p)+' posti<br>'+esc(d.d.t))+'/>'});
+  dots.sort(function(a,b){return b.d.p-a.d.p});
+  dots.forEach(function(d){var c=LC[d.d.l];s+='<circle cx="'+r1(d.x)+'" cy="'+r1(d.y)+'" r="'+r1(d.r)+'" fill="'+c.col+'" fill-opacity=".95" stroke="'+(d.d.l==='M3'?C.ink:'#fff')+'" stroke-width="'+(d.d.l==='M3'?1.5:2)+'"'+tip('<b>'+esc(d.d.n)+'</b><br>'+f0(d.d.p)+' posti<br>Collegato a: '+esc(d.d.coll))+'/>'});
+  var pl=placer(W,H,dots),lab='';
+  dots.forEach(function(d){lab+=pl.put(d.x,d.y,d.r,d.d.n+' '+f0(d.d.p),true,12)});
+  box.innerHTML=s+lab+'</svg>';
+  var g={};pts.forEach(function(x){g[x.l]=g[x.l]||{n:0,p:0};g[x.l].n++;g[x.l].p+=x.p});
+  $('lg-ic').innerHTML=['M1','M2','M3','altro'].map(function(k){return '<span><i class="dot" style="background:'+LC[k].col+';'+(k==='M3'?'border:1px solid '+C.ink:'')+'"></i>'+LC[k].nome+': '+f0(g[k].p)+' posti</span>'}).join('')+'<span><i class="dot" style="background:'+C.ink+';width:8px;height:8px"></i>parcheggio del Comune: '+f0(D.ufficiali.ds342_parcheggi_pubblici.posti)+' posti</span>';
+  var tot=icTot(),top=IC.slice().sort(function(a,b){return b.p-a.p}),t6=top.slice(0,6).reduce(function(a,b){return a+b.p},0);
+  $('t-ic').textContent='Nei '+IC.length+' parcheggi di interscambio in città ci sono '+f0(tot)+' posti: i sei più grandi ne hanno il '+f0(t6/tot*100)+'%';
+}
+
+/* ---------- 6. il tuo quartiere ---------- */
+var QC=['#B79AD0','#9363B8','#6E2F96','#3F1763'],QB=[];
+function mappaQ(){
+  var box=$('ch-qm'),W=width('ch-qm'),P=proj(W),H=P.H;
+  var v=N.map(function(o){return o.raso}).sort(function(a,b){return a-b});
+  var cut=[v[22],v[44],v[66]];
+  function cl(o){return o.raso<=cut[0]?0:o.raso<=cut[1]?1:o.raso<=cut[2]?2:3}
+  var nm=['meno di '+f1(cut[0])+'%','da '+f1(cut[0])+' a '+f1(cut[1])+'%','da '+f1(cut[1])+' a '+f1(cut[2])+'%','più di '+f1(cut[2])+'%'],cnt=[0,0,0,0];
+  var s=svgOpen(W,H),sS='';
+  N.forEach(function(o){var c=cl(o);cnt[c]++;var isS=o.id===sel;
+    var el='<path d="'+P.path(o.f)+'" fill="'+QC[c]+'" stroke="'+(isS?C.mi:'#fff')+'" stroke-width="'+(isS?3.5:.8)+'" stroke-linejoin="round" data-n="'+o.id+'"'+tip('<b>'+esc(o.n)+'</b><br>Piazzali mappati: '+f1(o.raso)+'% del quartiere ('+f1(o.rasoha)+' ettari)')+'/>';
+    if(isS)sS=el;else s+=el});
+  s+=sS;
+  var top=N.slice().sort(function(a,b){return b.raso-a.raso}).slice(0,3),lab=top.slice();if(sel!=null&&lab.indexOf(BY[sel])<0)lab.push(BY[sel]);
+  var dots=[],pl=placer(W,H,dots);
+  lab.forEach(function(o){var b=P.bb(o.f);s+=pl.put(b.x,b.y,2,o.sn+' '+f1(o.raso)+'%',true,13)});
+  box.innerHTML=s+'</svg>';
+  $('lg-qm').innerHTML=nm.map(function(t,i){return '<span>'+sw(QC[i])+t+' <b>&nbsp;'+cnt[i]+'</b></span>'}).join('');
+  var m=top[0];
+  $('t-qm').textContent='I piazzali mappati coprono l’'+f1(D.osm_fuori_strada.per_classe['a raso'].area_km2/D.citta.area_km2*100)+'% di Milano; in '+shortN(m.n)+' il '+f1(m.raso)+'%';
+}
+function elenco(){
+  $('elenco').innerHTML=N.slice().sort(function(a,b){return a.n.localeCompare(b.n,'it')}).map(function(o){return '<option value="'+esc(o.n)+'">'}).join('');
+  var q=$('q');
+  function trova(){var k=nz(q.value);if(!k){pick(null);return}
+    var c=N.filter(function(o){return nz(o.n)===k})[0]||N.filter(function(o){return nz(o.sn)===k})[0];if(c)pick(c.id)}
+  q.addEventListener('input',trova);q.addEventListener('change',trova);
+  $('ch-qm').addEventListener('click',function(e){var p=e.target.closest&&e.target.closest('path[data-n]');if(p){q.value=BY[+p.getAttribute('data-n')].n;pick(+p.getAttribute('data-n'))}});
+  pick(null);
+}
+function pick(id){
+  sel=id;mappaQ();tariffe();if(SV)sostaVerde();
+  var r=$('ris');
+  if(id==null){r.className='ris';r.innerHTML='Scrivi o scegli un quartiere dall’elenco: qui compaiono i suoi numeri.';return}
+  var o=BY[id],ce=CER[id]||[0,0,0,0],kk=['Area C','cerchia filoviaria','fuori dalla cerchia filoviaria','interscambio'],eu=['3,00','2,00','1,20','a fasce'];
+  var zs=[];ce.forEach(function(v,i){if(v>=5)zs.push([v,i])});zs.sort(function(a,b){return b[0]-a[0]});
+  var tar=zs.length?zs.map(function(z){return kk[z[1]]+' ('+(z[1]===3?'':eu[z[1]]+' € l’ora, ')+f0(z[0])+'% del quartiere)'}).join('; '):'nessuna zona della sosta regolata';
+  var cel=[
+   ['<b>'+f0(o.qa)+'<small>%</small></b>','del quartiere è dentro gli ambiti della sosta. In tutta Milano: '+f0(D.ambiti.quota_citta_pct)+'%.'],
+   ['<b>'+f1(o.raso)+'<small>%</small></b>','del quartiere è piazzale di parcheggio a cielo aperto mappato ('+f1(o.rasoha)+' ettari). In tutta Milano: '+f1(D.osm_fuori_strada.per_classe['a raso'].area_km2/D.citta.area_km2*100)+'%.'],
+   ['<b>'+f0(o.pk)+'</b>','posti nei parcheggi del Comune'+(o.pk?'':' (nessuno nel quartiere)')+'.'],
+   ['<b>'+f0(o.ic)+'</b>','posti in parcheggi di interscambio'+(o.ic?'':' (nessuno nel quartiere)')+'.'],
+   ['<b>'+f0(o.kin+o.kout)+'<small> km</small></b>','di strade, di cui '+f0(o.kin)+' km dentro gli ambiti.'],
+   ['<b>'+f1(o.cic)+'<small> km</small></b>','di piste e corsie ciclabili.']];
+  r.className='ris m';
+  r.innerHTML='<b class="big">'+esc(o.n)+'</b>'+f0(o.ab)+' residenti, '+f1(o.km2)+' km². Dove si paga: '+tar+'.<div class="cel">'+cel.map(function(c){return '<div>'+c[0]+'<span>'+c[1]+'</span></div>'}).join('')+'</div>';
+}
+
+/* ---------- in fondo ---------- */
+function limiti(){
+  var S=D.sintesi,L=[
+   '<b>Il numero degli stalli non è un dato aperto.</b> Il Comune non pubblica quanti posti auto ci sono in strada: né in totale, né per tipo, né per quartiere. Il totale di circa 297.000 e le quote per tipo vengono dalla presentazione «La sosta a Milano» del Comune, ripresa dai giornali: il documento originale non è stato letto, perché il sito del Comune non lo ha consegnato ai nostri programmi. L’anno della rilevazione non è noto. Un controllo con OpenStreetMap dà lo stesso ordine di grandezza (286.000-312.000) ma è solo un controllo.',
+   '<b>Le strisce blu: due numeri diversi.</b> Una fonte giornalistica parla di circa 83.000 stalli blu, probabilmente di un anno precedente; la quota del 37,2% su 297.000 ne dà circa 110.000. Non siamo riusciti a capire se l’offerta è cresciuta o se si contano cose diverse.',
+   '<b>Lo spazio di uno stallo è un’ipotesi.</b> Usiamo 12 m² (circa 5 metri per 2,2, più lo spazio per manovrare): con 10 m² la sosta su strada è '+f1(S.sensibilita_km2['10'])+' km², con 15 m² è '+f1(S.sensibilita_km2['15'])+' km². I posti in diagonale o a pettine occupano di più. Nel grafico degli stalli in fila ogni stallo è lungo 6 metri: un’altra ipotesi.',
+   '<b>Per quartiere non c’è un conteggio degli stalli.</b> Nel grafico «sosta contro parchi» gli stalli di ogni quartiere sono una stima: il totale della città ripartito in proporzione ai chilometri di strada. Quel conto dipende quasi solo dai chilometri di strada e nel centro (aree pedonali, Area C, aiuole) può essere troppo alto. Per questo il grafico dice dove le strade sono lunghe rispetto ai residenti, non quanti stalli ci sono davvero. Per il resto dei quartieri mostriamo solo ciò che è misurato: la parte dentro gli ambiti, i parcheggi del Comune, i piazzali mappati, le ciclabili.',
+   '<b>Le auto sono quelle iscritte a Milano</b> (PRA/ACI), non per forza quelle che stanno ferme a Milano. Per quartiere non esistono dati aperti.',
+   '<b>I posti fuori strada sono solo una parte.</b> Mancano i box, i cortili e le autorimesse private: nei dati aperti non ci sono, ed è la parte di sosta più grande. Per questo la linea delle «auto senza un posto noto» non dice che quelle auto non abbiano posto.',
+   '<b>OpenStreetMap è incompleta.</b> Solo il 5% degli stalli su strada è mappato e solo il 14,8% delle strade ha le informazioni sulla sosta. I piazzali a cielo aperto sono la parte più completa, ma con la capacità indicata solo per '+f0(D.osm_fuori_strada.per_classe['a raso'].n_con_capacita)+' su '+f0(D.osm_fuori_strada.per_classe['a raso'].n)+': la mappa dice quanta area, non quanti posti. Il 28% dell’area è segnata come privata o per i clienti.',
+   '<b>Ciclabili e aree pedonali.</b> Le larghezze delle ciclabili sono ipotesi nostre (1,5 metri per senso, 2,5 se a doppio senso); non contiamo le strade a 30 all’ora né i percorsi promiscui. Delle aree pedonali contiamo solo quelle formali del Comune, non i marciapiedi.',
+   '<b>Tariffe e orari.</b> Per la tariffa la fonte è il documento ATM del 2023, e le fonti dei giornali non coincidono su festivi e su una tariffa precedente. Gli ambiti in grigio non hanno regole nei dati, ma sul posto possono esserci divieti e cartelli: vale sempre il cartello. I perimetri degli ambiti non hanno una data.',
+   '<b>Parcheggi di interscambio.</b> L’elenco non ha una data e non dice quanti posti sono liberi; i posti sono scritti in un campo di testo. L’elenco dei parcheggi del Comune comprende anche autorimesse convenzionate: non è l’elenco di tutte le autorimesse.',
+   '<b>Pass per i residenti.</b> I dati aperti si fermano al 2017-2019: non si possono usare per contare i pass attivi, quindi non li usiamo.'
+  ];
+  $('limiti-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+function metodo(){
+  var A=D.ambiti,S=D.sintesi,L=[
+   '<b>Ambiti.</b> I '+A.n+' perimetri del Comune uniti e incrociati con i 88 quartieri: '+f1(A.area_km2)+' km², il '+f1(A.quota_citta_pct)+'% del Comune. La zona tariffaria di ogni ambito viene dal documento ATM e da Sicurauto. Per ogni quartiere abbiamo calcolato quanta area sta in ciascuna zona.',
+   '<b>Strade.</b> Dal file OpenStreetMap del 29/10/2026 (Lombardia) teniamo le strade su cui di norma si può parcheggiare (residenziali, di quartiere, di scorrimento; non cortili, vie pedonali, sentieri, autostrade) e le tagliamo sui quartieri: <b>'+f0(A.km_tot)+' km</b> nel Comune, di cui '+f0(A.km_in)+' dentro gli ambiti e '+f0(A.km_fuori)+' fuori.',
+   '<b>Superfici.</b> Stalli × 12 m². Campo da calcio: 7.140 m² (105 × 68 m). Ciclabili: lunghezza dei tratti del Comune (solo corsie e piste) × larghezza ipotizzata. Aree pedonali: unione delle aree pedonali del Comune, dentro il confine. Parchi e giardini: 10,7 m² per abitante, stima completa della pagina Parchi e verde (non i 18,8 m² del «verde urbano» ISTAT, che è un’altra misura).',
+   '<b>Il quadrato sulla mappa</b> ha il lato uguale alla radice quadrata della superficie, nella stessa scala della mappa. I quartieri coperti si contano su una griglia di 144 punti dentro il quadrato.',
+   '<b>Parcheggi fuori strada.</b> Da OpenStreetMap: aree con parcheggio che non sono marcate come sosta ai bordi della strada; area del poligono dentro il Comune, assegnata al quartiere in cui cade il centro. «A raso» sono i piazzali scoperti; in struttura e sotterranei ne sono mappati '+f0(D.osm_fuori_strada.per_classe['in struttura/sotterraneo'].n)+'. Ufficiali: i parcheggi del Comune ('+f0(D.ufficiali.ds342_parcheggi_pubblici.n)+', '+f0(D.ufficiali.ds342_parcheggi_pubblici.posti)+' posti) e i parcheggi di interscambio in città ('+f0(D.ufficiali.ds45_interscambio.posti_in_citta)+' posti).',
+   '<b>Auto.</b> Autovetture iscritte a Milano dal parco veicolare del Comune, 2007-2025. «Posti noti» = 297.000 stalli su strada + '+f0(S.ufficiali_posti)+' posti dei parcheggi ufficiali.',
+   '<b>Residenti.</b> Residenti per quartiere dall’anagrafe del Comune, anno 2024 (totale '+f0(D.citta.abitanti_2024)+'); superfici dai poligoni dei quartieri (totale '+f2(D.citta.area_km2)+' km²). Le quattro classi della mappa dei piazzali hanno lo stesso numero di quartieri.',
+   '<b>Non verificato.</b> Il documento originale degli stalli; l’occupazione dei parcheggi; il numero di pass sosta attivi; qualsiasi dato di sosta per quartiere. Il Comune potrebbe fornire l’elenco degli stalli per ambito con una richiesta di accesso ai dati.',
+   '<b>Pagina costruita da un programma</b> che legge le tabelle e scrive i file della sezione «File»; i controlli interni confrontano i numeri tra loro (per esempio la somma delle zone di un quartiere con la sua quota in tutti gli ambiti). Le ipotesi (12 m², 297.000 stalli, quote) sono nel file con tutti i numeri.'
+  ];
+  $('metodo-lista').innerHTML=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+})();
+</script>
+<script>
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1),el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();el.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',location.pathname+'#'+id)},true);
+</script></body></html>
