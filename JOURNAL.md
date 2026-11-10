@@ -3147,3 +3147,9 @@ arrivi-partenze: aggiunti i quattro quadranti nati meno morti e arrivi meno part
 universita: pagina nuova, iscritti agli atenei di Milano dal 2000, da dove arrivano (mappa d'Italia), cosa studiano (MUR, Comune).
 ospedali: pagina nuova, posti letto dal 2010, pubblici e privati, mappa degli ospedali, minuti a piedi dal pronto soccorso (Ministero della Salute, Comune, OpenStreetMap).
 catasto: pagina nuova, categorie catastali di Milano contro le altre città, due grafici (cerchi e 103 capoluoghi), box e negozi per abitante (Agenzia delle Entrate 2018-2025).
+arrivi-partenze: aggiunto il grafico residenti per età contro nati nell'anno di nascita (due trentenni per ogni nato).
+matrimoni: aggiunti gli adulti sposati dal 2012 (sotto la metà dal 2018) e lo strumento alla tua età quanti sono sposati.
+nascite: aggiunti nati e morti dal 1880 (nel 2024 meno nati che nel 1880).
+comunita: aggiunto il capitolo dei milanesi all'estero (AIRE 2016-2022).
+verde: aggiunto il capitolo dei pappagalli (quota del parrocchetto sulle segnalazioni di uccelli, GBIF).
+scuole: aggiunto il capitolo degli ascensori nelle scuole (2020/21); etichette dei piccoli grafici sistemate.
