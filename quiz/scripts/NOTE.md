@@ -22,6 +22,7 @@ Scrive:
 | `fatti_a_clima.py` | clima, ambiente, muoversi (26 pagine) |
 | `fatti_b_persone.py` | persone, casa, soldi (27 pagine) |
 | `fatti_c_cultura.py` | servizi, sicurezza, cultura, politica (29 pagine) |
+| `fatti_e_nuove.py` | 10 pagine nuove (56 domande): università, ospedali, catasto, economia, lavoro, aeroporti delle Olimpiadi, case e energia, negozi, proverbi, il tuo anno |
 | `fatti_d_quartieri.py` | «quale quartiere?»: terne di quartieri dalle schede, seme fisso |
 | `quartieri_gioco.py` | dati del gioco per quartiere (schede + età per quartiere) |
 
@@ -30,7 +31,7 @@ Scrive:
 - `genera.py` rilegge ogni file da capo e verifica: valori uguali, calcoli rifatti, ogni numero mostrato è una lettura o un calcolo, ogni numero scritto nel testo torna (arrotondato) con i dati, la pagina esiste, il tema viene da `temi.json`, la licenza è tra quelle della pagina in `docs/fonti/data/fonti.json`, niente parole vietate (nomi di file, «trappole»…). Deve finire con 0 errori e 0 avvisi.
 - Numeri che nel testo fanno parte di un'unità («ogni 1.000 abitanti», «a 15 minuti», «over 65») e i decenni sono ammessi senza lettura.
 - Si usa l'ultimo anno completo; gli anni parziali (2026 a metà) no. Ogni domanda dice l'anno.
-- `universita`, `ospedali`, `catasto`, `occupazione`, `economia` non hanno voce in `fonti.json`: per ora nessuna domanda da lì.
+- Le dieci pagine nuove (università, ospedali, catasto, economia, occupazione, Olimpiadi, case e energia, negozi, proverbi, il tuo anno) sono in `fatti_e_nuove.py`. Per `olimpiadi` le opere vengono da Simico, senza licenza dichiarata e fuori da `fonti.json` (c'è solo Eurostat per gli aeroporti): per questo ci sono solo domande sugli aeroporti, non sulle opere.
 
 ## Gioco per quartiere
 Le domande si costruiscono nel browser dai numeri di `quartieri.json`: più bambini o over 65, più donne o uomini, sopra/sotto Milano, posizione in classifica, metà alta della classifica, classifica migliore tra tre, cittadinanza straniera più numerosa, residenti, ordine con due altri quartieri. Si usa una misura solo se il quartiere è nella sua classifica (r non vuoto). I quartieri quasi vuoti o sotto i 1.000 residenti non sono nell'elenco.
