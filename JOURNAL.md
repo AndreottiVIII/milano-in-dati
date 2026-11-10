@@ -3140,3 +3140,10 @@ incroci: correzioni della revisione del 9/11 (regole, etichette, confronti e num
 sfratti: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
 divisa: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
 costo-vita: correzioni della revisione del 9/11 (regole, etichette, confronti e numeri allineati).
+elezioni: aggiunto chi non vota (mappa dei quartieri e barre non votanti contro primo candidato, Comunali 2021); sistemato il campo del voto dove abiti.
+parcheggi: aggiunto lo spazio delle auto ferme contro quello dei parchi, per quartiere (posti in strada stimati sui km di strada).
+eta: aggiunto il sorpasso degli over 80 sui bambini sotto i 10 anni (dal 2019).
+arrivi-partenze: aggiunti i quattro quadranti nati meno morti e arrivi meno partenze per quartiere.
+universita: pagina nuova, iscritti agli atenei di Milano dal 2000, da dove arrivano (mappa d'Italia), cosa studiano (MUR, Comune).
+ospedali: pagina nuova, posti letto dal 2010, pubblici e privati, mappa degli ospedali, minuti a piedi dal pronto soccorso (Ministero della Salute, Comune, OpenStreetMap).
+catasto: pagina nuova, categorie catastali di Milano contro le altre città, due grafici (cerchi e 103 capoluoghi), box e negozi per abitante (Agenzia delle Entrate 2018-2025).

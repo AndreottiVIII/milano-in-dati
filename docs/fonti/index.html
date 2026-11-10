@@ -201,7 +201,14 @@ function mancano(){
 
 var ESL={risponde:['risponde','ok'],non_risponde:['non risponde','no'],rifiuta:['rifiuta i programmi','rif'],non_controllato:['non controllato (robots.txt)','rif']};
 function dg(iso){return iso?dmy(iso):''}
-function host(u){return u.replace(/^https?:\/\//,'').replace(/\/$/,'')}
+function host(u){
+  var t=u.replace(/^https?:\/\//,'').replace(/\/$/,''),i=t.indexOf('/'),h=i<0?t:t.slice(0,i);
+  var m=i<0?null:t.slice(i).split(/[?#]/)[0].match(/\/([^\/]+)\.(?:zip|pdf|xlsx?|csv|json|docx?|ods|xml)$/i);
+  if(!m)return h;
+  var n;try{n=decodeURIComponent(m[1])}catch(e){n=m[1]}
+  n=n.replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim();
+  return n+' ('+h.replace(/^www\./,'')+')'
+}
 function statoUI(S){
   var L=S.link||{},DS=S.dataset_comune||{},PER={},G={},senza=0,ord=[];
   (S.periodi||[]).forEach(function(p){PER[p.pagina+'\t'+p.editore]=p.fino_a});

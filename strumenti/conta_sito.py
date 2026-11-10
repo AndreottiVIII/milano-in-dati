@@ -162,6 +162,11 @@ ANNI = {
     'aeroporti': (1994, None), 'bici': (2011, None), 'consiglio': (2016, 2026), 'verde': (2011, 2024),
     'imprese': (2000, 2025), 'hinterland': (2001, 2026), 'tasse': (2000, 2025), 'vibrazioni': (2019, 2026),
     'consumi': (2000, 2024),
+    'beni-confiscati': (2014, 2026), 'case-popolari': (2018, 2025), 'fogne': (2013, 2025), 'fondi-quartieri': (2014, 2025),
+    'medici-farmacie': (2005, 2026), 'milano-raccontata': (1900, None), 'parcheggi': (2023, 2025),
+    'pietre-inciampo': (2017, 2026), 'reati-citta': (2004, 2024), 'scuole-domani': (2009, 2024),
+    'speranza-vita': (2012, 2024), 'telefoni-pubblici': (2019, 2026), 'terzo-settore': (2011, 2026),
+    'violenza-donne': (2017, 2024),
     # senza una serie di anni: riepiloghi, giochi, elenchi di cose datate
     'vie': (None, None), 'statue': (None, None), 'targhe': (None, None), 'citta-15-minuti': (None, None),
     'nomi-fermate': (None, None), 'case-servizi-reddito': (None, None), 'quartiere': (None, None),

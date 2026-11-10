@@ -145,7 +145,10 @@
     { path: 'telefoni-pubblici/', label: 'Telefoni pubblici' },
     { path: 'tasse/', label: 'Tasse' },
     { path: 'vibrazioni/', label: 'Il respiro di Milano' },
-    { path: 'consumi/', label: 'Quanta corrente, quanta acqua' }
+    { path: 'consumi/', label: 'Quanta corrente, quanta acqua' },
+    { path: 'universita/', label: 'Università' },
+    { path: 'ospedali/', label: 'Ospedali' },
+    { path: 'catasto/', label: 'Il catasto' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
@@ -410,6 +413,15 @@
         return t && !h.closest('#mid-menu') && !h.closest('#mid-vicine') && !h.closest('details') &&
           h.offsetParent !== null && !FUORI.test(t) && !FUORI_ID.test(h.id || '');
       });
+      // data-capitolo="Nome": più titoli di fila con lo stesso nome fanno una sola voce nella barra
+      var prima = [], ultimo = null;
+      hs.forEach(function (h) {
+        var g = h.getAttribute('data-capitolo');
+        if (g && g === ultimo) return;
+        ultimo = g || null;
+        prima.push(h);
+      });
+      hs = prima;
       if (hs.length < 4) return;
       cap = document.createElement('div');
       cap.className = 'mid-cap';
@@ -418,7 +430,7 @@
         if (!h.id) h.id = 'cap-' + (i + 1);
         var a = document.createElement('a');
         a.href = '#' + h.id;
-        a.textContent = h.textContent.trim().replace(/^\d+\.\s*/, '');
+        a.textContent = h.getAttribute('data-capitolo') || h.textContent.trim().replace(/^\d+\.\s*/, '');
         a.title = a.textContent;
         cap.appendChild(a);
       });
@@ -449,6 +461,9 @@
       if (tick) return; tick = true;
       window.requestAnimationFrame(function () { tick = false; aggiorna(); });
     }, { passive: true });
+    // i grafici disegnati dopo cambiano le altezze: la voce accesa si ricalcola anche a pagina caricata e al ridimensionamento
+    window.addEventListener('load', function () { onK = -2; aggiorna(); setTimeout(function () { onK = -2; aggiorna(); }, 1500); });
+    window.addEventListener('resize', function () { onK = -2; aggiorna(); });
 
     // gli elementi "sticky" della pagina con top vicino a 0 finirebbero sotto la barra: li sposto sotto
     var altezzaPrima = -1;
@@ -490,7 +505,7 @@
     function rinomina() {
       if (!cap) return;
       for (var i = 0; i < capH.length; i++) {
-        var t = capH[i].textContent.trim().replace(/^\d+\.\s*/, '');
+        var t = capH[i].getAttribute('data-capitolo') || capH[i].textContent.trim().replace(/^\d+\.\s*/, '');
         if (t && cap.children[i].textContent !== t) { cap.children[i].textContent = t; cap.children[i].title = t; }
       }
     }
