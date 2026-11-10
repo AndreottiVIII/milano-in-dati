@@ -32,3 +32,5 @@ Pagina nuova (bozza in bozze-grafici/economia-v2/, dati in docs/economia/data/).
 - Parità di potere d'acquisto: prezzi medi nazionali, gonfia Bucarest e Varsavia.
 - Dati provinciali fino al 2023; metro fino al 2021 per quasi tutte (2022 solo per 58 aree, 2023 nessuna).
 - Esportazioni e conti territoriali ISTAT: non inclusi (vedi sopra).
+
+- Ordine dei programmi: dopo 02_elabora.py va sempre rilanciato 03_paesi_ue.py, perché 02 riscrive paesi_pil_2023 con i soli 5 paesi.

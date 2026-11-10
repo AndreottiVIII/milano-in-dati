@@ -148,7 +148,14 @@
     { path: 'consumi/', label: 'Quanta corrente, quanta acqua' },
     { path: 'universita/', label: 'Università' },
     { path: 'ospedali/', label: 'Ospedali' },
-    { path: 'catasto/', label: 'Il catasto' }
+    { path: 'catasto/', label: 'Il catasto' },
+    { path: 'il-tuo-anno/', label: 'Il tuo anno' },
+    { path: 'proverbi/', label: 'I proverbi alla prova' },
+    { path: 'economia/', label: 'Milano in Italia e in Europa' },
+    { path: 'occupazione/', label: 'Il lavoro che c’è' },
+    { path: 'olimpiadi/', label: 'Le Olimpiadi, a cose fatte' },
+    { path: 'case-energia/', label: 'Quanto consumano le case' },
+    { path: 'negozi/', label: 'I negozi di Milano' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

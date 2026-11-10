@@ -3153,3 +3153,10 @@ nascite: aggiunti nati e morti dal 1880 (nel 2024 meno nati che nel 1880).
 comunita: aggiunto il capitolo dei milanesi all'estero (AIRE 2016-2022).
 verde: aggiunto il capitolo dei pappagalli (quota del parrocchetto sulle segnalazioni di uccelli, GBIF).
 scuole: aggiunto il capitolo degli ascensori nelle scuole (2020/21); etichette dei piccoli grafici sistemate.
+proverbi: pagina nuova, otto proverbi sul tempo provati con le temperature di Brera dal 1763 e la pioggia dal 1858.
+il-tuo-anno: pagina nuova, scrivi l'anno di nascita e vedi nati, abitanti, coetanei di oggi e sposati (Comune dal 1880).
+economia: pagina nuova, quota di Milano sul PIL italiano, PIL a testa contro le province, Milano tra i paesi UE e le aree metropolitane europee (Eurostat).
+occupazione: pagina nuova, occupati e disoccupati contro l'Italia, divario donne-uomini, durata dei contratti, giovani, lavoro da casa.
+olimpiadi: pagina nuova, le 98 opere dei Giochi Milano-Cortina a sei mesi dalla fine (Simico, 28/8/2026).
+case-energia: pagina nuova, classi energetiche delle case per epoca e quartiere, riscaldamento, colonnine (CENED, Comune).
+negozi: pagina nuova, negozi di vicinato dal 2003, settori, vie e quartieri, mercati (Comune).
