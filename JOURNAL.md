@@ -3160,3 +3160,4 @@ occupazione: pagina nuova, occupati e disoccupati contro l'Italia, divario donne
 olimpiadi: pagina nuova, le 98 opere dei Giochi Milano-Cortina a sei mesi dalla fine (Simico, 28/8/2026).
 case-energia: pagina nuova, classi energetiche delle case per epoca e quartiere, riscaldamento, colonnine (CENED, Comune).
 negozi: pagina nuova, negozi di vicinato dal 2003, settori, vie e quartieri, mercati (Comune).
+Quante ne sai di Milano?: gioco a 10 domande (tutta Milano, quartiere, per tema), 136 domande dalle pagine del sito con fonte e licenza; grafica come le altre pagine; link nella barra in alto

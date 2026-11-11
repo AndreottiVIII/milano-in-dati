@@ -26,6 +26,9 @@ Scrive:
 | `fatti_d_quartieri.py` | «quale quartiere?»: terne di quartieri dalle schede, seme fisso |
 | `quartieri_gioco.py` | dati del gioco per quartiere (schede + età per quartiere) |
 
+## Domande tolte
+`escluse.txt`: 97 domande tolte l'11/11/2026 perché troppo tecniche o di nicchia (centraline, tariffe, catasto minuto, consiglio comunale…). Davide vuole fatti «grossi e succosi». `genera.py` le salta e avvisa se un id non esiste più. Nel mazzo restano 136 domande.
+
 ## Regole del mazzo
 - Ogni numero viene da `p.v(file, percorso…)` sui file di `docs/<pagina>/data/`, o da `p.calc(...)` su quei valori. Mai numeri a mano.
 - `genera.py` rilegge ogni file da capo e verifica: valori uguali, calcoli rifatti, ogni numero mostrato è una lettura o un calcolo, ogni numero scritto nel testo torna (arrotondato) con i dati, la pagina esiste, il tema viene da `temi.json`, la licenza è tra quelle della pagina in `docs/fonti/data/fonti.json`, niente parole vietate (nomi di file, «trappole»…). Deve finire con 0 errori e 0 avvisi.

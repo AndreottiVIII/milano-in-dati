@@ -155,7 +155,8 @@
     { path: 'occupazione/', label: 'Il lavoro che c’è' },
     { path: 'olimpiadi/', label: 'Le Olimpiadi, a cose fatte' },
     { path: 'case-energia/', label: 'Quanto consumano le case' },
-    { path: 'negozi/', label: 'I negozi di Milano' }
+    { path: 'negozi/', label: 'I negozi di Milano' },
+    { path: 'quiz/', label: 'Quante ne sai di Milano?' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito
@@ -266,7 +267,7 @@
   // I collegamenti stanno in una fila che, sui telefoni stretti, scorre di lato (Home e Cerca restano ferme)
   var lnks = document.createElement('div');
   lnks.className = 'mid-lnks';
-  [['dati-importanti/', 'Dati importanti'], ['quartiere/', 'Il tuo quartiere'], ['quartiere-ideale/', 'Quartiere ideale'], ['il-sito/', 'Il sito']].forEach(function (x) {
+  [['dati-importanti/', 'Dati importanti'], ['quiz/', 'Quante ne sai?'], ['quartiere/', 'Il tuo quartiere'], ['quartiere-ideale/', 'Quartiere ideale'], ['il-sito/', 'Il sito']].forEach(function (x) {
     var a = document.createElement('a');
     a.className = 'mid-b mid-lnk';
     a.href = new URL(x[0], rootUrl).href;

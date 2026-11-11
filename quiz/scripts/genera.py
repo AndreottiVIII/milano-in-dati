@@ -218,6 +218,15 @@ def main():
     tema, nomi, label = temi_e_pagine()
     lic = licenze_pagine()
     qs = moduli(solo)
+    # domande tolte a mano perché troppo di nicchia (vedi escluse.txt)
+    f_esc = os.path.join(os.path.dirname(__file__), 'escluse.txt')
+    if os.path.exists(f_esc):
+        esc = {r.strip() for r in open(f_esc, encoding='utf-8') if r.strip() and not r.startswith('#')}
+        ignote = esc - {q['id'] for q in qs}
+        if ignote and not solo:
+            print('AVVISO escluse.txt: id sconosciuti', sorted(ignote))
+        qs = [q for q in qs if q['id'] not in esc]
+        print('tolte perché di nicchia:', len(esc - ignote))
     errori, avvisi = controlla(qs, tema, label, lic)
     for a in avvisi:
         print('AVVISO', a)
