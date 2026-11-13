@@ -23,11 +23,12 @@ Scrive:
 | `fatti_b_persone.py` | persone, casa, soldi (27 pagine) |
 | `fatti_c_cultura.py` | servizi, sicurezza, cultura, politica (29 pagine) |
 | `fatti_e_nuove.py` | 10 pagine nuove (56 domande): università, ospedali, catasto, economia, lavoro, aeroporti delle Olimpiadi, case e energia, negozi, proverbi, il tuo anno |
+| `fatti_f_grosse.py` | 33 domande «grosse» aggiunte il 13/11/2026 (cultura, elezioni, casa, sicurezza, servizi): derby, Scala, Cenacolo, voto e reddito, case popolari |
 | `fatti_d_quartieri.py` | «quale quartiere?»: terne di quartieri dalle schede, seme fisso |
 | `quartieri_gioco.py` | dati del gioco per quartiere (schede + età per quartiere) |
 
 ## Domande tolte
-`escluse.txt`: 97 domande tolte l'11/11/2026 perché troppo tecniche o di nicchia (centraline, tariffe, catasto minuto, consiglio comunale…). Davide vuole fatti «grossi e succosi». `genera.py` le salta e avvisa se un id non esiste più. Nel mazzo restano 136 domande.
+`escluse.txt`: 97 domande tolte l'11/11/2026 perché troppo tecniche o di nicchia (centraline, tariffe, catasto minuto, consiglio comunale…). Davide vuole fatti «grossi e succosi». `genera.py` le salta e avvisa se un id non esiste più. Dopo le 33 domande grosse del 13/11 (una tolta come doppione) il mazzo ha 168 domande.
 
 ## Regole del mazzo
 - Ogni numero viene da `p.v(file, percorso…)` sui file di `docs/<pagina>/data/`, o da `p.calc(...)` su quei valori. Mai numeri a mano.
