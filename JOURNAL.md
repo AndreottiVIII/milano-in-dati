@@ -3201,3 +3201,4 @@ Voli: testi dei grafici portati a 12 px
 Acqua e fogne: capitolo nuovo La falda sotto i piedi (soggiacenza per quartiere, quota 2007-2022, stazioni del metrò; Città metropolitana su Open Data Lombardia)
 Acqua del sindaco: link al capitolo sulla falda
 Voli: tutti i testi dei grafici almeno a 12 px
+Anziani: pagina nuova Chi si prende cura degli anziani (RSA per quartiere, hinterland e province; Regione Lombardia, dato aperto per legge art. 52 CAD; ISTAT; Comune di Milano)

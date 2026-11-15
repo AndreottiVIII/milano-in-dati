@@ -175,7 +175,7 @@ ANNI = {
     'storia-case': (None, None), 'storia-centro': (None, None), 'oltre-il-reddito': (None, None),
     'sport': (None, None), 'dati-importanti': (None, None), 'elenco': (None, None), 'il-sito': (None, None),
     'fonti': (None, None),
-    'voli': (1995, 2024), 'altezze': (2012, 2020), 'velocita': (2026, 2026), 'sharing': (2011, 2025), 'senza-dimora': (2001, 2023),
+    'voli': (1995, 2024), 'altezze': (2012, 2020), 'velocita': (2026, 2026), 'sharing': (2011, 2025), 'senza-dimora': (2001, 2023), 'anziani': (2025, 2026),
 }
 SOLO_PAGINA = {'milano-trema'}
 GRUPPO_ALTRO = {'id': 'guide', 'nome': 'Riepiloghi e guide', 'colore': '#5f6673'}
