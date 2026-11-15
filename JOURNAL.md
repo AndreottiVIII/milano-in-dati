@@ -3205,3 +3205,5 @@ Anziani: pagina nuova Chi si prende cura degli anziani (RSA per quartiere, hinte
 Anziani: capitolo nuovo Chi cura a casa: badanti e colf (INPS, Osservatorio sui lavoratori domestici 2016-2025, dato aperto per legge art. 52 CAD); numero in alto 1,8 volte
 Benessere: radar sostituito da righe con pallini (Milano contro la città di mezzo, 11 temi)
 Area C: anello dei varchi sostituito da barre ordinate accanto alla mappa
+
+- 2026-11-15 sera — **Dominio e rifiniture**: sito su milanoindati.it (Search Console verificata, sitemap 126 pagine). Google Analytics solo con consenso (avviso cookie con Accetto/Rifiuto di pari peso). "Come citarci" CC BY-NC 4.0 con email di Davide (scelta di Davide: solo non commerciale, solo in fondo alle pagine). Lentezza: le pagine si aprivano in meno di 1 s ma "saltavano" quando arrivavano i grafici; nuovo strumenti/riserva_spazio.py (riserve min-height nella head, :not(:has(*)) così spariscono da sole, tetto 1500 px, spazio per il menu, .js .statico nascosto subito). Immagini di Milano raccontata 680 -> 320 KB.

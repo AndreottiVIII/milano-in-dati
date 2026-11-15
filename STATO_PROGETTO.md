@@ -1,10 +1,20 @@
-# Milano in dati: stato del progetto (2 novembre 2026, mattina)
+# Milano in dati: stato del progetto (16 novembre 2026)
 
-Sito: https://andreottiviii.github.io/milano-in-dati/ (Ctrl+F5 se una pagina sembra vecchia)
+Sito: https://milanoindati.it/ (dal 15/11/2026; i vecchi indirizzi github.io e davidecaniatti.com/milano-in-dati rimandano qui). Ctrl+F5 se una pagina sembra vecchia.
 
 Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni aperte, non i compiti.
 
 ## Decisioni aperte per Davide
+
+- Nessuna decisione aperta. Da fare a mano (solo Davide): sull'altro PC di casa svuotare la memoria DNS (`ipconfig /flushdns` e chrome://net-internals/#dns, "Clear host cache"): ricorda ancora "dominio inesistente".
+
+## Fatto il 15/11 sera
+
+- Dominio milanoindati.it (GoDaddy, rinnovo automatico 16/11/2027 con PayPal), https obbligatorio, Search Console (proprietà di dominio, TXT su GoDaddy da NON cancellare, sitemap inviata).
+- Google Analytics G-T3DC886QPS (proprietà "Milano in dati" nell'account di Davide), parte solo dopo "Accetto" nell'avviso cookie (menu.js); spiegazione in il-sito/#visite.
+- Come citarci: CC BY-NC 4.0, riquadro in fondo a ogni pagina (menu.js) e il-sito/#citare con l'email di Davide per gli usi commerciali.
+- Pagine senza salti al caricamento: strumenti/riserva_spazio.py (dentro dopo_pubblicazione.py) riserva lo spazio di grafici e menu e nasconde subito il testo statico. CLS da 0,2-1,3 a circa 0.
+- Pagine pesanti: immagini di Milano raccontata ridotte e caricate scorrendo; connessione anticipata alle mappe. Città dei 15 minuti lasciata così (rifarla costa più di quanto rende).
 
 
 ## Filone per filone
