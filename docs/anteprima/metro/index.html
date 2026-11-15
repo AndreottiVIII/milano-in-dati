@@ -96,6 +96,13 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 .pill.y{color:#000}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.88rem}
 .two ul{margin:.2em 0;padding-left:1.1em} .two li{margin:.2em 0}
+.pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:.4em 0 .6em;font-size:.95rem;font-weight:700}
+.pick select{font:inherit;font-weight:600;color:var(--ink);padding:9px 10px;min-height:44px;border:2px solid var(--ink);border-radius:4px;background:#fff;max-width:100%}
+.pick .sw{min-height:44px;min-width:44px;font:inherit;font-weight:800;border:2px solid var(--ink);border-radius:4px;background:#fff;cursor:pointer}
+.ch svg .bk{stroke:#0b0d12;stroke-width:1.6;stroke-dasharray:5 4}
+.via{margin:.3em 0 0;padding:0;list-style:none;font-size:.92rem}
+.via li{margin:.3em 0;line-height:1.35}
+.big{font-size:2rem;font-weight:800;line-height:1.1;margin:0}
 </style><script src="../menu.js" defer></script></head><body><div style="background:#FFD500;color:#000;font:600 14px/1.3 system-ui,Arial,sans-serif;padding:8px 16px;text-align:center">Anteprima: questa versione non è ancora pubblicata. <a href="../../metro/" style="color:#000">Pagina attuale</a></div><main>
 
 <h1>Il metrò di Milano</h1>
@@ -165,6 +172,25 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
   <p class="src">Fonte: AMAT, Report della Mobilità 2024, pagina 161 (letto dal grafico, ±3 mila). Apertura del tratto fino a San Babila: Wikipedia.</p>
 </div>
 
+<h2 id="tempi">Quanto ci metti</h2>
+<p class="intro">Il tempo in metrò tra due stazioni, secondo l'orario: scegli da dove parti e dove arrivi. È il tempo sul treno, più un cambio fisso se serve.</p>
+<div class="fig">
+  <h3 id="t-tempi"></h3>
+  <p class="sub">Scegli la stazione di partenza e quella di arrivo. La mappa mostra, per ogni stazione, quanti minuti servono dalla partenza; il percorso scelto è colorato.</p>
+  <div class="pick"><label for="sel-da">Da</label><select id="sel-da"></select><button type="button" class="sw" id="sw" aria-label="Inverti partenza e arrivo">⇄</button><label for="sel-a">A</label><select id="sel-a"></select></div>
+  <div class="card" id="card-t" style="--c:var(--ink)"></div>
+  <div class="lg" id="lg-iso"></div>
+  <div class="ch" id="ch-iso" role="img" aria-label="Mappa della rete del metrò con le stazioni colorate per minuti di viaggio dalla stazione di partenza"></div>
+  <p class="src">Fonte: Comune di Milano, orari del trasporto pubblico locale in formato GTFS (ds929, licenza CC BY 4.0), martedì 24 novembre 2026. Tempo sul treno: mediana delle corse tra le 7 e le 20; ogni cambio vale 4 minuti. Non comprende l'attesa alla partenza.</p>
+</div>
+
+<div class="fig">
+  <h3 id="t-capi"></h3>
+  <p class="sub">Minuti da un capolinea all'altro e velocità media di ogni percorso, dall'orario. Una linea con due rami ha due percorsi. Tocca una barra per i numeri.</p>
+  <div class="ch" id="ch-capi" role="img" aria-label="Barre: minuti da capolinea a capolinea di ogni percorso del metrò, con la velocità media"></div>
+  <p class="src">Fonte: Comune di Milano, orari GTFS (licenza CC BY 4.0), martedì 24 novembre 2026. Mediana delle corse tra le 7 e le 20, sulla lunghezza del tracciato disegnato nell'orario, soste alle stazioni comprese.</p>
+</div>
+
 <div class="fondo">
 <details id="limiti"><summary>Limiti dei dati</summary><div class="in"><ul id="limiti-lista"></ul></div></details>
 <details id="parole"><summary>Parole usate</summary><div class="in"><dl class="par">
@@ -194,6 +220,7 @@ footer{margin:2em 0 0;font-size:.78rem;color:var(--mut)}
 
 <footer>
 <p><b>Fonti e licenze.</b> Passeggeri per linea 2016-2024 e passeggeri di Linate: AMAT (Agenzia Mobilità Ambiente e Territorio, Comune di Milano), <i>Report della Mobilità 2024</i> (3ª edizione), PDF scaricato il 1 novembre 2026; «tutti i diritti riservati»: i numeri sono citati come fatti con la fonte, il PDF e i suoi grafici non sono ripresi. 2025 per linea: Wikipedia, voce «Metropolitana di Milano» (CC BY-SA 4.0), che cita il Report AMAT 2025 (non ancora verificato). Chilometri di rete, stazioni-linea, corse medie: ATM, <i>Carte della Mobilità</i> 2017-2026 (nessuna licenza dichiarata; solo numeri citati), scaricate il 1 novembre 2026. Orario e stazioni: GTFS ATM/AMAT, <a href="https://dati.comune.milano.it/">dati.comune.milano.it</a>, licenza Creative Commons Attribution (CC BY), feed 425. Date di apertura delle stazioni: Wikipedia, «Stazioni della metropolitana di Milano» (CC BY-SA 4.0), 1 novembre 2026. Totali pubblicati dalla stampa, usati come controllo: Il Giorno, 21 marzo 2024. Confini dei comuni: ISTAT (CC BY 4.0). Confini dei quartieri: Comune di Milano (CC BY).</p>
+<p>Tempi di percorrenza del metrò: Comune di Milano, orari GTFS (ds929), licenza Creative Commons Attribuzione 4.0 (CC BY 4.0).</p>
 <p>Programmi e note: <a href="https://github.com/AndreottiVIII/milano-in-dati">github.com/AndreottiVIII/milano-in-dati</a>.</p>
 </footer>
 </main>
@@ -248,7 +275,7 @@ function draw(f){f();RD.push(f)}
 function tutto(){
   RATIO=reteAt(2016).km/SEG.anni['2016'].km_tot;
   highlights();
-  draw(mappa);draw(indici);draw(linee);cerca();draw(bilancia);draw(linate);
+  draw(mappa);draw(indici);draw(linee);cerca();draw(bilancia);draw(linate);tempi();
   limiti();
   var rt,lw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rt);rt=setTimeout(function(){RD.forEach(function(f){f()})},150)});
 }
@@ -502,6 +529,135 @@ function linate(){
 }
 
 /* ---------- limiti ---------- */
+
+/* ---------- tempi di percorrenza (orario GTFS) ---------- */
+var TP=null,TSEL={da:0,a:0};
+var BAND=[{m:10,c:'#8CC63F',t:'fino a 10 minuti'},{m:20,c:'#FFD500',t:'11-20'},{m:30,c:'#F58220',t:'21-30'},{m:40,c:'#E30613',t:'31-40'},{m:50,c:'#7B3FA0',t:'41-50'},{m:999,c:'#2f3440',t:'oltre 50'}];
+function band(m){var k=0;while(k<5&&m>BAND[k].m)k++;return k}
+function box_(id,h){$(id).innerHTML=h}
+function tempi(){
+  getJ('data/tempi.json').then(function(r){TP=r;tempiInit()}).catch(function(e){console.error(e);$('t-tempi').textContent='Tempi non caricati'});
+}
+function dijk(sa){
+  var N=TP.nodi.length,dist=[],prev=[],done=[],adj=[];
+  for(var i=0;i<N;i++){dist.push(1e9);prev.push(null);done.push(false);adj.push([])}
+  TP.archi.forEach(function(e){adj[e[0]].push([e[1],e[2],0]);adj[e[1]].push([e[0],e[2],0])});
+  var gr={};TP.nodi.forEach(function(n,i){(gr[n[0]]=gr[n[0]]||[]).push(i)});
+  Object.keys(gr).forEach(function(k){var g=gr[k];g.forEach(function(a){g.forEach(function(b){if(a!==b)adj[a].push([b,TP.scambio_min*60,1])})})});
+  (gr[sa]||[]).forEach(function(i){dist[i]=0});
+  for(;;){
+    var u=-1,b=1e9;for(var i=0;i<N;i++)if(!done[i]&&dist[i]<b){b=dist[i];u=i}
+    if(u<0)break;done[u]=true;
+    adj[u].forEach(function(e){if(dist[u]+e[1]<dist[e[0]]){dist[e[0]]=dist[u]+e[1];prev[e[0]]=[u,e[2]]}});
+  }
+  return{dist:dist,prev:prev};
+}
+function nodoA(R,sb){var best=-1;TP.nodi.forEach(function(n,i){if(n[0]===sb&&(best<0||R.dist[i]<R.dist[best]))best=i});return best}
+function percorso(R,node){
+  var path=[],i=node,sc=0;
+  while(i>=0){var p=R.prev[i];path.unshift({n:i,sc:sc});if(p){sc=p[1];i=p[0]}else i=-1}
+  /* sc di ogni nodo = se il passo che ci porta qui e un cambio: si sposta di uno */
+  var out=[];
+  for(var j=0;j<path.length;j++){out.push({n:path[j].n,sc:j===0?0:(R.prev[path[j].n]?R.prev[path[j].n][1]:0)})}
+  return out;
+}
+function rifai(){RD.forEach(function(f){if(f.tp)f()})}
+function tempiInit(){
+  var ord=TP.stazioni.map(function(s,i){return i}).sort(function(a,b){return TP.stazioni[a].n<TP.stazioni[b].n?-1:1});
+  var op=ord.map(function(i){var s=TP.stazioni[i];return '<option value="'+i+'">'+esc(s.n)+' ('+s.l.join(', ')+')</option>'}).join('');
+  $('sel-da').innerHTML=op;$('sel-a').innerHTML=op;
+  function idx(n){var r=0;TP.stazioni.forEach(function(s,i){if(s.n===n)r=i});return r}
+  TSEL.da=idx('Duomo');TSEL.a=idx('Linate Aeroporto');
+  $('sel-da').value=String(TSEL.da);$('sel-a').value=String(TSEL.a);
+  $('sel-da').addEventListener('change',function(){TSEL.da=+this.value;rifai()});
+  $('sel-a').addEventListener('change',function(){TSEL.a=+this.value;rifai()});
+  $('sw').addEventListener('click',function(){var x=TSEL.da;TSEL.da=TSEL.a;TSEL.a=x;$('sel-da').value=String(TSEL.da);$('sel-a').value=String(TSEL.a);rifai()});
+  mappaTempi.tp=true;RD.push(mappaTempi);mappaTempi();
+  draw(capi);
+  var li=function(sel,h){var e=document.querySelector(sel);if(e){var x=document.createElement('li');x.innerHTML=h;e.appendChild(x)}};
+  li('#limiti-lista',"<b>I tempi in metrò sono quelli dell'orario.</b> Vengono dall'orario del Comune (GTFS), martedì 24 novembre 2026: sono tempi programmati, mediana delle corse tra le 7 e le 20, e non comprendono guasti, rallentamenti o treni soppressi.");
+  li('#limiti-lista',"<b>Il cambio vale sempre 4 minuti.</b> È un tempo fisso scelto da noi, che comprende camminata e attesa del treno; nella realtà cambia da stazione a stazione e con la frequenza dei treni. L'attesa alla partenza non è contata.");
+  li('#limiti-lista',"<b>Si guarda solo il metrò.</b> Il percorso più veloce è cercato solo sulla rete del metrò: non entrano tram, bus, passante ferroviario o camminate tra stazioni vicine. Sono stazioni di interscambio quelle con due linee a meno di 120 metri (a Loreto, a meno di 300).");
+  li('#limiti-lista',"<b>Rami e capolinea.</b> M1 e M2 hanno due rami: i percorsi da capolinea a capolinea sono quattro per ciascuna e nel grafico se ne mostra uno per coppia, con la media dei due versi. La velocità media comprende le soste in stazione ed è calcolata sulla lunghezza del tracciato disegnato nell'orario.");
+  li('#metodo ul',"<b>Tempi di percorrenza.</b> Dalle corse del metrò del 24 novembre 2026 si prende il tempo mediano tra stazioni successive (arrivo alla seconda meno arrivo alla prima). Le stazioni di linee diverse molto vicine sono unite in una sola; il percorso più breve è cercato sulla rete, con 4 minuti per ogni cambio.");
+  li('#download ul','<a href="data/tempi.json">I tempi in metrò tra le stazioni</a> e i percorsi da capolinea a capolinea');
+}
+function mappaTempi(){
+  if(!TP)return;
+  var R=dijk(TSEL.da),W=width('ch-iso'),SS=TP.stazioni;
+  var lo=1e9,hi=-1e9,a0=1e9,a1=-1e9,k=Math.cos(45.47*Math.PI/180),pad=0.012;
+  SS.forEach(function(s){lo=Math.min(lo,s.lon);hi=Math.max(hi,s.lon);a0=Math.min(a0,s.lat);a1=Math.max(a1,s.lat)});
+  var x0=(lo-pad)*k,x1=(hi+pad)*k,y0=a0-pad,y1=a1+pad,sc=W/(x1-x0),H=Math.round((y1-y0)*sc);
+  function PX(lon){return (lon*k-x0)*sc} function PY(lat){return (y1-lat)*sc}
+  function path(f){return anelli(f).map(function(rg){return 'M'+rg.map(function(p){return r1(PX(p[0]))+' '+r1(PY(p[1]))}).join('L')+'Z'}).join('')}
+  var s=svgOpen(W,H,' aria-hidden="true" style="overflow:hidden"');
+  s+='<rect width="'+W+'" height="'+H+'" fill="#fff"/>';
+  var milano='';
+  GEO.features.forEach(function(f){var m=f.properties.g==='MILANO';var d='<path d="'+path(f)+'" fill="'+(m?'#dde1e7':'#eef0f3')+'" stroke="#fff" stroke-width="1"/>';if(m)milano=d;else s+=d});
+  s+=milano;
+  NIL.features.forEach(function(f){s+='<path d="'+path(f)+'" fill="none" stroke="#fff" stroke-width=".8"/>'});
+  var NO=TP.nodi,LW=W<500?3.2:4.2;
+  TP.archi.forEach(function(e){var a=SS[NO[e[0]][0]],b=SS[NO[e[1]][0]];s+=Ln(PX(a.lon),PY(a.lat),PX(b.lon),PY(b.lat),'#b9bec8',LW,' stroke-linecap="round"')});
+  var nb=nodoA(R,TSEL.a),pth=percorso(R,nb),tot=R.dist[nb];
+  for(var i=1;i<pth.length;i++){
+    var a=pth[i-1],b=pth[i],A=SS[NO[a.n][0]],B=SS[NO[b.n][0]];
+    if(b.sc)continue;
+    s+=Ln(PX(A.lon),PY(A.lat),PX(B.lon),PY(B.lat),LS[NO[b.n][1]],LW+2.6,' stroke-linecap="round"');
+  }
+  var best=SS.map(function(x,i){var m=1e9;NO.forEach(function(n,j){if(n[0]===i&&R.dist[j]<m)m=R.dist[j]});return m});
+  var cnt=BAND.map(function(){return 0});
+  SS.map(function(x,i){return i}).sort(function(a,b){return best[b]-best[a]}).forEach(function(i){
+    var st=SS[i],m=best[i]/60,bd=band(Math.round(m));if(i!==TSEL.da)cnt[bd]++;
+    var tx=i===TSEL.da?'<b>'+esc(st.n)+'</b><br>partenza':'<b>'+esc(st.n)+'</b><br>'+f0(m)+' minuti da '+esc(SS[TSEL.da].n);
+    s+='<circle cx="'+r1(PX(st.lon))+'" cy="'+r1(PY(st.lat))+'" r="'+(st.l.length>1?(W<500?5.5:7):(W<500?4.2:5.4))+'" fill="'+BAND[bd].c+'" stroke="'+(i===TSEL.a?INK:'#fff')+'" stroke-width="'+(i===TSEL.a?3:1.4)+'"'+tip(tx)+'/>';
+  });
+  var d0=SS[TSEL.da],d1=SS[TSEL.a];
+  s+='<circle cx="'+r1(PX(d0.lon))+'" cy="'+r1(PY(d0.lat))+'" r="'+(W<500?8:10)+'" fill="none" stroke="'+INK+'" stroke-width="3"/>';
+  s+=T(PX(d0.lon)+12,PY(d0.lat)-12,esc(d0.n),{c:'b halo',st:'font-size:12px'});
+  if(d1!==d0)s+=T(PX(d1.lon)+10,PY(d1.lat)+16,esc(d1.n),{c:'b halo',st:'font-size:12px'});
+  box_('ch-iso',s+'</svg>');
+  $('lg-iso').innerHTML=BAND.map(function(b,i){return '<span><i class="dot" style="background:'+b.c+'"></i>'+b.t+' ('+cnt[i]+')</span>'}).join('');
+  var mins=Math.round(tot/60),steps=[],cur=null,nst=0,ch=[];
+  for(var i=1;i<pth.length;i++){
+    var b=pth[i],lin=NO[b.n][1],A=SS[NO[pth[i-1].n][0]],B=SS[NO[b.n][0]];
+    if(b.sc){ch.push(B.n);cur=null;continue}
+    var edge=TP.archi.filter(function(e){return (e[0]===pth[i-1].n&&e[1]===b.n)||(e[1]===pth[i-1].n&&e[0]===b.n)})[0];
+    if(!cur||cur.l!==lin){cur={l:lin,da:A.n,a:B.n,f:0,s:0};steps.push(cur)}
+    cur.a=B.n;cur.f++;cur.s+=edge?edge[2]:0;nst++;
+  }
+  var html;
+  if(TSEL.da===TSEL.a)html='<p class="big">0 minuti</p><p>Hai scelto la stessa stazione.</p>';
+  else{
+    html='<p class="big">'+mins+' minuti</p><p>'+(ch.length?ch.length+(ch.length>1?' cambi':' cambio')+' ('+ch.join(', ')+'), '+f0(ch.length*TP.scambio_min)+' minuti compresi nel totale':'Nessun cambio')+' · '+nst+(nst===1?' fermata':' fermate')+'.</p><ul class="via">';
+    steps.forEach(function(x){html+='<li>'+pill(x.l)+' da <b>'+esc(x.da)+'</b> a <b>'+esc(x.a)+'</b>: '+x.f+(x.f===1?' fermata':' fermate')+', '+f0(x.s/60)+' min</li>'});
+    html+='</ul>';
+  }
+  $('card-t').style.setProperty('--c',steps.length?LC[steps[0].l]:'#0b0d12');
+  $('card-t').innerHTML=html;
+  $('t-tempi').textContent=TSEL.da===TSEL.a?'Scegli due stazioni diverse':'Da '+SS[TSEL.da].n+' a '+SS[TSEL.a].n+' in metrò servono '+mins+' minuti'+(ch.length?', con '+(ch.length>1?ch.length+' cambi':'un cambio'):', senza cambi');
+}
+function capi(){
+  if(!TP)return;
+  var rows=[],seen={};
+  TP.percorsi.forEach(function(p){var key=p.l+'|'+[p.da,p.a].sort().join('|');if(seen[key]){var q=seen[key];q.min=(q.min+p.min)/2;q.kmh=(q.kmh+p.kmh)/2;return}seen[key]=JSON.parse(JSON.stringify(p));rows.push(seen[key])});
+  var W=width('ch-capi'),stretto=W<460,rh=stretto?48:38,m={t:22};
+  var H=m.t+rows.length*rh+4;
+  var x0=stretto?0:200,pw=W-x0-130,xm=Math.ceil(Math.max.apply(null,rows.map(function(r){return r.min}))/10)*10;
+  function X(v){return x0+v/xm*pw}
+  var s=svgOpen(W,H,' aria-hidden="true"');
+  for(var v=0;v<=xm;v+=10)s+=Ln(X(v),m.t-4,X(v),H-2,'#e6e8ec',1)+T(X(v),m.t-8,v+(v===xm?' min':''),{a:v===0?'start':'middle',c:'m'});
+  rows.forEach(function(r,i){
+    var y=m.t+i*rh,bh=stretto?18:rh-12,by=stretto?y+17:y+4,lab=r.da+' – '+r.a;
+    var tsp='<tspan style="font-weight:800;fill:'+LS[r.l]+'">'+r.l+'</tspan> ';
+    if(stretto)s+=T(0,y+11,tsp+esc(lab),{c:'m',st:'font-size:12px'});
+    else s+=T(0,by+bh/2+4,tsp+esc(lab.length>30?lab.slice(0,29)+'…':lab),{c:'m',st:'font-size:12px'});
+    s+='<rect x="'+x0+'" y="'+by+'" width="'+r1(X(r.min)-x0)+'" height="'+bh+'" rx="3" fill="'+LC[r.l]+'"'+(r.l==='M3'?' stroke="#0b0d12" stroke-width="1"':'')+tip('<b>'+r.l+' '+esc(r.da)+' – '+esc(r.a)+'</b><br>'+f0(r.min)+' minuti, '+f1(r.km)+' km<br>'+f1(r.kmh)+' km/h di media, '+r.fermate+' fermate')+'/>';
+    s+=T(X(r.min)+6,by+bh/2+4.5,f0(r.min)+' min · '+f1(r.kmh)+' km/h',{c:'b',st:'font-size:12px'});
+  });
+  box_('ch-capi',s+'</svg>');
+  var f=rows.slice().sort(function(a,b){return b.kmh-a.kmh})[0],sl=rows.slice().sort(function(a,b){return a.kmh-b.kmh})[0],lg=rows.slice().sort(function(a,b){return b.min-a.min})[0];
+  $('t-capi').textContent='Il percorso più lungo è '+lg.l+' '+lg.da+' – '+lg.a+': '+f0(lg.min)+' minuti. La media va da '+f1(sl.kmh)+' km/h ('+sl.l+') a '+f1(f.kmh)+' km/h ('+f.l+')';
+}
 function limiti(){
   var li=[
    '<b>Non si sa quanta gente entra in ogni stazione.</b> ATM conta i tornelli ma non pubblica il numero per stazione, né per giorno, né per ora. L\'unico dato per stazione trovato è vecchio e isolato: San Babila, circa 12.000 accessi al giorno nel primo mese dopo l\'apertura (ATM, riportato da Affaritaliani il 3 agosto 2023). Mancano anche feriale contro festivo per la metro e i giorni di partite a San Siro, di concerti, di scioperi e le Olimpiadi di febbraio 2026.',
