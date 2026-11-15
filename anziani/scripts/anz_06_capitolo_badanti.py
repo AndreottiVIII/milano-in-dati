@@ -36,7 +36,6 @@ cap = '''<h2 id="badanti">Chi cura a casa: badanti e colf</h2>
   <p class="sub">Per ogni provincia lombarda, due numeri ogni 100 persone con 80 anni o più: le badanti in regola (2025) e i posti in RSA. Le province sono in ordine di badanti. Tocca un pallino per i numeri.</p>
   <div class="lg"><span><i class="dot" style="background:var(--m2)"></i>badanti in regola</span><span><i class="dot" style="background:var(--m5)"></i>posti in RSA</span></div>
   <div class="ch" id="ch-badanti-prov" role="img" aria-label="Pallini su un asse: badanti in regola e posti in RSA ogni 100 persone con 80 anni o più, nelle 12 province lombarde"></div>
-  <p class="sel"><b>Un confronto, non una prova.</b> Dove ci sono più badanti non vuol dire che mancano le RSA, né il contrario: contano le famiglie, i redditi, le abitudini e quante persone lavorano senza contratto, che qui non si vedono.</p>
   <p class="src">Fonte: INPS, Osservatorio sui lavoratori domestici, dati annuali 2025, consultata il 15/11/2026 (dato aperto per legge, art. 52 del Codice dell’amministrazione digitale); Regione Lombardia, elenco delle RSA, 14/11/2026 (stessa licenza); ISTAT, popolazione per età al 1° gennaio 2026 (CC BY 4.0). Le badanti sono contate nella provincia dichiarata all’INPS, i posti dove si trova la RSA.</p>
 </div>
 

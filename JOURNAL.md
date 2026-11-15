@@ -3202,3 +3202,4 @@ Acqua e fogne: capitolo nuovo La falda sotto i piedi (soggiacenza per quartiere,
 Acqua del sindaco: link al capitolo sulla falda
 Voli: tutti i testi dei grafici almeno a 12 px
 Anziani: pagina nuova Chi si prende cura degli anziani (RSA per quartiere, hinterland e province; Regione Lombardia, dato aperto per legge art. 52 CAD; ISTAT; Comune di Milano)
+Anziani: capitolo nuovo Chi cura a casa: badanti e colf (INPS, Osservatorio sui lavoratori domestici 2016-2025, dato aperto per legge art. 52 CAD); numero in alto 1,8 volte
