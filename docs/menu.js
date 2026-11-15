@@ -901,3 +901,28 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mostra); else mostra();
   }
 })();
+
+/* "Come citarci": riquadro in fondo a ogni pagina (dentro il <footer>, o in fondo a <main> se manca).
+   Licenza scelta da Davide il 15/11/2026: CC BY-NC 4.0. Spiegazione lunga in il-sito/#citare. */
+(function () {
+  'use strict';
+  try {
+    if (document.getElementById('mid-cita')) return;
+    var src = (document.currentScript && document.currentScript.src) || '';
+    var RADICE = src ? src.replace(/menu\.js(\?.*)?$/, '') : '/';
+    function metti() {
+      if (document.getElementById('mid-cita')) return;
+      var dove = document.querySelector('main footer') || document.querySelector('footer') || document.querySelector('main');
+      if (!dove) return;
+      var st = document.createElement('style');
+      st.textContent = '#mid-cita{margin:1.2em 0;padding:12px 14px;border:3px solid #0b0d12;border-left:10px solid #E30613;background:#fff;color:#0b0d12;font-size:15px;line-height:1.45}' +
+        '#mid-cita a{color:#0b0d12;text-decoration:underline;text-underline-offset:2px}#mid-cita q{font-weight:700;quotes:"«" "»"}';
+      document.head.appendChild(st);
+      var p = document.createElement('p');
+      p.id = 'mid-cita';
+      p.innerHTML = '<b>Come citarci.</b> Grafici, mappe e testi di Milano in dati si possono riusare solo per scopi non commerciali, scrivendo sempre <q>Fonte: Milano in dati, milanoindati.it</q> con il link alla pagina (licenza <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.it" rel="license noopener">CC BY-NC 4.0</a>). Per usi commerciali serve il permesso: <a href="mailto:davide.caniatti@gmail.com">davide.caniatti@gmail.com</a>. I dati delle fonti restano con le loro licenze, elencate qui sopra. <a href="' + RADICE + 'il-sito/#citare">Tutte le regole</a>';
+      if (dove.tagName === 'FOOTER') dove.insertBefore(p, dove.firstChild); else dove.appendChild(p);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', metti); else metti();
+  } catch (e) { /* senza riquadro */ }
+})();

@@ -279,6 +279,9 @@ def controllo_testa(scelte):
         if ogu != [atteso]:
             out.append(('og:url sbagliato o doppio', p, '%s (atteso %s)' % (ogu, atteso)))
         fuori = sito.senza_blocchi(s)
+        # il nome del sito scritto nel testo da citare («Fonte: Milano in dati, milanoindati.it») e' voluto:
+        # contano solo gli indirizzi veri (http..., //...), non il nome nudo.
+        fuori = re.sub(r'(?<![/\w.])' + re.escape(dominio) + r'(?![/\w])', '', fuori)
         for d in (dominio, 'andreottiviii.github.io'):
             if d in fuori:
                 out.append(('indirizzo assoluto scritto a mano', p, d))
