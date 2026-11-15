@@ -3191,3 +3191,13 @@ proverbi: grafici rifatti dopo la review del 13/11 (niente pittogrammi a unità,
 redditi: grafici rifatti dopo la review del 13/11 (niente pittogrammi a unità, griglie da 100 o forme radiali; forme più leggibili)
 sport: grafici rifatti dopo la review del 13/11 (niente pittogrammi a unità, griglie da 100 o forme radiali; forme più leggibili)
 biblioteche: grafici rifatti dopo la review del 13/11 (niente pittogrammi a unità, griglie da 100 o forme radiali; forme più leggibili)
+Dove si vola da Milano: pagina nuova, rotte da Linate, Malpensa e Bergamo 2004-2024 (Eurostat), Roma in aereo con il dato FS sul treno citato
+Quanto è alta Milano: pagina nuova, altezze degli edifici 2012 e 2020 dal Database topografico del Comune
+Quanto vanno veloci tram e bus: pagina nuova, velocità tratto per tratto e ora per ora secondo l'orario GTFS
+Monopattini, scooter e auto in condivisione: pagina nuova, noleggi 2011-2025 e incidenti con monopattini
+Senza dimora: pagina nuova, iscritti all'anagrafe senza dimora (censimento ISTAT 2021 e 2023), età, cittadinanza, grandi città
+Metrò: capitolo nuovo Quanto ci metti (tempi di percorrenza da GTFS, da/a con mappa) e passeggeri per linea 2024-2025 a pallini collegati
+Voli: testi dei grafici portati a 12 px
+Acqua e fogne: capitolo nuovo La falda sotto i piedi (soggiacenza per quartiere, quota 2007-2022, stazioni del metrò; Città metropolitana su Open Data Lombardia)
+Acqua del sindaco: link al capitolo sulla falda
+Voli: tutti i testi dei grafici almeno a 12 px

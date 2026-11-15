@@ -156,6 +156,11 @@
     { path: 'olimpiadi/', label: 'Le Olimpiadi, a cose fatte' },
     { path: 'case-energia/', label: 'Quanto consumano le case' },
     { path: 'negozi/', label: 'I negozi di Milano' },
+    { path: 'voli/', label: 'Dove si vola da Milano' },
+    { path: 'altezze/', label: 'Quanto è alta Milano' },
+    { path: 'velocita/', label: 'Quanto vanno veloci tram e bus' },
+    { path: 'sharing/', label: 'Monopattini, scooter e auto in condivisione' },
+    { path: 'senza-dimora/', label: 'Senza dimora' },
     { path: 'quiz/', label: 'Quante ne sai di Milano?' }
   ];
 
