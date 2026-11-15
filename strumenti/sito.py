@@ -5,7 +5,7 @@ strumenti/dopo_pubblicazione.py.
 """
 import html, json, pathlib, re
 
-BASE = 'https://andreottiviii.github.io/milano-in-dati/'
+BASE = 'https://milanoindati.it/'
 LOCALE = 'http://localhost:8796/'
 USER_AGENT = 'milano-in-dati/1.0'
 R = pathlib.Path(__file__).resolve().parent.parent
