@@ -17,3 +17,6 @@ Le tavole per provincia/sesso/colf-badanti esistono solo nella banca dati intera
 
 ## Verifiche
 Posti Milano 7.784 (59 RSA), accreditati 7.728; hinterland 9.320 in 91 RSA; somma 17.104 = provincia. Over 80 Milano 115.137 (POSAS) / 116.213 (anagrafe, quartieri). 51 quartieri su 87 senza RSA (NIL 8 senza dato). Tutti i punti RSA cadono in un quartiere.
+
+## Capitolo badanti (15/11/2026)
+Dati INPS scaricati dal coordinatore (anz_04_inps.py, anz_05_domestici.py, grezzi in anziani/raw/inps/) -> docs/anziani/data/domestici.json. `anz_06_capitolo_badanti.py` (+ `anz_badanti.js`) riparte dalla pagina pubblicata docs/anziani/index.html, aggiunge il capitolo, il numero in alto "1,8 volte" (al posto di "1,7 a Buenos Aires"), limiti, metodo, file e piè di pagina, e scrive domestici.csv. Fonte: INPS, Osservatorio sui lavoratori domestici, dati annuali 2016-2025, https://servizi2.inps.it/servizi/osservatoristatistici/12, consultata il 15/11/2026; nessuna licenza dichiarata: art. 52 CAD.
