@@ -81,7 +81,7 @@ def sostituisci_blocco(s, nome, blocco, dopo=None):
     raise ValueError('nessun punto dove inserire il blocco ' + nome)
 
 
-def senza_blocchi(s, nomi=('seo', 'condividi', 'statico')):
+def senza_blocchi(s, nomi=('seo', 'condividi', 'statico', 'riserva')):
     for n in nomi:
         s = re.sub(r'<!--%s-->.*?<!--/%s-->' % (n, n), '', s, flags=re.S)
     return s

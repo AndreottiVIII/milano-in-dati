@@ -4,7 +4,8 @@ Lancia in ordine:
   0. conta_sito.py      (i conti di "Il sito": pagine, grafici, numeri; prima di tutto, perche' gli altri li leggono)
   1. anteprime_link.py  (immagine e meta di condivisione)
   2. statico.py         (testo visibile anche senza JavaScript)
-  3. seo.py             (description, canonical, JSON-LD, sitemap, manifest, 404)
+  3. riserva_spazio.py  (spazio riservato a numeri e grafici, contro i salti della pagina)
+  4. seo.py             (description, canonical, JSON-LD, sitemap, manifest, 404)
 seo.py viene dopo statico.py perche' la data "lastmod" della mappa del sito dipende dal testo della pagina,
 blocco statico compreso. Il server locale (http://localhost:8796) deve essere acceso.
 
@@ -17,7 +18,7 @@ QUI = pathlib.Path(__file__).resolve().parent
 
 def main():
     nomi = [a for a in sys.argv[1:] if not a.startswith('--')]
-    for prog in ('conta_sito.py', 'anteprime_link.py', 'statico.py', 'seo.py'):
+    for prog in ('conta_sito.py', 'anteprime_link.py', 'statico.py', 'riserva_spazio.py', 'seo.py'):
         print('==', prog, flush=True)
         # conta_sito.py conta sempre tutto il sito e non vuole nomi di pagine
         r = subprocess.run([sys.executable, '-I', '-X', 'utf8', str(QUI / prog)] + ([] if prog == 'conta_sito.py' else nomi))
