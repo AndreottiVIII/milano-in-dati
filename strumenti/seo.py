@@ -12,8 +12,9 @@ Scrive anche:
 - docs/sitemap.xml: tutte le pagine tranne anteprima/; lastmod cambia solo quando cambia il testo della pagina
   (impronta salvata in strumenti/date_pagine.json);
 - docs/site.webmanifest (icone favicon-192.png e favicon-512.png);
-- docs/404.html (usa percorsi assoluti: GitHub Pages la serve da qualsiasi indirizzo).
-robots.txt non serve: su un sito "di progetto" Google legge solo quello alla radice del dominio.
+- docs/404.html (usa percorsi assoluti ricavati da BASE: GitHub Pages la serve da qualsiasi indirizzo);
+- docs/robots.txt: serve alla radice di un dominio proprio (Google lo cerca li' e ci trova l'indirizzo della mappa
+  del sito). Su un sito "di progetto" (sottocartella) non avrebbe valore, ma e' innocuo.
 
 Meglio rilanciarlo DOPO statico.py (l'impronta del testo comprende il blocco statico).
 Uso: python -I -X utf8 strumenti/seo.py [pagina ...]   (senza nomi: tutte)
@@ -162,6 +163,10 @@ def manifest():
         ]}, ensure_ascii=False, indent=2) + '\n'
 
 
+def robots():
+    return 'User-agent: *\nAllow: /\n\nSitemap: %ssitemap.xml\n' % BASE
+
+
 def pagina_404():
     radice = urlparse(BASE).path or '/'
     temi = json.load(open(DOCS / 'temi.json', encoding='utf-8'))
@@ -236,6 +241,7 @@ def main():
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + '\n'.join(voci) + '\n</urlset>\n')
     sito.scrivi(DOCS / 'site.webmanifest', manifest())
     sito.scrivi(DOCS / '404.html', pagina_404())
+    sito.scrivi(DOCS / 'robots.txt', robots())
     print('seo: %d pagine scritte (%d cambiate), sitemap con %d indirizzi' % (len(scelte), cambiate, len(voci)))
 
 

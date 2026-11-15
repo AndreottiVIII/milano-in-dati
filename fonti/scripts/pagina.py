@@ -589,6 +589,15 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "fonti.json").write_text(json.dumps(uscita, ensure_ascii=False, indent=1), encoding="utf-8")
     scrivi_csv(out_dir / "fonti.csv", uscita)
+    # il numero "editori" della home (docs/temi.json, pagina fonti/) viene sempre da qui, mai scritto a mano
+    import re as _re
+    tj = docs / "temi.json"
+    if tj.exists():
+        t0 = tj.read_text(encoding="utf-8")
+        t1 = _re.sub(r'("path":"fonti/".*?"numero":\{"valore":")\d+(")', lambda m: m.group(1) + str(len(uscita["editori"])) + m.group(2), t0, count=1, flags=_re.S)
+        if t1 != t0:
+            tj.write_text(t1, encoding="utf-8", newline="")
+            print("temi.json: editori in home aggiornati a", len(uscita["editori"]))
     print(f"pagine {len(pagine)} | righe fonte {len(fonti_tutte)} | editori {len(uscita['editori'])} | senza fonti: {senza_fonti} | ricaduti sull'HTML grezzo: {ricaduti}")
 
 

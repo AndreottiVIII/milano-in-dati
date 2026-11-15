@@ -14,13 +14,15 @@
   - forme radiali: nei grafici (svg larghi almeno 200 px) archi di cerchio di raggio 25 o più, cioè torte,
     ciambelle, orologi, anelli. Gli archi piccoli (icone, angoli arrotondati) e i piccoli disegni non contano.
     Se una pagina usa un arco grande per altro, si segna l'svg o un suo contenitore con data-arco-ok.
+    Contano anche i poligoni radar (vertici su un cerchio), le righe disposte in cerchio (anelli di barre,
+    lancette, raggi) e d3.arc / d3.pie / d3.radialLine nel codice della pagina.
     Gli svg in schede nascoste contano con la larghezza dichiarata. Unica eccezione esplicita: #ch-anello nella pagina proverbi.
 Stampa un elenco breve (una riga per tipo di problema, con le prime pagine); con --tutto stampa ogni caso.
 
 Uso: python -I -X utf8 strumenti/controllo.py [--tutto] [pagina ...]   (senza nomi: tutte)
 Esce con codice 1 se trova qualcosa.
 """
-import asyncio, json, pathlib, sys
+import asyncio, json, pathlib, re, sys
 from playwright.async_api import async_playwright
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -148,6 +150,49 @@ async () => {
       if (R.arco.length > 3) break;
     }
   }
+  // forme radiali fatte di linee e poligoni (radar, anelli di barre, orologi a lancette): punti che stanno su un cerchio
+  // e lo coprono quasi tutto. Righe in fila, assi e griglie rettangolari non hanno questa forma.
+  const suCerchio = (pts) => {
+    const uniq = [], vistiP = new Set();
+    for (const q of pts) { const k = Math.round(q[0]) + ',' + Math.round(q[1]); if (!vistiP.has(k)) { vistiP.add(k); uniq.push(q); } }
+    if (uniq.length < 6) return 0;
+    const mx = uniq.reduce((a, q) => a + q[0], 0) / uniq.length, my = uniq.reduce((a, q) => a + q[1], 0) / uniq.length;
+    const rs = uniq.map(q => Math.hypot(q[0] - mx, q[1] - my)), rm = rs.reduce((a, b) => a + b, 0) / rs.length;
+    if (rm < 25) return 0;
+    const sd = Math.sqrt(rs.reduce((a, r) => a + (r - rm) * (r - rm), 0) / rs.length);
+    if (sd / rm > 0.12) return 0;
+    const an = uniq.map(q => Math.atan2(q[1] - my, q[0] - mx)).sort((a, b) => a - b);
+    let gap = an[0] + 2 * Math.PI - an[an.length - 1];
+    for (let i = 1; i < an.length; i++) gap = Math.max(gap, an[i] - an[i - 1]);
+    return gap < Math.PI * 0.55 ? Math.round(rm) : 0;
+  };
+  for (const sv of document.querySelectorAll('svg')) {
+    if (sv.closest('[data-arco-ok],.leaflet-container')) continue;
+    if (location.pathname.indexOf('proverbi') >= 0 && sv.closest('#ch-anello')) continue;
+    let lar = sv.getBoundingClientRect().width;
+    if (!lar) { const vb = (sv.getAttribute('viewBox') || '').split(/[ ,]+/); lar = parseFloat(vb[2]) || parseFloat(sv.getAttribute('width')) || 0; }
+    if (lar < 200) continue;
+    const nome = () => { const box = sv.parentElement; return box && box.id ? '#' + box.id : 'svg'; };
+    const num = (e, a) => parseFloat(e.getAttribute(a));
+    const L1 = [], L2 = [];
+    for (const l of sv.querySelectorAll('line')) {
+      const a = [num(l, 'x1'), num(l, 'y1')], b = [num(l, 'x2'), num(l, 'y2')];
+      if (a.concat(b).some(isNaN) || Math.hypot(a[0] - b[0], a[1] - b[1]) < 3) continue;
+      L1.push(a); L2.push(b);
+    }
+    let r = suCerchio(L1) || suCerchio(L2);
+    if (r) { R.arco.push(nome() + ' righe disposte in cerchio (raggio ' + r + ')'); continue; }
+    for (const pg of sv.querySelectorAll('polygon,polyline')) {
+      const pts = (pg.getAttribute('points') || '').trim().split(/[\s]+/).map(s => s.split(',').map(parseFloat)).filter(q => q.length === 2 && !isNaN(q[0]) && !isNaN(q[1]));
+      r = suCerchio(pts);
+      if (r) { R.arco.push(nome() + ' poligono radar (raggio ' + r + ')'); break; }
+    }
+  }
+  // d3.arc / d3.pie / d3.radialLine nel codice della pagina
+  for (const sc of document.querySelectorAll('script:not([src])')) {
+    const m = (sc.textContent || '').match(/\bd3\s*\.\s*(arc|pie|lineRadial|areaRadial|radialLine|radialArea)\s*\(/);
+    if (m) R.arco.push('script con d3.' + m[1]);
+  }
   // testo doppio: blocco statico ancora in pagina e visibile
   R.statico = [...document.querySelectorAll('.statico')].filter(x => x.getClientRects().length).length;
   return R;
@@ -200,7 +245,7 @@ def problemi(r):
     for x in r.get('pitt', []):
         out.append(('pittogramma a unità', x))
     for x in sorted(set(r.get('arco', []))):
-        out.append(('forma radiale (arco nel disegno)', x))
+        out.append(('forma radiale (arco, poligono radar, righe in cerchio, d3.arc/pie)', x))
     if r.get('statico'):
         out.append(('testo doppio (.statico visibile)', str(r['statico'])))
     return out
@@ -215,12 +260,40 @@ async def lavora(pagine):
     return ris
 
 
+def controllo_testa(scelte):
+    """Controllo statico della testa: un solo canonical e un solo og:url, uguali tra loro e uguali a BASE + pagina;
+    nessun indirizzo assoluto del sito scritto a mano fuori dai blocchi <!--seo--> e <!--condividi-->."""
+    out = []
+    dominio = sito.BASE.split('/')[2]
+    for p in scelte:
+        f = sito.file_pagina(p)
+        if not f.is_file():
+            continue
+        s = sito.leggi(f)
+        testa = s.split('</head>')[0]
+        can = re.findall(r'<link\s+rel="canonical"\s+href="([^"]*)"', testa)
+        ogu = re.findall(r'<meta\s+property="og:url"\s+content="([^"]*)"', testa)
+        atteso = sito.url_pagina(p)
+        if can != [atteso]:
+            out.append(('canonical sbagliato o doppio', p, '%s (atteso %s)' % (can, atteso)))
+        if ogu != [atteso]:
+            out.append(('og:url sbagliato o doppio', p, '%s (atteso %s)' % (ogu, atteso)))
+        fuori = sito.senza_blocchi(s)
+        for d in (dominio, 'andreottiviii.github.io'):
+            if d in fuori:
+                out.append(('indirizzo assoluto scritto a mano', p, d))
+                break
+    return out
+
+
 def main():
     args = sys.argv[1:]
     tutto = '--tutto' in args
     scelte = [a.strip('/') for a in args if not a.startswith('--')] or sito.pagine()
     ris = asyncio.run(lavora(scelte))
     per_tipo = {}
+    for tipo, p, d in controllo_testa(scelte):
+        per_tipo.setdefault(tipo, []).append('%s @0: %s' % (p or 'home', d))
     for r in ris:
         for tipo, d in problemi(r):
             per_tipo.setdefault(tipo, []).append('%s @%d: %s' % (r['p'] or 'home', r['w'], d))

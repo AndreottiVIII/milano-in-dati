@@ -562,6 +562,7 @@ function strips(box,rows){
   var W=width(box),m=16,r=4.2,step=2*r+1.2,y=0,s='',parts=[];
   rows.forEach(function(rw){
     var vals=CLN.filter(function(o){return o.v[rw.k]!=null}).map(function(o){return{o:o,v:o.v[rw.k]}}).sort(function(a,b){return a.v-b.v}),X=function(v){return m+(v-rw.min)/(rw.max-rw.min)*(W-2*m)},lev=[];
+    if(vals.length){if(vals[vals.length-1].v>rw.max)rw.max=Math.ceil(vals[vals.length-1].v/2)*2;if(vals[0].v<rw.min)rw.min=Math.floor(vals[0].v/2)*2}
     vals.forEach(function(q){q.x=X(q.v);var k=0;while(lev[k]&&lev[k].some(function(x){return Math.abs(x-q.x)<2*r+.6}))k++;(lev[k]=lev[k]||[]).push(q.x);q.k=k});
     var base=y+30+lev.length*step+4,mdv=med(vals.map(function(q){return q.v}));
     s+=T(0,y+12,esc(rw.t),{c:'k'});
@@ -569,7 +570,7 @@ function strips(box,rows){
     s+=L(m,base,W-m,base,C.axis,1.5);
     vals.forEach(function(q){s+='<circle cx="'+r1(q.x)+'" cy="'+r1(base-r-1.5-q.k*step)+'" r="'+r+'" fill="'+rw.col(q.v)+'" stroke="#fff" stroke-width=".7"'+tip('<b>'+esc(q.o.sn)+'</b><br>'+rw.t+': '+rw.fmt(q.v)+'<br>'+q.o.rk+'° in classifica')+'/>'});
     s+=L(X(mdv),y+22,X(mdv),base,C.ink,2.5)+T(Math.min(X(mdv)+6,W-90),y+32,'tipico '+rw.fmt(mdv),{c:'b'});
-    var mxq=vals[vals.length-1],lx=mxq.x,ly=base-r-1.5-mxq.k*step;s+=T(lx>W-110?lx-9:lx+9,ly+4,esc(mxq.o.sn),{a:lx>W-110?'end':'start',c:'halo',st:'font-size:12px;pointer-events:none'});
+    var mxq=vals[vals.length-1],lx=mxq.x,ly=base-r-1.5-mxq.k*step,sx=lx+9+String(mxq.o.sn).length*6.6>W-4;s+=T(sx?lx-9:lx+9,ly+4,esc(mxq.o.sn),{a:sx?'end':'start',c:'halo',st:'font-size:12px;pointer-events:none'});
     y=base+30});
   $(box).innerHTML=svgOpen(W,y)+s+'</svg>';
 }
