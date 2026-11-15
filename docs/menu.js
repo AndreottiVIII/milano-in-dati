@@ -818,3 +818,86 @@
     window.addEventListener('scroll', function () { if (!tend.hidden) posiziona(); }, { passive: true });
   } catch (e6) { /* senza tendina, i campi restano come erano */ }
 })();
+
+/* Visite: Google Analytics parte SOLO dopo "Accetto" nell'avviso cookie (stessa evidenza ai due pulsanti,
+   chiudere senza scegliere = nessun conteggio). La scelta resta nel browser (localStorage 'mid-cookie').
+   La pagina il-sito/#visite spiega tutto e ha il pulsante per cambiare scelta (window.midCookie()).
+   Fuori da milanoindati.it (anteprime in locale, controlli automatici) Analytics non parte mai;
+   con navigator.webdriver (i controlli automatici) l'avviso non si mostra, per non coprire i grafici. */
+(function () {
+  'use strict';
+  var ID = 'G-T3DC886QPS', CHIAVE = 'mid-cookie';
+  var src = (document.currentScript && document.currentScript.src) || '';
+  var RADICE = src ? src.replace(/menu\.js(\?.*)?$/, '') : '/';
+  var SITO = /(^|\.)milanoindati\.it$/.test(location.hostname) && !/\/anteprima\//.test(location.pathname);
+  function leggi() { try { return localStorage.getItem(CHIAVE); } catch (e) { return null; } }
+  function scrivi(v) { try { localStorage.setItem(CHIAVE, v); } catch (e) { /* niente */ } }
+  var partito = false;
+  function avvia() {
+    if (partito || !SITO) return;
+    partito = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', ID, { allow_google_signals: false, allow_ad_personalization_signals: false });
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ID;
+    document.head.appendChild(s);
+  }
+  function togliCookie() {
+    document.cookie.split(';').forEach(function (c) {
+      var n = c.split('=')[0].trim();
+      if (!/^_ga/.test(n)) return;
+      ['', location.hostname, '.' + location.hostname.replace(/^www\./, '')].forEach(function (d) {
+        document.cookie = n + '=; Max-Age=0; path=/' + (d ? '; domain=' + d : '');
+      });
+    });
+  }
+  var box = null;
+  function chiudi() { if (box && box.parentNode) box.parentNode.removeChild(box); box = null; }
+  function scegli(v) {
+    var prima = leggi();
+    scrivi(v);
+    chiudi();
+    if (v === 'si') avvia();
+    else { togliCookie(); if (prima === 'si' && partito) location.reload(); }
+  }
+  function mostra() {
+    if (box || !document.body) return;
+    if (!document.getElementById('mid-ck-stile')) {
+      var st = document.createElement('style');
+      st.id = 'mid-ck-stile';
+      st.textContent =
+        '#mid-ck{position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483000;max-width:560px;margin:0 auto;box-sizing:border-box;' +
+        'background:#fff;color:#0b0d12;border:3px solid #0b0d12;border-top:6px solid #E30613;padding:14px 16px;' +
+        'font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.18)}' +
+        '#mid-ck p{margin:0 0 12px}' +
+        '#mid-ck a{color:#0b0d12;text-decoration:underline;text-underline-offset:2px}' +
+        '#mid-ck .mid-ck-b{display:flex;gap:10px}' +
+        '#mid-ck button{flex:1 1 0;min-height:44px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;' +
+        'background:#0b0d12;color:#fff;border:2px solid #0b0d12;padding:8px 12px}' +
+        '#mid-ck button:hover{background:#2f3440}' +
+        '@media print{#mid-ck{display:none}}';
+      document.head.appendChild(st);
+    }
+    box = document.createElement('div');
+    box.id = 'mid-ck';
+    box.setAttribute('role', 'region');
+    box.setAttribute('aria-label', 'Avviso sui cookie');
+    box.innerHTML =
+      '<p>Questo sito conta le visite con Google Analytics, che usa dei cookie. Serve solo a sapere quali pagine vengono lette: niente pubblicità. <a href="' + RADICE + 'il-sito/#visite">Come funziona</a></p>' +
+      '<div class="mid-ck-b"><button type="button" data-v="si">Accetto</button><button type="button" data-v="no">Rifiuto</button></div>';
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button[data-v]') : null;
+      if (b) scegli(b.getAttribute('data-v'));
+    });
+    document.body.appendChild(box);
+  }
+  window.midCookie = mostra;
+  var scelta = leggi();
+  if (scelta === 'si') avvia();
+  else if (scelta !== 'no' && !navigator.webdriver) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mostra); else mostra();
+  }
+})();
