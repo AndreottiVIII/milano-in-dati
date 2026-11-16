@@ -31,7 +31,8 @@ TRATTIENI = re.compile(r'(/data/|\.(json|csv|geojson|topojson|txt)(\?|$)|tile\.o
 RX_RISERVA = re.compile(r'<!--riserva-->.*?<!--/riserva-->', re.S)
 
 MISURA_JS = r"""() => {
-  const radice = document.querySelector('main') || document.body;
+  // tutta la pagina, non solo dentro <main>: in home il contenitore vuoto e' proprio <main id="temi">
+  const radice = document.body;
   const out = {};
   for (const el of radice.querySelectorAll('[id]')) {
     if (el.children.length !== 0) continue;
