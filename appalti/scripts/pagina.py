@@ -144,10 +144,13 @@ def soglia(R):
         "quota": r6(num(naz["quota"])), "esatti_a_un_euro": int(naz["n_esatto_meno1"]) + int(naz["n_esatto_meno001"]),
         "quota_esatti": r6((int(naz["n_esatto_meno1"]) + int(naz["n_esatto_meno001"])) / int(naz["n_stretta"])),
     }
-    etich = {"1": "fino al 16/7/2020 (soglia 40.000 euro)", "2": "dal 17/7/2020 al 31/5/2021 (75.000)",
+    # periodi di legge in ordine di tempo; "5" (P1b) sono i due mesi a 150.000 per tutti (d.l. 76/2020,
+    # dal 17/7/2020; i 75.000 per servizi e forniture arrivano con la legge 120/2020 dal 15/9/2020)
+    etich = {"1": "fino al 16/7/2020 (soglia 40.000 euro)", "5": "dal 17/7 al 14/9/2020 (150.000)",
+             "2": "dal 15/9/2020 al 31/5/2021 (75.000)",
              "3": "dal 1/6/2021 al 30/6/2023 (139.000)", "4": "dal 1/7/2023 (140.000)"}
     periodi = []
-    for k in "1234":
+    for k in "15234":
         m = [r for r in dim if r["dimensione"] == "per" and r["valore"] == k and r["ambito"].startswith("Milano")][0]
         i = [r for r in dim if r["dimensione"] == "per" and r["valore"] == k and r["ambito"] == "Italia"][0]
         periodi.append({"periodo": etich[k], "quota_milano": r6(num(m["quota"])), "quota_attesa_milano": r6(num(m["quota_attesa"])),
@@ -364,29 +367,29 @@ def controlli(D):
     # soglia
     ml = [x for x in S["citta"] if x["citta"] == "Milano" and x["ambito"] == "enti locali"][0]
     mt = [x for x in S["citta"] if x["citta"] == "Milano" and x["ambito"] == "tutti gli enti"][0]
-    chk("soglia Milano quota", p(ml["quota"]), "21,8")
-    chk("soglia Milano attesa", p(ml["quota_attesa"]), "20,0")
+    chk("soglia Milano quota", p(ml["quota"]), "22,1")
+    chk("soglia Milano attesa", p(ml["quota_attesa"]), "20,2")
     chk("soglia rapporto", it(ml["rapporto"], 2), "1,09")
     chk("soglia ic", (it(ml["rapporto_intervallo_basso"], 2), it(ml["rapporto_intervallo_alto"], 2)), ("0,96", "1,20"))
-    chk("soglia affidamenti Milano locale", migliaia(ml["affidamenti_vicini_soglia"]), "32.516")
-    chk("soglia tutti", (p(mt["quota"]), p(mt["quota_attesa"])), ("18,9", "18,2"))
+    chk("soglia affidamenti Milano locale", migliaia(ml["affidamenti_vicini_soglia"]), "32.250")
+    chk("soglia tutti", (p(mt["quota"]), p(mt["quota_attesa"])), ("19,1", "18,3"))
     chk("soglia Italia", (p(S["italia"]["quota"]), migliaia(S["italia"]["nell_ultimo_5pct"]), migliaia(S["italia"]["affidamenti_vicini_soglia"])),
-        ("17,1", "247.734", "1.451.084"))
+        ("17,2", "248.069", "1.441.112"))
     chk("soglia altre citta", [p(x["quota"]) for x in S["citta"] if x["ambito"] == "enti locali"],
-        ['21,8', '16,4', '13,1', '15,0', '20,3', '18,6', '18,4', '11,5', '13,5'])
+        ['22,1', '16,6', '13,2', '15,1', '20,6', '18,8', '18,5', '11,5', '13,6'])
     chk("periodi quota", [(p(x["quota_milano"]), p(x["quota_italia"]), it(x["rapporto_milano"], 2)) for x in S["periodi"]],
-        [('32,8', '26,7', '1,04'), ('6,5', '6,9', '1,10'), ('8,6', '9,9', '1,01'), ('14,3', '13,9', '1,04')])
-    chk("esatti Milano", (S["esatti_milano"]["n"], migliaia(S["esatti_milano"]["su"]), p(S["esatti_milano"]["quota"])), (143, "8.571", "1,7"))
-    chk("esatti Italia", (migliaia(S["italia"]["esatti_a_un_euro"]), p(S["italia"]["quota_esatti"])), ("16.918", "6,8"))
+        [('32,8', '26,7', '1,04'), ('9,1', '8,9', '1,14'), ('7,1', '7,4', '1,11'), ('8,6', '9,9', '1,01'), ('14,3', '13,9', '1,04')])
+    chk("esatti Milano", (S["esatti_milano"]["n"], migliaia(S["esatti_milano"]["su"]), p(S["esatti_milano"]["quota"])), (145, "8.590", "1,7"))
+    chk("esatti Italia", (migliaia(S["italia"]["esatti_a_un_euro"]), p(S["italia"]["quota_esatti"])), ("16.931", "6,8"))
     sg = {x["gruppo"]: x for x in S["gruppi"]}
     c = sg["Comune di Milano e sue società"]
-    chk("soglia gruppo Comune", (it(c["rapporto"], 2), it(c["rapporto_intervallo_basso"], 2), it(c["rapporto_intervallo_alto"], 2)), ("1,22", "0,91", "1,55"))
+    chk("soglia gruppo Comune", (it(c["rapporto"], 2), it(c["rapporto_intervallo_basso"], 2), it(c["rapporto_intervallo_alto"], 2)), ("1,23", "0,92", "1,55"))
     n = sg["Altri enti nazionali con sede a Milano"]
     chk("soglia gruppo nazionali", (it(n["rapporto"], 2), it(n["rapporto_intervallo_basso"], 2), it(n["rapporto_intervallo_alto"], 2)), ("0,78", "0,63", "0,94"))
     chk("enti Milano", P["enti_milano_citta_con_procedure"], 505)
     sp = S["enti_che_spiccano"]
     chk("enti che spiccano", (sp["enti_con_almeno_100"], sp["rapporto_almeno_1_5_e_q_sotto_0_01"], sp["rapporto_almeno_2_e_q_sotto_0_01"],
-                              it(sp["rapporto_milano_senza_5_enti"], 2)), (108, 10, 2, "0,93"))
+                              it(sp["rapporto_milano_senza_5_enti"], 2)), (111, 10, 2, "0,93"))
     # un solo offerente
     om = {(x["ambito"], x["periodo"]): x for x in O["milano"]}
     a = om[("Milano città, tutti gli enti", "2019-2023")]
