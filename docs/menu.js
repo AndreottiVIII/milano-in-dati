@@ -861,7 +861,12 @@
     scrivi(v);
     chiudi();
     if (v === 'si') avvia();
-    else { togliCookie(); if (prima === 'si' && partito) location.reload(); }
+    else {
+      // blocca subito Analytics: altrimenti Google riscrive i cookie mentre la pagina si ricarica
+      window['ga-disable-' + ID] = true;
+      togliCookie();
+      if (prima === 'si' && partito) location.reload();
+    }
   }
   function mostra() {
     if (box || !document.body) return;
@@ -897,7 +902,8 @@
   window.midCookie = mostra;
   var scelta = leggi();
   if (scelta === 'si') avvia();
-  else if (scelta !== 'no' && !navigator.webdriver) {
+  else if (scelta === 'no') togliCookie(); // cookie rimasti da prima del rifiuto
+  else if (!navigator.webdriver) {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mostra); else mostra();
   }
 })();
