@@ -162,7 +162,8 @@
     { path: 'sharing/', label: 'Monopattini, scooter e auto in condivisione' },
     { path: 'senza-dimora/', label: 'Senza dimora' },
     { path: 'anziani/', label: 'Chi si prende cura degli anziani' },
-    { path: 'quiz/', label: 'Quante ne sai di Milano?' }
+    { path: 'quiz/', label: 'Quante ne sai di Milano?' },
+    { path: 'milanese/', label: 'Il milanese' }
   ];
 
   if (document.getElementById('mid-menu')) return; // già inserito

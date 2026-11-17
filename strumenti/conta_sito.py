@@ -174,7 +174,7 @@ ANNI = {
     'viaggio-linea': (None, None), 'attesa-fermata': (None, None), 'anno-covid': (None, None),
     'storia-case': (None, None), 'storia-centro': (None, None), 'oltre-il-reddito': (None, None),
     'sport': (None, None), 'dati-importanti': (None, None), 'elenco': (None, None), 'il-sito': (None, None),
-    'fonti': (None, None),
+    'fonti': (None, None), 'milanese': (None, None),
     'voli': (1995, 2024), 'altezze': (2012, 2020), 'velocita': (2026, 2026), 'sharing': (2011, 2025), 'senza-dimora': (2001, 2023), 'anziani': (2025, 2026),
 }
 SOLO_PAGINA = {'milano-trema'}

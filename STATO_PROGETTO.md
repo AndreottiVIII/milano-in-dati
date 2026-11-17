@@ -118,3 +118,7 @@ Il lavoro lo fa Claude; Davide guarda e decide. Qui ci sono solo le decisioni ap
 | — | Home | Online: tessere per tema (bozza 21), con ricerca |
 
 Dettagli, fonti e trappole dei dati di ogni filone: `JOURNAL.md`.
+
+## Il milanese (/milanese/)
+- Online dal 17/11: nomi dei paesi (finali -ate/-ago/-engo/-ano, ISTAT 2026, origini da Olivieri e altri) e parole del lombardo per lingua d'origine (Wiktionary + Wikizionario, CC BY-SA). Nell'hinterland resta il pezzo breve con il link.
+- Da fare: secondo giro con il Vocabolario milanese-italiano del Cherubini (archive.org, pubblico dominio); Ticino e Adda sulla mappa sono ancora linee a mano; i significati tradotti dall'inglese andrebbero riletti da chi parla milanese.
