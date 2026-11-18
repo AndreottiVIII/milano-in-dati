@@ -30,7 +30,7 @@ from sito import BASE, DOCS, STRUMENTI
 
 DATE = STRUMENTI / 'date_pagine.json'
 COLORE_TEMA = '#E30613'
-NON_DATI = {'elenco', 'fonti', 'il-sito', 'dati-importanti'}  # WebPage invece di Dataset
+NON_DATI = {'elenco', 'fonti', 'il-sito', 'dati-importanti', 'quiz'}  # WebPage invece di Dataset (il quiz e' un gioco, non un archivio di dati)
 
 # licenze con indirizzo (le altre indicate si scrivono a parole; quelle "non aperte" non sono licenze)
 URL_LICENZE = {
@@ -43,6 +43,9 @@ URL_LICENZE = {
     'NLOD 2.0': 'https://data.norge.no/nlod/en/2.0',
     'Dominio pubblico': 'https://creativecommons.org/publicdomain/mark/1.0/',
 }
+# «CC BY» senza versione: il portale dati.comune.milano.it dichiara cosi' 2.385 dataset su 2.617 e come indirizzo
+# della licenza da' quello di Open Definition (API CKAN license_list, id cc-by, controllato il 18/11/2026)
+URL_LICENZE_EDITORE = {('Comune di Milano', 'CC BY'): 'https://opendefinition.org/licenses/cc-by/'}
 NON_LICENZE = ('non indicata', 'uso con citazione', 'tutti i diritti riservati', 'autorizzazione dichiarata',
                'nessuna licenza', 'diritti riservati', 'libero accesso', 'quella di ogni')
 
@@ -70,7 +73,7 @@ def licenze(fonti_pagina):
             continue  # "CC BY" senza versione, quando la stessa pagina ha anche "CC BY 4.0"
         v = URL_LICENZE.get(l)
         if not v and l in ('CC BY', 'CC BY-SA'):
-            v = x.get('licenza_url')  # senza versione: la pagina della licenza della fonte, se c'e'
+            v = x.get('licenza_url') or URL_LICENZE_EDITORE.get(((x.get('editore') or '').strip(), l))  # senza versione: la pagina della licenza della fonte
         if not v or not v.startswith('http'):
             continue  # nel JSON-LD la licenza e' sempre un indirizzo, mai un testo
         if v not in out:
