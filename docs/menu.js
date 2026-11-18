@@ -929,6 +929,12 @@
       p.id = 'mid-cita';
       p.innerHTML = '<b>Come citarci.</b> Grafici, mappe e testi di Milano in dati si possono riusare solo per scopi non commerciali, scrivendo sempre <q>Fonte: Milano in dati, milanoindati.it</q> con il link alla pagina (licenza <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.it" rel="license noopener">CC BY-NC 4.0</a>). Per usi commerciali serve il permesso: <a href="mailto:davide.caniatti@gmail.com">davide.caniatti@gmail.com</a>. I dati delle fonti restano con le loro licenze, elencate qui sopra. <a href="' + RADICE + 'il-sito/#citare">Tutte le regole</a>';
       if (dove.tagName === 'FOOTER') dove.insertBefore(p, dove.firstChild); else dove.appendChild(p);
+      // rimando al profilo Instagram (aperto il 18/11/2026), subito sotto "Come citarci"
+      var ig = document.createElement('p');
+      ig.id = 'mid-social';
+      ig.style.cssText = 'margin:0 0 1.2em;font-size:15px;line-height:1.45;color:#0b0d12';
+      ig.innerHTML = '<b>Milano in dati è anche su Instagram:</b> <a href="https://www.instagram.com/milanoindati/" rel="me noopener" style="color:#0b0d12;font-weight:700;text-decoration:underline;text-underline-offset:2px">@milanoindati</a>, un dato su Milano ogni settimana.';
+      p.insertAdjacentElement('afterend', ig);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', metti); else metti();
   } catch (e) { /* senza riquadro */ }
